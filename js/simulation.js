@@ -737,20 +737,20 @@ const simulation = {
                     }
                 }
             }
-            if (tech.isMineAmmoBack) {
-                let count = 0;
-                for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
-                    if (bullet[i].bulletType === "mine") count++
-                }
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
-                    if (b.guns[i].name === "mine") {
-                        if (tech.isCrouchAmmo) count = Math.ceil(count / 2)
-                        b.guns[i].ammo += count
-                        simulation.updateGunHUD();
-                        break;
-                    }
+
+            let count = 0;
+            for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
+                if (bullet[i].bulletType === "mine" || bullet[i].bulletType === "laser mine") count++
+            }
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
+                if (b.guns[i].name === "mine") {
+                    if (tech.isCrouchAmmo) count = Math.ceil(count / 2)
+                    b.guns[i].ammo += count
+                    simulation.updateGunHUD();
+                    break;
                 }
             }
+
             if (tech.isMutualism && !tech.isEnergyHealth) {
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].isMutualismActive) {

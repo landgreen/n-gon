@@ -344,7 +344,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.isDamageForGuns || tech.isFireRateForGuns) && b.inventory.length + 5 < b.guns.length
+                    return (tech.isDamageForGuns || tech.isFireRateForGuns) && b.inventory.length < b.guns.length - 5 //12-5 guns total
                 },
                 requires: "arsenal or active cooling and less than 7 guns",
                 effect() {
@@ -470,7 +470,7 @@
             },
             {
                 name: "desublimated ammunition",
-                description: "use <strong>50%</strong> less <strong class='color-g'>ammo</strong> when <strong>crouching</strong><<br>strong>+6</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "use <strong>50%</strong> less <strong class='color-g'>ammo</strong> when <strong>crouching</strong><br><strong>+6</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2695,7 +2695,7 @@
                         powerUps.research.changeRerolls(0)
                     }, 1000);
                 },
-                description: "once per level, instead of <strong>dying</strong><br>consume <strong>1</strong> <strong class='color-r'>research</strong> and spawn <strong>6</strong> <strong class='color-h'>heals</strong>",
+                description: "once per level, instead of <strong>dying</strong><br>consume <strong>1</strong> <strong class='color-r'>research</strong> and spawn <strong>5</strong> <strong class='color-h'>heals</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -4042,7 +4042,7 @@
             },
             {
                 name: "ice-shot",
-                description: "<strong>shotgun</strong> grows <strong>18</strong> freezing <strong class='color-s'>ice IX</strong> crystals",
+                description: "<strong>shotgun</strong> grows <strong>15</strong> freezing <strong class='color-s'>ice IX</strong> crystals",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4057,25 +4057,6 @@
                 },
                 remove() {
                     tech.isIceShot = false;
-                }
-            },
-            {
-                name: "super duper",
-                description: "fire <strong>1</strong> additional <strong>super ball</strong>",
-                isGunTech: true,
-                maxCount: 9,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("super balls") && !tech.oneSuperBall
-                },
-                requires: "super balls, but not the tech super ball",
-                effect() {
-                    tech.superBallNumber++
-                },
-                remove() {
-                    tech.superBallNumber = 3;
                 }
             },
             {
@@ -4114,7 +4095,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("super balls") && tech.superBallNumber === 3 && !tech.superBallDelay
+                    return tech.haveGunCheck("super balls") && tech.missileCount === 1 && !tech.superBallDelay
                 },
                 requires: "super balls, but not super duper or supertemporal",
                 effect() {
@@ -4134,7 +4115,7 @@
             },
             {
                 name: "super sized",
-                description: `<strong>super balls</strong> are <strong>20%</strong> larger<br>increases mass and physical <strong class='color-d'>damage</strong>`,
+                description: `increase <strong>super ball</strong> radius by <strong>17%</strong><br>increases <strong class='color-d'>damage</strong> by about <strong>35%</strong>`,
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -4145,7 +4126,7 @@
                 },
                 requires: "super balls",
                 effect() {
-                    tech.bulletSize += 0.15
+                    tech.bulletSize += 0.17
                 },
                 remove() {
                     tech.bulletSize = 1;
@@ -4322,25 +4303,6 @@
                 }
             },
             {
-                name: "MIRV",
-                description: "missile <strong class='color-g'>gun</strong> and <strong>bot</strong> launch <strong>+1</strong> <strong>missile</strong><br>decrease <strong>size</strong> and <strong>fire rate</strong> by <strong>10%</strong>",
-                isGunTech: true,
-                maxCount: 9,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("missiles") || tech.missileBotCount
-                },
-                requires: "missiles",
-                effect() {
-                    tech.missileCount++;
-                },
-                remove() {
-                    tech.missileCount = 1;
-                }
-            },
-            {
                 name: "missile-bot",
                 description: "remove your <strong>missile gun</strong><br>gain a <strong class='color-bot'>bot</strong> that fires <strong>missiles</strong> at mobs",
                 isGunTech: true,
@@ -4366,6 +4328,25 @@
                         b.respawnBots();
                         if (!tech.haveGunCheck("missiles")) b.giveGuns("missiles")
                     }
+                }
+            },
+            {
+                name: "MIRV",
+                description: "fire <strong>+1</strong> <strong>missile</strong>, <strong>grenade</strong>, and <strong>super ball</strong><br>decrease <strong class='color-e'>explosion</strong> <strong>radius</strong> up to <strong>10%</strong>",
+                isGunTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("missiles") || tech.missileBotCount || tech.haveGunCheck("grenades") || (tech.haveGunCheck("super balls") && !tech.oneSuperBall)
+                },
+                requires: "missiles, grenades, super balls, not super ball",
+                effect() {
+                    tech.missileCount++;
+                },
+                remove() {
+                    tech.missileCount = 1;
                 }
             },
             {
@@ -4421,7 +4402,7 @@
                 allowed() {
                     return tech.isVacuumBomb && !tech.isExplodeRadio
                 },
-                requires: "vacuum bomb && not iridium-192",
+                requires: "vacuum bomb, not iridium-192",
                 effect() {
                     tech.isBlockExplode = true; //chain reaction
                 },
@@ -4470,6 +4451,28 @@
                 }
             },
             {
+                name: "booby trap",
+                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br><strong>+53</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("mine")
+                },
+                requires: "mines, not mine reclamation",
+                effect() {
+                    tech.isMineDrop = true;
+                    if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0)
+                    tech.addJunkTechToPool(53)
+                },
+                remove() {
+                    tech.isMineDrop = false;
+                    if (this.count > 0) tech.removeJunkTechFromPool(53)
+                }
+            },
+            {
                 name: "laser-mines",
                 description: "<strong>mines</strong> laid while you are <strong>crouched</strong><br>use <strong class='color-f'>energy</strong> to emit <strong>3</strong> unaimed <strong class='color-laser'>lasers</strong>",
                 isGunTech: true,
@@ -4486,25 +4489,6 @@
                 },
                 remove() {
                     tech.isLaserMine = false;
-                }
-            },
-            {
-                name: "mine reclamation",
-                description: "retrieve <strong class='color-g'>ammo</strong> from all undetonated <strong>mines</strong><br>and <strong>20%</strong> of <strong>mines</strong> after detonation",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("mine") && !tech.isMineDrop
-                },
-                requires: "mine, not bobby trap",
-                effect() {
-                    tech.isMineAmmoBack = true;
-                },
-                remove() {
-                    tech.isMineAmmoBack = false;
                 }
             },
             {
@@ -4543,28 +4527,6 @@
                 },
                 remove() {
                     tech.isMineStun = false;
-                }
-            },
-            {
-                name: "booby trap",
-                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br><strong>+30</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("mine") && !tech.isMineAmmoBack
-                },
-                requires: "mines, not mine reclamation",
-                effect() {
-                    tech.isMineDrop = true;
-                    if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
-                    tech.addJunkTechToPool(30)
-                },
-                remove() {
-                    tech.isMineDrop = false;
-                    if (this.count > 0) tech.removeJunkTechFromPool(30)
                 }
             },
             {
@@ -4901,7 +4863,7 @@
             },
             {
                 name: "uncertainty principle",
-                description: "<strong>foam</strong> bubbles randomly change <strong>position</strong><br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>55%</strong>",
+                description: "<strong>foam</strong> bubbles randomly change <strong>position</strong><br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>50%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5964,7 +5926,10 @@
                     tech.isIntangible = true;
                 },
                 remove() {
-                    tech.isIntangible = false;
+                    if (tech.isIntangible) {
+                        tech.isIntangible = false;
+                        player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
+                    }
                 }
             },
             {
@@ -7730,7 +7695,6 @@
         isPiezo: null,
         isFastDrones: null,
         isFastSpores: null,
-        superBallNumber: null,
         oneSuperBall: null,
         laserReflections: null,
         laserDamage: null,
@@ -7745,7 +7709,6 @@
         isSporeField: null,
         isMissileField: null,
         isIceField: null,
-        isMineAmmoBack: null,
         isPlasmaRange: null,
         isFreezeMobs: null,
         isIceCrystals: null,

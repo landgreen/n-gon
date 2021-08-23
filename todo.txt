@@ -1,17 +1,25 @@
 ******************************************************** NEXT PATCH **************************************************
 
-20% damage for all mine modes
-laser mines spin super fast when it first finds a target, and a bit faster overall
-mine sentry lasts 17 seconds (2 more seconds)
+tech: MIRV - now effects grenades and super balls in addition to missiles
+  no change for super balls and missiles, but this is a new tech for grenades
 
-desublimated ammunition comes with 7 JUNK tech
-several foam tech do 5% less damage
-shotgun has 1/9 less ammo
-apomixis now requires 11 research
-historyBoss takes 25% longer to reach it's minimum follow distance
+undetonated mines are returned at the end of a level
+  removed tech: mine reclamation
+  mine gun has 30% less ammo
+  laser mines do 7% less damage
+  booby trap now comes with 53 JUNK (up from 33) but it's mines can be returned for ammo
 
-bug fixes
+removed ctx.clip() from metamaterial cloaking field for performance reasons
+  the graphics look a bit different now, maybe not as good, maybe it's just different
+
+iceIX bullets last 50% less time, but do 50% more damage and have 25% more thrust
+  so it's more of a close range bullet
+  ice-shot has 2 fewer bullets
+
 ******************************************************** TODO ********************************************************
+
+tech MIRV applies to grenades
+  maybe also merge with tech: super balls?, laser refraction...
 
 work on necroBoss from TheShwarma
   make spawned blocks in the direction of the player
@@ -28,12 +36,10 @@ falling particle rain
   basically spores with no guidance
   lag if too many particles?
 
-wormhole show where you would go on mouse down
-  trigger teleport on release
-
 look into 360 wave beam lag
 
 aoe effect pushes mobs away,  then rapidly pulls them in
+  for mines?
 
 tech: shrapnel - nails have an larger randomized 3 point shape triangle shape and they do more damage
 
@@ -114,8 +120,6 @@ add back in gamepad support?
   but does anyone care?
   https://github.com/landgreen/landgreen.github.io/search?q=gamepadconnected
 
-RPG default or tech: grenades detonate on your cursor / where your cursor was when they were fired
-
 tech: time dilation - when you exit time dilation rewind to the state you entered
   position, velocity, and health
   no energy cost
@@ -125,9 +129,6 @@ be able to open up custom mode in the normal game
   while in through testing mode?
   have a way to make limited changes as allowed by tech you pick up in game
   disable the in custom setting flag
-
-super balls start at 3, not 4
-  have to balance damage
 
 make different move methods
   tech crouch charge jump
@@ -145,8 +146,6 @@ tech pilot wave: mini black hole - pull mobs and blocks in with more force
 tech pilot wave: antigravity - blocks have no gravity for a few seconds after exiting the field
   maybe they bounce too?
   maybe they explode?
-
-wormhole - make it clear when the wormhole can and can't teleport to a location before the player clicks
 
 new power up - increase damage and fire speed, for 15 seconds
   named boost?

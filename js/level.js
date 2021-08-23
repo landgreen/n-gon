@@ -11,13 +11,14 @@ const level = {
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
+            // simulation.enableConstructMode() //used to build maps in testing mode
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // b.giveGuns("mine")
-            // b.giveGuns("nail gun")
-            // m.setField("wormhole")
+            // b.giveGuns("grenades")
             // tech.giveTech("laser-mines")
+            // m.setField("metamaterial cloaking")
+            // for (let i = 0; i < 3; i++) tech.giveTech("super sized")
             // tech.giveTech("irradiated nails")
             // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
 
@@ -51,7 +52,6 @@ const level = {
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
             // for (let i = 0; i < 7; i++) tech.giveTech("undefined")
             // lore.techCount = 6
-            // simulation.enableConstructMode() //used to build maps in testing mode
 
             // simulation.isCheating = false //true;
             // localSettings.loreCount = 3; //this sets what conversation is heard
@@ -2246,7 +2246,7 @@ const level = {
             for (let i = 0; i < 4; ++i) spawn.bodyRect(x + 5, y - 260 + i * blockSize, 30, blockSize);
         }
         // blockDoor(710, -710);
-        // for (let i = 0; i < 30; i++) powerUps.directSpawn(710, -710, "tech");
+        // for (let i = 0; i < 200; i++) powerUps.directSpawn(710 + 1000 * Math.random(), -710 + 1000 * Math.random(), "tech");
 
         spawn.mapRect(2500, -1200, 200, 750); //right wall
         blockDoor(2585, -210)
@@ -4027,8 +4027,8 @@ const level = {
         // spawn.mapRect(-2600, -1975, 250, 25);
         spawn.mapRect(-2515, -2000, 180, 50);
 
-        spawn.bodyRect(-3410, -1425, 100, 100);
-        spawn.bodyRect(-3390, -1525, 100, 100);
+        spawn.bodyRect(-3410, -1425, 50, 50);
+        spawn.bodyRect(-3390, -1525, 40, 60);
         // spawn.bodyRect(-3245, -1425, 100, 100);
         //building 3
         spawn.mapRect(-4450, -1750, 800, 1050);
@@ -4171,16 +4171,6 @@ const level = {
             level.enter.draw();
         };
 
-
-        // simulation.draw.mapPath = new Path2D();
-        // for (let i = 0, len = map.length; i < len; ++i) {
-        //     let vertices = map[i].vertices;
-        //     simulation.draw.mapPath.moveTo(vertices[0].x, vertices[0].y);
-        //     for (let j = 1; j < vertices.length; j += 1) {
-        //         simulation.draw.mapPath.lineTo(vertices[j].x, vertices[j].y);
-        //     }
-        //     simulation.draw.mapPath.lineTo(vertices[0].x, vertices[0].y);
-        // }
         const lightingPath = new Path2D() //pre-draw the complex lighting path to save processing
         lightingPath.moveTo(-1800, -500)
         lightingPath.lineTo(-910, -500) //3rd floor light

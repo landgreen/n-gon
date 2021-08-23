@@ -697,7 +697,7 @@ const powerUps = {
             if (tech.isLaserMine && m.crouch) {
                 b.laserMine(who.position)
             } else {
-                b.mine(who.position, { x: 0, y: 0 }, 0, tech.isMineAmmoBack)
+                b.mine(who.position, { x: 0, y: 0 }, 0)
             }
         }
         if (tech.isRelay) {

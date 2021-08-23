@@ -642,7 +642,7 @@ const m = {
                     tech.isDeathAvoidedThisLevel = true
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
-                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
+                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     m.energy = m.maxEnergy
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function() { //set wipe to have trails
@@ -673,7 +673,7 @@ const m = {
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
                     <br>${powerUps.research.count}`)
-                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
+                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
@@ -2125,9 +2125,10 @@ const m = {
                 // m.fieldDamage = 2.46 // 1 + 146/100
                 m.fieldDrawRadius = 0
                 m.isSneakAttack = true;
-                const drawRadius = 1100
+                const drawRadius = 900
 
                 m.hold = function() {
+                    // console.log(m.holdingTarget)
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
                         m.holding();
@@ -2194,29 +2195,27 @@ const m = {
                         const wiggle = 0.15 * Math.sin(m.fieldPhase * 0.5)
                         ctx.beginPath();
                         ctx.ellipse(m.pos.x, m.pos.y, m.fieldDrawRadius * (1 - wiggle), m.fieldDrawRadius * (1 + wiggle), m.fieldPhase, 0, 2 * Math.PI);
-                        if (m.fireCDcycle > m.cycle && (input.field)) {
-                            ctx.lineWidth = 5;
-                            ctx.strokeStyle = `rgba(0, 204, 255,1)`
-                            ctx.stroke()
-                        }
-                        ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*m.energy})`;
-                        ctx.globalCompositeOperation = "destination-in"; //in or atop
+                        // if (m.fireCDcycle > m.cycle && (input.field)) {}
+                        ctx.fillStyle = "#fff"
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = "#000"
+                        ctx.stroke()
+                        // ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*m.energy})`;
+                        ctx.globalCompositeOperation = "destination-in";
                         ctx.fill();
                         ctx.globalCompositeOperation = "source-over";
-                        ctx.clip();
+                        // ctx.clip();  //seems to have a high performance cost
                     }
 
                     // const energy = Math.max(0.01, Math.min(m.energy, 1))
                     if (m.isCloak) {
                         this.fieldRange = this.fieldRange * 0.9 + 0.1 * drawRadius
-                        m.fieldDrawRadius = this.fieldRange * 0.9 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
+                        m.fieldDrawRadius = this.fieldRange * 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                         drawField()
-                    } else {
-                        if (this.fieldRange < 3000) {
-                            this.fieldRange += 200
-                            m.fieldDrawRadius = this.fieldRange //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
-                            drawField()
-                        }
+                    } else if (this.fieldRange < 3000) {
+                        this.fieldRange += 50
+                        m.fieldDrawRadius = this.fieldRange //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
+                        drawField()
                     }
                     if (tech.isIntangible) {
                         if (m.isCloak) {
@@ -2478,7 +2477,8 @@ const m = {
                                     if (
                                         dist2 < 5000 &&
                                         !simulation.isChoosing &&
-                                        (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth)
+                                        (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)
+                                        // (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth)
                                         // (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity)
                                     ) { //use power up if it is close enough
                                         powerUps.onPickUp(powerUp[i]);
