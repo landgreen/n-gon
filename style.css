@@ -521,10 +521,7 @@ summary {
 .color-symbol {
     color: #fff;
 }
-
-.color-gun {
-    color: hsl(218, 100%, 70%);
-} */
+ */
 
 
 
@@ -567,6 +564,10 @@ summary {
 .color-g {
     color: hsl(218, 80%, 40%);
     letter-spacing: 1px;
+}
+
+.color-ammo {
+    color: #356;
 }
 
 .color-dup {
@@ -706,6 +707,39 @@ summary {
     border-radius: 50%;
     display: inline-block;
     margin-bottom: -7px;
+}
+
+.research-circle {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-bottom: -2.5px;
+    background-color: #f7b;
+    border: 0.5px #fff solid;
+    opacity: 0.85;
+}
+
+.ammo-circle {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: #578;
+    border: 0.5px #fff solid;
+    opacity: 0.95;
+    margin-bottom: -2px;
+}
+
+.heal-circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-bottom: -3px;
+    background-color: #0d9;
+    border: 0.5px #fff solid;
+    opacity: 0.85;
 }
 
 .circle-grid-shadow {

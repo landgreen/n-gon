@@ -1919,15 +1919,14 @@ const m = {
                     if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 150 && (m.cycle % 2)) {
                         if (tech.isSporeField) {
                             if (tech.isSporeWorm) {
-                                if (m.energy > 0.15) {
-                                    m.energy -= 0.15
+                                if (m.energy > 0.16) {
+                                    m.energy -= 0.16
                                     b.worm({ x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) })
                                     const SPEED = 2 + 1 * Math.random();
                                     Matter.Body.setVelocity(bullet[bullet.length - 1], {
                                         x: SPEED * Math.cos(m.angle),
                                         y: SPEED * Math.sin(m.angle)
                                     });
-
                                 }
                             } else {
                                 for (let i = 0, len = Math.random() * 20; i < len; i++) {
@@ -1940,8 +1939,6 @@ const m = {
                                     }
                                 }
                             }
-
-
                         } else if (tech.isMissileField) {
                             m.energy -= 0.3;
                             b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
@@ -2204,7 +2201,7 @@ const m = {
                         ctx.globalCompositeOperation = "destination-in";
                         ctx.fill();
                         ctx.globalCompositeOperation = "source-over";
-                        // ctx.clip();  //seems to have a high performance cost
+                        ctx.clip();
                     }
 
                     // const energy = Math.max(0.01, Math.min(m.energy, 1))

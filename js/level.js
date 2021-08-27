@@ -15,11 +15,11 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // b.giveGuns("grenades")
-            // tech.giveTech("laser-mines")
             // m.setField("metamaterial cloaking")
+            // b.giveGuns("spores")
+            // tech.giveTech("nematodes")
+            // tech.giveTech("necrophage")
             // for (let i = 0; i < 3; i++) tech.giveTech("super sized")
-            // tech.giveTech("irradiated nails")
             // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
 
             level.intro(); //starting level
@@ -98,7 +98,7 @@ const level = {
         if (tech.isMACHO) spawn.MACHO()
         for (let i = 0; i < tech.wimpCount; i++) {
             spawn.WIMP()
-            for (let j = 0, len = 1 + 5 * Math.random(); j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
+            for (let j = 0, len = 5; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         }
         for (let i = 0; i < tech.wimpExperiment; i++) spawn.WIMP()
         if (tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
@@ -117,7 +117,7 @@ const level = {
             if (simulation.lookFreqScale > 0.2) simulation.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale > 0.2) simulation.CDScale *= 0.97 //mob CD time decreases each level
         }
-        simulation.dmgScale = 0.4 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.41 * simulation.difficulty //damage done by mobs increases each level
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
@@ -129,7 +129,7 @@ const level = {
             if (simulation.CDScale < 5) simulation.CDScale /= 0.97 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = 0.4 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.41 * simulation.difficulty //damage done by mobs increases each level
         if (simulation.dmgScale < 0.1) simulation.dmgScale = 0.1;
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055)
     },

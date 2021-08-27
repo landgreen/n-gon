@@ -105,7 +105,7 @@
                 if (tech.isMetaAnalysis && tech.tech[index].isJunk) {
                     simulation.makeTextLog(`//tech: meta-analysis replaced junk tech with random tech`);
                     tech.giveTech('random')
-                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 40 * Math.random(), m.pos.y + 40 * Math.random(), "research");
+                    for (let i = 0; i < 3; i++) powerUps.spawn(m.pos.x + 40 * Math.random(), m.pos.y + 40 * Math.random(), "research");
                     return
                 }
 
@@ -193,7 +193,7 @@
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return (tech.isPowerUpsVanish ? 0.17 : 0) + (tech.isStimulatedEmission ? 0.2 : 0) + tech.cancelCount * 0.048 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
+            return (tech.isPowerUpsVanish ? 0.15 : 0) + (tech.isStimulatedEmission ? 0.2 : 0) + tech.cancelCount * 0.047 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
         },
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
@@ -384,7 +384,7 @@
             },
             {
                 name: "ad hoc",
-                description: "for every <strong class='color-g'>gun</strong> in your inventory spawn a<br><strong class='color-h'>heal</strong>, <strong class='color-r'>research</strong>, <strong class='color-f'>field</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-m'>tech</strong>",
+                description: `for every <strong class='color-g'>gun</strong> in your inventory spawn a<br>${powerUps.orb.heal()}, ${powerUps.orb.research(1)}, <strong class='color-f'>field</strong>, ${powerUps.orb.ammo(1)}, or <strong class='color-m'>tech</strong>`,
                 maxCount: 1, //random power up
                 count: 0,
                 frequency: 1,
@@ -413,7 +413,7 @@
             },
             {
                 name: "logistics",
-                description: "<strong class='color-g'>ammo</strong> power ups give <strong>80%</strong> more <strong class='color-g'>ammo</strong><br>but <strong class='color-g'>ammo</strong> is only added to your current <strong class='color-g'>gun</strong>",
+                description: `${powerUps.orb.ammo()} give <strong>80%</strong> more <strong class='color-ammo'>ammo</strong><br>but it's only added to your current <strong class='color-g'>gun</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -431,7 +431,7 @@
             },
             {
                 name: "supply chain",
-                description: "double your current <strong class='color-g'>ammo</strong> for all <strong class='color-g'>guns</strong>",
+                description: "double your current <strong class='color-ammo'>ammo</strong> for all <strong class='color-g'>guns</strong>",
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
@@ -452,7 +452,7 @@
             },
             {
                 name: "catabolism",
-                description: "firing while <strong>out</strong> of <strong class='color-g'>ammo</strong> spawns <strong>4</strong> <strong class='color-g'>ammo</strong><br>and reduces your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>1</strong>",
+                description: `firing while <strong>out</strong> of <strong class='color-ammo'>ammo</strong> spawns ${powerUps.orb.ammo(4)}<br>and reduces your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>1</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -470,7 +470,7 @@
             },
             {
                 name: "desublimated ammunition",
-                description: "use <strong>50%</strong> less <strong class='color-g'>ammo</strong> when <strong>crouching</strong><br><strong>+6</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "every other <strong>crouched</strong> shot uses no <strong class='color-ammo'>ammo</strong><br><strong>+6</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -591,7 +591,7 @@
             },
             {
                 name: "Newton's 1st law",
-                description: "moving at high <strong>speeds</strong> reduces <strong class='color-harm'>harm</strong><br>by up to <strong>66%</strong>",
+                description: "moving at high <strong>speeds</strong><br>reduces <strong class='color-harm'>harm</strong> by up to <strong>66%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -609,7 +609,7 @@
             },
             {
                 name: "Newton's 2nd law",
-                description: "moving at high <strong>speeds</strong> increases <strong class='color-d'>damage</strong><br> by up to <strong>66%</strong>",
+                description: "moving at high <strong>speeds</strong><br>increases <strong class='color-d'>damage</strong> by up to <strong>66%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -1424,7 +1424,7 @@
             },
             {
                 name: "bot fabrication",
-                description: "anytime you collect <strong>4</strong> <strong class='color-r'>research</strong><br>use them to build a random <strong class='color-bot'>bot</strong>",
+                description: `anytime you collect ${powerUps.orb.research(4)}<br>use them to build a random <strong class='color-bot'>bot</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1445,21 +1445,18 @@
             },
             {
                 name: "robotics",
-                description: "use <strong>1</strong> <strong class='color-r'>research</strong> to spawn a random <strong>bot</strong><br><strong>quadruple</strong> the <strong class='flicker'>frequency</strong> of finding <strong>bot</strong> <strong class='color-m'>tech</strong>",
+                description: `spawn a random <strong>bot</strong><br><strong>quadruple</strong> the <strong class='flicker'>frequency</strong> of finding <strong>bot</strong> <strong class='color-m'>tech</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
                 frequencyDefault: 1,
                 isBotTech: true,
                 allowed() {
-                    return (b.totalBots() > 1 && powerUps.research.count > 0) || build.isExperimentSelection
+                    return b.totalBots() > 1 || build.isExperimentSelection
                 },
                 requires: "at least 2 bots",
                 effect: () => {
-                    if (powerUps.research.count > 0) {
-                        powerUps.research.changeRerolls(-1)
-                        b.randomBot()
-                    }
+                    b.randomBot()
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
                         if (tech.tech[i].isBotTech) tech.tech[i].frequency *= 4
                     }
@@ -1677,13 +1674,13 @@
             },
             {
                 name: "buckling",
-                description: "if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn <strong>1</strong> <strong class='color-h'>heal</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
+                description: `if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn <strong>1</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`,
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isTokamak
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && !tech.isTokamak
                 },
                 requires: "mass driver, not pilot wave not tokamak",
                 effect() {
@@ -2211,7 +2208,7 @@
             },
             {
                 name: "1st ionization energy",
-                description: "each <strong class='color-h'>heal</strong> <strong>power up</strong> you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>6</strong>",
+                description: `each ${powerUps.orb.heal()} you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>6</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2292,7 +2289,7 @@
             },
             {
                 name: "exciton-lattice",
-                description: `increase <strong class='color-d'>damage</strong> by <strong>60%</strong>, but<br><strong class='color-g'>ammo</strong> will no longer <strong>spawn</strong>`,
+                description: `increase <strong class='color-d'>damage</strong> by <strong>60%</strong>, but<br>${powerUps.orb.ammo()} will no longer <strong>spawn</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2612,7 +2609,7 @@
             },
             {
                 name: "quenching",
-                description: "over healing from <strong class='color-h'>heal</strong> power ups does <strong class='color-harm'>harm</strong><br>but it also increase your <strong>maximum</strong> <strong class='color-h'>health</strong>",
+                description: `over healing from ${powerUps.orb.heal()} does <strong class='color-harm'>harm</strong><br>but it also increase your <strong>maximum</strong> <strong class='color-h'>health</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2630,7 +2627,7 @@
             },
             {
                 name: "negative entropy",
-                description: `at the start of each <strong>level</strong><br>spawn a <strong class='color-h'>heal</strong> for every <strong>26</strong> missing health`,
+                description: `at the start of each <strong>level</strong><br>spawn ${powerUps.orb.heal()} for every <strong>26</strong> missing health`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2649,7 +2646,7 @@
             },
             {
                 name: "adiabatic healing",
-                description: "<strong class='color-h'>heal</strong> <strong>power ups</strong> are <strong>100%</strong> more effective",
+                description: `${powerUps.orb.heal()} are <strong>100%</strong> more effective`,
                 maxCount: 3,
                 count: 0,
                 frequency: 2,
@@ -2668,7 +2665,7 @@
             },
             {
                 name: "maintenance",
-                description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn <strong>11</strong> <strong class='color-h'>heals</strong>",
+                description: `</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn ${powerUps.orb.heal(11)}`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2695,7 +2692,7 @@
                         powerUps.research.changeRerolls(0)
                     }, 1000);
                 },
-                description: "once per level, instead of <strong>dying</strong><br>consume <strong>1</strong> <strong class='color-r'>research</strong> and spawn <strong>5</strong> <strong class='color-h'>heals</strong>",
+                description: `once per level, instead of <strong>dying</strong><br>use ${powerUps.orb.research(1)} and spawn ${powerUps.orb.heal(5)}`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2797,7 +2794,7 @@
             {
                 name: "many-worlds",
                 // description: "each <strong>level</strong> is an <strong class='alt'>alternate reality</strong>, where you<br>find a <strong class='color-m'>tech</strong> at the start of each level",
-                description: "on each new <strong>level</strong> use <strong>1</strong> <strong class='color-r'>research</strong> to enter an<br><strong class='alt'>alternate reality</strong> and spawn a <strong class='color-m'>tech</strong> power up",
+                description: `on each new <strong>level</strong> use ${powerUps.orb.research(1)} to enter an<br><strong class='alt'>alternate reality</strong> and spawn a <strong class='color-m'>tech</strong> power up`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2815,7 +2812,7 @@
             },
             {
                 name: "Ψ(t) collapse",
-                description: "enter an <strong class='alt'>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn <strong>16</strong> <strong class='color-r'>research</strong>",
+                description: `enter an <strong class='alt'>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn ${powerUps.orb.research(16)}`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2834,7 +2831,7 @@
             },
             {
                 name: "decoherence",
-                description: "<strong class='color-r'>researched</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> won't <strong>reoccur</strong> <br>spawn <strong>9</strong> <strong class='color-r'>research</strong>",
+                description: `<strong class='color-r'>researched</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> won't <strong>reoccur</strong> <br>spawn ${powerUps.orb.research(9)}`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2857,7 +2854,7 @@
             },
             {
                 name: "renormalization",
-                description: "using a <strong class='color-r'>research</strong> for <strong>any</strong> purpose<br>has a <strong>40%</strong> chance to spawn a <strong class='color-r'>research</strong>",
+                description: `using ${powerUps.orb.research(1)} for <strong>any</strong> purpose<br>has a <strong>40%</strong> chance to spawn ${powerUps.orb.research(1)}`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2875,7 +2872,7 @@
             },
             {
                 name: "perturbation theory",
-                description: "<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>when you have no <strong class='color-r'>research</strong> in your inventory",
+                description: `<strong>66%</strong> decreased <strong><em>delay</em></strong> after firing<br>when you have no ${powerUps.orb.research(1)} in your inventory`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2897,7 +2894,7 @@
             },
             {
                 name: "ansatz",
-                description: "after choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>if you have no <strong class='color-r'>research</strong> spawn <strong>2</strong>",
+                description: `after choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawn ${powerUps.orb.research(2)}if you have 0 ${powerUps.orb.research(1)} in your inventory`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2915,7 +2912,7 @@
             },
             {
                 name: "Bayesian statistics",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>3.7%</strong><br>for each <strong class='color-r'>research</strong> in your inventory",
+                description: `increase <strong class='color-d'>damage</strong> by <strong>3.7%</strong><br>for each ${powerUps.orb.research(1)} in your inventory`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2984,7 +2981,7 @@
             },
             {
                 name: "abiogenesis",
-                description: "at the start of a level spawn a 2nd <strong>boss</strong> for<br><strong>4</strong> <strong class='color-r'>research</strong> or <strong>+49</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
+                description: `at the start of a level spawn a 2nd <strong>boss</strong><br>use ${powerUps.orb.research(4)} or add <strong>49</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -3002,7 +2999,7 @@
             },
             {
                 name: "bubble fusion",
-                description: "after destroying a mob's natural <strong>shield</strong><br>spawn <strong>1-2</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, or <strong class='color-r'>research</strong>",
+                description: `after destroying a mob's natural <strong>shield</strong><br>spawn <strong>1-2</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3020,7 +3017,7 @@
             },
             {
                 name: "meta-analysis",
-                description: "if you choose a <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> you instead get a <br>random normal <strong class='color-m'>tech</strong> and <strong>5</strong> <strong class='color-r'>research</strong>",
+                description: `if you choose a <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> you instead get a<br>random normal <strong class='color-m'>tech</strong> and ${powerUps.orb.research(3)}`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3080,7 +3077,7 @@
             },
             {
                 name: "metastability",
-                description: "<strong>17%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong> ",
+                description: "<strong>15%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong> ",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3100,7 +3097,7 @@
             },
             {
                 name: "futures exchange",
-                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.8%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.7%</strong> power up <strong class='color-dup'>duplication</strong> chance",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3110,19 +3107,17 @@
                 },
                 requires: "below 100% duplication chance, not determinism",
                 effect() {
-                    // tech.cancelCount = 0
-                    tech.isCancelDuplication = true
+                    tech.isCancelDuplication = true //search for tech.cancelCount  to balance
                     powerUps.setDo(); //needed after adjusting duplication chance
                 },
                 remove() {
-                    // tech.cancelCount = 0
                     tech.isCancelDuplication = false
                     powerUps.setDo(); //needed after adjusting duplication chance
                 }
             },
             {
                 name: "commodities exchange",
-                description: "clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>9</strong> <strong class='color-h'>heals</strong>, <strong class='color-g'>ammo</strong>, and <strong class='color-r'>research</strong>",
+                description: `clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>9</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3176,7 +3171,7 @@
             },
             {
                 name: "apomixis",
-                description: "use <strong>11</strong> <strong class='color-r'>research</strong> to spawn <strong>8 bosses</strong><br>immediately after reaching <strong>100%</strong> <strong class='color-dup'>duplication</strong>",
+                description: `immediately use ${powerUps.orb.research(11)} and if you<br>reach <strong>100%</strong> <strong class='color-dup'>duplication</strong> spawn <strong>8 bosses</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -3277,7 +3272,7 @@
             },
             {
                 name: "strange attractor",
-                description: `use <strong>2</strong> <strong class='color-r'>research</strong> to spawn <strong>1</strong> <strong class='color-m'>tech</strong><br>with <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance`,
+                description: `use ${powerUps.orb.research(2)} to spawn <strong>1</strong> <strong class='color-m'>tech</strong><br>with <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3349,7 +3344,7 @@
             },
             {
                 name: "backward induction",
-                description: "use <strong>2</strong> <strong class='color-r'>research</strong> to <strong>choose</strong> all the unchosen<br> <strong class='color-m'>tech</strong> from your previous <strong class='color-m'>tech</strong> selection",
+                description: `use ${powerUps.orb.research(2)} to <strong>choose</strong> all the unchosen<br> <strong class='color-m'>tech</strong> from your previous <strong class='color-m'>tech</strong> selection`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3377,7 +3372,7 @@
             },
             {
                 name: "unified field theory",
-                description: `spawn <strong>6</strong> <strong class='color-r'>research</strong>, and when <strong>paused</strong><br><strong>clicking</strong> the <strong class='color-f'>field</strong> box switches your <strong class='color-f'>field</strong>`,
+                description: `spawn ${powerUps.orb.research(6)}and when <strong>paused</strong><br><strong>clicking</strong> the <strong class='color-f'>field</strong> box switches your <strong class='color-f'>field</strong>`,
                 // description: `in the <strong>pause</strong> menu, change your <strong class='color-f'>field</strong><br>by <strong>clicking</strong> on your <strong class='color-f'>field's</strong> box`,
                 maxCount: 1,
                 count: 0,
@@ -3465,7 +3460,7 @@
             },
             {
                 name: "superdeterminism",
-                description: "spawn <strong>5</strong> <strong class='color-m'>tech</strong><br><strong class='color-r'>research</strong>, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>",
+                description: `spawn <strong>5</strong> <strong class='color-m'>tech</strong><br>${powerUps.orb.research(1)}, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 8,
@@ -3512,7 +3507,7 @@
             },
             {
                 name: "ergodicity",
-                description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br><strong class='color-h'>heal</strong> power ups have <strong>no</strong> effect",
+                description: `reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br>${powerUps.orb.heal()} have <strong>no</strong> effect`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3591,7 +3586,7 @@
             },
             {
                 name: "needle gun",
-                description: "<strong>nail gun</strong> fires <strong>3</strong> mob piercing <strong>needles</strong><br>requires <strong>3</strong> times more <strong class='color-g'>ammo</strong>",
+                description: "<strong>nail gun</strong> fires <strong>3</strong> mob piercing <strong>needles</strong><br>requires <strong>3</strong> times more <strong>bullets</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3869,7 +3864,7 @@
             },
             {
                 name: "shotgun spin-statistics",
-                description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br>shotgun <strong class='color-g'>ammo</strong> gives <strong>50%</strong> less shots",
+                description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br>shotgun has gives <strong>50%</strong> fewer shots",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4665,7 +4660,7 @@
             },
             {
                 name: "reduced tolerances",
-                description: "increase <strong>drone</strong> <strong class='color-g'>ammo</strong>/<strong class='color-f'>efficiency</strong> by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>",
+                description: `increase <strong>drones</strong> per ${powerUps.orb.ammo()} or <strong class='color-f'>energy</strong> <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>`,
                 isGunTech: true,
                 maxCount: 3,
                 count: 0,
@@ -4714,7 +4709,7 @@
             },
             {
                 name: "drone repair",
-                description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>25%</strong> chance to use <strong>1</strong> <strong class='color-g'>ammo</strong>",
+                description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>25%</strong> chance to use <strong>1</strong> <strong>drone</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4771,7 +4766,7 @@
             },
             {
                 name: "irradiated drones",
-                description: "the space around <strong>drones</strong> is <strong class='color-p'>irradiated</strong><br>reduce <strong class='color-g'>ammo</strong>/<strong class='color-f'>efficiency</strong> by <strong>75%</strong>",
+                description: `the space around <strong>drones</strong> is <strong class='color-p'>irradiated</strong><br>reduce <strong>drones</strong> per ${powerUps.orb.ammo()} or <strong class='color-f'>energy</strong> <strong>75%</strong>`,
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4941,7 +4936,7 @@
             },
             {
                 name: "foam fractionation",
-                description: "<strong>foam</strong> gun bubbles are <strong>100%</strong> larger<br>when you have below <strong>300</strong> <strong class='color-g'>ammo</strong>",
+                description: "<strong>foam</strong> gun bubbles are <strong>100%</strong> larger<br>when you have below <strong>300</strong> <strong>foam</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5052,13 +5047,13 @@
                 requires: "laser, not pulse, diodes",
                 effect() {
                     tech.laserFieldDrain = 0.007 //base is 0.002
-                    tech.laserDamage = 0.45; //base is 0.15
+                    tech.laserDamage = 0.48; //base is 0.16
                     tech.laserColor = "#83f"
                     tech.laserColorAlpha = "rgba(136, 51, 255,0.5)"
                 },
                 remove() {
                     tech.laserFieldDrain = 0.002;
-                    tech.laserDamage = 0.15; //used in check on pulse: tech.laserDamage === 0.15
+                    tech.laserDamage = 0.16; //used in check on pulse: tech.laserDamage === 0.15
                     tech.laserColor = "#f00"
                     tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
                 }
@@ -5267,7 +5262,8 @@
             //************************************************** 
             {
                 name: "zero point energy",
-                description: "use <strong>2</strong> <strong class='color-r'>research</strong> to<br>increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>74</strong>",
+                description: `use ${powerUps.orb.research(2)}to increase your <strong>max</strong> <strong class='color-f'>energy</strong> by <strong>74</strong>`,
+                // description: "use <strong>2</strong> <strong class='color-r'>research</strong> to<br>increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>74</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5431,7 +5427,8 @@
             },
             {
                 name: "tessellation",
-                description: "use <strong>4</strong> <strong class='color-r'>research</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>",
+                description: `use ${powerUps.orb.research(4)}to reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>`,
+                // description: "use <strong>4</strong> <strong class='color-r'>research</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5530,7 +5527,7 @@
             },
             {
                 name: "bot manufacturing",
-                description: "use <strong>nano-scale manufacturing</strong> and <strong>2</strong> <strong class='color-r'>research</strong><br>to build <strong>3</strong> random <strong class='color-bot'>bots</strong>",
+                description: `use <strong>nano-scale manufacturing</strong> and ${powerUps.orb.research(2)}<br>to build <strong>3</strong> random <strong class='color-bot'>bots</strong>`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5556,7 +5553,7 @@
             },
             {
                 name: "bot prototypes",
-                description: "use <strong>nano-scale</strong> and <strong>3</strong> <strong class='color-r'>research</strong> to build<br><strong>2</strong> random <strong class='color-bot'>bots</strong> and <strong>upgrade</strong> all <strong class='color-bot'>bots</strong> to that type",
+                description: `use ${powerUps.orb.research(3)}to build<br><strong>2</strong> random <strong class='color-bot'>bots</strong> and <strong>upgrade</strong> all <strong class='color-bot'>bots</strong> to that type`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5633,7 +5630,8 @@
             },
             {
                 name: "mycelium manufacturing",
-                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
+                description: `use ${powerUps.orb.research(3)}to repurpose <strong>nano-scale</strong> field<br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>`,
+                // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5658,7 +5656,8 @@
             },
             {
                 name: "missile manufacturing",
-                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
+                description: `use ${powerUps.orb.research(3)}to repurpose <strong>nano-scale</strong> field<br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>`,
+                // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5683,7 +5682,8 @@
             },
             {
                 name: "ice IX manufacturing",
-                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>",
+                description: `use ${powerUps.orb.research(3)}to repurpose <strong>nano-scale</strong> field<br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>`,
+                // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5784,7 +5784,8 @@
             },
             {
                 name: "plasma jet",
-                description: "use <strong>1</strong> <strong class='color-r'>research</strong> to <br>increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>50%</strong>",
+                description: `use ${powerUps.orb.research(1)} to increase <strong class='color-plasma'>plasma</strong> <strong>torch</strong> range <strong>50%</strong>`,
+                // description: "use <strong>1</strong> <strong class='color-r'>research</strong> to <br>increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>50%</strong>",
                 isFieldTech: true,
                 maxCount: 3,
                 count: 0,
@@ -5864,7 +5865,7 @@
             },
             {
                 name: "Lorentz transformation",
-                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to increase your time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>50%</strong> faster",
+                description: `use ${powerUps.orb.research(3)}to increase your time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>50%</strong> faster`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5972,7 +5973,8 @@
             },
             {
                 name: "dynamical systems",
-                description: "use <strong>1</strong> <strong class='color-r'>research</strong><br>increase your <strong class='color-d'>damage</strong> by <strong>35%</strong>",
+                description: `use ${powerUps.orb.research(1)}to increase your <strong class='color-d'>damage</strong> by <strong>35%</strong>`,
+                // description: "use <strong>1</strong> <strong class='color-r'>research</strong><br>increase your <strong class='color-d'>damage</strong> by <strong>35%</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6035,7 +6037,7 @@
             },
             {
                 name: "WIMPs",
-                description: "at the end of each <strong>level</strong> spawn <strong>3-9</strong> <strong class='color-r'>research</strong><br> and a <strong class='color-harm'>harmful</strong> particle that slowly <strong>chases</strong> you",
+                description: `at the end of each <strong>level</strong> spawn ${powerUps.orb.research(5)}<br> and a <strong class='color-harm'>harmful</strong> particle that slowly <strong>chases</strong> you`,
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
@@ -6075,27 +6077,27 @@
             },
             {
                 name: "virtual particles",
-                description: "use <strong>3</strong> <strong class='color-r'>research</strong> to exploit your <strong>wormhole</strong> for a<br><strong>17%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>",
+                description: `use ${powerUps.orb.research(4)}to exploit your <strong>wormhole</strong> for a<br><strong>16%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "wormhole" && (build.isExperimentSelection || powerUps.research.count > 2) && tech.duplicationChance() < 1
+                    return m.fieldUpgrades[m.fieldMode].name === "wormhole" && (build.isExperimentSelection || powerUps.research.count > 3) && tech.duplicationChance() < 1
                 },
                 requires: "wormhole,below 100% duplication chance",
                 effect() {
-                    tech.wormDuplicate = 0.17
+                    tech.wormDuplicate = 0.16
                     powerUps.setDo(); //needed after adjusting duplication chance
-                    for (let i = 0; i < 3; i++) {
+                    for (let i = 0; i < 4; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                     }
                 },
                 remove() {
                     tech.wormDuplicate = 0
                     powerUps.setDo(); //needed after adjusting duplication chance
-                    if (this.count > 0) powerUps.research.changeRerolls(3)
+                    if (this.count > 0) powerUps.research.changeRerolls(4)
                 }
             },
             {
@@ -6138,7 +6140,7 @@
             },
             {
                 name: "traversable geodesics",
-                description: "your <strong>projectiles</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn 2 <strong class='color-g'>guns</strong> and <strong class='color-g'>ammo</strong>",
+                description: `your <strong>projectiles</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn 2 <strong class='color-g'>guns</strong> and ${powerUps.orb.ammo(2)}`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6474,7 +6476,7 @@
             },
             {
                 name: "hidden variable",
-                description: "spawn <strong>15</strong> <strong class='color-h'>heal</strong> power ups<br>but hide your <strong class='color-h'>health</strong> bar",
+                description: `spawn ${powerUps.orb.heal(15)}<br>but hide your <strong class='color-h'>health</strong> bar`,
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -7515,7 +7517,7 @@
             },
             {
                 name: "re-research",
-                description: "<strong>eject</strong> all your <strong class='color-r'>research</strong>",
+                description: `<strong>eject</strong> all your ${powerUps.orb.research(1)}`,
                 maxCount: 9,
                 count: 0,
                 frequency: 0,
@@ -7534,7 +7536,7 @@
             },
             {
                 name: "quantum black hole",
-                description: "use your <strong class='color-f'>energy</strong> and <strong>4</strong> <strong class='color-r'>research</strong> to <strong>spawn</strong><br>inside the event horizon of a huge <strong>black hole</strong>",
+                description: `use your <strong class='color-f'>energy</strong> and ${powerUps.orb.research(4)} to <strong>spawn</strong><br>inside the event horizon of a huge <strong>black hole</strong>`,
                 maxCount: 9,
                 count: 0,
                 frequency: 0,
@@ -7555,7 +7557,7 @@
             },
             {
                 name: "black hole cluster",
-                description: "spawn <strong>2</strong> <strong class='color-r'>research</strong><br><strong>spawn</strong> 40 nearby <strong>black holes</strong>",
+                description: `spawn ${powerUps.orb.research(2)}<br><strong>spawn</strong> 40 nearby <strong>black holes</strong>`,
                 maxCount: 9,
                 count: 0,
                 frequency: 0,

@@ -409,7 +409,7 @@ const spawn = {
             // });
             this.modeDo(); //this does different things based on the mode
             this.checkStatus();
-            this.cycle++; //switch modes÷
+            if (!m.isBodiesAsleep) this.cycle++; //switch modes÷  if time isn't paused
             this.totalCycles++;
             // if (!m.isBodiesAsleep) {
             if (this.health > 0.25) {
@@ -481,9 +481,11 @@ const spawn = {
                         y: this.velocity.y + velocity.y
                     });
                 }
-                const len = (this.totalCycles / 400 + simulation.difficulty / 2 - 30) / 15
-                for (let i = 0; i < len; i++) {
-                    spawn.randomLevelBoss(3000 * (simulation.isHorizontalFlipped ? -1 : 1) + 2000 * (Math.random() - 0.5), -1100 + 200 * (Math.random() - 0.5))
+                if (!(this.cycle % 2 * this.spawnInterval) && !m.isBodiesAsleep && mob.length < 40) {
+                    const len = (this.totalCycles / 600 + simulation.difficulty / 2 - 30) / 15
+                    for (let i = 0; i < len; i++) {
+                        spawn.randomLevelBoss(3000 * (simulation.isHorizontalFlipped ? -1 : 1) + 2000 * (Math.random() - 0.5), -1100 + 200 * (Math.random() - 0.5))
+                    }
                 }
             }
         }

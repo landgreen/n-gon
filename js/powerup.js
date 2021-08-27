@@ -1,6 +1,91 @@
 let powerUp = [];
 
 const powerUps = {
+    orb: {
+        research(num = 1) {
+            switch (num) {
+                case 1:
+                    return `<div class="research-circle"></div> `
+                case 2:
+                    return `<span style="position:relative;">
+                    <div class="research-circle" style="position:absolute; top:0; left:0;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:7px;"></div>
+                    </span> &nbsp; &nbsp; &nbsp; &nbsp;`
+                case 3:
+                    return `<span style="position:relative;">
+                    <div class="research-circle" style="position:absolute; top:0; left:0;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:8px;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:16px;"></div>
+                    </span> &nbsp; &nbsp; &nbsp; &nbsp; &thinsp; `
+                case 4:
+                    return `<span style="position:relative;">
+                    <div class="research-circle" style="position:absolute; top:0; left:0;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:8px;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:16px;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:24px;"></div>
+                    </span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `
+                case 5:
+                    return `<span style="position:relative;">
+                    <div class="research-circle" style="position:absolute; top:0; left:0;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:8px;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:16px;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:24px;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:32px;"></div>
+                    </span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `
+                case 6:
+                    return `<span style="position:relative;">
+                    <div class="research-circle" style="position:absolute; top:0; left:0;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:8px;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:16px;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:24px;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:32px;"></div>
+                    <div class="research-circle" style="position:absolute; top:0; left:40px;"></div>
+                    </span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `
+            }
+            let text = '<span style="position:relative;">'
+            for (let i = 0; i < num; i++) {
+                text += `<div class="research-circle" style="position:absolute; top:0; left:${i*8}px;"></div>`
+            }
+            text += '</span> &nbsp; &nbsp; '
+            for (let i = 0; i < num; i++) {
+                text += '&nbsp; '
+            }
+            return text
+        },
+        ammo(num = 1) {
+            switch (num) {
+                case 1:
+                    return `<div class="ammo-circle"></div>`
+            }
+            let text = '<span style="position:relative;">'
+            for (let i = 0; i < num; i++) {
+                text += `<div class="ammo-circle" style="position:absolute; top:1.5px; left:${i*8}px;"></div>`
+            }
+            text += '</span> &nbsp; &nbsp; '
+            for (let i = 0; i < num; i++) {
+                text += '&nbsp; '
+            }
+            return text
+        },
+        heal(num = 1) {
+            switch (num) {
+                case 1:
+                    return `<div class="heal-circle"></div>`
+            }
+            let text = '<span style="position:relative;">'
+            for (let i = 0; i < num; i++) {
+                text += `<div class="heal-circle" style="position:absolute; top:1px; left:${i*10}px;"></div>`
+            }
+            text += '</span> &nbsp; &nbsp; '
+            for (let i = 0; i < num; i++) {
+                text += '&nbsp; '
+            }
+            return text
+        },
+        tech(num = 1) {
+            return `<div class="tech-circle"></div>`
+        }
+    },
     totalPowerUps: 0, //used for tech that count power ups at the end of a level
     lastTechIndex: null,
     do() {},
@@ -176,7 +261,7 @@ const powerUps = {
             }
             if (tech.isCancelRerolls) {
                 for (let i = 0; i < 9; i++) {
-                    let spawnType = (m.health < 0.25 || tech.isEnergyNoAmmo) ? "heal" : "ammo"
+                    let spawnType = ((m.health < 0.25 && !tech.isEnergyHealth) || tech.isEnergyNoAmmo) ? "heal" : "ammo"
                     if (Math.random() < 0.33) {
                         spawnType = "heal"
                     } else if (Math.random() < 0.5 && !tech.isSuperDeterminism) {
@@ -375,7 +460,7 @@ const powerUps = {
                 if (target.ammo !== Infinity) {
                     const ammoAdded = Math.ceil((0.7 * Math.random() + 0.7 * Math.random()) * target.ammoPack)
                     target.ammo += ammoAdded
-                    simulation.makeTextLog(`${target.name}.<span class='color-gun'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
+                    simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
                 }
             } else { //give ammo to all guns in inventory
                 for (let i = 0, len = b.inventory.length; i < len; i++) {
@@ -383,7 +468,7 @@ const powerUps = {
                     if (target.ammo !== Infinity) {
                         const ammoAdded = Math.ceil((0.5 * Math.random() + 0.4 * Math.random()) * target.ammoPack) //Math.ceil(Math.random() * target.ammoPack)
                         target.ammo += ammoAdded
-                        simulation.makeTextLog(`${target.name}.<span class='color-gun'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
+                        simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
                     }
                 }
 
@@ -718,7 +803,7 @@ const powerUps = {
     //     if (ammo !== Infinity) {
     //         b.guns[ammoTarget].ammo += ammo;
     //         simulation.updateGunHUD();
-    //         simulation.makeTextLog(`${b.guns[ammoTarget].name}.<span class='color-gun'>ammo</span> <span class='color-symbol'>+=</span> ${ammo}`);
+    //         simulation.makeTextLog(`${b.guns[ammoTarget].name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammo}`);
     //     }
     // },
     spawnRandomPowerUp(x, y) { //mostly used after mob dies,  doesn't always return a power up

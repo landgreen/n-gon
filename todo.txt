@@ -1,25 +1,24 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: MIRV - now effects grenades and super balls in addition to missiles
-  no change for super balls and missiles, but this is a new tech for grenades
+orbs replaces some power up text descriptions
 
-undetonated mines are returned at the end of a level
-  removed tech: mine reclamation
-  mine gun has 30% less ammo
-  laser mines do 7% less damage
-  booby trap now comes with 53 JUNK (up from 33) but it's mines can be returned for ammo
+player damage taken is increased by 1%
+finalBoss ramps up the mob spawns more slowly, making lower damage high survival builds more effective on the finalBoss
+5% laser damage increase
+15% mine fire rate reduction
 
-removed ctx.clip() from metamaterial cloaking field for performance reasons
-  the graphics look a bit different now, maybe not as good, maybe it's just different
-
-iceIX bullets last 50% less time, but do 50% more damage and have 25% more thrust
-  so it's more of a close range bullet
-  ice-shot has 2 fewer bullets
+ctx.clip() is back for metamaterial cloaking field
+  it wasn't the source of the lag, firefox is just slow on my work computer
+tech: buckling was disallowed, but I fixed it so you can get the tech again
 
 ******************************************************** TODO ********************************************************
 
-tech MIRV applies to grenades
-  maybe also merge with tech: super balls?, laser refraction...
+experiment and understand vibe more obvious
+  mostly in early game or first time players
+
+slow down throw speed for very small blocks a bit
+
+necrophage isn't working.....
 
 work on necroBoss from TheShwarma
   make spawned blocks in the direction of the player

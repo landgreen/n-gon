@@ -359,6 +359,7 @@ const build = {
                     // console.log(tech.tech[i].name, isAllowed, tech.tech[i].count, tech.haveGunCheck("nail gun"))
                     const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
 
+                    // <div class="circle-grid-small research" style="position:absolute; top:13px; left:30px;opacity:0.85;"></div>
                     if (tech.tech[i].isFieldTech) {
                         techID.innerHTML = ` <div class="grid-title">
                         <span style="position:relative;">

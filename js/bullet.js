@@ -94,7 +94,7 @@ const b = {
         }
     },
     outOfAmmo() { //triggers after firing when you have NO ammo
-        simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-gun'>ammo</span><span class='color-symbol'>:</span> 0`);
+        simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-g'>ammo</span><span class='color-symbol'>:</span> 0`);
         m.fireCDcycle = m.cycle + 30; //fire cooldown       
         if (tech.isAmmoFromHealth && m.maxHealth > 0.01) {
             tech.extraMaxHealth -= 0.01 //decrease max health
@@ -858,7 +858,9 @@ const b = {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
                 if (tech.fragments) b.targetedNail(this.position, tech.fragments * 6)
             }
-            bullet[me].beforeDmg = function() {};
+            bullet[me].beforeDmg = function() {
+                this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
+            };
             bullet[me].restitution = 0.4;
             bullet[me].do = function() {
                 this.force.y += this.mass * 0.0025; //extra gravity for harder arcs
@@ -1829,7 +1831,13 @@ const b = {
                 },
                 beforeDmg(who) {
                     if (tech.wormSurviveDmg && who.alive) {
-                        this.endCycle = simulation.cycle + Math.floor((600 + Math.floor(Math.random() * 420)) * tech.isBulletsLastLonger); //bullet ends cycle resets
+                        setTimeout(() => {
+                            if (!who.alive) {
+                                this.endCycle = simulation.cycle + Math.floor((600 + Math.floor(Math.random() * 420)) * tech.isBulletsLastLonger); //bullet ends cycle resets
+                            } else {
+                                this.endCycle = 0; //bullet ends cycle after doing damage 
+                            }
+                        }, 1);
                     } else {
                         this.endCycle = 0; //bullet ends cycle after doing damage 
                     }
@@ -3088,13 +3096,13 @@ const b = {
                     this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.position)), this.mass * 0.006)
                 } else { //close to player
                     Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
-
                     if (this.cd < simulation.cycle && !(simulation.cycle % this.lookFrequency) && !m.isCloak) {
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist2 = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
                             if (
-                                mob[i].alive && !mob[i].isBadTarget &&
-                                dist2 > 250000 &&
+                                mob[i].alive &&
+                                !mob[i].isBadTarget &&
+                                dist2 > 40000 &&
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0
                             ) {
                                 this.cd = simulation.cycle + this.delay;
@@ -3779,7 +3787,6 @@ const b = {
                 }) //position, velocity, damage
                 if (tech.isIceCrystals) {
                     bullet[bullet.length - 1].beforeDmg = function(who) {
-                        console.log(who)
                         mobs.statusSlow(who, 60)
                         if (tech.isNailRadiation) mobs.statusDoT(who, 1 * (tech.isFastRadiation ? 2.6 : 0.65), tech.isSlowRadiation ? 240 : (tech.isFastRadiation ? 30 : 120)) // one tick every 30 cycles
                         if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
@@ -4579,19 +4586,20 @@ const b = {
                         const speed = 30
                         const velocity = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
                         b.laserMine(m.pos, velocity)
+                        m.fireCDcycle = m.cycle + Math.floor(65 * b.fireCDscale); // cool down
                     } else {
                         const pos = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                         let speed = 36
                         if (Matter.Query.point(map, pos).length > 0) speed = -2 //don't launch if mine will spawn inside map
                         b.mine(pos, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }, 0)
+                        m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCDscale); // cool down
                     }
-                    m.fireCDcycle = m.cycle + Math.floor(50 * b.fireCDscale); // cool down
                 } else {
                     const pos = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                     let speed = 23
                     if (Matter.Query.point(map, pos).length > 0) speed = -2 //don't launch if mine will spawn inside map
                     b.mine(pos, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }, 0)
-                    m.fireCDcycle = m.cycle + Math.floor(25 * b.fireCDscale); // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(35 * b.fireCDscale); // cool down
                 }
             }
         }, {
