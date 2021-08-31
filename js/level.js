@@ -109,12 +109,19 @@ const level = {
     },
     custom() {},
     customTopLayer() {},
+    setDifficulty() {
+        simulation.difficulty = 0
+        b.dmgScale = 1; //damage done by player decreases each level
+        simulation.accelScale = 1 //mob acceleration increases each level
+        simulation.CDScale = 1 //mob CD time decreases each level
+        simulation.dmgScale = 0.41 * simulation.difficulty //damage done by mobs increases each level
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
+    },
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
             b.dmgScale *= 0.914; //damage done by player decreases each level
             if (simulation.accelScale < 5) simulation.accelScale *= 1.02 //mob acceleration increases each level
-            if (simulation.lookFreqScale > 0.2) simulation.lookFreqScale *= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale > 0.2) simulation.CDScale *= 0.97 //mob CD time decreases each level
         }
         simulation.dmgScale = 0.41 * simulation.difficulty //damage done by mobs increases each level
@@ -125,7 +132,6 @@ const level = {
             simulation.difficulty--
             b.dmgScale /= 0.914; //damage done by player decreases each level
             if (simulation.accelScale > 0.2) simulation.accelScale /= 1.02 //mob acceleration increases each level
-            if (simulation.lookFreqScale < 5) simulation.lookFreqScale /= 0.98 //mob cycles between looks decreases each level
             if (simulation.CDScale < 5) simulation.CDScale /= 0.97 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
@@ -2266,12 +2272,13 @@ const level = {
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
         // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
-        spawn.starter(1900, -500, 200) //big boy
-        // spawn.spiderBoss(1900, -500)
+        // spawn.starter(1900, -500, 200) //big boy
+        spawn.necroBoss(1900, -500)
+        // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
 
-        // spawn.sniper(1900, -500)
+        // spawn.blockGroup(1900, -500)
         // spawn.grenadier(1900, -500)
         // spawn.sneaker(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
@@ -2286,7 +2293,7 @@ const level = {
         // spawn.powerUpBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.laserTargetingBoss(1600, -500)
-        // spawn.grenadierBoss(1200, -500)
+        // spawn.striker(1200, -500)
 
         // spawn.nodeGroup(1200, -500, "grenadier")
         // spawn.snakeBoss(1200, -500)

@@ -268,7 +268,7 @@ const mobs = {
             gravity() {
                 this.force.y += this.mass * this.g;
             },
-            seePlayerFreq: Math.floor((30 + 30 * Math.random()) * simulation.lookFreqScale), //how often NPC checks to see where player is, lower numbers have better vision
+            seePlayerFreq: Math.floor(30 + 30 * Math.random()), //how often NPC checks to see where player is, lower numbers have better vision
             foundPlayer() {
                 this.locatePlayer();
                 if (!this.seePlayer.yes) {
@@ -759,11 +759,6 @@ const mobs = {
             attraction() {
                 //accelerate towards the player
                 if (this.seePlayer.recall) {
-                    // && dx * dx + dy * dy < 2000000) {
-                    // const forceMag = this.accelMag * this.mass;
-                    // const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
-                    // this.force.x += forceMag * Math.cos(angle);
-                    // this.force.y += forceMag * Math.sin(angle);
                     const force = Vector.mult(Vector.normalise(Vector.sub(this.seePlayer.position, this.position)), this.accelMag * this.mass)
                     this.force.x += force.x;
                     this.force.y += force.y;

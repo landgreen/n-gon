@@ -306,9 +306,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return b.inventory.length > 0
+                    return b.inventory.length > 2
                 },
-                requires: "at least 1 gun",
+                requires: "at least 3 guns",
                 effect() {
                     tech.isDamageForGuns = true;
                 },
@@ -324,9 +324,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return b.inventory.length > 0
+                    return b.inventory.length > 1
                 },
-                requires: "at least 1 gun",
+                requires: "at least 2 guns",
                 effect() {
                     tech.isFireRateForGuns = true;
                     b.setFireCD();
@@ -2405,7 +2405,7 @@
             },
             {
                 name: "energy conservation",
-                description: "<strong>6%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
+                description: "<strong>5%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -2415,7 +2415,7 @@
                 },
                 requires: "",
                 effect() {
-                    tech.energySiphon += 0.06;
+                    tech.energySiphon += 0.05;
                 },
                 remove() {
                     tech.energySiphon = 0;
@@ -5053,7 +5053,7 @@
                 },
                 remove() {
                     tech.laserFieldDrain = 0.002;
-                    tech.laserDamage = 0.16; //used in check on pulse: tech.laserDamage === 0.15
+                    tech.laserDamage = 0.16; //used in check on pulse: tech.laserDamage === 0.16
                     tech.laserColor = "#f00"
                     tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
                 }
@@ -5219,7 +5219,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.15
+                    return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.16
                 },
                 requires: "laser gun, not specular reflection, diffuse, free-electron laser",
                 effect() {

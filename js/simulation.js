@@ -130,7 +130,6 @@ const simulation = {
     healScale: 1,
     accelScale: null, //set in levels.setDifficulty
     CDScale: null, //set in levels.setDifficulty
-    lookFreqScale: null, //set in levels.setDifficulty
     isNoPowerUps: false,
     // dropFPS(cap = 40, time = 15) {
     //   simulation.fpsCap = cap
@@ -541,10 +540,6 @@ const simulation = {
                 if (simulation.onTitlePage) requestAnimationFrame(cycle);
             }
             requestAnimationFrame(cycle)
-
-
-
-
         }, 1000);
     },
     startGame(isBuildRun = false) {
@@ -617,6 +612,7 @@ const simulation = {
         tech.plasmaBotCount = 0;
         tech.missileBotCount = 0;
 
+        simulation.isChoosing = false;
         b.setFireMethod()
         b.setFireCD();
         // simulation.updateTechHUD();
@@ -641,20 +637,25 @@ const simulation = {
 
         level.onLevel = 0;
         level.levelsCleared = 0;
-        //resetting difficulty
-        simulation.dmgScale = 0; //increases in level.difficultyIncrease
-        b.dmgScale = 1; //decreases in level.difficultyIncrease
-        simulation.accelScale = 1;
-        simulation.lookFreqScale = 1;
-        simulation.CDScale = 1;
-        simulation.difficulty = 0;
-        simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
-        build.isExperimentSelection = false;
 
+        //resetting difficulty
+        // simulation.difficulty = 0;
+        level.setDifficulty()
+        simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
+
+        build.isExperimentSelection = false;
         simulation.clearNow = true;
         document.getElementById("text-log").style.opacity = 0;
         document.getElementById("fade-out").style.opacity = 0;
         document.title = "n-gon";
+        // simulation.makeTextLog(`input.key.up<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]`);
+        // simulation.makeTextLog(`input.key.left<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]`);
+        // simulation.makeTextLog(`input.key.down<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]`);
+        // simulation.makeTextLog(`input.key.right<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]`);
+        simulation.makeTextLog(`<span class='color-var'>const</span> engine <span class='color-symbol'>=</span> Engine.create(); <em>//simulation begin</em>`);
+        simulation.makeTextLog(`engine.timing.timeScale <span class='color-symbol'>=</span> 1`);
+        simulation.makeTextLog(`<span class='color-var'>m</span>.setField("<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>")`);
+        // simulation.makeTextLog(`input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
 
         document.getElementById("health").style.display = "inline"
         document.getElementById("health-bg").style.display = "inline"
@@ -668,6 +669,7 @@ const simulation = {
         //set to default field
         tech.healMaxEnergyBonus = 0
         m.setMaxEnergy();
+        m.energy = 0
         m.fieldMode = 0;
         // simulation.makeTextLog(`${simulation.SVGrightMouse}<strong style='font-size:30px;'> ${m.fieldUpgrades[m.fieldMode].name}</strong><br><span class='faded'></span><br>${m.fieldUpgrades[m.fieldMode].description}`, 600);
         // simulation.makeTextLog(`
@@ -680,28 +682,6 @@ const simulation = {
         // <br>input.key.field <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>right mouse</span>"]
         // <br><span class='color-var'>m</span>.field.description <span class='color-symbol'>=</span> "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].description}</span>"
         // `, 800);
-
-
-        let delay = 500
-        const step = 150
-        setTimeout(function() {
-            simulation.makeTextLog(`input.key.up<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]`);
-        }, delay += step);
-        setTimeout(function() {
-            simulation.makeTextLog(`input.key.left<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]`);
-        }, delay += step);
-        setTimeout(function() {
-            simulation.makeTextLog(`input.key.down<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]`);
-        }, delay += step);
-        setTimeout(function() {
-            simulation.makeTextLog(`input.key.right<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]`);
-        }, delay += step);
-        setTimeout(function() {
-            simulation.makeTextLog(`<br><span class='color-var'>m</span>.fieldMode <span class='color-symbol'>=</span> "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>"`);
-        }, delay += step);
-        setTimeout(function() {
-            simulation.makeTextLog(`input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
-        }, delay += step);
 
         m.setField(m.fieldMode)
         // m.energy = 0;
@@ -718,7 +698,6 @@ const simulation = {
         simulation.fpsInterval = 1000 / simulation.fpsCap;
         simulation.then = Date.now();
         requestAnimationFrame(cycle); //starts game loop
-
     },
     clearTimeouts() {
         let id = window.setTimeout(function() {}, 0);

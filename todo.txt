@@ -1,26 +1,40 @@
 ******************************************************** NEXT PATCH **************************************************
 
-orbs replaces some power up text descriptions
+blockBoss: new boss based on work by TheShwarma
+  (3x chance to randomly see blockBoss until next patch)
+  it's over powered, I'll probably nerf it next patch, but I want to get some feedback first on how to nerf it
+  hint: if you kill the boss all the mobBlocks turn back into blocks
 
-player damage taken is increased by 1%
-finalBoss ramps up the mob spawns more slowly, making lower damage high survival builds more effective on the finalBoss
-5% laser damage increase
-15% mine fire rate reduction
+very very small blocks are slightly limited in how fast they can be thrown
+  they were moving so fast they would miss their target sometimes
 
-ctx.clip() is back for metamaterial cloaking field
-  it wasn't the source of the lag, firefox is just slow on my work computer
-tech: buckling was disallowed, but I fixed it so you can get the tech again
+tech: energy conservation gives 5% energy back (was 6%)
+tech: arsenal requires at least 3 guns in your inventory
+tech: active cooling requires at least 2 guns in your inventory
+
+several bug fixes
 
 ******************************************************** TODO ********************************************************
+
+fix simulation.CDScale  // it's always zero so it does nothing
+some mobs can't see player...
+3 laser boss isn't rotating...
+  it's always null
+  you shouldn't of removes lookFrequency scale var...
+
+tech remove all JUNK tech
+  but you can't research
+  maybe spend research
+
+tech missiles - move faster and more accurately, turn sharper
+  also some other bonus:
+    damage?  or size which is basically damage
 
 experiment and understand vibe more obvious
   mostly in early game or first time players
 
-slow down throw speed for very small blocks a bit
 
-necrophage isn't working.....
-
-work on necroBoss from TheShwarma
+work on blockBoss from TheShwarma
   make spawned blocks in the direction of the player
   make it search the level for blocks, but also kinda avoid the player
 

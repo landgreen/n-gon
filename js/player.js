@@ -389,12 +389,10 @@ const m = {
     },
     death() {
         if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
-
             //remove immortality tech
             // for (let i = 0; i < tech.tech.length; i++) {
             //     if (tech.tech[i].name === "quantum immortality") tech.removeTech(i)
             // }
-
             simulation.wipe = function() { //set wipe to have trails
                 ctx.fillStyle = "rgba(255,255,255,0)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -480,7 +478,7 @@ const m = {
     setMaxHealth() {
         m.maxHealth = m.baseHealth + tech.extraMaxHealth + tech.isFallingDamage //+ tech.bonusHealth
         document.getElementById("health-bg").style.width = `${Math.floor(300*m.maxHealth)}px`
-        simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(3)}`)
+        simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
         m.displayHealth();
     },
@@ -655,13 +653,12 @@ const m = {
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
                     }, 3000);
-                    return;
                 } else { //death
                     m.health = 0;
                     m.energy = 0;
                     m.death();
-                    return;
                 }
+                return;
             }
         } else {
             dmg *= m.harmReduction()
@@ -1161,7 +1158,7 @@ const m = {
 
                     const charge = Math.min(m.throwCharge / 5, 1)
                     //***** scale throw speed with the first number, 80 *****
-                    let speed = 80 * charge * Math.min(1, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
+                    let speed = 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
 
                     if (Matter.Query.collides(m.holdingTarget, map).length !== 0) {
                         speed *= 0.7 //drop speed by 30% if touching map

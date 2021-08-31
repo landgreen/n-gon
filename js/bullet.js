@@ -3080,13 +3080,13 @@ const b = {
             minDmgSpeed: 2,
             lookFrequency: 27 + Math.ceil(6 * Math.random()),
             cd: 0,
-            delay: 80,
+            delay: 70,
             range: 70 + 3 * b.totalBots(),
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
-                mask: b.totalBots() < 50 ? cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield //if over 50 bots, they no longer collide with each other
+                mask: b.totalBots() < 50 ? (cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield) : (cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield) //if over 50 bots, they no longer collide with each other
             },
             beforeDmg() {},
             onEnd() {},
@@ -5055,7 +5055,7 @@ const b = {
 
                             m.fireCDcycle = Infinity //can't fire until mouse is released
                             const previousCharge = this.charge
-                            let smoothRate = (m.crouch ? 0.98 : 0.985) * (0.98 + 0.02 * b.fireCDscale) //small b.fireCDscale = faster shots, b.fireCDscale=1 = normal shot,  big b.fireCDscale = slower chot
+                            let smoothRate = Math.min(0.998, (m.crouch ? 0.98 : 0.985) * (0.98 + 0.02 * b.fireCDscale)) //small b.fireCDscale = faster shots, b.fireCDscale=1 = normal shot,  big b.fireCDscale = slower chot
                             this.charge = this.charge * smoothRate + 1 - smoothRate
                             m.energy += (this.charge - previousCharge) * (tech.isRailEnergyGain ? 1 : -0.33) //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
                             //draw targeting
