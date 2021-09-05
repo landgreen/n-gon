@@ -272,6 +272,22 @@ summary {
     font-size: 0.65em;
 }
 
+/* .experiment-grid-module-field {
+    background-color: #eff;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+.experiment-grid-module-gun {
+    background-color: #eef;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+} */
+
+.experiment-grid-hide {
+    display: none;
+}
+
 .grid-title {
     padding-bottom: 6px;
     font-size: 1.4em;
@@ -305,6 +321,10 @@ summary {
 .build-tech-selected:hover {
     background-color: hsl(253, 100%, 81%);
 }
+
+/* .experiment-grid-show {
+    display: inline;
+} */
 
 .experiment-grid-disabled {
     /* opacity: 0.5; */

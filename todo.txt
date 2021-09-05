@@ -1,20 +1,41 @@
 ******************************************************** NEXT PATCH **************************************************
 
-blockBoss: new boss based on work by TheShwarma
-  (3x chance to randomly see blockBoss until next patch)
-  it's over powered, I'll probably nerf it next patch, but I want to get some feedback first on how to nerf it
-  hint: if you kill the boss all the mobBlocks turn back into blocks
+all explosions do 33% more damage to mobs
+  and 75% more damage to player
+  boom bot explosions are 16% smaller
 
-very very small blocks are slightly limited in how fast they can be thrown
-  they were moving so fast they would miss their target sometimes
+laser-bot does 15% more damage
+missile bot fires 15% quicker
+tech: phase velocity  also adds 15% wave damage  (because it disables phonon is was a bad choice)
+many duplication tech add less duplication
+Maxwell's demon now requires current energy above your max to unlock
 
-tech: energy conservation gives 5% energy back (was 6%)
-tech: arsenal requires at least 3 guns in your inventory
-tech: active cooling requires at least 2 guns in your inventory
-
-several bug fixes
+power ups in the intro tube get pushed around a bit, this might stop them from sliding on the walls
+mines when they are stuck to walls no longer collide with blocks  (to not block elevator)
+more bug fixes
 
 ******************************************************** TODO ********************************************************
+
+JUNK tech: add a score to in game console every 10 seconds
+
+tech -  explode after getting hit, but while you are immune to harm
+
+on mouse down wormhole shows a possible wormhole
+  on mouse up the wormhole becomes real
+make the player get a buff after using wormhole
+  while energy lasts: drain energy and give damage buff
+using wormhole makes you immune to harm and drains energy until you run out
+  disable incoming energy, by saving current energy and just setting energy in the next cycle to be lower then the saved value
+
+make a boss with a tail
+  but the tail is made of interesting mobs
+    stabbers maybe
+    suckers maybe
+
+set blockBoss frequency to 1x not 3x
+
+block groups should look for player,  so the player doesn't step on them?
+  remove heath bar?
 
 fix simulation.CDScale  // it's always zero so it does nothing
 some mobs can't see player...
@@ -32,11 +53,6 @@ tech missiles - move faster and more accurately, turn sharper
 
 experiment and understand vibe more obvious
   mostly in early game or first time players
-
-
-work on blockBoss from TheShwarma
-  make spawned blocks in the direction of the player
-  make it search the level for blocks, but also kinda avoid the player
 
 falling particle rain
   what causes it?
@@ -67,11 +83,6 @@ make non moving bosses not move after getting hit
   shooter, shielding, 
 
 buff rail gun
-
-make the player get a buff after using wormhole
-  while energy lasts: drain energy and give damage buff
-using wormhole makes you immune to harm and drains energy until you run out
-  disable incoming energy, by saving current energy and just setting energy in the next cycle to be lower then the saved value
 
 block shattering
  get code from planetesimals

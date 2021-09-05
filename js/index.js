@@ -82,7 +82,6 @@ function getUrlVars() {
     return vars;
 }
 window.addEventListener('load', () => {
-
     const set = getUrlVars()
     if (Object.keys(set).length !== 0) {
         build.populateGrid() //trying to solve a bug with this, but maybe it doesn't help
@@ -290,6 +289,7 @@ const build = {
         window.scrollTo(0, 0);
     },
     isExperimentSelection: false,
+    isExperimentRun: false,
     choosePowerUp(who, index, type, isAllowed = false) {
         if (type === "gun") {
             let isDeselect = false
@@ -360,24 +360,32 @@ const build = {
                     const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
 
                     // <div class="circle-grid-small research" style="position:absolute; top:13px; left:30px;opacity:0.85;"></div>
-                    if (tech.tech[i].isFieldTech) {
-                        techID.innerHTML = ` <div class="grid-title">
-                        <span style="position:relative;">
-                        <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                        <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
-                        </span>
-                        &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
-                        // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
-                        // <div class="circle-grid tech" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
-                        // border: #fff solid 0px;
-                    } else if (tech.tech[i].isGunTech) {
-                        techID.innerHTML = ` <div class="grid-title">
-                        <span style="position:relative;">
-                        <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                        <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
-                        </span>
-                        &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
-                    } else if (tech.tech[i].isJunk) {
+                    // if (tech.tech[i].isFieldTech) {
+                    //     techID.classList.remove('experiment-grid-hide');
+
+                    //     techID.innerHTML = `
+                    //     <div class="grid-title">
+                    //         <span style="position:relative;">
+                    //             <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                    //             <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
+                    //         </span>
+                    //         &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}
+                    //     </div>`
+                    //     // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
+                    //     // <div class="circle-grid tech" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
+                    //     // border: #fff solid 0px;
+                    // } else if (tech.tech[i].isGunTech) {
+                    //     techID.classList.remove('experiment-grid-hide');
+                    //     techID.innerHTML = `
+                    //     <div class="grid-title">
+                    //         <span style="position:relative;">
+                    //             <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                    //             <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
+                    //         </span>
+                    //         &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}
+                    //     </div>`
+                    // } else 
+                    if (tech.tech[i].isJunk) {
                         // text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                         techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
                     } else if (tech.tech[i].isExperimentalMode) {
@@ -394,6 +402,8 @@ const build = {
                         techID.classList.remove("experiment-grid-disabled");
                         techID.setAttribute("onClick", `javascript: build.choosePowerUp(this,${i},'tech')`);
                     }
+                    // } else if (tech.tech[i].isGunTech || tech.tech[i].isFieldTech) {
+                    //     techID.classList.add('experiment-grid-hide');
                 } else { //disabled color
                     // techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
                     // techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
@@ -459,8 +469,15 @@ const build = {
                         text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
                     }
                 } else {
-                    // text += `<div id="tech-${i}" class="experiment-grid-module  "><div class="grid-title">${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
                     text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled"><div class="grid-title"> ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
+                    // if (tech.tech[i].isGunTech || tech.tech[i].isFieldTech) {
+                    //     text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled experiment-grid-hide"></div>` //built but hidden
+                    // } else {
+                    //     text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled"><div class="grid-title"> ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
+                    // }
+                    // } else if (!tech.tech[i].isGunTech && !tech.tech[i].isFieldTech) {
+                    // text += `<div id="tech-${i}" class="experiment-grid-module  "><div class="grid-title">${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
+
                 }
             }
         }
@@ -483,6 +500,7 @@ const build = {
     reset() {
         simulation.startGame(true); //starts game, but pauses it
         build.isExperimentSelection = true;
+        build.isExperimentRun = true;
         simulation.paused = true;
         m.setField(0)
         b.inventory = []; //removes guns and ammo  

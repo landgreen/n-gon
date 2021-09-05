@@ -644,6 +644,7 @@ const simulation = {
         simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
 
         build.isExperimentSelection = false;
+        build.isExperimentRun = false;
         simulation.clearNow = true;
         document.getElementById("text-log").style.opacity = 0;
         document.getElementById("fade-out").style.opacity = 0;

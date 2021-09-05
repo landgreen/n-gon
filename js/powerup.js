@@ -260,11 +260,11 @@ const powerUps = {
                 tech.maxDuplicationEvent()
             }
             if (tech.isCancelRerolls) {
-                for (let i = 0; i < 9; i++) {
+                for (let i = 0, len = 5 + 5 * Math.random(); i < len; i++) {
                     let spawnType = ((m.health < 0.25 && !tech.isEnergyHealth) || tech.isEnergyNoAmmo) ? "heal" : "ammo"
-                    if (Math.random() < 0.33) {
+                    if (Math.random() < 0.36) {
                         spawnType = "heal"
-                    } else if (Math.random() < 0.5 && !tech.isSuperDeterminism) {
+                    } else if (Math.random() < 0.4 && !tech.isSuperDeterminism) {
                         spawnType = "research"
                     }
                     powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), spawnType, false);

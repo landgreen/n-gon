@@ -96,7 +96,7 @@ const b = {
     outOfAmmo() { //triggers after firing when you have NO ammo
         simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-g'>ammo</span><span class='color-symbol'>:</span> 0`);
         m.fireCDcycle = m.cycle + 30; //fire cooldown       
-        if (tech.isAmmoFromHealth && m.maxHealth > 0.01) {
+        if (tech.isAmmoFromHealth && m.health > 0.01) {
             tech.extraMaxHealth -= 0.01 //decrease max health
             m.setMaxHealth();
             for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "ammo");
@@ -312,7 +312,7 @@ const b = {
     explosion(where, radius, color = "rgba(255,25,0,0.6)") { // typically explode is used for some bullets with .onEnd
         radius *= tech.explosiveRadius
         let dist, sub, knock;
-        let dmg = radius * 0.013 * (tech.isExplosionStun ? 0.7 : 1);
+        let dmg = radius * 0.017 * (tech.isExplosionStun ? 0.7 : 1); //* 0.013 * (tech.isExplosionStun ? 0.7 : 1);
         if (tech.isExplosionHarm) radius *= 1.8 //    1/sqrt(2) radius -> area
         if (tech.isSmallExplosion) {
             color = "rgba(255,0,30,0.7)"
@@ -333,7 +333,7 @@ const b = {
 
             //player damage
             if (Vector.magnitude(Vector.sub(where, player.position)) < radius) {
-                const DRAIN = (tech.isExplosionHarm ? 0.7 : 0.25) * (tech.isRadioactiveResistance ? 0.25 : 1)
+                const DRAIN = (tech.isExplosionHarm ? 1.2 : 0.45) * (tech.isRadioactiveResistance ? 0.25 : 1)
                 // * (tech.isImmuneExplosion ? Math.min(1, Math.max(1 - m.energy * 0.7, 0)) : 1) 
                 if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 if (m.energy < 0) {
@@ -381,11 +381,12 @@ const b = {
                 dist = Vector.magnitude(sub);
 
                 if (dist < radius) {
+                    const harm = radius * (tech.isExplosionHarm ? 0.00055 : 0.00018)
                     if (tech.isImmuneExplosion) {
-                        const mitigate = Math.min(1, Math.max(1 - m.energy * 0.7, 0))
-                        m.damage(mitigate * radius * (tech.isExplosionHarm ? 0.0003 : 0.0001));
+                        const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
+                        m.damage(mitigate * harm);
                     } else {
-                        m.damage(radius * (tech.isExplosionHarm ? 0.0004 : 0.0001));
+                        m.damage(harm);
                     }
                     knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
                     player.force.x += knock.x;
@@ -1713,7 +1714,8 @@ const b = {
                                     if (angle > -0.2 || angle < -1.5) { //don't stick to level ground
                                         Matter.Body.setVelocity(this, { x: 0, y: 0 });
                                         Matter.Body.setStatic(this, true) //don't set to static if not touching map
-                                        this.collisionFilter.mask = cat.map | cat.bullet
+                                        this.collisionFilter.category = 0
+                                        this.collisionFilter.mask = 0 //cat.map | cat.bullet
                                     } else {
                                         Matter.Body.setVelocity(this, { x: 0, y: 0 });
                                         Matter.Body.setAngularVelocity(this, 0)
@@ -3219,7 +3221,7 @@ const b = {
             range: (700 + 400 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
             drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
             drain: (0.56 - 0.42 * tech.isLaserBotUpgrade) * tech.laserFieldDrain * tech.isLaserDiode,
-            laserDamage: 0.7 + 0.5 * tech.isLaserBotUpgrade,
+            laserDamage: 0.85 + 0.65 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -3312,7 +3314,7 @@ const b = {
             explode: 0,
             beforeDmg() {
                 if (this.lockedOn) {
-                    const explosionRadius = Math.min(170 + 220 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, m.pos)) - 30)
+                    const explosionRadius = Math.min(136 + 180 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, m.pos)) - 30)
                     if (explosionRadius > 60) {
                         this.explode = explosionRadius
                         // 
@@ -3399,12 +3401,10 @@ const b = {
             onEnd() {},
             do() {
                 const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, m.pos))
-                if (distanceToPlayer > 150) { //if far away move towards player
-                    this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.position)), this.mass * this.acceleration)
-                }
+                if (distanceToPlayer > 150) this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.position)), this.mass * this.acceleration) //if far away move towards player
                 Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
-                //find closest
-                if (!(simulation.cycle % this.lookFrequency)) {
+
+                if (!(simulation.cycle % this.lookFrequency)) { //find closest
                     this.lockedOn = null;
                     if (!m.isCloak) {
                         let closeDist = tech.isPlasmaRange * 1000;
@@ -3426,7 +3426,7 @@ const b = {
                     const DIST = Vector.magnitude(sub);
                     const unit = Vector.normalise(sub)
                     if (DIST < tech.isPlasmaRange * 450 && m.energy > this.drainThreshold) {
-                        m.energy -= 0.0003 + m.fieldRegen //0.004; //normal plasma field is 0.00008 + m.fieldRegen = 0.00108
+                        m.energy -= 0.00035 + m.fieldRegen //0.004; //normal plasma field is 0.00008 + m.fieldRegen = 0.00108
                         // if (m.energy < 0) {
                         //     m.fieldCDcycle = m.cycle + 120;
                         //     m.energy = 0;
@@ -3501,7 +3501,7 @@ const b = {
                                 y: best.y
                             };
                             if (best.who.alive) {
-                                const dmg = 0.65 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
+                                const dmg = 0.6 * b.dmgScale; //********** SCALE DAMAGE HERE *********************
                                 best.who.damage(dmg);
                                 best.who.locatePlayer();
                                 //push mobs away
@@ -3593,26 +3593,16 @@ const b = {
             orbitalSpeed: 0,
             phase: 2 * Math.PI * Math.random(),
             do() {
-
-                //check for damage
                 if (!m.isCloak && !m.isBodiesAsleep) { //if time dilation isn't active
-                    // q = Matter.Query.point(mob, this.position)
-                    // q = Matter.Query.collides(this, mob)
                     const size = 33
                     q = Matter.Query.region(mob, {
-                        min: {
-                            x: this.position.x - size,
-                            y: this.position.y - size
-                        },
-                        max: {
-                            x: this.position.x + size,
-                            y: this.position.y + size
-                        }
+                        min: { x: this.position.x - size, y: this.position.y - size },
+                        max: { x: this.position.x + size, y: this.position.y + size }
                     })
                     for (let i = 0; i < q.length; i++) {
                         if (!q[i].isShielded) {
                             mobs.statusStun(q[i], 180)
-                            const dmg = 0.5 * b.dmgScale * (this.isUpgraded ? 3.5 : 1) * (tech.isCrit ? 4 : 1)
+                            const dmg = 0.4 * b.dmgScale * (this.isUpgraded ? 3.5 : 1) * (tech.isCrit ? 4 : 1)
                             q[i].damage(dmg);
                             if (q[i].alive) q[i].foundPlayer();
                             simulation.drawList.push({ //add dmg to draw queue
@@ -4401,6 +4391,7 @@ const b = {
                 if (tech.isPhaseVelocity) {
                     waveSpeedMap = 3
                     waveSpeedBody = 1.9
+                    bullet[me].dmg *= 1.15
                 }
                 if (tech.waveReflections) {
                     bullet[me].reflectCycle = totalCycles / tech.waveReflections //tech.waveLengthRange

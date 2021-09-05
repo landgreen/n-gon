@@ -1,7 +1,7 @@
 //main object for spawning things in a level
 const spawn = {
     nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture", "growBossCulture"],
-    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss", "snakeSpitBoss", "laserBombingBoss", "blockBoss", "blockBoss", "blockBoss"]) {
+    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss", "snakeSpitBoss", "laserBombingBoss", "blockBoss", "blockBoss"]) {
         // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
@@ -726,14 +726,14 @@ const spawn = {
             }
         }
     },
-    blockBoss(x, y, radius = 30) {
+    blockBoss(x, y, radius = 60) {
         const activeBeams = []; // used to draw beams when converting
         const beamTotalDuration = 60
         mobs.spawn(x, y, 4, radius, "#999"); //#54291d
         const me = mob[mob.length - 1];
         me.isBoss = true;
-        // Matter.Body.setDensity(me, 0.001); //normal density even though its a boss
-        me.damageReduction = 0.06; //extra reduction for a boss, because normal density
+        Matter.Body.setDensity(me, 0.002); //normal density even though its a boss
+        me.damageReduction = 0.05; //extra reduction for a boss, because normal density
         me.frictionAir = 0.01;
         me.accelMag = 0.0002;
         me.onDeath = function() {
@@ -786,14 +786,19 @@ const spawn = {
                 }
 
                 //randomly spawn new mobs from nothing
-                if (!(simulation.cycle % 120)) {
+                if (!(simulation.cycle % 90)) {
                     let count = 0
                     for (let i = 0, len = mob.length; i < len; i++) {
                         if (mob[i].isNecroMob) count++
                     }
-                    if (count < 12 * Math.random() * Math.random()) { //limit number of spawns if there are already too many blockMobs
+                    if (count < 20 * Math.random() * Math.random()) { //limit number of spawns if there are already too many blockMobs
                         const unit = Vector.normalise(Vector.sub(player.position, this.position))
                         for (let i = 0, len = 3 * Math.random(); i < len; i++) {
+                            this.damageReduction += 0.001; //0.05 is starting value
+                            const scale = 0.99; //if 120 use 1.02
+                            Matter.Body.scale(this, scale, scale);
+                            this.radius *= scale;
+
                             const where = Vector.add(Vector.mult(unit, radius + 200 * Math.random()), this.position)
                             spawn.blockMob(where.x + 100 * (Math.random() - 0.5), where.y + 100 * (Math.random() - 0.5), null);
                             this.torque += 0.000035 * this.inertia; //spin after spawning
@@ -1836,7 +1841,7 @@ const spawn = {
         mobs.spawn(x, y, 0, radius, "transparent");
         let me = mob[mob.length - 1];
         Matter.Body.setDensity(me, 0.21); //extra dense //normal is 0.001
-        me.laserRange = 300;
+        me.laserRange = 350;
         me.seeAtDistance2 = 2000000;
         me.isBoss = true;
 
@@ -1849,7 +1854,7 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.damageReduction = 0.25 // me.damageReductionGoal
+        me.damageReduction = 0.35 // me.damageReductionGoal
         me.awake = function() {
             // this.armor();
             this.checkStatus();
@@ -1879,9 +1884,9 @@ const spawn = {
             if (this.distanceToPlayer() < this.laserRange) {
                 if (m.immuneCycle < m.cycle) {
                     if (m.energy > 0.002) {
-                        m.energy -= 0.0035
+                        m.energy -= 0.004
                     } else {
-                        m.damage(0.0003 * simulation.dmgScale)
+                        m.damage(0.0004 * simulation.dmgScale)
                     }
                 }
                 ctx.beginPath();

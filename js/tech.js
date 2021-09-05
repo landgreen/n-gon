@@ -193,7 +193,7 @@
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return (tech.isPowerUpsVanish ? 0.15 : 0) + (tech.isStimulatedEmission ? 0.2 : 0) + tech.cancelCount * 0.047 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
+            return (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.17 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
         },
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
@@ -849,7 +849,6 @@
             {
                 name: "shock wave",
                 description: "<strong class='color-e'>explosions</strong> <strong>stun</strong> mobs for <strong>1-2</strong> seconds<br>decrease <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>30%</strong>",
-                isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -868,7 +867,7 @@
             {
                 name: "electric reactive armor",
                 // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
-                description: "<strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong> is passively reduced<br>by <strong>6%</strong> for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
+                description: "<strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong> is passively reduced<br>by <strong>5%</strong> for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -892,7 +891,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isDroneTeleport || tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isDroneRadioactive && !tech.isDroneTeleport) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot
+                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isDroneTeleport || tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isDroneRadioactive && !tech.isDroneTeleport) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot && !tech.isNeedles
                 },
                 requires: "super balls, basic or slug shotgun, drones, not irradiated drones or burst drones",
                 effect() {
@@ -1590,7 +1589,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isTokamak
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
                 },
                 requires: "mass driver, not pilot wave not tokamak",
                 effect() {
@@ -1608,7 +1607,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && !tech.isTokamak
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
                 },
                 requires: "mass driver, not pilot wave not tokamak",
                 effect() {
@@ -1662,7 +1661,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name === "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isEnergyHealth
+                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isEnergyHealth
                 },
                 requires: "mass driver, a field that can hold things, not mass-energy",
                 effect() {
@@ -2182,7 +2181,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return !tech.isZeno && !tech.isNoHeals && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isTechDamage && !tech.isMutualism
+                    return !tech.isZeno && !tech.isNoHeals && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isRewindGun && !tech.isTechDamage && !tech.isMutualism //&& !tech.isAmmoFromHealth
                 },
                 requires: "not Zeno, ergodicity, piezoelectricity, CPT, rewind gun, antiscience, mutualism",
                 effect: () => {
@@ -2391,9 +2390,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isEnergyRecovery || tech.isPiezo || tech.energySiphon > 0 || tech.isRailEnergyGain || tech.isWormholeEnergy || tech.iceEnergy > 0 || tech.isMassEnergy || tech.isTokamak
+                    return m.energy > m.maxEnergy || build.isExperimentSelection
                 },
-                requires: "a source of overfilled energy",
+                requires: "energy above your max",
                 effect() {
                     tech.overfillDrain = 0.85 //70% = 1-(1-0.75)/(1-0.15) //92% = 1-(1-0.75)/(1-0.87)
                     tech.addJunkTechToPool(18)
@@ -3057,7 +3056,7 @@
             },
             {
                 name: "stimulated emission",
-                description: "<strong>20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>but, after a <strong>collision</strong> eject <strong>1</strong> <strong class='color-m'>tech</strong>",
+                description: "<strong>17%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>but, after a <strong>collision</strong> eject <strong>1</strong> <strong class='color-m'>tech</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3077,7 +3076,7 @@
             },
             {
                 name: "metastability",
-                description: "<strong>15%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong> ",
+                description: "<strong>13%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong> ",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3097,7 +3096,7 @@
             },
             {
                 name: "futures exchange",
-                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.7%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3117,7 +3116,7 @@
             },
             {
                 name: "commodities exchange",
-                description: `clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>9</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`,
+                description: `clicking <strong style = 'font-size:150%;'>×</strong> to cancel a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>5-10</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3632,9 +3631,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.isNeedles || tech.isNeedleShot) && !tech.isNailRadiation
+                    return (tech.isNeedles || tech.isNeedleShot)
                 },
-                requires: "needle gun, needle-shot, not irradiated nails",
+                requires: "needle gun, needle-shot",
                 effect() {
                     tech.isNeedleShieldPierce = true
                 },
@@ -3864,7 +3863,7 @@
             },
             {
                 name: "shotgun spin-statistics",
-                description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br>shotgun has gives <strong>50%</strong> fewer shots",
+                description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br>shotgun has <strong>50%</strong> fewer shots",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4129,7 +4128,8 @@
             },
             {
                 name: "phase velocity",
-                description: "wave beam <strong>propagates</strong> faster through <strong>solids</strong><br>up by <strong>3000%</strong> in the map and <strong>760%</strong> in <strong class='color-block'>blocks</strong>",
+                description: "wave beam <strong>propagates</strong> faster through <strong>solids</strong><br>increase wave beam <strong class='color-d'>damage</strong> by <strong>15%</strong>",
+                // description: "wave beam <strong>propagates</strong> faster through <strong>solids</strong><br>up by <strong>3000%</strong> in the map and <strong>760%</strong> in <strong class='color-block'>blocks</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4709,7 +4709,8 @@
             },
             {
                 name: "drone repair",
-                description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>25%</strong> chance to use <strong>1</strong> <strong>drone</strong>",
+                description: "after a <strong>drone</strong> ends it <strong>redeploys</strong><br>for a <strong>25%</strong> chance to use <strong>1</strong> <strong>drone</strong> <strong class='color-ammo'>ammo</strong>",
+                // description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>25%</strong> chance to use <strong>1</strong> <strong>drone</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6077,7 +6078,7 @@
             },
             {
                 name: "virtual particles",
-                description: `use ${powerUps.orb.research(4)}to exploit your <strong>wormhole</strong> for a<br><strong>16%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
+                description: `use ${powerUps.orb.research(4)}to exploit your <strong>wormhole</strong> for a<br><strong>14%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6088,7 +6089,7 @@
                 },
                 requires: "wormhole,below 100% duplication chance",
                 effect() {
-                    tech.wormDuplicate = 0.16
+                    tech.wormDuplicate = 0.14
                     powerUps.setDo(); //needed after adjusting duplication chance
                     for (let i = 0; i < 4; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
@@ -6806,6 +6807,27 @@
                         m.switchWorlds()
                         simulation.trails()
                     }, 20000); //every 30 seconds
+                },
+                remove() {}
+            },
+            {
+                name: "score",
+                description: "Add a score to n-gon!",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    setInterval(() => {
+                        let score = Math.ceil(1000 * Math.random() * Math.random() * Math.random() * Math.random() * Math.random())
+                        simulation.makeTextLog(`simulation.score <span class='color-symbol'>=</span> ${score.toFixed(0)}`);
+                    }, 1000); //every 10 seconds
                 },
                 remove() {}
             },
