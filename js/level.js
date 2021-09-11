@@ -15,8 +15,8 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("metamaterial cloaking")
-            // b.giveGuns("spores")
+            // m.setField("time dilation")
+            // b.giveGuns("harpoon")
             // tech.giveTech("nematodes")
             // tech.giveTech("necrophage")
             // for (let i = 0; i < 3; i++) tech.giveTech("super sized")
@@ -2273,7 +2273,7 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
         // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         // spawn.starter(1900, -500, 200) //big boy
-        spawn.blockBoss(1900, -500)
+        // spawn.blockGroup(1900, -500)
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
@@ -2295,7 +2295,11 @@ const level = {
         // spawn.laserTargetingBoss(1600, -500)
         // spawn.striker(1200, -500)
 
-        // spawn.nodeGroup(1200, -500, "grenadier")
+        spawn.nodeGroup(1200, -500, "grenadier")
+        // spawn.nodeGroup(1800, -500, "grenadier")
+        // spawn.nodeGroup(1200, 0, "grenadier")
+
+
         // spawn.snakeBoss(1200, -500)
         // spawn.suckerBoss(2900, -500)
         // spawn.randomMob(1600, -500)

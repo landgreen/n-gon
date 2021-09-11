@@ -1,7 +1,7 @@
 //main object for spawning things in a level
 const spawn = {
     nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture", "growBossCulture"],
-    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss", "snakeSpitBoss", "laserBombingBoss", "blockBoss", "blockBoss"]) {
+    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss", "snakeSpitBoss", "laserBombingBoss", "blockBoss"]) {
         // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
@@ -696,11 +696,13 @@ const spawn = {
         me.groupingStrength = 0.0005
         me.memory = 200;
         me.isGrouper = true;
+        me.seeAtDistance2 = 600 * 600
+        me.seePlayerFreq = Math.floor(50 + 50 * Math.random())
         me.do = function() {
             this.gravity();
             this.checkStatus();
+            this.seePlayerCheck();
             if (this.seePlayer.recall) {
-                this.seePlayerCheck();
                 this.attraction();
                 //tether to other blocks
                 ctx.beginPath();

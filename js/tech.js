@@ -865,6 +865,28 @@
                 }
             },
             {
+                name: "controlled explosion",
+                description: `use ${powerUps.orb.research(3)} to dynamically <strong>reduce</strong> all<br><strong class='color-e'>explosions</strong> until they do no <strong class='color-harm'>harm</strong>`,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 2) && (tech.haveGunCheck("missiles") || tech.isMissileField || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
+                },
+                requires: "an explosive damage source, not electric reactive armor",
+                effect: () => {
+                    tech.isSmartRadius = true;
+                    for (let i = 0; i < 3; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
+                },
+                remove() {
+                    tech.isSmartRadius = false;
+                    if (this.count > 0) powerUps.research.changeRerolls(3)
+                }
+            },
+            {
                 name: "electric reactive armor",
                 // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
                 description: "<strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong> is passively reduced<br>by <strong>5%</strong> for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
@@ -873,7 +895,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
+                    return !tech.isSmartRadius && !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
                 },
                 requires: "an explosive damage source, not iridium-192",
                 effect: () => {
@@ -903,15 +925,15 @@
             },
             {
                 name: "fragmentation",
-                description: "some <strong class='color-e'>detonations</strong> and collisions eject <strong>nails</strong><br><em style = 'font-size: 90%'>blocks, rail gun, grenades, missiles, shotgun slugs</em>",
+                description: "some <strong class='color-e'>detonations</strong> and collisions eject <strong>nails</strong><br><em style = 'font-size: 90%'>blocks, rail gun, grenades, missiles, slugs, harpoon</em>",
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.missileBotCount || tech.haveGunCheck("rail gun") || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.throwChargeRate > 1
+                    return tech.haveGunCheck("harpoon") || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.missileBotCount || tech.haveGunCheck("rail gun") || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.throwChargeRate > 1
                 },
-                requires: "grenades, missiles, rail gun, shotgun slugs, or mass driver",
+                requires: "grenades, missiles, rail gun, shotgun slugs, harpoon, or mass driver",
                 effect() {
                     tech.fragments++
                 },
@@ -3881,7 +3903,6 @@
                         if (b.guns[i].name === "shotgun") {
                             b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.5);
                             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack * 0.5
-                            simulation.makeGunHUD();
                             break;
                         }
                     }
@@ -3894,10 +3915,10 @@
                             if (b.guns[i].name === "shotgun") {
                                 b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
                                 b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 2);
-                                simulation.makeGunHUD();
                                 break;
                             }
                         }
+                        simulation.updateGunHUD();
                     }
                 }
             },
@@ -4954,6 +4975,63 @@
                     tech.isAmmoFoamSize = false;
                 }
             },
+            {
+                name: "filament",
+                description: "increase the <strong>length</strong> of your <strong>harpoon</strong>'s <strong>rope</strong><br>by <strong>1%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("harpoon")
+                },
+                requires: "harpoon, not spear",
+                effect() {
+                    tech.isFilament = true;
+                },
+                remove() {
+                    tech.isFilament = false;
+                }
+            },
+            {
+                name: "unaaq",
+                description: "increase the <strong>length</strong> of your <strong>harpoon</strong><br>by <strong>1%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("harpoon")
+                },
+                requires: "harpoon",
+                effect() {
+                    tech.isLargeHarpoon = true;
+                },
+                remove() {
+                    tech.isLargeHarpoon = false;
+                }
+            },
+            // {
+            //     name: "spear",
+            //     description: "<strong>harpoons</strong> fired while <strong>crouched</strong><br>have no <strong>rope</strong> and improved <strong>steering</strong>",
+            //     isGunTech: true,
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 2,
+            //     frequencyDefault: 2,
+            //     allowed() {
+            //         return tech.haveGunCheck("harpoon") && !tech.isFilament
+            //     },
+            //     requires: "harpoon, not filament",
+            //     effect() {
+            //         tech.isSpear = true;
+            //     },
+            //     remove() {
+            //         tech.isSpear = false;
+            //     }
+            // },
             {
                 name: "half-wave rectifier",
                 description: "charging the <strong>rail gun</strong> gives you <strong class='color-f'>energy</strong><br><em>instead of draining it</em>",
@@ -6355,6 +6433,82 @@
             //     },
             //     remove() {}
             // },
+            {
+                name: "true colors",
+                description: `set all power ups to their real world colors`,
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    // const colors = shuffle(["#f7b", "#0eb", "#467", "#0cf", "hsl(246,100%,77%)", "#26a"])
+                    const colors = shuffle([powerUps.research.color, powerUps.heal.color, powerUps.ammo.color, powerUps.ammo.color, powerUps.field.color, powerUps.gun.color])
+                    powerUps.research.color = colors[0]
+                    powerUps.heal.color = colors[1]
+                    powerUps.ammo.color = colors[2]
+                    powerUps.field.color = colors[3]
+                    powerUps.tech.color = colors[4]
+                    powerUps.gun.color = colors[5]
+                    for (let i = 0; i < powerUp.length; i++) {
+                        switch (powerUp[i].name) {
+                            case "research":
+                                powerUp[i].color = colors[0]
+                                break;
+                            case "heal":
+                                powerUp[i].color = colors[1]
+                                break;
+                            case "ammo":
+                                powerUp[i].color = colors[2]
+                                break;
+                            case "field":
+                                powerUp[i].color = colors[3]
+                                break;
+                            case "tech":
+                                powerUp[i].color = colors[4]
+                                break;
+                            case "gun":
+                                powerUp[i].color = colors[5]
+                                break;
+                        }
+                    }
+                },
+                remove() {
+                    const colors = ["#f7b", "#0eb", "#467", "#0cf", "hsl(246,100%,77%)", "#26a"] //no shuffle
+                    powerUps.research.color = colors[0]
+                    powerUps.heal.color = colors[1]
+                    powerUps.ammo.color = colors[2]
+                    powerUps.field.color = colors[3]
+                    powerUps.tech.color = colors[4]
+                    powerUps.gun.color = colors[5]
+                    for (let i = 0; i < powerUp.length; i++) {
+                        switch (powerUp[i].name) {
+                            case "research":
+                                powerUp[i].color = colors[0]
+                                break;
+                            case "heal":
+                                powerUp[i].color = colors[1]
+                                break;
+                            case "ammo":
+                                powerUp[i].color = colors[2]
+                                break;
+                            case "field":
+                                powerUp[i].color = colors[3]
+                                break;
+                            case "tech":
+                                powerUp[i].color = colors[4]
+                                break;
+                            case "gun":
+                                powerUp[i].color = colors[5]
+                                break;
+                        }
+                    }
+                }
+            },
             {
                 name: "emergency broadcasting",
                 description: "emit 2 sound sine waveforms at 853 Hz and 960 Hz<br><em>lower your volume</em>",
@@ -7942,5 +8096,9 @@
         wormSurviveDmg: null,
         isExtraGunField: null,
         isBigField: null,
-        isMineStun: null
+        isMineStun: null,
+        isSmartRadius: null,
+        isFilament: null,
+        // isSpear: null,
+        isLargeHarpoon: null
     }
