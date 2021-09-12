@@ -17,7 +17,8 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // m.setField("time dilation")
             // b.giveGuns("harpoon")
-            // tech.giveTech("nematodes")
+            // tech.giveTech("filament")
+            // tech.giveTech("reticulum")
             // tech.giveTech("necrophage")
             // for (let i = 0; i < 3; i++) tech.giveTech("super sized")
             // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
@@ -2280,7 +2281,7 @@ const level = {
 
         // spawn.snakeSuckBoss(1900, -500)
         // spawn.grenadier(1900, -500)
-        // spawn.sneaker(1900, -500)
+        // spawn.sneaker(1900, -500, 200)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.historyBoss(1200, -500)
@@ -2293,11 +2294,11 @@ const level = {
         // spawn.powerUpBoss(1600, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.laserTargetingBoss(1600, -500)
-        // spawn.striker(1200, -500)
+        // spawn.laser(1200, -500)
 
         spawn.nodeGroup(1200, -500, "grenadier")
-        // spawn.nodeGroup(1800, -500, "grenadier")
-        // spawn.nodeGroup(1200, 0, "grenadier")
+        spawn.nodeGroup(1800, -500, "grenadier")
+        spawn.nodeGroup(1200, 0, "grenadier")
 
 
         // spawn.snakeBoss(1200, -500)

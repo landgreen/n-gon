@@ -3645,17 +3645,17 @@
                 }
             },
             {
-                name: "ceramic needles",
-                description: `<strong>needles</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
+                name: "ceramics",
+                description: `<strong>needles</strong> and <strong>harpoons</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.isNeedles || tech.isNeedleShot)
+                    return tech.haveGunCheck("harpoon") || (tech.isNeedles || tech.isNeedleShot)
                 },
-                requires: "needle gun, needle-shot",
+                requires: "needle gun, needle-shot, harpoon",
                 effect() {
                     tech.isNeedleShieldPierce = true
                 },
@@ -4977,7 +4977,7 @@
             },
             {
                 name: "filament",
-                description: "increase the <strong>length</strong> of your <strong>harpoon</strong>'s <strong>rope</strong><br>by <strong>1%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
+                description: "increase the <strong>length</strong> of your <strong>harpoon</strong>'s <strong>rope</strong><br>by <strong>3%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4996,7 +4996,7 @@
             },
             {
                 name: "unaaq",
-                description: "increase the <strong>length</strong> of your <strong>harpoon</strong><br>by <strong>1%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
+                description: "increase the <strong>length</strong> of your <strong>harpoon</strong><br>by <strong>15%</strong> of the square root of its <strong class='color-ammo'>ammo</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5011,6 +5011,25 @@
                 },
                 remove() {
                     tech.isLargeHarpoon = false;
+                }
+            },
+            {
+                name: "reticulum",
+                description: "fire <strong>+1</strong> harpoon<br>when there are multiple targets in range",
+                isGunTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("harpoon")
+                },
+                requires: "harpoon",
+                effect() {
+                    tech.extraHarpoons++;
+                },
+                remove() {
+                    tech.extraHarpoons = 0;
                 }
             },
             // {
@@ -8100,5 +8119,6 @@
         isSmartRadius: null,
         isFilament: null,
         // isSpear: null,
-        isLargeHarpoon: null
+        isLargeHarpoon: null,
+        extraHarpoons: null
     }

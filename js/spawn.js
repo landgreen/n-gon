@@ -2125,7 +2125,8 @@ const spawn = {
                 };
                 vertexCollision(this.position, look, map);
                 vertexCollision(this.position, look, body);
-                if (!m.isCloak) vertexCollision(this.position, look, [player]);
+                if (!m.isCloak) vertexCollision(this.position, look, [playerBody, playerHead]);
+
                 // hitting player
                 if (best.who === player) {
                     if (m.immuneCycle < m.cycle) {
@@ -2254,8 +2255,8 @@ const spawn = {
                     y: this.position.y + seeRange * Math.sin(this.angle)
                 };
                 vertexCollision(this.position, look, map);
-                // vertexCollision(this.position, look, body);
-                if (!m.isCloak) vertexCollision(this.position, look, [player]);
+                if (!m.isCloak) vertexCollision(this.position, look, [playerBody, playerHead]);
+
                 // hitting player
                 if (best.who === player) {
                     this.targetingCount++

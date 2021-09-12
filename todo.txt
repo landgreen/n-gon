@@ -1,36 +1,48 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new gun harpoon
-tech: filament - harpoon rope gets 1% longer for every harpoon ammo in your inventory
-tech: unaaq - harpoon gets 1% longer for every harpoon ammo in your inventory
-  harpoon is pretty unbalanced, but I'm pushing it out so ya'll can let me know how I should balance it
-  more harpoon tech to come
-    2+ harpoons out at once
-    hold fire to extend rope longer
-    improved targeting: so it can hit the same target a few times
+harpoon gun
+  shaped more like a harpoon
+  grabs power ups slower, and from the tip of the harpoon
+  only uses energy on returning
+  doesn't have thrust if there is no mob target
 
-tech: controlled explosion - explosions shrink to prevent them from hitting you,  cost 3 research
+  tech: reticulum - make one more harpoon if there are mobs nearby that you are facing
+    I'm letting this stack to 9 even though it's silly cause that is n-gon's style
+  tech: ceramics now lets both harpoons and needles ignore shields
+    this was coded poorly so if shield bugs show up it might be from this
+  tech: fragmentation makes ~15% fewer nails for everything it affects
+  tech: filament gives 3% length per ammo (was 1%)
+    also length is capped at 75 ammo because after that it's just annoying
+  tech: unaaq is longer at low ammo but scales slower at high ammo
 
-JUNK tech: true colors - set all power ups to their real world colors (just makes random colors)
+bugs
+  fixed laser collisions on player head when crouching
+  returned experiment gun and field circles
+
 
 ******************************************************** TODO ********************************************************
+
 
 "Interstellar Disturbance": Cosmic String applies to mobs who cross the wormhole's path, even after initial wormholing, but at reduced damage and stun time.
 
 disable zoom progress when paused
 
 gun: harpoon
-  if no target no thrust and no airfriction
-  stuck in walls, and don't return ammo
   return to player is slower for heavier harpoons
+  harpoons despawn before they have time to return with filament and lots o ammo
 harpoon tech
   holding down fire lets the string extend farther,
+    this can overwrite crouch mode
     can't have 2+ harpoons
     it uses up ammo as extends, and returns it as it contracts?
       will this effect performance?
   fire 2+ harpoons at the same time but different angles
   2+ harpoons, with separate CDs
     can't have extended string?
+  grappling hook?
+
+  remove string in all modes,  why?
+    increase ammo
   post launch tracking: more airFriction, more thrust, harder turning
     if no target found slow down and aim much better?
   tracking so good harpoon can hit a target, circle around and hit it again

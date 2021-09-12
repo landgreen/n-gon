@@ -194,6 +194,7 @@ function collisionChecks(event) {
                             if (v > 9) {
                                 let dmg = 0.075 * b.dmgScale * v * obj.mass * (tech.throwChargeRate) * (tech.isBlockHarm ? 2.5 : 1) * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1);
                                 if (mob[k].isShielded) dmg *= 0.7
+                                // console.log(dmg)
                                 mob[k].damage(dmg, true);
                                 if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && m.throwCycle > m.cycle) {
                                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"

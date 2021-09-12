@@ -360,31 +360,31 @@ const build = {
                     const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
 
                     // <div class="circle-grid-small research" style="position:absolute; top:13px; left:30px;opacity:0.85;"></div>
-                    // if (tech.tech[i].isFieldTech) {
-                    //     techID.classList.remove('experiment-grid-hide');
+                    if (tech.tech[i].isFieldTech) {
+                        techID.classList.remove('experiment-grid-hide');
 
-                    //     techID.innerHTML = `
-                    //     <div class="grid-title">
-                    //         <span style="position:relative;">
-                    //             <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                    //             <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
-                    //         </span>
-                    //         &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}
-                    //     </div>`
-                    //     // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
-                    //     // <div class="circle-grid tech" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
-                    //     // border: #fff solid 0px;
-                    // } else if (tech.tech[i].isGunTech) {
-                    //     techID.classList.remove('experiment-grid-hide');
-                    //     techID.innerHTML = `
-                    //     <div class="grid-title">
-                    //         <span style="position:relative;">
-                    //             <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                    //             <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
-                    //         </span>
-                    //         &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}
-                    //     </div>`
-                    // } else 
+                        techID.innerHTML = `
+                        <div class="grid-title">
+                            <span style="position:relative;">
+                                <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
+                            </span>
+                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}
+                        </div>`
+                        // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
+                        // <div class="circle-grid tech" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
+                        // border: #fff solid 0px;
+                    } else if (tech.tech[i].isGunTech) {
+                        techID.classList.remove('experiment-grid-hide');
+                        techID.innerHTML = `
+                        <div class="grid-title">
+                            <span style="position:relative;">
+                                <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                                <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
+                            </span>
+                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}
+                        </div>`
+                    } else
                     if (tech.tech[i].isJunk) {
                         // text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                         techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
