@@ -1,35 +1,21 @@
 ******************************************************** NEXT PATCH **************************************************
 
-harpoon gun
-  shaped more like a harpoon
-  grabs power ups slower, and from the tip of the harpoon
-  only uses energy on returning
-  doesn't have thrust if there is no mob target
+harpoon cd on miss fire lowered to 1.5s (was 3s)
 
-  tech: reticulum - make one more harpoon if there are mobs nearby that you are facing
-    I'm letting this stack to 9 even though it's silly cause that is n-gon's style
-  tech: ceramics now lets both harpoons and needles ignore shields
-    this was coded poorly so if shield bugs show up it might be from this
-  tech: fragmentation makes ~15% fewer nails for everything it affects
-  tech: filament gives 3% length per ammo (was 1%)
-    also length is capped at 75 ammo because after that it's just annoying
-  tech: unaaq is longer at low ammo but scales slower at high ammo
-
-bugs
-  fixed laser collisions on player head when crouching
-  returned experiment gun and field circles
-
+bugs fixes
 
 ******************************************************** TODO ********************************************************
 
+Separate actually crouching and forced crouching for gun altfires?
 
 "Interstellar Disturbance": Cosmic String applies to mobs who cross the wormhole's path, even after initial wormholing, but at reduced damage and stun time.
 
 disable zoom progress when paused
 
 gun: harpoon
+  delay for a not returning harpoon is too long
+    the return system should just be simple, with no or a very predictable way to lose the harpoon
   return to player is slower for heavier harpoons
-  harpoons despawn before they have time to return with filament and lots o ammo
 harpoon tech
   holding down fire lets the string extend farther,
     this can overwrite crouch mode

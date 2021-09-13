@@ -1173,7 +1173,7 @@ const b = {
             returnToPlayer() {
                 if (Vector.magnitude(Vector.sub(this.position, m.pos)) < 100) { //near player
                     this.endCycle = 0;
-                    if (m.cycle + 25 * b.fireCDscale < m.fireCDcycle) m.fireCDcycle = m.cycle + 25 * b.fireCDscale
+                    if (m.cycle + 25 * b.fireCDscale < m.fireCDcycle) m.fireCDcycle = m.cycle + 25 * b.fireCDscale //lower cd to 25 if it is above 25
                     //recoil on catching
                     const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), this.mass * (m.crouch ? 0.0001 : 0.0002))
                     player.force.x += momentum.x
@@ -4644,11 +4644,8 @@ const b = {
                     if (tech.missileCount > 1) {
                         for (let i = 0; i < tech.missileCount; i++) {
                             setTimeout(() => {
-                                const where = {
-                                    x: m.pos.x,
-                                    y: m.pos.y - 40
-                                }
-                                b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction) * (tech.missileSize ? 1.5 : 1))
+                                const where = { x: m.pos.x, y: m.pos.y - 40 }
+                                b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction))
                                 bullet[bullet.length - 1].force.x += 0.025 * countReduction * (i - (tech.missileCount - 1) / 2);
                             }, 20 * tech.missileCount * Math.random());
                         }
@@ -4693,51 +4690,6 @@ const b = {
                     //     }, i * 50);
                     // }
                 }
-
-
-                // if (tech.missileCount) {
-                //     if (m.crouch) {
-                //         for (let i = 0; i < 3; i++) {
-                //             b.missile({
-                //                 x: m.pos.x,
-                //                 y: m.pos.y - 40
-                //             }, -Math.PI / 2 + 0.08 * (1 - i) + 0.3 * (Math.random() - 0.5), 0, 0.6 * (tech.missileSize ? 1.5 : 1))
-                //             bullet[bullet.length - 1].force.x -= 0.015 * (i - 1);
-                //         }
-                //     } else {
-                //         m.fireCDcycle = m.cycle + 80 * b.fireCDscale; // cool down
-                //         const direction = {
-                //             x: Math.cos(m.angle),
-                //             y: Math.sin(m.angle)
-                //         }
-                //         const push = Vector.mult(Vector.perp(direction), 0.02)
-                //         for (let i = 0; i < 3; i++) {
-                //             b.missile({
-                //                 x: m.pos.x + 40 * direction.x,
-                //                 y: m.pos.y + 40 * direction.y
-                //             }, m.angle + 0.06 * (Math.random() - 0.5), 5, 0.7 * (tech.missileSize ? 1.5 : 1))
-                //             bullet[bullet.length - 1].force.x += push.x * (i - 1);
-                //             bullet[bullet.length - 1].force.y += push.y * (i - 1);
-                //         }
-                //     }
-                // } else {
-                //     if (m.crouch) {
-                //         m.fireCDcycle = m.cycle + 10 * b.fireCDscale; // cool down
-                //         const off = Math.random() - 0.5
-                //         b.missile({
-                //                 x: m.pos.x,
-                //                 y: m.pos.y - 40
-                //             },
-                //             -Math.PI / 2 + 0.15 * off, 0, 0.83 * (tech.missileSize ? 1.5 : 1))
-                //         bullet[bullet.length - 1].force.x += off * 0.03;
-                //         // bullet[bullet.length - 1].force.y += push.y * (i - 1);
-                //     } else {
-                //         m.fireCDcycle = m.cycle + 55 * b.fireCDscale; // cool down
-
-                //         // bullet[bullet.length - 1].force.y += 0.01; //a small push down at first to make it seem like the missile is briefly falling
-                //     }
-
-                // }
             }
         }, {
             name: "grenades",
@@ -5068,7 +5020,7 @@ const b = {
                         this.ammo++ //make up for the ammo used up in fire()
                         simulation.updateGunHUD();
                     }
-                    m.fireCDcycle = m.cycle + 180 //Infinity; // cool down
+                    m.fireCDcycle = m.cycle + 90 //Infinity; // cool down
                 } else {
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
@@ -5081,7 +5033,7 @@ const b = {
                         }
                     }
                     b.harpoon(where, closest.target, m.angle, length, true, totalCycles)
-                    m.fireCDcycle = m.cycle + 180 //Infinity; // cool down
+                    m.fireCDcycle = m.cycle + 120 //Infinity; // cool down
                 }
                 const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), m.crouch ? 0.015 : 0.035)
                 player.force.x -= recoil.x

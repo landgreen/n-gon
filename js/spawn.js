@@ -735,7 +735,7 @@ const spawn = {
         const me = mob[mob.length - 1];
         me.isBoss = true;
         Matter.Body.setDensity(me, 0.002); //normal density even though its a boss
-        me.damageReduction = 0.05; //extra reduction for a boss, because normal density
+        me.damageReduction = 0.04; //extra reduction for a boss, because normal density
         me.frictionAir = 0.01;
         me.accelMag = 0.0002;
         me.onDeath = function() {

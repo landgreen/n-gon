@@ -5117,7 +5117,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.haveGunCheck("laser") || tech.laserBotCount > 1 || tech.isLaserMine) && tech.laserDamage === 0.15
+                    return (tech.haveGunCheck("laser") || tech.laserBotCount > 1 || tech.isLaserMine) && tech.laserDamage === 0.16
                 },
                 requires: "laser, not free-electron",
                 effect() {
@@ -5151,7 +5151,7 @@
                 },
                 remove() {
                     tech.laserFieldDrain = 0.002;
-                    tech.laserDamage = 0.16; //used in check on pulse: tech.laserDamage === 0.16
+                    tech.laserDamage = 0.16; //used in check on pulse and diode: tech.laserDamage === 0.16
                     tech.laserColor = "#f00"
                     tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
                 }
