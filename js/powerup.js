@@ -779,7 +779,7 @@ const powerUps = {
         if (tech.isTechDamage && who.name === "tech") m.damage(0.11)
         if (tech.isMassEnergy) m.energy += 2;
         if (tech.isMineDrop && bullet.length < 150) {
-            if (tech.isLaserMine && m.crouch) {
+            if (tech.isLaserMine && input.down) {
                 b.laserMine(who.position)
             } else {
                 b.mine(who.position, { x: 0, y: 0 }, 0)

@@ -1,20 +1,25 @@
 ******************************************************** NEXT PATCH **************************************************
 
-harpoon cd on miss fire lowered to 1.5s (was 3s)
+gun alt fire is determined by the down key not the player crouch state
+  (so you can control alt fire when in the air or stuck in a tunnel)
+  I did this with text replace, so it could produce some bugs
+
+harpoon
+  automatically uses power ups that return to player
+  will aim at harder to hit targets, and possible miss
+  returns extra fast if it is far from the player
+  bullets last a bit longer so they don't despawn early
+  cd on miss fire lowered to 1.5s (was 3s)
 
 bugs fixes
 
 ******************************************************** TODO ********************************************************
-
-Separate actually crouching and forced crouching for gun altfires?
 
 "Interstellar Disturbance": Cosmic String applies to mobs who cross the wormhole's path, even after initial wormholing, but at reduced damage and stun time.
 
 disable zoom progress when paused
 
 gun: harpoon
-  delay for a not returning harpoon is too long
-    the return system should just be simple, with no or a very predictable way to lose the harpoon
   return to player is slower for heavier harpoons
 harpoon tech
   holding down fire lets the string extend farther,
@@ -22,16 +27,15 @@ harpoon tech
     can't have 2+ harpoons
     it uses up ammo as extends, and returns it as it contracts?
       will this effect performance?
-  fire 2+ harpoons at the same time but different angles
   2+ harpoons, with separate CDs
     can't have extended string?
   grappling hook?
-
   remove string in all modes,  why?
     increase ammo
   post launch tracking: more airFriction, more thrust, harder turning
     if no target found slow down and aim much better?
   tracking so good harpoon can hit a target, circle around and hit it again
+    doesn't seem to be good physics
 
 level:lab too much walking around and too much platforming
 
@@ -45,6 +49,11 @@ make the player get a buff after using wormhole
   while energy lasts: drain energy and give damage buff
 using wormhole makes you immune to harm and drains energy until you run out
   disable incoming energy, by saving current energy and just setting energy in the next cycle to be lower then the saved value
+
+Pilot wave tech
+  Energy use is increased, but you can now shape blocks using pressure
+  Grouping blocks will merge them into a massive ball
+  Size, density is determined by total mass
 
 make a boss with a tail
   but the tail is made of interesting mobs
