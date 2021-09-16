@@ -2292,18 +2292,14 @@ const level = {
         // spawn.focuser(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        // spawn.beamer(1800, -120)
-        // spawn.orbitalBoss(1600, -500)
-        // spawn.powerUpBoss(1600, -500)
-        // spawn.cellBossCulture(1600, -500)
+        // spawn.laser(1800, -120)
+        // spawn.laserBombingBoss(1600, -500)
         // spawn.laserTargetingBoss(1600, -500)
-        // spawn.laser(1200, -500)
-
+        // spawn.laserBoss(1600, -500)
+        // spawn.cellBossCulture(1600, -500)
         spawn.nodeGroup(1200, -500, "grenadier")
         spawn.nodeGroup(1800, -500, "grenadier")
         spawn.nodeGroup(1200, 0, "grenadier")
-
-
         // spawn.snakeBoss(1200, -500)
         // spawn.suckerBoss(2900, -500)
         // spawn.randomMob(1600, -500)

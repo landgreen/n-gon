@@ -1,17 +1,14 @@
 ******************************************************** NEXT PATCH **************************************************
 
-gun alt fire is determined by the down key not the player crouch state
-  (so you can control alt fire when in the air or stuck in a tunnel)
-  I did this with text replace, so it could produce some bugs
+tech: cache - ammo power ups give 11x ammo, but you can't hold over 11x ammo
 
 harpoon
-  automatically uses power ups that return to player
-  will aim at harder to hit targets, and possible miss
-  returns extra fast if it is far from the player
-  bullets last a bit longer so they don't despawn early
-  cd on miss fire lowered to 1.5s (was 3s)
+  grabs 1 power up on the way out, or in
+  harpooned power ups are predictable
+    they attach to the harpoon instead of using physics to move towards player
 
 bugs fixes
+  lasers were broke, but I fixed them
 
 ******************************************************** TODO ********************************************************
 
@@ -19,9 +16,15 @@ bugs fixes
 
 disable zoom progress when paused
 
-gun: harpoon
-  return to player is slower for heavier harpoons
+harpoon
+  post launch tracking: more airFriction, more thrust, harder turning
+    if no target found slow down and aim much better?
 harpoon tech
+  tech that buffs alt fire:
+    remove the string, all shots are alt fire
+    alt fire has a 50% chance to not use ammo?
+    ammo power ups are 10% more likely to spawn from dead mobs
+    ammo power ups give the harpoon 2x more ammo
   holding down fire lets the string extend farther,
     this can overwrite crouch mode
     can't have 2+ harpoons
@@ -32,14 +35,10 @@ harpoon tech
   grappling hook?
   remove string in all modes,  why?
     increase ammo
-  post launch tracking: more airFriction, more thrust, harder turning
-    if no target found slow down and aim much better?
   tracking so good harpoon can hit a target, circle around and hit it again
     doesn't seem to be good physics
 
 level:lab too much walking around and too much platforming
-
-set blockBoss frequency to 1x not 2x
 
 tech -  explode after getting hit, but while you are immune to harm
 
@@ -475,6 +474,7 @@ possible names for tech
   hypergraph
   gnarl
   SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
+  nuclear pasta - hard matter in neutron star
 
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

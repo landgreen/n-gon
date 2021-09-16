@@ -455,23 +455,34 @@ const powerUps = {
             return 17;
         },
         effect() {
-            if (tech.isAmmoForGun && b.inventory.length > 0 && b.activeGun) {
+            if (tech.isAmmoForGun && b.inventory.length > 0 && b.activeGun) { //give extra ammo to one gun only with tech logistics
                 const target = b.guns[b.activeGun]
                 if (target.ammo !== Infinity) {
-                    const ammoAdded = Math.ceil((0.7 * Math.random() + 0.7 * Math.random()) * target.ammoPack)
-                    target.ammo += ammoAdded
-                    simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
+                    if (tech.ammoCap) {
+                        const ammoAdded = Math.ceil(target.ammoPack * 0.7 * tech.ammoCap) //0.7 is average
+                        target.ammo = ammoAdded
+                        simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}`)
+                    } else {
+                        const ammoAdded = Math.ceil((0.7 * Math.random() + 0.7 * Math.random()) * target.ammoPack)
+                        target.ammo += ammoAdded
+                        simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
+                    }
                 }
             } else { //give ammo to all guns in inventory
                 for (let i = 0, len = b.inventory.length; i < len; i++) {
                     const target = b.guns[b.inventory[i]]
                     if (target.ammo !== Infinity) {
-                        const ammoAdded = Math.ceil((0.5 * Math.random() + 0.4 * Math.random()) * target.ammoPack) //Math.ceil(Math.random() * target.ammoPack)
-                        target.ammo += ammoAdded
-                        simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
+                        if (tech.ammoCap) {
+                            const ammoAdded = Math.ceil(target.ammoPack * 0.45 * tech.ammoCap) //0.45 is average
+                            target.ammo = ammoAdded
+                            simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}`)
+                        } else {
+                            const ammoAdded = Math.ceil((0.45 * Math.random() + 0.45 * Math.random()) * target.ammoPack) //Math.ceil(Math.random() * target.ammoPack)
+                            target.ammo += ammoAdded
+                            simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
+                        }
                     }
                 }
-
             }
             simulation.updateGunHUD();
         }

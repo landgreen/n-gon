@@ -645,8 +645,8 @@ const spawn = {
                 // vertexCollision(where, look, mob);
                 vertexCollision(where, look, map);
                 vertexCollision(where, look, body);
-                if (!m.isCloak) vertexCollision(where, look, [player]);
-                if (best.who && best.who === player && m.immuneCycle < m.cycle) {
+                if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
+                if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                     if (m.immuneCycle < m.cycle + 60 + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + 60 + tech.collisionImmuneCycles; //player is immune to damage extra time
                     m.damage(dmg);
                     simulation.drawList.push({ //add dmg to draw queue
@@ -2014,7 +2014,6 @@ const spawn = {
         mobs.spawn(x, y, 3, radius, color);
         let me = mob[mob.length - 1];
         me.isBoss = true;
-
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
         me.accelMag = 0.00018 * Math.sqrt(simulation.accelScale);
@@ -2025,10 +2024,7 @@ const spawn = {
         me.frictionStatic = 0;
         me.friction = 0;
         me.lookTorque = 0.000001 * (Math.random() > 0.5 ? -1 : 1);
-        me.fireDir = {
-            x: 0,
-            y: 0
-        }
+        me.fireDir = { x: 0, y: 0 }
         Matter.Body.setDensity(me, 0.008); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 200 + 300 * Math.random())
@@ -2128,16 +2124,14 @@ const spawn = {
                 if (!m.isCloak) vertexCollision(this.position, look, [playerBody, playerHead]);
 
                 // hitting player
-                if (best.who === player) {
-                    if (m.immuneCycle < m.cycle) {
-                        const dmg = 0.002 * simulation.dmgScale;
-                        m.damage(dmg);
-                        //draw damage
-                        ctx.fillStyle = color;
-                        ctx.beginPath();
-                        ctx.arc(best.x, best.y, dmg * 10000, 0, 2 * Math.PI);
-                        ctx.fill();
-                    }
+                if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
+                    const dmg = 0.002 * simulation.dmgScale;
+                    m.damage(dmg);
+                    //draw damage
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(best.x, best.y, dmg * 10000, 0, 2 * Math.PI);
+                    ctx.fill();
                 }
                 //draw beam
                 if (best.dist2 === Infinity) best = look;
@@ -2258,7 +2252,7 @@ const spawn = {
                 if (!m.isCloak) vertexCollision(this.position, look, [playerBody, playerHead]);
 
                 // hitting player
-                if (best.who === player) {
+                if (best.who === playerBody || best.who === playerHead) {
                     this.targetingCount++
                     if (this.targetingCount > this.targetingTime) {
                         this.targetingCount -= 10;
@@ -2763,8 +2757,8 @@ const spawn = {
             // vertexCollision(where, look, mob);
             vertexCollision(where, look, map);
             vertexCollision(where, look, body);
-            if (!m.isCloak) vertexCollision(where, look, [player]);
-            if (best.who && best.who === player && m.immuneCycle < m.cycle) {
+            if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
+            if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                 m.immuneCycle = m.cycle + tech.collisionImmuneCycles + 60; //player is immune to damage for an extra second
                 const dmg = 0.14 * simulation.dmgScale;
                 m.damage(dmg);

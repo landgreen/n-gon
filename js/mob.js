@@ -532,7 +532,7 @@ const mobs = {
                     vertexCollision(this.position, look, body);
                     if (!m.isCloak) vertexCollision(this.position, look, [playerBody, playerHead]);
                     // hitting player
-                    if (best.who === player) {
+                    if (best.who === playerBody || best.who === playerHead) {
                         if (m.immuneCycle < m.cycle) {
                             const dmg = 0.0012 * simulation.dmgScale;
                             m.damage(dmg);

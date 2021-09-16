@@ -115,6 +115,7 @@ const b = {
         }
     },
     giveGuns(gun = "random", ammoPacks = 10) {
+        if (tech.ammoCap) ammoPacks = 0.45 * tech.ammoCap
         if (tech.isOneGun) b.removeAllGuns();
         if (gun === "random") {
             //find what guns player doesn't have
@@ -131,7 +132,7 @@ const b = {
             for (let i = 0; i < b.guns.length; i++) {
                 b.inventory[i] = i;
                 b.guns[i].have = true;
-                b.guns[i].ammo = Math.floor(b.guns[i].ammoPack * ammoPacks);
+                b.guns[i].ammo = Math.ceil(b.guns[i].ammoPack * ammoPacks);
             }
             b.activeGun = 0;
         } else {
@@ -148,7 +149,7 @@ const b = {
             }
             if (!b.guns[gun].have) b.inventory.push(gun);
             b.guns[gun].have = true;
-            b.guns[gun].ammo = Math.floor(b.guns[gun].ammoPack * ammoPacks);
+            b.guns[gun].ammo = Math.ceil(b.guns[gun].ammoPack * ammoPacks);
             if (b.activeGun === null) {
                 b.activeGun = gun //if no active gun switch to new gun
                 if (b.guns[b.activeGun].charge) b.guns[b.activeGun].charge = 0; //set foam charge to zero if foam is a new gun
@@ -1148,7 +1149,32 @@ const b = {
 
                 }
             },
-            onEnd() {},
+            caughtPowerUp: null,
+            dropCaughtPowerUp() {
+                if (this.caughtPowerUp) {
+                    this.caughtPowerUp.collisionFilter.category = cat.powerUp
+                    this.caughtPowerUp.collisionFilter.mask = cat.map | cat.powerUp
+                    this.caughtPowerUp = null
+                }
+            },
+            onEnd() {
+                if (this.caughtPowerUp && !simulation.isChoosing && (this.caughtPowerUp.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
+                    let index = null //find index
+                    for (let i = 0, len = powerUp.length; i < len; ++i) {
+                        if (powerUp[i] === this.caughtPowerUp) index = i
+                    }
+                    if (index !== null) {
+                        powerUps.onPickUp(this.caughtPowerUp);
+                        this.caughtPowerUp.effect();
+                        Matter.Composite.remove(engine.world, this.caughtPowerUp);
+                        powerUp.splice(index, 1);
+                    } else {
+                        this.dropCaughtPowerUp()
+                    }
+                } else {
+                    this.dropCaughtPowerUp()
+                }
+            },
             drawString() {
                 if (isReturn) {
                     const where = {
@@ -1183,50 +1209,37 @@ const b = {
                             break;
                         }
                     }
-                    // if you grabbed a power up, stop it near the player
-                    // for (let i = 0, len = powerUp.length; i < len; ++i) { //near power up
-                    //     if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 6000) {
-                    //         Matter.Body.setVelocity(powerUp[i], { x: 0, y: -2 })
-                    //         break
-                    //     }
-                    // }
-
-                    for (let i = 0, len = powerUp.length; i < len; ++i) {
-                        if ( //use power up if it is close enough
-                            Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 6000 &&
-                            !simulation.isChoosing &&
-                            (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)
-                        ) {
-                            powerUps.onPickUp(powerUp[i]);
-                            Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
-                                x: player.velocity.x + powerUp[i].velocity.x / player.mass * 1,
-                                y: player.velocity.y + powerUp[i].velocity.y / player.mass * 1
-                            });
-                            powerUp[i].effect();
-                            Matter.Composite.remove(engine.world, powerUp[i]);
-                            powerUp.splice(i, 1);
-                            break; //because the array order is messed up after splice
-                        }
-                    }
-
                 } else {
-                    let isPulling = false
-                    for (let i = 0, len = powerUp.length; i < len; ++i) { //near power up
-                        if (Vector.magnitudeSquared(Vector.sub(this.vertices[2], powerUp[i].position)) < 3000) {
-                            Matter.Body.setVelocity(powerUp[i], this.velocity)
-                            Matter.Body.setPosition(powerUp[i], this.vertices[2])
-                            isPulling = true
-                            this.endCycle += 0.5 //it pulls back slower, so this prevents it from ending early
-                            break //just pull 1 power up if possible
-                        }
-                    }
                     if (m.energy > 0.005) m.energy -= 0.005
                     const sub = Vector.sub(this.position, m.pos)
                     const rangeScale = 1 + 0.000001 * Vector.magnitude(sub) * Vector.magnitude(sub) //return faster when far from player
-                    const returnForce = Vector.mult(Vector.normalise(sub), rangeScale * this.thrustMag * this.mass * (isPulling ? 0.6 : 1))
+                    const returnForce = Vector.mult(Vector.normalise(sub), rangeScale * this.thrustMag * this.mass)
                     this.force.x -= returnForce.x
                     this.force.y -= returnForce.y
                     this.drawString()
+                    this.grabPowerUp()
+                }
+            },
+            grabPowerUp() { //grab power ups near the tip of the harpoon
+                if (this.caughtPowerUp) {
+                    Matter.Body.setPosition(this.caughtPowerUp, Vector.add(this.vertices[2], this.velocity))
+                    Matter.Body.setVelocity(this.caughtPowerUp, { x: 0, y: 0 })
+                } else { //&& simulation.cycle % 2 
+                    for (let i = 0, len = powerUp.length; i < len; ++i) {
+                        const radius = powerUp[i].circleRadius + 25
+                        if (Vector.magnitudeSquared(Vector.sub(this.vertices[2], powerUp[i].position)) < radius * radius) {
+                            if (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) {
+                                this.caughtPowerUp = powerUp[i]
+                                Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 })
+                                Matter.Body.setPosition(powerUp[i], this.vertices[2])
+                                powerUp[i].collisionFilter.category = 0
+                                powerUp[i].collisionFilter.mask = 0
+                                this.thrustMag *= 0.6
+                                this.endCycle += 0.5 //it pulls back slower, so this prevents it from ending early
+                                break //just pull 1 power up if possible
+                            }
+                        }
+                    }
                 }
             },
             do() {
@@ -1240,11 +1253,14 @@ const b = {
                                 this.force.y -= returnForce.y
                                 this.frictionAir = 0.002
                                 this.do = () => { this.force.y += this.mass * 0.001; }
+                                this.dropCaughtPowerUp()
                             } else { //return to player
                                 this.do = this.returnToPlayer
                                 if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
                                 this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
                             }
+                        } else {
+                            this.grabPowerUp()
                         }
                     } else if (this.cycle > 30) {
                         this.frictionAir = 0.003
@@ -4730,7 +4746,7 @@ const b = {
             name: "mine",
             description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>refund <strong>undetonated</strong> mines on <strong>exiting</strong> a level", //fires <strong>nails</strong> at mobs within range
             ammo: 0,
-            ammoPack: 1.1,
+            ammoPack: 1.25,
             have: false,
             do() {},
             fire() {

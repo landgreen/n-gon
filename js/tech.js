@@ -416,8 +416,8 @@
                 description: `${powerUps.orb.ammo()} give <strong>80%</strong> more <strong class='color-ammo'>ammo</strong><br>but it's only added to your current <strong class='color-g'>gun</strong>`,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return !tech.isEnergyNoAmmo
                 },
@@ -451,6 +451,25 @@
                 remove() {}
             },
             {
+                name: "cache",
+                description: `${powerUps.orb.ammo()} gives <strong>11x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return !tech.isEnergyNoAmmo
+                },
+                requires: "not exciton-lattice",
+                effect() {
+                    tech.ammoCap = 11;
+                    powerUps.ammo.effect()
+                },
+                remove() {
+                    tech.ammoCap = 0;
+                }
+            },
+            {
                 name: "catabolism",
                 description: `firing while <strong>out</strong> of <strong class='color-ammo'>ammo</strong> spawns ${powerUps.orb.ammo(4)}<br>and reduces your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>1</strong>`,
                 maxCount: 1,
@@ -473,8 +492,8 @@
                 description: "every other <strong>crouched</strong> shot uses no <strong class='color-ammo'>ammo</strong><br><strong>+6</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
                     return true
                 },
@@ -8120,5 +8139,6 @@
         isFilament: null,
         // isSpear: null,
         isLargeHarpoon: null,
-        extraHarpoons: null
+        extraHarpoons: null,
+        ammoCap: null
     }
