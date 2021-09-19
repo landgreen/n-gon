@@ -135,6 +135,7 @@
                         tech.tech[i].count = 0;
                     }
                 }
+                console.log('cheating')
                 sound.tone(250)
                 sound.tone(300)
                 sound.tone(375)
@@ -186,7 +187,7 @@
             if (tech.isEnergyDamage) dmg *= 1 + m.energy / 11;
             if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.005
             if (tech.isRerollDamage) dmg *= 1 + 0.037 * powerUps.research.count
-            if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.23
+            if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.1995
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
             if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
@@ -248,7 +249,7 @@
         },
         tech: [{
                 name: "integrated armament",
-                description: `increase <strong class='color-d'>damage</strong> by <strong>23%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
+                description: `increase <strong class='color-d'>damage</strong> by <strong>19.95%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -413,7 +414,7 @@
             },
             {
                 name: "logistics",
-                description: `${powerUps.orb.ammo()} give <strong>80%</strong> more <strong class='color-ammo'>ammo</strong><br>but it's only added to your current <strong class='color-g'>gun</strong>`,
+                description: `${powerUps.orb.ammo()} give <strong>80%</strong> more <strong class='color-ammo'>ammo</strong>, but<br>it's only added to your current <strong class='color-g'>gun</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -452,7 +453,7 @@
             },
             {
                 name: "cache",
-                description: `${powerUps.orb.ammo()} gives <strong>11x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
+                description: `${powerUps.orb.ammo()} give <strong>11x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -471,7 +472,7 @@
             },
             {
                 name: "catabolism",
-                description: `firing while <strong>out</strong> of <strong class='color-ammo'>ammo</strong> spawns ${powerUps.orb.ammo(4)}<br>and reduces your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>1</strong>`,
+                description: `firing while <strong>out</strong> of <strong class='color-ammo'>ammo</strong> spawns ${powerUps.orb.ammo(4)}<br>but it reduces your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>1</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -932,7 +933,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isDroneTeleport || tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isDroneRadioactive && !tech.isDroneTeleport) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot && !tech.isNeedles
+                    return ((m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" && !(tech.isDroneTeleport || tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isDroneRadioactive && !tech.isDroneTeleport) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot && !tech.isNeedleShot
                 },
                 requires: "super balls, basic or slug shotgun, drones, not irradiated drones or burst drones",
                 effect() {
@@ -1464,16 +1465,17 @@
             },
             {
                 name: "bot fabrication",
-                description: `anytime you collect ${powerUps.orb.research(4)}<br>use them to build a random <strong class='color-bot'>bot</strong>`,
+                //-----------description is overwritten in powerUps.research.changeRerolls------------
+                description: `if you collect ${powerUps.orb.research(2)}use them to build a<br>random <strong class='color-bot'>bot</strong> <em>(+1 cost every 5 bots)</em>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 isBotTech: true,
                 allowed() {
-                    return powerUps.research.count > 3 || build.isExperimentSelection
+                    return powerUps.research.count > 2 || build.isExperimentSelection
                 },
-                requires: "at least 4 research",
+                requires: "at least 3 research",
                 effect() {
                     tech.isRerollBots = true;
                     powerUps.research.changeRerolls(0)
@@ -2904,10 +2906,32 @@
                 },
                 requires: "at least 3 research and not superdeterminism",
                 effect() {
-                    tech.renormalization = true;
+                    tech.renormalization = true; //40% set in regularization tech
                 },
                 remove() {
                     tech.renormalization = false;
+                }
+            },
+            {
+                name: "regularization",
+                description: `increase <strong>renormalization</strong> chance by <strong>10%</strong><br>use ${powerUps.orb.research(6)}`,
+                maxCount: 3,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.renormalization && (powerUps.research.count > 5 || build.isExperimentSelection)
+                },
+                requires: "renormalization",
+                effect() {
+                    tech.regularization += 0.1
+                    for (let i = 0; i < 6; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
+                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 120 * (Math.random() - 0.5), m.pos.y + 120 * (Math.random() - 0.5), "research", false);
+                },
+                remove() {
+                    tech.regularization = 0.4
                 }
             },
             {
@@ -3021,7 +3045,7 @@
             },
             {
                 name: "abiogenesis",
-                description: `at the start of a level spawn a 2nd <strong>boss</strong><br>use ${powerUps.orb.research(4)} or add <strong>49</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool`,
+                description: `at the start of a level spawn a 2nd <strong>boss</strong><br>use ${powerUps.orb.research(4)}or add <strong>49</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -4256,9 +4280,9 @@
                 frequency: 4,
                 frequencyDefault: 4,
                 allowed() {
-                    return tech.haveGunCheck("wave beam") && !tech.isPhaseVelocity
+                    return tech.haveGunCheck("wave beam") && !tech.isPhaseVelocity && !tech.isBulletTeleport
                 },
-                requires: "wave beam, not phase velocity ",
+                requires: "wave beam, not phase velocity, uncertainty principle",
                 effect() {
                     tech.isLongitudinal = true;
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4887,7 +4911,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isFoamTeleport && (tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot)
+                    return !tech.isBulletTeleport && (tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot)
                 },
                 requires: "foam, not uncertainty",
                 effect() {
@@ -4899,21 +4923,21 @@
             },
             {
                 name: "uncertainty principle",
-                description: "<strong>foam</strong> bubbles randomly change <strong>position</strong><br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>50%</strong>",
+                description: "<strong>foam</strong> and <strong>wave</strong> particle <strong>positions</strong> are random<br>increase their <strong class='color-d'>damage</strong> by <strong>50%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return !tech.isFoamAttract && (tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot)
+                    return (!tech.isFoamAttract && (tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot)) || (tech.haveGunCheck("wave beam") && !tech.isLongitudinal)
                 },
-                requires: "foam, not electrostatic induction",
+                requires: "foam, not electrostatic induction, wave beam, not phonon",
                 effect() {
-                    tech.isFoamTeleport = true
+                    tech.isBulletTeleport = true
                 },
                 remove() {
-                    tech.isFoamTeleport = false;
+                    tech.isBulletTeleport = false;
                 }
             },
             {
@@ -5030,6 +5054,26 @@
                 },
                 remove() {
                     tech.isLargeHarpoon = false;
+                }
+            },
+            {
+                name: "toggling harpoon",
+                description: "increase the <strong class='color-d'>damage</strong> of your next <strong>harpoon</strong><br>by <strong>600%</strong> after using it to collect a <strong>power up</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("harpoon")
+                },
+                requires: "harpoon",
+                effect() {
+                    tech.isHarpoonPowerUp = true
+                },
+                remove() {
+                    tech.isHarpoonPowerUp = false
+                    tech.harpoonDensity = 0.005
                 }
             },
             {
@@ -6302,6 +6346,7 @@
                 requires: "",
                 effect() {
                     m.shipMode()
+                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 remove() {}
             },
@@ -6325,6 +6370,8 @@
                             simulation.trails()
                         }
                     }, 20000); //every 20 seconds
+                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
+
                 },
                 remove() {
                     if (this.count > 0) clearTimeout(this.interval);
@@ -6350,6 +6397,7 @@
                             }
                         }
                     }, 5000); //every 5 seconds
+                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 interval: undefined,
                 remove() {
@@ -6377,6 +6425,7 @@
                         m.transX += (m.transSmoothX - m.transX) * 0.07;
                         m.transY += (m.transSmoothY - m.transY) * 0.07;
                     }
+                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 remove() {
                     if (this.count > 0) m.look = m.lookDefault()
@@ -6405,6 +6454,7 @@
                             }
                         }
                     }, 1000); //every 1 seconds
+                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 interval: undefined,
                 remove() {
@@ -6425,6 +6475,7 @@
                 requires: "",
                 effect() {
                     tech.deathSpawns = 0.2
+                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 remove() {
                     tech.deathSpawns = 0
@@ -6443,7 +6494,8 @@
                 },
                 requires: "",
                 effect() {
-                    tech.wimpExperiment = 3
+                    tech.wimpExperiment = 5
+                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 remove() {
                     tech.wimpExperiment = 0
@@ -7820,14 +7872,14 @@
                         if (lore.techCount === lore.techGoal) {
                             // tech.removeLoreTechFromPool();
                             this.frequency = 0;
-                            this.description = `<strong class="lore-text">null</strong> is open`
+                            this.description = `<strong class="lore-text">null</strong> is open at level.final()`
                         } else {
                             this.frequency += lore.techGoal
                             // for (let i = 0; i < tech.tech.length; i++) { //set name for all unchosen copies of this tech
                             //     if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech[i].description = `${lore.techCount+1}/${lore.techGoal}<br><em>add copies of <strong class="lore-text">this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`
                             // }
                             // for (let i = 0, len = 10; i < len; i++) tech.addLoreTechToPool()
-                            this.description = `<em>uncaught error:</em><br><strong>${lore.techGoal-lore.techCount}</strong> more required for access to <strong class="lore-text">null</strong>`
+                            this.description = `<em>uncaught error:</em><br><strong>${Math.max(0,lore.techGoal-lore.techCount)}</strong> more required for access to <strong class="lore-text">null</strong>`
                         }
                     }, 1);
                 },
@@ -8108,7 +8160,7 @@
         droneRadioDamage: null,
         isDroneTeleport: null,
         isDroneFastLook: null,
-        isFoamTeleport: null,
+        isBulletTeleport: null,
         isResearchBoss: null,
         isJunkResearch: null,
         junkResearchNumber: null,
@@ -8140,5 +8192,8 @@
         // isSpear: null,
         isLargeHarpoon: null,
         extraHarpoons: null,
-        ammoCap: null
+        ammoCap: null,
+        regularization: null,
+        isHarpoonPowerUp: null,
+        harpoonDensity: null
     }

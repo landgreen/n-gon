@@ -1109,9 +1109,9 @@ const b = {
             b.grenade = grenadeDefault
         }
     },
-    harpoon(where, target, angle = m.angle, scale = 1, isReturn = false, ropeLength = 15) {
+    harpoon(where, target, angle = m.angle, harpoonLength = 1, isReturn = false, totalCycles = 15) {
         const me = bullet.length;
-        bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -40 * scale, y: 2, index: 0, isInternal: false }, { x: -40 * scale, y: -2, index: 1, isInternal: false }, { x: 50 * scale, y: -3, index: 3, isInternal: false }, { x: 30 * scale, y: 2, index: 4, isInternal: false }], {
+        bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -40 * harpoonLength, y: 2, index: 0, isInternal: false }, { x: -40 * harpoonLength, y: -2, index: 1, isInternal: false }, { x: 50 * harpoonLength, y: -3, index: 3, isInternal: false }, { x: 30 * harpoonLength, y: 2, index: 4, isInternal: false }], {
             cycle: 0,
             angle: angle,
             friction: 1,
@@ -1122,14 +1122,14 @@ const b = {
             drawStringFlip: (Math.round(Math.random()) ? 1 : -1),
             dmg: 0, //damage done in addition to the damage from momentum
             classType: "bullet",
-            endCycle: simulation.cycle + ropeLength * 2.5 + 15,
+            endCycle: simulation.cycle + totalCycles * 2.5 + 15,
             collisionFilter: {
                 category: cat.bullet,
                 mask: tech.isNeedleShieldPierce ? cat.map | cat.body | cat.mob | cat.mobBullet : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield,
             },
             minDmgSpeed: 0,
             lookFrequency: Math.floor(7 + Math.random() * 3),
-            density: 0.005, //0.001 is normal
+            density: tech.harpoonDensity, //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.035 when buffed
             beforeDmg(who) {
                 if (tech.isNeedleShieldPierce && who.isShielded) { //disable shields
                     who.isShielded = false
@@ -1168,6 +1168,7 @@ const b = {
                         this.caughtPowerUp.effect();
                         Matter.Composite.remove(engine.world, this.caughtPowerUp);
                         powerUp.splice(index, 1);
+                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.035 //0.005 is normal
                     } else {
                         this.dropCaughtPowerUp()
                     }
@@ -1246,7 +1247,7 @@ const b = {
                 if (!m.isBodiesAsleep) {
                     this.cycle++
                     if (isReturn) {
-                        if (this.cycle > ropeLength) {
+                        if (this.cycle > totalCycles) {
                             if (m.energy < 0.05) { //snap rope if not enough energy
                                 const returnForce = Vector.mult(Vector.normalise(Vector.sub(this.position, m.pos)), 3 * this.thrustMag * this.mass)
                                 this.force.x -= returnForce.x
@@ -1317,6 +1318,40 @@ const b = {
                     // }
                 }
                 this.drawString()
+                if (tech.isHarpoonPowerUp && this.density > 0.01) {
+                    this.drawString = () => {
+                        ctx.beginPath();
+                        ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                        for (let j = 1, len = this.vertices.length; j < len; j += 1) {
+                            ctx.lineTo(this.vertices[j].x, this.vertices[j].y);
+                        }
+                        ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+                        ctx.lineWidth = 10;
+                        ctx.strokeStyle = "#000";
+                        ctx.lineJoin = "miter"
+                        ctx.miterLimit = 100;
+                        ctx.stroke();
+                        ctx.lineJoin = "round"
+                        ctx.miterLimit = 10
+
+                        if (isReturn) {
+                            const where = {
+                                x: m.pos.x + 30 * Math.cos(m.angle),
+                                y: m.pos.y + 30 * Math.sin(m.angle)
+                            }
+                            const sub = Vector.sub(where, this.vertices[0])
+                            const perpendicular = Vector.mult(Vector.normalise(Vector.perp(sub)), this.drawStringFlip * Math.min(80, 10 + this.drawStringControlMagnitude / (10 + Vector.magnitude(sub))))
+                            const controlPoint = Vector.add(Vector.add(where, Vector.mult(sub, -0.5)), perpendicular)
+                            ctx.strokeStyle = "#000" // "#0ce"
+                            ctx.lineWidth = 0.5
+                            ctx.beginPath();
+                            ctx.moveTo(where.x, where.y);
+                            ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
+                            // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
             },
         });
         if (!isReturn && !target) {
@@ -2759,7 +2794,7 @@ const b = {
             inertia: Infinity,
             frictionAir: 0.003,
             dmg: 0, //damage on impact
-            damage: (tech.isFastFoam ? 0.039 : 0.011) * (tech.isFoamTeleport ? 1.5 : 1), //damage done over time
+            damage: (tech.isFastFoam ? 0.039 : 0.011) * (tech.isBulletTeleport ? 1.5 : 1), //damage done over time
             scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.65 : 1),
             classType: "bullet",
             collisionFilter: {
@@ -2898,7 +2933,7 @@ const b = {
                             }
                         }
                     }
-                    if (this.nextPortCycle < simulation.cycle) { //teleport around if you have tech.isFoamTeleport
+                    if (this.nextPortCycle < simulation.cycle) { //teleport around if you have tech.isBulletTeleport
                         this.nextPortCycle = simulation.cycle + this.portFrequency
                         const range = 15 * Math.sqrt(this.radius) * Math.random()
                         Matter.Body.setPosition(this, Vector.add(this.position, Vector.rotate({ x: range, y: 0 }, 2 * Math.PI * Math.random())))
@@ -2906,7 +2941,7 @@ const b = {
                 }
             }
         });
-        if (tech.isFoamTeleport) bullet[me].nextPortCycle = simulation.cycle + bullet[me].portFrequency
+        if (tech.isBulletTeleport) bullet[me].nextPortCycle = simulation.cycle + bullet[me].portFrequency
         Composite.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
     },
@@ -4236,7 +4271,7 @@ const b = {
             name: "super balls",
             description: "fire <strong>3</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss",
             ammo: 0,
-            ammoPack: 11,
+            ammoPack: 10,
             have: false,
             // num: 5,
             do() {},
@@ -4382,7 +4417,7 @@ const b = {
                 ctx.lineWidth = 2 * tech.wavePacketDamage
                 ctx.beginPath();
                 const end = 700 * Math.sqrt(tech.isBulletsLastLonger) / Math.sqrt(tech.waveReflections * 0.5) //should equal about 1060
-                const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage //damage is lower for large radius mobs, since they feel the waves longer
+                const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.5 : 1) //damage is lower for large radius mobs, since they feel the waves longer
 
                 for (let i = this.waves.length - 1; i > -1; i--) {
                     //draw wave
@@ -4390,6 +4425,14 @@ const b = {
                     ctx.arc(this.waves[i].position.x, this.waves[i].position.y, this.waves[i].radius, 0, 2 * Math.PI);
                     // collisions
                     if (!m.isBodiesAsleep) {
+
+
+                        if (tech.isBulletTeleport && Math.random() < 0.04) {
+                            const scale = 400 * Math.random()
+                            this.waves[i].position = Vector.add(this.waves[i].position, { x: scale * (Math.random() - 0.5), y: scale * (Math.random() - 0.5) })
+                        }
+
+
                         for (let j = 0, len = mob.length; j < len; j++) {
                             const dist = Vector.magnitude(Vector.sub(this.waves[i].position, mob[j].position))
                             const r = mob[j].radius + 30
@@ -4464,7 +4507,7 @@ const b = {
                 ctx.lineWidth = 2 * tech.wavePacketDamage
                 ctx.beginPath();
                 const end = 1100 * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
-                const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage //damage is lower for large radius mobs, since they feel the waves longer
+                const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.5 : 1) //damage is lower for large radius mobs, since they feel the waves longer
 
                 for (let i = this.waves.length - 1; i > -1; i--) {
                     const v1 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit1, this.waves[i].radius))
@@ -4475,6 +4518,19 @@ const b = {
                     // collisions
                     //using small angle linear approximation of circle arc, this will not work if the arc gets large   // https://stackoverflow.com/questions/13652518/efficiently-find-points-inside-a-circle-sector
                     if (!m.isBodiesAsleep) {
+                        if (tech.isBulletTeleport && Math.random() < 0.05) {
+                            if (Math.random() < 0.5) {
+                                // const scale = 500 * Math.random()
+                                // this.waves[i].position = Vector.add(this.waves[i].position, { x: scale * (Math.random() - 0.5), y: scale * (Math.random() - 0.5) })
+                            } else {
+                                this.waves[i].arc *= 1 + 1 * (Math.random() - 0.5)
+                                const halfArc = this.waves[i].arc / 2
+                                const angle = m.angle + 0.5 * (Math.random() - 0.5)
+                                this.waves[i].angle = angle - halfArc
+                                this.waves[i].unit1 = { x: Math.cos(angle - halfArc), y: Math.sin(angle - halfArc) }
+                                this.waves[i].unit2 = { x: Math.cos(angle + halfArc), y: Math.sin(angle + halfArc) }
+                            }
+                        }
                         let hits = Matter.Query.ray(mob, v1, v2, 50) //Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
                         for (let j = 0; j < hits.length; j++) {
                             const who = hits[j].body
@@ -4566,7 +4622,7 @@ const b = {
                     slow: 0,
                     amplitude: (input.down ? 5 : 10) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin((this.wavePacketCycle + 1) * 0.088), //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
                     minDmgSpeed: 0,
-                    dmg: b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage, //also control damage when you divide by mob.mass 
+                    dmg: b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage * (tech.isBulletTeleport ? 1.5 : 1), //also control damage when you divide by mob.mass 
                     classType: "bullet",
                     collisionFilter: {
                         category: 0,
@@ -4613,7 +4669,24 @@ const b = {
                         Matter.Body.setPosition(this, Vector.add(this.position, where))
                     }
                 });
+                if (tech.isBulletTeleport) {
+                    bullet[me].wiggle = function() {
+                        this.cycle++
+                        const where = Vector.mult(transverse, this.amplitude * Math.cos(this.cycle * tech.waveFrequency))
+                        if (Math.random() < 0.005) {
+                            if (Math.random() < 0.33) { //randomize position
+                                const scale = 500 * Math.random()
+                                Matter.Body.setPosition(this, Vector.add({ x: scale * (Math.random() - 0.5), y: scale * (Math.random() - 0.5) }, Vector.add(this.position, where)))
+                            } else { //randomize position in velocity direction
+                                const velocityScale = Vector.mult(this.velocity, 50 * (Math.random() - 0.5))
+                                Matter.Body.setPosition(this, Vector.add(velocityScale, Vector.add(this.position, where)))
+                            }
 
+                        } else {
+                            Matter.Body.setPosition(this, Vector.add(this.position, where))
+                        }
+                    }
+                }
                 let waveSpeedMap = 0.1
                 let waveSpeedBody = 0.25
                 if (tech.isPhaseVelocity) {
@@ -4977,7 +5050,7 @@ const b = {
                             setTimeout(() => {
                                 if (!simulation.paused) {
                                     b.foam(position, Vector.rotate(velocity, spread), radius)
-                                    // (tech.isFastFoam ? 0.044 : 0.011) * (tech.isFoamTeleport ? 1.60 : 1)
+                                    // (tech.isFastFoam ? 0.044 : 0.011) * (tech.isBulletTeleport ? 1.60 : 1)
                                     bullet[bullet.length - 1].damage *= (1 + 0.7 * tech.foamFutureFire)
                                 }
                             }, 250 * tech.foamFutureFire);
@@ -5028,7 +5101,7 @@ const b = {
                             }
                         }
                     }
-                    b.harpoon(where, closest.target, m.angle, length, false)
+                    b.harpoon(where, closest.target, m.angle, length, false, 15)
                     m.fireCDcycle = m.cycle + 40 * b.fireCDscale; // cool down
                 } else if (tech.extraHarpoons) {
                     const range = 560 * (tech.isFilament ? 1 + this.ammo / 33 : 1)
@@ -5071,6 +5144,7 @@ const b = {
                 const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), input.down ? 0.015 : 0.035)
                 player.force.x -= recoil.x
                 player.force.y -= recoil.y
+                tech.harpoonDensity = 0.005
             }
         },
         {

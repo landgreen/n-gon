@@ -319,22 +319,25 @@ const powerUps = {
                 }
             }
             if (tech.isRerollBots) {
-                for (const cost = 4; powerUps.research.count > cost - 1; powerUps.research.count -= cost) {
+                for (const cost = 2 + Math.floor(0.2 * b.totalBots()); powerUps.research.count > cost - 1; powerUps.research.count -= cost) {
                     b.randomBot()
                     if (tech.renormalization) {
                         for (let i = 0; i < cost; i++) {
-                            if (Math.random() < 0.4) {
+                            if (Math.random() < tech.regularization) {
                                 m.fieldCDcycle = m.cycle + 20;
                                 powerUps.spawn(m.pos.x, m.pos.y, "research");
                             }
                         }
                     }
                 }
+                for (let i = 0, len = tech.tech.length; i < len; i++) {
+                    if (tech.tech[i].name === "bot fabrication") tech.tech[i].description = `if you collect ${powerUps.orb.research(2 + Math.floor(0.2 * b.totalBots()))}use them to build a<br>random <strong class='color-bot'>bot</strong>  <em>(+1 cost every 5 bots)</em>`
+                }
             }
             if (tech.isDeathAvoid && document.getElementById("tech-anthropic")) {
                 document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.count}`
             }
-            if (tech.renormalization && Math.random() < 0.4 && amount < 0) {
+            if (tech.renormalization && Math.random() < tech.regularization && amount < 0) {
                 for (let i = 0, len = -amount; i < len; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
             }
             if (tech.isRerollHaste) {

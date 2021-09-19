@@ -261,7 +261,7 @@ summary {
 }
 
 .experiment-grid-module {
-    margin: -1px;
+    margin: -0.5px;
     padding: 10px;
     line-height: 170%;
     /* border-radius: 6px; */
@@ -734,10 +734,10 @@ summary {
     height: 13px;
     border-radius: 50%;
     display: inline-block;
-    margin-bottom: -2.5px;
     background-color: #f7b;
     border: 0.5px #fff solid;
     opacity: 0.85;
+    margin-bottom: -2.5px;
 }
 
 .ammo-circle {
@@ -756,10 +756,10 @@ summary {
     height: 14px;
     border-radius: 50%;
     display: inline-block;
-    margin-bottom: -3px;
     background-color: #0d9;
     border: 0.5px #fff solid;
     opacity: 0.85;
+    margin-bottom: -3px;
 }
 
 .circle-grid-shadow {

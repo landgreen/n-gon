@@ -155,7 +155,7 @@ function setupCanvas() {
     canvas.height = window.innerHeight;
     canvas.width2 = canvas.width / 2; //precalculated because I use this often (in mouse look)
     canvas.height2 = canvas.height / 2;
-    canvas.diagonal = Math.sqrt(canvas.width2 * canvas.width2 + canvas.height2 * canvas.height2);
+    // canvas.diagonal = Math.sqrt(canvas.width2 * canvas.width2 + canvas.height2 * canvas.height2);
     // ctx.font = "18px Arial";
     // ctx.textAlign = "center";
     ctx.font = "25px Arial";
@@ -590,9 +590,25 @@ const build = {
             }
             removeOne();
         }
-        simulation.isCheating = true;
+        // simulation.isCheating = true;
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (tech.tech[i].isLore) tech.tech[i].frequency = 0;
+            // if ((tech.tech[i].isLore && tech.tech[i].count === 0) || (!tech.tech[i].isLore && tech.tech[i].count > 0)) { //don't remove lore frequency if you only have lore tech
+            //     tech.tech[i].frequency = 0; //remove lore power up chance
+            // }
+            if (!simulation.isCheating && tech.tech[i].count > 0 && !tech.tech[i].isLore && !tech.tech[i].isExperimentalMode) {
+                simulation.isCheating = true;
+            }
+            if (tech.tech[i].isLore) {
+                tech.tech[i].frequency = 0; //remove lore power up chance
+            }
+        }
+        //if you have no tech (not cheating) remove all power ups that might have spawned from tech
+        if (!simulation.isCheating) {
+            function removeAll(array) {
+                for (let i = 0; i < array.length; ++i) Matter.Composite.remove(engine.world, array[i]);
+            }
+            removeAll(powerUp);
+            powerUp = [];
         }
         document.body.style.cursor = "none";
         document.body.style.overflow = "hidden"

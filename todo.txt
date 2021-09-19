@@ -1,16 +1,23 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: cache - ammo power ups give 11x ammo, but you can't hold over 11x ammo
+tech: toggling harpoon - after picking up a power up with the harpoon, your next harpoon is 7x more dense
+  this probably needs to be balanced in the next patch
+tech: regularization - use 6 research to increase renormalization by 10%
+  (renormalization is 40% chance to get research when you use research)
+tech: bot fabrication uses 2 research to build a bot (+1 cost every 5 bots)
+tech: uncertainty principle now applies to wave beam in addition to foam
+tech: integrated armament gives 19.95% damage (was 23%)
 
-harpoon
-  grabs 1 power up on the way out, or in
-  harpooned power ups are predictable
-    they attach to the harpoon instead of using physics to move towards player
-
-bugs fixes
-  lasers were broke, but I fixed them
+level: labs - platforming rooms have been simplified
+start with 7/7 undefinded tech if you choose an -experiment- and no other tech
 
 ******************************************************** TODO ********************************************************
+
+Tech: Make player smol
+
+Tech: For the particle waves gun, Incompatible with phonon
+  shooting creates small particles that randomly jump around the map, often randomly changing their position completely instead of randomly jumping
+  combine with foam uncertainty?
 
 "Interstellar Disturbance": Cosmic String applies to mobs who cross the wormhole's path, even after initial wormholing, but at reduced damage and stun time.
 
@@ -23,8 +30,6 @@ harpoon tech
   tech that buffs alt fire:
     remove the string, all shots are alt fire
     alt fire has a 50% chance to not use ammo?
-    ammo power ups are 10% more likely to spawn from dead mobs
-    ammo power ups give the harpoon 2x more ammo
   holding down fire lets the string extend farther,
     this can overwrite crouch mode
     can't have 2+ harpoons
@@ -33,12 +38,8 @@ harpoon tech
   2+ harpoons, with separate CDs
     can't have extended string?
   grappling hook?
-  remove string in all modes,  why?
-    increase ammo
   tracking so good harpoon can hit a target, circle around and hit it again
     doesn't seem to be good physics
-
-level:lab too much walking around and too much platforming
 
 tech -  explode after getting hit, but while you are immune to harm
 
@@ -475,7 +476,7 @@ possible names for tech
   gnarl
   SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
   nuclear pasta - hard matter in neutron star
-
+ 
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players
   put something on the intro map
