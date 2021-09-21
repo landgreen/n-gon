@@ -1,25 +1,32 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: toggling harpoon - after picking up a power up with the harpoon, your next harpoon is 7x more dense
-  this probably needs to be balanced in the next patch
-tech: regularization - use 6 research to increase renormalization by 10%
-  (renormalization is 40% chance to get research when you use research)
-tech: bot fabrication uses 2 research to build a bot (+1 cost every 5 bots)
-tech: uncertainty principle now applies to wave beam in addition to foam
-tech: integrated armament gives 19.95% damage (was 23%)
+harpoon damage is increased 30%
+picks up power ups from farther away
+harpoon's range has been reduced about 20%
+filament and unaaq require about 40% more ammo for the same effect
+harpoon density lowers when it retracts
+  so it doesn't do as much damage on retracting
 
-level: labs - platforming rooms have been simplified
-start with 7/7 undefinded tech if you choose an -experiment- and no other tech
+more bug fixes
 
 ******************************************************** TODO ********************************************************
 
+JUNK tech: planetesimals game inside n-gon
+https://codepen.io/lilgreenland/pen/jrMvaB?editors=0010
+
+how to make it more interesting to get multiple guns?
+  make final boss less about having huge dps
+    lower final boss health when it spawns boss
+      spawn more bosses
+  make guns have more weaknesses/advantages to specific situations
+    no gun should be good at everything
+  remove gun tech that stacks to 9?
+  nerf a few of the most overpowered gun tech
+  make more gun tech apply to multiple guns
+  after picking up a gun tech open a menu with just gun tech for that gun?
+    but then the player never gets to try the vanilla version of the gun
+
 Tech: Make player smol
-
-Tech: For the particle waves gun, Incompatible with phonon
-  shooting creates small particles that randomly jump around the map, often randomly changing their position completely instead of randomly jumping
-  combine with foam uncertainty?
-
-"Interstellar Disturbance": Cosmic String applies to mobs who cross the wormhole's path, even after initial wormholing, but at reduced damage and stun time.
 
 disable zoom progress when paused
 
@@ -43,6 +50,8 @@ harpoon tech
 
 tech -  explode after getting hit, but while you are immune to harm
 
+"Interstellar Disturbance": Cosmic String applies to mobs who cross the wormhole's path, even after initial wormholing, but at reduced damage and stun time.
+
 on mouse down wormhole shows a possible wormhole
   on mouse up the wormhole becomes real
 make the player get a buff after using wormhole
@@ -55,7 +64,7 @@ Pilot wave tech
   Grouping blocks will merge them into a massive ball
   Size, density is determined by total mass
 
-make a boss with a tail
+make another boss with a tail
   but the tail is made of interesting mobs
     stabbers maybe
     suckers maybe

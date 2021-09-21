@@ -590,24 +590,26 @@ const build = {
             }
             removeOne();
         }
-        // simulation.isCheating = true;
-        for (let i = 0, len = tech.tech.length; i < len; i++) {
-            // if ((tech.tech[i].isLore && tech.tech[i].count === 0) || (!tech.tech[i].isLore && tech.tech[i].count > 0)) { //don't remove lore frequency if you only have lore tech
-            //     tech.tech[i].frequency = 0; //remove lore power up chance
-            // }
-            if (!simulation.isCheating && tech.tech[i].count > 0 && !tech.tech[i].isLore && !tech.tech[i].isExperimentalMode) {
-                simulation.isCheating = true;
-            }
-            if (tech.tech[i].isLore) {
-                tech.tech[i].frequency = 0; //remove lore power up chance
-            }
-        }
-        //if you have no tech (not cheating) remove all power ups that might have spawned from tech
         if (!simulation.isCheating) {
-            function removeAll(array) {
-                for (let i = 0; i < array.length; ++i) Matter.Composite.remove(engine.world, array[i]);
+            for (let i = 0, len = tech.tech.length; i < len; i++) {
+                if (tech.tech[i].count > 0 && !tech.tech[i].isLore && !tech.tech[i].isExperimentalMode) {
+                    simulation.isCheating = true;
+                }
             }
-            removeAll(powerUp);
+            if (b.inventory.length !== 0 || m.fieldMode !== 0) simulation.isCheating = true;
+        }
+
+        if (simulation.isCheating) { //if you are cheating remove any lore you might have gotten
+            lore.techCount = 0;
+            for (let i = 0, len = tech.tech.length; i < len; i++) {
+                if (tech.tech[i].isLore) {
+                    tech.tech[i].frequency = 0; //remove lore power up chance
+                    tech.tech[i].count = 0; //remove lore power up chance
+                }
+            }
+            simulation.updateTechHUD();
+        } else { //if you have no tech (not cheating) remove all power ups that might have spawned from tech
+            for (let i = 0; i < powerUp.length; ++i) Matter.Composite.remove(engine.world, powerUp[i]);
             powerUp = [];
         }
         document.body.style.cursor = "none";

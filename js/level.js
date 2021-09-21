@@ -18,7 +18,7 @@ const level = {
             // m.setField("time dilation")
             // b.giveGuns("harpoon")
             // tech.giveTech("toggling harpoon")
-            // tech.giveTech("phonon")
+            // tech.giveTech("filament")
             // tech.giveTech("isotropic radiator")
             // tech.giveTech("necrophage")
             // for (let i = 0; i < 3; i++) tech.giveTech("super sized")
@@ -2288,7 +2288,7 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
-        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         spawn.starter(1900, -500, 200) //big boy
         // spawn.blockGroup(1900, -500)
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
@@ -2480,11 +2480,21 @@ const level = {
     },
     intro() {
         if (level.levelsCleared === 0) { //if this is the 1st level of the game
-            // powerUps.spawn(2500, -50, "research", false);
-            powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070, "research", false);
-            powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 25, "heal", false);
-            powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 75, "heal", false);
-            powerUps.spawnStartingPowerUps(2095 + 15 * (Math.random() - 0.5), -2070 - 125);
+            //wait to spawn power ups until unpaused
+            //power ups don't spawn in experiment mode, so they don't get removed at the start of experiment mode
+            function cycle() {
+                if (simulation.cycle > 10) {
+                    // powerUps.spawn(2500, -50, "research", false);
+                    powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070, "research", false);
+                    powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 25, "heal", false);
+                    powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 75, "heal", false);
+                    powerUps.spawnStartingPowerUps(2095 + 15 * (Math.random() - 0.5), -2070 - 125);
+                } else {
+                    requestAnimationFrame(cycle);
+                }
+            }
+            requestAnimationFrame(cycle);
+
             if (localSettings.levelsClearedLastGame < 3) {
                 if (!simulation.isCheating && !m.isShipMode && !build.isExperimentRun) {
                     spawn.wireFoot();

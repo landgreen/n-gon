@@ -1281,7 +1281,7 @@ const m = {
             }
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
-                who.damage(tech.blockDmg * b.dmgScale)
+                who.damage(tech.blockDmg * b.dmgScale, true)
                 //draw electricity
                 const step = 40
                 ctx.beginPath();

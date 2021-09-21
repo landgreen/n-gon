@@ -945,7 +945,6 @@ const b = {
             bullet[me].radiusDecay = (0.81 + 0.15 * tech.isNeutronSlow) / tech.isBulletsLastLonger
             bullet[me].stuckTo = null;
             bullet[me].stuckToRelativePosition = null;
-
             if (tech.isRPG) {
                 const SCALE = 2
                 Matter.Body.scale(bullet[me], SCALE, SCALE);
@@ -1053,7 +1052,7 @@ const b = {
                         //aoe damage to mobs
                         for (let i = 0, len = mob.length; i < len; i++) {
                             if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius + mob[i].radius) {
-                                let dmg = b.dmgScale * 0.1
+                                let dmg = b.dmgScale * 0.11
                                 if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
                                 if (mob[i].shield) dmg *= 3 //to make up for the /5 that shields normally take
                                 mob[i].damage(dmg);
@@ -1093,8 +1092,6 @@ const b = {
                 }
             }
         }
-
-
         if (tech.isNeutronBomb) {
             b.grenade = grenadeNeutron
         } else if (tech.isRPG) {
@@ -1120,7 +1117,7 @@ const b = {
             turnRate: isReturn ? 0.1 : 0.03, //0.015
             drawStringControlMagnitude: 3000 + 5000 * Math.random(),
             drawStringFlip: (Math.round(Math.random()) ? 1 : -1),
-            dmg: 0, //damage done in addition to the damage from momentum
+            dmg: 6, //damage done in addition to the damage from momentum
             classType: "bullet",
             endCycle: simulation.cycle + totalCycles * 2.5 + 15,
             collisionFilter: {
@@ -1168,7 +1165,7 @@ const b = {
                         this.caughtPowerUp.effect();
                         Matter.Composite.remove(engine.world, this.caughtPowerUp);
                         powerUp.splice(index, 1);
-                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.035 //0.005 is normal
+                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.006 * 6 //0.006 is normal
                     } else {
                         this.dropCaughtPowerUp()
                     }
@@ -1227,7 +1224,7 @@ const b = {
                     Matter.Body.setVelocity(this.caughtPowerUp, { x: 0, y: 0 })
                 } else { //&& simulation.cycle % 2 
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
-                        const radius = powerUp[i].circleRadius + 25
+                        const radius = powerUp[i].circleRadius + 50
                         if (Vector.magnitudeSquared(Vector.sub(this.vertices[2], powerUp[i].position)) < radius * radius) {
                             if (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) {
                                 this.caughtPowerUp = powerUp[i]
@@ -1257,8 +1254,10 @@ const b = {
                                 this.dropCaughtPowerUp()
                             } else { //return to player
                                 this.do = this.returnToPlayer
+                                Matter.Body.setDensity(this, 0.0005); //reduce density on return
                                 if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
                                 this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
+
                             }
                         } else {
                             this.grabPowerUp()
@@ -1326,7 +1325,7 @@ const b = {
                             ctx.lineTo(this.vertices[j].x, this.vertices[j].y);
                         }
                         ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
-                        ctx.lineWidth = 10;
+                        ctx.lineWidth = 4;
                         ctx.strokeStyle = "#000";
                         ctx.lineJoin = "miter"
                         ctx.miterLimit = 100;
@@ -2397,7 +2396,7 @@ const b = {
             beforeDmg(who) {
                 if (tech.isIncendiary && simulation.cycle + this.deathCycles < this.endCycle) {
                     const max = Math.max(Math.min(this.endCycle - simulation.cycle - this.deathCycles, 1500), 0)
-                    b.explosion(this.position, max * 0.09 + this.isImproved * 100 + 60 * Math.random()); //makes bullet do explosive damage at end
+                    b.explosion(this.position, max * 0.1 + this.isImproved * 110 + 60 * Math.random()); //makes bullet do explosive damage at end
                     this.endCycle -= max
                 } else {
                     //move away from target after hitting
@@ -4105,7 +4104,7 @@ const b = {
                     if (tech.isIncendiary) {
                         bullet[me].endCycle = simulation.cycle + 60
                         bullet[me].onEnd = function() {
-                            b.explosion(this.position, 320 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
+                            b.explosion(this.position, 300 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
                         }
                         bullet[me].beforeDmg = function() {
                             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -4160,7 +4159,7 @@ const b = {
                             y: speed * Math.sin(dirOff)
                         });
                         bullet[me].onEnd = function() {
-                            b.explosion(this.position, 160 * (tech.isShotgunReversed ? 1.6 : 1) + (Math.random() - 0.5) * 40); //makes bullet do explosive damage at end
+                            b.explosion(this.position, 150 * (tech.isShotgunReversed ? 1.5 : 1) + (Math.random() - 0.5) * 40); //makes bullet do explosive damage at end
                         }
                         bullet[me].beforeDmg = function() {
                             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -4297,7 +4296,7 @@ const b = {
                 bullet[me].beforeDmg = function(who) {
                     mobs.statusStun(who, 180) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
                     if (tech.isIncendiary) {
-                        b.explosion(this.position, this.mass * 300); //makes bullet do explosive damage at end
+                        b.explosion(this.position, this.mass * 280); //makes bullet do explosive damage at end
                         this.endCycle = 0
                     }
                 };
@@ -4326,7 +4325,7 @@ const b = {
                     };
                     bullet[me].beforeDmg = function() {
                         if (tech.isIncendiary) {
-                            b.explosion(this.position, this.mass * 355 + 70 * Math.random()); //makes bullet do explosive damage at end
+                            b.explosion(this.position, this.mass * 320 + 70 * Math.random()); //makes bullet do explosive damage at end
                             this.endCycle = 0
                         }
                     };
@@ -4359,7 +4358,7 @@ const b = {
                     };
                     bullet[me].beforeDmg = function() {
                         if (tech.isIncendiary) {
-                            b.explosion(this.position, this.mass * 355 + 70 * Math.random()); //makes bullet do explosive damage at end
+                            b.explosion(this.position, this.mass * 320 + 70 * Math.random()); //makes bullet do explosive damage at end
                             this.endCycle = 0
                         }
                     };
@@ -5088,8 +5087,8 @@ const b = {
                 }
                 //look for closest mob in player's LoS
                 const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
-                const length = tech.isLargeHarpoon ? 1 + 0.15 * Math.sqrt(this.ammo) : 1
-                const totalCycles = 8 * (tech.isFilament ? 1 + Math.min(75, this.ammo) / 33 : 1)
+                const length = tech.isLargeHarpoon ? 1 + 0.09 * Math.sqrt(this.ammo) : 1
+                const totalCycles = 7 * (tech.isFilament ? 1 + 0.009 * Math.min(100, this.ammo) : 1)
                 if (input.down) {
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
@@ -5104,10 +5103,10 @@ const b = {
                     b.harpoon(where, closest.target, m.angle, length, false, 15)
                     m.fireCDcycle = m.cycle + 40 * b.fireCDscale; // cool down
                 } else if (tech.extraHarpoons) {
-                    const range = 560 * (tech.isFilament ? 1 + this.ammo / 33 : 1)
+                    const range = 450 * (tech.isFilament ? 1 + Math.min(100, this.ammo) / 100 : 1)
                     let targetCount = 0
                     for (let i = 0, len = mob.length; i < len; ++i) {
-                        if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
+                        if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
                             const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                             const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
                             if (dist < range && dot > 0.7) { //target closest mob that player is looking at and isn't too close to target

@@ -2906,32 +2906,10 @@
                 },
                 requires: "at least 3 research and not superdeterminism",
                 effect() {
-                    tech.renormalization = true; //40% set in regularization tech
+                    tech.renormalization = true;
                 },
                 remove() {
                     tech.renormalization = false;
-                }
-            },
-            {
-                name: "regularization",
-                description: `increase <strong>renormalization</strong> chance by <strong>10%</strong><br>use ${powerUps.orb.research(6)}`,
-                maxCount: 3,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.renormalization && (powerUps.research.count > 5 || build.isExperimentSelection)
-                },
-                requires: "renormalization",
-                effect() {
-                    tech.regularization += 0.1
-                    for (let i = 0; i < 6; i++) {
-                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-                    }
-                    for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 120 * (Math.random() - 0.5), m.pos.y + 120 * (Math.random() - 0.5), "research", false);
-                },
-                remove() {
-                    tech.regularization = 0.4
                 }
             },
             {
@@ -4173,7 +4151,7 @@
             },
             {
                 name: "super sized",
-                description: `increase <strong>super ball</strong> radius by <strong>17%</strong><br>increases <strong class='color-d'>damage</strong> by about <strong>35%</strong>`,
+                description: `increase <strong>super ball</strong> radius by <strong>15%</strong><br>increases <strong class='color-d'>damage</strong> by about <strong>30%</strong>`,
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -4184,7 +4162,7 @@
                 },
                 requires: "super balls",
                 effect() {
-                    tech.bulletSize += 0.17
+                    tech.bulletSize += 0.15
                 },
                 remove() {
                     tech.bulletSize = 1;
@@ -5020,7 +4998,7 @@
             },
             {
                 name: "filament",
-                description: "increase the <strong>length</strong> of your <strong>harpoon</strong>'s <strong>rope</strong><br>by <strong>3%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
+                description: "increase the <strong>length</strong> of your <strong>harpoon</strong>'s <strong>rope</strong><br>by <strong>1%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5039,7 +5017,7 @@
             },
             {
                 name: "unaaq",
-                description: "increase the <strong>length</strong> of your <strong>harpoon</strong><br>by <strong>15%</strong> of the square root of its <strong class='color-ammo'>ammo</strong>",
+                description: "increase the <strong>length</strong> of your <strong>harpoon</strong><br>by <strong>10%</strong> of the square root of its <strong class='color-ammo'>ammo</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5073,7 +5051,7 @@
                 },
                 remove() {
                     tech.isHarpoonPowerUp = false
-                    tech.harpoonDensity = 0.005
+                    tech.harpoonDensity = 0.006
                 }
             },
             {
@@ -8189,11 +8167,9 @@
         isMineStun: null,
         isSmartRadius: null,
         isFilament: null,
-        // isSpear: null,
         isLargeHarpoon: null,
         extraHarpoons: null,
         ammoCap: null,
-        regularization: null,
         isHarpoonPowerUp: null,
         harpoonDensity: null
     }
