@@ -1,13 +1,6 @@
 ******************************************************** NEXT PATCH **************************************************
 
-harpoon damage is increased 30%
-picks up power ups from farther away
-harpoon's range has been reduced about 20%
-filament and unaaq require about 40% more ammo for the same effect
-harpoon density lowers when it retracts
-  so it doesn't do as much damage on retracting
 
-more bug fixes
 
 ******************************************************** TODO ********************************************************
 
@@ -34,6 +27,8 @@ harpoon
   post launch tracking: more airFriction, more thrust, harder turning
     if no target found slow down and aim much better?
 harpoon tech
+  crouch fire grapple hook
+    attaches to map at long range and pulls player?
   tech that buffs alt fire:
     remove the string, all shots are alt fire
     alt fire has a 50% chance to not use ammo?

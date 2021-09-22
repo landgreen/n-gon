@@ -6324,7 +6324,6 @@
                 requires: "",
                 effect() {
                     m.shipMode()
-                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 remove() {}
             },
@@ -6348,7 +6347,6 @@
                             simulation.trails()
                         }
                     }, 20000); //every 20 seconds
-                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
 
                 },
                 remove() {
@@ -6375,7 +6373,6 @@
                             }
                         }
                     }, 5000); //every 5 seconds
-                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 interval: undefined,
                 remove() {
@@ -6403,7 +6400,6 @@
                         m.transX += (m.transSmoothX - m.transX) * 0.07;
                         m.transY += (m.transSmoothY - m.transY) * 0.07;
                     }
-                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 remove() {
                     if (this.count > 0) m.look = m.lookDefault()
@@ -6432,7 +6428,6 @@
                             }
                         }
                     }, 1000); //every 1 seconds
-                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 interval: undefined,
                 remove() {
@@ -6453,7 +6448,6 @@
                 requires: "",
                 effect() {
                     tech.deathSpawns = 0.2
-                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 remove() {
                     tech.deathSpawns = 0
@@ -6473,7 +6467,6 @@
                 requires: "",
                 effect() {
                     tech.wimpExperiment = 5
-                    for (let i = 0; i < 7; i++) tech.giveTech("undefined")
                 },
                 remove() {
                     tech.wimpExperiment = 0

@@ -590,10 +590,15 @@ const build = {
             }
             removeOne();
         }
+        let hasExperimentalMode = false
         if (!simulation.isCheating) {
             for (let i = 0, len = tech.tech.length; i < len; i++) {
-                if (tech.tech[i].count > 0 && !tech.tech[i].isLore && !tech.tech[i].isExperimentalMode) {
-                    simulation.isCheating = true;
+                if (tech.tech[i].count > 0) {
+                    if (tech.tech[i].isExperimentalMode) {
+                        hasExperimentalMode = true
+                    } else if (!tech.tech[i].isLore) {
+                        simulation.isCheating = true;
+                    }
                 }
             }
             if (b.inventory.length !== 0 || m.fieldMode !== 0) simulation.isCheating = true;
@@ -611,6 +616,9 @@ const build = {
         } else { //if you have no tech (not cheating) remove all power ups that might have spawned from tech
             for (let i = 0; i < powerUp.length; ++i) Matter.Composite.remove(engine.world, powerUp[i]);
             powerUp = [];
+            if (hasExperimentalMode) {
+                for (let i = 0; i < 7; i++) tech.giveTech("undefined")
+            }
         }
         document.body.style.cursor = "none";
         document.body.style.overflow = "hidden"
