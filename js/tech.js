@@ -6092,6 +6092,26 @@
                 }
             },
             {
+                name: "pacifist",
+                description: "if you <strong>kill</strong> a <strong>mob</strong> lose <strong>2%</strong> max <strong class='color-h'>health</strong><br>spawn <strong>2</strong> <strong class='color-m'>tech</strong> at the <strong>end</strong> of every level",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" && !tech.removeMaxHealthOnKill
+                },
+                requires: "metamaterial cloaking, not -pacifist-",
+                effect() {
+                    tech.removeMaxHealthOnKill = 0.02
+                    for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false)
+                },
+                remove() {
+                    tech.removeMaxHealthOnKill = 0
+                }
+            },
+            {
                 name: "ambush",
                 description: "metamaterial cloaking field <strong class='color-d'>damage</strong> effect<br>is increased from <span style = 'text-decoration: line-through;'>300%</span> to <strong>600%</strong>",
                 isFieldTech: true,
@@ -6472,6 +6492,25 @@
                     tech.wimpExperiment = 0
                 }
             },
+            {
+                name: "-pacifist-",
+                description: "<strong style='color: #f55;'>experiment:</strong> if you <strong>kill</strong> a <strong>mob</strong><br>lose <strong>1%</strong> max <strong class='color-h'>health</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isBadRandomOption: true,
+                isExperimentalMode: true,
+                allowed() {
+                    return build.isExperimentSelection
+                },
+                requires: "",
+                effect() {
+                    tech.removeMaxHealthOnKill = 0.01
+                },
+                remove() {
+                    tech.removeMaxHealthOnKill = 0
+                }
+            },
             //************************************************** 
             //************************************************** JUNK
             //************************************************** tech
@@ -6494,6 +6533,25 @@
             //     },
             //     remove() {}
             // },
+            {
+                name: "bounce",
+                description: "you bounce off things.  It's annoying, but not that bad.",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    player.restitution = 0.9
+                },
+                remove() {
+                    if (this.count) player.restitution = 0
+                }
+            },
             {
                 name: "true colors",
                 description: `set all power ups to their real world colors`,
@@ -8164,5 +8222,6 @@
         extraHarpoons: null,
         ammoCap: null,
         isHarpoonPowerUp: null,
-        harpoonDensity: null
+        harpoonDensity: null,
+        removeMaxHealthOnKill: null
     }

@@ -1,8 +1,11 @@
 ******************************************************** NEXT PATCH **************************************************
 
-
+tech: pacifist - if you kill a mob lose 2% max health, but gain 2 tech at the end of every level
+junk tech: bounce - you bounce, it's kinda annoying
 
 ******************************************************** TODO ********************************************************
+
+experiment: like lose 1% max health every time you kill a mob?
 
 JUNK tech: planetesimals game inside n-gon
 https://codepen.io/lilgreenland/pen/jrMvaB?editors=0010

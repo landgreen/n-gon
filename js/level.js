@@ -108,6 +108,9 @@ const level = {
             m.eyeFillColor = m.fieldMeterColor
             simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
         }
+        if (tech.removeMaxHealthOnKill > 0.01) {
+            for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false)
+        }
     },
     custom() {},
     customTopLayer() {},

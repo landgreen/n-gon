@@ -1140,6 +1140,17 @@ const mobs = {
                         bullet[bullet.length - 1].endCycle = simulation.cycle + 840 //14 seconds
                         this.leaveBody = false; // no body since it turned into the bot
                     }
+                    if (tech.removeMaxHealthOnKill) {
+                        if (tech.isEnergyHealth) {
+                            if (m.maxEnergy > tech.removeMaxHealthOnKill) {
+                                tech.healMaxEnergyBonus -= tech.removeMaxHealthOnKill
+                                m.setMaxEnergy();
+                            }
+                        } else if (m.maxHealth > tech.removeMaxHealthOnKill) {
+                            tech.extraMaxHealth -= tech.removeMaxHealthOnKill //decrease max health
+                            m.setMaxHealth();
+                        }
+                    }
                 } else if (tech.isShieldAmmo && this.shield && !this.isExtraShield) {
                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                     if (Math.random() < 0.4) {
