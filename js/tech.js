@@ -194,26 +194,16 @@
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.17 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
+            return (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.17 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
         },
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
                 tech.is100Duplicate = false
-
-                const range = 550
+                const range = 500
                 for (let i = 0, len = 8; i < len; i++) {
                     const angle = 2 * Math.PI * i / len
                     spawn.randomLevelBoss(m.pos.x + range * Math.cos(angle), m.pos.y + range * Math.sin(angle), spawn.nonCollideBossList);
                 }
-
-                // spawn.randomLevelBoss(m.pos.x + range, m.pos.y, spawn.nonCollideBossList);
-                // spawn.randomLevelBoss(m.pos.x, m.pos.y + range, spawn.nonCollideBossList);
-                // spawn.randomLevelBoss(m.pos.x - range, m.pos.y, spawn.nonCollideBossList);
-                // spawn.randomLevelBoss(m.pos.x, m.pos.y - range, spawn.nonCollideBossList);
-                // spawn.randomLevelBoss(m.pos.x + range, m.pos.y + range, spawn.nonCollideBossList);
-                // spawn.randomLevelBoss(m.pos.x + range, m.pos.y - range, spawn.nonCollideBossList);
-                // spawn.randomLevelBoss(m.pos.x - range, m.pos.y + range, spawn.nonCollideBossList);
-                // spawn.randomLevelBoss(m.pos.x - range, m.pos.y - range, spawn.nonCollideBossList);
             }
         },
         setTechFrequency(name, frequency) {
@@ -480,7 +470,7 @@
                 allowed() {
                     return !tech.isEnergyNoAmmo && !tech.isEnergyHealth
                 },
-                requires: "exciton-lattice, not mass-energy",
+                requires: "not exciton-lattice, mass-energy",
                 effect: () => {
                     tech.isAmmoFromHealth = true;
                 },
@@ -748,7 +738,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb || tech.isIceField || tech.isIceShot || tech.relayIce || tech.blockingIce > 1
+                    return m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("wave beam") || tech.isNeutronBomb || tech.isIceField || tech.isIceShot || tech.relayIce || tech.blockingIce > 1 || tech.isWormShot || tech.foamBotCount > 1
                 },
                 requires: "drones, spores, missiles, foam, wave beam, neutron bomb, ice IX",
                 effect() {
@@ -1634,7 +1624,7 @@
                 allowed() {
                     return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
                 },
-                requires: "mass driver, not pilot wave not tokamak",
+                requires: "mass driver, not pilot wave, tokamak",
                 effect() {
                     tech.isAddBlockMass = true
                 },
@@ -2620,7 +2610,7 @@
                 allowed() {
                     return m.maxHealth > 1;
                 },
-                requires: "health above 100",
+                requires: "max health above 100",
                 effect() {
                     tech.isAcidDmg = true;
                 },
@@ -2768,11 +2758,11 @@
                 requires: "anthropic principle, below 66% duplication chance",
                 effect() {
                     tech.isAnthropicTech = true
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                 },
                 remove() {
                     tech.isAnthropicTech = false
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                 }
             },
             {
@@ -2821,7 +2811,7 @@
                 allowed() {
                     return !tech.isResearchReality && !tech.isSwitchReality
                 },
-                requires: "Ψ(t) collapse, many-worlds",
+                requires: "not Ψ(t) collapse, many-worlds",
                 effect() {
                     tech.isCollisionRealitySwitch = true;
                     level.difficultyDecrease(simulation.difficultyMode * 2)
@@ -2862,7 +2852,7 @@
                 allowed() {
                     return !tech.isSwitchReality && !tech.isCollisionRealitySwitch && !tech.isJunkResearch
                 },
-                requires: "many-worlds, non-unitary, not pseudoscience",
+                requires: "not many-worlds, non-unitary, pseudoscience",
                 effect() {
                     tech.isResearchReality = true;
                     for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + Math.random() * 60, m.pos.y + Math.random() * 60, "research", false);
@@ -3088,12 +3078,12 @@
                 requires: "below 100% duplication chance",
                 effect() {
                     tech.duplicateChance += 0.1
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                     tech.addJunkTechToPool(30)
                 },
                 remove() {
                     tech.duplicateChance = 0
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                     if (this.count > 1) tech.removeJunkTechFromPool(30)
                 }
             },
@@ -3110,11 +3100,11 @@
                 requires: "below 100% duplication chance",
                 effect: () => {
                     tech.isStimulatedEmission = true
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                 },
                 remove() {
                     tech.isStimulatedEmission = false
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                 }
             },
             {
@@ -3130,11 +3120,11 @@
                 requires: "below 100% duplication chance",
                 effect: () => {
                     tech.isPowerUpsVanish = true
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                 },
                 remove() {
                     tech.isPowerUpsVanish = false
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                 }
             },
             {
@@ -3150,11 +3140,11 @@
                 requires: "below 100% duplication chance, not determinism",
                 effect() {
                     tech.isCancelDuplication = true //search for tech.cancelCount  to balance
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                 },
                 remove() {
                     tech.isCancelDuplication = false
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                 }
             },
             {
@@ -3324,7 +3314,7 @@
                 allowed() {
                     return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.research.count > 1
                 },
-                requires: "at least 2 research, not super determinism",
+                requires: "some duplication, not super determinism",
                 effect: () => {
                     powerUps.research.changeRerolls(-2)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2<br>${powerUps.research.count}`)
@@ -3992,7 +3982,7 @@
                 allowed() {
                     return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot && !tech.isNeedleShot
                 },
-                requires: "shotgun, not nail-shot, foam-shot, worm-shot, ice-shot",
+                requires: "shotgun, not nail-shot, foam-shot, worm-shot, ice-shot, needle-shot",
                 effect() {
                     tech.isSlugShot = true;
                 },
@@ -4011,7 +4001,7 @@
                 allowed() {
                     return tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isSlugShot && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot && !tech.isNeedleShot
                 },
-                requires: "shotgun, not incendiary, slug, foam-shot, worm-shot, ice-shot",
+                requires: "shotgun, not incendiary, slug, foam-shot, worm-shot, ice-shot, needle-shot",
                 effect() {
                     tech.isNailShot = true;
                 },
@@ -4049,7 +4039,7 @@
                 allowed() {
                     return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isSlugShot && !tech.isIceShot && !tech.isFoamShot && !tech.isNeedleShot
                 },
-                requires: "shotgun, not incendiary, nail-shot, slug, foam-shot, ice-shot",
+                requires: "shotgun, not incendiary, nail-shot, slug, foam-shot, ice-shot, needle-shot",
                 effect() {
                     tech.isWormShot = true;
                 },
@@ -4068,7 +4058,7 @@
                 allowed() {
                     return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isSlugShot && !tech.isIceShot && !tech.isWormShot && !tech.isNeedleShot
                 },
-                requires: "shotgun, not incendiary, nail-shot, slug, worm-shot, ice-shot",
+                requires: "shotgun, not incendiary, nail-shot, slug, worm-shot, ice-shot, needle-shot",
                 effect() {
                     tech.isFoamShot = true;
                 },
@@ -4133,7 +4123,7 @@
                 allowed() {
                     return tech.haveGunCheck("super balls") && tech.missileCount === 1 && !tech.superBallDelay
                 },
-                requires: "super balls, but not super duper or supertemporal",
+                requires: "super balls, but not MIRV or supertemporal",
                 effect() {
                     tech.oneSuperBall = true;
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4352,7 +4342,7 @@
                 allowed() {
                     return tech.haveGunCheck("missiles")
                 },
-                requires: "missiles",
+                requires: "missile gun",
                 effect() {
                     tech.missileBotCount++;
                     b.missileBot();
@@ -4498,7 +4488,7 @@
                 allowed() {
                     return tech.haveGunCheck("mine")
                 },
-                requires: "mines, not mine reclamation",
+                requires: "mines",
                 effect() {
                     tech.isMineDrop = true;
                     if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0)
@@ -4577,7 +4567,7 @@
                 allowed() {
                     return tech.haveGunCheck("spores")
                 },
-                requires: "spores",
+                requires: "spore gun",
                 effect() {
                     tech.isSporeGrowth = true
                 },
@@ -5007,7 +4997,7 @@
                 allowed() {
                     return tech.haveGunCheck("harpoon")
                 },
-                requires: "harpoon, not spear",
+                requires: "harpoon",
                 effect() {
                     tech.isFilament = true;
                 },
@@ -5227,7 +5217,7 @@
                 allowed() {
                     return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.laserBotCount > 1) && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
                 },
-                requires: "laser, not wide beam, diffuse beam, pulse, or slow light",
+                requires: "laser, not diffuse beam, pulse, or slow light",
                 effect() {
                     tech.laserReflections += 2;
                 },
@@ -6051,6 +6041,51 @@
                 }
             },
             {
+                name: "no-cloning theorem",
+                description: `<strong>42%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>if you <strong>kill</strong> a <strong>mob</strong> lose <strong>1%</strong> <strong class='color-dup'>duplication</strong> chance`,
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking") && tech.duplicationChance() < 1
+                },
+                requires: "metamaterial cloaking, below 100% duplication chance",
+                effect() {
+                    tech.cloakDuplication = 0.42
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
+
+                },
+                remove() {
+                    tech.cloakDuplication = 0
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
+                }
+            },
+            {
+                name: "symbiosis",
+                description: "if you <strong>kill</strong> a <strong>mob</strong> lose <strong>2%</strong> max <strong class='color-h'>health</strong><br>at the <strong>start</strong> of each level spawn <strong>2</strong> <strong class='color-m'>tech</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking") && !tech.removeMaxHealthOnKill
+                },
+                requires: "metamaterial cloaking, not -symbiosis-",
+                effect() {
+                    tech.removeMaxHealthOnKill = 0.02
+                    tech.isSpawnExitTech = true
+                    // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false);  //start
+                    // for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false)  //exit
+                },
+                remove() {
+                    tech.removeMaxHealthOnKill = 0
+                    tech.isSpawnExitTech = false
+                }
+            },
+            {
                 name: "boson composite",
                 description: "<strong>intangible</strong> to <strong class='color-block'>blocks</strong> and mobs while <strong class='color-cloaked'>cloaked</strong><br>passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
@@ -6089,26 +6124,6 @@
                 },
                 remove() {
                     tech.isCloakStun = false;
-                }
-            },
-            {
-                name: "pacifist",
-                description: "if you <strong>kill</strong> a <strong>mob</strong> lose <strong>2%</strong> max <strong class='color-h'>health</strong><br>spawn <strong>2</strong> <strong class='color-m'>tech</strong> at the <strong>end</strong> of every level",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" && !tech.removeMaxHealthOnKill
-                },
-                requires: "metamaterial cloaking, not -pacifist-",
-                effect() {
-                    tech.removeMaxHealthOnKill = 0.02
-                    for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false)
-                },
-                remove() {
-                    tech.removeMaxHealthOnKill = 0
                 }
             },
             {
@@ -6245,17 +6260,17 @@
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "wormhole" && (build.isExperimentSelection || powerUps.research.count > 3) && tech.duplicationChance() < 1
                 },
-                requires: "wormhole,below 100% duplication chance",
+                requires: "wormhole, below 100% duplication chance",
                 effect() {
                     tech.wormDuplicate = 0.14
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                     for (let i = 0; i < 4; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                     }
                 },
                 remove() {
                     tech.wormDuplicate = 0
-                    powerUps.setDo(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
                     if (this.count > 0) powerUps.research.changeRerolls(4)
                 }
             },
@@ -6493,8 +6508,8 @@
                 }
             },
             {
-                name: "-pacifist-",
-                description: "<strong style='color: #f55;'>experiment:</strong> if you <strong>kill</strong> a <strong>mob</strong><br>lose <strong>1%</strong> max <strong class='color-h'>health</strong>",
+                name: "-symbiosis-",
+                description: "<strong style='color: #f55;'>experiment:</strong> if you <strong>kill</strong> a <strong>mob</strong><br>lose <strong>0.2%</strong> max <strong class='color-h'>health</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -6505,7 +6520,7 @@
                 },
                 requires: "",
                 effect() {
-                    tech.removeMaxHealthOnKill = 0.01
+                    tech.removeMaxHealthOnKill = 0.002
                 },
                 remove() {
                     tech.removeMaxHealthOnKill = 0
@@ -6552,6 +6567,117 @@
                     if (this.count) player.restitution = 0
                 }
             },
+            {
+                name: "mouth",
+                description: "mobs have a non functional mouth",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    mobs.draw = () => {
+                        ctx.lineWidth = 2;
+                        let i = mob.length;
+                        while (i--) {
+                            ctx.beginPath();
+                            const vertices = mob[i].vertices;
+                            ctx.moveTo(vertices[0].x, vertices[0].y);
+                            for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+                            ctx.quadraticCurveTo(mob[i].position.x, mob[i].position.y, vertices[0].x, vertices[0].y);
+                            ctx.fillStyle = mob[i].fill;
+                            ctx.strokeStyle = mob[i].stroke;
+                            ctx.fill();
+                            ctx.stroke();
+                        }
+                    }
+                },
+                remove() {
+                    mobs.draw = () => {
+                        ctx.lineWidth = 2;
+                        let i = mob.length;
+                        while (i--) {
+                            ctx.beginPath();
+                            const vertices = mob[i].vertices;
+                            ctx.moveTo(vertices[0].x, vertices[0].y);
+                            for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+                            ctx.lineTo(vertices[0].x, vertices[0].y);
+                            ctx.fillStyle = mob[i].fill;
+                            ctx.strokeStyle = mob[i].stroke;
+                            ctx.fill();
+                            ctx.stroke();
+                        }
+                    }
+                }
+            },
+            {
+                name: "all-stars",
+                description: "make all mobs look like stars",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    mobs.draw = () => {
+                        ctx.lineWidth = 2;
+                        let i = mob.length;
+                        while (i--) {
+                            ctx.beginPath();
+                            const vertices = mob[i].vertices;
+                            ctx.moveTo(vertices[0].x, vertices[0].y);
+                            for (let j = 1, len = vertices.length; j < len; ++j) {
+                                ctx.quadraticCurveTo(mob[i].position.x, mob[i].position.y, vertices[j].x, vertices[j].y);
+                            }
+                            ctx.quadraticCurveTo(mob[i].position.x, mob[i].position.y, vertices[0].x, vertices[0].y);
+                            ctx.fillStyle = mob[i].fill;
+                            ctx.strokeStyle = mob[i].stroke;
+                            ctx.fill();
+                            ctx.stroke();
+                        }
+                    }
+                },
+                remove() {
+                    mobs.draw = () => {
+                        ctx.lineWidth = 2;
+                        let i = mob.length;
+                        while (i--) {
+                            ctx.beginPath();
+                            const vertices = mob[i].vertices;
+                            ctx.moveTo(vertices[0].x, vertices[0].y);
+                            for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+                            ctx.lineTo(vertices[0].x, vertices[0].y);
+                            ctx.fillStyle = mob[i].fill;
+                            ctx.strokeStyle = mob[i].stroke;
+                            ctx.fill();
+                            ctx.stroke();
+                        }
+                    }
+                }
+            },
+            // draw() {
+            //     ctx.lineWidth = 2;
+            //     let i = mob.length;
+            //     while (i--) {
+            //         ctx.beginPath();
+            //         const vertices = mob[i].vertices;
+            //         ctx.moveTo(vertices[0].x, vertices[0].y);
+            //         for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+            //         ctx.lineTo(vertices[0].x, vertices[0].y);
+            //         ctx.fillStyle = mob[i].fill;
+            //         ctx.strokeStyle = mob[i].stroke;
+            //         ctx.fill();
+            //         ctx.stroke();
+            //     }
+            // },
             {
                 name: "true colors",
                 description: `set all power ups to their real world colors`,
@@ -8223,5 +8349,7 @@
         ammoCap: null,
         isHarpoonPowerUp: null,
         harpoonDensity: null,
-        removeMaxHealthOnKill: null
+        removeMaxHealthOnKill: null,
+        isSpawnExitTech: null,
+        cloakDuplication: null
     }

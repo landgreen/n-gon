@@ -89,7 +89,7 @@ const powerUps = {
     totalPowerUps: 0, //used for tech that count power ups at the end of a level
     lastTechIndex: null,
     do() {},
-    setDo() {
+    setDupChance() {
         if (tech.duplicationChance() > 0 || tech.isAnthropicTech) {
             if (tech.isPowerUpsVanish) {
                 powerUps.do = powerUps.doDuplicatesVanish
@@ -319,16 +319,20 @@ const powerUps = {
                 }
             }
             if (tech.isRerollBots) {
+                let delay = 0
                 for (const cost = 2 + Math.floor(0.2 * b.totalBots()); powerUps.research.count > cost - 1; powerUps.research.count -= cost) {
-                    b.randomBot()
-                    if (tech.renormalization) {
-                        for (let i = 0; i < cost; i++) {
-                            if (Math.random() < 0.4) {
-                                m.fieldCDcycle = m.cycle + 20;
-                                powerUps.spawn(m.pos.x, m.pos.y, "research");
+                    delay += 500
+                    setTimeout(() => {
+                        b.randomBot()
+                        if (tech.renormalization) {
+                            for (let i = 0; i < cost; i++) {
+                                if (Math.random() < 0.4) {
+                                    m.fieldCDcycle = m.cycle + 20;
+                                    powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
+                                }
                             }
                         }
-                    }
+                    }, delay);
                 }
                 for (let i = 0, len = tech.tech.length; i < len; i++) {
                     if (tech.tech[i].name === "bot fabrication") tech.tech[i].description = `if you collect ${powerUps.orb.research(2 + Math.floor(0.2 * b.totalBots()))}use them to build a<br>random <strong class='color-bot'>bot</strong>  <em>(+1 cost every 5 bots)</em>`
@@ -472,21 +476,39 @@ const powerUps = {
                     }
                 }
             } else { //give ammo to all guns in inventory
+                let textLog = ""
                 for (let i = 0, len = b.inventory.length; i < len; i++) {
                     const target = b.guns[b.inventory[i]]
                     if (target.ammo !== Infinity) {
                         if (tech.ammoCap) {
                             const ammoAdded = Math.ceil(target.ammoPack * 0.45 * tech.ammoCap) //0.45 is average
                             target.ammo = ammoAdded
-                            simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}`)
+                            textLog += `${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}<br>`
                         } else {
                             const ammoAdded = Math.ceil((0.45 * Math.random() + 0.45 * Math.random()) * target.ammoPack) //Math.ceil(Math.random() * target.ammoPack)
                             target.ammo += ammoAdded
-                            simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
+                            textLog += `${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}<br>`
                         }
                     }
                 }
+                simulation.makeTextLog(textLog)
             }
+            // } else { //give ammo to all guns in inventory
+            //     for (let i = 0, len = b.inventory.length; i < len; i++) {
+            //         const target = b.guns[b.inventory[i]]
+            //         if (target.ammo !== Infinity) {
+            //             if (tech.ammoCap) {
+            //                 const ammoAdded = Math.ceil(target.ammoPack * 0.45 * tech.ammoCap) //0.45 is average
+            //                 target.ammo = ammoAdded
+            //                 simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}`)
+            //             } else {
+            //                 const ammoAdded = Math.ceil((0.45 * Math.random() + 0.45 * Math.random()) * target.ammoPack) //Math.ceil(Math.random() * target.ammoPack)
+            //                 target.ammo += ammoAdded
+            //                 simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
+            //             }
+            //         }
+            //     }
+            // }
             simulation.updateGunHUD();
         }
     },

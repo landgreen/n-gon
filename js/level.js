@@ -19,8 +19,8 @@ const level = {
             // b.giveGuns("harpoon")
             // tech.giveTech("toggling harpoon")
             // tech.giveTech("filament")
-            // tech.giveTech("isotropic radiator")
-            // tech.giveTech("necrophage")
+            // tech.giveTech("mouth")
+            // tech.giveTech("all-stars")
             // for (let i = 0; i < 3; i++) tech.giveTech("super sized")
             // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
 
@@ -108,8 +108,9 @@ const level = {
             m.eyeFillColor = m.fieldMeterColor
             simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
         }
-        if (tech.removeMaxHealthOnKill > 0.01) {
-            for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false)
+        if (tech.isSpawnExitTech) {
+            // for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false)   //exit
+            for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false); //start
         }
     },
     custom() {},
@@ -2291,14 +2292,13 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
-        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         spawn.starter(1900, -500, 200) //big boy
         // spawn.blockGroup(1900, -500)
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
 
-        // spawn.snakeSuckBoss(1900, -500)
         // spawn.grenadier(1900, -500)
         // spawn.sneaker(1900, -500, 200)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
@@ -2316,7 +2316,7 @@ const level = {
         // spawn.nodeGroup(1200, -500, "grenadier")
         // spawn.nodeGroup(1800, -500, "grenadier")
         // spawn.nodeGroup(1200, 0, "grenadier")
-        // spawn.snakeBoss(1200, -500)
+        spawn.snakeBoss(1200, -500)
         // spawn.suckerBoss(2900, -500)
         // spawn.randomMob(1600, -500)
     },
@@ -4365,15 +4365,15 @@ const level = {
             Composite.add(engine.world, cons[cons.length - 1]);
 
             spawn.bodyRect(-2700, 1150, 100, 160, 1, spawn.propsSlide); //weight
-            spawn.bodyRect(-2550, 1150, 200, 100, 1, spawn.propsSlide); //weight
-            spawn.bodyRect(-2775, 1300, 400, 100, 1, spawn.propsHoist); //hoist
+            spawn.bodyRect(-2550, 1200, 150, 150, 1, spawn.propsSlide); //weight
+            spawn.bodyRect(-2763, 1300, 350, 100, 1, spawn.propsHoist); //hoist
             cons[cons.length] = Constraint.create({
                 pointA: {
                     x: -2575,
                     y: 150
                 },
                 bodyB: body[body.length - 1],
-                stiffness: 0.0005,
+                stiffness: 0.0004,
                 length: 566
             });
             Composite.add(engine.world, cons[cons.length - 1]);

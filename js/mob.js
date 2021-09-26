@@ -362,7 +362,7 @@ const mobs = {
             seePlayerByDistOrLOS() {
                 if (!(simulation.cycle % this.seePlayerFreq)) {
                     if (
-                        (this.distanceToPlayer2() < this.seeAtDistance2 || (Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 && Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0)) &&
+                        (this.distanceToPlayer2() < this.seeAtDistance2 || (Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0)) && //&& Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
                         !m.isCloak
                     ) {
                         this.foundPlayer();
@@ -1151,6 +1151,10 @@ const mobs = {
                             m.setMaxHealth();
                         }
                     }
+                    if (tech.cloakDuplication) {
+                        tech.cloakDuplication -= 0.01
+                        powerUps.setDupChance(); //needed after adjusting duplication chance
+                    }
                 } else if (tech.isShieldAmmo && this.shield && !this.isExtraShield) {
                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                     if (Math.random() < 0.4) {
@@ -1242,29 +1246,67 @@ const mobs = {
             replace(i) {
                 //if there are too many bodies don't turn into blocks to help performance
                 if (this.leaveBody && body.length < 40 && this.mass < 200 && this.radius > 18) {
-                    const len = body.length;
-                    const v = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //might help with vertex collision issue, not sure
-                    body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v);
-                    Matter.Body.setVelocity(body[len], Vector.mult(this.velocity, 0.5));
-                    Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
-                    body[len].collisionFilter.category = cat.body;
-                    body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
-                    // if (body[len].mass > 10 || 45 + 10 * Math.random() < body.length) {
-                    //   body[len].collisionFilter.mask = cat.player | cat.bullet | cat.mob | cat.mobBullet;
-                    // }
-                    body[len].classType = "body";
-                    Composite.add(engine.world, body[len]); //add to world
+                    let v = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //might help with vertex collision issue, not sure
+                    if (v.length > 5 && body.length < 35 && Math.random() < 0.5) {
+                        const cutPoint = 3 + Math.floor((v.length - 6) * Math.random()) //Math.floor(v.length / 2)
+                        const v2 = v.slice(0, cutPoint + 1)
+                        v = v.slice(cutPoint - 1)
+                        const len = body.length;
+                        body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v2);
+                        Matter.Body.setVelocity(body[len], Vector.mult(this.velocity, 0.5));
+                        Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
+                        body[len].collisionFilter.category = cat.body;
+                        body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+                        body[len].classType = "body";
+                        Composite.add(engine.world, body[len]); //add to world
 
-                    //large mobs shrink so they don't block paths
-                    if (body[len].mass > 9) {
-                        const shrink = function(that, massLimit) {
-                            if (that.mass > massLimit) {
-                                const scale = 0.95;
-                                Matter.Body.scale(that, scale, scale);
-                                setTimeout(shrink, 20, that, massLimit);
-                            }
-                        };
-                        shrink(body[len], 7 + 4 * Math.random())
+                        const len2 = body.length;
+                        body[len2] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v);
+                        Matter.Body.setVelocity(body[len2], Vector.mult(this.velocity, 0.5));
+                        Matter.Body.setAngularVelocity(body[len2], this.angularVelocity);
+                        body[len2].collisionFilter.category = cat.body;
+                        body[len2].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+                        // if (body[len].mass > 10 || 45 + 10 * Math.random() < body.length) {
+                        //   body[len].collisionFilter.mask = cat.player | cat.bullet | cat.mob | cat.mobBullet;
+                        // }
+                        body[len2].classType = "body";
+                        Composite.add(engine.world, body[len2]); //add to world
+
+                        //large mobs shrink so they don't block paths
+                        if (body[len].mass + body[len2].mass > 16) {
+                            const massLimit = 8 + 6 * Math.random()
+                            const shrink = function(that1, that2) {
+                                if (that1.mass + that2.mass > massLimit) {
+                                    const scale = 0.95;
+                                    Matter.Body.scale(that1, scale, scale);
+                                    Matter.Body.scale(that2, scale, scale);
+                                    setTimeout(shrink, 20, that1, that2);
+                                }
+                            };
+                            shrink(body[len], body[len2])
+                        }
+                    } else {
+                        const len = body.length;
+                        body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v);
+                        Matter.Body.setVelocity(body[len], Vector.mult(this.velocity, 0.5));
+                        Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
+                        body[len].collisionFilter.category = cat.body;
+                        body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+                        body[len].classType = "body";
+                        Composite.add(engine.world, body[len]); //add to world
+
+                        //large mobs shrink so they don't block paths
+                        if (body[len].mass > 9) {
+                            const massLimit = 7 + 4 * Math.random()
+                            const shrink = function(that) {
+                                if (that.mass > massLimit) {
+                                    const scale = 0.95;
+                                    Matter.Body.scale(that, scale, scale);
+                                    setTimeout(shrink, 20, that);
+                                }
+                            };
+                            shrink(body[len])
+                        }
                     }
                     Matter.Composite.remove(engine.world, this);
                     mob.splice(i, 1);

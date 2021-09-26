@@ -948,7 +948,7 @@ const m = {
         m.fieldHarmReduction = 1;
         m.isSneakAttack = false
         m.duplicateChance = 0
-        powerUps.setDo();
+        powerUps.setDupChance();
         m.grabPowerUpRange2 = 156000;
         m.blockingRecoil = 4;
         m.fieldRange = 155;
@@ -2219,9 +2219,9 @@ const m = {
                                 for (let i = 0; i < inPlayer.length; i++) {
                                     if (m.energy > 0) {
                                         if (inPlayer[i].shield) { //shields drain player energy
-                                            m.energy -= 0.014;
+                                            m.energy -= 0.016;
                                         } else {
-                                            m.energy -= 0.004;
+                                            m.energy -= 0.006;
                                         }
                                     }
                                 }
@@ -2590,7 +2590,7 @@ const m = {
             description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             effect: function() {
                 m.duplicateChance = 0.07
-                powerUps.setDo(); //needed after adjusting duplication chance
+                powerUps.setDupChance(); //needed after adjusting duplication chance
 
                 m.hold = function() {
                     // m.hole = {  //this is reset with each new field, but I'm leaving it here for reference

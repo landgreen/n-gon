@@ -917,7 +917,7 @@ const spawn = {
         me.onDamage = function(dmg) {
             if (Math.random() < 0.33 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
         }
-        me.damageReduction = 0.2 //me.damageReductionGoal
+        me.damageReduction = 0.18 //me.damageReductionGoal
         me.do = function() {
             // // this.armor();
             if (!m.isBodiesAsleep) {
@@ -990,7 +990,7 @@ const spawn = {
         me.onHit = function() { //run this function on hitting player
             this.explode();
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.22
         me.doAwake = function() {
             if (!m.isBodiesAsleep) {
                 // this.armor();
@@ -1107,7 +1107,7 @@ const spawn = {
                 if (!count % 2) powerUps.spawnRandomPowerUp(this.position.x, this.position.y) // higher then normal chance to drop heals and ammo
             }
         }
-        me.damageReduction = 0.25
+        me.damageReduction = 0.22
         me.do = function() {
             // this.armor();
             this.alwaysSeePlayer();
@@ -3070,7 +3070,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.isBoss = true;
 
-        Matter.Body.setDensity(me, 0.002 + 0.0001 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0025 + 0.00013 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
 
         me.stroke = "transparent"; //used for drawGhost
         me.seeAtDistance2 = 1500000;
@@ -3084,11 +3084,8 @@ const spawn = {
         me.friction = 0;
         me.frictionAir = 0.01;
         me.memory = Infinity;
-        // me.memory = 300;
-        // Matter.Body.setDensity(me, 0.0015); //extra dense //normal is 0.001
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         spawn.shield(me, x, y, 1);
-
 
         const len = Math.floor(Math.min(15, 3 + Math.sqrt(simulation.difficulty))) // simulation.difficulty = 40 on hard mode level 10
         const speed = (0.007 + 0.003 * Math.random() + 0.004 * Math.sqrt(simulation.difficulty))
@@ -3100,7 +3097,7 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.2
         me.do = function() {
             // this.armor();
             this.seePlayerCheckByDistance();
