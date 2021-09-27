@@ -194,7 +194,7 @@
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.17 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)
+            return Math.max(0, (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.17 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0))
         },
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
@@ -6042,18 +6042,18 @@
             },
             {
                 name: "no-cloning theorem",
-                description: `<strong>42%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>if you <strong>kill</strong> a <strong>mob</strong> lose <strong>1%</strong> <strong class='color-dup'>duplication</strong> chance`,
+                description: `<strong>50%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>mob</strong> <strong>dies</strong>, lose <strong>1%</strong> <strong class='color-dup'>duplication</strong> chance`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking") && tech.duplicationChance() < 1
+                    return (m.fieldUpgrades[m.fieldMode].name === "wormhole" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking") && tech.duplicationChance() < 1
                 },
-                requires: "metamaterial cloaking, below 100% duplication chance",
+                requires: "cloaking, wormhole or time dilation and below 100% duplication chance",
                 effect() {
-                    tech.cloakDuplication = 0.42
+                    tech.cloakDuplication = 0.5
                     powerUps.setDupChance(); //needed after adjusting duplication chance
 
                 },
@@ -6064,27 +6064,67 @@
             },
             {
                 name: "symbiosis",
-                description: "if you <strong>kill</strong> a <strong>mob</strong> lose <strong>2%</strong> max <strong class='color-h'>health</strong><br>at the <strong>start</strong> of each level spawn <strong>2</strong> <strong class='color-m'>tech</strong>",
+                description: "after a <strong>mob</strong> <strong>dies</strong>, lose <strong>1</strong> max <strong class='color-h'>health</strong><br><strong>bosses</strong> spawn <strong>2</strong> extra <strong class='color-m'>tech</strong> after they <strong>die</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking") && !tech.removeMaxHealthOnKill
+                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking")
                 },
-                requires: "metamaterial cloaking, not -symbiosis-",
+                requires: "metamaterial cloaking",
                 effect() {
-                    tech.removeMaxHealthOnKill = 0.02
-                    tech.isSpawnExitTech = true
-                    // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false);  //start
-                    // for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false)  //exit
+                    tech.isAddRemoveMaxHealth = true
                 },
                 remove() {
-                    tech.removeMaxHealthOnKill = 0
-                    tech.isSpawnExitTech = false
+                    tech.isAddRemoveMaxHealth = false
                 }
             },
+            // {
+            //     name: "symbiosis",
+            //     description: "after a <strong>mob</strong> <strong>dies</strong>, lose <strong>0.5</strong> max <strong class='color-h'>health</strong><br>after picking up <strong class='color-m'>tech</strong> gain <strong>10</strong> max <strong class='color-h'>health</strong>",
+            //     isFieldTech: true,
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 2,
+            //     frequencyDefault: 2,
+            //     allowed() {
+            //         return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking")
+            //     },
+            //     requires: "metamaterial cloaking",
+            //     effect() {
+            //         tech.isAddRemoveMaxHealth = true
+            //         tech.extraMaxHealth += 0.1 //increase max health
+            //         m.setMaxHealth();
+            //     },
+            //     remove() {
+            //         tech.isAddRemoveMaxHealth = false
+            //     }
+            // },
+            // {
+            //     name: "symbiosis",
+            //     description: "if a <strong>mob</strong> <strong>dies</strong>, lose <strong>1%</strong> max <strong class='color-h'>health</strong><br>at the <strong>end</strong> of each level spawn <strong>2</strong> <strong class='color-m'>tech</strong>",
+            //     isFieldTech: true,
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 2,
+            //     frequencyDefault: 2,
+            //     allowed() {
+            //         return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking") && !tech.removeMaxHealthOnKill
+            //     },
+            //     requires: "metamaterial cloaking, not -symbiosis-",
+            //     effect() {
+            //         tech.removeMaxHealthOnKill = 0.01
+            //         tech.isSpawnExitTech = true
+            //         // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false);  //start
+            //         for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false) //exit
+            //     },
+            //     remove() {
+            //         tech.removeMaxHealthOnKill = 0
+            //         tech.isSpawnExitTech = false
+            //     }
+            // },
             {
                 name: "boson composite",
                 description: "<strong>intangible</strong> to <strong class='color-block'>blocks</strong> and mobs while <strong class='color-cloaked'>cloaked</strong><br>passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
@@ -6128,7 +6168,7 @@
             },
             {
                 name: "ambush",
-                description: "metamaterial cloaking field <strong class='color-d'>damage</strong> effect<br>is increased from <span style = 'text-decoration: line-through;'>300%</span> to <strong>600%</strong>",
+                description: "metamaterial cloaking field <strong class='color-d'>damage</strong> effect<br>is increased from <span style = 'text-decoration: line-through;'>333%</span> to <strong>666%</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6139,10 +6179,10 @@
                 },
                 requires: "metamaterial cloaking",
                 effect() {
-                    tech.sneakAttackDmg = 7
+                    tech.sneakAttackDmg = 7.66
                 },
                 remove() {
-                    tech.sneakAttackDmg = 4
+                    tech.sneakAttackDmg = 4.33
                 }
             },
             {
@@ -6509,7 +6549,7 @@
             },
             {
                 name: "-symbiosis-",
-                description: "<strong style='color: #f55;'>experiment:</strong> if you <strong>kill</strong> a <strong>mob</strong><br>lose <strong>0.2%</strong> max <strong class='color-h'>health</strong>",
+                description: "<strong style='color: #f55;'>experiment:</strong> if you <strong>kill</strong> a <strong>mob</strong><br>lose <strong>0.2</strong> max <strong class='color-h'>health</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -8349,6 +8389,7 @@
         ammoCap: null,
         isHarpoonPowerUp: null,
         harpoonDensity: null,
+        isAddRemoveMaxHealth: null,
         removeMaxHealthOnKill: null,
         isSpawnExitTech: null,
         cloakDuplication: null

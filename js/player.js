@@ -2219,9 +2219,9 @@ const m = {
                                 for (let i = 0; i < inPlayer.length; i++) {
                                     if (m.energy > 0) {
                                         if (inPlayer[i].shield) { //shields drain player energy
-                                            m.energy -= 0.016;
+                                            m.energy -= 0.012;
                                         } else {
-                                            m.energy -= 0.006;
+                                            m.energy -= 0.005;
                                         }
                                     }
                                 }

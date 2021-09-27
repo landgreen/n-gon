@@ -726,7 +726,6 @@ const powerUps = {
                     // powerUps.spawn(m.pos.x, m.pos.y, "tech");
                     powerUps.endDraft("tech");
                 }
-
             }
         }
     },

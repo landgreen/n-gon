@@ -1,17 +1,8 @@
 ******************************************************** NEXT PATCH **************************************************
 
-no cloning theorem - 42% duplication, but lose 1% dup if you kill a mob
-  requires cloaking or time dilation field
-tech: symbiosis - if you kill a mob lose 2% max health, but gain 2 tech at the end of every level.
-  requires cloaking or time dilation field
-
-JUNK tech: all-stars - make mobs look like stars
-JUNK tech: mouth - make mobs look like they have a mouth
-
-the nonCollideBosses have been made 10% harder to kill
-  these are the types of bosses that spawn from apomixis on 100% duplication
-
-7+ sided mobs may slice in two when they die
+metamaterial cloaking field 300% -> 333% damage
+no-cloning theorem 43% -> 50% duplication
+symbiosis lose 2% -> 1% max health
 
 ******************************************************** TODO ********************************************************
 
@@ -52,7 +43,7 @@ harpoon tech
     can't have extended string?
   grappling hook?
   tracking so good harpoon can hit a target, circle around and hit it again
-    doesn't seem to be good physics
+    doesn't seem to be good physics, the harpoon hits walls and doesn't get room to build up speed
 
 "Interstellar Disturbance": Cosmic String applies to mobs who cross the wormhole's path, even after initial wormholing, but at reduced damage and stun time.
 

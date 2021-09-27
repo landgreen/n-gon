@@ -1140,14 +1140,31 @@ const mobs = {
                         bullet[bullet.length - 1].endCycle = simulation.cycle + 840 //14 seconds
                         this.leaveBody = false; // no body since it turned into the bot
                     }
+                    if (tech.isAddRemoveMaxHealth) {
+                        if (this.isBoss) {
+                            for (let i = 0; i < 2; i++) powerUps.spawn(this.position.x, this.position.y, "tech", false) //exit
+                        } else {
+                            const amount = 0.01
+                            if (tech.isEnergyHealth) {
+                                if (m.maxEnergy > amount) {
+                                    tech.healMaxEnergyBonus -= amount
+                                    m.setMaxEnergy();
+                                }
+                            } else if (m.maxHealth > amount) {
+                                tech.extraMaxHealth -= amount //decrease max health
+                                m.setMaxHealth();
+                            }
+                        }
+                    }
                     if (tech.removeMaxHealthOnKill) {
+                        const amount = 0.002
                         if (tech.isEnergyHealth) {
-                            if (m.maxEnergy > tech.removeMaxHealthOnKill) {
-                                tech.healMaxEnergyBonus -= tech.removeMaxHealthOnKill
+                            if (m.maxEnergy > amount) {
+                                tech.healMaxEnergyBonus -= amount
                                 m.setMaxEnergy();
                             }
-                        } else if (m.maxHealth > tech.removeMaxHealthOnKill) {
-                            tech.extraMaxHealth -= tech.removeMaxHealthOnKill //decrease max health
+                        } else if (m.maxHealth > amount) {
+                            tech.extraMaxHealth -= amount //decrease max health
                             m.setMaxHealth();
                         }
                     }
