@@ -665,7 +665,7 @@ const input = {
     right: false,
     isPauseKeyReady: true,
     key: {
-        // fire: "ShiftLeft",
+        fire: "KeyF",
         field: "Space",
         up: "KeyW", // jump
         down: "KeyS", // crouch
@@ -678,7 +678,7 @@ const input = {
     },
     setDefault() {
         input.key = {
-            // fire: "ShiftLeft",
+            fire: "KeyF",
             field: "Space",
             up: "KeyW", // jump
             down: "KeyS", // crouch
@@ -695,6 +695,7 @@ const input = {
         function cleanText(text) {
             return text.replace('Key', '').replace('Digit', '')
         }
+        document.getElementById("key-fire").innerHTML = cleanText(input.key.fire)
         document.getElementById("key-field").innerHTML = cleanText(input.key.field)
         document.getElementById("key-up").innerHTML = cleanText(input.key.up)
         document.getElementById("key-down").innerHTML = cleanText(input.key.down)
@@ -718,6 +719,7 @@ const input = {
     focus: null,
     setTextFocus() {
         const backgroundColor = "#fff"
+        document.getElementById("key-fire").style.background = backgroundColor
         document.getElementById("key-field").style.background = backgroundColor
         document.getElementById("key-up").style.background = backgroundColor
         document.getElementById("key-down").style.background = backgroundColor
@@ -736,6 +738,7 @@ const input = {
                 event.code === "ArrowLeft" ||
                 event.code === "ArrowUp" ||
                 event.code === "ArrowDown" ||
+                event.code === input.key.fire ||
                 event.code === input.key.field ||
                 event.code === input.key.up ||
                 event.code === input.key.down ||
@@ -747,6 +750,9 @@ const input = {
                 event.code === input.key.testing
             )) {
             switch (input.focus.id) {
+                case "key-fire":
+                    input.key.fire = event.code
+                    break;
                 case "key-field":
                     input.key.field = event.code
                     break;
@@ -818,6 +824,9 @@ window.addEventListener("keyup", function(event) {
         case "ArrowDown":
             input.down = false
             break;
+        case input.key.fire:
+            input.fire = false
+            break
         case input.key.field:
             input.field = false
             break
@@ -842,6 +851,10 @@ window.addEventListener("keydown", function(event) {
         case "ArrowDown":
             input.down = true
             break;
+        case input.key.fire:
+            // event.preventDefault();
+            input.fire = true
+            break
         case input.key.field:
             event.preventDefault();
             input.field = true

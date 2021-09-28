@@ -1,10 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-metamaterial cloaking field 300% -> 333% damage
-no-cloning theorem 43% -> 50% duplication
-symbiosis lose 2% -> 1% max health
+pausing time or being cloaked gives you 50% harm reduction from mob collisions
+
+no-cloning theorem duplication => down to 42%, but no longer removes 1% on bosses
+dazzler => drains 25%->10% energy, and it has a 15% bigger radius
+boson composite => only drains energy when you touch shields
+
+'F' key lets you fire, and it can be rebound to other keys
+  might be some bugs here, I didn't do much testing
+
 
 ******************************************************** TODO ********************************************************
+
+how to make only killing mobs more viable:
+  reduce damage from mobs that are asleep or unaware of the player when you touch them?
 
 JUNK tech: planetesimals game inside n-gon
 https://codepen.io/lilgreenland/pen/jrMvaB?editors=0010

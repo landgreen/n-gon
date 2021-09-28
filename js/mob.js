@@ -1168,7 +1168,7 @@ const mobs = {
                             m.setMaxHealth();
                         }
                     }
-                    if (tech.cloakDuplication) {
+                    if (tech.cloakDuplication && !this.isBoss) {
                         tech.cloakDuplication -= 0.01
                         powerUps.setDupChance(); //needed after adjusting duplication chance
                     }

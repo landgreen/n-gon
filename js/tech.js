@@ -6042,18 +6042,18 @@
             },
             {
                 name: "no-cloning theorem",
-                description: `<strong>50%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>mob</strong> <strong>dies</strong>, lose <strong>1%</strong> <strong class='color-dup'>duplication</strong> chance`,
+                description: `<strong>42%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>mob</strong> <strong>dies</strong>, lose <strong>1%</strong> <strong class='color-dup'>duplication</strong> chance`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "wormhole" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking") && tech.duplicationChance() < 1
+                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking") && tech.duplicationChance() < 1 //m.fieldUpgrades[m.fieldMode].name === "wormhole" ||
                 },
                 requires: "cloaking, wormhole or time dilation and below 100% duplication chance",
                 effect() {
-                    tech.cloakDuplication = 0.5
+                    tech.cloakDuplication = 0.42
                     powerUps.setDupChance(); //needed after adjusting duplication chance
 
                 },
@@ -6127,7 +6127,7 @@
             // },
             {
                 name: "boson composite",
-                description: "<strong>intangible</strong> to <strong class='color-block'>blocks</strong> and mobs while <strong class='color-cloaked'>cloaked</strong><br>passing through <strong>mobs</strong> drains your <strong class='color-f'>energy</strong>",
+                description: "<strong>intangible</strong> to <strong class='color-block'>blocks</strong> and mobs while <strong class='color-cloaked'>cloaked</strong><br>passing through <strong>shields</strong> drains your <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6149,7 +6149,7 @@
             },
             {
                 name: "dazzler",
-                description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs<br>drains <strong>25%</strong> of your stored <strong class='color-f'>energy</strong>",
+                description: "<strong class='color-cloaked'>decloaking</strong> <strong>stuns</strong> nearby mobs<br>and drains 10 <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
