@@ -1141,7 +1141,7 @@ const mobs = {
                         this.leaveBody = false; // no body since it turned into the bot
                     }
                     if (tech.isAddRemoveMaxHealth) {
-                        if (this.isBoss) {
+                        if (this.isBoss && this.isDropPowerUp) {
                             for (let i = 0; i < 2; i++) powerUps.spawn(this.position.x, this.position.y, "tech", false) //exit
                         } else {
                             const amount = 0.01

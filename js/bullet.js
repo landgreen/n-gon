@@ -1108,6 +1108,7 @@ const b = {
     },
     harpoon(where, target, angle = m.angle, harpoonLength = 1, isReturn = false, totalCycles = 15) {
         const me = bullet.length;
+        const returnRadius = 100 * Math.sqrt(harpoonLength)
         bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -40 * harpoonLength, y: 2, index: 0, isInternal: false }, { x: -40 * harpoonLength, y: -2, index: 1, isInternal: false }, { x: 50 * harpoonLength, y: -3, index: 3, isInternal: false }, { x: 30 * harpoonLength, y: 2, index: 4, isInternal: false }], {
             cycle: 0,
             angle: angle,
@@ -1192,7 +1193,7 @@ const b = {
                 }
             },
             returnToPlayer() {
-                if (Vector.magnitude(Vector.sub(this.position, m.pos)) < 100) { //near player
+                if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius) { //near player
                     this.endCycle = 0;
                     if (m.cycle + 25 * b.fireCDscale < m.fireCDcycle) m.fireCDcycle = m.cycle + 25 * b.fireCDscale //lower cd to 25 if it is above 25
                     //recoil on catching
@@ -2793,7 +2794,7 @@ const b = {
             inertia: Infinity,
             frictionAir: 0.003,
             dmg: 0, //damage on impact
-            damage: (tech.isFastFoam ? 0.039 : 0.011) * (tech.isBulletTeleport ? 1.5 : 1), //damage done over time
+            damage: (tech.isFastFoam ? 0.039 : 0.011) * (tech.isBulletTeleport ? 1.43 : 1), //damage done over time
             scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.65 : 1),
             classType: "bullet",
             collisionFilter: {
@@ -4416,7 +4417,7 @@ const b = {
                 ctx.lineWidth = 2 * tech.wavePacketDamage
                 ctx.beginPath();
                 const end = 700 * Math.sqrt(tech.isBulletsLastLonger) / Math.sqrt(tech.waveReflections * 0.5) //should equal about 1060
-                const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.5 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) //damage is lower for large radius mobs, since they feel the waves longer
 
                 for (let i = this.waves.length - 1; i > -1; i--) {
                     //draw wave
@@ -4506,7 +4507,7 @@ const b = {
                 ctx.lineWidth = 2 * tech.wavePacketDamage
                 ctx.beginPath();
                 const end = 1100 * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
-                const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.5 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                const damage = 2 * b.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) //damage is lower for large radius mobs, since they feel the waves longer
 
                 for (let i = this.waves.length - 1; i > -1; i--) {
                     const v1 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit1, this.waves[i].radius))
@@ -4621,7 +4622,7 @@ const b = {
                     slow: 0,
                     amplitude: (input.down ? 5 : 10) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin((this.wavePacketCycle + 1) * 0.088), //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
                     minDmgSpeed: 0,
-                    dmg: b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage * (tech.isBulletTeleport ? 1.5 : 1), //also control damage when you divide by mob.mass 
+                    dmg: b.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage * (tech.isBulletTeleport ? 1.43 : 1), //also control damage when you divide by mob.mass 
                     classType: "bullet",
                     collisionFilter: {
                         category: 0,
@@ -5088,7 +5089,7 @@ const b = {
                 //look for closest mob in player's LoS
                 const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
                 const length = tech.isLargeHarpoon ? 1 + 0.09 * Math.sqrt(this.ammo) : 1
-                const totalCycles = 7 * (tech.isFilament ? 1 + 0.009 * Math.min(100, this.ammo) : 1)
+                const totalCycles = 7 * (tech.isFilament ? 1 + 0.009 * Math.min(100, this.ammo) : 1) * Math.sqrt(length)
                 if (input.down) {
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {

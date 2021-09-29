@@ -3079,6 +3079,7 @@
                 effect() {
                     tech.duplicateChance += 0.1
                     powerUps.setDupChance(); //needed after adjusting duplication chance
+                    if (!build.isExperimentSelection) simulation.circleFlare(0.1);
                     tech.addJunkTechToPool(30)
                 },
                 remove() {
@@ -3100,7 +3101,8 @@
                 requires: "below 100% duplication chance",
                 effect: () => {
                     tech.isStimulatedEmission = true
-                    powerUps.setDupChance(); //needed after adjusting duplication chance
+                    powerUps.setDupChance(0.17); //needed after adjusting duplication chance
+                    if (!build.isExperimentSelection) simulation.circleFlare(0.17);
                 },
                 remove() {
                     tech.isStimulatedEmission = false
@@ -3121,6 +3123,7 @@
                 effect: () => {
                     tech.isPowerUpsVanish = true
                     powerUps.setDupChance(); //needed after adjusting duplication chance
+                    if (!build.isExperimentSelection) simulation.circleFlare(0.13);
                 },
                 remove() {
                     tech.isPowerUpsVanish = false
@@ -4891,7 +4894,7 @@
             },
             {
                 name: "uncertainty principle",
-                description: "<strong>foam</strong> and <strong>wave</strong> particle <strong>positions</strong> are random<br>increase their <strong class='color-d'>damage</strong> by <strong>50%</strong>",
+                description: "<strong>foam</strong> and <strong>wave</strong> particle <strong>positions</strong> are random<br>increase their <strong class='color-d'>damage</strong> by <strong>43%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6055,7 +6058,7 @@
                 effect() {
                     tech.cloakDuplication = 0.42
                     powerUps.setDupChance(); //needed after adjusting duplication chance
-
+                    if (!build.isExperimentSelection) simulation.circleFlare(0.42);
                 },
                 remove() {
                     tech.cloakDuplication = 0
@@ -6304,6 +6307,7 @@
                 effect() {
                     tech.wormDuplicate = 0.14
                     powerUps.setDupChance(); //needed after adjusting duplication chance
+                    if (!build.isExperimentSelection) simulation.circleFlare(0.14);
                     for (let i = 0; i < 4; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                     }

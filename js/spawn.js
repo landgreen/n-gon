@@ -1477,15 +1477,15 @@ const spawn = {
                     y: this.velocity.y * 0.99
                 });
             }
-            // this.seePlayerCheckByDistance()
-            if (!(simulation.cycle % this.seePlayerFreq)) {
-                if (this.distanceToPlayer2() < this.seeAtDistance2) { //   ignore cloak for black holes
-                    this.locatePlayer();
-                    if (!this.seePlayer.yes) this.seePlayer.yes = true;
-                } else if (this.seePlayer.recall) {
-                    this.lostPlayer();
-                }
-            }
+            this.seePlayerCheckByDistance()
+            // if (!(simulation.cycle % this.seePlayerFreq)) {
+            //     if (this.distanceToPlayer2() < this.seeAtDistance2) { //   ignore cloak for black holes
+            //         this.locatePlayer();
+            //         if (!this.seePlayer.yes) this.seePlayer.yes = true;
+            //     } else if (this.seePlayer.recall) {
+            //         this.lostPlayer();
+            //     }
+            // }
             this.checkStatus();
             if (this.seePlayer.recall) {
                 //eventHorizon waves in and out

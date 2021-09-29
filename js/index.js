@@ -695,6 +695,7 @@ const input = {
         function cleanText(text) {
             return text.replace('Key', '').replace('Digit', '')
         }
+        if (!input.key.fire) input.key.fire = "KeyF"
         document.getElementById("key-fire").innerHTML = cleanText(input.key.fire)
         document.getElementById("key-field").innerHTML = cleanText(input.key.field)
         document.getElementById("key-up").innerHTML = cleanText(input.key.up)

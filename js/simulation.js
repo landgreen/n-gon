@@ -256,7 +256,41 @@ const simulation = {
             }
         }
     },
-    lastLogTime: 0,
+    circleFlare(dup, loops = 100) {
+        boltNum = dup * 300
+        const bolts = []
+        colors = [powerUps.research.color, powerUps.ammo.color, powerUps.heal.color, powerUps.tech.color, powerUps.field.color, powerUps.gun.color]
+        for (let i = 0; i < boltNum; ++i) {
+            const mag = 4 + 20 * Math.random()
+            const angle = 2 * Math.PI * Math.random()
+            bolts.push({
+                x: m.pos.x,
+                y: m.pos.y,
+                Vx: mag * Math.cos(angle),
+                Vy: mag * Math.sin(angle),
+                color: colors[Math.floor(Math.random() * colors.length)]
+            })
+        }
+        let count = 0
+        loop = () => { //draw electricity
+            if (count++ < loops) requestAnimationFrame(loop)
+            for (let i = 0, len = bolts.length; i < len; ++i) {
+                bolts[i].x += bolts[i].Vx
+                bolts[i].y += bolts[i].Vy
+                if (Math.random() < 0.2) {
+                    simulation.drawList.push({
+                        x: bolts[i].x,
+                        y: bolts[i].y,
+                        radius: 1.5 + 5 * Math.random(),
+                        // color: "rgba(0,155,155,0.7)",
+                        color: bolts[i].color,
+                        time: Math.floor(9 + 25 * Math.random() * Math.random())
+                    });
+                }
+            }
+        }
+        requestAnimationFrame(loop)
+    },
     // lastLogTimeBig: 0,
     boldActiveGunHUD() {
         if (b.inventory.length > 0) {
@@ -314,6 +348,7 @@ const simulation = {
         }
         document.getElementById("tech").innerHTML = text
     },
+    lastLogTime: 0,
     isTextLogOpen: true,
     // <!-- <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
     // <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#7ce" stroke="none" /> -->

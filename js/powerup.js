@@ -173,7 +173,6 @@ const powerUps = {
                 break
             }
         }
-
         ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.25) + 0.6
         for (let i = 0, len = powerUp.length; i < len; ++i) {
             ctx.beginPath();
@@ -258,6 +257,8 @@ const powerUps = {
             if (tech.isCancelDuplication) {
                 tech.cancelCount++
                 tech.maxDuplicationEvent()
+                simulation.makeTextLog(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${0.045}`)
+                simulation.circleFlare(0.045);
             }
             if (tech.isCancelRerolls) {
                 for (let i = 0, len = 5 + 5 * Math.random(); i < len; i++) {

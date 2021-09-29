@@ -2027,7 +2027,7 @@ const m = {
         },
         {
             name: "time dilation",
-            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><strong>move</strong> and <strong>fire</strong> while time is stopped<br>mobs do <strong>50%</strong> <strong class='color-harm'>harm</strong> while time is stopped",
+            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong>",
             effect: () => {
                 // m.fieldMeterColor = "#000"
                 m.fieldFire = true;
@@ -2108,7 +2108,7 @@ const m = {
         },
         {
             name: "metamaterial cloaking", //"weak photonic coupling" "electromagnetically induced transparency" "optical non-coupling" "slow light field" "electro-optic transparency"
-            description: "when not firing activate a <strong class='color-cloaked'>cloaking</strong> effect<br><strong>+333%</strong> <strong class='color-d'>damage</strong> if a mob hasn't recently <strong>died</strong><br>mobs do <strong>50%</strong> <strong class='color-harm'>harm</strong> while you're <strong class='color-cloaked'>cloaked</strong>",
+            description: "when not firing activate a <strong class='color-cloaked'>cloaking</strong> effect<br><strong>+333%</strong> <strong class='color-d'>damage</strong> if a mob hasn't recently <strong>died</strong><br><strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong> when <strong class='color-cloaked'>cloaked</strong>",
             effect: () => {
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
@@ -2156,12 +2156,12 @@ const m = {
                         }
                         if (tech.isCloakStun) { //stun nearby mobs after exiting cloak
                             let isMobsAround = false
-                            const stunRange = m.fieldDrawRadius * 1.4
-                            const drain = 0.1
+                            const stunRange = m.fieldDrawRadius * 1.5
+                            const drain = 0.15
                             const stunTime = 180
                             if (m.energy > drain) {
                                 for (let i = 0, len = mob.length; i < len; ++i) {
-                                    if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) < stunRange && Matter.Query.ray(map, mob[i].position, m.pos).length === 0) {
+                                    if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) < stunRange && Matter.Query.ray(map, mob[i].position, m.pos).length === 0 && !mob[i].isBadTarget) {
                                         isMobsAround = true
                                         mobs.statusStun(mob[i], stunTime)
                                     }
@@ -2172,7 +2172,7 @@ const m = {
                                         x: m.pos.x,
                                         y: m.pos.y,
                                         radius: stunRange,
-                                        color: "hsla(0,50%,100%,0.8)",
+                                        color: "hsla(0,50%,100%,0.7)",
                                         time: 7
                                     });
                                 }
@@ -2213,7 +2213,7 @@ const m = {
                             let inPlayer = Matter.Query.region(mob, player.bounds)
                             if (inPlayer.length > 0) {
                                 for (let i = 0; i < inPlayer.length; i++) {
-                                    if (m.energy > 0 && inPlayer[i].shield) m.energy -= 0.012;
+                                    if (m.energy > 0 && inPlayer[i].shield) m.energy -= 0.014;
                                 }
                             }
                         } else {

@@ -1,14 +1,9 @@
 ******************************************************** NEXT PATCH **************************************************
 
-pausing time or being cloaked gives you 50% harm reduction from mob collisions
+blackhole mobs can no longer see past stealth
+adding dup chance has graphics now
 
-no-cloning theorem duplication => down to 42%, but no longer removes 1% on bosses
-dazzler => drains 25%->10% energy, and it has a 15% bigger radius
-boson composite => only drains energy when you touch shields
-
-'F' key lets you fire, and it can be rebound to other keys
-  might be some bugs here, I didn't do much testing
-
+bug fixes
 
 ******************************************************** TODO ********************************************************
 
