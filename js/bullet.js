@@ -1118,7 +1118,7 @@ const b = {
             turnRate: isReturn ? 0.1 : 0.03, //0.015
             drawStringControlMagnitude: 3000 + 5000 * Math.random(),
             drawStringFlip: (Math.round(Math.random()) ? 1 : -1),
-            dmg: 6, //damage done in addition to the damage from momentum
+            dmg: 7, //damage done in addition to the damage from momentum
             classType: "bullet",
             endCycle: simulation.cycle + totalCycles * 2.5 + 15,
             collisionFilter: {
@@ -1133,10 +1133,9 @@ const b = {
                     who.isShielded = false
                     requestAnimationFrame(() => { who.isShielded = true });
                 }
+                if (tech.fragments) b.targetedNail(this.vertices[2], tech.fragments * 3)
                 if (!who.isBadTarget) {
-                    if (tech.fragments) {
-                        b.targetedNail(this.vertices[2], tech.fragments * 4)
-                    } else if (isReturn) {
+                    if (isReturn) {
                         this.do = this.returnToPlayer
                     } else {
                         this.frictionAir = 0.01
@@ -1166,7 +1165,7 @@ const b = {
                         this.caughtPowerUp.effect();
                         Matter.Composite.remove(engine.world, this.caughtPowerUp);
                         powerUp.splice(index, 1);
-                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.006 * 6 //0.006 is normal
+                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.008 * 6 //0.006 is normal
                     } else {
                         this.dropCaughtPowerUp()
                     }
@@ -1195,7 +1194,7 @@ const b = {
             returnToPlayer() {
                 if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius) { //near player
                     this.endCycle = 0;
-                    if (m.cycle + 25 * b.fireCDscale < m.fireCDcycle) m.fireCDcycle = m.cycle + 25 * b.fireCDscale //lower cd to 25 if it is above 25
+                    if (m.cycle + 25 * b.fireCDscale < m.fireCDcycle) m.fireCDcycle = m.cycle + 35 * b.fireCDscale //lower cd to 25 if it is above 25
                     //recoil on catching
                     const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), this.mass * (input.down ? 0.0001 : 0.0002))
                     player.force.x += momentum.x
@@ -1364,6 +1363,48 @@ const b = {
                 this.force.y += this.mass * 0.001; //gravity
             }
         }
+
+        /*        todo
+        despawn
+            when player gets far away?
+            set time
+            release mouse?
+
+        */
+        // if (true && input.down) {
+        //     Matter.Body.setVelocity(bullet[me], {
+        //         x: m.Vx / 2 + 70 * Math.cos(bullet[me].angle),
+        //         y: m.Vy / 2 + 70 * Math.sin(bullet[me].angle)
+        //     });
+        //     bullet[me].frictionAir = 0.0011
+        //     bullet[me].endCycle = simulation.cycle + Infinity
+        //     bullet[me].do = function() {
+        //         if (!m.isBodiesAsleep) {
+        //             this.cycle++
+        //             if (Matter.Query.collides(this, map).length) {
+        //                 // this.collisionFilter.mask = 0; //non collide with everything
+        //                 this.collisionFilter.category = cat.map
+        //                 this.collisionFilter.mask = cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+
+        //                 Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(Vector.normalise(this.lastVelocity), 30))) //move a bit into the wall
+        //                 Matter.Body.setVelocity(this, { x: 0, y: 0 });
+        //                 Matter.Body.setStatic(this, true) //don't set to static if not touching map
+
+        //                 Matter.Body.setAngularVelocity(this, 0)
+        //                 const unit = Vector.normalise(Vector.sub({ x: this.position.x, y: this.position.y - 150 }, player.position))
+        //                 const push = Vector.mult(unit, 1)
+        //                 player.force.x += push.x
+        //                 player.force.y += push.y
+        //                 //pull player back in
+        //                 this.do = () => {
+
+        //                 }
+        //             }
+        //             this.lastVelocity = { x: this.velocity.x, y: this.velocity.y }
+        //         }
+        //         this.drawString()
+        //     }
+        // }
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
     missile(where, angle, speed, size = 1) {
@@ -2794,7 +2835,7 @@ const b = {
             inertia: Infinity,
             frictionAir: 0.003,
             dmg: 0, //damage on impact
-            damage: (tech.isFastFoam ? 0.039 : 0.011) * (tech.isBulletTeleport ? 1.43 : 1), //damage done over time
+            damage: (tech.isFastFoam ? 0.033 : 0.011) * (tech.isBulletTeleport ? 1.43 : 1), //damage done over time
             scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.65 : 1),
             classType: "bullet",
             collisionFilter: {
@@ -5102,7 +5143,7 @@ const b = {
                         }
                     }
                     b.harpoon(where, closest.target, m.angle, length, false, 15)
-                    m.fireCDcycle = m.cycle + 40 * b.fireCDscale; // cool down
+                    m.fireCDcycle = m.cycle + 50 * b.fireCDscale; // cool down
                 } else if (tech.extraHarpoons) {
                     const range = 450 * (tech.isFilament ? 1 + Math.min(100, this.ammo) / 100 : 1)
                     let targetCount = 0
@@ -5144,7 +5185,7 @@ const b = {
                 const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), input.down ? 0.015 : 0.035)
                 player.force.x -= recoil.x
                 player.force.y -= recoil.y
-                tech.harpoonDensity = 0.005
+                tech.harpoonDensity = 0.008
             }
         },
         {

@@ -2300,11 +2300,11 @@ const level = {
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
 
-        // spawn.grenadier(1900, -500)
+        spawn.slasher(1900, -500)
         // spawn.sneaker(1900, -500, 200)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
-        // spawn.historyBoss(1200, -500)
+        // spawn.growBossCulture(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
         // spawn.focuser(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
@@ -2313,7 +2313,7 @@ const level = {
         // spawn.laserBombingBoss(1600, -500)
         // spawn.laserTargetingBoss(1600, -500)
         // spawn.laserBoss(1600, -500)
-        spawn.cellBossCulture(1600, -500)
+        // spawn.cellBossCulture(1600, -500)
         // spawn.nodeGroup(1200, -500, "grenadier")
         // spawn.nodeGroup(1800, -500, "grenadier")
         // spawn.nodeGroup(1200, 0, "grenadier")
@@ -4420,7 +4420,7 @@ const level = {
         spawn.randomSmallMob(-900, 825);
 
         if (simulation.difficulty > 1) {
-            if (Math.random() < 0.33) {
+            if (Math.random() < 0.70) {
                 spawn.randomLevelBoss(-800, -1300)
             } else {
                 spawn.snakeBoss(-1000 + Math.random() * 2500, -1300); //boss snake with head

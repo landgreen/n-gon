@@ -443,7 +443,7 @@
             },
             {
                 name: "cache",
-                description: `${powerUps.orb.ammo()} give <strong>11x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
+                description: `${powerUps.orb.ammo()} give <strong>13x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -453,7 +453,7 @@
                 },
                 requires: "not exciton-lattice",
                 effect() {
-                    tech.ammoCap = 11;
+                    tech.ammoCap = 13;
                     powerUps.ammo.effect()
                 },
                 remove() {
@@ -4932,7 +4932,7 @@
             },
             {
                 name: "aerogel",
-                description: "<strong>foam</strong> bubbles <strong>float</strong> and dissipate <strong>50%</strong> faster<br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>260%</strong>",
+                description: "<strong>foam</strong> bubbles <strong>float</strong> and dissipate <strong>50%</strong> faster<br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>200%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5044,7 +5044,7 @@
                 },
                 remove() {
                     tech.isHarpoonPowerUp = false
-                    tech.harpoonDensity = 0.006
+                    tech.harpoonDensity = 0.008
                 }
             },
             {
@@ -5877,6 +5877,25 @@
             //     }
             // },
             {
+                name: "tokamak",
+                description: "throwing a <strong class='color-block'>block</strong> converts it into <strong class='color-f'>energy</strong><br>and a pulsed fusion <strong class='color-e'>explosion</strong>",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing"
+                },
+                requires: "plasma torch",
+                effect() {
+                    tech.isTokamak = true;
+                },
+                remove() {
+                    tech.isTokamak = false;
+                }
+            },
+            {
                 name: "plasma-bot",
                 description: "remove your <strong>field</strong> to build a <strong class='color-bot'>bot</strong><br>that uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong>",
                 isFieldTech: true,
@@ -5934,25 +5953,6 @@
                 remove() {
                     tech.isPlasmaRange = 1;
                     if (this.count > 0) powerUps.research.changeRerolls(this.count)
-                }
-            },
-            {
-                name: "tokamak",
-                description: "throwing a <strong class='color-block'>block</strong> converts it into <strong class='color-f'>energy</strong><br>and a pulsed fusion <strong class='color-e'>explosion</strong>",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch"
-                },
-                requires: "plasma torch",
-                effect() {
-                    tech.isTokamak = true;
-                },
-                remove() {
-                    tech.isTokamak = false;
                 }
             },
             {
@@ -6074,7 +6074,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking")
+                    return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
                 },
                 requires: "metamaterial cloaking",
                 effect() {
@@ -6221,7 +6221,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                    return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "nano-scale manufacturing"
                 },
                 requires: "metamaterial cloaking or pilot wave",
                 effect() {

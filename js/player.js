@@ -1121,12 +1121,12 @@ const m = {
                 m.fieldCDcycle = m.cycle + 15;
                 m.isHolding = false;
 
-                if (tech.isTokamak && m.throwCharge > 5) { //remove the block body and pulse  in the direction you are facing
+                if (tech.isTokamak && m.throwCharge > 3) { //remove the block body and pulse  in the direction you are facing
                     //m.throwCharge > 5 seems to be when the field full colors in a block you are holding
-                    m.throwCharge = 0;
                     m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
+                    if (m.immuneCycle < m.cycle) m.energy += 0.25 * Math.sqrt(m.holdingTarget.mass) * Math.min(5, m.throwCharge)
+                    m.throwCharge = 0;
                     m.definePlayerMass() //return to normal player mass
-                    if (m.immuneCycle < m.cycle) m.energy += 2.5 * Math.sqrt(m.holdingTarget.mass)
                     //remove block before pulse, so it doesn't get in the way
                     for (let i = 0; i < body.length; i++) {
                         if (body[i] === m.holdingTarget) {
@@ -1134,7 +1134,7 @@ const m = {
                             body.splice(i, 1);
                         }
                     }
-                    b.pulse(50 * Math.pow(m.holdingTarget.mass, 0.25), m.angle)
+                    b.pulse(60 * Math.pow(m.holdingTarget.mass, 0.25), m.angle)
                 } else { //normal throw
                     //bullet-like collisions
                     m.holdingTarget.collisionFilter.category = cat.bullet
@@ -2027,7 +2027,8 @@ const m = {
         },
         {
             name: "time dilation",
-            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong>",
+            // description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong>",
+            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><strong>move</strong> and <strong>fire</strong> while time is stopped<br>but, <strong>collisions</strong> still do <strong class='color-harm'>harm</strong>",
             effect: () => {
                 // m.fieldMeterColor = "#000"
                 m.fieldFire = true;

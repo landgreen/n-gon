@@ -8,6 +8,7 @@ const spawn = {
     pickList: ["starter", "starter"],
     fullPickList: [
         "hopper", "hopper", "hopper",
+        "slasher", "slasher",
         "shooter", "shooter",
         "grenadier", "grenadier",
         "striker", "striker",
@@ -27,7 +28,7 @@ const spawn = {
         "spawner",
         "ghoster",
     ],
-    allowedGroupList: ["spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "stabber", "sniper", "pulsar", "grenadier"],
+    allowedGroupList: ["spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "stabber", "sniper", "pulsar", "grenadier", "slasher"],
     setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
         //each level has 2 mobs: one new mob and one from the last level
         spawn.pickList.splice(0, 1);
@@ -1079,7 +1080,7 @@ const spawn = {
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body //| cat.map   //"rgba(255,60,0,0.3)"
 
         me.buffCount = 0
-        me.accelMag = 0.00006 //* simulation.accelScale;
+        me.accelMag = 0.00005 //* simulation.accelScale;
         me.setBuffed = function() {
             this.buffCount++
             this.accelMag += 0.000035 //* Math.sqrt(simulation.accelScale)
@@ -1104,10 +1105,11 @@ const spawn = {
                 powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             } else {
                 this.leaveBody = false;
-                if (!count % 2) powerUps.spawnRandomPowerUp(this.position.x, this.position.y) // higher then normal chance to drop heals and ammo
+                this.isDropPowerUp = false;
+                powerUps.spawnRandomPowerUp(this.position.x, this.position.y) // manual power up spawn to avoid spawning too many tech with "symbiosis"
             }
         }
-        me.damageReduction = 0.22
+        me.damageReduction = 0.18
         me.do = function() {
             // this.armor();
             this.alwaysSeePlayer();
@@ -2910,6 +2912,117 @@ const spawn = {
             }
         };
     },
+    slasher(x, y, radius = 36 + Math.ceil(Math.random() * 25)) {
+        mobs.spawn(x, y, 5, radius, "rgb(201,202,225)");
+        let me = mob[mob.length - 1];
+        Matter.Body.rotate(me, 2 * Math.PI * Math.random());
+        me.accelMag = 0.00085 * simulation.accelScale;
+        me.torqueMagnitude = 0.00002 * me.inertia * (Math.random() > 0.5 ? -1 : 1);
+        me.frictionStatic = 0;
+        me.friction = 0;
+        me.frictionAir = 0.035;
+        me.delay = 120 * simulation.CDScale;
+        me.cd = 0;
+        me.swordRadius = 0;
+        me.swordRadiusMax = 350 + 5 * simulation.difficulty;
+        me.swordRadiusGrowRate = me.swordRadiusMax * (0.02 + 0.0008 * simulation.difficulty)
+        me.isSlashing = false;
+        me.swordDamage = 0.07 * simulation.dmgScale
+        const laserAngle = 3 * Math.PI / 5
+        const seeDistance2 = 200000
+        spawn.shield(me, x, y);
+        me.onDamage = function() {};
+        me.do = function() {
+            this.checkStatus();
+            this.seePlayerByHistory(15);
+            this.attraction();
+            if (!m.isBodiesAsleep) this.sword() //does various things depending on what stage of the sword swing
+        };
+
+        me.swordWaiting = function() {
+            if (
+                this.seePlayer.recall &&
+                this.cd < simulation.cycle &&
+                this.distanceToPlayer2() < seeDistance2 &&
+                Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
+                Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
+            ) {
+                this.sword = this.swordGrow
+                // Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                this.accelMag = 0
+            }
+        }
+        me.sword = me.swordWaiting //base function that changes during different aspects of the sword swing
+        me.swordGrow = function() {
+            this.laserSword(this.vertices[1], this.angle + laserAngle);
+            this.swordRadius += this.swordRadiusGrowRate
+            if (this.swordRadius > this.swordRadiusMax) {
+                this.sword = this.swordSlash
+                this.spinCount = 0
+            }
+        }
+        me.swordSlash = function() {
+            this.laserSword(this.vertices[1], this.angle + laserAngle);
+            this.torque += this.torqueMagnitude;
+            this.spinCount++
+            if (this.spinCount > 60) {
+                this.sword = this.swordWaiting
+                this.swordRadius = 0
+                this.accelMag = 0.001 * simulation.accelScale;
+                this.cd = simulation.cycle + this.delay;
+            }
+        }
+        me.laserSword = function(where, angle) {
+            const vertexCollision = function(v1, v1End, domain) {
+                for (let i = 0; i < domain.length; ++i) {
+                    let vertices = domain[i].vertices;
+                    const len = vertices.length - 1;
+                    for (let j = 0; j < len; j++) {
+                        results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                        if (results.onLine1 && results.onLine2) {
+                            const dx = v1.x - results.x;
+                            const dy = v1.y - results.y;
+                            const dist2 = dx * dx + dy * dy;
+                            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: vertices[j], v2: vertices[j + 1] };
+                        }
+                    }
+                    results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                    if (results.onLine1 && results.onLine2) {
+                        const dx = v1.x - results.x;
+                        const dy = v1.y - results.y;
+                        const dist2 = dx * dx + dy * dy;
+                        if (dist2 < best.dist2) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: vertices[0], v2: vertices[len] };
+                    }
+                }
+            };
+            best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
+            const look = { x: where.x + this.swordRadius * Math.cos(angle), y: where.y + this.swordRadius * Math.sin(angle) };
+            vertexCollision(where, look, body); // vertexCollision(where, look, mob);
+            vertexCollision(where, look, map);
+            if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
+            if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
+                m.immuneCycle = m.cycle + tech.collisionImmuneCycles + 60; //player is immune to damage for an extra second
+                m.damage(this.swordDamage);
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: best.x,
+                    y: best.y,
+                    radius: this.swordDamage * 1500,
+                    color: "rgba(80,0,255,0.5)",
+                    time: 20
+                });
+            }
+            if (best.dist2 === Infinity) best = look;
+            ctx.beginPath(); //draw beam
+            ctx.moveTo(where.x, where.y);
+            ctx.lineTo(best.x, best.y);
+            ctx.strokeStyle = "rgba(100,100,255,0.1)"; // Purple path
+            ctx.lineWidth = 15;
+            ctx.stroke();
+            ctx.strokeStyle = "rgba(100,100,255,0.5)"; // Purple path
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        }
+    },
     sneaker(x, y, radius = 15 + Math.ceil(Math.random() * 10)) {
         mobs.spawn(x, y, 5, radius, "transparent");
         let me = mob[mob.length - 1];
@@ -2961,11 +3074,11 @@ const spawn = {
             }
         };
     },
-    ghoster(x, y, radius = 40 + Math.ceil(Math.random() * 100)) {
+    ghoster(x, y, radius = 50 + Math.ceil(Math.random() * 90)) {
         mobs.spawn(x, y, 7, radius, "transparent");
         let me = mob[mob.length - 1];
         me.seeAtDistance2 = 300000;
-        me.accelMag = 0.00012 * simulation.accelScale;
+        me.accelMag = 0.00013 * simulation.accelScale;
         if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
         // Matter.Body.setDensity(me, 0.001); //normal is 0.001 //makes effective life much lower
         me.stroke = "transparent"; //used for drawGhost
@@ -2989,10 +3102,10 @@ const spawn = {
             this.search();
             //draw
             if (!m.isBodiesAsleep) {
-                if (this.distanceToPlayer2() - this.seeAtDistance2 < 0) {
-                    if (this.alpha < 1) this.alpha += 0.002 * simulation.CDScale;
+                if (this.distanceToPlayer2() < this.seeAtDistance2) {
+                    if (this.alpha < 1) this.alpha += 0.003 * simulation.CDScale; //near player go solid
                 } else {
-                    if (this.alpha > 0) this.alpha -= 0.03;
+                    if (this.alpha > 0) this.alpha -= 0.03; ///away from player, hide
                 }
             }
             if (this.alpha > 0) {
@@ -4146,6 +4259,7 @@ const spawn = {
         me.accelMag = 0.0004 * simulation.accelScale;
         me.leaveBody = false;
         me.showHealthBar = false;
+        me.isDropPowerUp = false;
         // Matter.Body.setDensity(me, 0.00004); //normal is 0.001
         me.frictionAir = 0.02;
         me.isSnakeTail = true;

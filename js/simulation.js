@@ -261,7 +261,7 @@ const simulation = {
         const bolts = []
         colors = [powerUps.research.color, powerUps.ammo.color, powerUps.heal.color, powerUps.tech.color, powerUps.field.color, powerUps.gun.color]
         for (let i = 0; i < boltNum; ++i) {
-            const mag = 4 + 20 * Math.random()
+            const mag = 6 + 20 * Math.random()
             const angle = 2 * Math.PI * Math.random()
             bolts.push({
                 x: m.pos.x,

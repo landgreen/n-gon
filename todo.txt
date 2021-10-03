@@ -1,14 +1,30 @@
 ******************************************************** NEXT PATCH **************************************************
 
-blackhole mobs can no longer see past stealth
-adding dup chance has graphics now
+new mob: slasher - it's basically a jedi
+
+harpoon: +33% damage, +33% delay after firing
+time dilation reverted 50% -> 0% collision harm reduction
+time dilation can no longer get tech: symbiosis
+nano-scale: can access tokamak and discrete optimization
+cache: 11x -> 13x ammo
 
 bug fixes
 
 ******************************************************** TODO ********************************************************
 
-how to make only killing mobs more viable:
-  reduce damage from mobs that are asleep or unaware of the player when you touch them?
+slasher compute fastest direction to rotate towards player
+  cross product
+
+death animation ideas:
+  redraw game in strange ways, to show that it's a simulation (for example the testing mode is a strange redraw of map)
+    stroke only, but connect all vertices together,  no moveTo
+    draw dots at all the vertices
+
+be nice if block throwing had a projected path
+
+slasher mob: extends a thin radial line, then spins around and damages player if in circle around mob
+  do short length laser damage
+  doesn't have to be a full spin
 
 JUNK tech: planetesimals game inside n-gon
 https://codepen.io/lilgreenland/pen/jrMvaB?editors=0010
@@ -63,10 +79,6 @@ Pilot wave tech
   Grouping blocks will merge them into a massive ball
   Size, density is determined by total mass
 
-make another boss with a tail
-  but the tail is made of interesting mobs
-    stabbers maybe
-    suckers maybe
 
 make experiment and understand vibe more obvious
   mostly in early game or first time players
@@ -75,8 +87,6 @@ look into 360 wave beam lag
 
 aoe effect pushes mobs away,  then rapidly pulls them in
   for mines?
-
-tech: shrapnel - nails have an larger randomized 3 point shape triangle shape and they do more damage
 
 mob: spawning seekers on death
 
