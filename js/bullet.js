@@ -2835,7 +2835,7 @@ const b = {
             inertia: Infinity,
             frictionAir: 0.003,
             dmg: 0, //damage on impact
-            damage: (tech.isFastFoam ? 0.033 : 0.011) * (tech.isBulletTeleport ? 1.43 : 1), //damage done over time
+            damage: (tech.isFastFoam ? 0.0275 : 0.011) * (tech.isBulletTeleport ? 1.43 : 1), //damage done over time
             scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.65 : 1),
             classType: "bullet",
             collisionFilter: {

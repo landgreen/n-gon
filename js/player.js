@@ -2385,7 +2385,7 @@ const m = {
         // },
         {
             name: "pilot wave",
-            description: "use <strong class='color-f'>energy</strong> to push <strong class='color-block'>blocks</strong> with your mouse<br><strong class='color-block'>blocks</strong> can <strong>collide</strong> with <strong>intangible</strong> mobs<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong>",
+            description: "use <strong class='color-f'>energy</strong> to push <strong class='color-block'>blocks</strong> with your mouse<br><strong class='color-block'>blocks</strong> can't <strong>collide</strong> with <strong>intangible</strong> mobs<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong>",
             effect: () => {
                 m.fieldPhase = 0;
                 m.fieldPosition = {

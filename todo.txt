@@ -1,16 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new mob: slasher - it's basically a jedi
+new boss: slasherBoss - radially waving short distance lasers
 
-harpoon: +33% damage, +33% delay after firing
-time dilation reverted 50% -> 0% collision harm reduction
-time dilation can no longer get tech: symbiosis
-nano-scale: can access tokamak and discrete optimization
-cache: 11x -> 13x ammo
+aerogel 250%->150% foam damage
 
 bug fixes
 
 ******************************************************** TODO ********************************************************
+
+slasherBoss
+  sine wave of lasers that travel around vertexes
+    10+ sided
+    low laser damage, but it doesn't trigger damage immunity
 
 slasher compute fastest direction to rotate towards player
   cross product

@@ -15,7 +15,7 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("time dilation")
+            // m.setField("pilot wave")
             // b.giveGuns("harpoon")
             // tech.giveTech("toggling harpoon")
             // tech.giveTech("filament")
@@ -1623,14 +1623,14 @@ const level = {
                     spawn.mapRect(x + 550, y + -10 - 640, 900, 25); //raised floor 
                     spawn.mapRect(x + 450, y + -20 - 640, 1100, 25);
                     spawn.mapRect(x + 450, y + -675 - 640, 1100, 25); //chamber ceiling
-                    powerUps.spawn(x + 998, y - 333 - 640, "tech", false);
+                    powerUps.directSpawn(x + 998, y - 333 - 640, "tech", false);
                     spawn.mapVertex(x + 1000, y + -0, "575 0  -575 0  -450 -100  450 -100"); //base
                 } else { //lower chamber
                     spawn.mapRect(x + 400, y + -10, 1200, 50); //raised floor 
                     spawn.mapRect(x + 450, y + -20, 1100, 50);
                     spawn.mapRect(x + 450, y + -675, 1100, 25); //chamber ceiling
                     spawn.mapRect(x + 550, y + -685, 900, 25);
-                    powerUps.spawn(x + 998, y - 333, "tech", false);
+                    powerUps.directSpawn(x + 998, y - 333, "tech", false);
                 }
                 const powerUp1 = powerUp[powerUp.length - 1]
                 powerUp1.holdPosition = { x: powerUp1.position.x, y: powerUp1.position.y }
@@ -2300,13 +2300,13 @@ const level = {
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
 
-        spawn.slasher(1900, -500)
-        // spawn.sneaker(1900, -500, 200)
+        spawn.slashBoss(1900, -500)
+        // spawn.ghoster(1900, -500, 200)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.growBossCulture(1200, -500)
         // spawn.laserTargetingBoss(1600, -400)
-        // spawn.focuser(1600, -500)
+        // spawn.blinkBoss(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
         // spawn.laser(1800, -120)

@@ -637,7 +637,7 @@
             },
             {
                 name: "kinetic bombardment",
-                description: "increase <strong class='color-d'>damage</strong> by up to <strong>33%</strong><br>at a <strong>distance</strong> of 40 steps from the target",
+                description: "increase <strong class='color-d'>damage</strong> by up to <strong>33%</strong> at a <strong>distance</strong><br>of up to 50 player widths from the target",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -4932,7 +4932,7 @@
             },
             {
                 name: "aerogel",
-                description: "<strong>foam</strong> bubbles <strong>float</strong> and dissipate <strong>50%</strong> faster<br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>200%</strong>",
+                description: "<strong>foam</strong> bubbles <strong>float</strong> and dissipate <strong>50%</strong> faster<br>increase <strong>foam</strong> <strong class='color-d'>damage</strong> per second by <strong>150%</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
