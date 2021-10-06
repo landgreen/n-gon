@@ -388,9 +388,9 @@ const simulation = {
         }
     },
     switchGun() {
-        if (tech.isLongitudinal && b.guns[b.activeGun].name === "wave beam") {
+        if (tech.isLongitudinal && b.guns[b.activeGun].name === "matter wave") {
             for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
-                if (b.guns[i].name === "wave beam") {
+                if (b.guns[i].name === "matter wave") {
                     b.guns[i].waves = []; //empty array of wave bullets
                     break;
                 }
@@ -746,7 +746,7 @@ const simulation = {
         if (m.alive) {
             if (tech.isLongitudinal) {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
-                    if (b.guns[i].name === "wave beam") {
+                    if (b.guns[i].name === "matter wave") {
                         b.guns[i].waves = []; //empty array of wave bullets
                         break;
                     }

@@ -1,12 +1,15 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new boss: slasherBoss - radially waving short distance lasers
-
-aerogel 250%->150% foam damage
-
-bug fixes
+tech, field, and gun names are now clickable wikipedia searches
+  works in pause and experiment modes
+  several names have also been adjusted
 
 ******************************************************** TODO ********************************************************
+
+bad links:
+
+add link URL to all tech guns and field on page load
+  but only if URL is undefined so hard to search names can be added in by hand
 
 slasherBoss
   sine wave of lasers that travel around vertexes
@@ -84,7 +87,7 @@ Pilot wave tech
 make experiment and understand vibe more obvious
   mostly in early game or first time players
 
-look into 360 wave beam lag
+look into 360 matter wave lag
 
 aoe effect pushes mobs away,  then rapidly pulls them in
   for mines?
@@ -99,7 +102,7 @@ it would be helpful if there was a mechanism to recover mobs that fly off the ma
 make non moving bosses not move after getting hit
   shooter, shielding, 
 
-buff rail gun
+buff railgun
 
 scrolling console history in pause menu?
 pause should at least show the last in game console message
@@ -114,7 +117,7 @@ tech: quantized shields - harmonic standing wave field can only lose 33 energy p
   doesn't stack with spherical tech
 
 make a tech that improves all charge guns
-  for: pulse, foam, rail gun
+  for: pulse, foam, railgun
   effect:
     faster charge rate?
       fire speed already does that...
@@ -135,7 +138,7 @@ tech: use the ability for power ups to have custom code
     explode if they touch?
 
 apply the new gun.do functions to other guns
-  rail gun
+  railgun
   crouching missile?
     works similar to foam
     performance issues?

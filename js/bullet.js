@@ -102,7 +102,7 @@ const b = {
             for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "ammo");
         }
     },
-    refundAmmo() { //triggers after firing when you removed ammo for a gun, but didn't need to  (like a rail gun misfire)
+    refundAmmo() { //triggers after firing when you removed ammo for a gun, but didn't need to  (like a railgun misfire)
         if (tech.isCrouchAmmo && input.down) {
             tech.isCrouchAmmo--
             if ((tech.isCrouchAmmo) % 2) {
@@ -4430,7 +4430,7 @@ const b = {
             fire() {}
         },
         {
-            name: "wave beam",
+            name: "matter wave",
             description: "emit a <strong>wave packet</strong> of oscillating particles<br>that propagates through <strong>solids</strong>",
             ammo: 0,
             ammoPack: 120,
@@ -5189,7 +5189,7 @@ const b = {
             }
         },
         {
-            name: "rail gun",
+            name: "railgun",
             description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
             ammo: 0,
             ammoPack: 3.5,

@@ -1471,7 +1471,7 @@ const m = {
             }
         },
         {
-            name: "standing wave harmonics",
+            name: "standing wave",
             description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> protects you in every <strong>direction</strong><br><strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>", //drains <strong class='color-f'>energy</strong>
             drainCD: 0,
             effect: () => {
@@ -1757,7 +1757,7 @@ const m = {
             }
         },
         {
-            name: "negative mass field",
+            name: "negative mass",
             description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong><br>hold <strong class='color-block'>blocks</strong> as if they have a lower <strong>mass</strong>",
             fieldDrawRadius: 0,
             effect: () => {
@@ -1907,7 +1907,7 @@ const m = {
             }
         },
         {
-            name: "nano-scale manufacturing",
+            name: "molecular assembler",
             description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration",
             effect: () => {
                 // m.fieldMeterColor = "#0c5"

@@ -172,6 +172,13 @@ window.onresize = () => {
 //**********************************************************************
 // experimental build grid display and pause
 //**********************************************************************
+//set wikipedia link
+for (let i = 0, len = tech.tech.length; i < len; i++) {
+    if (!tech.tech[i].link) {
+        tech.tech[i].link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(tech.tech[i].name).replace(/'/g, '%27')}&title=Special:Search' style="color: #000;">${tech.tech[i].name}</a>`
+    }
+}
+
 const build = {
     // onLoadPowerUps() {
     //     const set = getUrlVars()
@@ -241,7 +248,7 @@ const build = {
       </svg>
 </div>`;
         for (let i = 0, len = b.inventory.length; i < len; i++) {
-            text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[b.inventory[i]].name} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div> ${b.guns[b.inventory[i]].description}</div>`
+            text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div> ${b.guns[b.inventory[i]].description}</div>`
         }
         let el = document.getElementById("pause-grid-left")
         el.style.display = "grid"
@@ -249,7 +256,7 @@ const build = {
 
         //left side
         text = "";
-        text += `<div class="pause-grid-module" id ="pause-field"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
+        text += `<div class="pause-grid-module" id ="pause-field"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
                 const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
@@ -259,23 +266,23 @@ const build = {
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                               <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                             </span>
-                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
+                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isGunTech) {
                     text += `<div class="pause-grid-module"><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                                             </span>
-                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
+                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isLore) {
                     text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                     // } else if (tech.tech[i].isJunk) {
                     // text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 } else {
-                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].description}</div></div>`
                 }
             } else if (tech.tech[i].isLost) {
-                text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].description}</div></div>`
+                text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].link}</div>${tech.tech[i].description}</div></div>`
             }
         }
         el = document.getElementById("pause-grid-right")
@@ -369,7 +376,7 @@ const build = {
                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                 <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                             </span>
-                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}
+                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].description}
                         </div>`
                         // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
                         // <div class="circle-grid tech" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
@@ -382,18 +389,18 @@ const build = {
                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                             </span>
-                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}
+                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].description}
                         </div>`
                     } else
                     if (tech.tech[i].isJunk) {
                         // text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div></div>`
-                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
+                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].description}</div>`
                     } else if (tech.tech[i].isExperimentalMode) {
                         // techID.innerHTML = `${tech.tech[i].description}</div>`
                         techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].description}</div>`
                         // text += `<div class="grid-title">${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
                     } else {
-                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].description}</div>`
+                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].description}</div>`
                     }
                     //deselect selected tech options if you don't have the tech any more // for example: when bot techs are converted after a bot upgrade tech is taken
                     if (tech.tech[i].count === 0 && techID.classList.contains("build-tech-selected")) techID.classList.remove("build-tech-selected");
@@ -455,10 +462,10 @@ const build = {
     </div>
   </div>`
         for (let i = 0, len = m.fieldUpgrades.length; i < len; i++) {
-            text += `<div id ="field-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[i].name}</div> ${m.fieldUpgrades[i].description}</div>`
+            text += `<div id ="field-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div> ${m.fieldUpgrades[i].description}</div>`
         }
         for (let i = 0, len = b.guns.length; i < len; i++) {
-            text += `<div id = "gun-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[i].name}</div> ${b.guns[i].description}</div>`
+            text += `<div id = "gun-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div> ${b.guns[i].description}</div>`
         }
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
@@ -466,7 +473,7 @@ const build = {
                     if (tech.tech[i].isExperimentalMode) {
                         text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title">${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
                     } else {
-                        text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
+                        text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link}</div> ${tech.tech[i].description}</div>`
                     }
                 } else {
                     text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled"><div class="grid-title"> ${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
@@ -496,6 +503,9 @@ const build = {
                 // document.getElementById(`tech-${i}`).setAttribute('title', tech.tech[i].requires); //add tooltip
             }
         }
+    },
+    nameLink(text) { //converts text into a clickable wikipedia search
+        return `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(text).replace(/'/g, '%27')}&title=Special:Search' style="color: #000;">${text}</a>`
     },
     reset() {
         simulation.startGame(true); //starts game, but pauses it
