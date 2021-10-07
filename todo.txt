@@ -1,12 +1,20 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech, field, and gun names are now clickable wikipedia searches
-  works in pause and experiment modes
-  several names have also been adjusted
+plasma extruder
+  extruder lag issues should be fixed!
+  extruder graphics have a cool glow
+  45% more damage
+  20% more energy drain
+  slows mobs a bit more
+  extends faster
+  it can hit mobs that get near it now instead of just inside it
+  plasma jet now works with extruder
 
 ******************************************************** TODO ********************************************************
 
-bad links:
+toggle harpoon is weak and should be more obvious
+
+Tech: "Growth": Increase damage by 3% for every mob currently alive.
 
 add link URL to all tech guns and field on page load
   but only if URL is undefined so hard to search names can be added in by hand
@@ -475,6 +483,7 @@ possible names for tech
   gnarl
   SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
   nuclear pasta - hard matter in neutron star
+  nonlocal
  
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

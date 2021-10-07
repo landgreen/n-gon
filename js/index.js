@@ -174,9 +174,7 @@ window.onresize = () => {
 //**********************************************************************
 //set wikipedia link
 for (let i = 0, len = tech.tech.length; i < len; i++) {
-    if (!tech.tech[i].link) {
-        tech.tech[i].link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(tech.tech[i].name).replace(/'/g, '%27')}&title=Special:Search' style="color: #000;">${tech.tech[i].name}</a>`
-    }
+    if (!tech.tech[i].link) tech.tech[i].link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(tech.tech[i].name).replace(/'/g, '%27')}&title=Special:Search' style="color: #000;">${tech.tech[i].name}</a>`
 }
 
 const build = {

@@ -1518,7 +1518,7 @@ const b = {
     didExtruderDrain: false,
     canExtruderFire: true,
     extruder() {
-        const DRAIN = 0.0008 + m.fieldRegen
+        const DRAIN = 0.0011 + m.fieldRegen
         if (m.energy > DRAIN && b.canExtruderFire) {
             m.energy -= DRAIN
             if (m.energy < 0) {
@@ -1526,18 +1526,18 @@ const b = {
                 m.energy = 0;
             }
             b.isExtruderOn = true
-            const SPEED = 14
+            const SPEED = 10 + 10 * tech.isPlasmaRange
             const me = bullet.length;
             const where = Vector.add(m.pos, player.velocity)
             bullet[me] = Bodies.polygon(where.x + 20 * Math.cos(m.angle), where.y + 20 * Math.sin(m.angle), 4, 0.01, {
                 cycle: -0.5,
                 isWave: true,
-                endCycle: simulation.cycle + 53, // + 30 * tech.isPlasmaRange,
+                endCycle: simulation.cycle + 33, // + 30 * tech.isPlasmaRange,
                 inertia: Infinity,
                 frictionAir: 0,
                 isInHole: true, //this keeps the bullet from entering wormholes
                 minDmgSpeed: 0,
-                dmg: b.dmgScale * 1.8, //damage also changes when you divide by mob.mass on in .do()
+                dmg: b.dmgScale * 2.5, //damage also changes when you divide by mob.mass on in .do()
                 classType: "bullet",
                 isBranch: false,
                 restitution: 0,
@@ -1555,25 +1555,31 @@ const b = {
                         if (Matter.Query.point(map, this.position).length) { //check if inside map
                             this.isBranch = true;
                         } else { //check if inside a body
-                            const q = Matter.Query.point(mob, this.position)
-                            for (let i = 0; i < q.length; i++) {
-                                Matter.Body.setVelocity(q[i], {
-                                    x: q[i].velocity.x * 0.2,
-                                    y: q[i].velocity.y * 0.2
-                                });
-                                Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
-                                let dmg = this.dmg / Math.min(10, q[i].mass)
-                                q[i].damage(dmg);
-                                if (q[i].alive) q[i].foundPlayer();
-                                //removed to improve performance
-                                // simulation.drawList.push({ //add dmg to draw queue
-                                //     x: this.position.x,
-                                //     y: this.position.y,
-                                //     radius: Math.log(2 * dmg + 1.1) * 40,
-                                //     color: "rgba(255, 0, 119, 0.5)",
-                                //     time: simulation.drawTime
-                                // });
+                            for (let i = 0, len = mob.length; i < len; i++) {
+                                const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position))
+                                const radius = mob[i].radius + 20
+                                if (dist < radius * radius) {
+                                    Matter.Body.setVelocity(mob[i], {
+                                        x: mob[i].velocity.x * 0.15,
+                                        y: mob[i].velocity.y * 0.15
+                                    });
+                                    Matter.Body.setPosition(this, Vector.add(this.position, mob[i].velocity)) //move with the medium
+                                    let dmg = this.dmg / Math.min(10, mob[i].mass)
+                                    mob[i].damage(dmg);
+                                    if (mob[i].alive) mob[i].foundPlayer();
+                                }
                             }
+                            // const q = Matter.Query.point(mob, this.position)
+                            // for (let i = 0; i < q.length; i++) {
+                            //     Matter.Body.setVelocity(q[i], {
+                            //         x: q[i].velocity.x * 0.15,
+                            //         y: q[i].velocity.y * 0.15
+                            //     });
+                            //     Matter.Body.setPosition(this, Vector.add(this.position, q[i].velocity)) //move with the medium
+                            //     let dmg = this.dmg / Math.min(10, q[i].mass)
+                            //     q[i].damage(dmg);
+                            //     if (q[i].alive) q[i].foundPlayer();
+                            // }
                         }
                         this.cycle++
                         const wiggleMag = (input.down ? 6 : 12) * Math.cos(simulation.cycle * 0.09)
@@ -4348,10 +4354,11 @@ const b = {
                 m.fireCDcycle = m.cycle + Math.floor((input.down ? 23 : 15) * b.fireCDscale); // cool down
                 const SPREAD = input.down ? 0.08 : 0.13
                 const num = tech.missileCount + 2
+                const radius = 11 * tech.bulletSize
                 let dir = m.angle - SPREAD * (num - 1) / 2;
                 for (let i = 0; i < num; i++) {
                     const me = bullet.length;
-                    bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 12, 11 * tech.bulletSize, b.fireAttributes(dir, false));
+                    bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 12, radius, b.fireAttributes(dir, false));
                     Composite.add(engine.world, bullet[me]); //add bullet to world
                     Matter.Body.setVelocity(bullet[me], {
                         x: SPEED * Math.cos(dir),

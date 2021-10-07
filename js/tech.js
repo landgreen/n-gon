@@ -2832,6 +2832,7 @@
             },
             {
                 name: "non-unitary operator",
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Unitary_operator' style="color: #000;">non-unitary operator</a>`,
                 description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>, but<br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
                 maxCount: 1,
                 count: 0,
@@ -2873,6 +2874,7 @@
             },
             {
                 name: "Ψ(t) collapse",
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Wave_function_collapse' style="color: #000;">Ψ(t) collapse</a>`,
                 description: `enter an <strong class='alt'>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn ${powerUps.orb.research(16)}`,
                 maxCount: 1,
                 count: 0,
@@ -3616,7 +3618,7 @@
                 allowed() {
                     return (b.totalBots() > 3 || m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isEnergyHealth && !tech.isRewindAvoidDeath //build.isExperimentSelection ||
                 },
-                requires: "bots > 3, plasma torch, nano-scale, pilot wave, not mass-energy equivalence, CPT",
+                requires: "bots > 3, plasma torch, assembler, pilot wave, not mass-energy equivalence, CPT",
                 effect() {
                     tech.isRewindGun = true
                     b.guns.push(b.gunRewind)
@@ -4197,7 +4199,7 @@
                 },
                 requires: "super balls",
                 effect() {
-                    tech.bulletSize += 0.15
+                    tech.bulletSize += 0.14
                 },
                 remove() {
                     tech.bulletSize = 1;
@@ -5800,7 +5802,7 @@
                         }
                         simulation.makeTextLog(`tech.isOrbitalBotUpgrade = true`)
                     })
-                    for (let i = 0; i < 2; i++) { //double chance for dynamo-bot, since it's very good for nano-scale
+                    for (let i = 0; i < 2; i++) { //double chance for dynamo-bot, since it's very good for assembler
                         notUpgradedBots.push(() => {
                             tech.giveTech("dynamo-bot upgrade")
                             for (let i = 0; i < num; i++) {
@@ -5817,8 +5819,8 @@
             {
                 name: "mycelium manufacturing",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Mycelium' style="color: #000;">mycelium manufacturing</a>`,
-                description: `use ${powerUps.orb.research(3)}to repurpose <strong>nano-scale</strong> field<br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>`,
-                // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
+                description: `use ${powerUps.orb.research(3)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>`,
+                // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>assembler</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5844,8 +5846,8 @@
             {
                 name: "missile manufacturing",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Missile' style="color: #000;">missile manufacturing</a>`,
-                description: `use ${powerUps.orb.research(3)}to repurpose <strong>nano-scale</strong> field<br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>`,
-                // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
+                description: `use ${powerUps.orb.research(3)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>`,
+                // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>assembler</strong><br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5871,8 +5873,8 @@
             {
                 name: "ice IX manufacturing",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ice-nine_(disambiguation)' style="color: #000;">ice IX manufacturing</a>`,
-                description: `use ${powerUps.orb.research(3)}to repurpose <strong>nano-scale</strong> field<br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>`,
-                // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>nano-scale</strong><br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>",
+                description: `use ${powerUps.orb.research(3)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>`,
+                // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>assembler</strong><br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5966,7 +5968,7 @@
                 allowed() {
                     return !tech.isExtruder && m.fieldUpgrades[m.fieldMode].name === "plasma torch" && (build.isExperimentSelection || powerUps.research.count > 0)
                 },
-                requires: "plasma torch, not micro-extruder",
+                requires: "plasma torch, not extruder",
                 effect() {
                     tech.plasmaBotCount++;
                     b.plasmaBot();
@@ -6002,9 +6004,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.plasmaBotCount || (m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder)) && (build.isExperimentSelection || powerUps.research.count > 0)
+                    return (tech.plasmaBotCount || m.fieldUpgrades[m.fieldMode].name === "plasma torch") && (build.isExperimentSelection || powerUps.research.count > 0)
                 },
-                requires: "plasma torch, not micro-extruder",
+                requires: "plasma torch",
                 effect() {
                     tech.isPlasmaRange += 0.5;
                     if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
@@ -6023,9 +6025,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && tech.isPlasmaRange === 1 && tech.plasmaBotCount === 0
+                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && tech.plasmaBotCount === 0
                 },
-                requires: "plasma torch, not plasma jet, plasma-bot",
+                requires: "plasma torch, not  plasma-bot",
                 effect() {
                     tech.isExtruder = true;
                 },
@@ -6042,7 +6044,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "time dilation"
+                    return m.fieldUpgrades[m.fieldMode].name === "time dilation" && !m.isShipMode
                 },
                 requires: "time dilation",
                 effect() {

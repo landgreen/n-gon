@@ -2006,20 +2006,30 @@ const m = {
                             b.wasExtruderOn = false
                             b.canExtruderFire = true
                         }
-                        ctx.lineWidth = 5;
-                        ctx.strokeStyle = "#f07"
                         ctx.beginPath(); //draw all the wave bullets
                         for (let i = 0, len = bullet.length; i < len; i++) {
                             if (bullet[i].isWave) {
                                 if (bullet[i].isBranch) {
-                                    ctx.stroke();
-                                    ctx.beginPath(); //draw all the wave bullets
+                                    ctx.moveTo(bullet[i].position.x, bullet[i].position.y)
+
+                                    // ctx.lineWidth = 5;
+                                    // ctx.strokeStyle = "#f07"
+                                    // ctx.stroke();
+                                    // ctx.lineWidth = 30;
+                                    // ctx.strokeStyle = "rgba(255,0,110,0.05)"
+                                    // ctx.stroke();
+                                    // ctx.beginPath(); //draw all the wave bullets
                                 } else {
                                     ctx.lineTo(bullet[i].position.x, bullet[i].position.y)
                                 }
                             }
                         }
                         if (b.wasExtruderOn && b.isExtruderOn) ctx.lineTo(m.pos.x + 15 * Math.cos(m.angle), m.pos.y + 15 * Math.sin(m.angle))
+                        ctx.lineWidth = 5;
+                        ctx.strokeStyle = "#f07"
+                        ctx.stroke();
+                        ctx.lineWidth = 35;
+                        ctx.strokeStyle = "rgba(255,0,110,0.05)"
                         ctx.stroke();
                     }
                 }

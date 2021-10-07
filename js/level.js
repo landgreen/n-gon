@@ -15,9 +15,9 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("pilot wave")
+            // m.setField("plasma torch")
             // b.giveGuns("harpoon")
-            // tech.giveTech("toggling harpoon")
+            // tech.giveTech("extruder")
             // tech.giveTech("filament")
             // tech.giveTech("mouth")
             // tech.giveTech("all-stars")
@@ -128,18 +128,19 @@ const level = {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
             b.dmgScale *= 0.914; //damage done by player decreases each level
-            if (simulation.accelScale < 5) simulation.accelScale *= 1.02 //mob acceleration increases each level
-            if (simulation.CDScale > 0.2) simulation.CDScale *= 0.97 //mob CD time decreases each level
+            if (simulation.accelScale < 6) simulation.accelScale *= 1.025 //mob acceleration increases each level
+            if (simulation.CDScale > 0.15) simulation.CDScale *= 0.965 //mob CD time decreases each level
         }
         simulation.dmgScale = 0.41 * simulation.difficulty //damage done by mobs increases each level
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
+        // console.log(`CD = ${simulation.CDScale}`)
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
             b.dmgScale /= 0.914; //damage done by player decreases each level
-            if (simulation.accelScale > 0.2) simulation.accelScale /= 1.02 //mob acceleration increases each level
-            if (simulation.CDScale < 5) simulation.CDScale /= 0.97 //mob CD time decreases each level
+            if (simulation.accelScale > 1) simulation.accelScale /= 1.025 //mob acceleration increases each level
+            if (simulation.CDScale < 1) simulation.CDScale /= 0.965 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
         simulation.dmgScale = 0.41 * simulation.difficulty //damage done by mobs increases each level
@@ -2300,8 +2301,8 @@ const level = {
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
 
-        spawn.slashBoss(1900, -500)
-        // spawn.ghoster(1900, -500, 200)
+        // spawn.slashBoss(1900, -500)
+        spawn.shooter(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.growBossCulture(1200, -500)
