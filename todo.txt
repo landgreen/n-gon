@@ -1,31 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
+extruder:
+  new tech: refractory metal - increase extruder damage radius
+  fixed extruder graphics bug, and collisions bug
+  dynamical systems and discrete optimization are allowed with plasma torch
+    (although I nerfed them both just a bit)
 
-plasma extruder
-  extruder lag issues should be fixed!
-  extruder graphics have a cool glow
-  45% more damage
-  20% more energy drain
-  slows mobs a bit more
-  extends faster
-  it can hit mobs that get near it now instead of just inside it
-  plasma jet now works with extruder
+irradiated nails: 90% damage spread over 2s -> 3s
+  same total damage, but it takes 1 second longer
+toggling harpoon: 6x -> 8x damage
+  also the graphic effect is more obvious
+slasher mobs will grow their sword at the farthest vertex from the player
 
 ******************************************************** TODO ********************************************************
-
-toggle harpoon is weak and should be more obvious
-
-Tech: "Growth": Increase damage by 3% for every mob currently alive.
-
-add link URL to all tech guns and field on page load
-  but only if URL is undefined so hard to search names can be added in by hand
-
-slasherBoss
-  sine wave of lasers that travel around vertexes
-    10+ sided
-    low laser damage, but it doesn't trigger damage immunity
-
-slasher compute fastest direction to rotate towards player
-  cross product
 
 death animation ideas:
   redraw game in strange ways, to show that it's a simulation (for example the testing mode is a strange redraw of map)
@@ -34,24 +20,8 @@ death animation ideas:
 
 be nice if block throwing had a projected path
 
-slasher mob: extends a thin radial line, then spins around and damages player if in circle around mob
-  do short length laser damage
-  doesn't have to be a full spin
-
 JUNK tech: planetesimals game inside n-gon
 https://codepen.io/lilgreenland/pen/jrMvaB?editors=0010
-
-how to make it more interesting to get multiple guns?
-  make final boss less about having huge dps
-    lower final boss health when it spawns boss
-      spawn more bosses
-  make guns have more weaknesses/advantages to specific situations
-    no gun should be good at everything
-  remove gun tech that stacks to 9?
-  nerf a few of the most overpowered gun tech
-  make more gun tech apply to multiple guns
-  after picking up a gun tech open a menu with just gun tech for that gun?
-    but then the player never gets to try the vanilla version of the gun
 
 Tech: Make player smol
 
@@ -90,10 +60,6 @@ Pilot wave tech
   Energy use is increased, but you can now shape blocks using pressure
   Grouping blocks will merge them into a massive ball
   Size, density is determined by total mass
-
-
-make experiment and understand vibe more obvious
-  mostly in early game or first time players
 
 look into 360 matter wave lag
 
@@ -484,6 +450,8 @@ possible names for tech
   SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
   nuclear pasta - hard matter in neutron star
   nonlocal
+  fine-tuned universe
+  eternalism https://en.wikipedia.org/wiki/Eternalism_(philosophy_of_time)
  
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

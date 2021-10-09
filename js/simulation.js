@@ -678,8 +678,6 @@ const simulation = {
         level.setDifficulty()
         simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
 
-        build.isExperimentSelection = false;
-        build.isExperimentRun = false;
         simulation.clearNow = true;
         document.getElementById("text-log").style.opacity = 0;
         document.getElementById("fade-out").style.opacity = 0;
@@ -690,7 +688,6 @@ const simulation = {
         // simulation.makeTextLog(`input.key.right<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]`);
         simulation.makeTextLog(`<span class='color-var'>const</span> engine <span class='color-symbol'>=</span> Engine.create(); <em>//simulation begin</em>`);
         simulation.makeTextLog(`engine.timing.timeScale <span class='color-symbol'>=</span> 1`);
-        simulation.makeTextLog(`<span class='color-var'>m</span>.setField("<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>")`);
         // simulation.makeTextLog(`input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
 
         document.getElementById("health").style.display = "inline"
@@ -706,7 +703,6 @@ const simulation = {
         tech.healMaxEnergyBonus = 0
         m.setMaxEnergy();
         m.energy = 0
-        m.fieldMode = 0;
         // simulation.makeTextLog(`${simulation.SVGrightMouse}<strong style='font-size:30px;'> ${m.fieldUpgrades[m.fieldMode].name}</strong><br><span class='faded'></span><br>${m.fieldUpgrades[m.fieldMode].description}`, 600);
         // simulation.makeTextLog(`
         // input.key.up <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]
@@ -719,7 +715,7 @@ const simulation = {
         // <br><span class='color-var'>m</span>.field.description <span class='color-symbol'>=</span> "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].description}</span>"
         // `, 800);
 
-        m.setField(m.fieldMode)
+        m.setField(0)
         // m.energy = 0;
         //exit testing
         if (simulation.testing) {
@@ -729,6 +725,8 @@ const simulation = {
         }
         simulation.isCheating = false
         simulation.firstRun = false;
+        build.isExperimentSelection = false;
+        build.isExperimentRun = false;
 
         //setup FPS cap
         simulation.fpsInterval = 1000 / simulation.fpsCap;

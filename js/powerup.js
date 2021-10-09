@@ -217,7 +217,6 @@ const powerUps = {
             simulation.makeTextLog(text);
         } else if (type === "field") {
             m.setField(index)
-            simulation.makeTextLog(`<span class='color-var'>m</span>.setField("<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>")`);
         } else if (type === "tech") {
             setTimeout(() => {
                 powerUps.lastTechIndex = index

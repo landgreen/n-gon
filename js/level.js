@@ -15,13 +15,13 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("plasma torch")
             // b.giveGuns("harpoon")
+            // m.setField("plasma torch")
             // tech.giveTech("extruder")
-            // tech.giveTech("filament")
+            // for (let i = 0; i < 1; i++) tech.giveTech("refractory metal")
             // tech.giveTech("mouth")
             // tech.giveTech("all-stars")
-            // for (let i = 0; i < 3; i++) tech.giveTech("super sized")
+            // for (let i = 0; i < 3; i++) tech.giveTech("overcharge")
             // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
             // tech.isCancelDuplication = true
 
@@ -2265,7 +2265,7 @@ const level = {
         spawn.mapRect(-950, -1800, 8200, 800); //roof
         spawn.mapRect(-250, -400, 1000, 600); // shelf
         spawn.mapRect(-250, -1200, 1000, 550); // shelf roof
-        powerUps.spawnStartingPowerUps(600, -800);
+        // powerUps.spawnStartingPowerUps(600, -800);
         // for (let i = 0; i < 50; ++i) powerUps.spawn(550, -800, "research", false);
         // powerUps.spawn(350, -800, "gun", false);
 
@@ -2302,7 +2302,7 @@ const level = {
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
 
         // spawn.slashBoss(1900, -500)
-        spawn.shooter(1900, -500)
+        spawn.slasher(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.growBossCulture(1200, -500)

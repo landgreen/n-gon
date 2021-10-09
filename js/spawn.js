@@ -3013,11 +3013,12 @@ const spawn = {
         me.delay = 120 * simulation.CDScale;
         me.cd = 0;
         me.swordRadius = 0;
+        me.swordVertex = 1
         me.swordRadiusMax = 350 + 5 * simulation.difficulty;
         me.swordRadiusGrowRate = me.swordRadiusMax * (0.018 + 0.0006 * simulation.difficulty)
         me.isSlashing = false;
         me.swordDamage = 0.05 * simulation.dmgScale
-        const laserAngle = 3 * Math.PI / 5
+        me.laserAngle = 3 * Math.PI / 5
         const seeDistance2 = 200000
         spawn.shield(me, x, y);
         me.onDamage = function() {};
@@ -3027,7 +3028,6 @@ const spawn = {
             this.attraction();
             if (!m.isBodiesAsleep) this.sword() //does various things depending on what stage of the sword swing
         };
-
         me.swordWaiting = function() {
             if (
                 this.seePlayer.recall &&
@@ -3036,6 +3036,17 @@ const spawn = {
                 Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
                 Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
             ) {
+                //find vertex farthest away from player
+                let dist = 0
+                for (let i = 0, len = this.vertices.length; i < len; i++) {
+                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
+                    if (D > dist) {
+                        dist = D
+                        this.swordVertex = i
+                    }
+                }
+                // this.laserAngle = 7 / 10 * Math.PI + this.swordVertex / 5 * 2 * Math.PI - Math.PI / 2
+                this.laserAngle = this.swordVertex / 5 * 2 * Math.PI + 0.6283
                 this.sword = this.swordGrow
                 // Matter.Body.setVelocity(this, { x: 0, y: 0 });
                 this.accelMag = 0
@@ -3043,7 +3054,7 @@ const spawn = {
         }
         me.sword = me.swordWaiting //base function that changes during different aspects of the sword swing
         me.swordGrow = function() {
-            this.laserSword(this.vertices[1], this.angle + laserAngle);
+            this.laserSword(this.vertices[this.swordVertex], this.angle + this.laserAngle);
             this.swordRadius += this.swordRadiusGrowRate
             if (this.swordRadius > this.swordRadiusMax) {
                 this.sword = this.swordSlash
@@ -3051,7 +3062,7 @@ const spawn = {
             }
         }
         me.swordSlash = function() {
-            this.laserSword(this.vertices[1], this.angle + laserAngle);
+            this.laserSword(this.vertices[this.swordVertex], this.angle + this.laserAngle);
             this.torque += this.torqueMagnitude;
             this.spinCount++
             if (this.spinCount > 60) {
@@ -3064,23 +3075,23 @@ const spawn = {
         me.laserSword = function(where, angle) {
             const vertexCollision = function(v1, v1End, domain) {
                 for (let i = 0; i < domain.length; ++i) {
-                    let vertices = domain[i].vertices;
-                    const len = vertices.length - 1;
+                    let v = domain[i].vertices;
+                    const len = v.length - 1;
                     for (let j = 0; j < len; j++) {
-                        results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                        results = simulation.checkLineIntersection(v1, v1End, v[j], v[j + 1]);
                         if (results.onLine1 && results.onLine2) {
                             const dx = v1.x - results.x;
                             const dy = v1.y - results.y;
                             const dist2 = dx * dx + dy * dy;
-                            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: vertices[j], v2: vertices[j + 1] };
+                            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: v[j], v2: v[j + 1] };
                         }
                     }
-                    results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                    results = simulation.checkLineIntersection(v1, v1End, v[0], v[len]);
                     if (results.onLine1 && results.onLine2) {
                         const dx = v1.x - results.x;
                         const dy = v1.y - results.y;
                         const dist2 = dx * dx + dy * dy;
-                        if (dist2 < best.dist2) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: vertices[0], v2: vertices[len] };
+                        if (dist2 < best.dist2) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: v[0], v2: v[len] };
                     }
                 }
             };

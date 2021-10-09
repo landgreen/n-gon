@@ -393,12 +393,18 @@ const m = {
             // for (let i = 0; i < tech.tech.length; i++) {
             //     if (tech.tech[i].name === "quantum immortality") tech.removeTech(i)
             // }
+
+            m.setMaxHealth()
+            m.health = 1;
+            // m.addHealth(1)
+
             simulation.wipe = function() { //set wipe to have trails
                 ctx.fillStyle = "rgba(255,255,255,0)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
             spawn.setSpawnList(); //new mob types
             simulation.clearNow = true; //triggers a map reset
+
             m.switchWorlds()
             const swapPeriod = 1000
             for (let i = 0, len = 5; i < len; i++) {
@@ -1443,6 +1449,7 @@ const m = {
         document.getElementById("field").innerHTML = m.fieldUpgrades[index].name
         m.setHoldDefaults();
         m.fieldUpgrades[index].effect();
+        simulation.makeTextLog(`<span class='color-var'>m</span>.setField("<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>")`);
     },
     fieldUpgrades: [{
             name: "field emitter",
@@ -1972,34 +1979,82 @@ const m = {
                 }
             }
         },
+        // {
+        //     name: "plasma torch",
+        //     description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away",
+        //     effect() {
+        //         m.fieldMeterColor = "#f0f"
+        //         m.eyeFillColor = m.fieldMeterColor
+        //         m.hold = function() {
+        //             b.isExtruderOn = false
+        //             if (m.isHolding) {
+        //                 m.drawHold(m.holdingTarget);
+        //                 m.holding();
+        //                 m.throwBlock();
+        //             } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+        //                 m.grabPowerUp();
+        //                 m.lookForPickUp();
+        //                 if (tech.isExtruder) {
+        //                     b.extruder();
+        //                 } else {
+        //                     b.plasma();
+        //                 }
+        //             } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+        //                 m.pickUp();
+        //             } else {
+        //                 m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+        //             }
+        //             m.drawFieldMeter("rgba(0, 0, 0, 0.2)")
+
+        //             if (tech.isExtruder) {
+        //                 if (input.field) {
+        //                     b.wasExtruderOn = true
+        //                 } else {
+        //                     b.wasExtruderOn = false
+        //                     b.canExtruderFire = true
+        //                 }
+        //                 ctx.beginPath(); //draw all the wave bullets
+        //                 for (let i = 0, len = bullet.length; i < len; i++) {
+        //                     if (bullet[i].isWave) {
+        //                         if (bullet[i].isBranch) {
+        //                             ctx.moveTo(bullet[i].position.x, bullet[i].position.y)
+        //                         } else {
+        //                             ctx.lineTo(bullet[i].position.x, bullet[i].position.y)
+        //                         }
+        //                     }
+        //                 }
+        //                 if (b.wasExtruderOn && b.isExtruderOn) ctx.lineTo(m.pos.x + 15 * Math.cos(m.angle), m.pos.y + 15 * Math.sin(m.angle))
+        //                 ctx.lineWidth = 4;
+        //                 ctx.strokeStyle = "#f07"
+        //                 ctx.stroke();
+        //                 ctx.lineWidth = tech.extruderRange;
+        //                 ctx.strokeStyle = "rgba(255,0,110,0.05)"
+        //                 ctx.stroke();
+        //             }
+        //         }
+        //     }
+        // },
         {
             name: "plasma torch",
             description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away",
-            effect() {
-                m.fieldMeterColor = "#f0f"
-                m.eyeFillColor = m.fieldMeterColor
-                m.hold = function() {
-                    b.isExtruderOn = false
-                    if (m.isHolding) {
-                        m.drawHold(m.holdingTarget);
-                        m.holding();
-                        m.throwBlock();
-                    } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
-                        m.grabPowerUp();
-                        m.lookForPickUp();
-                        if (tech.isExtruder) {
+            set() {
+                if (tech.isExtruder) {
+                    m.hold = function() {
+                        b.isExtruderOn = false
+                        if (m.isHolding) {
+                            m.drawHold(m.holdingTarget);
+                            m.holding();
+                            m.throwBlock();
+                        } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+                            m.grabPowerUp();
+                            m.lookForPickUp();
                             b.extruder();
+                        } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+                            m.pickUp();
                         } else {
-                            b.plasma();
+                            m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                         }
-                    } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
-                        m.pickUp();
-                    } else {
-                        m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-                    }
-                    m.drawFieldMeter("rgba(0, 0, 0, 0.2)")
-
-                    if (tech.isExtruder) {
+                        m.drawFieldMeter("rgba(0, 0, 0, 0.2)")
                         if (input.field) {
                             b.wasExtruderOn = true
                         } else {
@@ -2007,32 +2062,47 @@ const m = {
                             b.canExtruderFire = true
                         }
                         ctx.beginPath(); //draw all the wave bullets
-                        for (let i = 0, len = bullet.length; i < len; i++) {
+                        for (let i = 1, len = bullet.length; i < len; i++) { //skip the first bullet (which is is oldest bullet)
                             if (bullet[i].isWave) {
-                                if (bullet[i].isBranch) {
+                                if (bullet[i].isBranch || bullet[i - 1].isBranch) {
                                     ctx.moveTo(bullet[i].position.x, bullet[i].position.y)
-
-                                    // ctx.lineWidth = 5;
-                                    // ctx.strokeStyle = "#f07"
-                                    // ctx.stroke();
-                                    // ctx.lineWidth = 30;
-                                    // ctx.strokeStyle = "rgba(255,0,110,0.05)"
-                                    // ctx.stroke();
-                                    // ctx.beginPath(); //draw all the wave bullets
                                 } else {
                                     ctx.lineTo(bullet[i].position.x, bullet[i].position.y)
                                 }
                             }
                         }
                         if (b.wasExtruderOn && b.isExtruderOn) ctx.lineTo(m.pos.x + 15 * Math.cos(m.angle), m.pos.y + 15 * Math.sin(m.angle))
-                        ctx.lineWidth = 5;
+                        ctx.lineWidth = 4;
                         ctx.strokeStyle = "#f07"
                         ctx.stroke();
-                        ctx.lineWidth = 35;
-                        ctx.strokeStyle = "rgba(255,0,110,0.05)"
+                        ctx.lineWidth = tech.extruderRange;
+                        ctx.strokeStyle = "rgba(255,0,110,0.06)"
                         ctx.stroke();
                     }
+                } else {
+                    m.hold = function() {
+                        b.isExtruderOn = false
+                        if (m.isHolding) {
+                            m.drawHold(m.holdingTarget);
+                            m.holding();
+                            m.throwBlock();
+                        } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+                            m.grabPowerUp();
+                            m.lookForPickUp();
+                            b.plasma();
+                        } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+                            m.pickUp();
+                        } else {
+                            m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                        }
+                        m.drawFieldMeter("rgba(0, 0, 0, 0.2)")
+                    }
                 }
+            },
+            effect() {
+                m.fieldMeterColor = "#f0f"
+                m.eyeFillColor = m.fieldMeterColor
+                this.set();
             }
         },
         {

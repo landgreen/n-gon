@@ -506,11 +506,12 @@ const build = {
         return `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(text).replace(/'/g, '%27')}&title=Special:Search' style="color: #000;">${text}</a>`
     },
     reset() {
+        build.isExperimentSelection = true;
+        build.isExperimentRun = true;
         simulation.startGame(true); //starts game, but pauses it
         build.isExperimentSelection = true;
         build.isExperimentRun = true;
         simulation.paused = true;
-        m.setField(0)
         b.inventory = []; //removes guns and ammo  
         for (let i = 0, len = b.guns.length; i < len; ++i) {
             b.guns[i].count = 0;

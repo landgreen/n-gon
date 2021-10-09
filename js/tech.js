@@ -3876,7 +3876,7 @@
             {
                 name: "irradiated nails",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Irradiation' style="color: #000;">irradiated nails</a>`,
-                description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br>about <strong>90%</strong> more <strong class='color-d'>damage</strong> over <strong>2</strong> seconds",
+                description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br>about <strong>90%</strong> more <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3894,8 +3894,8 @@
                 }
             },
             {
-                name: "4s half-life",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Half-life' style="color: #000;">4s half-life</a>`,
+                name: "6s half-life",
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Half-life' style="color: #000;">6s half-life</a>`,
                 description: "<strong>nails</strong> are made of <strong class='color-p'>plutonium-238</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong> over <strong>6</strong> seconds",
                 isGunTech: true,
                 maxCount: 1,
@@ -3905,7 +3905,7 @@
                 allowed() {
                     return tech.isNailRadiation && !tech.isFastRadiation
                 },
-                requires: "irradiated nails, not 1/2s half-life",
+                requires: "irradiated nails, not 1s half-life",
                 effect() {
                     tech.isSlowRadiation = true;
                 },
@@ -3914,9 +3914,9 @@
                 }
             },
             {
-                name: "1/2s half-life",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Half-life' style="color: #000;">1/2s half-life</a>`,
-                description: "<strong>nails</strong> are made of <strong class='color-p'>lithium-8</strong><br><strong class='color-d'>damage</strong> occurs after <strong>1/2</strong> a second",
+                name: "1s half-life",
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Half-life' style="color: #000;">1s half-life</a>`,
+                description: "<strong>nails</strong> are made of <strong class='color-p'>lithium-8</strong><br><strong class='color-d'>damage</strong> occurs after <strong>1</strong> second",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -3925,7 +3925,7 @@
                 allowed() {
                     return tech.isNailRadiation && !tech.isSlowRadiation
                 },
-                requires: "irradiated nails, not 4s half-life",
+                requires: "irradiated nails, not 6s half-life",
                 effect() {
                     tech.isFastRadiation = true;
                 },
@@ -4188,7 +4188,7 @@
             },
             {
                 name: "super sized",
-                description: `increase <strong>super ball</strong> radius by <strong>15%</strong><br>increases <strong class='color-d'>damage</strong> by about <strong>30%</strong>`,
+                description: `increase <strong>super ball</strong> radius by <strong>14%</strong><br>increases <strong class='color-d'>damage</strong> by about <strong>27%</strong>`,
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -5084,7 +5084,7 @@
             },
             {
                 name: "toggling harpoon",
-                description: "increase the <strong class='color-d'>damage</strong> of your next <strong>harpoon</strong><br>by <strong>600%</strong> after using it to collect a <strong>power up</strong>",
+                description: "increase the <strong class='color-d'>damage</strong> of your next <strong>harpoon</strong><br>by <strong>800%</strong> after using it to collect a <strong>power up</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5206,7 +5206,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.haveGunCheck("laser") || tech.laserBotCount > 1 || tech.isLaserMine) && tech.laserDamage === 0.16
+                    return (tech.haveGunCheck("laser") || tech.laserBotCount > 1 || tech.isLaserMine) && tech.laserDamage === 0.17
                 },
                 requires: "laser, not free-electron",
                 effect() {
@@ -5234,13 +5234,13 @@
                 requires: "laser, not pulse, diodes",
                 effect() {
                     tech.laserFieldDrain = 0.007 //base is 0.002
-                    tech.laserDamage = 0.48; //base is 0.16
+                    tech.laserDamage = 0.51; //base is 0.16
                     tech.laserColor = "#83f"
                     tech.laserColorAlpha = "rgba(136, 51, 255,0.5)"
                 },
                 remove() {
                     tech.laserFieldDrain = 0.002;
-                    tech.laserDamage = 0.16; //used in check on pulse and diode: tech.laserDamage === 0.16
+                    tech.laserDamage = 0.17; //used in check on pulse and diode: tech.laserDamage === 0.16
                     tech.laserColor = "#f00"
                     tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
                 }
@@ -5999,7 +5999,7 @@
                 description: `use ${powerUps.orb.research(1)} to increase <strong class='color-plasma'>plasma</strong> <strong>torch</strong> range <strong>50%</strong>`,
                 // description: "use <strong>1</strong> <strong class='color-r'>research</strong> to <br>increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>50%</strong>",
                 isFieldTech: true,
-                maxCount: 3,
+                maxCount: 9,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
@@ -6018,7 +6018,7 @@
             },
             {
                 name: "extruder",
-                description: "<strong class='color-plasma'>plasma</strong> <strong>torch</strong> extrudes a thin <strong class='color-plasma'>hot</strong> wire<br>increases <strong class='color-d'>damage</strong>, <strong class='color-f'>energy</strong> drain, and <strong>lag</strong>",
+                description: "<strong class='color-plasma'>plasma</strong> <strong>torch</strong> <strong class='color-plasma'>extrudes</strong> a thin hot      wire<br>increases <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6030,9 +6030,30 @@
                 requires: "plasma torch, not  plasma-bot",
                 effect() {
                     tech.isExtruder = true;
+                    m.fieldUpgrades[m.fieldMode].set()
                 },
                 remove() {
                     tech.isExtruder = false;
+                    if (this.count) m.fieldUpgrades[m.fieldMode].set()
+                }
+            },
+            {
+                name: "refractory metal",
+                description: "<strong class='color-plasma'>extrude</strong> metals at a higher <strong class='color-plasma'>temperature</strong><br>increases effective <strong>radius</strong>",
+                isFieldTech: true,
+                maxCount: 9,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.isExtruder
+                },
+                requires: "extruder",
+                effect() {
+                    tech.extruderRange += 50
+                },
+                remove() {
+                    tech.extruderRange = 15
                 }
             },
             {
@@ -6252,7 +6273,7 @@
             },
             {
                 name: "dynamical systems",
-                description: `use ${powerUps.orb.research(1)}to increase your <strong class='color-d'>damage</strong> by <strong>35%</strong>`,
+                description: `use ${powerUps.orb.research(2)}to increase your <strong class='color-d'>damage</strong> by <strong>35%</strong>`,
                 // description: "use <strong>1</strong> <strong class='color-r'>research</strong><br>increase your <strong class='color-d'>damage</strong> by <strong>35%</strong>",
                 isFieldTech: true,
                 maxCount: 1,
@@ -6260,34 +6281,34 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && (build.isExperimentSelection || powerUps.research.count > 0)
+                    return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && (build.isExperimentSelection || powerUps.research.count > 1)
                 },
-                requires: "metamaterial cloaking or pilot wave",
+                requires: "metamaterial cloaking pilot wave or plasma torch",
                 effect() {
                     tech.isCloakingDamage = true
-                    for (let i = 0; i < 1; i++) {
+                    for (let i = 0; i < 2; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                     }
                 },
                 remove() {
                     tech.isCloakingDamage = false
-                    if (this.count > 0) powerUps.research.changeRerolls(1)
+                    if (this.count > 0) powerUps.research.changeRerolls(2)
                 }
             },
             {
                 name: "discrete optimization",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br><strong>50%</strong> increased <strong><em>delay</em></strong> after firing",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>40%</strong><br><strong>40%</strong> increased <strong><em>delay</em></strong> after firing",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
+                    return m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
                 },
-                requires: "metamaterial cloaking or pilot wave",
+                requires: "metamaterial cloaking, plasma torch or pilot wave",
                 effect() {
-                    tech.aimDamage = 1.5
+                    tech.aimDamage = 1.40
                     b.setFireCD();
                 },
                 remove() {
@@ -8459,5 +8480,6 @@
         isAddRemoveMaxHealth: null,
         removeMaxHealthOnKill: null,
         isSpawnExitTech: null,
-        cloakDuplication: null
+        cloakDuplication: null,
+        extruderRange: null
     }
