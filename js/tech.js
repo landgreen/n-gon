@@ -185,7 +185,7 @@
             if (tech.isAcidDmg && m.health > 1) dmg *= 1.35;
             if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
             if (tech.isEnergyDamage) dmg *= 1 + m.energy / 11;
-            if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.005
+            if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
             if (tech.isRerollDamage) dmg *= 1 + 0.037 * powerUps.research.count
             if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.1995
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
@@ -239,7 +239,7 @@
         },
         tech: [{
                 name: "integrated armament",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Weapon' style="color: #000;">integrated armament</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Weapon' class="link">integrated armament</a>`,
                 description: `increase <strong class='color-d'>damage</strong> by <strong>19.95%</strong><br>your inventory can only hold 1 <strong class='color-g'>gun</strong>`,
                 maxCount: 1,
                 count: 0,
@@ -364,7 +364,7 @@
                 allowed() {
                     return !tech.isSuperDeterminism
                 },
-                requires: "not superdeterminism",
+                requires: "NOT EXPERIMENT MODE, not superdeterminism",
                 effect() {
                     powerUps.spawn(m.pos.x, m.pos.y, "gun");
                     // this.count--
@@ -385,7 +385,7 @@
                 allowed() {
                     return b.inventory.length > 1
                 },
-                requires: "at least 2 guns",
+                requires: "NOT EXPERIMENT MODE, at least 2 guns",
                 effect() {
                     for (let i = 0; i < b.inventory.length; i++) {
                         if (Math.random() < 0.2) {
@@ -428,8 +428,6 @@
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
-                isNonRefundable: true,
-                isBadRandomOption: true,
                 allowed() {
                     return tech.isAmmoForGun
                 },
@@ -440,11 +438,18 @@
                     }
                     simulation.makeGunHUD();
                 },
-                remove() {}
+                remove() {
+                    for (let j = 0; j < this.count; j++) {
+                        for (let i = 0; i < b.guns.length; i++) {
+                            if (b.guns[i].have) b.guns[i].ammo = Math.floor(0.5 * b.guns[i].ammo)
+                        }
+                    }
+                    simulation.makeGunHUD();
+                }
             },
             {
                 name: "cache",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Cache_(computing)' style="color: #000;">cache</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Cache_(computing)' class="link">cache</a>`,
                 description: `${powerUps.orb.ammo()} give <strong>13x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
                 maxCount: 1,
                 count: 0,
@@ -482,7 +487,7 @@
             },
             {
                 name: "desublimated ammunition",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Deposition_(phase_transition)' style="color: #000;">desublimated ammunition</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Deposition_(phase_transition)' class="link">desublimated ammunition</a>`,
                 description: "every other <strong>crouched</strong> shot uses no <strong class='color-ammo'>ammo</strong><br><strong>+6</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
@@ -716,8 +721,8 @@
             },
             {
                 name: "microstates",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Microstate_(statistical_mechanics)' style="color: #000;">microstates</a>`,
-                description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for every <strong>10</strong> active <strong>projectiles</strong>",
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Microstate_(statistical_mechanics)' class="link">microstates</a>`,
+                description: "increase <strong class='color-d'>damage</strong> by <strong>7%</strong><br>for every <strong>10</strong> active <strong>projectiles</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -735,7 +740,7 @@
             },
             {
                 name: "anti-shear topology",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Topology' style="color: #000;">anti-shear topology</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Topology' class="link">anti-shear topology</a>`,
                 description: "some <strong>projectiles</strong> last <strong>30% longer</strong><br><em style = 'font-size: 83%'>drones, spores, missiles, foam, wave, neutron</em>",
                 // isGunTech: true,
                 maxCount: 3,
@@ -773,7 +778,7 @@
             },
             {
                 name: "water shielding",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Radiation_protection#Radiation_shielding' style="color: #000;">water shielding</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Radiation_protection#Radiation_shielding' class="link">water shielding</a>`,
                 description: "<strong class='color-p'>radioactive</strong> effects on you are reduced by 75%<br><em>neutron bomb, drones, explosions, slime</em>",
                 maxCount: 1,
                 count: 0,
@@ -995,7 +1000,7 @@
             },
             {
                 name: "zoospore vector",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Disease_vector' style="color: #000;">zoospore vector</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Disease_vector' class="link">zoospore vector</a>`,
                 description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>11%</strong> chance",
                 maxCount: 9,
                 count: 0,
@@ -1079,7 +1084,7 @@
             },
             {
                 name: "scrap bots",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Scrap' style="color: #000;">scrap bots</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Scrap' class="link">scrap bots</a>`,
                 description: "<strong>33%</strong> chance after killing a mob to build<br>a scrap <strong class='color-bot'>bot</strong> that operates for <strong>14</strong> seconds",
                 maxCount: 3,
                 count: 0,
@@ -1099,7 +1104,7 @@
             },
             {
                 name: "scrap refit",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Scrap' style="color: #000;">scrap refit</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Scrap' class="link">scrap refit</a>`,
                 description: "killing a mob resets your functional scrap <strong class='color-bot'>bots</strong><br>to <strong>14</strong> seconds of operation",
                 maxCount: 1,
                 count: 0,
@@ -1119,7 +1124,7 @@
             },
             {
                 name: "nail-bot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">nail-bot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">nail-bot</a>`,
                 description: "a <strong class='color-bot'>bot</strong> fires <strong>nails</strong> at mobs in line of sight",
                 maxCount: 9,
                 count: 0,
@@ -1145,7 +1150,7 @@
             },
             {
                 name: "nail-bot upgrade",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">nail-bot upgrade</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">nail-bot upgrade</a>`,
                 description: "<strong>convert</strong> all your bots to <strong>nail-bots</strong><br><strong>500%</strong> increased nail-bot <strong>fire rate</strong>",
                 maxCount: 1,
                 count: 0,
@@ -1177,7 +1182,7 @@
             },
             {
                 name: "foam-bot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">foam-bot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">foam-bot</a>`,
                 description: "a <strong class='color-bot'>bot</strong> fires <strong>foam</strong> at nearby mobs",
                 maxCount: 9,
                 count: 0,
@@ -1203,7 +1208,7 @@
             },
             {
                 name: "foam-bot upgrade",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">foam-bot upgrade</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">foam-bot upgrade</a>`,
                 description: "<strong>convert</strong> all your bots to <strong>foam-bots</strong><br><strong>250%</strong> increased foam <strong>size</strong> and <strong>fire rate</strong>",
                 maxCount: 1,
                 count: 0,
@@ -1235,7 +1240,7 @@
             },
             {
                 name: "boom-bot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">boom-bot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">boom-bot</a>`,
                 description: "a <strong class='color-bot'>bot</strong> <strong>defends</strong> the space around you<br>ignites an <strong class='color-e'>explosion</strong> after hitting a mob",
                 maxCount: 9,
                 count: 0,
@@ -1261,7 +1266,7 @@
             },
             {
                 name: "boom-bot upgrade",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">boom-bot upgrade-bot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">boom-bot upgrade-bot</a>`,
                 description: "<strong>convert</strong> all your bots to <strong>boom-bots</strong><br><strong>250%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size",
                 maxCount: 1,
                 count: 0,
@@ -1293,7 +1298,7 @@
             },
             {
                 name: "laser-bot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">laser-bot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">laser-bot</a>`,
                 description: "a <strong class='color-bot'>bot</strong> uses <strong class='color-f'>energy</strong> to emit a <strong class='color-laser'>laser</strong> beam<br>that targets nearby mobs",
                 maxCount: 9,
                 count: 0,
@@ -1319,7 +1324,7 @@
             },
             {
                 name: "laser-bot upgrade",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">laser-bot upgrade</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">laser-bot upgrade</a>`,
                 description: "<strong>convert</strong> all your bots to <strong>laser-bots</strong><br><strong>75%</strong> improved <strong class='color-d'>damage</strong>, efficiency, and range", //  <strong>400%</strong> increased <strong>laser-bot</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
                 maxCount: 1,
                 count: 0,
@@ -1351,7 +1356,7 @@
             },
             {
                 name: "orbital-bot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">orbital-bot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">orbital-bot</a>`,
                 description: "a <strong class='color-bot'>bot</strong> is locked in <strong>orbit</strong> around you<br><strong>stuns</strong> and <strong class='color-d'>damages</strong> mobs on <strong>contact</strong>",
                 maxCount: 9,
                 count: 0,
@@ -1377,7 +1382,7 @@
             },
             {
                 name: "orbital-bot upgrade",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">orbital-bot upgrade</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">orbital-bot upgrade</a>`,
                 description: "<strong>convert</strong> all your bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>250%</strong> and <strong>radius</strong> by <strong>40%</strong>",
                 maxCount: 1,
                 count: 0,
@@ -1418,7 +1423,7 @@
             },
             {
                 name: "dynamo-bot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">dynamo-bot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">dynamo-bot</a>`,
                 description: "a <strong class='color-bot'>bot</strong> <strong class='color-d'>damages</strong> mobs while it <strong>traces</strong> your path<br>regen <strong>6</strong> <strong class='color-f'>energy</strong> per second when it's near",
                 maxCount: 9,
                 count: 0,
@@ -1444,7 +1449,7 @@
             },
             {
                 name: "dynamo-bot upgrade",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">dynamo-bot upgrade</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">dynamo-bot upgrade</a>`,
                 description: "<strong>convert</strong> your bots to <strong>dynamo-bots</strong><br>increase regen to <strong>16</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
@@ -1476,7 +1481,7 @@
             },
             {
                 name: "bot fabrication",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">bot fabrication</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">bot fabrication</a>`,
                 //-----------description is overwritten in powerUps.research.changeRerolls------------
                 description: `if you collect ${powerUps.orb.research(2)}use them to build a<br>random <strong class='color-bot'>bot</strong> <em>(+1 cost every 5 bots)</em>`,
                 maxCount: 1,
@@ -1563,7 +1568,7 @@
             },
             {
                 name: "ersatz bots",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ersatz_good' style="color: #000;">ersatz bots</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ersatz_good' class="link">ersatz bots</a>`,
                 description: "<strong>double</strong> your current permanent <strong class='color-bot'>bots</strong><br>remove <strong>all</strong> of your current <strong class='color-g'>guns</strong>",
                 maxCount: 1,
                 count: 0,
@@ -1574,9 +1579,9 @@
                 isBadRandomOption: true,
                 numberOfGunsLost: 0,
                 allowed() {
-                    return b.totalBots() > 3
+                    return b.totalBots() > 3 && !build.isExperimentSelection
                 },
-                requires: "at least 4 bots",
+                requires: "NOT EXPERIMENT MODE, at least 4 bots",
                 effect() {
                     this.numberOfGunsLost = b.inventory.length
                     b.removeAllGuns();
@@ -1639,7 +1644,7 @@
             },
             {
                 name: "inflation",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Inflation_(cosmology)' style="color: #000;">inflation</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Inflation_(cosmology)' class="link">inflation</a>`,
                 description: "<strong>throwing</strong> a <strong class='color-block'>block</strong> expands it by <strong>300%</strong><br>increase <strong>throw</strong> charge rate by <strong>200%</strong>",
                 maxCount: 1,
                 count: 0,
@@ -1803,7 +1808,7 @@
             },
             {
                 name: "flip-flop",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Flip-flop_(electronics)' style="color: #000;">flip-flop</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Flip-flop_(electronics)' class="link">flip-flop</a>`,
                 description: `toggle <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after a <strong>collision</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
                 nameInfo: "<span id = 'tech-flip-flop'></span>",
                 addNameInfo() {
@@ -1879,24 +1884,6 @@
                 }
             },
             {
-                name: "thermocouple",
-                description: "if  <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>condense <strong>1-9</strong> <strong class='color-s'>ice IX</strong> crystals every second",
-                maxCount: 9,
-                count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
-                allowed() {
-                    return tech.isRelay
-                },
-                requires: "relay switch",
-                effect() {
-                    tech.relayIce++
-                },
-                remove() {
-                    tech.relayIce = 0
-                }
-            },
-            {
                 name: "NAND gate",
                 description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>50%</strong> more <strong class='color-d'>damage</strong>",
                 maxCount: 1,
@@ -1916,7 +1903,7 @@
             },
             {
                 name: "transistor",
-                description: "if <strong class='color-flop'>ON</strong> regen <strong>22</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>2.2</strong> <strong class='color-f'>energy</strong> per second",
+                description: "if <strong class='color-flop'>ON</strong> regen <strong>20</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>1</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
                 frequency: 4,
@@ -1948,6 +1935,24 @@
                 },
                 remove() {
                     tech.isFlipFlopLevelReset = false;
+                }
+            },
+            {
+                name: "thermocouple",
+                description: "if  <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>condense <strong>1-9</strong> <strong class='color-s'>ice IX</strong> crystals every second",
+                maxCount: 9,
+                count: 0,
+                frequency: 4,
+                frequencyDefault: 4,
+                allowed() {
+                    return tech.isRelay
+                },
+                requires: "relay switch",
+                effect() {
+                    tech.relayIce++
+                },
+                remove() {
+                    tech.relayIce = 0
                 }
             },
             {
@@ -2059,6 +2064,24 @@
                 }
             },
             {
+                name: "quantum immortality",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>33%</strong><br>after <strong>dying</strong>, continue in an <strong class='alt'>alternate reality</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 3,
+                frequencyDefault: 3,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    tech.isImmortal = true;
+                },
+                remove() {
+                    tech.isImmortal = false;
+                }
+            },
+            {
                 name: "MACHO",
                 description: "a massive but compact object slowly <strong>follows</strong> you<br>take <strong>66%</strong> less <strong class='color-harm'>harm</strong> inside it's <strong>halo</strong>",
                 maxCount: 1,
@@ -2103,7 +2126,7 @@
             },
             {
                 name: "non-Newtonian armor",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Non-Newtonian_fluid' style="color: #000;">non-Newtonian armor</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Non-Newtonian_fluid' class="link">non-Newtonian armor</a>`,
                 description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong>",
                 maxCount: 1,
                 count: 0,
@@ -2158,7 +2181,7 @@
             },
             {
                 name: "causality bots",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Causality' style="color: #000;">causality bots</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Causality' class="link">causality bots</a>`,
                 description: "when you <strong class='color-rewind'>rewind</strong>, build several <strong class='color-bot'>bots</strong><br>that protect you for about <strong>9</strong> seconds",
                 maxCount: 3,
                 count: 0,
@@ -2178,7 +2201,7 @@
             },
             {
                 name: "causality bombs",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Causality' style="color: #000;">causality bombs</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Causality' class="link">causality bombs</a>`,
                 description: "before you <strong class='color-rewind'>rewind</strong> drop several <strong>grenades</strong><br>become immune to <strong class='color-harm'>harm</strong> until they <strong class='color-e'>explode</strong>",
                 maxCount: 1,
                 count: 0,
@@ -2268,7 +2291,7 @@
             },
             {
                 name: "1st ionization energy",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ionization_energy' style="color: #000;">1st ionization energy</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ionization_energy' class="link">1st ionization energy</a>`,
                 description: `each ${powerUps.orb.heal()} you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>6</strong>`,
                 maxCount: 1,
                 count: 0,
@@ -2736,7 +2759,7 @@
                 allowed() {
                     return true
                 },
-                requires: "",
+                requires: "NOT EXPERIMENT MODE",
                 effect() {
                     for (let i = 0; i < 11; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -2813,26 +2836,8 @@
                 }
             },
             {
-                name: "quantum immortality",
-                description: "reduce <strong class='color-harm'>harm</strong> by <strong>33%</strong><br>after <strong>dying</strong>, continue in an <strong class='alt'>alternate reality</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 3,
-                frequencyDefault: 3,
-                allowed() {
-                    return tech.isDeathAvoid
-                },
-                requires: "anthropic principle",
-                effect() {
-                    tech.isImmortal = true;
-                },
-                remove() {
-                    tech.isImmortal = false;
-                }
-            },
-            {
                 name: "non-unitary operator",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Unitary_operator' style="color: #000;">non-unitary operator</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Unitary_operator' class="link">non-unitary operator</a>`,
                 description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>, but<br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
                 maxCount: 1,
                 count: 0,
@@ -2874,7 +2879,7 @@
             },
             {
                 name: "Ψ(t) collapse",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Wave_function_collapse' style="color: #000;">Ψ(t) collapse</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Wave_function_collapse' class="link">Ψ(t) collapse</a>`,
                 description: `enter an <strong class='alt'>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn ${powerUps.orb.research(16)}`,
                 maxCount: 1,
                 count: 0,
@@ -3021,7 +3026,7 @@
                 allowed() {
                     return (tech.totalCount > 6)
                 },
-                requires: "more than 6 tech",
+                requires: "NOT EXPERIMENT MODE, more than 6 tech",
                 effect: () => {
                     //remove active bullets  //to get rid of bots
                     for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
@@ -3297,7 +3302,7 @@
                 allowed() {
                     return (tech.totalCount > 3) && !tech.isSuperDeterminism
                 },
-                requires: "at least 4 tech, not superdeterminism",
+                requires: "NOT EXPERIMENT MODE, at least 4 tech, not superdeterminism",
                 effect: () => {
                     const have = [] //find which tech you have
                     for (let i = 0; i < tech.tech.length; i++) {
@@ -3329,7 +3334,7 @@
                 allowed() {
                     return (tech.totalCount > 3) && !tech.isSuperDeterminism && tech.duplicationChance() > 0
                 },
-                requires: "at least 4 tech, a chance to duplicate power ups, not superdeterminism",
+                requires: "NOT EXPERIMENT MODE, at least 4 tech, a chance to duplicate power ups, not superdeterminism",
                 effect: () => {
                     const removeTotal = powerUps.removeRandomTech()
                     for (let i = 0; i < removeTotal + 1; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
@@ -3348,7 +3353,7 @@
                 allowed() {
                     return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.research.count > 1
                 },
-                requires: "some duplication, not super determinism",
+                requires: "NOT EXPERIMENT MODE, some duplication, not super determinism",
                 effect: () => {
                     powerUps.research.changeRerolls(-2)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2<br>${powerUps.research.count}`)
@@ -3371,7 +3376,7 @@
                 allowed() {
                     return !tech.isSuperDeterminism
                 },
-                requires: "not superdeterminism",
+                requires: "NOT EXPERIMENT MODE, not superdeterminism",
                 effect() {
                     powerUps.spawn(m.pos.x, m.pos.y, "field");
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -3420,7 +3425,7 @@
                 allowed() {
                     return powerUps.tech.choiceLog.length > 10 && !tech.isDeterminism && powerUps.research.count > 1
                 },
-                requires: "rejected an option in the last tech selection, at least 2 research, not determinism",
+                requires: "NOT EXPERIMENT MODE, rejected an option in the last tech selection, at least 2 research, not determinism",
                 effect: () => {
                     powerUps.research.changeRerolls(-2)
                     let num = 3
@@ -3608,7 +3613,7 @@
             //**************************************************
             {
                 name: "CPT gun",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/CPT_symmetry' style="color: #000;">CPT gun</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/CPT_symmetry' class="link">CPT gun</a>`,
                 description: `adds the <strong>CPT</strong> <strong class='color-g'>gun</strong> to your inventory<br>it <strong>rewinds</strong> your <strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong>`,
                 isGunTech: true,
                 maxCount: 1,
@@ -3763,7 +3768,7 @@
             },
             {
                 name: "ice crystal nucleation",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Nucleation' style="color: #000;">ice crystal nucleation</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Nucleation' class="link">ice crystal nucleation</a>`,
                 description: "the <strong>nail gun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>ice shards</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -3875,7 +3880,7 @@
             },
             {
                 name: "irradiated nails",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Irradiation' style="color: #000;">irradiated nails</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Irradiation' class="link">irradiated nails</a>`,
                 description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br>about <strong>90%</strong> more <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
                 isGunTech: true,
                 maxCount: 1,
@@ -3895,7 +3900,7 @@
             },
             {
                 name: "6s half-life",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Half-life' style="color: #000;">6s half-life</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Half-life' class="link">6s half-life</a>`,
                 description: "<strong>nails</strong> are made of <strong class='color-p'>plutonium-238</strong><br>increase <strong class='color-d'>damage</strong> by <strong>100%</strong> over <strong>6</strong> seconds",
                 isGunTech: true,
                 maxCount: 1,
@@ -3915,7 +3920,7 @@
             },
             {
                 name: "1s half-life",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Half-life' style="color: #000;">1s half-life</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Half-life' class="link">1s half-life</a>`,
                 description: "<strong>nails</strong> are made of <strong class='color-p'>lithium-8</strong><br><strong class='color-d'>damage</strong> occurs after <strong>1</strong> second",
                 isGunTech: true,
                 maxCount: 1,
@@ -3935,7 +3940,7 @@
             },
             {
                 name: "shotgun spin-statistics",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Spin%E2%80%93statistics_theorem' style="color: #000;">shotgun spin-statistics</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Spin%E2%80%93statistics_theorem' class="link">shotgun spin-statistics</a>`,
                 description: "<strong>immune</strong> to <strong class='color-harm'>harm</strong> while firing the <strong>shotgun</strong><br>shotgun has <strong>50%</strong> fewer shots",
                 isGunTech: true,
                 maxCount: 1,
@@ -3994,7 +3999,7 @@
             },
             {
                 name: "Noether violation",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Noether%27s_theorem' style="color: #000;">Noether violation</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Noether%27s_theorem' class="link">Noether violation</a>`,
                 description: "increase <strong>shotgun</strong> and <strong>railgun</strong> <strong class='color-d'>damage</strong> <strong>60%</strong><br>their <strong>recoil</strong> is increased and <strong>reversed</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -4033,7 +4038,7 @@
             },
             {
                 name: "nail-shot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Nail_(fastener)' style="color: #000;">nail-shot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Nail_(fastener)' class="link">nail-shot</a>`,
                 description: "<strong>shotgun</strong> fires <strong>17</strong> <strong>nails</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -4053,7 +4058,7 @@
             },
             {
                 name: "needle-shot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Needle' style="color: #000;">needle-shot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Needle' class="link">needle-shot</a>`,
                 description: "<strong>shotgun</strong> propels <strong>11</strong> mob piercing <strong>needles</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -4073,7 +4078,7 @@
             },
             {
                 name: "worm-shot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Worm' style="color: #000;">worm-shot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Worm' class="link">worm-shot</a>`,
                 description: "<strong>shotgun</strong> hatches <strong>3-4</strong> mob seeking <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong><br><em>worms benefit from spore technology</em>", //<br><strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> seek out nearby mobs
                 isGunTech: true,
                 maxCount: 1,
@@ -4093,7 +4098,7 @@
             },
             {
                 name: "foam-shot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Foam' style="color: #000;">foam-shot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Foam' class="link">foam-shot</a>`,
                 description: "<strong>shotgun</strong> sprays <strong>13</strong> sticky <strong>foam</strong> bubbles",
                 isGunTech: true,
                 maxCount: 1,
@@ -4113,7 +4118,7 @@
             },
             {
                 name: "ice-shot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ice-nine_(disambiguation)' style="color: #000;">ice-shot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ice-nine_(disambiguation)' class="link">ice-shot</a>`,
                 description: "<strong>shotgun</strong> grows <strong>15</strong> freezing <strong class='color-s'>ice IX</strong> crystals",
                 isGunTech: true,
                 maxCount: 1,
@@ -4133,7 +4138,7 @@
             },
             {
                 name: "supertemporal",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Temporal_paradox' style="color: #000;">supertemporal</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Temporal_paradox' class="link">supertemporal</a>`,
                 description: "fire <strong>super ball</strong> from the same point in <strong>space</strong><br> but separated by <strong>0.1</strong> seconds in <strong>time</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -4378,7 +4383,7 @@
             },
             {
                 name: "missile-bot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">missile-bot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">missile-bot</a>`,
                 description: "remove your <strong>missile gun</strong><br>gain a <strong class='color-bot'>bot</strong> that fires <strong>missiles</strong> at mobs",
                 isGunTech: true,
                 maxCount: 1,
@@ -4549,7 +4554,7 @@
             },
             {
                 name: "laser-mines",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Laser' style="color: #000;">laser-mines</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Laser' class="link">laser-mines</a>`,
                 description: "<strong>mines</strong> laid while you are <strong>crouched</strong><br>use <strong class='color-f'>energy</strong> to emit <strong>3</strong> unaimed <strong class='color-laser'>lasers</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -4588,7 +4593,7 @@
             },
             {
                 name: "blast mines",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Anti-personnel_mine' style="color: #000;">blast mines</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Anti-personnel_mine' class="link">blast mines</a>`,
                 description: "when a <strong>mine</strong> <strong>activates</strong><br>it <strong>stuns</strong> nearby mobs for <strong>2-4</strong> seconds",
                 isGunTech: true,
                 maxCount: 1,
@@ -4608,7 +4613,7 @@
             },
             {
                 name: "mycelial fragmentation",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Fungus' style="color: #000;">tinsellated flagella</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Fungus' class="link">tinsellated flagella</a>`,
                 description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>6</strong> extra <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br>during their <strong>growth</strong> phase",
                 isGunTech: true,
                 maxCount: 1,
@@ -4628,7 +4633,7 @@
             },
             {
                 name: "tinsellated flagella",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Zoospore#Flagella_types' style="color: #000;">tinsellated flagella</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Zoospore#Flagella_types' class="link">tinsellated flagella</a>`,
                 description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>40% faster</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -4744,7 +4749,7 @@
             },
             {
                 name: "reduced tolerances",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Engineering_tolerance' style="color: #000;">reduced tolerances</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Engineering_tolerance' class="link">reduced tolerances</a>`,
                 description: `increase <strong>drones</strong> per ${powerUps.orb.ammo()} or <strong class='color-f'>energy</strong> <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>`,
                 isGunTech: true,
                 maxCount: 3,
@@ -4794,7 +4799,7 @@
             },
             {
                 name: "drone repair",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Unmanned_aerial_vehicle' style="color: #000;">drone repair</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Unmanned_aerial_vehicle' class="link">drone repair</a>`,
                 description: "after a <strong>drone</strong> ends it <strong>redeploys</strong><br>for a <strong>25%</strong> chance to use <strong>1</strong> <strong>drone</strong> <strong class='color-ammo'>ammo</strong>",
                 // description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>25%</strong> chance to use <strong>1</strong> <strong>drone</strong>",
                 isGunTech: true,
@@ -4815,7 +4820,7 @@
             },
             {
                 name: "torque bursts",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Electric_motor#Torque_motor' style="color: #000;">torque bursts</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Electric_motor#Torque_motor' class="link">torque bursts</a>`,
                 description: "<strong>drones</strong> rapidly <strong>rush</strong> towards their target<br>increase <strong>drone</strong> collision <strong class='color-d'>damage</strong> by <strong>33%</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -4854,7 +4859,7 @@
             },
             {
                 name: "irradiated drones",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Irradiation' style="color: #000;">irradiated drones</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Irradiation' class="link">irradiated drones</a>`,
                 description: `the space around <strong>drones</strong> is <strong class='color-p'>irradiated</strong><br>reduce <strong>drones</strong> per ${powerUps.orb.ammo()} or <strong class='color-f'>energy</strong> <strong>75%</strong>`,
                 isGunTech: true,
                 maxCount: 1,
@@ -4909,7 +4914,7 @@
             },
             {
                 name: "orthocyclic winding",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Coil_winding_technology' style="color: #000;">orthocyclic winding</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Coil_winding_technology' class="link">orthocyclic winding</a>`,
                 description: "<strong>drones</strong> accelerate <strong>66%</strong> faster<br>increase <strong class='color-p'>radiation</strong> <strong class='color-d'>damage</strong> by <strong>33%</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -5064,7 +5069,7 @@
             },
             {
                 name: "unaaq",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Harpoon#/media/File:Harpon_Unaaq_MHNT_ETH_AC_198.jpg' style="color: #000;">unaaq</a>`, //https://en.wikipedia.org/wiki/Weapon
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Harpoon#/media/File:Harpon_Unaaq_MHNT_ETH_AC_198.jpg' class="link">unaaq</a>`, //https://en.wikipedia.org/wiki/Weapon
                 description: "increase the <strong>length</strong> of your <strong>harpoon</strong><br>by <strong>10%</strong> of the square root of its <strong class='color-ammo'>ammo</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -5312,7 +5317,7 @@
             },
             {
                 name: "diffuse beam",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Diffuser_(optics)' style="color: #000;">diffuse beam</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Diffuser_(optics)' class="link">diffuse beam</a>`,
                 description: "<strong class='color-laser'>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>200%</strong>",
                 isGunTech: true,
                 maxCount: 1,
@@ -5407,7 +5412,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.16
+                    return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.17
                 },
                 requires: "laser gun, not specular reflection, diffuse, free-electron laser",
                 effect() {
@@ -5727,7 +5732,7 @@
                 allowed() {
                     return powerUps.research.count > 1 && m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
                 },
-                requires: "molecular assembler",
+                requires: "NOT EXPERIMENT MODE, molecular assembler",
                 effect: () => {
                     for (let i = 0; i < 2; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
@@ -5753,7 +5758,7 @@
                 allowed() {
                     return powerUps.research.count > 2 && m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
                 },
-                requires: "molecular assembler",
+                requires: "NOT EXPERIMENT MODE, molecular assembler",
                 effect: () => {
                     for (let i = 0; i < 3; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
@@ -5818,8 +5823,8 @@
             },
             {
                 name: "mycelium manufacturing",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Mycelium' style="color: #000;">mycelium manufacturing</a>`,
-                description: `use ${powerUps.orb.research(3)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Mycelium' class="link">mycelium manufacturing</a>`,
+                description: `use ${powerUps.orb.research(1)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>`,
                 // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>assembler</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
                 isFieldTech: true,
                 maxCount: 1,
@@ -5827,12 +5832,12 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
+                    return (build.isExperimentSelection || powerUps.research.count > 0) && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
                 },
                 requires: "molecular assembler, no other manufacturing, no drone tech",
                 effect() {
                     if (!build.isExperimentSelection) {
-                        for (let i = 0; i < 3; i++) {
+                        for (let i = 0; i < 1; i++) {
                             if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                         }
                     }
@@ -5840,13 +5845,13 @@
                 },
                 remove() {
                     tech.isSporeField = false;
-                    if (this.count > 0) powerUps.research.changeRerolls(3)
+                    if (this.count > 0) powerUps.research.changeRerolls(1)
                 }
             },
             {
                 name: "missile manufacturing",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Missile' style="color: #000;">missile manufacturing</a>`,
-                description: `use ${powerUps.orb.research(3)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Missile' class="link">missile manufacturing</a>`,
+                description: `use ${powerUps.orb.research(1)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>`,
                 // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>assembler</strong><br>excess <strong class='color-f'>energy</strong> used to construct <strong>missiles</strong>",
                 isFieldTech: true,
                 maxCount: 1,
@@ -5854,12 +5859,12 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
+                    return (build.isExperimentSelection || powerUps.research.count > 0) && m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
                 },
                 requires: "molecular assembler, no other manufacturing, no drone tech",
                 effect() {
                     if (!build.isExperimentSelection) {
-                        for (let i = 0; i < 3; i++) {
+                        for (let i = 0; i < 1; i++) {
                             if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                         }
                     }
@@ -5867,13 +5872,13 @@
                 },
                 remove() {
                     tech.isMissileField = false;
-                    if (this.count > 0) powerUps.research.changeRerolls(3)
+                    if (this.count > 0) powerUps.research.changeRerolls(1)
                 }
             },
             {
                 name: "ice IX manufacturing",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ice-nine_(disambiguation)' style="color: #000;">ice IX manufacturing</a>`,
-                description: `use ${powerUps.orb.research(3)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ice-nine_(disambiguation)' class="link">ice IX manufacturing</a>`,
+                description: `use ${powerUps.orb.research(1)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>`,
                 // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>assembler</strong><br>excess <strong class='color-f'>energy</strong> used to condense <strong class='color-s'>ice IX</strong>",
                 isFieldTech: true,
                 maxCount: 1,
@@ -5881,12 +5886,12 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (build.isExperimentSelection || powerUps.research.count > 2) && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
+                    return (build.isExperimentSelection || powerUps.research.count > 0) && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
                 },
                 requires: "molecular assembler, no other manufacturing, no drone tech",
                 effect() {
                     if (!build.isExperimentSelection) {
-                        for (let i = 0; i < 3; i++) {
+                        for (let i = 0; i < 1; i++) {
                             if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                         }
                     }
@@ -5894,7 +5899,7 @@
                 },
                 remove() {
                     tech.isIceField = false;
-                    if (this.count > 0) powerUps.research.changeRerolls(3)
+                    if (this.count > 0) powerUps.research.changeRerolls(1)
                 }
             },
             {
@@ -5956,7 +5961,7 @@
             },
             {
                 name: "plasma-bot",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' style="color: #000;">plasma-bot</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">plasma-bot</a>`,
                 description: "remove your <strong>field</strong> to build a <strong class='color-bot'>bot</strong><br>that uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong>",
                 isFieldTech: true,
                 maxCount: 1,
@@ -5995,11 +6000,11 @@
             },
             {
                 name: "plasma jet",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Plasma_(physics)' style="color: #000;">plasma jet</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Plasma_(physics)' class="link">plasma jet</a>`,
                 description: `use ${powerUps.orb.research(1)} to increase <strong class='color-plasma'>plasma</strong> <strong>torch</strong> range <strong>50%</strong>`,
                 // description: "use <strong>1</strong> <strong class='color-r'>research</strong> to <br>increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>50%</strong>",
                 isFieldTech: true,
-                maxCount: 9,
+                maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
@@ -6018,7 +6023,7 @@
             },
             {
                 name: "extruder",
-                description: "<strong class='color-plasma'>plasma</strong> <strong>torch</strong> <strong class='color-plasma'>extrudes</strong> a thin hot      wire<br>increases <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+                description: "<strong class='color-plasma'>plasma</strong> <strong>torch</strong> <strong class='color-plasma'>extrudes</strong> a thin hot wire<br>increases <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6039,7 +6044,7 @@
             },
             {
                 name: "refractory metal",
-                description: "<strong class='color-plasma'>extrude</strong> metals at a higher <strong class='color-plasma'>temperature</strong><br>increases effective <strong>radius</strong>",
+                description: "<strong class='color-plasma'>extrude</strong> metals at a higher <strong class='color-plasma'>temperature</strong><br>increases effective <strong>radius</strong> and <strong class='color-d'>damage</strong>",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
@@ -6212,7 +6217,7 @@
             // },
             {
                 name: "boson composite",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Boson' style="color: #000;">boson composite</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Boson' class="link">boson composite</a>`,
                 description: "<strong>intangible</strong> to <strong class='color-block'>blocks</strong> and mobs while <strong class='color-cloaked'>cloaked</strong><br>passing through <strong>shields</strong> drains your <strong class='color-f'>energy</strong>",
                 isFieldTech: true,
                 maxCount: 1,
@@ -6422,7 +6427,7 @@
             },
             {
                 name: "transdimensional spores",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Dimension' style="color: #000;">transdimensional spores</a>`,
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Dimension' class="link">transdimensional spores</a>`,
                 description: "when <strong class='color-block'>blocks</strong> fall into a <strong class='color-worm'>wormhole</strong><br>higher dimension <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> are summoned",
                 isFieldTech: true,
                 maxCount: 1,

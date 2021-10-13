@@ -996,6 +996,14 @@ summary {
     }
 }
 
+.link {
+    color: #000;
+}
+
+.link:hover {
+    text-decoration: underline;
+    /* color: #0ad; */
+}
 
 /* #console {
     font-family: monospace;

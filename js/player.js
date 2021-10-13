@@ -438,7 +438,7 @@ const m = {
             m.health = 0;
             m.displayHealth();
             document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
-            document.getElementById("fade-out").style.opacity = 1; //slowly fades out
+            document.getElementById("fade-out").style.opacity = 0.8; //1; //slowly fade to white
             // build.shareURL(false)
             setTimeout(function() {
                 Composite.clear(engine.world);
@@ -2038,6 +2038,7 @@ const m = {
             name: "plasma torch",
             description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away",
             set() {
+                b.isExtruderOn = false
                 if (tech.isExtruder) {
                     m.hold = function() {
                         b.isExtruderOn = false
@@ -2081,7 +2082,6 @@ const m = {
                     }
                 } else {
                     m.hold = function() {
-                        b.isExtruderOn = false
                         if (m.isHolding) {
                             m.drawHold(m.holdingTarget);
                             m.holding();

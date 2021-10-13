@@ -871,9 +871,9 @@ const simulation = {
             if (m.energy > m.maxEnergy) m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
             if (tech.isFlipFlopEnergy && m.immuneCycle < m.cycle) {
                 if (tech.isFlipFlopOn) {
-                    if (m.immuneCycle < m.cycle) m.energy += 0.22;
+                    if (m.immuneCycle < m.cycle) m.energy += 0.2;
                 } else {
-                    m.energy -= 0.022;
+                    m.energy -= 0.01;
                     if (m.energy < 0) m.energy = 0
                 }
             }

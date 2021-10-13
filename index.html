@@ -256,6 +256,11 @@
             animation: 4s ease 3s normal forwards 1 fadein;
         }
 
+        .fade-in-fast {
+            opacity: 0;
+            animation: 3s ease 2s normal forwards 1 fadein;
+        }
+
         @keyframes fadein {
             0% {
                 opacity: 0;
@@ -364,15 +369,27 @@
 		</g> -->
         <!-- mouse -->
         <g class="draw-lines3" transform="translate(290,430) scale(0.28)" stroke-linecap="round" stroke-linejoin="round" stroke-width="10px" stroke="#222" fill="none">
+            <path class="fade-in" stroke="none" fill="#fff" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
             <path class="fade-in" d="M832.41,106.64 V322 H651.57 V255 c0-82,67.5-148,150-148 Z" fill="rgb(0, 200, 255)" stroke="none" />
             <!-- <path class="fade-in" d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
-			<path class="fade-in" d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#7ce" stroke="none" /> -->
+                <path class="fade-in" d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#7ce" stroke="none" /> -->
             <path d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
-            <path d="M657 317 h 340 h-170 v-207 s 21 -59, -5 -59 S 807 7, 807 7" />
-            <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />
+            <path d="M657 317 h340 h-170 v-25 m0 -140 v-42 s 21 -59, -5 -59 S 807 7, 807 7" />
+            <ellipse fill="none" cx="827.57" cy="218.64" rx="29" ry="68" />
+            <ellipse fill="#fff" class="fade-in-fast" cx="827.57" cy="218.64" rx="29" ry="68" />
         </g>
+
         <!-- keys -->
         <g transform="translate(195,480) scale(0.8)">
+            <!-- fade in background -->
+            <g fill='#fff' stroke='none' class="fade-in">
+                <path d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
+                <path d="M70 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
+                <path d="M140 60 h60 v-60 h-60 v60" class="draw-lines-box-3" />
+                <path d="M0 70 h60 v60 h-60 v-60" class="draw-lines-box-1" />
+                <path d="M70 70 h60 v60 h-60 v-60" class="draw-lines-box-2" />
+                <path d="M140 70 h60 v60 h-60 v-60" class="draw-lines-box-3" />
+            </g>
             <g fill='none' stroke='#222' stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
                 <path d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
                 <path d="M70 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
@@ -380,13 +397,8 @@
                 <path d="M0 70 h60 v60 h-60 v-60" class="draw-lines-box-1" />
                 <path d="M70 70 h60 v60 h-60 v-60" class="draw-lines-box-2" />
                 <path d="M140 70 h60 v60 h-60 v-60" class="draw-lines-box-3" />
-                <!-- <rect x="0" y="0" width="60" height="60" rx='3' /> -->
-                <!-- <rect x="140" y="0" width="60" height="60" rx='3' /> -->
-                <!-- <rect x="0" y="70" width="60" height="60" rx='3' /> -->
-                <!-- <rect x="70" y="0" width="60" height="60" rx='3' /> -->
-                <!-- <rect x="70" y="70" width="60" height="60" rx='3' /> -->
-                <!-- <rect x="140" y="70" width="60" height="60" rx='3' /> -->
             </g>
+
             <g class="draw-lines4" text-anchor="middle" stroke='#000' fill='none' stroke-width="2" font-size="38px" font-family="Arial Black, sans-serif">
                 <!-- <text class="fade-in" fill='#aaa' stroke="none" x="30" y="45">Q</text>
 				<text class="fade-in" fill='#aaa' stroke="none" x="170" y="45">E</text> -->
@@ -405,9 +417,9 @@
         </g>
 
         <g class="fade-in" fill="none" stroke="#aaa" stroke-width="1">
+            <!-- simple lines that point to words -->
             <path d="M 254 433.5 h-35.5 v40" />
             <path d="M 295 433.5 h36.5 v40" />
-
             <path d="M 274 625 v-35" />
             <path d="M 430.5 442 v50 h38" />
             <path d="M 612.5 442 v50 h-38" />
@@ -419,7 +431,7 @@
             <text x="420" y="438">fire</text>
             <text x="599" y="438">field</text>
         </g>
-        <g id="gamepad" transform="translate(700,700) scale(0.2)" style="display: none;" stroke="#333" stroke-width="0.5" fill="#444">
+        <!-- <g id="gamepad" transform="translate(700,700) scale(0.2)" style="display: none;" stroke="#333" stroke-width="0.5" fill="#444">
             <path style="fill:#FB7686;" d="M122.578,86.897H68.276c-6.184,0-11.196,5.013-11.196,11.196v12.126h76.692V98.091
 				C133.772,91.908,128.76,86.897,122.578,86.897z" />
             <rect x="57.08" y="100.766" style="opacity:0.4;fill:#FF4E64;enable-background:new    ;" width="76.69" height="9.453" />
@@ -470,7 +482,7 @@
                 <path style="fill:#FFFFFF;" d="M309.506,190.234h-23.773c-4.572,0-8.276-3.705-8.276-8.276s3.704-8.276,8.276-8.276h23.773
 					c4.572,0,8.276,3.705,8.276,8.276S314.077,190.234,309.506,190.234z" />
             </g>
-        </g>
+        </g> -->
         <!-- <g id="gamepad" transform="translate(640,640) scale(0.3)" style="display: none;" stroke="#333" stroke-width="0.5" fill="#444">
 			<path d="M115.824,187.891c-2.95,2.95-4.576,6.872-4.576,11.045c0,4.172,1.625,8.095,4.575,11.045l10.322,10.322
 				c2.95,2.949,6.872,4.573,11.042,4.573h9.511c8.612,0,15.619-7.007,15.619-15.619v-21.268c0-8.612-7.007-15.619-15.619-15.619

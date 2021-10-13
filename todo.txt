@@ -1,15 +1,8 @@
 ******************************************************** NEXT PATCH **************************************************
-extruder:
-  new tech: refractory metal - increase extruder damage radius
-  fixed extruder graphics bug, and collisions bug
-  dynamical systems and discrete optimization are allowed with plasma torch
-    (although I nerfed them both just a bit)
 
-irradiated nails: 90% damage spread over 2s -> 3s
-  same total damage, but it takes 1 second longer
-toggling harpoon: 6x -> 8x damage
-  also the graphic effect is more obvious
-slasher mobs will grow their sword at the farthest vertex from the player
+after you die your canvas sticks around at 10% opacity
+add a mouse over underline effect to hint that names are links
+molecular assembler: all 3 manufacturing tech cost 3 -> 1 research
 
 ******************************************************** TODO ********************************************************
 
@@ -17,6 +10,16 @@ death animation ideas:
   redraw game in strange ways, to show that it's a simulation (for example the testing mode is a strange redraw of map)
     stroke only, but connect all vertices together,  no moveTo
     draw dots at all the vertices
+
+buff railgun
+  relativistic jets:    fire something out the front and back
+    alternate name: gamma-ray burst
+    small particles that shot out from front and back poles and end up in a wide variety of spirals
+      slow trickle when charging and several more when firing
+  
+
+adapt the cloaking graphics to make a flashlight cone visual effect
+  put code in level.do?
 
 be nice if block throwing had a projected path
 
@@ -75,8 +78,6 @@ it would be helpful if there was a mechanism to recover mobs that fly off the ma
   add a ceiling system and a left/right walls system similar to the floor checks but only for mobs
 make non moving bosses not move after getting hit
   shooter, shielding, 
-
-buff railgun
 
 scrolling console history in pause menu?
 pause should at least show the last in game console message

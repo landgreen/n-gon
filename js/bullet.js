@@ -1520,7 +1520,7 @@ const b = {
     didExtruderDrain: false,
     canExtruderFire: true,
     extruder() {
-        const DRAIN = 0.0011 + m.fieldRegen
+        const DRAIN = 0.0021
         if (m.energy > DRAIN && b.canExtruderFire) {
             m.energy -= DRAIN
             if (m.energy < 0) {
@@ -1560,7 +1560,7 @@ const b = {
                         } else { //check if inside a body
                             for (let i = 0, len = mob.length; i < len; i++) {
                                 const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position))
-                                const radius = mob[i].radius + tech.extruderRange
+                                const radius = mob[i].radius + tech.extruderRange / 2
                                 if (dist < radius * radius) {
                                     Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.25, y: mob[i].velocity.y * 0.25 });
                                     Matter.Body.setPosition(this, Vector.add(this.position, mob[i].velocity)) //move with the medium
@@ -1594,7 +1594,7 @@ const b = {
         }
     },
     plasma() {
-        const DRAIN = 0.00008 + m.fieldRegen
+        const DRAIN = 0.0011
         if (m.energy > DRAIN) {
             m.energy -= DRAIN;
             if (m.energy < 0) {
@@ -3520,7 +3520,7 @@ const b = {
             lookFrequency: 40 + Math.floor(7 * Math.random()) - 10 * tech.isLaserBotUpgrade,
             range: (700 + 400 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
             drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
-            drain: (0.56 - 0.42 * tech.isLaserBotUpgrade) * tech.laserFieldDrain * tech.isLaserDiode,
+            drain: (0.5 - 0.42 * tech.isLaserBotUpgrade) * tech.laserFieldDrain * tech.isLaserDiode,
             laserDamage: 0.85 + 0.65 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
@@ -3584,6 +3584,33 @@ const b = {
             }
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
+
+        //laser mobs that fire with the player
+        // if (true) {
+        //     bullet[me].do = function() {
+        //         if (!(simulation.cycle % this.lookFrequency)) {
+        //             if (Math.random() < 0.15) {
+        //                 const range = 170 + 3 * b.totalBots()
+        //                 this.offPlayer = {
+        //                     x: range * (Math.random() - 0.5),
+        //                     y: range * (Math.random() - 0.5) - 20,
+        //                 }
+        //             }
+        //         }
+        //         const playerPos = Vector.add(Vector.add(this.offPlayer, m.pos), Vector.mult(player.velocity, 20)) //also include an offset unique to this bot to keep many bots spread out
+        //         const farAway = Math.max(0, (Vector.magnitude(Vector.sub(this.position, playerPos))) / this.playerRange) //linear bounding well 
+        //         const mag = Math.min(farAway, 4) * this.mass * this.acceleration
+        //         this.force = Vector.mult(Vector.normalise(Vector.sub(playerPos, this.position)), mag)
+        //         //manual friction to not lose rotational velocity
+        //         Matter.Body.setVelocity(this, { x: this.velocity.x * 0.95, y: this.velocity.y * 0.95 });
+        //         //hit target with laser
+        //         if (input.fire && m.energy > this.drain) {
+        //             m.energy -= this.drain
+        //             const unit = Vector.sub(simulation.mouseInGame, this.vertices[0])
+        //             b.laser(this.vertices[0], Vector.mult(unit, 1000), b.dmgScale * this.laserDamage * tech.laserDamage, tech.laserReflections, false, 0.4) //tech.laserDamage = 0.16
+        //         }
+        //     }
+        // }
     },
     boomBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.boomBot()`);

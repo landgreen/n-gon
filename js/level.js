@@ -15,14 +15,14 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // b.giveGuns("harpoon")
+            // b.giveGuns("laser")
             // m.setField("plasma torch")
             // tech.giveTech("extruder")
-            // for (let i = 0; i < 1; i++) tech.giveTech("refractory metal")
+            // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("mouth")
             // tech.giveTech("all-stars")
             // for (let i = 0; i < 3; i++) tech.giveTech("overcharge")
-            // for (let i = 0; i < 9; i++) tech.giveTech("MIRV")
+            // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.isCancelDuplication = true
 
             level.intro(); //starting level
@@ -2294,15 +2294,14 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
-        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
-        // spawn.starter(1900, -500, 200) //big boy
+        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        spawn.starter(1900, -500, 200) //big boy
         // spawn.blockGroup(1900, -500)
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
-
         // spawn.slashBoss(1900, -500)
-        spawn.slasher(1900, -500)
+        // spawn.slasher(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.growBossCulture(1200, -500)
@@ -2917,16 +2916,16 @@ const level = {
             spawn.randomMob(-75, -1475, 0);
             spawn.randomGroup(600, -2600, 0);
         }
-        if (simulation.difficulty < 20) {
+        if (simulation.difficulty < 10) {
             spawn.randomMob(700, -1650, 0);
             spawn.randomMob(600, -3500, 0.2);
             spawn.randomMob(-75, -1175, 0.2);
             powerUps.spawnBossPowerUp(-125, -1760);
         } else {
             if (Math.random() < 0.5) {
-                spawn.randomLevelBoss(700, -1550, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss", "grenadierBoss"]);
+                spawn.randomLevelBoss(700, -1550);
             } else {
-                spawn.randomLevelBoss(675, -2775, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss", "grenadierBoss"]);
+                spawn.randomLevelBoss(675, -2775); //["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss", "grenadierBoss"]
             }
         }
         powerUps.addResearchToLevel() //needs to run after mobs are spawned

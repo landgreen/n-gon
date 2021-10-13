@@ -513,8 +513,6 @@ const mobs = {
                     }
                 };
                 if (this.seePlayer.recall && !this.isSlowed) {
-                    this.torque = this.lookTorque * this.inertia * 2;
-
                     const seeRange = 2500;
                     best = {
                         x: null,
@@ -534,10 +532,9 @@ const mobs = {
                     // hitting player
                     if (best.who === playerBody || best.who === playerHead) {
                         if (m.immuneCycle < m.cycle) {
-                            const dmg = 0.0012 * simulation.dmgScale;
+                            const dmg = 0.0014 * simulation.dmgScale;
                             m.damage(dmg);
-                            //draw damage
-                            ctx.fillStyle = "#f00";
+                            ctx.fillStyle = "#f00"; //draw damage
                             ctx.beginPath();
                             ctx.arc(best.x, best.y, dmg * 10000, 0, 2 * Math.PI);
                             ctx.fill();

@@ -174,7 +174,7 @@ window.onresize = () => {
 //**********************************************************************
 //set wikipedia link
 for (let i = 0, len = tech.tech.length; i < len; i++) {
-    if (!tech.tech[i].link) tech.tech[i].link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(tech.tech[i].name).replace(/'/g, '%27')}&title=Special:Search' style="color: #000;">${tech.tech[i].name}</a>`
+    if (!tech.tech[i].link) tech.tech[i].link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(tech.tech[i].name).replace(/'/g, '%27')}&title=Special:Search' class="link">${tech.tech[i].name}</a>`
 }
 
 const build = {
@@ -466,8 +466,8 @@ const build = {
             text += `<div id = "gun-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div> ${b.guns[i].description}</div>`
         }
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
-                if (tech.tech[i].allowed()) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
+            if (!tech.tech[i].isExperimentHide) { //&& (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
+                if (tech.tech[i].allowed() && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
                     if (tech.tech[i].isExperimentalMode) {
                         text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title">${tech.tech[i].name}</div> ${tech.tech[i].description}</div>`
                     } else {
@@ -503,7 +503,7 @@ const build = {
         }
     },
     nameLink(text) { //converts text into a clickable wikipedia search
-        return `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(text).replace(/'/g, '%27')}&title=Special:Search' style="color: #000;">${text}</a>`
+        return `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(text).replace(/'/g, '%27')}&title=Special:Search' class="link">${text}</a>`
     },
     reset() {
         build.isExperimentSelection = true;

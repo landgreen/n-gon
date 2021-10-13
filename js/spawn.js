@@ -541,6 +541,77 @@ const spawn = {
         }
         me.rotateVelocity = 0.0025
         me.rotateCount = 0;
+        me.lasers = function(where, angle, dmg = 0.14 * simulation.dmgScale) {
+            const vertexCollision = function(v1, v1End, domain) {
+                for (let i = 0; i < domain.length; ++i) {
+                    let vertices = domain[i].vertices;
+                    const len = vertices.length - 1;
+                    for (let j = 0; j < len; j++) {
+                        results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                        if (results.onLine1 && results.onLine2) {
+                            const dx = v1.x - results.x;
+                            const dy = v1.y - results.y;
+                            const dist2 = dx * dx + dy * dy;
+                            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = {
+                                x: results.x,
+                                y: results.y,
+                                dist2: dist2,
+                                who: domain[i],
+                                v1: vertices[j],
+                                v2: vertices[j + 1]
+                            };
+                        }
+                    }
+                    results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                    if (results.onLine1 && results.onLine2) {
+                        const dx = v1.x - results.x;
+                        const dy = v1.y - results.y;
+                        const dist2 = dx * dx + dy * dy;
+                        if (dist2 < best.dist2) best = {
+                            x: results.x,
+                            y: results.y,
+                            dist2: dist2,
+                            who: domain[i],
+                            v1: vertices[0],
+                            v2: vertices[len]
+                        };
+                    }
+                }
+            };
+
+            const seeRange = 7000;
+            best = {
+                x: null,
+                y: null,
+                dist2: Infinity,
+                who: null,
+                v1: null,
+                v2: null
+            };
+            const look = {
+                x: where.x + seeRange * Math.cos(angle),
+                y: where.y + seeRange * Math.sin(angle)
+            };
+            // vertexCollision(where, look, mob);
+            vertexCollision(where, look, map);
+            vertexCollision(where, look, body);
+            if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
+            if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
+                if (m.immuneCycle < m.cycle + 60 + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + 60 + tech.collisionImmuneCycles; //player is immune to damage extra time
+                m.damage(dmg);
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: best.x,
+                    y: best.y,
+                    radius: dmg * 1500,
+                    color: "rgba(80,0,255,0.5)",
+                    time: 20
+                });
+            }
+            //draw beam
+            if (best.dist2 === Infinity) best = look;
+            ctx.moveTo(where.x, where.y);
+            ctx.lineTo(best.x, best.y);
+        }
         me.modeLasers = function() {
             if (!m.isBodiesAsleep && !this.isStunned) {
                 let slowed = false //check if slowed
@@ -561,12 +632,12 @@ const spawn = {
                 const scale = this.cycle / 240
                 const dmg = (this.cycle < 120) ? 0 : 0.14 * simulation.dmgScale * scale
                 ctx.beginPath();
-                this.laser(this.vertices[0], this.angle + Math.PI / 6, dmg);
-                this.laser(this.vertices[1], this.angle + 3 * Math.PI / 6, dmg);
-                this.laser(this.vertices[2], this.angle + 5 * Math.PI / 6, dmg);
-                this.laser(this.vertices[3], this.angle + 7 * Math.PI / 6, dmg);
-                this.laser(this.vertices[4], this.angle + 9 * Math.PI / 6, dmg);
-                this.laser(this.vertices[5], this.angle + 11 * Math.PI / 6, dmg);
+                this.lasers(this.vertices[0], this.angle + Math.PI / 6, dmg);
+                this.lasers(this.vertices[1], this.angle + 3 * Math.PI / 6, dmg);
+                this.lasers(this.vertices[2], this.angle + 5 * Math.PI / 6, dmg);
+                this.lasers(this.vertices[3], this.angle + 7 * Math.PI / 6, dmg);
+                this.lasers(this.vertices[4], this.angle + 9 * Math.PI / 6, dmg);
+                this.lasers(this.vertices[5], this.angle + 11 * Math.PI / 6, dmg);
                 ctx.strokeStyle = "#50f";
                 ctx.lineWidth = 1.5 * scale;
                 ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
@@ -577,12 +648,12 @@ const spawn = {
                 ctx.stroke(); // Draw it
             } else {
                 ctx.beginPath();
-                this.laser(this.vertices[0], this.angle + Math.PI / 6);
-                this.laser(this.vertices[1], this.angle + 3 * Math.PI / 6);
-                this.laser(this.vertices[2], this.angle + 5 * Math.PI / 6);
-                this.laser(this.vertices[3], this.angle + 7 * Math.PI / 6);
-                this.laser(this.vertices[4], this.angle + 9 * Math.PI / 6);
-                this.laser(this.vertices[5], this.angle + 11 * Math.PI / 6);
+                this.lasers(this.vertices[0], this.angle + Math.PI / 6);
+                this.lasers(this.vertices[1], this.angle + 3 * Math.PI / 6);
+                this.lasers(this.vertices[2], this.angle + 5 * Math.PI / 6);
+                this.lasers(this.vertices[3], this.angle + 7 * Math.PI / 6);
+                this.lasers(this.vertices[4], this.angle + 9 * Math.PI / 6);
+                this.lasers(this.vertices[5], this.angle + 11 * Math.PI / 6);
                 ctx.strokeStyle = "#50f";
                 ctx.lineWidth = 1.5;
                 ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
@@ -591,77 +662,6 @@ const spawn = {
                 ctx.lineWidth = 20;
                 ctx.strokeStyle = "rgba(80,0,255,0.07)";
                 ctx.stroke(); // Draw it
-            }
-            me.laser = function(where, angle, dmg = 0.14 * simulation.dmgScale) {
-                const vertexCollision = function(v1, v1End, domain) {
-                    for (let i = 0; i < domain.length; ++i) {
-                        let vertices = domain[i].vertices;
-                        const len = vertices.length - 1;
-                        for (let j = 0; j < len; j++) {
-                            results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-                            if (results.onLine1 && results.onLine2) {
-                                const dx = v1.x - results.x;
-                                const dy = v1.y - results.y;
-                                const dist2 = dx * dx + dy * dy;
-                                if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = {
-                                    x: results.x,
-                                    y: results.y,
-                                    dist2: dist2,
-                                    who: domain[i],
-                                    v1: vertices[j],
-                                    v2: vertices[j + 1]
-                                };
-                            }
-                        }
-                        results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-                        if (results.onLine1 && results.onLine2) {
-                            const dx = v1.x - results.x;
-                            const dy = v1.y - results.y;
-                            const dist2 = dx * dx + dy * dy;
-                            if (dist2 < best.dist2) best = {
-                                x: results.x,
-                                y: results.y,
-                                dist2: dist2,
-                                who: domain[i],
-                                v1: vertices[0],
-                                v2: vertices[len]
-                            };
-                        }
-                    }
-                };
-
-                const seeRange = 7000;
-                best = {
-                    x: null,
-                    y: null,
-                    dist2: Infinity,
-                    who: null,
-                    v1: null,
-                    v2: null
-                };
-                const look = {
-                    x: where.x + seeRange * Math.cos(angle),
-                    y: where.y + seeRange * Math.sin(angle)
-                };
-                // vertexCollision(where, look, mob);
-                vertexCollision(where, look, map);
-                vertexCollision(where, look, body);
-                if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
-                if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
-                    if (m.immuneCycle < m.cycle + 60 + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + 60 + tech.collisionImmuneCycles; //player is immune to damage extra time
-                    m.damage(dmg);
-                    simulation.drawList.push({ //add dmg to draw queue
-                        x: best.x,
-                        y: best.y,
-                        radius: dmg * 1500,
-                        color: "rgba(80,0,255,0.5)",
-                        time: 20
-                    });
-                }
-                //draw beam
-                if (best.dist2 === Infinity) best = look;
-                ctx.moveTo(where.x, where.y);
-                ctx.lineTo(best.x, best.y);
             }
         }
     },
@@ -2615,7 +2615,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-        me.accelMag = 0.00007 * simulation.accelScale;
+        me.accelMag = 0.0001 * simulation.accelScale;
         me.onHit = function() {
             //run this function on hitting player
             this.explode();
@@ -2625,6 +2625,7 @@ const spawn = {
             this.checkStatus();
             this.attraction();
             this.laser();
+            this.torque = this.lookTorque * this.inertia * 0.5;
         };
     },
     laserBoss(x, y, radius = 30) {
@@ -2685,9 +2686,9 @@ const spawn = {
                     }
                 }
                 ctx.beginPath();
-                this.laser(this.vertices[0], this.angle + Math.PI / 3);
-                this.laser(this.vertices[1], this.angle + Math.PI);
-                this.laser(this.vertices[2], this.angle - Math.PI / 3);
+                this.lasers(this.vertices[0], this.angle + Math.PI / 3);
+                this.lasers(this.vertices[1], this.angle + Math.PI);
+                this.lasers(this.vertices[2], this.angle - Math.PI / 3);
                 ctx.strokeStyle = "#50f";
                 ctx.lineWidth = 1.5;
                 ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
@@ -2706,7 +2707,7 @@ const spawn = {
             // Matter.Body.setPosition(this, this.startingPosition);
 
         };
-        me.laser = function(where, angle) {
+        me.lasers = function(where, angle) {
             const vertexCollision = function(v1, v1End, domain) {
                 for (let i = 0; i < domain.length; ++i) {
                     let vertices = domain[i].vertices;
