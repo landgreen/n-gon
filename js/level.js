@@ -15,11 +15,10 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // b.giveGuns("laser")
             // m.setField("plasma torch")
-            // tech.giveTech("extruder")
+            // b.giveGuns("railgun")
+            // tech.giveTech("aerodynamic heating")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
-            // tech.giveTech("mouth")
             // tech.giveTech("all-stars")
             // for (let i = 0; i < 3; i++) tech.giveTech("overcharge")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
@@ -78,6 +77,20 @@ const level = {
         simulation.draw.setPaths();
         b.respawnBots();
         m.resetHistory();
+
+        if (tech.isForeverDrones) {
+            if (tech.isDroneRadioactive) {
+                for (let i = 0; i < tech.isForeverDrones * 0.25; i++) {
+                    b.droneRadioactive({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
+                    bullet[bullet.length - 1].endCycle = Infinity
+                }
+            } else {
+                for (let i = 0; i < tech.isForeverDrones; i++) {
+                    b.drone({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
+                    bullet[bullet.length - 1].endCycle = Infinity
+                }
+            }
+        }
         if (tech.isExtraMaxEnergy) {
             tech.healMaxEnergyBonus += 0.03 * powerUps.totalPowerUps //Math.min(0.02 * powerUps.totalPowerUps, 0.51)
             m.setMaxEnergy();
@@ -2294,9 +2307,9 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
-        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
-        spawn.starter(1900, -500, 200) //big boy
-        // spawn.blockGroup(1900, -500)
+        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        // spawn.starter(1900, -500, 200) //big boy
+        spawn.blockGroup(1900, -500)
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)

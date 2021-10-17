@@ -88,12 +88,12 @@
     <div style="position: absolute; top:0;right:0;">
         <div id="pause-grid-right" class="pause-grid"></div>
     </div>
-    <svg class="SVG-button" id="experiment-button" width="155" height="40" style="border: 2px #333 solid;">
+    <svg class="SVG-button ui" id="experiment-button" width="155" height="40" style="border: 2px #333 solid;">
         <g stroke='none' fill='#333' stroke-width="2" font-size="28px" font-family="Arial, sans-serif">
             <text x="10" y="30">experiment</text>
         </g>
     </svg>
-    <div id='info'>
+    <div id='info' class="ui">
         <div id="settings">
             <details>
                 <summary>settings</summary>
@@ -334,7 +334,7 @@
             animation: dash 5s ease-in forwards;
         }
     </style>
-    <svg id='splash' class="intro" viewBox="0 0 800 800" onclick="simulation.startGame()">
+    <svg id='splash' class="intro ui" viewBox="0 0 800 800" onclick="simulation.startGame()">
         <!-- title -->
         <!-- <g class="fade-in" transform="translate(100,210) scale(34)" fill='#bbb' stroke='none'>
 			<path d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" fill="rgb(50,200,255)" />

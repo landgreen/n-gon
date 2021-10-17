@@ -3154,6 +3154,40 @@ const b = {
             if (bullet[i].botType && bullet[i].endCycle === Infinity) bullet[i].endCycle = 0 //remove active bots, but don't remove temp bots
         }
     },
+    removeBot() {
+        if (tech.nailBotCount > 1) {
+            tech.nailBotCount--
+            return
+        }
+        if (tech.laserBotCount > 1) {
+            tech.laserBotCount--
+            return
+        }
+        if (tech.foamBotCount > 1) {
+            tech.foamBotCount--
+            return
+        }
+        if (tech.boomBotCount > 1) {
+            tech.boomBotCount--
+            return
+        }
+        if (tech.orbitBotCount > 1) {
+            tech.orbitBotCount--
+            return
+        }
+        if (tech.dynamoBotCount > 1) {
+            tech.dynamoBotCount--
+            return
+        }
+        if (tech.missileBotCount > 1) {
+            tech.missileBotCount--
+            return
+        }
+        if (tech.plasmaBotCount > 1) {
+            tech.plasmaBotCount--
+            return
+        }
+    },
     zeroBotCount() { //remove all bots
         tech.dynamoBotCount = 0
         tech.laserBotCount = 0
@@ -5156,6 +5190,16 @@ const b = {
                 const length = tech.isLargeHarpoon ? 1 + 0.09 * Math.sqrt(this.ammo) : 1
                 const totalCycles = 7 * (tech.isFilament ? 1 + 0.009 * Math.min(100, this.ammo) : 1) * Math.sqrt(length)
                 if (input.down) {
+                    // if (true) {
+                    //     if (m.immuneCycle < m.cycle + 60) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
+                    //     b.harpoon(where, closest.target, m.angle, length, false, 15)
+                    //     m.fireCDcycle = m.cycle + 50 * b.fireCDscale; // cool down
+                    //     const speed = 50
+                    //     const velocity = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
+                    //     Matter.Body.setVelocity(player, velocity);
+
+                    // } else {
+
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
                             const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
@@ -5168,6 +5212,7 @@ const b = {
                     }
                     b.harpoon(where, closest.target, m.angle, length, false, 15)
                     m.fireCDcycle = m.cycle + 50 * b.fireCDscale; // cool down
+                    // }
                 } else if (tech.extraHarpoons) {
                     const range = 450 * (tech.isFilament ? 1 + Math.min(100, this.ammo) / 100 : 1)
                     let targetCount = 0
@@ -5405,10 +5450,6 @@ const b = {
                         if ((!input.fire && this.charge > 0.6)) { //fire on mouse release or on low energy
                             m.fireCDcycle = m.cycle + 2; // set fire cool down
                             //normal bullet behavior occurs after firing, overwrites this function
-                            this.do = function() {
-                                this.force.y += this.mass * 0.0003 / this.charge; // low gravity that scales with charge
-                            }
-
                             Matter.Body.scale(this, 8000, 8000) // show the bullet by scaling it up  (don't judge me...  I know this is a bad way to do it)
                             this.endCycle = simulation.cycle + 140
                             this.collisionFilter.category = cat.bullet
@@ -5422,6 +5463,96 @@ const b = {
                                 x: m.Vx / 2 + speed * this.charge * Math.cos(m.angle),
                                 y: m.Vy / 2 + speed * this.charge * Math.sin(m.angle)
                             });
+
+                            if (tech.isRodAreaDamage) {
+                                this.auraRadius = 800
+                                this.semiMinor = 0.5
+                                this.where = { x: m.pos.x, y: m.pos.y }
+                                this.velocityAura = { x: this.velocity.x, y: this.velocity.y }
+                                this.angleAura = this.angle
+                                this.do = function() {
+                                    this.force.y += this.mass * 0.0003 / this.charge; // low gravity that scales with charge
+                                    this.velocityAura.y += 0.085 / this.charge;
+                                    this.where = Vector.add(this.where, this.velocityAura)
+
+                                    //draw damage aura
+                                    this.semiMinor = this.semiMinor * 0.99
+                                    this.auraRadius = this.auraRadius * 0.99
+                                    let where = Vector.add(Vector.mult(this.velocityAura, -0.5), this.where)
+                                    ctx.beginPath();
+                                    ctx.ellipse(where.x, where.y, this.auraRadius * 0.25, this.auraRadius * 0.15 * this.semiMinor, this.angleAura, 0, 2 * Math.PI)
+                                    ctx.fillStyle = "rgba(255,100,0,0.75)";
+                                    ctx.fill();
+                                    where = Vector.add(Vector.mult(this.velocity, -1), where)
+                                    ctx.beginPath();
+                                    ctx.ellipse(where.x, where.y, this.auraRadius * 0.5, this.auraRadius * 0.5 * this.semiMinor, this.angleAura, 0, 2 * Math.PI)
+                                    ctx.fillStyle = "rgba(255,50,0,0.35)";
+                                    ctx.fill();
+                                    where = Vector.add(Vector.mult(this.velocity, -1), where)
+                                    ctx.beginPath();
+                                    ctx.ellipse(where.x, where.y, this.auraRadius * 0.75, this.auraRadius * 0.7 * this.semiMinor, this.angleAura, 0, 2 * Math.PI)
+                                    ctx.fillStyle = "rgba(255,0,0,0.15)";
+                                    ctx.fill();
+                                    where = Vector.add(Vector.mult(this.velocity, -1), where)
+                                    ctx.beginPath();
+                                    ctx.ellipse(where.x, where.y, this.auraRadius, this.auraRadius * this.semiMinor, this.angleAura, 0, 2 * Math.PI)
+                                    ctx.fillStyle = "rgba(255,0,0,0.03)";
+                                    ctx.fill();
+                                    // this.semiMinor = this.semiMinor * 0.95 + (1 - Math.min(0.5, this.speed * 0.02)) * 0.05
+                                    // this.auraRadius = this.auraRadius * 0.95 + this.speed * 10 * 0.05
+                                    // let where = Vector.add(Vector.mult(this.velocity, -1), this.position)
+                                    // const angle = Math.atan2(this.velocity.y, this.velocity.x)
+                                    // ctx.beginPath();
+                                    // ctx.ellipse(where.x, where.y, this.auraRadius * 0.25, this.auraRadius * 0.15 * this.semiMinor, angle, 0, 2 * Math.PI)
+                                    // ctx.fillStyle = "rgba(255,100,0,0.75)";
+                                    // ctx.fill();
+                                    // where = Vector.add(Vector.mult(this.velocity, -2), where)
+                                    // ctx.beginPath();
+                                    // ctx.ellipse(where.x, where.y, this.auraRadius * 0.5, this.auraRadius * 0.5 * this.semiMinor, angle, 0, 2 * Math.PI)
+                                    // ctx.fillStyle = "rgba(255,50,0,0.35)";
+                                    // ctx.fill();
+                                    // where = Vector.add(Vector.mult(this.velocity, -2), where)
+                                    // ctx.beginPath();
+                                    // ctx.ellipse(where.x, where.y, this.auraRadius * 0.75, this.auraRadius * 0.7 * this.semiMinor, angle, 0, 2 * Math.PI)
+                                    // ctx.fillStyle = "rgba(255,0,0,0.15)";
+                                    // ctx.fill();
+                                    // where = Vector.add(Vector.mult(this.velocity, -2), where)
+                                    // ctx.beginPath();
+                                    // ctx.ellipse(where.x, where.y, this.auraRadius, this.auraRadius * this.semiMinor, angle, 0, 2 * Math.PI)
+                                    // ctx.fillStyle = "rgba(255,0,0,0.03)";
+                                    // ctx.fill();
+                                    //damage mobs in a circle based on this.semiMinor radius
+                                    if (this.auraRadius > 200) {
+                                        for (let i = 0, len = mob.length; i < len; ++i) {
+                                            const dist = Vector.magnitude(Vector.sub(mob[i].position, where))
+                                            if (dist < mob[i].radius + this.auraRadius) {
+                                                //push mob in direction of bullet
+                                                const mag = 0.0001
+                                                mob[i].force.x += mag * this.velocity.x;
+                                                mob[i].force.y += mag * this.velocity.y;
+                                                //damage mob
+                                                const damage = b.dmgScale * 0.002 * dist
+                                                mob[i].damage(damage);
+                                                mob[i].locatePlayer();
+                                                simulation.drawList.push({ //add dmg to draw queue
+                                                    x: mob[i].position.x,
+                                                    y: mob[i].position.y,
+                                                    radius: Math.log(2 * damage + 1.1) * 40,
+                                                    color: "rgba(255,0,0,0.25)",
+                                                    time: simulation.drawTime
+                                                });
+                                            }
+                                        }
+                                    }
+                                    //push blocks power ups and mobs to the direction the rod is moving
+
+                                }
+                            } else {
+                                this.do = function() {
+                                    this.force.y += this.mass * 0.0003 / this.charge; // low gravity that scales with charge
+                                }
+                            }
+
 
                             //knock back
                             const KNOCK = ((input.down) ? 0.1 : 0.5) * this.charge * this.charge * (tech.isShotgunReversed ? -2 : 1)

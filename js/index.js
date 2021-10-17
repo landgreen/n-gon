@@ -155,13 +155,9 @@ function setupCanvas() {
     canvas.height = window.innerHeight;
     canvas.width2 = canvas.width / 2; //precalculated because I use this often (in mouse look)
     canvas.height2 = canvas.height / 2;
-    // canvas.diagonal = Math.sqrt(canvas.width2 * canvas.width2 + canvas.height2 * canvas.height2);
-    // ctx.font = "18px Arial";
-    // ctx.textAlign = "center";
     ctx.font = "25px Arial";
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
-    // ctx.lineCap='square';
     simulation.setZoom();
 }
 setupCanvas();

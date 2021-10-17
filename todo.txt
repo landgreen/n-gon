@@ -1,22 +1,26 @@
 ******************************************************** NEXT PATCH **************************************************
 
-after you die your canvas sticks around at 10% opacity
-add a mouse over underline effect to hint that names are links
-molecular assembler: all 3 manufacturing tech cost 3 -> 1 research
+tech: fault tolerance - spawn 9 drones that last forever, remove your drone gun
+
+fade in after death is more gradual
 
 ******************************************************** TODO ********************************************************
 
-death animation ideas:
-  redraw game in strange ways, to show that it's a simulation (for example the testing mode is a strange redraw of map)
-    stroke only, but connect all vertices together,  no moveTo
-    draw dots at all the vertices
+tech rocket jump - jumping produces an explosion at your feet that lets you jump extra high, but does some damage
 
-buff railgun
-  relativistic jets:    fire something out the front and back
-    alternate name: gamma-ray burst
-    small particles that shot out from front and back poles and end up in a wide variety of spirals
-      slow trickle when charging and several more when firing
+harpoon tech: dash -   press down and fire to go immune to harm for 1 second and dash forward with your harpoon acting like a lance
+  after you fire harpoon replace it's this.do()  with just being in front of player
+
+harpoon grappling hook - basic effect is working, but needs work before it becomes fun
+
+tech: aerodynamic heating - railgun rods super heat the air around it doing AoE damage
+
+tech: relativistic jets:
+  small particles that shot out from front and back poles and end up in a wide variety of spirals
+    slow trickle when charging and several more when firing
   
+Tech: Make player smol
+
 
 adapt the cloaking graphics to make a flashlight cone visual effect
   put code in level.do?
@@ -26,29 +30,7 @@ be nice if block throwing had a projected path
 JUNK tech: planetesimals game inside n-gon
 https://codepen.io/lilgreenland/pen/jrMvaB?editors=0010
 
-Tech: Make player smol
-
 disable zoom progress when paused
-
-harpoon
-  post launch tracking: more airFriction, more thrust, harder turning
-    if no target found slow down and aim much better?
-harpoon tech
-  crouch fire grapple hook
-    attaches to map at long range and pulls player?
-  tech that buffs alt fire:
-    remove the string, all shots are alt fire
-    alt fire has a 50% chance to not use ammo?
-  holding down fire lets the string extend farther,
-    this can overwrite crouch mode
-    can't have 2+ harpoons
-    it uses up ammo as extends, and returns it as it contracts?
-      will this effect performance?
-  2+ harpoons, with separate CDs
-    can't have extended string?
-  grappling hook?
-  tracking so good harpoon can hit a target, circle around and hit it again
-    doesn't seem to be good physics, the harpoon hits walls and doesn't get room to build up speed
 
 "Interstellar Disturbance": Cosmic String applies to mobs who cross the wormhole's path, even after initial wormholing, but at reduced damage and stun time.
 
@@ -453,6 +435,7 @@ possible names for tech
   nonlocal
   fine-tuned universe
   eternalism https://en.wikipedia.org/wiki/Eternalism_(philosophy_of_time)
+  axial motor
  
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

@@ -670,7 +670,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         // console.log(`mass=${me.mass}, radius = ${radius}`)
         me.accelMag = 0.0002
-        me.repulsionRange = 100000 + radius * radius; //squared
+        me.repulsionRange = 200000 + radius * radius; //squared
         // me.memory = 120;
         me.seeAtDistance2 = 2000000 //1400 vision range
         Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback

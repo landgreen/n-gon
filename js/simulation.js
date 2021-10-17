@@ -524,14 +524,22 @@ const simulation = {
         document.getElementById("choose-grid").style.visibility = "hidden"
         document.getElementById("choose-grid").style.opacity = "0"
         document.getElementById("info").style.display = "inline";
+        document.getElementById("info").style.opacity = "0";
         document.getElementById("experiment-button").style.display = "inline"
+        document.getElementById("experiment-button").style.opacity = "0";
         document.getElementById("experiment-grid").style.display = "none"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"
         document.getElementById("splash").style.display = "inline";
+        document.getElementById("splash").style.opacity = "0";
         document.getElementById("dmg").style.display = "none";
         document.getElementById("health-bg").style.display = "none";
         document.body.style.cursor = "auto";
+        setTimeout(() => {
+            document.getElementById("experiment-button").style.opacity = "1";
+            document.getElementById("info").style.opacity = "1";
+            document.getElementById("splash").style.opacity = "1";
+        }, 200);
     },
     fpsInterval: 0, //set in startGame
     then: null,
@@ -590,6 +598,7 @@ const simulation = {
         document.getElementById("experiment-grid").style.display = "none"
         document.getElementById("info").style.display = "none";
         document.getElementById("experiment-button").style.display = "none";
+        // document.getElementById("experiment-button").style.opacity = "0";
         document.getElementById("splash").onclick = null; //removes the onclick effect so the function only runs once
         document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
         document.getElementById("dmg").style.display = "inline";
