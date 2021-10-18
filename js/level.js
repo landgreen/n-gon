@@ -4315,13 +4315,13 @@ const level = {
             isElevators = true
             elevator1 = level.elevator(-1780, 500, 260, 40, 7, 0.0003) //    elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
             elevator2 = level.elevator(820, 1300, 260, 40, 607, 0.0003)
-            elevator3 = level.elevator(-2850, 1300, 160, 40, 700, 0.007)
+            elevator3 = level.elevator(-2850, 1250, 160, 40, 600, 0.007)
             if (simulation.isHorizontalFlipped) {
                 spawn.mapVertex(-2900, 225, "0 0  0 -500  -500 -500")
             } else {
                 spawn.mapVertex(-2900, 225, "0 0  0 -500  500 -500")
             }
-            spawn.mapRect(-3050, 1275, 175, 200);
+            spawn.mapRect(-3050, 1175, 175, 300);
             spawn.bodyRect(-2375, 1300, 100, 100);
             spawn.bodyRect(-2325, 1250, 50, 50);
             spawn.bodyRect(-2275, 1350, 125, 50);

@@ -141,7 +141,7 @@
                 sound.tone(375)
             }
         },
-        haveGunCheck(name) {
+        haveGunCheck(name, needActive = true) {
             // if (
             //     !build.isExperimentSelection &&
             //     b.inventory.length > 2 &&
@@ -154,12 +154,12 @@
             //     if (b.guns[b.inventory[i]].name === name) return true
             // }
             // return false
-            if (build.isExperimentSelection) {
+            if (build.isExperimentSelection || !needActive) {
                 for (i = 0, len = b.inventory.length; i < len; i++) {
                     if (b.guns[b.inventory[i]].name === name) return true
                 }
                 return false
-            } else {
+            } else { //must be holding gun, this is the standard while playing
                 return b.inventory.length > 0 && b.guns[b.activeGun].name === name
             }
         },
@@ -4398,20 +4398,20 @@
                 isBot: true,
                 isBotTech: true,
                 allowed() {
-                    return tech.haveGunCheck("missiles")
+                    return tech.haveGunCheck("missiles", false)
                 },
                 requires: "missile gun",
                 effect() {
                     tech.missileBotCount++;
                     b.missileBot();
-                    if (tech.haveGunCheck("missiles")) b.removeGun("missiles") //remove your last gun
+                    if (tech.haveGunCheck("missiles", false)) b.removeGun("missiles") //remove your last gun
                 },
                 remove() {
                     if (this.count) {
                         tech.missileBotCount = 0;
                         b.clearPermanentBots();
                         b.respawnBots();
-                        if (!tech.haveGunCheck("missiles")) b.giveGuns("missiles")
+                        if (!tech.haveGunCheck("missiles", false)) b.giveGuns("missiles")
                     }
                 }
             },
@@ -4754,20 +4754,20 @@
             },
             {
                 name: "fault tolerance",
-                description: "spawn <strong>9</strong> <strong>drones</strong> that last <strong>forever</strong><br>remove your <strong>drone gun</strong>",
+                description: "spawn <strong>8</strong> <strong>drones</strong> that last <strong>forever</strong><br>remove your <strong>drone gun</strong>",
                 isGunTech: true,
                 maxCount: 3,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("drones") || tech.isForeverDrones
+                    return tech.haveGunCheck("drones", false) || tech.isForeverDrones
                 },
                 requires: "drone gun",
                 effect() {
-                    const num = 9
+                    const num = 8
                     tech.isForeverDrones += num
-                    if (tech.haveGunCheck("drones")) b.removeGun("drones")
+                    if (tech.haveGunCheck("drones", false)) b.removeGun("drones")
                     //spawn drones
                     if (tech.isDroneRadioactive) {
                         for (let i = 0; i < num * 0.25; i++) {
@@ -4783,7 +4783,7 @@
                 },
                 remove() {
                     tech.isForeverDrones = 0
-                    if (this.count && !tech.haveGunCheck("drones")) b.giveGuns("drones")
+                    if (this.count && !tech.haveGunCheck("drones", false)) b.giveGuns("drones")
                 }
             },
             {
@@ -4866,9 +4866,9 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (tech.haveGunCheck("drones") || tech.isForeverDrones) && !tech.isDroneRadioactive && !tech.isIncendiary
+                    return (tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isMissileField || tech.isIceField))) && !tech.isDroneRadioactive && !tech.isIncendiary
                 },
-                requires: "drone gun, not irradiated drones, incendiary",
+                requires: "drone gun, molecular assembler, not irradiated drones, incendiary",
                 effect() {
                     tech.isDroneTeleport = true
                 },
@@ -4887,7 +4887,7 @@
                 allowed() {
                     return tech.isDroneTeleport
                 },
-                requires: "torque bursts",
+                requires: "brushless motor",
                 effect() {
                     tech.isDroneFastLook = true
                 },
@@ -5087,6 +5087,38 @@
                 }
             },
             {
+                name: "surfactant",
+                description: "gain <strong>3</strong> <strong class='color-bot'>foam-bots</strong> and <strong>upgrade</strong> bots to foam<br>remove your <strong>foam gun</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                isBot: true,
+                isBotTech: true,
+                isNonRefundable: true,
+                requires: "NOT EXPERIMENT MODE, foam gun",
+                allowed() {
+                    return tech.haveGunCheck("foam", false) && !tech.isFoamBotUpgrade
+                },
+                effect() {
+                    tech.giveTech("foam-bot upgrade")
+                    for (let i = 0; i < 3; i++) {
+                        b.foamBot()
+                        tech.foamBotCount++;
+                    }
+                    simulation.makeTextLog(`tech.isFoamBotUpgrade = true`)
+                    if (tech.haveGunCheck("foam", false)) b.removeGun("foam")
+                },
+                remove() {
+                    // if (this.count) {
+                    //     b.clearPermanentBots();
+                    //     b.respawnBots();
+                    //     if (!tech.haveGunCheck("foam")) b.giveGuns("foam")
+                    // }
+                }
+            },
+            {
                 name: "filament",
                 description: "increase the <strong>length</strong> of your <strong>harpoon</strong>'s <strong>rope</strong><br>by <strong>1%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
                 isGunTech: true,
@@ -5221,25 +5253,25 @@
                     tech.isRailAreaDamage = false;
                 }
             },
-            {
-                name: "aerodynamic heating",
-                description: "<strong>railgun</strong> rod <strong class='color-d'>damage</strong> nearby mobs",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("railgun")
-                },
-                requires: "railgun",
-                effect() {
-                    tech.isRodAreaDamage = true;
-                },
-                remove() {
-                    tech.isRodAreaDamage = false;
-                }
-            },
+            // {
+            //     name: "aerodynamic heating",
+            //     description: "<strong>railgun</strong> rod <strong class='color-d'>damage</strong> nearby mobs",
+            //     isGunTech: true,
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 2,
+            //     frequencyDefault: 2,
+            //     allowed() {
+            //         return tech.haveGunCheck("railgun")
+            //     },
+            //     requires: "railgun",
+            //     effect() {
+            //         tech.isRodAreaDamage = true;
+            //     },
+            //     remove() {
+            //         tech.isRodAreaDamage = false;
+            //     }
+            // },
             {
                 name: "capacitor bank",
                 description: "the <strong>railgun</strong> no longer takes time to <strong>charge</strong><br><strong>railgun</strong> rods are <strong>66%</strong> less massive",

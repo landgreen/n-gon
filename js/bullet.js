@@ -1216,7 +1216,7 @@ const b = {
                     this.endCycle = 0;
                     if (m.cycle + 25 * b.fireCDscale < m.fireCDcycle) m.fireCDcycle = m.cycle + 35 * b.fireCDscale //lower cd to 25 if it is above 25
                     //recoil on catching
-                    const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), this.mass * (input.down ? 0.0001 : 0.0002))
+                    const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.00015 : 0.0003))
                     player.force.x += momentum.x
                     player.force.y += momentum.y
                     // refund ammo
@@ -5498,29 +5498,6 @@ const b = {
                                     ctx.ellipse(where.x, where.y, this.auraRadius, this.auraRadius * this.semiMinor, this.angleAura, 0, 2 * Math.PI)
                                     ctx.fillStyle = "rgba(255,0,0,0.03)";
                                     ctx.fill();
-                                    // this.semiMinor = this.semiMinor * 0.95 + (1 - Math.min(0.5, this.speed * 0.02)) * 0.05
-                                    // this.auraRadius = this.auraRadius * 0.95 + this.speed * 10 * 0.05
-                                    // let where = Vector.add(Vector.mult(this.velocity, -1), this.position)
-                                    // const angle = Math.atan2(this.velocity.y, this.velocity.x)
-                                    // ctx.beginPath();
-                                    // ctx.ellipse(where.x, where.y, this.auraRadius * 0.25, this.auraRadius * 0.15 * this.semiMinor, angle, 0, 2 * Math.PI)
-                                    // ctx.fillStyle = "rgba(255,100,0,0.75)";
-                                    // ctx.fill();
-                                    // where = Vector.add(Vector.mult(this.velocity, -2), where)
-                                    // ctx.beginPath();
-                                    // ctx.ellipse(where.x, where.y, this.auraRadius * 0.5, this.auraRadius * 0.5 * this.semiMinor, angle, 0, 2 * Math.PI)
-                                    // ctx.fillStyle = "rgba(255,50,0,0.35)";
-                                    // ctx.fill();
-                                    // where = Vector.add(Vector.mult(this.velocity, -2), where)
-                                    // ctx.beginPath();
-                                    // ctx.ellipse(where.x, where.y, this.auraRadius * 0.75, this.auraRadius * 0.7 * this.semiMinor, angle, 0, 2 * Math.PI)
-                                    // ctx.fillStyle = "rgba(255,0,0,0.15)";
-                                    // ctx.fill();
-                                    // where = Vector.add(Vector.mult(this.velocity, -2), where)
-                                    // ctx.beginPath();
-                                    // ctx.ellipse(where.x, where.y, this.auraRadius, this.auraRadius * this.semiMinor, angle, 0, 2 * Math.PI)
-                                    // ctx.fillStyle = "rgba(255,0,0,0.03)";
-                                    // ctx.fill();
                                     //damage mobs in a circle based on this.semiMinor radius
                                     if (this.auraRadius > 200) {
                                         for (let i = 0, len = mob.length; i < len; ++i) {

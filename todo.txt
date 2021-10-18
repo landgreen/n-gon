@@ -1,12 +1,25 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: fault tolerance - spawn 9 drones that last forever, remove your drone gun
+tech: surfactant - remove foam gun, get 3 foam bots, upgrade all bots to foam
+  you can now have a chance to see gun removing tech even when that gun isn't active
 
-fade in after death is more gradual
+n-gon title draws in 1/2 the time
+  I'm getting flagged by google search that my loading page takes a long time to full render, so this might remove the flag
+  the site is very fast to load, but I think google is getting confused by the title animation
+
+bug fixes
 
 ******************************************************** TODO ********************************************************
 
+junk tech negative air friction on player
+
+remove foam gun get 2 foam bots and upgrade
+need a new way of checking if have gun, that doesn't care if it's not active gun
+  apply to missile gun?
+  and 10 drone tech
+
 tech rocket jump - jumping produces an explosion at your feet that lets you jump extra high, but does some damage
+  require electric reactive armor?
 
 harpoon tech: dash -   press down and fire to go immune to harm for 1 second and dash forward with your harpoon acting like a lance
   after you fire harpoon replace it's this.do()  with just being in front of player

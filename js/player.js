@@ -444,7 +444,7 @@ const m = {
                 Composite.clear(engine.world);
                 Engine.clear(engine);
                 simulation.splashReturn();
-            }, 3000);
+            }, 5000);
         }
     },
     health: 0,
