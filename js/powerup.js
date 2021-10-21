@@ -424,10 +424,9 @@ const powerUps = {
                     simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
 
                     if (tech.isOverHeal && overHeal > 0) { //tech quenching
-                        const scaledOverHeal = overHeal * 0.8
+                        const scaledOverHeal = overHeal * 0.7
                         m.damage(scaledOverHeal);
                         simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>-=</span> ${(scaledOverHeal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
-
                         //draw damage
                         simulation.drawList.push({ //add dmg to draw queue
                             x: m.pos.x,

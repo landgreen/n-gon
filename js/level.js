@@ -16,8 +16,8 @@ const level = {
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.setField("plasma torch")
-            // b.giveGuns("railgun")
-            // tech.giveTech("aerodynamic heating")
+            // b.giveGuns("nail gun")
+            // tech.giveTech("negative friction")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("all-stars")
             // for (let i = 0; i < 3; i++) tech.giveTech("overcharge")

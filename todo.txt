@@ -1,15 +1,31 @@
 ******************************************************** NEXT PATCH **************************************************
+tech: needle ice - needles make 1-2 ice 9 after they impact a wall
+needle shot gun fires 1 less needle
 
-tech: surfactant - remove foam gun, get 3 foam bots, upgrade all bots to foam
-  you can now have a chance to see gun removing tech even when that gun isn't active
+most harpoon tech are about 5% better
+JUNK tech: negative friction - you speed up when you touch walls
 
-n-gon title draws in 1/2 the time
-  I'm getting flagged by google search that my loading page takes a long time to full render, so this might remove the flag
-  the site is very fast to load, but I think google is getting confused by the title animation
+no-cloning theorem:  42% -> 38% dup chance
+symbiosis:  2 tech -> 1-2 tech after a boss dies
+quenching gives 10% less max health for over heal
 
-bug fixes
 
 ******************************************************** TODO ********************************************************
+
+no passive energy regen, but regen energy after doing damage
+  tech or just default?
+  modify conservation of energy tech
+
+Tech: Schrödinger’s cat (or superposition)
+Requires: Metamaterial Cloaking and Dazzler
+Upon decloaking, all mobs nearby (same range as Dazzler) are irradiated. Increase energy drain by 15%. 
+
+game idea - auto battler with n-gon mob AI and tech
+  name: auto-gon
+  you build a group of mobs and bosses from n-gon
+    they fight other mobs and bosses
+  similar research and tech system to n-gon
+  some mobs can fire player weapons
 
 junk tech negative air friction on player
 

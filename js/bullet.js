@@ -3099,6 +3099,10 @@ const b = {
                 this.do = function() {
                     if (!Matter.Query.collides(this, map).length) this.force.y += this.mass * 0.001;
                 }
+                if (tech.isNeedleIce) {
+                    b.iceIX(5 + 5 * Math.random(), 2 * Math.PI * Math.random(), this.position) // iceIX(speed = 0, dir = m.angle + Math.PI * 2 * Math.random(), where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }) {
+                    if (0.5 < Math.random()) b.iceIX(5 + 5 * Math.random(), 2 * Math.PI * Math.random(), this.position)
+                }
             } else if (this.speed < 30) {
                 this.force.y += this.mass * 0.001; //no gravity until it slows down to improve aiming
             }
@@ -4332,7 +4336,7 @@ const b = {
                         b.foam(where, { x: SPEED * Math.cos(angle), y: SPEED * Math.sin(angle) }, 5 + 8 * Math.random())
                     }
                 } else if (tech.isNeedleShot) {
-                    const number = 11 * (tech.isShotgunReversed ? 1.6 : 1)
+                    const number = 9 * (tech.isShotgunReversed ? 1.6 : 1)
                     const spread = (input.down ? 0.03 : 0.05)
                     let angle = m.angle - (number - 1) * spread * 0.5
                     for (let i = 0; i < number; i++) {
@@ -5187,8 +5191,8 @@ const b = {
                 }
                 //look for closest mob in player's LoS
                 const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
-                const length = tech.isLargeHarpoon ? 1 + 0.09 * Math.sqrt(this.ammo) : 1
-                const totalCycles = 7 * (tech.isFilament ? 1 + 0.009 * Math.min(100, this.ammo) : 1) * Math.sqrt(length)
+                const length = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
+                const totalCycles = 7 * (tech.isFilament ? 1 + 0.01 * Math.min(110, this.ammo) : 1) * Math.sqrt(length)
                 if (input.down) {
                     // if (true) {
                     //     if (m.immuneCycle < m.cycle + 60) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
@@ -5214,7 +5218,7 @@ const b = {
                     m.fireCDcycle = m.cycle + 50 * b.fireCDscale; // cool down
                     // }
                 } else if (tech.extraHarpoons) {
-                    const range = 450 * (tech.isFilament ? 1 + Math.min(100, this.ammo) / 100 : 1)
+                    const range = 450 * (tech.isFilament ? 1 + 0.005 * Math.min(110, this.ammo) : 1)
                     let targetCount = 0
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {

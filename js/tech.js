@@ -3701,6 +3701,25 @@
                 }
             },
             {
+                name: "needle ice",
+                description: `when <strong>needles</strong> impact walls<br>they chip off <strong>1-2</strong> freezing <strong class='color-s'>ice IX</strong> crystals`,
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.isNeedles || tech.isNeedleShot
+                },
+                requires: "needle gun, needle-shot",
+                effect() {
+                    tech.isNeedleIce = true
+                },
+                remove() {
+                    tech.isNeedleIce = false
+                }
+            },
+            {
                 name: "ceramics",
                 description: `<strong>needles</strong> and <strong>harpoons</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
                 isGunTech: true,
@@ -5088,7 +5107,7 @@
             },
             {
                 name: "surfactant",
-                description: "gain <strong>3</strong> <strong class='color-bot'>foam-bots</strong> and <strong>upgrade</strong> bots to foam<br>remove your <strong>foam gun</strong>",
+                description: "trade your <strong>foam gun</strong> for <strong>2</strong> <strong class='color-bot'>foam-bots</strong><br>and <strong>upgrade</strong> all bots to foam<br>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5099,11 +5118,11 @@
                 isNonRefundable: true,
                 requires: "NOT EXPERIMENT MODE, foam gun",
                 allowed() {
-                    return tech.haveGunCheck("foam", false) && !tech.isFoamBotUpgrade
+                    return tech.haveGunCheck("foam", false) && !b.hasBotUpgrade()
                 },
                 effect() {
                     tech.giveTech("foam-bot upgrade")
-                    for (let i = 0; i < 3; i++) {
+                    for (let i = 0; i < 2; i++) {
                         b.foamBot()
                         tech.foamBotCount++;
                     }
@@ -6221,7 +6240,7 @@
             },
             {
                 name: "no-cloning theorem",
-                description: `<strong>42%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>mob</strong> <strong>dies</strong>, lose <strong>1%</strong> <strong class='color-dup'>duplication</strong> chance`,
+                description: `<strong>38%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>mob</strong> <strong>dies</strong>, lose <strong>1%</strong> <strong class='color-dup'>duplication</strong> chance`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6232,9 +6251,9 @@
                 },
                 requires: "cloaking, wormhole or time dilation and below 100% duplication chance",
                 effect() {
-                    tech.cloakDuplication = 0.42
+                    tech.cloakDuplication = 0.38
                     powerUps.setDupChance(); //needed after adjusting duplication chance
-                    if (!build.isExperimentSelection) simulation.circleFlare(0.42);
+                    if (!build.isExperimentSelection) simulation.circleFlare(0.38);
                 },
                 remove() {
                     tech.cloakDuplication = 0
@@ -6243,7 +6262,7 @@
             },
             {
                 name: "symbiosis",
-                description: "after a <strong>mob</strong> <strong>dies</strong>, lose <strong>1</strong> max <strong class='color-h'>health</strong><br><strong>bosses</strong> spawn <strong>2</strong> extra <strong class='color-m'>tech</strong> after they <strong>die</strong>",
+                description: "after a <strong>mob</strong> <strong>dies</strong>, lose <strong>1</strong> max <strong class='color-h'>health</strong><br><strong>bosses</strong> spawn <strong>1-2</strong> extra <strong class='color-m'>tech</strong> after they <strong>die</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6770,6 +6789,25 @@
             //     },
             //     remove() {}
             // },
+            {
+                name: "negative friction",
+                description: "when you touch walls you speed up instead of slowing down. It's actually pretty cool, seriously.",
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    player.friction = -0.5
+                },
+                remove() {
+                    if (this.count) player.friction = 0.002
+                }
+            },
             {
                 name: "bounce",
                 description: "you bounce off things.  It's annoying, but not that bad.",

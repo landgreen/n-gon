@@ -1139,7 +1139,8 @@ const mobs = {
                     }
                     if (tech.isAddRemoveMaxHealth) {
                         if (this.isBoss && this.isDropPowerUp) {
-                            for (let i = 0; i < 2; i++) powerUps.spawn(this.position.x, this.position.y, "tech", false) //exit
+                            powerUps.spawn(this.position.x, this.position.y, "tech", false)
+                            if (0.5 < Math.random()) powerUps.spawn(this.position.x, this.position.y, "tech", false)
                         } else {
                             const amount = 0.01
                             if (tech.isEnergyHealth) {
