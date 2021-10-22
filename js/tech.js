@@ -171,7 +171,7 @@
             if (tech.isCloakingDamage) dmg *= 1.35
             if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.5
             if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
-            if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 2 : 0.66
+            if (tech.isDamageAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 2 : 0.72
             if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= tech.sneakAttackDmg
             if (tech.isTechDamage) dmg *= 1.9
             if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
@@ -190,20 +190,23 @@
             if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.1995
             if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
             if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
-            if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
+            if (tech.isBotDamage) dmg *= 1 + 0.07 * b.totalBots()
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
             return Math.max(0, (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.17 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0))
         },
+        isScaleMobsWithDuplication: false,
         maxDuplicationEvent() {
             if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
                 tech.is100Duplicate = false
                 const range = 500
+                tech.isScaleMobsWithDuplication = true
                 for (let i = 0, len = 8; i < len; i++) {
                     const angle = 2 * Math.PI * i / len
                     spawn.randomLevelBoss(m.pos.x + range * Math.cos(angle), m.pos.y + range * Math.sin(angle), spawn.nonCollideBossList);
                 }
+                tech.isScaleMobsWithDuplication = false
             }
         },
         setTechFrequency(name, frequency) {
@@ -748,7 +751,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("matter wave") || tech.isNeutronBomb || tech.isIceField || tech.isIceShot || tech.relayIce || tech.blockingIce > 1 || tech.isWormShot || tech.foamBotCount > 1
+                    return m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("matter wave") || tech.isNeutronBomb || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1 || tech.isWormShot || tech.foamBotCount > 1
                 },
                 requires: "drones, spores, missiles, foam, matter wave, neutron bomb, ice IX",
                 effect() {
@@ -1535,7 +1538,7 @@
             },
             {
                 name: "perimeter defense",
-                description: "reduce <strong class='color-harm'>harm</strong> by <strong>7%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>8%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1554,7 +1557,7 @@
             },
             {
                 name: "network effect",
-                description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
+                description: "increase <strong class='color-d'>damage</strong> by <strong>7%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1574,7 +1577,7 @@
             {
                 name: "ersatz bots",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ersatz_good' class="link">ersatz bots</a>`,
-                description: "<strong>double</strong> your current permanent <strong class='color-bot'>bots</strong><br>remove <strong>all</strong> of your current <strong class='color-g'>guns</strong>",
+                description: "<strong>double</strong> your current permanent <strong class='color-bot'>bots</strong><br>remove <strong>all</strong> <strong class='color-g'>guns</strong> in your inventory",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -1968,7 +1971,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.isIceShot || tech.relayIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
+                    return (tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
                 },
                 requires: "a localized freeze effect, no other mob death tech",
                 effect() {
@@ -1986,7 +1989,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isIceField || tech.relayIce || tech.blockingIce || tech.iceIXOnDeath || tech.isIceShot
+                    return tech.isIceField || tech.relayIce || tech.isNeedleIce || tech.blockingIce || tech.iceIXOnDeath || tech.isIceShot
                 },
                 requires: "ice IX",
                 effect() {
@@ -2004,7 +2007,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
+                    return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
                 },
                 requires: "a localized freeze effect",
                 effect() {
@@ -2022,7 +2025,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.isStunField || tech.isExplosionStun || tech.isMineStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
+                    return tech.isStunField || tech.isExplosionStun || tech.isMineStun || tech.oneSuperBall || tech.isHarmFreeze || tech.isIceField || tech.relayIce || tech.isNeedleIce || tech.isIceCrystals || tech.isSporeFreeze || tech.isAoESlow || tech.isFreezeMobs || tech.isCloakStun || tech.orbitBotCount > 1 || tech.isWormholeDamage || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
                 },
                 requires: "a freezing or stunning effect",
                 effect() {
@@ -2549,7 +2552,7 @@
             },
             {
                 name: "dormancy",
-                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:90%;'>increase <strong class='color-d'>damage</strong> by <strong>99%</strong> else decrease it by <strong>33%</strong></span>",
+                description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br><span style = 'font-size:90%;'>increase <strong class='color-d'>damage</strong> by <strong>100%</strong> else decrease it by <strong>28%</strong></span>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3229,7 +3232,7 @@
             },
             {
                 name: "parthenogenesis",
-                description: "levels have a chance to spawn a 2nd <strong>boss</strong><br>equal to <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance",
+                description: "<span style = 'font-size:90%;'> <strong>bosses</strong> have a <strong>2x</strong> chance to be <strong class='color-dup'>duplicated</strong>, but their<br><strong>health</strong> is increased by your <strong class='color-dup'>duplication</strong> chance</span>",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -3247,27 +3250,21 @@
             },
             {
                 name: "apomixis",
-                description: `immediately use ${powerUps.orb.research(11)} and if you<br>reach <strong>100%</strong> <strong class='color-dup'>duplication</strong> spawn <strong>8 bosses</strong>`,
+                description: `when you reach <strong>100%</strong> <strong class='color-dup'>duplication</strong><br>spawn <strong>8 bosses</strong> with <strong>100%</strong> more <strong>health</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.duplicationChance() > 0.6 && powerUps.research.count > 10
+                    return tech.duplicationChance() > 0.33
                 },
-                requires: "duplication chance above 60%",
+                requires: "duplication chance above 33%",
                 effect() {
                     tech.is100Duplicate = true;
                     tech.maxDuplicationEvent()
-                    for (let i = 0; i < 11; i++) {
-                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-                    }
                 },
                 remove() {
-                    if (tech.is100Duplicate) {
-                        tech.is100Duplicate = false;
-                        if (this.count > 0) powerUps.research.changeRerolls(11)
-                    }
+                    tech.is100Duplicate = false;
                 }
             },
             // {
@@ -3518,6 +3515,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 isBadRandomOption: true,
+                // isNonRefundable: true,
                 allowed() {
                     return !tech.isExtraChoice && !tech.isCancelDuplication && !tech.isCancelRerolls
                 },
@@ -3530,7 +3528,18 @@
                 remove() {
                     if (tech.isDeterminism) {
                         tech.isDeterminism = false;
-                        for (let i = 0; i < 5; i++) powerUps.removeRandomTech()
+                        for (let i = 0; i < 5; i++) {
+                            const numberRemoved = powerUps.removeRandomTech()
+                            if (numberRemoved === 0) { //if the player didn't remove a power up then remove 1 tech for the map
+                                for (let i = 0; i < powerUp.length; i++) {
+                                    if (powerUp[i].name === "tech") {
+                                        Matter.Composite.remove(engine.world, powerUp[i]);
+                                        powerUp.splice(i, 1);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             },

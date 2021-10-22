@@ -872,7 +872,7 @@ const powerUps = {
     randomPowerUpCounter: 0,
     spawnBossPowerUp(x, y) { //boss spawns field and gun tech upgrades
         if (level.levels[level.onLevel] !== "final") {
-            if (m.fieldMode === 0) {
+            if (m.fieldMode === 0 && !tech.isSuperDeterminism) {
                 powerUps.spawn(x, y, "field")
             } else {
                 powerUps.randomPowerUpCounter++;

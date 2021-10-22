@@ -506,7 +506,7 @@ const m = {
         if (tech.isSlowFPS) dmg *= 0.8
         // if (tech.isPiezo) dmg *= 0.85
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.4
-        if (tech.isBotArmor) dmg *= 0.93 ** b.totalBots()
+        if (tech.isBotArmor) dmg *= 0.92 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.energyRegen === 0) dmg *= 0.34

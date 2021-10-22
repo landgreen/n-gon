@@ -1,16 +1,15 @@
 ******************************************************** NEXT PATCH **************************************************
-tech: needle ice - needles make 1-2 ice 9 after they impact a wall
-needle shot gun fires 1 less needle
 
-most harpoon tech are about 5% better
-JUNK tech: negative friction - you speed up when you touch walls
+perimeter defense and network effect each give 1% more bonus per bot  (around an 18% increase for each tech)
 
-no-cloning theorem:  42% -> 38% dup chance
-symbiosis:  2 tech -> 1-2 tech after a boss dies
-quenching gives 10% less max health for over heal
-
+extra bosses spawned from parthenogenesis and apomixis have health increased by your duplication chance
+  (if you have 50% duplication the extra boss have 50% more health)
+apomixis no longer costs 8 research
 
 ******************************************************** TODO ********************************************************
+
+Plasma Burner: upgrade for plasma torch, basically just a jet engine. does high damage, but short range, mostly for player movement.
+  maybe reduce gravity to really low then apply a vector away from mouse direction
 
 no passive energy regen, but regen energy after doing damage
   tech or just default?

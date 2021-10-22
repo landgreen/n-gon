@@ -91,7 +91,9 @@ const spawn = {
     },
     secondaryBossChance(x, y) {
         if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) {
+            tech.isScaleMobsWithDuplication = true
             spawn.randomLevelBoss(x, y);
+            tech.isScaleMobsWithDuplication = false
             return true
         } else if (tech.isResearchBoss) {
             if (powerUps.research.count > 3) {
@@ -736,7 +738,7 @@ const spawn = {
         const me = mob[mob.length - 1];
         me.isBoss = true;
         Matter.Body.setDensity(me, 0.002); //normal density even though its a boss
-        me.damageReduction = 0.04; //extra reduction for a boss, because normal density
+        me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1); //extra reduction for a boss, because normal density
         me.frictionAir = 0.01;
         me.accelMag = 0.0002;
         me.onDeath = function() {
@@ -918,7 +920,7 @@ const spawn = {
         me.onDamage = function(dmg) {
             if (Math.random() < 0.33 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
         }
-        me.damageReduction = 0.18 //me.damageReductionGoal
+        me.damageReduction = 0.18 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1); //me.damageReductionGoal
         me.do = function() {
             // // this.armor();
             if (!m.isBodiesAsleep) {
@@ -991,7 +993,7 @@ const spawn = {
         me.onHit = function() { //run this function on hitting player
             this.explode();
         };
-        me.damageReduction = 0.22
+        me.damageReduction = 0.22 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
         me.doAwake = function() {
             if (!m.isBodiesAsleep) {
                 // this.armor();
@@ -1109,7 +1111,7 @@ const spawn = {
                 powerUps.spawnRandomPowerUp(this.position.x, this.position.y) // manual power up spawn to avoid spawning too many tech with "symbiosis"
             }
         }
-        me.damageReduction = 0.18
+        me.damageReduction = 0.18 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.alwaysSeePlayer();
@@ -1137,7 +1139,6 @@ const spawn = {
         mobs.spawn(x, y, vertices, radius, "transparent");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-
         me.frictionAir = 0.01
         me.seeAtDistance2 = 1000000;
         me.accelMag = 0.0005 * simulation.accelScale;
@@ -1171,7 +1172,7 @@ const spawn = {
             }
             for (let i = 0; i < powerUp.length; i++) powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.stroke = `hsl(0,0%,${80+25*Math.sin(simulation.cycle*0.01)}%)`
@@ -1340,7 +1341,7 @@ const spawn = {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
         me.lastSpeed = me.speed
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.gravity();
@@ -1571,7 +1572,7 @@ const spawn = {
                 // toMe(bullet, this.position, this.eventHorizon)
             }
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             //keep it slow, to stop issues from explosion knock backs
@@ -1695,7 +1696,7 @@ const spawn = {
         Composite.add(engine.world, cons[cons.length - 1]);
         cons[len2].length = 100 + 1.5 * radius;
         me.cons2 = cons[len2];
-        me.damageReduction = 0.25 //normal is 1,  most bosses have 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) //normal is 1,  most bosses have 0.25
         me.do = function() {
             // this.armor();
             this.gravity();
@@ -1858,7 +1859,7 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.damageReduction = 0.35 // me.damageReductionGoal
+        me.damageReduction = 0.35 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) // me.damageReductionGoal
         me.awake = function() {
             // this.armor();
             this.checkStatus();
@@ -2038,7 +2039,7 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.seePlayerByLookingAt();
@@ -2174,7 +2175,7 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.targetingCount = 0;
         me.targetingTime = 60 - Math.min(58, 3 * simulation.difficulty)
         me.do = function() {
@@ -2334,7 +2335,7 @@ const spawn = {
             }
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         }
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.seePlayerByHistory()
@@ -2400,7 +2401,7 @@ const spawn = {
         me.do = function() {
             if (player.speed > 5) this.do = this.fire //don't attack until player moves
         }
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.fire = function() {
             // this.armor();
             this.checkStatus();
@@ -2655,7 +2656,7 @@ const spawn = {
         // me.torque -= me.inertia * 0.002
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
         Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.isBoss = true;
 
         // spawn.shield(me, x, y, 1);  //not working, not sure why
@@ -2921,7 +2922,7 @@ const spawn = {
         mobs.spawn(x, y, sides, radius, "rgb(201,202,225)");
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
-        me.accelMag = 0.00037 * Math.sqrt(simulation.accelScale);
+        me.accelMag = 0.00038 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.01;
         me.swordRadiusMax = 450 + 7 * simulation.difficulty;
         me.laserAngle = 0;
@@ -2929,7 +2930,7 @@ const spawn = {
 
         spawn.shield(me, x, y, 1);
         Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.12
+        me.damageReduction = 0.11 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.isBoss = true;
         me.onDamage = function() {};
         me.onDeath = function() {
@@ -3206,13 +3207,13 @@ const spawn = {
             //draw
             if (!m.isBodiesAsleep) {
                 if (this.distanceToPlayer2() < this.seeAtDistance2) {
-                    if (this.alpha < 1) this.alpha += 0.003 * simulation.CDScale; //near player go solid
+                    if (this.alpha < 1) this.alpha += 0.005 * simulation.CDScale; //near player go solid
                 } else {
-                    if (this.alpha > 0) this.alpha -= 0.03; ///away from player, hide
+                    if (this.alpha > 0) this.alpha -= 0.05; ///away from player, hide
                 }
             }
             if (this.alpha > 0) {
-                if (this.alpha > 0.9 && this.seePlayer.recall) {
+                if (this.alpha > 0.8 && this.seePlayer.recall) {
                     this.healthBar();
                     if (!this.canTouchPlayer) {
                         this.canTouchPlayer = true;
@@ -3313,7 +3314,7 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.damageReduction = 0.2
+        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.seePlayerCheckByDistance();
@@ -3401,7 +3402,7 @@ const spawn = {
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
         };
 
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.seePlayerByLookingAt();
@@ -3684,7 +3685,7 @@ const spawn = {
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
         };
         me.onDamage = function() {};
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.seePlayerCheck();
@@ -3749,7 +3750,7 @@ const spawn = {
                 });
             }
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             if (this.grenadeLimiter > 1) this.grenadeLimiter--
@@ -3916,7 +3917,7 @@ const spawn = {
         me.onDamage = function() {
             this.cycle = 0
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.checkStatus();
@@ -3976,7 +3977,7 @@ const spawn = {
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
         };
         me.onDamage = function() {};
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.seePlayerCheck();
@@ -4195,7 +4196,7 @@ const spawn = {
         me.closestVertex1 = 0;
         // me.closestVertex2 = 1;
         me.cycle = 0
-        me.damageReduction = 0.2
+        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.seePlayerByHistory()
@@ -4309,7 +4310,7 @@ const spawn = {
                 }
             }
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.seePlayerByHistory()
@@ -4415,7 +4416,7 @@ const spawn = {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             this.removeCons(); //remove constraint
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.gravity();
@@ -4424,14 +4425,14 @@ const spawn = {
             this.attraction();
         };
     },
-    shield(target, x, y, chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2), isExtraShield = false) {
+    shield(target, x, y, chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2) + tech.duplicationChance(), isExtraShield = false) {
         if (this.allowShields && Math.random() < chance) {
             mobs.spawn(x, y, 9, target.radius + 30, "rgba(220,220,255,0.9)");
             let me = mob[mob.length - 1];
             me.stroke = "rgb(220,220,255)";
             Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
             me.shield = true;
-            me.damageReduction = 0.075
+            me.damageReduction = 0.075 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
             me.isUnblockable = true
             me.isExtraShield = isExtraShield //this prevents spamming with tech.isShieldAmmo
             me.collisionFilter.category = cat.mobShield
@@ -4480,7 +4481,7 @@ const spawn = {
         Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
         me.frictionAir = 0;
         me.shield = true;
-        me.damageReduction = 0.075
+        me.damageReduction = 0.075 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.collisionFilter.category = cat.mobShield
         me.collisionFilter.mask = cat.bullet;
         for (let i = 0; i < nodes; ++i) {
@@ -4600,7 +4601,7 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.damageReduction = 0.25
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.seePlayerCheckByDistance();
