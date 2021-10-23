@@ -17,7 +17,9 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // m.setField("plasma torch")
             // b.giveGuns("nail gun")
-            // tech.giveTech("negative friction")
+            // tech.giveTech("rotary cannon")
+            // tech.giveTech("pneumatic actuator")
+            // tech.giveTech("rivet gun")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("all-stars")
             // for (let i = 0; i < 3; i++) tech.giveTech("overcharge")
@@ -2291,7 +2293,7 @@ const level = {
         // for (let i = 0; i < 200; i++) powerUps.directSpawn(710 + 1000 * Math.random(), -710 + 1000 * Math.random(), "tech");
 
         spawn.mapRect(2500, -1200, 200, 750); //right wall
-        blockDoor(2585, -210)
+        // blockDoor(2585, -210)
         spawn.mapRect(2500, -200, 200, 300); //right wall
         spawn.mapRect(4500, -1200, 200, 650); //right wall
         blockDoor(4585, -310)
@@ -2307,9 +2309,9 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
-        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
-        // spawn.starter(1900, -500, 200) //big boy
-        spawn.blockGroup(1900, -500)
+        level.difficultyIncrease(40) //30 is near max on hard  //60 is near max on why
+        spawn.starter(1900, -500, 200) //big boy
+        // spawn.blockGroup(1900, -500)
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)

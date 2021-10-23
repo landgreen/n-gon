@@ -3671,45 +3671,6 @@
                 }
             },
             {
-                name: "needle gun",
-                description: "<strong>nail gun</strong> fires <strong>3</strong> mob piercing <strong>needles</strong><br>requires <strong>3</strong> times more <strong>bullets</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isIceCrystals && !tech.isRivets
-                },
-                requires: "nail gun, not ice crystal, rivets, or pneumatic actuator",
-                effect() {
-                    tech.isNeedles = true
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "nail gun") {
-                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
-                            b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
-                            b.guns[i].chooseFireMethod()
-                            simulation.updateGunHUD();
-                            break
-                        }
-                    }
-                },
-                remove() {
-                    if (tech.isNeedles) {
-                        tech.isNeedles = false
-                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                            if (b.guns[i].name === "nail gun") {
-                                b.guns[i].chooseFireMethod()
-                                b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
-                                b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
-                                simulation.updateGunHUD();
-                                break
-                            }
-                        }
-                    }
-                }
-            },
-            {
                 name: "needle ice",
                 description: `when <strong>needles</strong> impact walls<br>they chip off <strong>1-2</strong> freezing <strong class='color-s'>ice IX</strong> crystals`,
                 isGunTech: true,
@@ -3745,6 +3706,45 @@
                 },
                 remove() {
                     tech.isNeedleShieldPierce = false
+                }
+            },
+            {
+                name: "needle gun",
+                description: "<strong>nail gun</strong> fires <strong>3</strong> mob piercing <strong>needles</strong><br>requires <strong>3</strong> times more <strong>bullets</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isIceCrystals && !tech.isRivets && !tech.nailRecoil
+                },
+                requires: "nail gun, not ice crystal, rivets, or pneumatic actuator",
+                effect() {
+                    tech.isNeedles = true
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "nail gun") {
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 3);
+                            b.guns[i].ammoPack = Math.ceil(b.guns[i].defaultAmmoPack / 3);
+                            b.guns[i].chooseFireMethod()
+                            simulation.updateGunHUD();
+                            break
+                        }
+                    }
+                },
+                remove() {
+                    if (tech.isNeedles) {
+                        tech.isNeedles = false
+                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                            if (b.guns[i].name === "nail gun") {
+                                b.guns[i].chooseFireMethod()
+                                b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 3);
+                                b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+                                simulation.updateGunHUD();
+                                break
+                            }
+                        }
+                    }
                 }
             },
             {
@@ -3847,9 +3847,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles
+                    return tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles && !tech.nailRecoil
                 },
-                requires: "nail gun, not rivets or needles",
+                requires: "nail gun, not rotary cannon, rivets, or needles",
                 effect() {
                     tech.nailInstantFireRate = true
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -3865,33 +3865,33 @@
                     }
                 }
             },
-            // {
-            //     name: "powder-actuated",
-            //     description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>nails have a <strong>30%</strong> faster muzzle <strong>speed</strong>",
-            //     isGunTech: true,
-            //     maxCount: 1,
-            //     count: 0,
-            //     frequency: 2,
-            //     frequencyDefault: 2,
-            //     allowed() {
-            //         return tech.haveGunCheck("nail gun") && tech.nailFireRate && !tech.isIceCrystals
-            //     },
-            //     requires: "nail gun and pneumatic actuator not ice crystal nucleation",
-            //     effect() {
-            //         tech.nailInstantFireRate = true
-            //         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-            //             if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
-            //         }
-            //     },
-            //     remove() {
-            //         if (tech.nailInstantFireRate) {
-            //             tech.nailInstantFireRate = false
-            //             for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-            //                 if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
-            //             }
-            //         }
-            //     }
-            // },
+            {
+                name: "rotary cannon",
+                description: "<strong>nail gun</strong> has increased muzzle <strong>speed</strong>,<br>maximum <strong>fire rate</strong>, <strong>accuracy</strong>, and <strong>recoil</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate
+                },
+                requires: "nail gun, not pneumatic actuator",
+                effect() {
+                    tech.nailRecoil = true
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
+                    }
+                },
+                remove() {
+                    if (tech.nailRecoil) {
+                        tech.nailRecoil = false
+                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                            if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
+                        }
+                    }
+                }
+            },
             {
                 name: "supercritical fission",
                 description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> can <strong class='color-e'>explode</strong><br>if they strike mobs near their <strong>center</strong>",
@@ -6776,6 +6776,25 @@
                     tech.removeMaxHealthOnKill = 0
                 }
             },
+            {
+                name: "-parthenocarpy-",
+                description: "<strong style='color: #f55;'>experiment:</strong> spawn about 50% more mobs",
+                maxCount: 1,
+                count: 1,
+                frequency: 0,
+                isBadRandomOption: true,
+                isExperimentalMode: true,
+                allowed() {
+                    return build.isExperimentSelection
+                },
+                requires: "",
+                effect() {
+                    tech.isMoreMobs = true
+                },
+                remove() {
+                    tech.isMoreMobs = false
+                }
+            },
             //************************************************** 
             //************************************************** JUNK
             //************************************************** tech
@@ -6800,7 +6819,7 @@
             // },
             {
                 name: "negative friction",
-                description: "when you touch walls you speed up instead of slowing down. It's actually pretty cool, seriously.",
+                description: "when you touch walls you speed up instead of slowing down. It's kinda fun.",
                 maxCount: 1,
                 count: 0,
                 frequency: 0,
@@ -6811,7 +6830,7 @@
                 },
                 requires: "",
                 effect() {
-                    player.friction = -0.5
+                    player.friction = -0.4
                 },
                 remove() {
                     if (this.count) player.friction = 0.002
@@ -8624,5 +8643,7 @@
         cloakDuplication: null,
         extruderRange: null,
         isRodAreaDamage: null,
-        isForeverDrones: null
+        isForeverDrones: null,
+        isMoreMobs: null,
+        nailRecoil: null
     }

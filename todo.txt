@@ -1,12 +1,18 @@
 ******************************************************** NEXT PATCH **************************************************
 
-perimeter defense and network effect each give 1% more bonus per bot  (around an 18% increase for each tech)
-
-extra bosses spawned from parthenogenesis and apomixis have health increased by your duplication chance
-  (if you have 50% duplication the extra boss have 50% more health)
-apomixis no longer costs 8 research
+tech: rotary cannon - nail gun (and rivet gun) have increased fire rate, muzzle speed, recoil, and accuracy
+experiment -parthenocarpy- spawn about 50% more mobs
 
 ******************************************************** TODO ********************************************************
+
+minigun: tech for nail gun - Its ramp-up time must not be removable. Recoil should be intense, enough that the player cannot walk forward quickly while using it.
+  nail gun gains:  accuracy, bullet speed, huge recoil, fire rate
+    alternative to pnumatic that stops ramp up
+    maybe try to also apply to rivets?
+
+animate going to next level?
+  door fills in with color that climbs up vertically through the door graphic the longer you stand on door
+  hold crouch on door? or automatically
 
 Plasma Burner: upgrade for plasma torch, basically just a jet engine. does high damage, but short range, mostly for player movement.
   maybe reduce gravity to really low then apply a vector away from mouse direction

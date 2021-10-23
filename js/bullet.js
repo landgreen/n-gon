@@ -4023,7 +4023,13 @@ const b = {
             nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
             startingHoldCycle: 0,
             chooseFireMethod() { //set in simulation.startGame
-                if (tech.isRivets) {
+                if (tech.nailRecoil) {
+                    if (tech.isRivets) {
+                        this.fire = this.fireRecoilRivets
+                    } else {
+                        this.fire = this.fireRecoilNails
+                    }
+                } else if (tech.isRivets) {
                     this.fire = this.fireRivets
                 } else if (tech.isNeedles) {
                     this.fire = this.fireNeedles
@@ -4036,8 +4042,37 @@ const b = {
                 }
             },
             do() {},
-            fire() {
+            fire() {},
+            fireRecoilNails() {
+                if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
+                const CD = Math.max(11 - 0.08 * (m.cycle - this.startingHoldCycle), 1) //CD scales with cycles fire is held down
+                this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
 
+                m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
+                this.baseFire(m.angle + (Math.random() - 0.5) * (input.down ? 0.05 : 0.1) / CD, 43 + 8 * Math.random())
+                //very complex recoil system
+                if (m.onGround) {
+                    if (input.down) {
+                        const KNOCK = 0.01
+                        player.force.x -= KNOCK * Math.cos(m.angle)
+                        player.force.y -= KNOCK * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
+                        Matter.Body.setVelocity(player, {
+                            x: player.velocity.x * 0.5,
+                            y: player.velocity.y * 0.5
+                        });
+                    } else {
+                        const KNOCK = 0.05
+                        player.force.x -= KNOCK * Math.cos(m.angle)
+                        player.force.y -= KNOCK * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
+                        Matter.Body.setVelocity(player, {
+                            x: player.velocity.x * 0.8,
+                            y: player.velocity.y * 0.8
+                        });
+                    }
+                } else {
+                    if (Math.abs(player.velocity.x) < 12) player.force.x -= 0.04 * Math.cos(m.angle)
+                    player.force.y -= 0.01 * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
+                }
             },
             fireNormal() {
                 if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
@@ -4118,21 +4153,98 @@ const b = {
                     }
                 };
                 b.muzzleFlash(30);
+                //very complex recoil system
+                if (m.onGround) {
+                    if (input.down) {
+                        const KNOCK = 0.01
+                        player.force.x -= KNOCK * Math.cos(m.angle)
+                        player.force.y -= KNOCK * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
+                    } else {
+                        const KNOCK = 0.02
+                        player.force.x -= KNOCK * Math.cos(m.angle)
+                        player.force.y -= KNOCK * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
+                    }
+                } else {
+                    const KNOCK = 0.01
+                    player.force.x -= KNOCK * Math.cos(m.angle)
+                    player.force.y -= KNOCK * Math.sin(m.angle) * 0.5 //reduce knock back in vertical direction to stop super jumps    
+                }
             },
-            // fireNailFireRate() {
-            //     if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
-            //     const CD = Math.max(7.5 - 0.06 * (m.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
-            //     this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
+            fireRecoilRivets() {
+                // m.fireCDcycle = m.cycle + Math.floor((input.down ? 25 : 17) * b.fireCDscale); // cool down
+                if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
+                const CD = Math.max(30 - 0.15 * (m.cycle - this.startingHoldCycle), 8) //CD scales with cycles fire is held down
+                this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
+                m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
 
-            //     m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
-            //     this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (input.down ? 1.35 : 3.2) / CD)
-            // },
+                const me = bullet.length;
+                const size = tech.rivetSize * 8
+                bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 5 * size, size, b.fireAttributes(m.angle));
+                bullet[me].dmg = tech.isNailRadiation ? 0 : 2.75
+                Matter.Body.setDensity(bullet[me], 0.002);
+                Composite.add(engine.world, bullet[me]); //add bullet to world
+                const SPEED = input.down ? 60 : 50
+                Matter.Body.setVelocity(bullet[me], {
+                    x: SPEED * Math.cos(m.angle),
+                    y: SPEED * Math.sin(m.angle)
+                });
+                bullet[me].endCycle = simulation.cycle + 180
+                bullet[me].beforeDmg = function(who) { //beforeDmg is rewritten with ice crystal tech
+                    if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
+                        b.explosion(this.position, 300 + 30 * Math.random()); //makes bullet do explosive damage at end
+                    }
+                    if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 0.7 : 0.24), tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
+                };
+
+                bullet[me].minDmgSpeed = 10
+                bullet[me].frictionAir = 0.006;
+                bullet[me].do = function() {
+                    this.force.y += this.mass * 0.0008
+
+                    //rotates bullet to face current velocity?
+                    if (this.speed > 7) {
+                        const facing = {
+                            x: Math.cos(this.angle),
+                            y: Math.sin(this.angle)
+                        }
+                        const mag = 0.002 * this.mass
+                        if (Vector.cross(Vector.normalise(this.velocity), facing) < 0) {
+                            this.torque += mag
+                        } else {
+                            this.torque -= mag
+                        }
+                    }
+                };
+                b.muzzleFlash(30);
+                //very complex recoil system
+                if (m.onGround) {
+                    if (input.down) {
+                        const KNOCK = 0.05
+                        player.force.x -= KNOCK * Math.cos(m.angle)
+                        player.force.y -= KNOCK * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
+                        Matter.Body.setVelocity(player, {
+                            x: player.velocity.x * 0.4,
+                            y: player.velocity.y * 0.4
+                        });
+                    } else {
+                        const KNOCK = 0.15
+                        player.force.x -= KNOCK * Math.cos(m.angle)
+                        player.force.y -= KNOCK * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
+                        Matter.Body.setVelocity(player, {
+                            x: player.velocity.x * 0.7,
+                            y: player.velocity.y * 0.7
+                        });
+                    }
+                } else {
+                    if (Math.abs(player.velocity.x) < 12) player.force.x -= 0.1 * Math.cos(m.angle)
+                    player.force.y -= 0.03 * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
+                }
+            },
             fireInstantFireRate() {
                 m.fireCDcycle = m.cycle + Math.floor(2 * b.fireCDscale); // cool down
                 this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (input.down ? 1.35 : 3.2) / 2)
             },
-            baseFire(angle) {
-                const speed = 30 + 6 * Math.random()
+            baseFire(angle, speed = 30 + 6 * Math.random()) {
                 b.nail({
                     x: m.pos.x + 30 * Math.cos(m.angle),
                     y: m.pos.y + 30 * Math.sin(m.angle)

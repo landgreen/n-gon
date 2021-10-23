@@ -42,12 +42,23 @@ const spawn = {
             const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
             this[pick](x, y);
         }
+
+        if (tech.isMoreMobs) {
+            const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
+            this[pick](x, y);
+        }
     },
     randomSmallMob(x, y,
         num = Math.max(Math.min(Math.round(Math.random() * simulation.difficulty * 0.2), 4), 0),
         size = 16 + Math.ceil(Math.random() * 15),
         chance = 1) {
         if (spawn.spawnChance(chance)) {
+            for (let i = 0; i < num; ++i) {
+                const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
+                this[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
+            }
+        }
+        if (tech.isMoreMobs) {
             for (let i = 0; i < num; ++i) {
                 const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
                 this[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
