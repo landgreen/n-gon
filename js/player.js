@@ -75,8 +75,10 @@ const m = {
     Fx: 0.016, //run Force on ground //
     jumpForce: 0.42,
     setMovement() {
-        m.Fx = 0.016 * tech.squirrelFx * (tech.isFastTime ? 1.5 : 1);
-        m.jumpForce = 0.42 * tech.squirrelJump * (tech.isFastTime ? 1.13 : 1)
+        // m.Fx = 0.08 / mass * tech.squirrelFx 
+        // m.FxAir = 0.4 / mass / mass 
+        m.Fx = tech.baseFx * tech.squirrelFx * (tech.isFastTime ? 1.5 : 1) / player.mass //base player mass is 5
+        m.jumpForce = tech.baseJumpForce * tech.squirrelJump * (tech.isFastTime ? 1.13 : 1) / player.mass / player.mass //base player mass is 5
     },
     FxAir: 0.016, // 0.4/5/5  run Force in Air
     yOff: 70,
@@ -431,6 +433,7 @@ const m = {
                 }
                 simulation.isTextLogOpen = true;
                 simulation.makeTextLog("simulation.amplitude <span class='color-symbol'>=</span> null");
+                tech.isImmortal = false //disable future immortality
             }, 6 * swapPeriod);
         } else if (m.alive) { //normal death code here
             m.alive = false;
@@ -504,8 +507,8 @@ const m = {
         if (tech.isBlockHarm && m.isHolding) dmg *= 0.15
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
         if (tech.isSlowFPS) dmg *= 0.8
-        // if (tech.isPiezo) dmg *= 0.85
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.4
+        if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.1
         if (tech.isBotArmor) dmg *= 0.92 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
@@ -945,6 +948,14 @@ const m = {
         m.fieldThreshold = Math.cos(m.fieldArc * Math.PI)
     },
     setHoldDefaults() {
+        if (tech.isFreeWormHole && m.fieldUpgrades[m.fieldMode].name !== "wormhole") {
+            tech.removeTech("charmed baryon") //neutronum can get player stuck so it has to be removed if player has wrong field
+            powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
+        }
+        if (tech.isNeutronium && m.fieldUpgrades[m.fieldMode].name !== "negative mass") {
+            tech.removeTech("neutronium") //neutronum can get player stuck so it has to be removed if player has wrong field
+            powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
+        }
         if (m.energy < m.maxEnergy) m.energy = m.maxEnergy;
         m.fieldRegen = tech.energyRegen; //0.001
         m.fieldMeterColor = "#0cf"
@@ -1038,11 +1049,17 @@ const m = {
             m.holdingTarget = null;
         }
     },
+    // setMovement() {
+    //     console.log('hi')
+    //     m.Fx = tech.baseFx * tech.squirrelFx * (tech.isFastTime ? 1.5 : 1);
+    //     m.jumpForce = tech.baseJumpForce * tech.squirrelJump * (tech.isFastTime ? 1.13 : 1)
+    // },
     definePlayerMass(mass = m.defaultMass) {
         Matter.Body.setMass(player, mass);
         //reduce air and ground move forces
-        m.Fx = 0.08 / mass * tech.squirrelFx //base player mass is 5
-        m.FxAir = 0.4 / mass / mass //base player mass is 5
+        m.setMovement()
+        // m.Fx = 0.08 / mass * tech.squirrelFx //base player mass is 5
+        // m.FxAir = 0.4 / mass / mass //base player mass is 5
         //make player stand a bit lower when holding heavy masses
         m.yOffWhen.stand = Math.max(m.yOffWhen.crouch, Math.min(49, 49 - (mass - 5) * 6))
         if (m.onGround && !m.crouch) m.yOffGoal = m.yOffWhen.stand;
@@ -2878,7 +2895,7 @@ const m = {
                         ) {
                             const sub = Vector.sub(simulation.mouseInGame, m.pos)
                             const mag = Vector.magnitude(sub)
-                            const drain = 0.06 + 0.006 * Math.sqrt(mag)
+                            const drain = tech.isFreeWormHole ? 0 : 0.06 + 0.006 * Math.sqrt(mag)
                             if (m.energy > drain && mag > 300) {
                                 m.energy -= drain
                                 m.hole.isReady = false;

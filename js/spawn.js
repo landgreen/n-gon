@@ -1501,52 +1501,52 @@ const spawn = {
             //     }
             // }
             this.checkStatus();
-            if (this.seePlayer.recall) {
-                //eventHorizon waves in and out
-                const eventHorizon = this.eventHorizon * (0.93 + 0.17 * Math.sin(simulation.cycle * 0.011))
+            // if (this.seePlayer.recall) {
+            //eventHorizon waves in and out
+            const eventHorizon = this.eventHorizon * (0.93 + 0.17 * Math.sin(simulation.cycle * 0.011))
 
-                //accelerate towards the player
-                const forceMag = this.accelMag * this.mass;
-                const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
-                this.force.x += forceMag * Math.cos(angle);
-                this.force.y += forceMag * Math.sin(angle);
+            //accelerate towards the player
+            const forceMag = this.accelMag * this.mass;
+            const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+            this.force.x += forceMag * Math.cos(angle);
+            this.force.y += forceMag * Math.sin(angle);
 
-                //draw darkness
-                ctx.beginPath();
-                ctx.arc(this.position.x, this.position.y, eventHorizon * 0.25, 0, 2 * Math.PI);
-                ctx.fillStyle = "rgba(0,0,0,0.9)";
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(this.position.x, this.position.y, eventHorizon * 0.55, 0, 2 * Math.PI);
-                ctx.fillStyle = "rgba(0,0,0,0.5)";
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(this.position.x, this.position.y, eventHorizon, 0, 2 * Math.PI);
-                ctx.fillStyle = "rgba(0,0,0,0.1)";
-                ctx.fill();
+            //draw darkness
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, eventHorizon * 0.25, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(0,0,0,0.9)";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, eventHorizon * 0.55, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, eventHorizon, 0, 2 * Math.PI);
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.fill();
 
-                //when player is inside event horizon
-                if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
-                    if (m.immuneCycle < m.cycle) {
-                        if (m.energy > 0) m.energy -= 0.004
-                        if (m.energy < 0.1) m.damage(0.00015 * simulation.dmgScale);
-                    }
-                    const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-                    player.force.x -= 0.00125 * player.mass * Math.cos(angle) * (m.onGround ? 1.8 : 1);
-                    player.force.y -= 0.0001 * player.mass * Math.sin(angle);
-                    //draw line to player
-                    ctx.beginPath();
-                    ctx.moveTo(this.position.x, this.position.y);
-                    ctx.lineTo(m.pos.x, m.pos.y);
-                    ctx.lineWidth = Math.min(60, this.radius * 2);
-                    ctx.strokeStyle = "rgba(0,0,0,0.5)";
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
-                    ctx.fillStyle = "rgba(0,0,0,0.3)";
-                    ctx.fill();
+            //when player is inside event horizon
+            if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
+                if (m.immuneCycle < m.cycle) {
+                    if (m.energy > 0) m.energy -= 0.004
+                    if (m.energy < 0.1) m.damage(0.00015 * simulation.dmgScale);
                 }
+                const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
+                player.force.x -= 0.00125 * player.mass * Math.cos(angle) * (m.onGround ? 1.8 : 1);
+                player.force.y -= 0.0001 * player.mass * Math.sin(angle);
+                //draw line to player
+                ctx.beginPath();
+                ctx.moveTo(this.position.x, this.position.y);
+                ctx.lineTo(m.pos.x, m.pos.y);
+                ctx.lineWidth = Math.min(60, this.radius * 2);
+                ctx.strokeStyle = "rgba(0,0,0,0.5)";
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
+                ctx.fillStyle = "rgba(0,0,0,0.3)";
+                ctx.fill();
             }
+            // }
         }
     },
     suckerBoss(x, y, radius = 25) {

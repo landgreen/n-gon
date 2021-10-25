@@ -29,8 +29,18 @@
             tech.totalCount = 0;
             simulation.updateTechHUD();
         },
-        removeTech(index) {
-            if (isNaN(index)) { //find index by name
+        removeTech(index = 'random') {
+            if (index === 'random') {
+                const have = [] //find which tech you have
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) have.push(i)
+                }
+                if (have.length) {
+                    index = have[Math.floor(Math.random() * have.length)]
+                } else {
+                    return 0 //if none found don't remove any tech
+                }
+            } else if (isNaN(index)) { //find index by name
                 let found = false;
                 for (let i = 0; i < tech.tech.length; i++) {
                     if (index === tech.tech[i].name) {
@@ -39,11 +49,16 @@
                         break;
                     }
                 }
-                if (!found) return //if name not found don't remove any tech
+                if (!found) return 0 //if name not found don't remove any tech
             }
-            tech.tech[index].remove();
+            const totalRemoved = tech.tech[index].count
+            simulation.makeTextLog(`<span class='color-var'>tech</span>.removeTech("<span class='color-text'>${tech.tech[index].name}</span>")`)
             tech.tech[index].count = 0;
+            tech.tech[index].remove();
             simulation.updateTechHUD();
+            tech.tech[index].isLost = true
+            simulation.updateTechHUD();
+            return totalRemoved //return the total number of tech removed
         },
         // onclick="tech.removeTechPaused(${i}, this)"  //add this to tech elements in pause menu
         // removeTechPaused(index, who) {
@@ -590,7 +605,7 @@
             },
             {
                 name: "squirrel-cage rotor",
-                description: "<strong>move</strong> and <strong>jump</strong> about <strong>30%</strong> faster<br>take <strong>5%</strong> more <strong class='color-harm'>harm</strong>",
+                description: "<strong>move</strong> and <strong>jump</strong> <strong>30%</strong> faster<br>take <strong>5%</strong> more <strong class='color-harm'>harm</strong>",
                 maxCount: 9,
                 count: 0,
                 frequency: 2,
@@ -3338,7 +3353,7 @@
                 },
                 requires: "NOT EXPERIMENT MODE, at least 4 tech, a chance to duplicate power ups, not superdeterminism",
                 effect: () => {
-                    const removeTotal = powerUps.removeRandomTech()
+                    const removeTotal = tech.removeTech()
                     for (let i = 0; i < removeTotal + 1; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
                 },
                 remove() {}
@@ -3529,7 +3544,7 @@
                     if (tech.isDeterminism) {
                         tech.isDeterminism = false;
                         for (let i = 0; i < 5; i++) {
-                            const numberRemoved = powerUps.removeRandomTech()
+                            const numberRemoved = tech.removeTech()
                             if (numberRemoved === 0) { //if the player didn't remove a power up then remove 1 tech for the map
                                 for (let i = 0; i < powerUp.length; i++) {
                                     if (powerUp[i].name === "tech") {
@@ -3562,7 +3577,9 @@
                 },
                 remove() {
                     tech.isSuperDeterminism = false;
-                    for (let i = 0; i < 5; i++) powerUps.removeRandomTech()
+                    if (this.count) {
+                        for (let i = 0; i < 5; i++) tech.removeTech()
+                    }
                 }
             },
             {
@@ -5207,7 +5224,7 @@
             },
             {
                 name: "reticulum",
-                description: "fire <strong>+1</strong> harpoon<br>when there are multiple targets in range",
+                description: "fire <strong>+1</strong> <strong>harpoon</strong>, but <strong class='color-f'>energy</strong> cost<br>to <strong>retract</strong> also increases",
                 isGunTech: true,
                 maxCount: 9,
                 count: 0,
@@ -5760,22 +5777,31 @@
                 }
             },
             {
-                name: "degenerate matter",
-                description: "reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong> while your <strong class='color-f'>field</strong> is active",
+                name: "neutronium",
+                description: `reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong> while your <strong class='color-f'>field</strong> is active<br><strong>move</strong> and <strong>jump</strong> <strong>33%</strong> <strong>slower</strong>`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass") && !tech.isEnergyHealth
+                    return m.fieldUpgrades[m.fieldMode].name === "negative mass" && !tech.isEnergyHealth && !tech.isFreeWormHole
                 },
-                requires: "field: perfect, negative mass, pilot wave, plasma, not mass-energy",
+                requires: "wormhole or negative mass, not mass-energy, charmed baryon",
                 effect() {
-                    tech.isHarmReduce = true
+                    tech.isNeutronium = true
+                    tech.baseFx *= 0.66
+                    tech.baseJumpForce *= 0.66
+                    m.setMovement()
                 },
+                //also removed in m.setHoldDefaults() if player switches into a bad field
                 remove() {
-                    tech.isHarmReduce = false;
+                    tech.isNeutronium = false
+                    if (!tech.isFreeWormHole) {
+                        tech.baseFx = 0.08
+                        tech.baseJumpForce = 10.5
+                        m.setMovement()
+                    }
                 }
             },
             {
@@ -6057,6 +6083,25 @@
             //         tech.isPlasmaRange = 1;
             //     }
             // },
+            {
+                name: "degenerate matter",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong> while your <strong class='color-f'>field</strong> is active",
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isEnergyHealth
+                },
+                requires: "perfect diamagnetism, pilot wave, plasma, not mass-energy",
+                effect() {
+                    tech.isHarmReduce = true
+                },
+                remove() {
+                    tech.isHarmReduce = false;
+                }
+            },
             {
                 name: "tokamak",
                 description: "throwing a <strong class='color-block'>block</strong> converts it into <strong class='color-f'>energy</strong><br>and a pulsed fusion <strong class='color-e'>explosion</strong>",
@@ -6587,6 +6632,34 @@
                             if (b.inventory.length) b.removeGun(b.guns[b.inventory[b.inventory.length - 1]].name) //remove your last gun
                         }
                         tech.isWormBullets = false;
+                    }
+                }
+            },
+            {
+                name: "charmed baryons",
+                description: `<strong>wormhole</strong> field uses no <strong class='color-f'>energy</strong><br><strong>move</strong> and <strong>jump</strong> <strong>33%</strong> <strong>slower</strong>`,
+                isFieldTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return m.fieldUpgrades[m.fieldMode].name === "wormhole" && !tech.isNeutronium
+                },
+                requires: "wormhole, not neutronium",
+                effect() {
+                    tech.isFreeWormHole = true
+                    tech.baseFx *= 0.66
+                    tech.baseJumpForce *= 0.66
+                    m.setMovement()
+                },
+                //also removed in m.setHoldDefaults() if player switches into a bad field
+                remove() {
+                    tech.isFreeWormHole = false
+                    if (!tech.isNeutronium) {
+                        tech.baseFx = 0.08
+                        tech.baseJumpForce = 10.5
+                        m.setMovement()
                     }
                 }
             },
@@ -7324,30 +7397,30 @@
                 },
                 remove() {}
             },
-            {
-                name: "inverted mouse",
-                description: "your mouse is scrambled<br>it's fine, just rotate it 90 degrees",
-                maxCount: 1,
-                count: 0,
-                frequency: 0,
-                isExperimentHide: true,
-                isNonRefundable: true,
-                isJunk: true,
-                allowed() {
-                    return !m.isShipMode
-                },
-                requires: "not ship",
-                effect() {
-                    document.body.addEventListener("mousemove", (e) => {
-                        const ratio = window.innerWidth / window.innerHeight
-                        simulation.mouse.x = e.clientY * ratio
-                        simulation.mouse.y = e.clientX / ratio;
-                    });
-                },
-                remove() {
-                    // m.look = m.lookDefault
-                }
-            },
+            // {
+            //     name: "inverted mouse",
+            //     description: "your mouse is scrambled<br>it's fine, just rotate it 90 degrees",
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 0,
+            //     isExperimentHide: true,
+            //     isNonRefundable: true,
+            //     isJunk: true,
+            //     allowed() {
+            //         return !m.isShipMode
+            //     },
+            //     requires: "not ship",
+            //     effect() {
+            //         document.body.addEventListener("mousemove", (e) => {
+            //             const ratio = window.innerWidth / window.innerHeight
+            //             simulation.mouse.x = e.clientY * ratio
+            //             simulation.mouse.y = e.clientX / ratio;
+            //         });
+            //     },
+            //     remove() {
+            //         // m.look = m.lookDefault
+            //     }
+            // },
             {
                 name: "Fourier analysis",
                 description: "your aiming is now controlled by this equation:<br>2sin(0.0133t) + sin(0.013t) + 0.5sin(0.031t)+ 0.33sin(0.03t)",
@@ -7514,7 +7587,7 @@
                     setInterval(() => {
                         let score = Math.ceil(1000 * Math.random() * Math.random() * Math.random() * Math.random() * Math.random())
                         simulation.makeTextLog(`simulation.score <span class='color-symbol'>=</span> ${score.toFixed(0)}`);
-                    }, 1000); //every 10 seconds
+                    }, 10000); //every 10 seconds
                 },
                 remove() {}
             },
@@ -8645,5 +8718,9 @@
         isRodAreaDamage: null,
         isForeverDrones: null,
         isMoreMobs: null,
-        nailRecoil: null
+        nailRecoil: null,
+        baseJumpForce: null,
+        baseFx: null,
+        isNeutronium: null,
+        isFreeWormHole: null
     }

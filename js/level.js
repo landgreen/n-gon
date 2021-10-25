@@ -15,14 +15,14 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("plasma torch")
-            // b.giveGuns("nail gun")
+            // m.setField("negative mass")
+            // b.giveGuns("harpoon")
             // tech.giveTech("rotary cannon")
-            // tech.giveTech("pneumatic actuator")
+            // tech.giveTech("fragmentation")
             // tech.giveTech("rivet gun")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("all-stars")
-            // for (let i = 0; i < 3; i++) tech.giveTech("overcharge")
+            // for (let i = 0; i < 9; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.isCancelDuplication = true
 
@@ -2309,14 +2309,14 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
-        level.difficultyIncrease(40) //30 is near max on hard  //60 is near max on why
-        spawn.starter(1900, -500, 200) //big boy
+        // level.difficultyIncrease(40) //30 is near max on hard  //60 is near max on why
+        // spawn.starter(1900, -500, 200) //big boy
         // spawn.blockGroup(1900, -500)
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
         // spawn.slashBoss(1900, -500)
-        // spawn.slasher(1900, -500)
+        spawn.sucker(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.growBossCulture(1200, -500)

@@ -1,14 +1,20 @@
 ******************************************************** NEXT PATCH **************************************************
+tech: neutronium - 90% harm reduce while field is active, 33% slower move speed
+  (requires negative mass field)
+tech: charmed baryon - 0 cost wormhole, 33% slower move speed
+harpoon tech: reticulum now always fires extra harpoons even if there are no targets
 
-tech: rotary cannon - nail gun (and rivet gun) have increased fire rate, muzzle speed, recoil, and accuracy
-experiment -parthenocarpy- spawn about 50% more mobs
+tech.removeTech() method has been improved
+bug fixes
 
 ******************************************************** TODO ********************************************************
 
-minigun: tech for nail gun - Its ramp-up time must not be removable. Recoil should be intense, enough that the player cannot walk forward quickly while using it.
-  nail gun gains:  accuracy, bullet speed, huge recoil, fire rate
-    alternative to pnumatic that stops ramp up
-    maybe try to also apply to rivets?
+bug - death while paused crashes game?
+
+tech: aerodynamic heating - railgun rods super heat the air around it doing AoE damage
+
+tech rocket jump - jumping produces an explosion at your feet that lets you jump extra high, but does some damage
+  require electric reactive armor?
 
 animate going to next level?
   door fills in with color that climbs up vertically through the door graphic the longer you stand on door
@@ -17,14 +23,6 @@ animate going to next level?
 Plasma Burner: upgrade for plasma torch, basically just a jet engine. does high damage, but short range, mostly for player movement.
   maybe reduce gravity to really low then apply a vector away from mouse direction
 
-no passive energy regen, but regen energy after doing damage
-  tech or just default?
-  modify conservation of energy tech
-
-Tech: Schrödinger’s cat (or superposition)
-Requires: Metamaterial Cloaking and Dazzler
-Upon decloaking, all mobs nearby (same range as Dazzler) are irradiated. Increase energy drain by 15%. 
-
 game idea - auto battler with n-gon mob AI and tech
   name: auto-gon
   you build a group of mobs and bosses from n-gon
@@ -32,29 +30,13 @@ game idea - auto battler with n-gon mob AI and tech
   similar research and tech system to n-gon
   some mobs can fire player weapons
 
-junk tech negative air friction on player
-
-remove foam gun get 2 foam bots and upgrade
-need a new way of checking if have gun, that doesn't care if it's not active gun
-  apply to missile gun?
-  and 10 drone tech
-
-tech rocket jump - jumping produces an explosion at your feet that lets you jump extra high, but does some damage
-  require electric reactive armor?
-
-harpoon tech: dash -   press down and fire to go immune to harm for 1 second and dash forward with your harpoon acting like a lance
-  after you fire harpoon replace it's this.do()  with just being in front of player
-
 harpoon grappling hook - basic effect is working, but needs work before it becomes fun
-
-tech: aerodynamic heating - railgun rods super heat the air around it doing AoE damage
 
 tech: relativistic jets:
   small particles that shot out from front and back poles and end up in a wide variety of spirals
     slow trickle when charging and several more when firing
   
 Tech: Make player smol
-
 
 adapt the cloaking graphics to make a flashlight cone visual effect
   put code in level.do?
@@ -63,10 +45,6 @@ be nice if block throwing had a projected path
 
 JUNK tech: planetesimals game inside n-gon
 https://codepen.io/lilgreenland/pen/jrMvaB?editors=0010
-
-disable zoom progress when paused
-
-"Interstellar Disturbance": Cosmic String applies to mobs who cross the wormhole's path, even after initial wormholing, but at reduced damage and stun time.
 
 on mouse down wormhole shows a possible wormhole
   on mouse up the wormhole becomes real

@@ -1133,7 +1133,10 @@ const b = {
                     who.isShielded = false
                     requestAnimationFrame(() => { who.isShielded = true });
                 }
-                if (tech.fragments) b.targetedNail(this.vertices[2], tech.fragments * 3)
+                if (tech.fragments) {
+                    b.targetedNail(this.vertices[2], tech.fragments * 4)
+                    if (!isReturn) this.endCycle = 0;
+                }
                 if (!who.isBadTarget) {
                     if (isReturn) {
                         this.do = this.returnToPlayer
@@ -4049,11 +4052,11 @@ const b = {
                 this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
 
                 m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
-                this.baseFire(m.angle + (Math.random() - 0.5) * (input.down ? 0.05 : 0.1) / CD, 43 + 8 * Math.random())
+                this.baseFire(m.angle + (Math.random() - 0.5) * (input.down ? 0.1 : 0.13) / CD, 45 + 6 * Math.random())
                 //very complex recoil system
                 if (m.onGround) {
                     if (input.down) {
-                        const KNOCK = 0.01
+                        const KNOCK = 0.006
                         player.force.x -= KNOCK * Math.cos(m.angle)
                         player.force.y -= KNOCK * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
                         Matter.Body.setVelocity(player, {
@@ -4061,7 +4064,7 @@ const b = {
                             y: player.velocity.y * 0.5
                         });
                     } else {
-                        const KNOCK = 0.05
+                        const KNOCK = 0.03
                         player.force.x -= KNOCK * Math.cos(m.angle)
                         player.force.y -= KNOCK * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
                         Matter.Body.setVelocity(player, {
@@ -4070,8 +4073,8 @@ const b = {
                         });
                     }
                 } else {
-                    if (Math.abs(player.velocity.x) < 12) player.force.x -= 0.04 * Math.cos(m.angle)
-                    player.force.y -= 0.01 * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
+                    if (Math.abs(player.velocity.x) < 12) player.force.x -= 0.025 * Math.cos(m.angle)
+                    player.force.y -= 0.006 * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
                 }
             },
             fireNormal() {
@@ -4173,7 +4176,7 @@ const b = {
             fireRecoilRivets() {
                 // m.fireCDcycle = m.cycle + Math.floor((input.down ? 25 : 17) * b.fireCDscale); // cool down
                 if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
-                const CD = Math.max(30 - 0.15 * (m.cycle - this.startingHoldCycle), 8) //CD scales with cycles fire is held down
+                const CD = Math.max(25 - 0.14 * (m.cycle - this.startingHoldCycle), 6) //CD scales with cycles fire is held down
                 this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
                 m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
 
@@ -4219,7 +4222,7 @@ const b = {
                 //very complex recoil system
                 if (m.onGround) {
                     if (input.down) {
-                        const KNOCK = 0.05
+                        const KNOCK = 0.03
                         player.force.x -= KNOCK * Math.cos(m.angle)
                         player.force.y -= KNOCK * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
                         Matter.Body.setVelocity(player, {
@@ -4227,7 +4230,7 @@ const b = {
                             y: player.velocity.y * 0.4
                         });
                     } else {
-                        const KNOCK = 0.15
+                        const KNOCK = 0.1
                         player.force.x -= KNOCK * Math.cos(m.angle)
                         player.force.y -= KNOCK * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
                         Matter.Body.setVelocity(player, {
@@ -4236,8 +4239,8 @@ const b = {
                         });
                     }
                 } else {
-                    if (Math.abs(player.velocity.x) < 12) player.force.x -= 0.1 * Math.cos(m.angle)
-                    player.force.y -= 0.03 * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
+                    if (Math.abs(player.velocity.x) < 12) player.force.x -= 0.06 * Math.cos(m.angle)
+                    player.force.y -= 0.02 * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
                 }
             },
             fireInstantFireRate() {
@@ -5330,29 +5333,39 @@ const b = {
                     m.fireCDcycle = m.cycle + 50 * b.fireCDscale; // cool down
                     // }
                 } else if (tech.extraHarpoons) {
+                    const harpoons = tech.extraHarpoons + 1
                     const range = 450 * (tech.isFilament ? 1 + 0.005 * Math.min(110, this.ammo) : 1)
                     let targetCount = 0
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
                             const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                             const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
-                            if (dist < range && dot > 0.7) { //target closest mob that player is looking at and isn't too close to target
+                            if (dist < range && dot > 0.7) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
                                 if (this.ammo > 0) {
                                     this.ammo--
                                     b.harpoon(where, mob[i], m.angle, length, true, totalCycles) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
                                     targetCount++
-                                    if (targetCount > tech.extraHarpoons) break
+                                    if (targetCount > harpoons) break
                                 }
                             }
                         }
                     }
-                    if (!targetCount) {
-                        b.harpoon(where, null, m.angle, length, true, totalCycles) //if no target
-                    } else if (targetCount > 0) {
-                        this.ammo++ //make up for the ammo used up in fire()
-                        simulation.updateGunHUD();
+                    //if more harpoons and no targets left
+                    if (targetCount < harpoons) {
+                        const SPREAD = 0.1
+                        const num = harpoons - targetCount
+                        let dir = m.angle - SPREAD * (num - 1) / 2;
+                        for (let i = 0; i < num; i++) {
+                            if (this.ammo > 0) {
+                                this.ammo--
+                                b.harpoon(where, null, dir, length, true, totalCycles) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
+                                dir += SPREAD
+                            }
+                        }
                     }
-                    m.fireCDcycle = m.cycle + 90 //Infinity; // cool down
+                    this.ammo++ //make up for the ammo used up in fire()
+                    simulation.updateGunHUD();
+                    m.fireCDcycle = m.cycle + 90 // cool down
                 } else {
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
