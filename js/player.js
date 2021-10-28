@@ -1300,7 +1300,7 @@ const m = {
             if (m.energy < 0) m.energy = 0;
             m.fieldCDcycle = m.cycle + m.fieldBlockCD;
             if (tech.blockingIce) {
-                for (let i = 0; i < fieldBlockCost * 35 * tech.blockingIce; i++) b.iceIX(3, 2 * Math.PI * Math.random(), m.pos)
+                for (let i = 0; i < fieldBlockCost * 50 * tech.blockingIce; i++) b.iceIX(3, 2 * Math.PI * Math.random(), m.pos)
             }
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
@@ -1620,7 +1620,7 @@ const m = {
                                 const unit = Vector.normalise(Vector.sub(m.fieldPosition, mob[i].position))
                                 m.fieldCDcycle = m.cycle + m.fieldBlockCD + (mob[i].isShielded ? 15 : 0);
                                 if (tech.blockingIce) {
-                                    for (let i = 0; i < tech.blockingIce; i++) {
+                                    for (let i = 0; i < 2 * tech.blockingIce; i++) {
                                         const angle = m.fieldAngle + 1.55 * (Math.random() - 0.5)
                                         b.iceIX(10, angle, Vector.add(m.fieldPosition, { x: m.fieldRange * Math.cos(angle), y: m.fieldRange * Math.sin(angle) }))
                                     }

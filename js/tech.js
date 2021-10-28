@@ -3919,9 +3919,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate
+                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isNeedles
                 },
-                requires: "nail gun, not pneumatic actuator",
+                requires: "nail gun, not pneumatic actuator, needle gun",
                 effect() {
                     tech.nailRecoil = true
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -5621,7 +5621,7 @@
             //************************************************** 
             {
                 name: "zero point energy",
-                description: `use ${powerUps.orb.research(2)}to increase your <strong>max</strong> <strong class='color-f'>energy</strong> by <strong>74</strong>`,
+                description: `use ${powerUps.orb.research(2)}to increase your <strong>max</strong> <strong class='color-f'>energy</strong> by <strong>100</strong>`,
                 // description: "use <strong>2</strong> <strong class='color-r'>research</strong> to<br>increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>74</strong>",
                 isFieldTech: true,
                 maxCount: 1,
@@ -5633,7 +5633,7 @@
                 },
                 requires: "standing wave or pilot wave",
                 effect() {
-                    tech.harmonicEnergy = 0.74
+                    tech.harmonicEnergy = 1
                     m.setMaxEnergy()
                     for (let i = 0; i < 2; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
@@ -5702,7 +5702,7 @@
                 },
                 requires: "standing wave, perfect diamagnetism",
                 effect() {
-                    tech.blockDmg += 1.25 //if you change this value also update the for loop in the electricity graphics in m.pushMass
+                    tech.blockDmg += 1.75 //if you change this value also update the for loop in the electricity graphics in m.pushMass
                 },
                 remove() {
                     tech.blockDmg = 0;
@@ -5729,7 +5729,7 @@
             },
             {
                 name: "flux pinning",
-                description: "<strong>deflecting</strong> mobs with your <strong>field</strong><br><strong>stuns</strong> them for <strong>2</strong> seconds",
+                description: "<strong>deflecting</strong> mobs with your <strong>field</strong><br><strong>stuns</strong> them for <strong>4</strong> seconds",
                 isFieldTech: true,
                 maxCount: 9,
                 count: 0,
@@ -5740,7 +5740,7 @@
                 },
                 requires: "a field that can block",
                 effect() {
-                    tech.isStunField += 120;
+                    tech.isStunField += 240;
                 },
                 remove() {
                     tech.isStunField = 0;
@@ -5786,7 +5786,7 @@
             },
             {
                 name: "tessellation",
-                description: `use ${powerUps.orb.research(4)}to reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>`,
+                description: `use ${powerUps.orb.research(2)}to reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>`,
                 // description: "use <strong>4</strong> <strong class='color-r'>research</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>50%</strong>",
                 isFieldTech: true,
                 maxCount: 1,
@@ -5799,18 +5799,18 @@
                 requires: "perfect diamagnetism or negative mass",
                 effect() {
                     tech.isFieldHarmReduction = true
-                    for (let i = 0; i < 4; i++) {
+                    for (let i = 0; i < 2; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                     }
                 },
                 remove() {
                     tech.isFieldHarmReduction = false
-                    if (this.count > 0) powerUps.research.changeRerolls(4)
+                    if (this.count > 0) powerUps.research.changeRerolls(2)
                 }
             },
             {
                 name: "neutronium",
-                description: `reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong> while your <strong class='color-f'>field</strong> is active<br><strong>move</strong> and <strong>jump</strong> <strong>33%</strong> <strong>slower</strong>`,
+                description: `reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong> when your <strong class='color-f'>field</strong> is active<br><strong>move</strong> and <strong>jump</strong> <strong>33%</strong> <strong>slower</strong>`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6312,7 +6312,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation") && tech.energyRegen !== 0
+                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && tech.energyRegen !== 0
                 },
                 requires: "time dilation, not ground state",
                 effect: () => {
@@ -6333,7 +6333,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking") && tech.duplicationChance() < 1 //m.fieldUpgrades[m.fieldMode].name === "wormhole" ||
+                    return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking")
                 },
                 requires: "cloaking, wormhole or time dilation and below 100% duplication chance",
                 effect() {
@@ -6355,7 +6355,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
+                    return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "time dilation"
                 },
                 requires: "metamaterial cloaking",
                 effect() {
@@ -6543,7 +6543,7 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "wormhole"
+                    return m.fieldUpgrades[m.fieldMode].name === "wormhole" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
                 requires: "wormhole",
                 effect: () => {

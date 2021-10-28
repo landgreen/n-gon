@@ -1,33 +1,20 @@
 ******************************************************** NEXT PATCH **************************************************
 
-JUNK tech: facsimile - copy current level and insert into level queue
-JUNK tech: planetesimals - spawn a tech, and play planetesimals, an annoying asteroids like game with realistic physics
+field tech balance:
+  pilot wave has access to more field tech: time crystals, WIMPs, no-cloning
+  time dilation: can get symbiosis
+  flux pinning: 2s -> 4s stun on blocking
+  zero point energy:  74 energy -> 100 energy
+  tessellation: 4->2 research cost
+  bremsstrahlung: 33% more damage
+  triple point: 50% more ice
 
-tech that previously added 1 junk tech now adds 1% (of current non-JUNK tech options)
-  the percent values may seem like more but I actually lowered the JUNK chance about 10%
-
-meta-analysis no longer requires replication - (if you choose a JUNK tech get a random tech and 3 research)
-symbiosis: only gives 1 bonus tech (was 1 or 2)
-blink boss rebalanced (it's easier, and has two modes)
-
-bug fixes
+  bug fixes
 
 ******************************************************** TODO ********************************************************
 
-fields weak in late game?
-  Pilot wave?
-    buff with cool tech options from other fields
-    buff with another damage scaling tech
-  stand wave and diamagnetism
-    buff end stage tech for these
-  
-
-
 tech perfect diamagnetism - holding the field makes the field slowly travel forward
   could be base effect
-
-make a field that just fires your first gun
-  if they have to share a cooldown give 50% shorter fire CD
 
 bug - death while paused crashes game?
 

@@ -2931,7 +2931,7 @@ const level = {
             spawn.randomMob(-75, -1475, 0);
             spawn.randomGroup(600, -2600, 0);
         }
-        if (simulation.difficulty < 1) {
+        if (simulation.difficulty > 1) {
             if (Math.random() < 0.5) {
                 spawn.randomLevelBoss(700, -1550);
             } else {
