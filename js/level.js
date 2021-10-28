@@ -22,7 +22,7 @@ const level = {
             // tech.giveTech("rivet gun")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("all-stars")
-            // for (let i = 0; i < 9; i++) tech.giveTech("reticulum")
+            // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.isCancelDuplication = true
 
@@ -2316,7 +2316,7 @@ const level = {
         // spawn.laserBombingBoss(1900, -500)
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
         // spawn.slashBoss(1900, -500)
-        spawn.sucker(1900, -500)
+        // spawn.sucker(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.growBossCulture(1200, -500)
@@ -2332,7 +2332,7 @@ const level = {
         // spawn.nodeGroup(1200, -500, "grenadier")
         // spawn.nodeGroup(1800, -500, "grenadier")
         // spawn.nodeGroup(1200, 0, "grenadier")
-        // spawn.snakeBoss(1200, -500)
+        spawn.blinkBoss(1200, -500)
         // spawn.suckerBoss(2900, -500)
         // spawn.randomMob(1600, -500)
     },
@@ -2931,12 +2931,7 @@ const level = {
             spawn.randomMob(-75, -1475, 0);
             spawn.randomGroup(600, -2600, 0);
         }
-        if (simulation.difficulty < 10) {
-            spawn.randomMob(700, -1650, 0);
-            spawn.randomMob(600, -3500, 0.2);
-            spawn.randomMob(-75, -1175, 0.2);
-            powerUps.spawnBossPowerUp(-125, -1760);
-        } else {
+        if (simulation.difficulty < 1) {
             if (Math.random() < 0.5) {
                 spawn.randomLevelBoss(700, -1550);
             } else {

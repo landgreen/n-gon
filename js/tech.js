@@ -53,8 +53,8 @@
             }
             const totalRemoved = tech.tech[index].count
             simulation.makeTextLog(`<span class='color-var'>tech</span>.removeTech("<span class='color-text'>${tech.tech[index].name}</span>")`)
-            tech.tech[index].count = 0;
             tech.tech[index].remove();
+            tech.tech[index].count = 0;
             simulation.updateTechHUD();
             tech.tech[index].isLost = true
             simulation.updateTechHUD();
@@ -73,15 +73,40 @@
         //         if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech.splice(i, 1)
         //     }
         // },
-        addJunkTechToPool(num = 1) {
+        addJunkTechToPool(chance) { //chance is number between 0-1
+            // { //count JUNK
+            //     let count = 0
+            //     for (let i = 0, len = tech.tech.length; i < len; i++) {
+            //         if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && tech.tech[i].isJunk && tech.tech[i].frequency > 0) count += tech.tech[i].frequency
+            //     }
+            //     console.log(count)
+            // }
+            // { //count not JUNK
+            //     let count = 0
+            //     for (let i = 0, len = tech.tech.length; i < len; i++) {
+            //         if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isJunk && tech.tech[i].frequency > 0) count++
+            //     }
+            //     console.log(count)
+            // }
+            // count total non junk tech
+            let count = 0
+            for (let i = 0, len = tech.tech.length; i < len; i++) {
+                if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isJunk) count += tech.tech[i].frequency
+            }
+            //make an array for possible junk tech to add
             let options = [];
             for (let i = 0; i < tech.tech.length; i++) {
                 if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].isJunk) options.push(i);
             }
+            //add random array options to tech pool
             if (options.length) {
+                const num = chance * count //scale number added
                 for (let i = 0; i < num; i++) tech.tech[options[Math.floor(Math.random() * options.length)]].frequency++
+                simulation.makeTextLog(`<span class='color-var'>tech</span>.tech.push(${num} <span class='color-text'>JUNK</span>)`)
+                return num
+            } else {
+                return 0
             }
-            simulation.makeTextLog(`<span class='color-var'>tech</span>.tech.push(${num} <span class='color-text'>JUNK</span>)`)
         },
         removeJunkTechFromPool(num = 1) {
             for (let j = 0; j < num; j++) {
@@ -506,7 +531,7 @@
             {
                 name: "desublimated ammunition",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Deposition_(phase_transition)' class="link">desublimated ammunition</a>`,
-                description: "every other <strong>crouched</strong> shot uses no <strong class='color-ammo'>ammo</strong><br><strong>+6</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "every other <strong>crouched</strong> shot uses no <strong class='color-ammo'>ammo</strong><br><strong>+6%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -517,32 +542,18 @@
                 requires: "",
                 effect() {
                     tech.isCrouchAmmo = true
-                    tech.addJunkTechToPool(6)
+                    this.refundAmount += tech.addJunkTechToPool(0.06)
                 },
+                refundAmount: 0,
                 remove() {
-                    tech.isCrouchAmmo = false;
-                    if (this.count > 0) tech.removeJunkTechFromPool(6)
+                    tech.isExtraChoice = false;
+                    if (this.count > 0 && this.refundAmount > 0) {
+                        tech.removeJunkTechFromPool(this.refundAmount)
+                        this.refundAmount = 0
+                    }
                 }
+
             },
-            // <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
-            //     maxCount: 9,
-            //     count: 0,
-            //     frequency: 1,
-            //     frequencyDefault: 1,
-            //     allowed() {
-            //         return true
-            //     },
-            //     requires: "",
-            //     effect() {
-            //         tech.bonusEnergy += 0.6
-            //         m.setMaxEnergy()
-            //         tech.addJunkTechToPool(10)
-            //     },
-            //     remove() {
-            //         tech.bonusEnergy = 0;
-            //         m.setMaxEnergy()
-            //         if (this.count > 0) tech.removeJunkTechFromPool(10)
-            //     }
             {
                 name: "gun turret",
                 description: "reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong> when <strong>crouching</strong>",
@@ -2470,7 +2481,7 @@
             },
             {
                 name: "overcharge",
-                description: "increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>60</strong><br><strong>+10</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>60</strong><br><strong>+10%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -2482,17 +2493,21 @@
                 effect() {
                     tech.bonusEnergy += 0.6
                     m.setMaxEnergy()
-                    tech.addJunkTechToPool(10)
+                    this.refundAmount += tech.addJunkTechToPool(0.1)
                 },
+                refundAmount: 0,
                 remove() {
                     tech.bonusEnergy = 0;
                     m.setMaxEnergy()
-                    if (this.count > 0) tech.removeJunkTechFromPool(10)
+                    if (this.count > 0 && this.refundAmount > 0) {
+                        tech.removeJunkTechFromPool(this.refundAmount)
+                        this.refundAmount = 0
+                    }
                 }
             },
             {
                 name: "Maxwell's demon",
-                description: "<strong class='color-f'>energy</strong> above your max decays <strong>92%</strong> slower<br><strong>+18</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "<strong class='color-f'>energy</strong> above your max decays <strong>92%</strong> slower<br><strong>+18%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2503,11 +2518,15 @@
                 requires: "energy above your max",
                 effect() {
                     tech.overfillDrain = 0.85 //70% = 1-(1-0.75)/(1-0.15) //92% = 1-(1-0.75)/(1-0.87)
-                    tech.addJunkTechToPool(18)
+                    this.refundAmount += tech.addJunkTechToPool(0.18)
                 },
+                refundAmount: 0,
                 remove() {
                     tech.overfillDrain = 0.7
-                    if (this.count > 0) tech.removeJunkTechFromPool(18)
+                    if (this.count > 0 && this.refundAmount > 0) {
+                        tech.removeJunkTechFromPool(this.refundAmount)
+                        this.refundAmount = 0
+                    }
                 }
             },
             {
@@ -3021,7 +3040,7 @@
             },
             {
                 name: "pseudoscience",
-                description: "<span style = 'font-size:94%;'>when <strong>selecting</strong> a power up, <strong class='color-r'>research</strong> <strong>3</strong> times</span><br>for <strong>free</strong>, but add <strong>0-3</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
+                description: "<span style = 'font-size:94%;'>when <strong>selecting</strong> a power up, <strong class='color-r'>research</strong> <strong>3</strong> times</span><br>for <strong>free</strong>, but add <strong>0-3%</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3072,7 +3091,7 @@
             },
             {
                 name: "abiogenesis",
-                description: `at the start of a level spawn a 2nd <strong>boss</strong><br>use ${powerUps.orb.research(4)}or add <strong>49</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool`,
+                description: `at the start of a level spawn a 2nd <strong>boss</strong><br>use ${powerUps.orb.research(4)}or add <strong>49%</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -3114,9 +3133,9 @@
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return tech.duplicateChance
+                    return true
                 },
-                requires: "replication",
+                requires: "",
                 effect() {
                     tech.isMetaAnalysis = true
                 },
@@ -3126,7 +3145,7 @@
             },
             {
                 name: "replication",
-                description: "<strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+30</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "<strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+30%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -3139,12 +3158,16 @@
                     tech.duplicateChance += 0.1
                     powerUps.setDupChance(); //needed after adjusting duplication chance
                     if (!build.isExperimentSelection) simulation.circleFlare(0.1);
-                    tech.addJunkTechToPool(30)
+                    this.refundAmount += tech.addJunkTechToPool(0.3)
                 },
+                refundAmount: 0,
                 remove() {
                     tech.duplicateChance = 0
                     powerUps.setDupChance(); //needed after adjusting duplication chance
-                    if (this.count > 1) tech.removeJunkTechFromPool(30)
+                    if (this.count > 0 && this.refundAmount > 0) {
+                        tech.removeJunkTechFromPool(this.refundAmount)
+                        this.refundAmount = 0
+                    }
                 }
             },
             {
@@ -3515,11 +3538,15 @@
                 requires: "not determinism",
                 effect: () => {
                     tech.isExtraChoice = true;
-                    tech.addJunkTechToPool(5)
+                    this.refundAmount += tech.addJunkTechToPool(0.05)
                 },
+                refundAmount: 0,
                 remove() {
                     tech.isExtraChoice = false;
-                    if (this.count > 0) tech.removeJunkTechFromPool(5)
+                    if (this.count > 0 && this.refundAmount > 0) {
+                        tech.removeJunkTechFromPool(this.refundAmount)
+                        this.refundAmount = 0
+                    }
                 }
             },
             {
@@ -3584,7 +3611,7 @@
             },
             {
                 name: "dark patterns",
-                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br><strong>+31</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br><strong>+31%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3597,12 +3624,13 @@
                     level.difficultyDecrease(simulation.difficultyMode)
                     // simulation.difficulty<span class='color-symbol'>-=</span>
                     simulation.makeTextLog(`level.difficultyDecrease(simulation.difficultyMode)`)
-                    tech.addJunkTechToPool(31)
+                    this.refundAmount += tech.addJunkTechToPool(0.31)
                     // for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
                 },
+                refundAmount: 0,
                 remove() {
                     if (this.count > 0) {
-                        tech.removeJunkTechFromPool(31)
+                        if (this.refundAmount > 0) tech.removeJunkTechFromPool(this.refundAmount)
                         level.difficultyIncrease(simulation.difficultyMode)
                     }
                 }
@@ -3734,9 +3762,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isIceCrystals && !tech.isRivets && !tech.nailRecoil
+                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isIceCrystals && !tech.isRivets && !tech.nailRecoil && !tech.nailRecoil
                 },
-                requires: "nail gun, not ice crystal, rivets, or pneumatic actuator",
+                requires: "nail gun, not ice crystal, rivets, rotary cannon, or pneumatic actuator",
                 effect() {
                     tech.isNeedles = true
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4582,7 +4610,7 @@
             },
             {
                 name: "booby trap",
-                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br><strong>+53</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br><strong>+53%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -4595,11 +4623,15 @@
                 effect() {
                     tech.isMineDrop = true;
                     if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0)
-                    tech.addJunkTechToPool(53)
+                    this.refundAmount += tech.addJunkTechToPool(0.53)
                 },
+                refundAmount: 0,
                 remove() {
                     tech.isMineDrop = false;
-                    if (this.count > 0) tech.removeJunkTechFromPool(53)
+                    if (this.count > 0 && this.refundAmount > 0) {
+                        tech.removeJunkTechFromPool(this.refundAmount)
+                        this.refundAmount = 0
+                    }
                 }
             },
             {
@@ -6316,7 +6348,7 @@
             },
             {
                 name: "symbiosis",
-                description: "after a <strong>mob</strong> <strong>dies</strong>, lose <strong>1</strong> max <strong class='color-h'>health</strong><br><strong>bosses</strong> spawn <strong>1-2</strong> extra <strong class='color-m'>tech</strong> after they <strong>die</strong>",
+                description: "after a <strong>mob</strong> <strong>dies</strong>, lose <strong>1</strong> max <strong class='color-h'>health</strong><br><strong>bosses</strong> spawn <strong>1</strong> extra <strong class='color-m'>tech</strong> after they <strong>die</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6890,6 +6922,43 @@
             //     },
             //     remove() {}
             // },
+            {
+                name: "planetesimals",
+                description: `spawn a <strong class='color-m'>tech</strong> and play <strong>planetesimals</strong>,<br>an annoying asteroids game with Newtonian physics`,
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    window.open('../../planetesimals/index.html', '_blank')
+                    powerUps.spawn(m.pos.x, m.pos.y, "tech");
+                },
+                remove() {}
+            },
+            {
+                name: "facsimile",
+                description: `inserts a copy of your current level into the level list`,
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    level.levels.splice(level.onLevel, 0, level.levels[level.onLevel]);
+                },
+                remove() {}
+            },
             {
                 name: "negative friction",
                 description: "when you touch walls you speed up instead of slowing down. It's kinda fun.",
@@ -7872,7 +7941,7 @@
             },
             {
                 name: "expert system",
-                description: "spawn a <strong class='color-m'>tech</strong> power up<br><strong>+64</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "spawn a <strong class='color-m'>tech</strong> power up<br><strong>+64%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 0,
@@ -7885,7 +7954,7 @@
                 requires: "",
                 effect() {
                     powerUps.spawn(m.pos.x, m.pos.y, "tech");
-                    tech.addJunkTechToPool(64)
+                    tech.addJunkTechToPool(0.64)
                 },
                 remove() {}
             },

@@ -357,7 +357,7 @@ const powerUps = {
         currentRerollCount: 0,
         use(type) { //runs when you actually research a list of selections, type can be field, gun, or tech
             if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
-                tech.addJunkTechToPool(tech.junkResearchNumber)
+                tech.addJunkTechToPool(tech.junkResearchNumber * 0.01)
             } else {
                 powerUps.research.changeRerolls(-1)
             }

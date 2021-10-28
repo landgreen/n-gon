@@ -111,7 +111,7 @@ const spawn = {
                 powerUps.research.changeRerolls(-4)
                 simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 4<br>${powerUps.research.count}`)
             } else {
-                tech.addJunkTechToPool(49)
+                tech.addJunkTechToPool(0.49)
             }
             spawn.randomLevelBoss(x, y);
             return true
@@ -2323,11 +2323,15 @@ const spawn = {
         me.friction = 0;
         me.memory = 240
         me.seePlayerFreq = 60
-        me.delay = 25 + 30 * simulation.CDScale;
-        me.nextBlinkCycle = me.delay;
         me.blinkRange = 235
-        me.grenadeDelay = 35 + 60 * simulation.CDScale
-        me.pulseRadius = 2 * Math.min(550, 220 + simulation.difficulty * 4)
+        if (false && 0.5 < Math.random()) {
+            me.grenadeDelay = 260
+        } else {
+            me.grenadeDelay = 100
+        }
+        me.pulseRadius = 1.4 * Math.min(550, 220 + simulation.difficulty * 4)
+        me.delay = 30 + 35 * simulation.CDScale;
+        me.nextBlinkCycle = me.delay;
         spawn.shield(me, x, y, 1);
         me.onDamage = function() {
             // this.cd = simulation.cycle + this.delay;

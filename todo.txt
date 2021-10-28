@@ -1,13 +1,33 @@
 ******************************************************** NEXT PATCH **************************************************
-tech: neutronium - 90% harm reduce while field is active, 33% slower move speed
-  (requires negative mass field)
-tech: charmed baryon - 0 cost wormhole, 33% slower move speed
-harpoon tech: reticulum now always fires extra harpoons even if there are no targets
 
-tech.removeTech() method has been improved
+JUNK tech: facsimile - copy current level and insert into level queue
+JUNK tech: planetesimals - spawn a tech, and play planetesimals, an annoying asteroids like game with realistic physics
+
+tech that previously added 1 junk tech now adds 1% (of current non-JUNK tech options)
+  the percent values may seem like more but I actually lowered the JUNK chance about 10%
+
+meta-analysis no longer requires replication - (if you choose a JUNK tech get a random tech and 3 research)
+symbiosis: only gives 1 bonus tech (was 1 or 2)
+blink boss rebalanced (it's easier, and has two modes)
+
 bug fixes
 
 ******************************************************** TODO ********************************************************
+
+fields weak in late game?
+  Pilot wave?
+    buff with cool tech options from other fields
+    buff with another damage scaling tech
+  stand wave and diamagnetism
+    buff end stage tech for these
+  
+
+
+tech perfect diamagnetism - holding the field makes the field slowly travel forward
+  could be base effect
+
+make a field that just fires your first gun
+  if they have to share a cooldown give 50% shorter fire CD
 
 bug - death while paused crashes game?
 

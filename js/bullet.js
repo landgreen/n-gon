@@ -1231,7 +1231,7 @@ const b = {
                         }
                     }
                 } else {
-                    if (m.energy > 0.005) m.energy -= 0.005
+                    if (m.energy > 0.005 && !m.isBodiesAsleep) m.energy -= 0.005
                     const sub = Vector.sub(this.position, m.pos)
                     const rangeScale = 1 + 0.000001 * Vector.magnitude(sub) * Vector.magnitude(sub) //return faster when far from player
                     const returnForce = Vector.mult(Vector.normalise(sub), rangeScale * this.thrustMag * this.mass)
@@ -1478,7 +1478,6 @@ const b = {
                             y: Math.sin(this.angle)
                         };
                         const target = Vector.normalise(Vector.sub(this.position, this.lockedOn.position));
-                        // const target = Vector.normalise(Vector.sub(this.position, this.lockedOn.position));
                         const dot = Vector.dot(target, face)
                         const aim = Math.min(0.08, (1 + dot) * 1)
                         if (Vector.cross(target, face) > 0) {
@@ -1486,7 +1485,7 @@ const b = {
                         } else {
                             Matter.Body.rotate(this, -aim);
                         }
-                        this.frictionAir = Math.min(0.1, Math.max(0.04, (1 + dot) * 1)) //0.08; //extra friction if turning
+                        this.frictionAir = Math.min(0.1, Math.max(0.04, 1 + dot)) //0.08; //extra friction if turning
                     }
                     //accelerate in direction bullet is facing
                     const dir = this.angle;
@@ -4073,7 +4072,7 @@ const b = {
                         });
                     }
                 } else {
-                    if (Math.abs(player.velocity.x) < 12) player.force.x -= 0.025 * Math.cos(m.angle)
+                    player.force.x -= 0.06 * Math.cos(m.angle) * Math.min(1, 3 / (0.1 + Math.abs(player.velocity.x)))
                     player.force.y -= 0.006 * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
                 }
             },
@@ -4239,7 +4238,9 @@ const b = {
                         });
                     }
                 } else {
-                    if (Math.abs(player.velocity.x) < 12) player.force.x -= 0.06 * Math.cos(m.angle)
+                    player.force.x -= 0.2 * Math.cos(m.angle) * Math.min(1, 3 / (0.1 + Math.abs(player.velocity.x)))
+                    // player.force.x -= 0.06 * Math.cos(m.angle) * Math.min(1, 3 / (0.1 + Math.abs(player.velocity.x)))
+
                     player.force.y -= 0.02 * Math.sin(m.angle) //reduce knock back in vertical direction to stop super jumps
                 }
             },
@@ -5333,7 +5334,6 @@ const b = {
                     m.fireCDcycle = m.cycle + 50 * b.fireCDscale; // cool down
                     // }
                 } else if (tech.extraHarpoons) {
-                    const harpoons = tech.extraHarpoons + 1
                     const range = 450 * (tech.isFilament ? 1 + 0.005 * Math.min(110, this.ammo) : 1)
                     let targetCount = 0
                     for (let i = 0, len = mob.length; i < len; ++i) {
@@ -5345,15 +5345,15 @@ const b = {
                                     this.ammo--
                                     b.harpoon(where, mob[i], m.angle, length, true, totalCycles) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
                                     targetCount++
-                                    if (targetCount > harpoons) break
+                                    if (targetCount > tech.extraHarpoons) break
                                 }
                             }
                         }
                     }
                     //if more harpoons and no targets left
-                    if (targetCount < harpoons) {
+                    if (targetCount < tech.extraHarpoons + 1) {
                         const SPREAD = 0.1
-                        const num = harpoons - targetCount
+                        const num = tech.extraHarpoons + 1 - targetCount
                         let dir = m.angle - SPREAD * (num - 1) / 2;
                         for (let i = 0; i < num; i++) {
                             if (this.ammo > 0) {

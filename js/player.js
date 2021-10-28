@@ -949,12 +949,12 @@ const m = {
     },
     setHoldDefaults() {
         if (tech.isFreeWormHole && m.fieldUpgrades[m.fieldMode].name !== "wormhole") {
-            tech.removeTech("charmed baryon") //neutronum can get player stuck so it has to be removed if player has wrong field
-            powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
+            const removed = tech.removeTech("charmed baryon") //neutronum can get player stuck so it has to be removed if player has wrong field
+            if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
         }
         if (tech.isNeutronium && m.fieldUpgrades[m.fieldMode].name !== "negative mass") {
-            tech.removeTech("neutronium") //neutronum can get player stuck so it has to be removed if player has wrong field
-            powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
+            const removed = tech.removeTech("neutronium") //neutronum can get player stuck so it has to be removed if player has wrong field
+            if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
         }
         if (m.energy < m.maxEnergy) m.energy = m.maxEnergy;
         m.fieldRegen = tech.energyRegen; //0.001
