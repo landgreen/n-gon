@@ -1,6 +1,18 @@
 const lore = {
     techCount: 0,
     techGoal: 7,
+    setTechGoal() {
+        if (simulation.difficultyMode === 1) {
+            this.techGoal = 14
+        } else if (simulation.difficultyMode === 2) {
+            this.techGoal = 7
+        } else if (simulation.difficultyMode === 4) {
+            this.techGoal = 3
+        } else if (simulation.difficultyMode === 6) {
+            this.techGoal = 1
+        }
+
+    },
     talkingColor: "#dff", //set color of graphic on level.null
     isSpeech: false,
     testSpeechAPI() {

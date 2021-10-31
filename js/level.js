@@ -54,8 +54,8 @@ const level = {
             // level.tunnel() //community level
             // powerUps.research.changeRerolls(3000)
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
-            // for (let i = 0; i < 7; i++) tech.giveTech("undefined")
-            // lore.techCount = 6
+            // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
+            // lore.techCount = 3
 
             // simulation.isCheating = false //true;
             // localSettings.loreCount = 3; //this sets what conversation is heard

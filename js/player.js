@@ -2431,7 +2431,7 @@ const m = {
                             let isMobsAround = false
                             const stunRange = m.fieldDrawRadius * 1.5
                             const drain = 0.15
-                            const stunTime = 180
+                            const stunTime = 240
                             if (m.energy > drain) {
                                 for (let i = 0, len = mob.length; i < len; ++i) {
                                     if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) < stunRange && Matter.Query.ray(map, mob[i].position, m.pos).length === 0 && !mob[i].isBadTarget) {

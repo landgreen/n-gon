@@ -126,6 +126,7 @@ window.addEventListener('load', () => {
 
             if (property === "difficulty") {
                 simulation.difficultyMode = Number(set[property])
+                lore.setTechGoal()
                 document.getElementById("difficulty-select-experiment").value = Number(set[property])
             }
             if (property === "level") document.getElementById("starting-level").value = Math.max(Number(set[property]) - 1, 0)
@@ -486,6 +487,7 @@ const build = {
         document.getElementById("difficulty-select-experiment").value = document.getElementById("difficulty-select").value
         document.getElementById("difficulty-select-experiment").addEventListener("input", () => {
             simulation.difficultyMode = Number(document.getElementById("difficulty-select-experiment").value)
+            lore.setTechGoal()
             localSettings.difficultyMode = Number(document.getElementById("difficulty-select-experiment").value)
             document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-experiment").value
             localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -1155,6 +1157,7 @@ if (localSettings) {
     simulation.isCommunityMaps = localSettings.isCommunityMaps
     document.getElementById("community-maps").checked = localSettings.isCommunityMaps
     simulation.difficultyMode = localSettings.difficultyMode
+    lore.setTechGoal()
     document.getElementById("difficulty-select").value = localSettings.difficultyMode
     if (localSettings.fpsCapDefault === 'max') {
         simulation.fpsCapDefault = 999999999;
@@ -1208,6 +1211,7 @@ document.getElementById("community-maps").addEventListener("input", () => {
 // difficulty-select-experiment event listener is set in build.makeGrid
 document.getElementById("difficulty-select").addEventListener("input", () => {
     simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
+    lore.setTechGoal()
     localSettings.difficultyMode = simulation.difficultyMode
     localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
     localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage

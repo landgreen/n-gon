@@ -317,10 +317,13 @@ const spawn = {
 
                 //add lore level as next level if player took lore tech earlier in the game
                 if (lore.techCount > (lore.techGoal - 1) && !simulation.isCheating) {
-                    simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}<br>level.levels.push("<span class='lore-text'>null</span>")`);
-                    level.levels.push("null")
+                    simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`, 360);
+                    setTimeout(function() {
+                        simulation.makeTextLog(`level.levels.push("<span class='lore-text'>null</span>")`, 720);
+                        unlockExit()
+                        level.levels.push("null")
+                    }, 4000);
                     //remove block map element so exit is clear
-                    unlockExit()
                 } else { //reset game
                     let count = 0
 

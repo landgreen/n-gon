@@ -1,26 +1,10 @@
 ******************************************************** NEXT PATCH **************************************************
 
-time dilation tech: retrocausality - instead of pausing time your field rewinds time, including your health
-  this tech replaces replaces CPT gun
-  works well with tech: causality bots and grenades
-
-wormhole
-  activated on mouse up
-  draw an outline of the wormhole to show if can work at your mouse location
-
-adiabatic healing: adds 5% JUNK in addition to 100% better heals
-
-several tech pool frequencies have been adjusted to roughly this rule:
-  no requirements:  1x chance
-  requirements: 2x chance
-    (most gun and field tech)
-  strict requirements: 3x chance or higher
+number of undefined tech needed to get lore is now lower at higher difficulty modes
 
 bug fixes
 
 ******************************************************** TODO ********************************************************
-
-make causality bots and bombs work with retrocausality
 
 tech: after bullets hit a mob, the mob takes 1% more damage
     this.damageReduction *= 1.01
