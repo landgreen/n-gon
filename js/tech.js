@@ -6270,8 +6270,8 @@
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 200,
-                frequencyDefault: 200,
+                frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "time dilation" && !m.isShipMode && !tech.isRewindAvoidDeath && !tech.isEnergyHealth && !tech.isTimeSkip && !tech.isFreezeMobs
                 },
