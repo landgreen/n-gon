@@ -1,20 +1,32 @@
 ******************************************************** NEXT PATCH **************************************************
 
-field tech balance:
-  pilot wave has access to more field tech: time crystals, WIMPs, no-cloning
-  time dilation: can get symbiosis
-  flux pinning: 2s -> 4s stun on blocking
-  zero point energy:  74 energy -> 100 energy
-  tessellation: 4->2 research cost
-  bremsstrahlung: 33% more damage
-  triple point: 50% more ice
+time dilation tech: retrocausality - instead of pausing time your field rewinds time, including your health
+  this tech replaces replaces CPT gun
+  works well with tech: causality bots and grenades
 
-  bug fixes
+wormhole
+  activated on mouse up
+  draw an outline of the wormhole to show if can work at your mouse location
+
+adiabatic healing: adds 5% JUNK in addition to 100% better heals
+
+several tech pool frequencies have been adjusted to roughly this rule:
+  no requirements:  1x chance
+  requirements: 2x chance
+    (most gun and field tech)
+  strict requirements: 3x chance or higher
+
+bug fixes
 
 ******************************************************** TODO ********************************************************
 
-tech perfect diamagnetism - holding the field makes the field slowly travel forward
-  could be base effect
+make causality bots and bombs work with retrocausality
+
+tech: after bullets hit a mob, the mob takes 1% more damage
+    this.damageReduction *= 1.01
+
+make CPT gun a tech for time dilation field
+  tech: CPT - time dilation field rewinds your health velocity and position
 
 bug - death while paused crashes game?
 
@@ -52,13 +64,6 @@ be nice if block throwing had a projected path
 
 JUNK tech: planetesimals game inside n-gon
 https://codepen.io/lilgreenland/pen/jrMvaB?editors=0010
-
-on mouse down wormhole shows a possible wormhole
-  on mouse up the wormhole becomes real
-make the player get a buff after using wormhole
-  while energy lasts: drain energy and give damage buff
-using wormhole makes you immune to harm and drains energy until you run out
-  disable incoming energy, by saving current energy and just setting energy in the next cycle to be lower then the saved value
 
 Pilot wave tech
   Energy use is increased, but you can now shape blocks using pressure

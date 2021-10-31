@@ -45,7 +45,7 @@ const mobs = {
         applySlow(who)
         //look for mobs near the target
         if (tech.isAoESlow) {
-            const range2 = (180 + 170 * Math.random()) ** 2
+            const range2 = (200 + 170 * Math.random()) ** 2
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (who !== mob[i] && Vector.magnitudeSquared(Vector.sub(who.position, mob[i].position)) < range2 + mob[i].radius) applySlow(mob[i])
             }

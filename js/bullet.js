@@ -5390,7 +5390,7 @@ const b = {
             name: "railgun",
             description: "use <strong class='color-f'>energy</strong> to launch a high-speed <strong>dense</strong> rod<br><strong>hold</strong> left mouse to charge, <strong>release</strong> to fire",
             ammo: 0,
-            ammoPack: 3.5,
+            ammoPack: 3.8,
             have: false,
             do() {},
             fire() {

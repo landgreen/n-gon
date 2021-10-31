@@ -292,6 +292,7 @@ const powerUps = {
 
         document.body.style.cursor = "none";
         // document.body.style.overflow = "hidden"
+        // if (m.alive){}
         simulation.paused = false;
         simulation.isChoosing = false; //stops p from un pausing on key down
         if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 30 cycles

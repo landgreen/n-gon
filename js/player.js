@@ -133,6 +133,7 @@ const m = {
     transX: 0,
     transY: 0,
     history: [], //tracks the last second of player position
+    rewindCount: 0, //used with CPT gun
     resetHistory() {
         for (let i = 0; i < 600; i++) { //reset history
             m.history[i] = {
@@ -298,7 +299,7 @@ const m = {
     },
     alive: false,
     switchWorlds() {
-        const totalGuns = b.inventory.length - tech.isRewindGun //count guns, but not CPT gun
+        const totalGuns = b.inventory.length //- tech.isRewindGun //count guns, but not CPT gun
         simulation.isTextLogOpen = false; //prevent console spam
         //remove all tech and count current tech total
         let totalTech = 0;
@@ -932,7 +933,7 @@ const m = {
     holdingMassScale: 0,
     hole: {
         isOn: false,
-        isReady: true,
+        isReady: false,
         pos1: {
             x: 0,
             y: 0
@@ -983,7 +984,7 @@ const m = {
         // m.setMaxEnergy();
         m.hole = {
             isOn: false,
-            isReady: true,
+            isReady: false,
             pos1: {
                 x: 0,
                 y: 0
@@ -2126,82 +2127,256 @@ const m = {
             name: "time dilation",
             // description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong>",
             description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><strong>move</strong> and <strong>fire</strong> while time is stopped<br>but, <strong>collisions</strong> still do <strong class='color-harm'>harm</strong>",
-            effect: () => {
-                // m.fieldMeterColor = "#000"
-                m.fieldFire = true;
-                m.isBodiesAsleep = false;
-                m.drain = 0.0005
-                m.hold = function() {
-                    if (m.isHolding) {
-                        m.wakeCheck();
-                        m.drawHold(m.holdingTarget);
-                        m.holding();
-                        m.throwBlock();
-                    } else if (input.field && m.fieldCDcycle < m.cycle) {
-                        m.grabPowerUp();
-                        m.lookForPickUp(180);
+            set() {
+                if (tech.isRewindField) {
+                    this.rewindCount = 0
+                    m.grabPowerUpRange2 = 300000
+                    m.hold = function() {
+                        if (m.isHolding) {
+                            m.drawHold(m.holdingTarget);
+                            m.holding();
+                            m.throwBlock();
+                        } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+                            m.grabPowerUp();
+                            if (this.rewindCount === 0) m.lookForPickUp();
 
-                        m.drain += 0.0000025
-                        if (m.energy > m.drain) {
-                            m.energy -= m.drain;
-                            if (m.energy < m.drain) {
-                                m.fieldCDcycle = m.cycle + 120;
-                                m.energy = 0;
+                            if (!m.holdingTarget) {
+                                this.rewindCount += 6;
+                                const DRAIN = 0.001
+                                let history = m.history[(m.cycle - this.rewindCount) % 600]
+                                if (this.rewindCount > 599 || m.energy < DRAIN) {
+                                    this.rewindCount = 0;
+                                    m.resetHistory();
+                                    if (m.fireCDcycle < m.cycle + 60) m.fieldCDcycle = m.cycle + 60
+                                    m.immuneCycle = m.cycle //if you reach the end of the history disable harm immunity
+                                } else {
+                                    //draw field everywhere
+                                    ctx.globalCompositeOperation = "saturation"
+                                    ctx.fillStyle = "#ccc";
+                                    ctx.fillRect(-100000, -100000, 200000, 200000)
+                                    ctx.globalCompositeOperation = "source-over"
+                                    // m.grabPowerUp(); //a second grab power up to make the power ups easier to grab, and they more fast which matches the time theme
+                                    m.energy -= DRAIN
+                                    if (m.immuneCycle < m.cycle + 60) m.immuneCycle = m.cycle + 60; //player is immune to damage for __ cycles
+                                    Matter.Body.setPosition(player, history.position);
+                                    Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
+                                    if (m.health < history.health) {
+                                        m.health = history.health
+                                        if (m.health > m.maxHealth) m.health = m.maxHealth
+                                        m.displayHealth();
+                                    }
+                                    m.yOff = history.yOff
+                                    if (m.yOff < 48) {
+                                        m.doCrouch()
+                                    } else {
+                                        m.undoCrouch()
+                                    }
+                                    //grab power ups
+                                    for (let i = 0, len = powerUp.length; i < len; ++i) {
+                                        if (
+                                            Vector.magnitudeSquared(Vector.sub(m.pos, powerUp[i].position)) < 100000 &&
+                                            !simulation.isChoosing &&
+                                            (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)
+                                        ) {
+                                            powerUps.onPickUp(powerUp[i]);
+                                            powerUp[i].effect();
+                                            Matter.Composite.remove(engine.world, powerUp[i]);
+                                            powerUp.splice(i, 1);
+                                            break; //because the array order is messed up after splice
+                                        }
+                                    }
+                                    if (!(this.rewindCount % 30)) {
+                                        if (tech.isRewindBot) {
+                                            for (let i = 0; i < tech.isRewindBot; i++) {
+                                                b.randomBot(m.pos, false, false)
+                                                bullet[bullet.length - 1].endCycle = simulation.cycle + 480 + Math.floor(120 * Math.random()) //8-9 seconds
+                                            }
+                                        }
+
+                                        if (tech.isRewindGrenade) {
+                                            b.grenade(m.pos, this.rewindCount) //Math.PI / 2
+                                            const who = bullet[bullet.length - 1]
+                                            // Matter.Body.setVelocity(who, {
+                                            //     x: 0,
+                                            //     y: 0
+                                            // });
+                                            who.endCycle = simulation.cycle + 60
+                                            // if (tech.isVacuumBomb) {
+                                            //     Matter.Body.setVelocity(who, {
+                                            //         x: who.velocity.x * 0.5,
+                                            //         y: who.velocity.y * 0.5
+                                            //     });
+                                            // } else if (tech.isRPG) {
+                                            //     who.endCycle = simulation.cycle + 10
+                                            // } else if (tech.isNeutronBomb) {
+                                            //     Matter.Body.setVelocity(who, {
+                                            //         x: who.velocity.x * 0.3,
+                                            //         y: who.velocity.y * 0.3
+                                            //     });
+                                            // } else {
+                                            //     Matter.Body.setVelocity(who, {
+                                            //         x: who.velocity.x * 0.5,
+                                            //         y: who.velocity.y * 0.5
+                                            //     });
+                                            //     who.endCycle = simulation.cycle + 30
+                                            // }
+                                        }
+
+
+                                    }
+                                }
+                            }
+                        } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+                            m.pickUp();
+                            this.rewindCount = 0;
+                        } else {
+                            m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                            this.rewindCount = 0;
+                        }
+                        m.drawFieldMeter()
+
+
+
+
+                        // // console.log(this.rewindCount)
+                        // if (input.field && m.fieldCDcycle < m.cycle) { //button has been held down
+                        //     if (m.isHolding) {
+                        //         m.drawHold(m.holdingTarget);
+                        //         m.holding();
+                        //         m.throwBlock();
+                        //     } else {
+                        //         m.grabPowerUp();
+                        //         m.lookForPickUp();
+                        //         if (!m.holdingTarget) {
+                        //             this.rewindCount += 8;
+                        //             const DRAIN = 0.001
+                        //             let history = m.history[(m.cycle - this.rewindCount) % 600]
+                        //             if (this.rewindCount > 599 || m.energy < DRAIN) {
+                        //                 this.rewindCount = 0;
+                        //                 m.resetHistory();
+                        //             } else {
+                        //                 // m.grabPowerUp(); //a second grab power up to make the power ups easier to grab, and they more fast which matches the time theme
+                        //                 m.energy -= DRAIN
+                        //                 if (m.immuneCycle < m.cycle + 30) m.immuneCycle = m.cycle + 30; //player is immune to damage for 30 cycles
+                        //                 Matter.Body.setPosition(player, history.position);
+                        //                 Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
+                        //                 if (m.health < history.health) {
+                        //                     m.health = history.health
+                        //                     m.displayHealth();
+                        //                 }
+                        //                 m.yOff = history.yOff
+                        //                 if (m.yOff < 48) {
+                        //                     m.doCrouch()
+                        //                 } else {
+                        //                     m.undoCrouch()
+                        //                 }
+                        //                 //grab power ups
+                        //                 for (let i = 0, len = powerUp.length; i < len; ++i) {
+                        //                     if (
+                        //                         Vector.magnitudeSquared(Vector.sub(m.pos, powerUp[i].position)) < 100000 &&
+                        //                         !simulation.isChoosing &&
+                        //                         (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)
+                        //                     ) {
+                        //                         powerUps.onPickUp(powerUp[i]);
+                        //                         powerUp[i].effect();
+                        //                         Matter.Composite.remove(engine.world, powerUp[i]);
+                        //                         powerUp.splice(i, 1);
+                        //                         break; //because the array order is messed up after splice
+                        //                     }
+                        //                 }
+                        //             }
+                        //         }
+                        //     }
+                        // } else { //button is held the first time
+                        //     this.rewindCount = 0;
+                        //     if (m.holdingTarget && m.fieldCDcycle < m.cycle) {
+                        //         m.pickUp();
+                        //     } else {
+                        //         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                        //     }
+                        // }
+
+                    }
+                } else {
+                    m.fieldFire = true;
+                    m.isBodiesAsleep = false;
+                    m.drain = 0.0005
+                    m.hold = function() {
+                        if (m.isHolding) {
+                            m.wakeCheck();
+                            m.drawHold(m.holdingTarget);
+                            m.holding();
+                            m.throwBlock();
+                        } else if (input.field && m.fieldCDcycle < m.cycle) {
+                            m.grabPowerUp();
+                            m.lookForPickUp();
+
+                            m.drain += 0.0000025
+                            if (m.energy > m.drain) {
+                                m.energy -= m.drain;
+                                if (m.energy < m.drain) {
+                                    m.fieldCDcycle = m.cycle + 120;
+                                    m.energy = 0;
+                                    m.wakeCheck();
+                                }
+                                //draw field everywhere
+                                ctx.globalCompositeOperation = "saturation"
+                                ctx.fillStyle = "#ccc";
+                                ctx.fillRect(-100000, -100000, 200000, 200000)
+                                ctx.globalCompositeOperation = "source-over"
+                                //stop time
+                                m.isBodiesAsleep = true;
+
+                                function sleep(who) {
+                                    for (let i = 0, len = who.length; i < len; ++i) {
+                                        if (!who[i].isSleeping) {
+                                            who[i].storeVelocity = who[i].velocity
+                                            who[i].storeAngularVelocity = who[i].angularVelocity
+                                        }
+                                        Matter.Sleeping.set(who[i], true)
+                                    }
+                                }
+                                sleep(mob);
+                                sleep(body);
+                                sleep(bullet);
+
+                                simulation.cycle--; //pause all functions that depend on game cycle increasing
+                                if (tech.isTimeSkip) {
+                                    if (m.immuneCycle < m.cycle + 10) m.immuneCycle = m.cycle + 10;
+                                    simulation.isTimeSkipping = true;
+                                    m.cycle++;
+                                    simulation.gravity();
+                                    if (tech.isFireMoveLock && input.fire) {
+                                        player.force.x = 0
+                                        player.force.y = 0
+                                    }
+                                    Engine.update(engine, simulation.delta);
+                                    m.move();
+                                    simulation.checks();
+                                    m.walk_cycle += m.flipLegs * m.Vx;
+                                    b.fire();
+                                    b.bulletDo();
+                                    simulation.isTimeSkipping = false;
+                                }
+                            } else { //holding, but field button is released
                                 m.wakeCheck();
                             }
-                            //draw field everywhere
-                            ctx.globalCompositeOperation = "saturation"
-                            ctx.fillStyle = "#ccc";
-                            ctx.fillRect(-100000, -100000, 200000, 200000)
-                            ctx.globalCompositeOperation = "source-over"
-                            //stop time
-                            m.isBodiesAsleep = true;
-
-                            function sleep(who) {
-                                for (let i = 0, len = who.length; i < len; ++i) {
-                                    if (!who[i].isSleeping) {
-                                        who[i].storeVelocity = who[i].velocity
-                                        who[i].storeAngularVelocity = who[i].angularVelocity
-                                    }
-                                    Matter.Sleeping.set(who[i], true)
-                                }
-                            }
-                            sleep(mob);
-                            sleep(body);
-                            sleep(bullet);
-
-                            simulation.cycle--; //pause all functions that depend on game cycle increasing
-                            if (tech.isTimeSkip) {
-                                if (m.immuneCycle < m.cycle + 10) m.immuneCycle = m.cycle + 10;
-                                simulation.isTimeSkipping = true;
-                                m.cycle++;
-                                simulation.gravity();
-                                if (tech.isFireMoveLock && input.fire) {
-                                    player.force.x = 0
-                                    player.force.y = 0
-                                }
-                                Engine.update(engine, simulation.delta);
-                                m.move();
-                                simulation.checks();
-                                m.walk_cycle += m.flipLegs * m.Vx;
-                                b.fire();
-                                b.bulletDo();
-                                simulation.isTimeSkipping = false;
-                            }
-                        } else { //holding, but field button is released
+                        } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                             m.wakeCheck();
+                            m.pickUp();
+                        } else {
+                            if (m.drain > 0.0005) m.drain -= 0.000005 //return drain to base level
+                            m.wakeCheck();
+                            m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                         }
-                    } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
-                        m.wakeCheck();
-                        m.pickUp();
-                    } else {
-                        if (m.drain > 0.0005) m.drain -= 0.000005 //return drain to base level
-                        m.wakeCheck();
-                        m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                        // console.log(m.drain.toFixed(6))
+                        m.drawFieldMeter()
                     }
-                    // console.log(m.drain.toFixed(6))
-                    m.drawFieldMeter()
                 }
+            },
+            effect() {
+                // m.fieldMeterColor = "#000"
+                this.set();
             }
         },
         {
@@ -2678,6 +2853,7 @@ const m = {
             description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             effect: function() {
                 m.duplicateChance = 0.07
+                m.fieldRange = 0
                 powerUps.setDupChance(); //needed after adjusting duplication chance
 
                 m.hold = function() {
@@ -2785,7 +2961,7 @@ const m = {
                                                 body.splice(i, 1);
                                                 m.fieldRange *= 0.8
                                                 if (tech.isWormholeEnergy) m.energy += 0.63
-                                                if (tech.isWormholeSpores) { //pandimensionalspermia
+                                                if (tech.isWormholeSpores) { //pandimensional spermia
                                                     for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                         if (tech.isSporeWorm) {
                                                             b.worm(Vector.add(m.hole.pos2, Vector.rotate({
@@ -2819,7 +2995,7 @@ const m = {
                                             m.fieldRange *= 0.8
                                             // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
                                             if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.63
-                                            if (tech.isWormholeSpores) { //pandimensionalspermia
+                                            if (tech.isWormholeSpores) { //pandimensional spermia
                                                 for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                     if (tech.isSporeWorm) {
                                                         b.worm(Vector.add(m.hole.pos1, Vector.rotate({
@@ -2871,12 +3047,60 @@ const m = {
                         }
                     }
 
-                    if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
-                        const justPastMouse = Vector.add(Vector.mult(Vector.normalise(Vector.sub(simulation.mouseInGame, m.pos)), 50), simulation.mouseInGame)
+                    if (m.fieldCDcycle < m.cycle) {
                         const scale = 60
-                        // console.log(Matter.Query.region(map, bounds))
-                        if (m.hole.isReady &&
-                            (
+                        const justPastMouse = Vector.add(Vector.mult(Vector.normalise(Vector.sub(simulation.mouseInGame, m.pos)), 50), simulation.mouseInGame)
+                        const sub = Vector.sub(simulation.mouseInGame, m.pos)
+                        const mag = Vector.magnitude(sub)
+                        const drain = tech.isFreeWormHole ? 0 : 0.06 + 0.006 * Math.sqrt(mag)
+                        if (input.field) {
+                            m.grabPowerUp();
+
+                            //draw possible wormhole
+                            if (mag > 250 && m.energy > drain) {
+                                const unit = Vector.perp(Vector.normalise(sub))
+                                const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
+                                m.fieldRange = 0.97 * m.fieldRange + 0.03 * (50 + 10 * Math.sin(simulation.cycle * 0.025))
+                                const edge2a = Vector.add(Vector.mult(unit, 1.5 * m.fieldRange), simulation.mouseInGame)
+                                const edge2b = Vector.add(Vector.mult(unit, -1.5 * m.fieldRange), simulation.mouseInGame)
+                                ctx.beginPath();
+                                ctx.moveTo(where.x, where.y)
+                                ctx.bezierCurveTo(where.x, where.y, simulation.mouseInGame.x, simulation.mouseInGame.y, edge2a.x, edge2a.y);
+                                ctx.moveTo(where.x, where.y)
+                                ctx.bezierCurveTo(where.x, where.y, simulation.mouseInGame.x, simulation.mouseInGame.y, edge2b.x, edge2b.y);
+                                if (
+                                    Matter.Query.region(map, {
+                                        min: {
+                                            x: simulation.mouseInGame.x - scale,
+                                            y: simulation.mouseInGame.y - scale
+                                        },
+                                        max: {
+                                            x: simulation.mouseInGame.x + scale,
+                                            y: simulation.mouseInGame.y + scale
+                                        }
+                                    }).length === 0 &&
+                                    Matter.Query.ray(map, m.pos, justPastMouse).length === 0
+                                ) {
+                                    m.hole.isReady = true;
+                                    // ctx.fillStyle = "rgba(255,255,255,0.5)"
+                                    // ctx.fill();
+                                    ctx.lineWidth = 1
+                                    ctx.strokeStyle = "#000"
+                                    ctx.stroke();
+                                } else {
+                                    m.hole.isReady = false;
+                                    ctx.lineWidth = 1
+                                    ctx.strokeStyle = "#000"
+                                    ctx.lineDashOffset = 30 * Math.random()
+                                    ctx.setLineDash([20, 40]);
+                                    ctx.stroke();
+                                    ctx.setLineDash([]);
+                                }
+                            }
+                        } else {
+                            //make new wormhole
+                            if (
+                                m.hole.isReady && mag > 250 && m.energy > drain &&
                                 Matter.Query.region(map, {
                                     min: {
                                         x: simulation.mouseInGame.x - scale,
@@ -2888,15 +3112,7 @@ const m = {
                                     }
                                 }).length === 0 &&
                                 Matter.Query.ray(map, m.pos, justPastMouse).length === 0
-                                // Matter.Query.ray(map, m.pos, simulation.mouseInGame).length === 0 &&
-                                // Matter.Query.ray(map, player.position, simulation.mouseInGame).length === 0 &&
-                                // Matter.Query.ray(map, player.position, justPastMouse).length === 0
-                            )
-                        ) {
-                            const sub = Vector.sub(simulation.mouseInGame, m.pos)
-                            const mag = Vector.magnitude(sub)
-                            const drain = tech.isFreeWormHole ? 0 : 0.06 + 0.006 * Math.sqrt(mag)
-                            if (m.energy > drain && mag > 300) {
+                            ) {
                                 m.energy -= drain
                                 m.hole.isReady = false;
                                 m.fieldRange = 0
@@ -2940,21 +3156,111 @@ const m = {
                                         }
                                     }
                                 }
-                            } else {
-                                m.grabPowerUp();
                             }
-                        } else {
-                            m.grabPowerUp();
                         }
-                        // } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
-                        // m.pickUp();
-                    } else {
-                        m.hole.isReady = true;
                     }
+
+                    // if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+                    //     const justPastMouse = Vector.add(Vector.mult(Vector.normalise(Vector.sub(simulation.mouseInGame, m.pos)), 50), simulation.mouseInGame)
+                    //     const scale = 60
+                    //     // console.log(Matter.Query.region(map, bounds))
+                    //     const sub = Vector.sub(simulation.mouseInGame, m.pos)
+                    //     const mag = Vector.magnitude(sub)
+                    //     const drain = tech.isFreeWormHole ? 0 : 0.06 + 0.006 * Math.sqrt(mag)
+                    //     if (m.hole.isReady && mag > 250 && m.energy > drain) {
+                    //         if (
+                    //             Matter.Query.region(map, {
+                    //                 min: {
+                    //                     x: simulation.mouseInGame.x - scale,
+                    //                     y: simulation.mouseInGame.y - scale
+                    //                 },
+                    //                 max: {
+                    //                     x: simulation.mouseInGame.x + scale,
+                    //                     y: simulation.mouseInGame.y + scale
+                    //                 }
+                    //             }).length === 0 &&
+                    //             Matter.Query.ray(map, m.pos, justPastMouse).length === 0
+                    //             // Matter.Query.ray(map, m.pos, simulation.mouseInGame).length === 0 &&
+                    //             // Matter.Query.ray(map, player.position, simulation.mouseInGame).length === 0 &&
+                    //             // Matter.Query.ray(map, player.position, justPastMouse).length === 0
+                    //         ) {
+                    //             m.energy -= drain
+                    //             m.hole.isReady = false;
+                    //             m.fieldRange = 0
+                    //             Matter.Body.setPosition(player, simulation.mouseInGame);
+                    //             m.buttonCD_jump = 0 //this might fix a bug with jumping
+                    //             const velocity = Vector.mult(Vector.normalise(sub), 20)
+                    //             Matter.Body.setVelocity(player, {
+                    //                 x: velocity.x,
+                    //                 y: velocity.y - 4 //an extra vertical kick so the player hangs in place longer
+                    //             });
+                    //             if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 1/4 seconds 
+                    //             // move bots to player
+                    //             for (let i = 0; i < bullet.length; i++) {
+                    //                 if (bullet[i].botType) {
+                    //                     Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                    //                         x: 250 * (Math.random() - 0.5),
+                    //                         y: 250 * (Math.random() - 0.5)
+                    //                     }));
+                    //                     Matter.Body.setVelocity(bullet[i], {
+                    //                         x: 0,
+                    //                         y: 0
+                    //                     });
+                    //                 }
+                    //             }
+
+                    //             //set holes
+                    //             m.hole.isOn = true;
+                    //             m.hole.pos1.x = m.pos.x
+                    //             m.hole.pos1.y = m.pos.y
+                    //             m.hole.pos2.x = player.position.x
+                    //             m.hole.pos2.y = player.position.y
+                    //             m.hole.angle = Math.atan2(sub.y, sub.x)
+                    //             m.hole.unit = Vector.perp(Vector.normalise(sub))
+
+                    //             if (tech.isWormholeDamage) {
+                    //                 who = Matter.Query.ray(mob, m.pos, simulation.mouseInGame, 100)
+                    //                 for (let i = 0; i < who.length; i++) {
+                    //                     if (who[i].body.alive) {
+                    //                         mobs.statusDoT(who[i].body, 1, 420)
+                    //                         mobs.statusStun(who[i].body, 360)
+                    //                     }
+                    //                 }
+                    //             }
+                    //         } else {
+                    //             //draw failed wormhole
+                    //             const unit = Vector.perp(Vector.normalise(Vector.sub(simulation.mouseInGame, m.pos)))
+                    //             const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle), }
+                    //             m.fieldRange = 0.97 * m.fieldRange + 0.03 * (50 + 10 * Math.sin(simulation.cycle * 0.025))
+                    //             const edge2a = Vector.add(Vector.mult(unit, 1.5 * m.fieldRange), simulation.mouseInGame)
+                    //             const edge2b = Vector.add(Vector.mult(unit, -1.5 * m.fieldRange), simulation.mouseInGame)
+                    //             ctx.beginPath();
+                    //             ctx.moveTo(where.x, where.y)
+                    //             ctx.bezierCurveTo(where.x, where.y, simulation.mouseInGame.x, simulation.mouseInGame.y, edge2a.x, edge2a.y);
+                    //             ctx.lineTo(edge2b.x, edge2b.y)
+                    //             ctx.bezierCurveTo(simulation.mouseInGame.x, simulation.mouseInGame.y, where.x, where.y, where.x, where.y);
+                    //             // ctx.fillStyle = "rgba(255,255,255,0.5)"
+                    //             // ctx.fill();
+                    //             ctx.lineWidth = 1
+                    //             ctx.strokeStyle = "#000"
+                    //             ctx.lineDashOffset = 30 * Math.random()
+                    //             ctx.setLineDash([20, 40]);
+                    //             ctx.stroke();
+                    //             ctx.setLineDash([]);
+                    //         }
+                    //     }
+                    //     m.grabPowerUp();
+                    // } else {
+                    //     m.hole.isReady = true;
+                    // }
+
+
+
+
                     m.drawFieldMeter()
                 }
             },
-            rewindCount: 0,
+
             // rewind: function() {
             //     if (input.down) {
             //         if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed

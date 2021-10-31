@@ -15,13 +15,13 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("negative mass")
+            // m.setField("time dilation")
             // b.giveGuns("harpoon")
-            // tech.giveTech("rotary cannon")
-            // tech.giveTech("fragmentation")
-            // tech.giveTech("rivet gun")
+            // tech.giveTech("retrocausality")
+            // tech.giveTech("causality bots")
+            // tech.giveTech("causality bombs")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
-            // tech.giveTech("all-stars")
+            // tech.giveTech("antiscience")
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.isCancelDuplication = true
