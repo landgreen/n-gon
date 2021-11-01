@@ -5,6 +5,10 @@ number of undefined tech needed to get lore is now lower at higher difficulty mo
 bug fixes
 
 ******************************************************** TODO ********************************************************
+Game idea: bayonet
+    tech: Allows player to shoot while using plasma torch 
+    
+Game idea: dual wielding: adds one more plasma torch like difraction grating, plasma torch drains 5% more energy.    
 
 tech: after bullets hit a mob, the mob takes 1% more damage
     this.damageReduction *= 1.01
