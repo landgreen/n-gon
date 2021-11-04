@@ -16,9 +16,9 @@ const level = {
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.setField("time dilation")
-            // b.giveGuns("harpoon")
-            // tech.giveTech("retrocausality")
-            // tech.giveTech("causality bots")
+            // b.giveGuns("grenades")
+            // tech.giveTech("neutron bomb")
+            // tech.giveTech("vacuum bomb")
             // tech.giveTech("causality bombs")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("antiscience")

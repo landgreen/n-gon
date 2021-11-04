@@ -234,18 +234,21 @@
             return dmg * tech.slowFire * tech.aimDamage
         },
         duplicationChance() {
-            return Math.max(0, (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.17 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0))
+            return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.04 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.45 : 0))
         },
         isScaleMobsWithDuplication: false,
         maxDuplicationEvent() {
-            if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
-                tech.is100Duplicate = false
-                const range = 500
+            if (tech.is111Duplicate && tech.duplicationChance() > 1.11) {
+                tech.is111Duplicate = false
+                const range = 1300
                 tech.isScaleMobsWithDuplication = true
-                for (let i = 0, len = 8; i < len; i++) {
+                for (let i = 0, len = 9; i < len; i++) {
                     const angle = 2 * Math.PI * i / len
                     spawn.randomLevelBoss(m.pos.x + range * Math.cos(angle), m.pos.y + range * Math.sin(angle), spawn.nonCollideBossList);
                 }
+                spawn.historyBoss(0, 0)
+                spawn.pulsarBoss(level.exit.x, level.exit.y, 70, true)
+                spawn.blockBoss(level.enter.x, level.enter.y)
                 tech.isScaleMobsWithDuplication = false
             }
         },
@@ -2850,15 +2853,15 @@
             },
             {
                 name: "weak anthropic principle",
-                description: "after <strong>anthropic principle</strong> prevents your <strong>death</strong><br>add <strong>50%</strong> <strong class='color-dup'>duplication</strong> chance for that level",
+                description: "after <strong>anthropic principle</strong> prevents your <strong>death</strong><br>add <strong>45%</strong> <strong class='color-dup'>duplication</strong> chance for that level",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.isDeathAvoid && tech.duplicationChance() < 0.66
+                    return tech.isDeathAvoid
                 },
-                requires: "anthropic principle, below 66% duplication chance",
+                requires: "anthropic principle",
                 effect() {
                     tech.isAnthropicTech = true
                     powerUps.setDupChance(); //needed after adjusting duplication chance
@@ -3154,7 +3157,7 @@
             },
             {
                 name: "replication",
-                description: "<strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+30%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "<strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+40%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
@@ -3167,7 +3170,7 @@
                     tech.duplicateChance += 0.1
                     powerUps.setDupChance(); //needed after adjusting duplication chance
                     if (!build.isExperimentSelection) simulation.circleFlare(0.1);
-                    this.refundAmount += tech.addJunkTechToPool(0.3)
+                    this.refundAmount += tech.addJunkTechToPool(0.4)
                 },
                 refundAmount: 0,
                 remove() {
@@ -3181,7 +3184,7 @@
             },
             {
                 name: "stimulated emission",
-                description: "<strong>17%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>but, after a <strong>collision</strong> eject <strong>1</strong> <strong class='color-m'>tech</strong>",
+                description: "<strong>15%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>but, after a <strong>collision</strong> eject <strong>1</strong> <strong class='color-m'>tech</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3192,8 +3195,8 @@
                 requires: "below 100% duplication chance",
                 effect: () => {
                     tech.isStimulatedEmission = true
-                    powerUps.setDupChance(0.17); //needed after adjusting duplication chance
-                    if (!build.isExperimentSelection) simulation.circleFlare(0.17);
+                    powerUps.setDupChance(); //needed after adjusting duplication chance
+                    if (!build.isExperimentSelection) simulation.circleFlare(0.15);
                 },
                 remove() {
                     tech.isStimulatedEmission = false
@@ -3202,7 +3205,7 @@
             },
             {
                 name: "metastability",
-                description: "<strong>13%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong> ",
+                description: "<strong>12%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong> ",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3214,7 +3217,7 @@
                 effect: () => {
                     tech.isPowerUpsVanish = true
                     powerUps.setDupChance(); //needed after adjusting duplication chance
-                    if (!build.isExperimentSelection) simulation.circleFlare(0.13);
+                    if (!build.isExperimentSelection) simulation.circleFlare(0.12);
                 },
                 remove() {
                     tech.isPowerUpsVanish = false
@@ -3223,7 +3226,7 @@
             },
             {
                 name: "futures exchange",
-                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+                description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4%</strong> power up <strong class='color-dup'>duplication</strong> chance",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3297,21 +3300,21 @@
             },
             {
                 name: "apomixis",
-                description: `when you reach <strong>100%</strong> <strong class='color-dup'>duplication</strong><br>spawn <strong>8 bosses</strong> with <strong>100%</strong> more <strong>health</strong>`,
+                description: `when you reach <strong>111%</strong> <strong class='color-dup'>duplication</strong><br>spawn <strong>11 bosses</strong> with <strong>111%</strong> more <strong>health</strong>`,
                 maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 10,
+                frequencyDefault: 10,
                 allowed() {
-                    return tech.duplicationChance() > 0.33
+                    return tech.duplicationChance() > 0.99
                 },
                 requires: "duplication chance above 33%",
                 effect() {
-                    tech.is100Duplicate = true;
+                    tech.is111Duplicate = true;
                     tech.maxDuplicationEvent()
                 },
                 remove() {
-                    tech.is100Duplicate = false;
+                    tech.is111Duplicate = false;
                 }
             },
             {
@@ -3381,10 +3384,8 @@
                 effect: () => {
                     powerUps.research.changeRerolls(-2)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2<br>${powerUps.research.count}`)
-                    const chanceStore = tech.duplicateChance
-                    tech.duplicateChance = (tech.isStimulatedEmission ? 0.2 : 0) + tech.cancelCount * 0.045 + m.duplicateChance + tech.duplicateChance * 2 //increase duplication chance to simulate doubling all 3 sources of duplication chance
-                    powerUps.spawn(m.pos.x, m.pos.y, "tech");
-                    tech.duplicateChance = chanceStore
+                    powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
+                    if (Math.random() < tech.duplicationChance() * 2) powerUps.directSpawn(m.pos.x + 10, m.pos.y + 5, "tech");
                 },
                 remove() {}
             },
@@ -5778,9 +5779,9 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "negative mass") && (build.isExperimentSelection || powerUps.research.count > 3)
+                    return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "negative mass") && (build.isExperimentSelection || powerUps.research.count > 3)
                 },
-                requires: "perfect diamagnetism or negative mass",
+                requires: "perfect diamagnetism, negative mass, pilot wave",
                 effect() {
                     tech.isFieldHarmReduction = true
                     for (let i = 0; i < 2; i++) {
@@ -6266,7 +6267,7 @@
             // },
             {
                 name: "retrocausality",
-                description: "<strong>time dilation</strong> uses <strong class='color-f'>energy</strong> to <strong>rewind</strong> your<br><strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong> up to <strong>10</strong> s",
+                description: "<strong>time dilation</strong> uses <strong class='color-f'>energy</strong> to <strong>rewind</strong> your<br><strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong> up to <strong>10 s</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6316,9 +6317,9 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "time dilation" && (build.isExperimentSelection || powerUps.research.count > 2)
+                    return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "time dilation") && (build.isExperimentSelection || powerUps.research.count > 2)
                 },
-                requires: "time dilation",
+                requires: "time dilation, pilot wave",
                 effect() {
                     tech.isFastTime = true
                     m.setMovement();
@@ -6357,7 +6358,7 @@
             },
             {
                 name: "no-cloning theorem",
-                description: `<strong>38%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>mob</strong> <strong>dies</strong>, lose <strong>1%</strong> <strong class='color-dup'>duplication</strong> chance`,
+                description: `<strong>40%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>mob</strong> <strong>dies</strong>, lose <strong>2%</strong> <strong class='color-dup'>duplication</strong> chance`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6368,9 +6369,9 @@
                 },
                 requires: "cloaking, wormhole or time dilation and below 100% duplication chance",
                 effect() {
-                    tech.cloakDuplication = 0.38
+                    tech.cloakDuplication = 0.4
                     powerUps.setDupChance(); //needed after adjusting duplication chance
-                    if (!build.isExperimentSelection) simulation.circleFlare(0.38);
+                    if (!build.isExperimentSelection) simulation.circleFlare(0.4);
                 },
                 remove() {
                     tech.cloakDuplication = 0
@@ -6607,20 +6608,20 @@
             },
             {
                 name: "virtual particles",
-                description: `use ${powerUps.orb.research(4)}to exploit your <strong>wormhole</strong> for a<br><strong>14%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
+                description: `use ${powerUps.orb.research(4)}to exploit your <strong>wormhole</strong> for a<br><strong>13%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "wormhole" && (build.isExperimentSelection || powerUps.research.count > 3) && tech.duplicationChance() < 1
+                    return m.fieldUpgrades[m.fieldMode].name === "wormhole" && (build.isExperimentSelection || powerUps.research.count > 3)
                 },
-                requires: "wormhole, below 100% duplication chance",
+                requires: "wormhole",
                 effect() {
-                    tech.wormDuplicate = 0.14
+                    tech.wormDuplicate = 0.13
                     powerUps.setDupChance(); //needed after adjusting duplication chance
-                    if (!build.isExperimentSelection) simulation.circleFlare(0.14);
+                    if (!build.isExperimentSelection) simulation.circleFlare(0.13);
                     for (let i = 0; i < 4; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                     }
@@ -8727,7 +8728,7 @@
         isGunSwitchField: null,
         isNeedleShieldPierce: null,
         isDuplicateBoss: null,
-        is100Duplicate: null,
+        is111Duplicate: null,
         isDynamoBotUpgrade: null,
         isBlockPowerUps: null,
         isBlockHarm: null,

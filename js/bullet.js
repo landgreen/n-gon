@@ -741,6 +741,7 @@ const b = {
             bullet[me].endCycle = simulation.cycle + Math.floor(input.down ? 120 : 80);
             bullet[me].restitution = 0.4;
             bullet[me].do = function() {
+                // console.log(this.mass * 0.0025)
                 this.force.y += this.mass * 0.0025; //extra gravity for harder arcs
             };
             Composite.add(engine.world, bullet[me]); //add bullet to world
@@ -794,6 +795,7 @@ const b = {
                 this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
             };
             speed = input.down ? 46 : 32
+
             Matter.Body.setVelocity(bullet[me], {
                 x: m.Vx / 2 + speed * Math.cos(angle),
                 y: m.Vy / 2 + speed * Math.sin(angle)
@@ -917,6 +919,8 @@ const b = {
                 }
             };
             speed = 35
+            // speed = input.down ? 43 : 32
+
             bullet[me].endCycle = simulation.cycle + 70;
             if (input.down) {
                 speed += 9
@@ -950,6 +954,8 @@ const b = {
                 Matter.Body.scale(bullet[me], SCALE, SCALE);
 
                 speed = input.down ? 25 : 15
+                // speed = input.down ? 43 : 32
+
                 Matter.Body.setVelocity(bullet[me], {
                     x: m.Vx / 2 + speed * Math.cos(angle),
                     y: m.Vy / 2 + speed * Math.sin(angle)
@@ -1092,9 +1098,36 @@ const b = {
                 }
             }
         }
+        let gunIndex = null
+        for (let i = 0, len = b.guns.length; i < len; i++) {
+            if (b.guns[i].name === "grenades") {
+                gunIndex = i
+            }
+        }
+
+
         if (tech.isNeutronBomb) {
             b.grenade = grenadeNeutron
+            if (tech.isRPG) {
+                b.guns[gunIndex].do = function() {}
+            } else {
+                if (gunIndex) b.guns[gunIndex].do = function() {
+                    const cycles = 80
+                    const speed = input.down ? 35 : 20 //input.down ? 43 : 32
+                    const g = input.down ? 0.137 : 0.135
+                    const v = { x: m.Vx / 2 + speed * Math.cos(m.angle), y: m.Vy / 2 + speed * Math.sin(m.angle) }
+                    ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
+                    ctx.lineWidth = 2
+                    ctx.beginPath()
+                    for (let i = 1, len = 19; i < len + 1; i++) {
+                        const time = cycles * i / len
+                        ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + g * time * time)
+                    }
+                    ctx.stroke()
+                }
+            }
         } else if (tech.isRPG) {
+            b.guns[gunIndex].do = function() {}
             if (tech.isVacuumBomb) {
                 b.grenade = grenadeRPGVacuum
             } else {
@@ -1102,8 +1135,34 @@ const b = {
             }
         } else if (tech.isVacuumBomb) {
             b.grenade = grenadeVacuum
+            if (gunIndex) b.guns[gunIndex].do = function() {
+                const cycles = Math.floor(input.down ? 50 : 30) //30
+                const speed = input.down ? 44 : 35
+                const v = { x: m.Vx / 2 + speed * Math.cos(m.angle), y: m.Vy / 2 + speed * Math.sin(m.angle) }
+                ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
+                ctx.lineWidth = 2
+                ctx.beginPath()
+                for (let i = 1.6, len = 19; i < len + 1; i++) {
+                    const time = cycles * i / len
+                    ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
+                }
+                ctx.stroke()
+            }
         } else {
             b.grenade = grenadeDefault
+            if (gunIndex) b.guns[gunIndex].do = function() {
+                const cycles = Math.floor(input.down ? 120 : 80) //30
+                const speed = input.down ? 43 : 32
+                const v = { x: m.Vx / 2 + speed * Math.cos(m.angle), y: m.Vy / 2 + speed * Math.sin(m.angle) }
+                ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
+                ctx.lineWidth = 2
+                ctx.beginPath()
+                for (let i = 0.5, len = 19; i < len + 1; i++) {
+                    const time = cycles * i / len
+                    ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
+                }
+                ctx.stroke()
+            }
         }
     },
     harpoon(where, target, angle = m.angle, harpoonLength = 1, isReturn = false, totalCycles = 15) {
@@ -2437,7 +2496,14 @@ const b = {
                 if (tech.isIncendiary && simulation.cycle + this.deathCycles < this.endCycle) {
                     const max = Math.max(Math.min(this.endCycle - simulation.cycle - this.deathCycles, 1500), 0)
                     b.explosion(this.position, max * 0.1 + this.isImproved * 110 + 60 * Math.random()); //makes bullet do explosive damage at end
-                    this.endCycle -= max
+                    if (tech.isForeverDrones) {
+                        this.endCycle = 0
+                        b.drone({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
+                        bullet[bullet.length - 1].endCycle = Infinity
+                    } else {
+
+                        this.endCycle -= max
+                    }
                 } else {
                     //move away from target after hitting
                     const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20)

@@ -1,10 +1,16 @@
 ******************************************************** NEXT PATCH **************************************************
 
-number of undefined tech needed to get lore is now lower at higher difficulty modes
+grenades display their trajectory, to help you aim
+  I'm might get rid of it, but for now we'll try it out
 
-bug fixes
+several duplication tech give slightly lower duplication chance
+strange attractor now properly includes all your tech in duplication chance (it wasn't updated for recent duplication tech)
 
 ******************************************************** TODO ********************************************************
+
+give all duplicated power ups a half life that scales with the duplication chance
+  metastability reduces the half life
+  how to communicate the half-life?
 
 tech: after bullets hit a mob, the mob takes 1% more damage
     this.damageReduction *= 1.01

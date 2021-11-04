@@ -223,7 +223,7 @@ const build = {
       <strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}%
       <br><strong class='color-harm'>harm</strong> reduction: ${harm.toFixed(harm > 90 ? 2 : 0)}%
       <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
-      <br><strong class='color-dup'>duplication</strong> chance: ${(Math.min(1,tech.duplicationChance())*100).toFixed(0)}%
+      <br><strong class='color-dup'>duplication</strong> chance: ${(tech.duplicationChance()*100).toFixed(0)}%
       ${botText}
       <br>
       <br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  

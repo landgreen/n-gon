@@ -1167,7 +1167,7 @@ const mobs = {
                         }
                     }
                     if (tech.cloakDuplication && !this.isBoss) {
-                        tech.cloakDuplication -= 0.01
+                        tech.cloakDuplication -= 0.02
                         powerUps.setDupChance(); //needed after adjusting duplication chance
                     }
                 } else if (tech.isShieldAmmo && this.shield && !this.isExtraShield) {

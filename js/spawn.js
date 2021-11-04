@@ -2379,10 +2379,10 @@ const spawn = {
             this.checkStatus();
         };
     },
-    pulsarBoss(x, y, radius = 90) {
+    pulsarBoss(x, y, radius = 90, isNonCollide = false) {
         mobs.spawn(x, y, 3, radius, "#a0f");
         let me = mob[mob.length - 1];
-
+        if (isNonCollide) me.collisionFilter.mask = cat.bullet | cat.player
         setTimeout(() => { //fix mob in place, but allow rotation
             me.constraint = Constraint.create({
                 pointA: {
