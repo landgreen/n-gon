@@ -556,19 +556,18 @@
                         this.refundAmount = 0
                     }
                 }
-
             },
             {
                 name: "gun turret",
-                description: "reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong> when <strong>crouching</strong>",
+                description: "reduce <strong class='color-harm'>harm</strong> by <strong>60%</strong> when <strong>crouching</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.isCrouchAmmo && !tech.isEnergyHealth
+                    return (tech.isCrouchAmmo && !tech.isEnergyHealth) || tech.isCrouchRegen
                 },
-                requires: "desublimated ammunition, not mass-energy",
+                requires: "relative permittivity, desublimated ammunition, not mass-energy",
                 effect() {
                     tech.isTurret = true
                 },
@@ -2332,7 +2331,7 @@
             {
                 name: "1st ionization energy",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ionization_energy' class="link">1st ionization energy</a>`,
-                description: `each ${powerUps.orb.heal()} you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>6</strong>`,
+                description: `each ${powerUps.orb.heal()} you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>7</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2358,8 +2357,8 @@
                 }
             },
             {
-                name: "inductive coupling",
-                description: "each unused <strong>power up</strong> at the end of a <strong>level</strong><br>adds 3 <strong>maximum</strong> <strong class='color-f'>energy</strong>", // <em>(up to 51 health per level)</em>",
+                name: "permittivity",
+                description: "each unused <strong>power up</strong> at the end of a <strong>level</strong><br>adds 4 <strong>maximum</strong> <strong class='color-f'>energy</strong>", // <em>(up to 51 health per level)</em>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2385,7 +2384,7 @@
                 allowed() {
                     return tech.isExtraMaxEnergy
                 },
-                requires: "inductive coupling",
+                requires: "permittivity",
                 effect() {
                     tech.isEndLevelPowerUp = true;
                 },
@@ -2533,6 +2532,29 @@
                         tech.removeJunkTechFromPool(this.refundAmount)
                         this.refundAmount = 0
                     }
+                }
+            },
+            {
+                name: "inductive coupling",
+                description: "passive <strong class='color-f'>energy</strong> regen is increased by <strong>500%</strong><br>but you only regen when <strong>crouched</strong>",
+                maxCount: 1,
+                count: 0,
+                frequency: 1,
+                frequencyDefault: 1,
+                allowed() {
+                    return tech.energyRegen !== 0
+                },
+                requires: "not ground state",
+                effect() {
+                    tech.isCrouchRegen = true; //only used to check for requirements
+                    m.regenEnergy = function() {
+                        if (m.immuneCycle < m.cycle && m.crouch) m.energy += 5 * m.fieldRegen; //m.fieldRegen = 0.001
+                        if (m.energy < 0) m.energy = 0
+                    }
+                },
+                remove() {
+                    tech.isCrouchRegen = false;
+                    m.regenEnergy = m.regenEnergyDefault
                 }
             },
             {
@@ -4890,7 +4912,7 @@
                 allowed() {
                     return !tech.isExtraMaxEnergy && (tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isMissileField || tech.isIceField)))
                 },
-                requires: "drones, not inductive coupling",
+                requires: "drones, not permittivity",
                 effect() {
                     tech.isDroneGrab = true
                 },
@@ -5655,7 +5677,7 @@
             },
             {
                 name: "expansion",
-                description: "using <strong>standing wave</strong> field uses <strong class='color-f'>energy</strong><br>to temporarily <strong>expand</strong> its <strong>radius</strong>",
+                description: "using <strong>standing wave</strong> field temporarily<br><strong>expands</strong> its <strong>radius</strong>",
                 // description: "use <strong class='color-f'>energy</strong> to <strong>expand</strong> <strong>standing wave</strong><br>the field slowly <strong>contracts</strong> when not used",
                 isFieldTech: true,
                 maxCount: 1,
@@ -6956,10 +6978,10 @@
             // },
             {
                 name: "planetesimals",
-                description: `spawn a <strong class='color-m'>tech</strong> and play <strong>planetesimals</strong>,<br>an annoying asteroids game with Newtonian physics`,
+                description: `play <strong>planetesimals</strong><br><em>(an annoying asteroids game with Newtonian physics)</em><br>clearing a <strong>level</strong> in <strong>planetesimals</strong> spawns a <strong class='color-m'>tech</strong> in <strong>n-gon</strong><br>but, if you <strong style="color:red;">die</strong> in <strong>planetesimals</strong> you <strong style="color:red;">die</strong> in <strong>n-gon</strong>`,
                 maxCount: 1,
                 count: 0,
-                frequency: 0,
+                frequency: 100,
                 isNonRefundable: true,
                 isExperimentHide: true,
                 isJunk: true,
@@ -6969,7 +6991,24 @@
                 requires: "",
                 effect() {
                     window.open('../../planetesimals/index.html', '_blank')
-                    powerUps.spawn(m.pos.x, m.pos.y, "tech");
+                    // powerUps.spawn(m.pos.x, m.pos.y, "tech");
+
+                    // for communicating to other tabs, like planetesimals
+                    // Connection to a broadcast channel
+                    const bc = new BroadcastChannel('planetesimals');
+                    bc.activated = false
+
+                    bc.onmessage = function(ev) {
+                        if (ev.data === 'tech') powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
+                        if (ev.data === 'death') {
+                            m.death()
+                            bc.close(); //end session
+                        }
+                        if (ev.data === 'ready' && !bc.activated) {
+                            bc.activated = true //prevents n-gon from activating multiple copies of planetesimals
+                            bc.postMessage("activate");
+                        }
+                    }
                 },
                 remove() {}
             },
@@ -7096,9 +7135,7 @@
                             ctx.beginPath();
                             const vertices = mob[i].vertices;
                             ctx.moveTo(vertices[0].x, vertices[0].y);
-                            for (let j = 1, len = vertices.length; j < len; ++j) {
-                                ctx.quadraticCurveTo(mob[i].position.x, mob[i].position.y, vertices[j].x, vertices[j].y);
-                            }
+                            for (let j = 1, len = vertices.length; j < len; ++j) ctx.quadraticCurveTo(mob[i].position.x, mob[i].position.y, vertices[j].x, vertices[j].y);
                             ctx.quadraticCurveTo(mob[i].position.x, mob[i].position.y, vertices[0].x, vertices[0].y);
                             ctx.fillStyle = mob[i].fill;
                             ctx.strokeStyle = mob[i].stroke;
@@ -8824,5 +8861,6 @@
         baseFx: null,
         isNeutronium: null,
         isFreeWormHole: null,
-        isRewindField: null
+        isRewindField: null,
+        isCrouchRegen: null
     }

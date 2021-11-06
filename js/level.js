@@ -15,16 +15,21 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("time dilation")
-            // b.giveGuns("grenades")
-            // tech.giveTech("neutron bomb")
-            // tech.giveTech("vacuum bomb")
+            // m.setField("metamaterial cloaking")
+            b.giveGuns("laser")
+            // tech.giveTech("spherical harmonics")
+            tech.giveTech("relative permittivity")
             // tech.giveTech("causality bombs")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("antiscience")
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.isCancelDuplication = true
+
+
+
+
+
 
             level.intro(); //starting level
             // level.testing(); //not in rotation, used for testing
@@ -94,7 +99,7 @@ const level = {
             }
         }
         if (tech.isExtraMaxEnergy) {
-            tech.healMaxEnergyBonus += 0.03 * powerUps.totalPowerUps //Math.min(0.02 * powerUps.totalPowerUps, 0.51)
+            tech.healMaxEnergyBonus += 0.04 * powerUps.totalPowerUps //Math.min(0.02 * powerUps.totalPowerUps, 0.51)
             m.setMaxEnergy();
         }
         if (tech.isGunCycle) {

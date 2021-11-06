@@ -1,12 +1,27 @@
 ******************************************************** NEXT PATCH **************************************************
 
-grenades display their trajectory, to help you aim
-  I'm might get rid of it, but for now we'll try it out
+tech: inductive coupling - regen is increased by 500%, but you only regen when crouched
 
-several duplication tech give slightly lower duplication chance
-strange attractor now properly includes all your tech in duplication chance (it wasn't updated for recent duplication tech)
+tech gun turret gives 55% -> 60% harm reduction
+  also I fixed a bug where it was giving 45% not 55%
+
+old tech inductive coupling is renamed: permittivity
+permittivity gives 3 -> 4 max energy per unused power up
+1st ionization energy gives 6 -> 7 max energy per heal
+
+tech expansion - no longer costs energy to expand standing wave field
+
+JUNK tech planetesimals now can spawn tech in n-gon
+  or kill the player in n-gon
 
 ******************************************************** TODO ********************************************************
+
+tech: open a new tab for n-gon, spawn things in the original game based on events in new game
+  if you die in new die in original?
+  new is n-gon classic?
+  make a JUNK tech?
+if you die in original open a tab with a new n-gon that starts on a random level with a random load out.  if you clear the level you come back to life in the original?
+
 
 give all duplicated power ups a half life that scales with the duplication chance
   metastability reduces the half life

@@ -443,7 +443,7 @@ const powerUps = {
             }
 
             if (tech.healGiveMaxEnergy) {
-                tech.healMaxEnergyBonus += 0.06
+                tech.healMaxEnergyBonus += 0.07
                 m.setMaxEnergy();
             }
         },

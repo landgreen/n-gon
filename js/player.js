@@ -514,7 +514,7 @@ const m = {
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.energyRegen === 0) dmg *= 0.34
-        if (tech.isTurret && m.crouch) dmg *= 0.55;
+        if (tech.isTurret && m.crouch) dmg *= 0.4;
         if (tech.isEntanglement && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
         }
@@ -1002,8 +1002,7 @@ const m = {
     fieldMeterColor: "#0cf",
     drawFieldMeter(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {
         if (m.energy < m.maxEnergy) {
-            if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
-            if (m.energy < 0) m.energy = 0
+            m.regenEnergy();
             ctx.fillStyle = bgColor;
             const xOff = m.pos.x - m.radius * m.maxEnergy
             const yOff = m.pos.y - 50
@@ -1018,9 +1017,30 @@ const m = {
             ctx.fillStyle = m.fieldMeterColor;
             ctx.fillRect(xOff, yOff, range * m.energy, 10);
         }
-        // else {
-        //   m.energy = m.maxEnergy
-        // }
+    },
+    drawFieldMeterCloaking: function() {
+        if (m.energy < m.maxEnergy) { // replaces m.drawFieldMeter() with custom code
+            m.regenEnergy();
+            const xOff = m.pos.x - m.radius * m.maxEnergy
+            const yOff = m.pos.y - 50
+            ctx.fillStyle = "rgba(0, 0, 0, 0.3)" //
+            ctx.fillRect(xOff, yOff, 60 * m.maxEnergy, 10);
+            ctx.fillStyle = "#fff" //m.cycle > m.lastKillCycle + 300 ? "#000" : "#fff" //"#fff";
+            ctx.fillRect(xOff, yOff, 60 * m.energy, 10);
+            ctx.beginPath()
+            ctx.rect(xOff, yOff, 60 * m.maxEnergy, 10);
+            ctx.strokeStyle = m.fieldMeterColor;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+    },
+    regenEnergy: function() { //used in drawFieldMeter  // rewritten by some tech
+        if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
+        if (m.energy < 0) m.energy = 0
+    },
+    regenEnergyDefault: function() {
+        if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
+        if (m.energy < 0) m.energy = 0
     },
     lookingAt(who) {
         //calculate a vector from body to player and make it length 1
@@ -1301,7 +1321,7 @@ const m = {
             if (m.energy < 0) m.energy = 0;
             m.fieldCDcycle = m.cycle + m.fieldBlockCD;
             if (tech.blockingIce) {
-                for (let i = 0; i < fieldBlockCost * 50 * tech.blockingIce; i++) b.iceIX(3, 2 * Math.PI * Math.random(), m.pos)
+                for (let i = 0; i < fieldBlockCost * 60 * tech.blockingIce; i++) b.iceIX(3, 2 * Math.PI * Math.random(), m.pos)
             }
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
@@ -1536,12 +1556,12 @@ const m = {
                 }
                 m.harmonicRadius = 1 //for smoothing function when player holds mouse (for harmonicAtomic)
                 m.harmonicAtomic = () => { //several ellipses spinning about different axises
-                    const rotation = simulation.cycle * 0.002
-                    const phase = simulation.cycle * 0.03
+                    const rotation = simulation.cycle * 0.0031
+                    const phase = simulation.cycle * 0.023
                     const radius = m.fieldRange * m.harmonicRadius
                     ctx.lineWidth = 1;
-                    ctx.strokeStyle = "rgba(110,170,200,0.9)"
-                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.7, m.energy * (0.13 + 0.15 * Math.random()) * (3 / tech.harmonics)) + ")";
+                    ctx.strokeStyle = "rgba(110,170,200,0.8)"
+                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.7, m.energy * (0.13 + 0.1 * Math.random()) * (3 / tech.harmonics)) + ")";
                     // ctx.fillStyle = "rgba(110,170,200," + Math.min(0.7, m.energy * (0.22 - 0.01 * tech.harmonics) * (0.5 + 0.5 * Math.random())) + ")";
                     for (let i = 0; i < tech.harmonics; i++) {
                         ctx.beginPath();
@@ -1584,9 +1604,9 @@ const m = {
                     if (m.energy > 0.1 && m.fieldCDcycle < m.cycle) {
                         if (tech.isStandingWaveExpand) {
                             if (input.field) {
-                                const oldHarmonicRadius = m.harmonicRadius
+                                // const oldHarmonicRadius = m.harmonicRadius
                                 m.harmonicRadius = 0.985 * m.harmonicRadius + 0.015 * 2.5
-                                m.energy -= 0.1 * (m.harmonicRadius - oldHarmonicRadius)
+                                // m.energy -= 0.1 * (m.harmonicRadius - oldHarmonicRadius)
                             } else {
                                 m.harmonicRadius = 0.995 * m.harmonicRadius + 0.005
                             }
@@ -2494,21 +2514,7 @@ const m = {
                         }
                     }
 
-                    if (m.energy < m.maxEnergy) { // replaces m.drawFieldMeter() with custom code
-                        if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
-                        if (m.energy < 0) m.energy = 0
-                        const xOff = m.pos.x - m.radius * m.maxEnergy
-                        const yOff = m.pos.y - 50
-                        ctx.fillStyle = "rgba(0, 0, 0, 0.3)" //
-                        ctx.fillRect(xOff, yOff, 60 * m.maxEnergy, 10);
-                        ctx.fillStyle = "#fff" //m.cycle > m.lastKillCycle + 300 ? "#000" : "#fff" //"#fff";
-                        ctx.fillRect(xOff, yOff, 60 * m.energy, 10);
-                        ctx.beginPath()
-                        ctx.rect(xOff, yOff, 60 * m.maxEnergy, 10);
-                        ctx.strokeStyle = m.fieldMeterColor;
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-                    }
+                    this.drawFieldMeterCloaking()
                     //show sneak attack status 
 
                     if (m.cycle > m.lastKillCycle + 240) {
