@@ -1157,6 +1157,19 @@ const m = {
                         ctx.lineTo(m.holdingTarget.vertices[i + 1].x, m.holdingTarget.vertices[i + 1].y);
                         ctx.fill();
                     }
+                    //trajectory path prediction
+                    const cycles = 30
+                    const charge = Math.min(m.throwCharge / 5, 1)
+                    const speed = 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
+                    const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) } //m.Vy / 2 + removed to make the path less jerky
+                    ctx.beginPath()
+                    for (let i = 1, len = 10; i < len + 1; i++) {
+                        const time = cycles * i / len
+                        ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
+                    }
+                    ctx.strokeStyle = "rgba(68, 68, 68, 0.15)" //color.map
+                    ctx.lineWidth = 2
+                    ctx.stroke()
                 } else {
                     m.drop()
                 }
@@ -1203,21 +1216,16 @@ const m = {
                     const charge = Math.min(m.throwCharge / 5, 1)
                     //***** scale throw speed with the first number, 80 *****
                     let speed = 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
-
                     if (Matter.Query.collides(m.holdingTarget, map).length !== 0) {
                         speed *= 0.7 //drop speed by 30% if touching map
                         if (Matter.Query.ray(map, m.holdingTarget.position, m.pos).length !== 0) speed = 0 //drop to zero if the center of the block can't see the center of the player through the map
-                        //|| Matter.Query.ray(body, m.holdingTarget.position, m.pos).length > 1
                     }
-
                     m.throwCharge = 0;
                     m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
                     Matter.Body.setVelocity(m.holdingTarget, {
                         x: player.velocity.x * 0.5 + Math.cos(m.angle) * speed,
                         y: player.velocity.y * 0.5 + Math.sin(m.angle) * speed
                     });
-                    //player recoil //stronger in x-dir to prevent jump hacking
-
                     Matter.Body.setVelocity(player, {
                         x: player.velocity.x - Math.cos(m.angle) * speed / (m.crouch ? 30 : 10) * Math.sqrt(m.holdingTarget.mass),
                         y: player.velocity.y - Math.sin(m.angle) * speed / 30 * Math.sqrt(m.holdingTarget.mass)
@@ -1958,7 +1966,7 @@ const m = {
                 // m.fieldMeterColor = "#0c5"
                 // m.eyeFillColor = m.fieldMeterColor
                 m.hold = function() {
-                    if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 150 && (m.cycle % 2)) {
+                    if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 200 && (m.cycle % 2)) {
                         if (tech.isSporeField) {
                             if (tech.isSporeWorm) {
                                 if (m.energy > 0.16) {

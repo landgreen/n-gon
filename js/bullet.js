@@ -1112,18 +1112,20 @@ const b = {
                 b.guns[gunIndex].do = function() {}
             } else {
                 if (gunIndex) b.guns[gunIndex].do = function() {
-                    const cycles = 80
-                    const speed = input.down ? 35 : 20 //input.down ? 43 : 32
-                    const g = input.down ? 0.137 : 0.135
-                    const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
-                    ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
-                    ctx.lineWidth = 2
-                    ctx.beginPath()
-                    for (let i = 1, len = 19; i < len + 1; i++) {
-                        const time = cycles * i / len
-                        ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + g * time * time)
+                    if (!input.field) {
+                        const cycles = 80
+                        const speed = input.down ? 35 : 20 //input.down ? 43 : 32
+                        const g = input.down ? 0.137 : 0.135
+                        const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
+                        ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
+                        ctx.lineWidth = 2
+                        ctx.beginPath()
+                        for (let i = 1, len = 19; i < len + 1; i++) {
+                            const time = cycles * i / len
+                            ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + g * time * time)
+                        }
+                        ctx.stroke()
                     }
-                    ctx.stroke()
                 }
             }
         } else if (tech.isRPG) {
@@ -1136,32 +1138,36 @@ const b = {
         } else if (tech.isVacuumBomb) {
             b.grenade = grenadeVacuum
             if (gunIndex) b.guns[gunIndex].do = function() {
-                const cycles = Math.floor(input.down ? 50 : 30) //30
-                const speed = input.down ? 44 : 35
-                const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
-                ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
-                ctx.lineWidth = 2
-                ctx.beginPath()
-                for (let i = 1.6, len = 19; i < len + 1; i++) {
-                    const time = cycles * i / len
-                    ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
+                if (!input.field) {
+                    const cycles = Math.floor(input.down ? 50 : 30) //30
+                    const speed = input.down ? 44 : 35
+                    const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
+                    ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
+                    ctx.lineWidth = 2
+                    ctx.beginPath()
+                    for (let i = 1.6, len = 19; i < len + 1; i++) {
+                        const time = cycles * i / len
+                        ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
+                    }
+                    ctx.stroke()
                 }
-                ctx.stroke()
             }
         } else {
             b.grenade = grenadeDefault
             if (gunIndex) b.guns[gunIndex].do = function() {
-                const cycles = Math.floor(input.down ? 120 : 80) //30
-                const speed = input.down ? 43 : 32
-                const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) } //m.Vy / 2 + removed to make the path less jerky
-                ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
-                ctx.lineWidth = 2
-                ctx.beginPath()
-                for (let i = 0.5, len = 19; i < len + 1; i++) {
-                    const time = cycles * i / len
-                    ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
+                if (!input.field) {
+                    const cycles = Math.floor(input.down ? 120 : 80) //30
+                    const speed = input.down ? 43 : 32
+                    const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) } //m.Vy / 2 + removed to make the path less jerky
+                    ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
+                    ctx.lineWidth = 2
+                    ctx.beginPath()
+                    for (let i = 0.5, len = 19; i < len + 1; i++) {
+                        const time = cycles * i / len
+                        ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
+                    }
+                    ctx.stroke()
                 }
-                ctx.stroke()
             }
         }
     },
@@ -2481,7 +2487,7 @@ const b = {
             //total 0.24 + 0.3 average
             dmg: 0.34 + 0.12 * tech.isDroneTeleport + 0.15 * tech.isDroneFastLook, //damage done in addition to the damage from momentum
             lookFrequency: (tech.isDroneFastLook ? 20 : 70) + Math.floor(17 * Math.random()),
-            endCycle: simulation.cycle + Math.floor((950 + 420 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction) + 140 + RADIUS * 5,
+            endCycle: simulation.cycle + Math.floor((950 + 400 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction) + 5 * RADIUS + Math.max(0, 150 - b.length),
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -2686,7 +2692,7 @@ const b = {
             restitution: 0.4 + 0.199 * Math.random(),
             dmg: 0, //0.24   damage done in addition to the damage from momentum   and radiation
             lookFrequency: 120 + Math.floor(23 * Math.random()),
-            endCycle: simulation.cycle + Math.floor((900 + 120 * Math.random()) * tech.isBulletsLastLonger / tech.droneRadioDamage) + 140 + RADIUS * 5,
+            endCycle: simulation.cycle + Math.floor((900 + 110 * Math.random()) * tech.isBulletsLastLonger / tech.droneRadioDamage) + 5 * RADIUS + Math.max(0, 150 - 2 * b.length),
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -2700,7 +2706,7 @@ const b = {
             isImproved: false,
             radioRadius: 0,
             maxRadioRadius: 300 + Math.floor(100 * Math.random()),
-            beforeDmg(who) {
+            beforeDmg() {
                 // const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20) //move away from target after hitting
                 // Matter.Body.setVelocity(this, {
                 //     x: unit.x,
@@ -3361,11 +3367,11 @@ const b = {
                         if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250 && m.immuneCycle < m.cycle) { //give energy
                             Matter.Body.setAngularVelocity(this, this.spin)
                             if (this.isUpgraded) {
-                                m.energy += 0.08
+                                m.energy += 0.1
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: this.position.x,
                                     y: this.position.y,
-                                    radius: 8,
+                                    radius: 10,
                                     color: m.fieldMeterColor,
                                     time: simulation.drawTime
                                 });
@@ -3464,10 +3470,16 @@ const b = {
                                 Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
                                 !mob[i].isShielded
                             ) {
-                                const SPEED = 35
                                 const unit = Vector.normalise(Vector.sub(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60)), this.position))
-                                b.nail(this.position, Vector.mult(unit, SPEED))
-                                this.force = Vector.mult(unit, -0.01 * this.mass)
+                                if (this.isUpgraded) {
+                                    const SPEED = 50
+                                    b.nail(this.position, Vector.mult(unit, SPEED))
+                                    this.force = Vector.mult(unit, -0.018 * this.mass)
+                                } else {
+                                    const SPEED = 35
+                                    b.nail(this.position, Vector.mult(unit, SPEED))
+                                    this.force = Vector.mult(unit, -0.01 * this.mass)
+                                }
                                 break;
                             }
                         }
@@ -3565,7 +3577,7 @@ const b = {
             restitution: 0.6 * (1 + 0.5 * Math.random()),
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
-            lookFrequency: 60 + Math.floor(17 * Math.random()) - 35 * tech.isFoamBotUpgrade,
+            lookFrequency: 60 + Math.floor(17 * Math.random()) - 40 * tech.isFoamBotUpgrade,
             cd: 0,
             delay: 100,
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
@@ -3593,7 +3605,7 @@ const b = {
                                 this.cd = simulation.cycle + this.delay;
                                 target = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist2) / 60))
                                 const radius = 6 + 7 * Math.random()
-                                const SPEED = 29 - radius * 0.5; //(input.down ? 32 : 20) - radius * 0.7;
+                                const SPEED = 29 - radius * 0.4; //(input.down ? 32 : 20) - radius * 0.7;
                                 const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
                                 b.foam(this.position, velocity, radius + 7 * this.isUpgraded)
                                 break;
@@ -3627,10 +3639,10 @@ const b = {
             dmg: 0, //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
             lookFrequency: 40 + Math.floor(7 * Math.random()) - 10 * tech.isLaserBotUpgrade,
-            range: (700 + 400 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
+            range: (700 + 450 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
             drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
-            drain: (0.5 - 0.42 * tech.isLaserBotUpgrade) * tech.laserFieldDrain * tech.isLaserDiode,
-            laserDamage: 0.85 + 0.65 * tech.isLaserBotUpgrade,
+            drain: (0.5 - 0.43 * tech.isLaserBotUpgrade) * tech.laserFieldDrain * tech.isLaserDiode,
+            laserDamage: 0.85 + 0.7 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -3739,7 +3751,7 @@ const b = {
             lookFrequency: 43 + Math.floor(7 * Math.random()) - 10 * tech.isBoomBotUpgrade,
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
             attackAcceleration: 0.012 + 0.005 * tech.isBoomBotUpgrade,
-            range: 500 * (1 + 0.1 * Math.random()) + 300 * tech.isBoomBotUpgrade,
+            range: 500 * (1 + 0.1 * Math.random()) + 320 * tech.isBoomBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -3750,7 +3762,7 @@ const b = {
             explode: 0,
             beforeDmg() {
                 if (this.lockedOn) {
-                    const explosionRadius = Math.min(136 + 180 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, m.pos)) - 30)
+                    const explosionRadius = Math.min(136 + 200 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, m.pos)) - 30)
                     if (explosionRadius > 60) {
                         this.explode = explosionRadius
                         // 
@@ -4025,7 +4037,7 @@ const b = {
                     }
                 }
             },
-            range: 190 + 100 * tech.isOrbitBotUpgrade, //range is set in bot upgrade too! //150 + (80 + 100 * tech.isOrbitBotUpgrade) * Math.random(), // + 5 * tech.orbitBotCount,
+            range: 190 + 120 * tech.isOrbitBotUpgrade, //range is set in bot upgrade too!
             orbitalSpeed: 0,
             phase: 2 * Math.PI * Math.random(),
             do() {
@@ -4038,7 +4050,7 @@ const b = {
                     for (let i = 0; i < q.length; i++) {
                         if (!q[i].isShielded) {
                             mobs.statusStun(q[i], 180)
-                            const dmg = 0.4 * b.dmgScale * (this.isUpgraded ? 3.5 : 1) * (tech.isCrit ? 4 : 1)
+                            const dmg = 0.4 * b.dmgScale * (this.isUpgraded ? 4 : 1) * (tech.isCrit ? 4 : 1)
                             q[i].damage(dmg);
                             if (q[i].alive) q[i].foundPlayer();
                             simulation.drawList.push({ //add dmg to draw queue
@@ -5091,7 +5103,7 @@ const b = {
             ammo: 0,
             ammoPack: 5,
             have: false,
-            do() {},
+            do() {}, //do is set in b.setGrenadeMode()
             fire() {
                 const countReduction = Math.pow(0.93, tech.missileCount)
                 m.fireCDcycle = m.cycle + Math.floor((input.down ? 40 : 30) * b.fireCDscale / countReduction); // cool down
@@ -5109,7 +5121,21 @@ const b = {
             ammo: 0,
             ammoPack: 1.25,
             have: false,
-            do() {},
+            do() {
+                if (!input.field && input.down && !tech.isLaserMine) {
+                    const cycles = 60 //30
+                    const speed = 40
+                    const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) } //m.Vy / 2 + removed to make the path less jerky
+                    ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
+                    ctx.lineWidth = 2
+                    ctx.beginPath()
+                    for (let i = 1.5, len = 19; i < len + 1; i++) {
+                        const time = cycles * i / len
+                        ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
+                    }
+                    ctx.stroke()
+                }
+            },
             fire() {
                 if (input.down) {
                     if (tech.isLaserMine) {
@@ -5145,7 +5171,7 @@ const b = {
                 bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 20, 4.5, b.fireAttributes(dir, false));
                 b.fireProps(input.down ? 45 : 25, input.down ? 30 : 16, dir, me); //cd , speed
                 Matter.Body.setDensity(bullet[me], 0.000001);
-                bullet[me].endCycle = simulation.cycle + 600;
+                bullet[me].endCycle = simulation.cycle + 480 + Math.max(0, 120 - 2 * b.length);
                 bullet[me].frictionAir = 0;
                 bullet[me].friction = 0.5;
                 bullet[me].radius = 4.5;
@@ -5899,7 +5925,7 @@ const b = {
                                     ctx.moveTo(history.position.x, history.position.y - off);
                                     ctx.ellipse(history.position.x, history.position.y - off, mag, mag * 0.65, history.angle, 0, 2 * Math.PI)
                                 }
-                                ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
+                                ctx.fillStyle = tech.isLaserDiode === 1 ? `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})` : `rgba(0,0,255,${0.09 * Math.sqrt(this.charge)})`;
                                 ctx.fill();
                                 //fire
                                 if (!input.fire) {
@@ -5921,7 +5947,8 @@ const b = {
                                 //draw charge level
                                 ctx.beginPath();
                                 ctx.arc(m.pos.x, m.pos.y, 4.2 * Math.sqrt(this.charge), 0, 2 * Math.PI);
-                                ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
+                                // ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
+                                ctx.fillStyle = tech.isLaserDiode === 1 ? `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})` : `rgba(0,0,255,${0.09 * Math.sqrt(this.charge)})`;
                                 ctx.fill();
                                 //fire  
                                 if (!input.fire) {

@@ -1,37 +1,31 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: inductive coupling - regen is increased by 500%, but you only regen when crouched
+block throwing and mines when crouched now have trajectory prediction, like grenades
 
-tech gun turret gives 55% -> 60% harm reduction
-  also I fixed a bug where it was giving 45% not 55%
+all bot upgrades are about 20% better
+Ψ(t) collapse gives 16->21 research
+spores and drones have up to 20% shorter life span when the number of active bullets is high
 
-old tech inductive coupling is renamed: permittivity
-permittivity gives 3 -> 4 max energy per unused power up
-1st ionization energy gives 6 -> 7 max energy per heal
-
-tech expansion - no longer costs energy to expand standing wave field
-
-JUNK tech planetesimals now can spawn tech in n-gon
-  or kill the player in n-gon
+1st ionization energy gives 7 -> 8 max energy per heal
+permittivity renamed weak interaction
+weak interaction gives 4 -> 5 max energy per unused power up
+transceiver renamed electroweak interaction
+fixed about 70 different requirement text situations
 
 ******************************************************** TODO ********************************************************
+
+need a mine tech that mines there be fewer mines
+  disables booby trap
+  makes mines do more damage
+
+tech: after bullets hit a mob, the mob takes 1% more damage
+    this.damageReduction *= 1.01
 
 tech: open a new tab for n-gon, spawn things in the original game based on events in new game
   if you die in new die in original?
   new is n-gon classic?
   make a JUNK tech?
 if you die in original open a tab with a new n-gon that starts on a random level with a random load out.  if you clear the level you come back to life in the original?
-
-
-give all duplicated power ups a half life that scales with the duplication chance
-  metastability reduces the half life
-  how to communicate the half-life?
-
-tech: after bullets hit a mob, the mob takes 1% more damage
-    this.damageReduction *= 1.01
-
-make CPT gun a tech for time dilation field
-  tech: CPT - time dilation field rewinds your health velocity and position
 
 bug - death while paused crashes game?
 

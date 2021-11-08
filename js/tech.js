@@ -535,26 +535,30 @@
             {
                 name: "desublimated ammunition",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Deposition_(phase_transition)' class="link">desublimated ammunition</a>`,
-                description: "every other <strong>crouched</strong> shot uses no <strong class='color-ammo'>ammo</strong><br><strong>+6%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: `use ${powerUps.orb.research(1)} to produce bullets from air molecules<br>every other <strong>crouched</strong> shot uses no <strong class='color-ammo'>ammo</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return true
+                    return build.isExperimentSelection || powerUps.research.count > 0
                 },
                 requires: "",
                 effect() {
                     tech.isCrouchAmmo = true
-                    this.refundAmount += tech.addJunkTechToPool(0.06)
+                    for (let i = 0; i < 1; i++) {
+                        if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                    }
+                    // this.refundAmount += tech.addJunkTechToPool(0.06)
                 },
-                refundAmount: 0,
+                // refundAmount: 0,
                 remove() {
                     tech.isExtraChoice = false;
-                    if (this.count > 0 && this.refundAmount > 0) {
-                        tech.removeJunkTechFromPool(this.refundAmount)
-                        this.refundAmount = 0
-                    }
+                    if (this.count > 0) powerUps.research.changeRerolls(1)
+                    // if (this.count > 0 && this.refundAmount > 0) {
+                    //     tech.removeJunkTechFromPool(this.refundAmount)
+                    //     this.refundAmount = 0
+                    // }
                 }
             },
             {
@@ -567,7 +571,7 @@
                 allowed() {
                     return (tech.isCrouchAmmo && !tech.isEnergyHealth) || tech.isCrouchRegen
                 },
-                requires: "relative permittivity, desublimated ammunition, not mass-energy",
+                requires: "inductive coupling, desublimated ammunition, not mass-energy",
                 effect() {
                     tech.isTurret = true
                 },
@@ -1184,7 +1188,7 @@
             {
                 name: "nail-bot upgrade",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">nail-bot upgrade</a>`,
-                description: "<strong>convert</strong> all your bots to <strong>nail-bots</strong><br><strong>500%</strong> increased nail-bot <strong>fire rate</strong>",
+                description: "<strong>convert</strong> your current bots to <strong>nail-bots</strong><br><strong>+500%</strong> <strong>fire rate</strong> and <strong>+40%</strong> nail <strong>velocity</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -1193,7 +1197,7 @@
                 allowed() {
                     return tech.nailBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more nail bots and only 1 bot upgrade",
+                requires: "2 or more nail bots and no other bot upgrade",
                 effect() {
                     tech.isNailBotUpgrade = true
                     b.convertBotsTo("nail-bot")
@@ -1242,7 +1246,7 @@
             {
                 name: "foam-bot upgrade",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">foam-bot upgrade</a>`,
-                description: "<strong>convert</strong> all your bots to <strong>foam-bots</strong><br><strong>250%</strong> increased foam <strong>size</strong> and <strong>fire rate</strong>",
+                description: "<strong>convert</strong> your current bots to <strong>foam-bots</strong><br><strong>300%</strong> increased foam <strong>size</strong> and <strong>fire rate</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -1251,7 +1255,7 @@
                 allowed() {
                     return tech.foamBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more foam bots and only 1 bot upgrade",
+                requires: "2 or more foam bots and no other bot upgrade",
                 effect() {
                     tech.isFoamBotUpgrade = true
                     b.convertBotsTo("foam-bot")
@@ -1299,8 +1303,8 @@
             },
             {
                 name: "boom-bot upgrade",
-                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">boom-bot upgrade-bot</a>`,
-                description: "<strong>convert</strong> all your bots to <strong>boom-bots</strong><br><strong>250%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size",
+                link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">boom-bot upgrade</a>`,
+                description: "<strong>convert</strong> your current bots to <strong>boom-bots</strong><br><strong>300%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -1309,7 +1313,7 @@
                 allowed() {
                     return tech.boomBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more boom bots and only 1 bot upgrade",
+                requires: "2 or more boom bots and no other bot upgrade",
                 effect() {
                     tech.isBoomBotUpgrade = true
                     b.convertBotsTo("boom-bot")
@@ -1358,7 +1362,7 @@
             {
                 name: "laser-bot upgrade",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">laser-bot upgrade</a>`,
-                description: "<strong>convert</strong> all your bots to <strong>laser-bots</strong><br><strong>75%</strong> improved <strong class='color-d'>damage</strong>, efficiency, and range", //  <strong>400%</strong> increased <strong>laser-bot</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+                description: "<strong>convert</strong> your current bots to <strong>laser-bots</strong><br><strong>100%</strong> improved <strong class='color-d'>damage</strong>, efficiency, and range", //  <strong>400%</strong> increased <strong>laser-bot</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -1367,7 +1371,7 @@
                 allowed() {
                     return tech.laserBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more laser bots and only 1 bot upgrade",
+                requires: "2 or more laser bots and no other bot upgrade",
                 effect() {
                     tech.isLaserBotUpgrade = true
                     b.convertBotsTo("laser-bot")
@@ -1416,7 +1420,7 @@
             {
                 name: "orbital-bot upgrade",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">orbital-bot upgrade</a>`,
-                description: "<strong>convert</strong> all your bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>250%</strong> and <strong>radius</strong> by <strong>40%</strong>",
+                description: "<strong>convert</strong> your current bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>300%</strong> and <strong>radius</strong> by <strong>50%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -1425,11 +1429,11 @@
                 allowed() {
                     return tech.orbitBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more orbital bots and only 1 bot upgrade",
+                requires: "2 or more orbital bots and no other bot upgrade",
                 effect() {
                     tech.isOrbitBotUpgrade = true
                     b.convertBotsTo("orbital-bot")
-                    const range = 190 + 100 * tech.isOrbitBotUpgrade
+                    const range = 190 + 120 * tech.isOrbitBotUpgrade
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].botType === 'orbit') {
                             bullet[i].isUpgraded = true
@@ -1483,7 +1487,7 @@
             {
                 name: "dynamo-bot upgrade",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">dynamo-bot upgrade</a>`,
-                description: "<strong>convert</strong> your bots to <strong>dynamo-bots</strong><br>increase regen to <strong>16</strong> <strong class='color-f'>energy</strong> per second",
+                description: "<strong>convert</strong> your current bots to <strong>dynamo-bots</strong><br>increase regen to <strong>19</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -1492,7 +1496,7 @@
                 allowed() {
                     return tech.dynamoBotCount > 1 && !b.hasBotUpgrade()
                 },
-                requires: "2 or more dynamo bots and only 1 bot upgrade",
+                requires: "2 or more dynamo bots and no other bot upgrade",
                 effect() {
                     tech.isDynamoBotUpgrade = true
                     b.convertBotsTo("dynamo-bot")
@@ -1692,7 +1696,7 @@
                 allowed() {
                     return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
                 },
-                requires: "mass driver, not pilot wave, tokamak",
+                requires: "mass driver, not pilot wave, tokamak, wormhole",
                 effect() {
                     tech.isAddBlockMass = true
                 },
@@ -1710,7 +1714,7 @@
                 allowed() {
                     return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
                 },
-                requires: "mass driver, not pilot wave not tokamak",
+                requires: "mass driver, not pilot wave not tokamak, wormhole",
                 effect() {
                     tech.isBlockRestitution = true
                 },
@@ -1782,7 +1786,7 @@
                 allowed() {
                     return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && !tech.isTokamak
                 },
-                requires: "mass driver, not pilot wave not tokamak",
+                requires: "mass driver, not pilot wave, tokamak",
                 effect() {
                     tech.isBlockPowerUps = true
                 },
@@ -2210,7 +2214,7 @@
                 allowed() { //&& (m.fieldUpgrades[m.fieldMode].name !== "molecular assembler" || m.maxEnergy > 1)
                     return m.maxEnergy > 0.99 && m.fieldUpgrades[m.fieldMode].name !== "standing wave" && !tech.isEnergyHealth && !tech.isRewindField //&& !tech.isRewindGun
                 },
-                requires: "not standing wave, mass-energy, max energy reduction, CPT gun",
+                requires: "not standing wave, mass-energy, max energy reduction",
                 effect() {
                     tech.isRewindAvoidDeath = true;
                 },
@@ -2284,7 +2288,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain || tech.energySiphon || tech.isEnergyRecovery || tech.dynamoBotCount || tech.isFlipFlopEnergy || tech.isTokamak) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth
+                    return (tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain || tech.energySiphon || tech.isEnergyRecovery || tech.dynamoBotCount || tech.isFlipFlopEnergy || tech.isTokamak) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth && !tech.isCrouchRegen
                 },
                 requires: "a way to regen extra energy, not time crystals",
                 effect: () => {
@@ -2331,7 +2335,7 @@
             {
                 name: "1st ionization energy",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ionization_energy' class="link">1st ionization energy</a>`,
-                description: `each ${powerUps.orb.heal()} you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>7</strong>`,
+                description: `each ${powerUps.orb.heal()} you collect<br>increases your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>8</strong>`,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2357,8 +2361,8 @@
                 }
             },
             {
-                name: "permittivity",
-                description: "each unused <strong>power up</strong> at the end of a <strong>level</strong><br>adds 4 <strong>maximum</strong> <strong class='color-f'>energy</strong>", // <em>(up to 51 health per level)</em>",
+                name: "weak interaction",
+                description: "each unused <strong>power up</strong> at the end of a <strong>level</strong><br>adds 5 <strong>maximum</strong> <strong class='color-f'>energy</strong>", // <em>(up to 51 health per level)</em>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2366,7 +2370,7 @@
                 allowed() {
                     return !tech.isDroneGrab
                 },
-                requires: "not drone harvester",
+                requires: "not delivery drone",
                 effect() {
                     tech.isExtraMaxEnergy = true; //tracked by  tech.extraMaxHealth
                 },
@@ -2375,7 +2379,7 @@
                 }
             },
             {
-                name: "transceiver",
+                name: "electroweak interaction",
                 description: "unused <strong>power ups</strong> at the end of each <strong>level</strong><br>are still activated <em>(selections are random)</em>",
                 maxCount: 1,
                 count: 0,
@@ -2384,7 +2388,7 @@
                 allowed() {
                     return tech.isExtraMaxEnergy
                 },
-                requires: "permittivity",
+                requires: "weak interaction",
                 effect() {
                     tech.isEndLevelPowerUp = true;
                 },
@@ -2956,7 +2960,7 @@
             {
                 name: "Ψ(t) collapse",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Wave_function_collapse' class="link">Ψ(t) collapse</a>`,
-                description: `enter an <strong class='alt'>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn ${powerUps.orb.research(16)}`,
+                description: `enter an <strong class='alt'>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn ${powerUps.orb.research(21)}`,
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -3062,9 +3066,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return powerUps.research.count > 4 || build.isExperimentSelection
+                    return powerUps.research.count > 3 || build.isExperimentSelection
                 },
-                requires: "at least 5 research",
+                requires: "at least 4 research",
                 effect() {
                     tech.isRerollDamage = true;
                 },
@@ -3330,7 +3334,7 @@
                 allowed() {
                     return tech.duplicationChance() > 0.99
                 },
-                requires: "duplication chance above 33%",
+                requires: "duplication chance above 99%",
                 effect() {
                     tech.is111Duplicate = true;
                     tech.maxDuplicationEvent()
@@ -3769,7 +3773,7 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isIceCrystals && !tech.isRivets && !tech.nailRecoil && !tech.nailRecoil
+                    return tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.isIceCrystals && !tech.isRivets && !tech.nailRecoil
                 },
                 requires: "nail gun, not ice crystal, rivets, rotary cannon, or pneumatic actuator",
                 effect() {
@@ -4847,7 +4851,7 @@
                 allowed() {
                     return tech.haveGunCheck("drones", false) || tech.isForeverDrones
                 },
-                requires: "drone gun",
+                requires: "drone gun or fault tolerance",
                 effect() {
                     const num = 8
                     tech.isForeverDrones += num
@@ -5181,7 +5185,7 @@
                 isBot: true,
                 isBotTech: true,
                 isNonRefundable: true,
-                requires: "NOT EXPERIMENT MODE, foam gun",
+                requires: "NOT EXPERIMENT MODE, foam gun, no other bot upgrades",
                 allowed() {
                     return tech.haveGunCheck("foam", false) && !b.hasBotUpgrade()
                 },
@@ -5377,7 +5381,7 @@
             },
             {
                 name: "laser diode",
-                description: "all <strong class='color-laser'>lasers</strong> drain <strong>30%</strong> less <strong class='color-f'>energy</strong><br><em>affects laser-gun, laser-bot, and laser-mines</em>",
+                description: "all <strong class='color-laser'>lasers</strong> drain <strong>30%</strong> less <strong class='color-f'>energy</strong><br><em>affects laser-gun, laser-bot, laser-mines, pulse</em>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5824,9 +5828,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "negative mass" && !tech.isEnergyHealth && !tech.isFreeWormHole
+                    return m.fieldUpgrades[m.fieldMode].name === "negative mass" && !tech.isEnergyHealth
                 },
-                requires: "wormhole or negative mass, not mass-energy, charmed baryon",
+                requires: "negative mass, not mass-energy",
                 effect() {
                     tech.isNeutronium = true
                     tech.baseFx *= 0.66
@@ -6152,7 +6156,7 @@
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
                 },
-                requires: "plasma torch",
+                requires: "plasma torch or molecular assembler",
                 effect() {
                     tech.isTokamak = true;
                 },
@@ -6368,7 +6372,7 @@
                 allowed() {
                     return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && tech.energyRegen !== 0
                 },
-                requires: "time dilation, not ground state",
+                requires: "time dilation or pilot wave, not ground state",
                 effect: () => {
                     tech.energyRegen = 0.004;
                     m.fieldRegen = tech.energyRegen;
@@ -6389,7 +6393,7 @@
                 allowed() {
                     return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking")
                 },
-                requires: "cloaking, wormhole or time dilation and below 100% duplication chance",
+                requires: "cloaking, time dilation, or pilot wave",
                 effect() {
                     tech.cloakDuplication = 0.4
                     powerUps.setDupChance(); //needed after adjusting duplication chance
@@ -6411,7 +6415,7 @@
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "time dilation"
                 },
-                requires: "metamaterial cloaking",
+                requires: "cloaking or time dilation",
                 effect() {
                     tech.isAddRemoveMaxHealth = true
                 },
@@ -6536,7 +6540,7 @@
                 allowed() {
                     return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && (build.isExperimentSelection || powerUps.research.count > 1)
                 },
-                requires: "metamaterial cloaking pilot wave or plasma torch",
+                requires: "cloaking, pilot wave, or plasma torch",
                 effect() {
                     tech.isCloakingDamage = true
                     for (let i = 0; i < 2; i++) {
@@ -6559,7 +6563,7 @@
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
                 },
-                requires: "metamaterial cloaking, plasma torch or pilot wave",
+                requires: "metamaterial cloaking, molecular assembler, plasma torch or pilot wave",
                 effect() {
                     tech.aimDamage = 1.40
                     b.setFireCD();
@@ -6599,7 +6603,7 @@
                 allowed() {
                     return m.fieldUpgrades[m.fieldMode].name === "wormhole" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
                 },
-                requires: "wormhole",
+                requires: "wormhole or pilot wave",
                 effect: () => {
                     tech.wimpCount++
                     spawn.WIMP()
@@ -6730,9 +6734,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "wormhole" && !tech.isNeutronium
+                    return m.fieldUpgrades[m.fieldMode].name === "wormhole"
                 },
-                requires: "wormhole, not neutronium",
+                requires: "wormhole",
                 effect() {
                     tech.isFreeWormHole = true
                     tech.baseFx *= 0.66
