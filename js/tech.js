@@ -451,6 +451,38 @@
                 remove() {}
             },
             {
+                name: "applied science",
+                description: `spawn ${powerUps.orb.research(1)} and get a random <strong class='color-m'>tech</strong><br>for each <strong class='color-g'>gun</strong> in your inventory`,
+                maxCount: 9,
+                count: 0,
+                isNonRefundable: true,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return b.inventory.length > 1
+                },
+                requires: "NOT EXPERIMENT MODE, at least 2 guns",
+                effect() {
+                    for (let i = 0; i < b.inventory.length; i++) {
+                        //spawn a research for each gun
+                        powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
+                        //find a gun tech for this gun
+                        const gunTechPool = []
+                        for (let j = 0; j < tech.tech.length; j++) {
+                            if (tech.tech[j].isGunTech && tech.tech[j].allowed && !tech.tech[j].isJunk && !tech.tech[j].isBadRandomOption && tech.tech[j].count < tech.tech[j].maxCount) {
+                                const regex = tech.tech[j].requires.search(b.guns[b.inventory[i]].name) //get string index of gun name
+                                const not = tech.tech[j].requires.search(' not ') //get string index of ' not '
+                                //look for the gun name in the requirements, but the gun name needs to show up before the word ' not '
+                                if (regex !== -1 && (not === -1 || not > regex)) gunTechPool.push(j)
+                                // console.log(gunName, regex, not, tech.tech[j].name)
+                            }
+                        }
+                        if (gunTechPool.length) tech.giveTech(gunTechPool[Math.floor(Math.random() * gunTechPool.length)]) // choose from the gun pool
+                    }
+                },
+                remove() {}
+            },
+            {
                 name: "logistics",
                 description: `${powerUps.orb.ammo()} give <strong>80%</strong> more <strong class='color-ammo'>ammo</strong>, but<br>it's only added to your current <strong class='color-g'>gun</strong>`,
                 maxCount: 1,
@@ -3737,7 +3769,7 @@
                 allowed() {
                     return tech.isNeedles || tech.isNeedleShot
                 },
-                requires: "needle gun, needle-shot",
+                requires: "nail gun, needle gun, needle-shot",
                 effect() {
                     tech.isNeedleIce = true
                 },
@@ -3756,7 +3788,7 @@
                 allowed() {
                     return tech.haveGunCheck("harpoon") || (tech.isNeedles || tech.isNeedleShot)
                 },
-                requires: "needle gun, needle-shot, harpoon",
+                requires: "nail gun, needle gun, needle-shot, harpoon",
                 effect() {
                     tech.isNeedleShieldPierce = true
                 },
@@ -3847,7 +3879,7 @@
                 allowed() {
                     return tech.isRivets
                 },
-                requires: "rivet gun",
+                requires: "nail gun, rivet gun",
                 effect() {
                     tech.rivetSize += 0.2
                 },
@@ -3959,7 +3991,7 @@
                 allowed() {
                     return (tech.isNailShot || tech.isNeedleShot || tech.nailBotCount > 1 || tech.haveGunCheck("nail gun"))
                 },
-                requires: "nails",
+                requires: "nail gun, nails",
                 effect() {
                     tech.isNailCrit = true
                 },
@@ -3979,7 +4011,7 @@
                 allowed() {
                     return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob / 2 + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + (tech.haveGunCheck("nail gun") && !tech.isNeedleShieldPierce) + tech.isNeedleShot + tech.isNailShot) * 2 > 1
                 },
-                requires: "nails, rivets, not ceramic needles",
+                requires: "nail gun, nails, rivets, not ceramic needles",
                 effect() {
                     tech.isNailRadiation = true;
                 },
@@ -4098,7 +4130,7 @@
                 allowed() {
                     return (tech.haveGunCheck("shotgun") || tech.haveGunCheck("railgun")) && !tech.isShotgunRecoil
                 },
-                requires: "shotgun or railgun, not Newton's 3rd law",
+                requires: "shotgun, railgun, not Newton's 3rd law",
                 effect() {
                     tech.isShotgunReversed = true;
                 },
@@ -4386,8 +4418,8 @@
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
+                frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.haveGunCheck("matter wave") && !tech.isPhaseVelocity && !tech.isBulletTeleport
                 },
@@ -4426,12 +4458,12 @@
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 4,
-                frequencyDefault: 4,
+                frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isLongitudinal
                 },
-                requires: "phonon",
+                requires: "matter wave, phonon",
                 effect() {
                     tech.is360Longitudinal = true;
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4477,14 +4509,14 @@
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 3,
-                frequencyDefault: 3,
+                frequency: 2,
+                frequencyDefault: 2,
                 isBot: true,
                 isBotTech: true,
                 allowed() {
                     return tech.haveGunCheck("missiles", false)
                 },
-                requires: "missile gun",
+                requires: "missiles",
                 effect() {
                     tech.missileBotCount++;
                     b.missileBot();
@@ -4566,12 +4598,12 @@
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
-                frequency: 1,
-                frequencyDefault: 1,
+                frequency: 2,
+                frequencyDefault: 2,
                 allowed() {
                     return tech.isVacuumBomb && !tech.isExplodeRadio
                 },
-                requires: "vacuum bomb, not iridium-192",
+                requires: "grenades, vacuum bomb, not iridium-192",
                 effect() {
                     tech.isBlockExplode = true; //chain reaction
                 },
@@ -4611,7 +4643,7 @@
                 allowed() {
                     return tech.isNeutronBomb
                 },
-                requires: "neutron bomb",
+                requires: "grenades, neutron bomb",
                 effect() {
                     tech.isNeutronSlow = true
                 },
@@ -4736,7 +4768,7 @@
                 allowed() {
                     return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
                 },
-                requires: "spores",
+                requires: "spore gun, spores",
                 effect() {
                     tech.isFastSpores = true
                 },
@@ -4756,7 +4788,7 @@
                 allowed() {
                     return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isWormShot
                 },
-                requires: "spores or worms",
+                requires: "spore gun, spores or worms",
                 effect() {
                     tech.isSporeFreeze = true
                 },
@@ -4775,7 +4807,7 @@
                 allowed() {
                     return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isWormShot
                 },
-                requires: "spores or worms",
+                requires: "spore gun, spores or worms",
                 effect() {
                     tech.isSporeFollow = true
                 },
@@ -4794,7 +4826,7 @@
                 allowed() {
                     return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField) && !tech.isEnergyHealth || tech.isWormShot
                 },
-                requires: "spores, worms, not mass-energy",
+                requires: "spore gun, spores, worms, not mass-energy",
                 effect() {
                     tech.isMutualism = true
                 },
@@ -4813,7 +4845,7 @@
                 allowed() {
                     return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isWormholeSpores
                 },
-                requires: "spores",
+                requires: "spore gun, spores",
                 effect() {
                     tech.isSporeWorm = true
                 },
@@ -4832,7 +4864,7 @@
                 allowed() {
                     return tech.isSporeWorm || tech.isWormShot
                 },
-                requires: "worms",
+                requires: "spore gun, worms",
                 effect() {
                     tech.wormSurviveDmg = true
                 },
@@ -4851,7 +4883,7 @@
                 allowed() {
                     return tech.haveGunCheck("drones", false) || tech.isForeverDrones
                 },
-                requires: "drone gun or fault tolerance",
+                requires: "drones, fault tolerance",
                 effect() {
                     const num = 8
                     tech.isForeverDrones += num
@@ -4937,7 +4969,7 @@
                 allowed() {
                     return tech.haveGunCheck("drones")
                 },
-                requires: "drone gun",
+                requires: "drones",
                 effect() {
                     tech.isDroneRespawn = true
                 },
@@ -4956,7 +4988,7 @@
                 allowed() {
                     return (tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isMissileField || tech.isIceField))) && !tech.isDroneRadioactive && !tech.isIncendiary
                 },
-                requires: "drone gun, molecular assembler, not irradiated drones, incendiary",
+                requires: "drones, molecular assembler, not irradiated drones, incendiary",
                 effect() {
                     tech.isDroneTeleport = true
                 },
@@ -4975,7 +5007,7 @@
                 allowed() {
                     return tech.isDroneTeleport
                 },
-                requires: "brushless motor",
+                requires: "drones, brushless motor",
                 effect() {
                     tech.isDroneFastLook = true
                 },
@@ -5030,7 +5062,7 @@
                 allowed() {
                     return tech.isDroneRadioactive
                 },
-                requires: "irradiated drones",
+                requires: "drones irradiated drones",
                 effect() {
                     tech.droneRadioDamage = 2
                 },
@@ -5050,7 +5082,7 @@
                 allowed() {
                     return tech.isDroneRadioactive
                 },
-                requires: "irradiated drones",
+                requires: "drones, irradiated drones",
                 effect() {
                     tech.isFastDrones = true
                 },
@@ -5147,7 +5179,7 @@
                 allowed() {
                     return tech.haveGunCheck("foam")
                 },
-                requires: "foam gun",
+                requires: "foam",
                 effect() {
                     tech.foamFutureFire++
                 },
@@ -5166,7 +5198,7 @@
                 allowed() {
                     return tech.haveGunCheck("foam")
                 },
-                requires: "foam gun",
+                requires: "foam",
                 effect() {
                     tech.isAmmoFoamSize = true
                 },
@@ -5185,7 +5217,7 @@
                 isBot: true,
                 isBotTech: true,
                 isNonRefundable: true,
-                requires: "NOT EXPERIMENT MODE, foam gun, no other bot upgrades",
+                requires: "foam gun, not bot upgrades NOT EXPERIMENT MODE,",
                 allowed() {
                     return tech.haveGunCheck("foam", false) && !b.hasBotUpgrade()
                 },
@@ -5533,7 +5565,7 @@
                 allowed() {
                     return tech.isWideLaser
                 },
-                requires: "diffuse beam",
+                requires: "laser gun, diffuse beam",
                 effect() {
                     tech.wideLaser += 2
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -5618,7 +5650,7 @@
                 allowed() {
                     return tech.isPulseLaser && !tech.beamSplitter
                 },
-                requires: "pulse, not diffraction grating",
+                requires: "laser gun, pulse, not diffraction grating",
                 effect() {
                     tech.isPulseAim = true;
                 },
@@ -6315,7 +6347,7 @@
             },
             {
                 name: "timelike",
-                description: "<strong>time dilation</strong> doubles your relative time <strong>rate</strong><br>and makes you <strong>immune</strong> to <strong class='color-harm'>harm</strong>",
+                description: "<strong>time dilation</strong> doubles your relative time <strong>rate</strong><br>and makes you immune to <strong class='color-harm'>harm</strong>",
                 isFieldTech: true,
                 maxCount: 1,
                 count: 0,
@@ -6327,11 +6359,9 @@
                 requires: "time dilation, not retrocausality",
                 effect() {
                     tech.isTimeSkip = true;
-                    b.setFireCD();
                 },
                 remove() {
                     tech.isTimeSkip = false;
-                    b.setFireCD();
                 }
             },
             {
@@ -6980,6 +7010,72 @@
             //     },
             //     remove() {}
             // },
+            {
+                name: "palantír",
+                description: `see far away lands`,
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    m.look = () => {
+                        //always on mouse look
+                        m.angle = Math.atan2(
+                            simulation.mouseInGame.y - m.pos.y,
+                            simulation.mouseInGame.x - m.pos.x
+                        );
+                        //smoothed mouse look translations
+                        const scale = 2;
+                        m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
+                        m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
+                        m.transX += (m.transSmoothX - m.transX) * m.lookSmoothing;
+                        m.transY += (m.transSmoothY - m.transY) * m.lookSmoothing;
+                    }
+                },
+                remove() {
+                    if (this.count) m.look = m.lookDefault
+                }
+            },
+            {
+                name: "motion sickness",
+                description: `disable camera smoothing`,
+                maxCount: 1,
+                count: 0,
+                frequency: 0,
+                isNonRefundable: true,
+                isExperimentHide: true,
+                isJunk: true,
+                allowed() {
+                    return true
+                },
+                requires: "",
+                effect() {
+                    m.look = () => {
+                        //always on mouse look
+                        m.angle = Math.atan2(
+                            simulation.mouseInGame.y - m.pos.y,
+                            simulation.mouseInGame.x - m.pos.x
+                        );
+                        //smoothed mouse look translations
+                        const scale = 1.2;
+                        m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
+                        m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
+                        m.transX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
+                        m.transY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
+                        // m.transX += (m.transSmoothX - m.transX) * m.lookSmoothing;
+                        // m.transY += (m.transSmoothY - m.transY) * m.lookSmoothing;
+                    }
+                },
+                remove() {
+                    if (this.count) m.look = m.lookDefault
+                }
+            },
             {
                 name: "planetesimals",
                 description: `play <strong>planetesimals</strong><br><em>(an annoying asteroids game with Newtonian physics)</em><br>clearing a <strong>level</strong> in <strong>planetesimals</strong> spawns a <strong class='color-m'>tech</strong> in <strong>n-gon</strong><br>but, if you <strong style="color:red;">die</strong> in <strong>planetesimals</strong> you <strong style="color:red;">die</strong> in <strong>n-gon</strong>`,

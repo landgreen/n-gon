@@ -922,7 +922,7 @@ const spawn = {
         Matter.Body.setDensity(me, 0.00035) // normal density is 0.001 // this reduces life by half and decreases knockback
         const k = 642 //k=r^2/m
         me.split = function() {
-            Matter.Body.scale(this, 0.4, 0.4);
+            Matter.Body.scale(this, 0.45, 0.45);
             this.radius = Math.sqrt(this.mass * k / Math.PI)
             spawn.cellBoss(this.position.x, this.position.y, this.radius, this.cellID);
             mob[mob.length - 1].health = this.health
@@ -932,9 +932,9 @@ const spawn = {
             this.split();
         };
         me.onDamage = function(dmg) {
-            if (Math.random() < 0.33 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
+            if (Math.random() < 0.34 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
         }
-        me.damageReduction = 0.18 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1); //me.damageReductionGoal
+        me.damageReduction = 0.17 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1); //me.damageReductionGoal
         me.do = function() {
             // // this.armor();
             if (!m.isBodiesAsleep) {

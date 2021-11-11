@@ -299,7 +299,17 @@ const m = {
     },
     alive: false,
     switchWorlds() {
-        const totalGuns = b.inventory.length //- tech.isRewindGun //count guns, but not CPT gun
+        const totalGuns = b.inventory.length
+        //track ammo/ ammoPack count
+        let ammoCount = 0
+        for (let i = 0, len = b.inventory.length; i < len; i++) {
+            if (b.guns[b.inventory[i]].ammo !== Infinity) {
+                ammoCount += b.guns[b.inventory[i]].ammo / b.guns[b.inventory[i]].ammoPack
+            } else {
+                ammoCount += 5
+            }
+        }
+
         simulation.isTextLogOpen = false; //prevent console spam
         //remove all tech and count current tech total
         let totalTech = 0;
@@ -345,15 +355,7 @@ const m = {
         //randomize field
         m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1)))
 
-        //track ammo/ ammoPack count
-        let ammoCount = 0
-        for (let i = 0, len = b.inventory.length; i < len; i++) {
-            if (b.guns[b.inventory[i]].ammo !== Infinity) {
-                ammoCount += b.guns[b.inventory[i]].ammo / b.guns[b.inventory[i]].ammoPack
-            } else {
-                ammoCount += 5
-            }
-        }
+
         //removes guns and ammo  
         b.inventory = [];
         b.activeGun = null;
@@ -367,7 +369,7 @@ const m = {
 
         //randomize ammo based on ammo/ammoPack count
         for (let i = 0, len = b.inventory.length; i < len; i++) {
-            if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (1.05 + 0.5 * (Math.random() - 0.5))))
+            if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (1.05 + 0.3 * (Math.random() - 0.5))))
         }
 
         //randomize tech
@@ -1136,40 +1138,66 @@ const m = {
                     if (m.fireCDcycle < m.cycle) m.fireCDcycle = m.cycle
                     m.throwCharge += 0.5 * (tech.throwChargeRate / b.fireCDscale + 2 * tech.isAddBlockMass) / m.holdingTarget.mass
                     if (m.throwCharge < 6) m.energy -= 0.001 / tech.throwChargeRate / b.fireCDscale; // m.throwCharge caps at 5 
-                    //draw charge
-                    const x = m.pos.x + 15 * Math.cos(m.angle);
-                    const y = m.pos.y + 15 * Math.sin(m.angle);
-                    const len = m.holdingTarget.vertices.length - 1;
-                    const edge = m.throwCharge * m.throwCharge * m.throwCharge;
-                    const grd = ctx.createRadialGradient(x, y, edge, x, y, edge + 5);
-                    grd.addColorStop(0, "rgba(255,50,150,0.3)");
-                    grd.addColorStop(1, "transparent");
-                    ctx.fillStyle = grd;
-                    ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(m.holdingTarget.vertices[len].x, m.holdingTarget.vertices[len].y);
-                    ctx.lineTo(m.holdingTarget.vertices[0].x, m.holdingTarget.vertices[0].y);
-                    ctx.fill();
-                    for (let i = 0; i < len; i++) {
+
+                    //trajectory path prediction
+                    if (tech.isTokamak) {
+                        //draw charge
+                        if (m.throwCharge > 4) {
+
+                            const x = m.pos.x + 15 * Math.cos(m.angle);
+                            const y = m.pos.y + 15 * Math.sin(m.angle);
+                            const len = m.holdingTarget.vertices.length - 1;
+                            ctx.fillStyle = "rgba(200,0,255,0.3)";
+                            ctx.beginPath();
+                            ctx.moveTo(x, y);
+                            ctx.lineTo(m.holdingTarget.vertices[len].x, m.holdingTarget.vertices[len].y);
+                            ctx.lineTo(m.holdingTarget.vertices[0].x, m.holdingTarget.vertices[0].y);
+                            ctx.fill();
+                            for (let i = 0; i < len; i++) {
+                                ctx.beginPath();
+                                ctx.moveTo(x, y);
+                                ctx.lineTo(m.holdingTarget.vertices[i].x, m.holdingTarget.vertices[i].y);
+                                ctx.lineTo(m.holdingTarget.vertices[i + 1].x, m.holdingTarget.vertices[i + 1].y);
+                                ctx.fill();
+                            }
+
+                        }
+                    } else {
+                        //draw charge
+                        const x = m.pos.x + 15 * Math.cos(m.angle);
+                        const y = m.pos.y + 15 * Math.sin(m.angle);
+                        const len = m.holdingTarget.vertices.length - 1;
+                        const edge = m.throwCharge * m.throwCharge * m.throwCharge;
+                        const grd = ctx.createRadialGradient(x, y, edge, x, y, edge + 5);
+                        grd.addColorStop(0, "rgba(255,50,150,0.3)");
+                        grd.addColorStop(1, "transparent");
+                        ctx.fillStyle = grd;
                         ctx.beginPath();
                         ctx.moveTo(x, y);
-                        ctx.lineTo(m.holdingTarget.vertices[i].x, m.holdingTarget.vertices[i].y);
-                        ctx.lineTo(m.holdingTarget.vertices[i + 1].x, m.holdingTarget.vertices[i + 1].y);
+                        ctx.lineTo(m.holdingTarget.vertices[len].x, m.holdingTarget.vertices[len].y);
+                        ctx.lineTo(m.holdingTarget.vertices[0].x, m.holdingTarget.vertices[0].y);
                         ctx.fill();
+                        for (let i = 0; i < len; i++) {
+                            ctx.beginPath();
+                            ctx.moveTo(x, y);
+                            ctx.lineTo(m.holdingTarget.vertices[i].x, m.holdingTarget.vertices[i].y);
+                            ctx.lineTo(m.holdingTarget.vertices[i + 1].x, m.holdingTarget.vertices[i + 1].y);
+                            ctx.fill();
+                        }
+                        //trajectory prediction
+                        const cycles = 30
+                        const charge = Math.min(m.throwCharge / 5, 1)
+                        const speed = 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
+                        const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) } //m.Vy / 2 + removed to make the path less jerky
+                        ctx.beginPath()
+                        for (let i = 1, len = 10; i < len + 1; i++) {
+                            const time = cycles * i / len
+                            ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
+                        }
+                        ctx.strokeStyle = "rgba(68, 68, 68, 0.15)" //color.map
+                        ctx.lineWidth = 2
+                        ctx.stroke()
                     }
-                    //trajectory path prediction
-                    const cycles = 30
-                    const charge = Math.min(m.throwCharge / 5, 1)
-                    const speed = 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
-                    const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) } //m.Vy / 2 + removed to make the path less jerky
-                    ctx.beginPath()
-                    for (let i = 1, len = 10; i < len + 1; i++) {
-                        const time = cycles * i / len
-                        ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
-                    }
-                    ctx.strokeStyle = "rgba(68, 68, 68, 0.15)" //color.map
-                    ctx.lineWidth = 2
-                    ctx.stroke()
                 } else {
                     m.drop()
                 }
@@ -1178,7 +1206,7 @@ const m = {
                 m.fieldCDcycle = m.cycle + 15;
                 m.isHolding = false;
 
-                if (tech.isTokamak && m.throwCharge > 3) { //remove the block body and pulse  in the direction you are facing
+                if (tech.isTokamak && m.throwCharge > 4) { //remove the block body and pulse  in the direction you are facing
                     //m.throwCharge > 5 seems to be when the field full colors in a block you are holding
                     m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
                     if (m.immuneCycle < m.cycle) m.energy += 0.25 * Math.sqrt(m.holdingTarget.mass) * Math.min(5, m.throwCharge)
@@ -2339,7 +2367,7 @@ const m = {
                             m.grabPowerUp();
                             m.lookForPickUp();
 
-                            m.drain += 0.0000025
+                            m.drain += 0.0000025 //also increases inside tech.isTimeSkip
                             if (m.energy > m.drain) {
                                 m.energy -= m.drain;
                                 if (m.energy < m.drain) {
@@ -2370,7 +2398,10 @@ const m = {
 
                                 simulation.cycle--; //pause all functions that depend on game cycle increasing
                                 if (tech.isTimeSkip) {
-                                    if (m.immuneCycle < m.cycle + 10) m.immuneCycle = m.cycle + 10;
+                                    m.immuneCycle = 0;
+                                    m.drain += 0.0000025
+                                    m.regenEnergy(); //immunity disables normal regen, so turn off immunity for just this function
+                                    m.immuneCycle = m.cycle + 10;
                                     simulation.isTimeSkipping = true;
                                     m.cycle++;
                                     simulation.gravity();

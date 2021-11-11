@@ -1,22 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
-block throwing and mines when crouched now have trajectory prediction, like grenades
+tech: applied science - gives a random gun tech and a research for each gun in your inventory
 
-all bot upgrades are about 20% better
-Ψ(t) collapse gives 16->21 research
-spores and drones have up to 20% shorter life span when the number of active bullets is high
+JUNK tech - motion sickness - disable camera smoothing
+JUNK tech - palantír - see far away
 
-1st ionization energy gives 7 -> 8 max energy per heal
-permittivity renamed weak interaction
-weak interaction gives 4 -> 5 max energy per unused power up
-transceiver renamed electroweak interaction
-fixed about 70 different requirement text situations
+foam-bot, nail-bot, missile-bot: are now affected by fire delay tech
+  this gives some options for late game bot scaling
+
+timelike now allows some energy regen while immune to harm in double time
+Tokamak now overrides the trajectory throw graphics with its own
 
 ******************************************************** TODO ********************************************************
-
-need a mine tech that mines there be fewer mines
-  disables booby trap
-  makes mines do more damage
 
 tech: after bullets hit a mob, the mob takes 1% more damage
     this.damageReduction *= 1.01

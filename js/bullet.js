@@ -3443,6 +3443,7 @@ const b = {
             minDmgSpeed: 2,
             // lookFrequency: 56 + Math.floor(17 * Math.random()) - isUpgraded * 20,
             lastLookCycle: simulation.cycle + 60 * Math.random(),
+            delay: Math.floor((tech.isNailBotUpgrade ? 21 : 110) * b.fireCDscale),
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(),
             endCycle: Infinity,
@@ -3460,7 +3461,7 @@ const b = {
                 } else { //close to player
                     Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
                     if (this.lastLookCycle < simulation.cycle && !m.isCloak) {
-                        this.lastLookCycle = simulation.cycle + (this.isUpgraded ? 21 : 110)
+                        this.lastLookCycle = simulation.cycle + this.delay
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
                             if (
@@ -3503,7 +3504,7 @@ const b = {
             minDmgSpeed: 2,
             lookFrequency: 27 + Math.ceil(6 * Math.random()),
             cd: 0,
-            delay: 70,
+            delay: Math.floor(65 * b.fireCDscale),
             range: 70 + 3 * b.totalBots(),
             endCycle: Infinity,
             classType: "bullet",
@@ -3579,7 +3580,7 @@ const b = {
             minDmgSpeed: 2,
             lookFrequency: 60 + Math.floor(17 * Math.random()) - 40 * tech.isFoamBotUpgrade,
             cd: 0,
-            delay: 100,
+            delay: Math.floor(105 * b.fireCDscale),
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(),
             endCycle: Infinity,
