@@ -15,11 +15,11 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("metamaterial cloaking")
-            // b.giveGuns("laser")
-            // tech.giveTech("tokamak")
-            // tech.giveTech("relative permittivity")
-            // tech.giveTech("palantír")
+            // m.setField("molecular assembler")
+            // b.giveGuns("harpoon")
+            // tech.giveTech("railgun")
+            // tech.giveTech("capacitor bank")
+            // tech.giveTech("half-wave rectifier")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("antiscience")
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
@@ -2309,13 +2309,13 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
-        // level.difficultyIncrease(40) //30 is near max on hard  //60 is near max on why
-        // spawn.starter(1900, -500, 200) //big boy
+        level.difficultyIncrease(40) //30 is near max on hard  //60 is near max on why
+        spawn.starter(1900, -500, 200) //big boy
 
         // spawn.spiderBoss(1700, -500)
         // spawn.launcherBoss(3200, -500)
-        spawn.laserTargetingBoss(1700, -500)
-        spawn.powerUpBoss(3200, -500)
+        // spawn.laserTargetingBoss(1700, -500)
+        // spawn.powerUpBoss(3200, -500)
         // spawn.snakeBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
         // spawn.pulsarBoss(1700, -500)
@@ -2324,6 +2324,7 @@ const level = {
         // spawn.growBossCulture(3200, -500)
         // spawn.blinkBoss(1700, -500)
         // spawn.snakeSpitBoss(3200, -500)
+
         // spawn.laserBombingBoss(1700, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.blockBoss(1700, -500)

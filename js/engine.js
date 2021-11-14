@@ -192,7 +192,7 @@ function collisionChecks(event) {
                         if (obj.classType === "body" && obj.speed > 6) {
                             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
                             if (v > 9) {
-                                let dmg = 0.075 * b.dmgScale * v * obj.mass * (tech.throwChargeRate) * (tech.isBlockHarm ? 2.5 : 1) * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1);
+                                let dmg = tech.blockDamage * b.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1);
                                 if (mob[k].isShielded) dmg *= 0.7
                                 // console.log(dmg)
                                 mob[k].damage(dmg, true);

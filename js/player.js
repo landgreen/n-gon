@@ -507,7 +507,7 @@ const m = {
         if (tech.isHarmReduceAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 0.33 : 1.15
         if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
-        if (tech.isBlockHarm && m.isHolding) dmg *= 0.15
+        if (tech.isAddBlockMass && m.isHolding) dmg *= 0.15
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
         if (tech.isSlowFPS) dmg *= 0.8
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.4
@@ -1136,31 +1136,30 @@ const m = {
             if (input.field) {
                 if (m.energy > 0.001) {
                     if (m.fireCDcycle < m.cycle) m.fireCDcycle = m.cycle
-                    m.throwCharge += 0.5 * (tech.throwChargeRate / b.fireCDscale + 2 * tech.isAddBlockMass) / m.holdingTarget.mass
-                    if (m.throwCharge < 6) m.energy -= 0.001 / tech.throwChargeRate / b.fireCDscale; // m.throwCharge caps at 5 
+                    if (tech.isCapacitor && m.throwCharge < 4) m.throwCharge = 4
+                    m.throwCharge += 0.5 / m.holdingTarget.mass
+
+                    if (m.throwCharge < 6) m.energy -= 0.001; // m.throwCharge caps at 5 
 
                     //trajectory path prediction
                     if (tech.isTokamak) {
                         //draw charge
-                        if (m.throwCharge > 4) {
-
-                            const x = m.pos.x + 15 * Math.cos(m.angle);
-                            const y = m.pos.y + 15 * Math.sin(m.angle);
-                            const len = m.holdingTarget.vertices.length - 1;
-                            ctx.fillStyle = "rgba(200,0,255,0.3)";
+                        const x = m.pos.x + 15 * Math.cos(m.angle);
+                        const y = m.pos.y + 15 * Math.sin(m.angle);
+                        const len = m.holdingTarget.vertices.length - 1;
+                        const opacity = m.throwCharge > 4 ? 0.65 : m.throwCharge * 0.06
+                        ctx.fillStyle = `rgba(255,0,255,${opacity})`;
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(m.holdingTarget.vertices[len].x, m.holdingTarget.vertices[len].y);
+                        ctx.lineTo(m.holdingTarget.vertices[0].x, m.holdingTarget.vertices[0].y);
+                        ctx.fill();
+                        for (let i = 0; i < len; i++) {
                             ctx.beginPath();
                             ctx.moveTo(x, y);
-                            ctx.lineTo(m.holdingTarget.vertices[len].x, m.holdingTarget.vertices[len].y);
-                            ctx.lineTo(m.holdingTarget.vertices[0].x, m.holdingTarget.vertices[0].y);
+                            ctx.lineTo(m.holdingTarget.vertices[i].x, m.holdingTarget.vertices[i].y);
+                            ctx.lineTo(m.holdingTarget.vertices[i + 1].x, m.holdingTarget.vertices[i + 1].y);
                             ctx.fill();
-                            for (let i = 0; i < len; i++) {
-                                ctx.beginPath();
-                                ctx.moveTo(x, y);
-                                ctx.lineTo(m.holdingTarget.vertices[i].x, m.holdingTarget.vertices[i].y);
-                                ctx.lineTo(m.holdingTarget.vertices[i + 1].x, m.holdingTarget.vertices[i + 1].y);
-                                ctx.fill();
-                            }
-
                         }
                     } else {
                         //draw charge
@@ -2048,7 +2047,7 @@ const m = {
                     } else {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     }
-                    if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
+                    m.regenEnergy()
                     m.drawFieldMeter()
                 }
             }
@@ -2799,7 +2798,7 @@ const m = {
                                 //find mouse velocity
                                 const diff = Vector.sub(m.fieldPosition, m.lastFieldPosition)
                                 const speed = Vector.magnitude(diff)
-                                const velocity = Vector.mult(Vector.normalise(diff), Math.min(speed, 40)) //limit velocity
+                                const velocity = Vector.mult(Vector.normalise(diff), Math.min(speed, 60)) //limit velocity
                                 let radius, radiusSmooth
                                 if (Matter.Query.ray(map, m.fieldPosition, player.position).length) { //is there something block the player's view of the field
                                     radius = 0
@@ -2812,7 +2811,7 @@ const m = {
 
                                 for (let i = 0, len = body.length; i < len; ++i) {
                                     if (Vector.magnitude(Vector.sub(body[i].position, m.fieldPosition)) < m.fieldRadius && !body[i].isNotHoldable) {
-                                        const DRAIN = speed * body[i].mass * 0.000015 // * (1 + m.energy * m.energy) //drain more energy when you have more energy
+                                        const DRAIN = speed * body[i].mass * 0.000006 // * (1 + m.energy * m.energy) //drain more energy when you have more energy
                                         if (m.energy > DRAIN) {
                                             m.energy -= DRAIN;
                                             Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity
@@ -2820,9 +2819,9 @@ const m = {
                                             // body[i].force.y -= body[i].mass * simulation.g; //remove gravity effects
                                             //blocks drift towards center of pilot wave
                                             const sub = Vector.sub(m.fieldPosition, body[i].position)
-                                            const unit = Vector.mult(Vector.normalise(sub), body[i].mass * tech.pilotForce * Vector.magnitude(sub))
-                                            body[i].force.x += unit.x
-                                            body[i].force.y += unit.y - body[i].mass * simulation.g //remove gravity effects
+                                            const push = Vector.mult(Vector.normalise(sub), 0.0007 * body[i].mass * Vector.magnitude(sub))
+                                            body[i].force.x += push.x
+                                            body[i].force.y += push.y - body[i].mass * simulation.g //remove gravity effects
                                             // if (body[i].collisionFilter.category !== cat.bullet) {
                                             //     body[i].collisionFilter.category = cat.bullet;
                                             // }
@@ -3141,6 +3140,8 @@ const m = {
                                     ctx.stroke();
                                     ctx.setLineDash([]);
                                 }
+                            } else {
+                                m.hole.isReady = false;
                             }
                         } else {
                             //make new wormhole
@@ -3392,6 +3393,11 @@ const m = {
             // },
         },
     ],
+    //************************************************************************************
+    //************************************************************************************
+    //*************************************  SHIP  ***************************************
+    //************************************************************************************
+    //************************************************************************************
     isShipMode: false,
     shipMode(thrust = 0.03, drag = 0.99, torque = 1.15, rotationDrag = 0.92) { //  m.shipMode() //thrust = 0.03, drag = 0.99, torque = 1.15, rotationDrag = 0.92
         if (!m.isShipMode) {
@@ -3664,7 +3670,7 @@ const m = {
                                 if (obj.classType === "body" && obj.speed > 6) {
                                     const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
                                     if (v > 9) {
-                                        let dmg = 0.075 * b.dmgScale * v * obj.mass * (tech.throwChargeRate) * (tech.isBlockHarm ? 2 : 1) * (tech.isMobBlockFling ? 2 : 1);
+                                        let dmg = tech.blockDamage * b.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2 : 1);
                                         if (mob[k].isShielded) dmg *= 0.7
                                         mob[k].damage(dmg, true);
                                         if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && m.throwCycle > m.cycle) {

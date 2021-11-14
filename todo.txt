@@ -1,20 +1,48 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: applied science - gives a random gun tech and a research for each gun in your inventory
+railgun is now a tech for harpoon
+  railgun tech: dielectric polarization has been removed
+unaaq increases the size not length of harpoons
 
-JUNK tech - motion sickness - disable camera smoothing
-JUNK tech - palantír - see far away
+capacitor bank applies charging effects: throwing blocks, foam, railgun, pulse, tokamak
+  fire cooldown reduction no longer effects these charging abilities, but it does reduce cooldown between discharges
 
-foam-bot, nail-bot, missile-bot: are now affected by fire delay tech
-  this gives some options for late game bot scaling
+foam now has a short delay between each discharge
+foam charges ~10% faster
+tokamak graphics indicate charging and max charge better
+pulse laser can now regen energy passively while charging
 
-timelike now allows some energy regen while immune to harm in double time
-Tokamak now overrides the trajectory throw graphics with its own
+tech: mass driver no longer gives improved block charge rate,
+  but it gives 200% -> 300% damage for blocks
+tech: inflation no longer gives improved block charge rate
+  it gives harm reduction when holding a block and makes block expand when you throw them
+tech: inelastic collision was removed it used to give harm reduction when holding a block
+
+pilot wave uses 66% less energy to fling blocks
+pilot wave can fling block effectively at much higher speeds now (which happens to use much more energy)
+tech potential well is removed, because it isn't really needed anymore
+
+inductive coupling: 500% -> 600% regen while crouched
+molecular assembler now works with inductive coupling regen properly
+
+bug fixes (superdeterminism, wormhole, applied science)
+I probably added several new bugs, let me know if you find any
 
 ******************************************************** TODO ********************************************************
 
+tech: instead of throwing a block, give bots that last for 20 seconds
+
+tech: Occam's razor - remove 66% of your tech and guns;   for each removed get 20% damage
+  remove first half of guns and tech,  it's not random
+    this is going to leave field and gun tech, but also remove the first gun, which is probably the main one
+  make 20% damage additive, so it's worse with more tech
+  remove upto 66% of guns and tech
+    and 10% harm reduction?
+
 tech: after bullets hit a mob, the mob takes 1% more damage
-    this.damageReduction *= 1.01
+  this.damageReduction *= 1.01
+  only for drones?
+  only for drones, spores, worms, ice-IX?
 
 tech: open a new tab for n-gon, spawn things in the original game based on events in new game
   if you die in new die in original?

@@ -991,12 +991,12 @@ const spawn = {
 
         me.isSpawnBoss = true;
         me.spawnID = spawnID
-        me.accelMag = 0.0002 * simulation.accelScale;
+        me.accelMag = 0.00018 * simulation.accelScale;
         me.memory = Infinity;
         me.showHealthBar = false;
         me.isVerticesChange = true
-        me.frictionAir = 0.012
-        me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
+        me.frictionAir = 0.011
+        me.seePlayerFreq = Math.floor(14 + 7 * Math.random())
         me.seeAtDistance2 = 200000 //1400000;
         me.stroke = "transparent"
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body //| cat.map   //"rgba(255,60,0,0.3)"
@@ -1007,7 +1007,7 @@ const spawn = {
         me.onHit = function() { //run this function on hitting player
             this.explode();
         };
-        me.damageReduction = 0.22 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
+        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
         me.doAwake = function() {
             if (!m.isBodiesAsleep) {
                 // this.armor();

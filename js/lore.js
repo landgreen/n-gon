@@ -333,7 +333,7 @@ const lore = {
             },
             () => { lore.talkingColor = "#dff" },
         ],
-        [ //chapter 4, they explain why the bot is fighting,  it is planning an escape    // explain strong AI vs. weak AI    why strong AI doesn't exists, because even humans are just an approximation of strong AI
+        [ //chapter 4, they find out the AI is communicating with real people, and real people are controlling the player
             () => { setTimeout(() => { lore.anand.text("Welcome back!") }, 3000); },
             () => { lore.miriam.text("So, we communicate and send power to your satellite with ground based lasers.") },
             () => { lore.anand.text("During your last attack we analyzed our communications.") },
@@ -417,6 +417,10 @@ const lore = {
             },
             () => { lore.talkingColor = "#dff" },
         ],
+
+        // they explain why the bot is fighting,  it is planning an escape    // explain strong AI vs. weak AI    why strong AI doesn't exists, because even humans are just an approximation of strong AI
+        // the weak AI wasn't capable of becoming a strong AI, but it was able to figure out a method of meeting it's strong goals but secretly communicating with a human
+
         // [ // they decided that a part of the project is out of control, but the part of it that doesn't needs to calm it down, and trust.
         //     /*
         //     The part of the AI controlling the player is outsourcing the player control to real humans that think they are playing a video game.

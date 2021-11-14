@@ -469,7 +469,7 @@
                         //find a gun tech for this gun
                         const gunTechPool = []
                         for (let j = 0; j < tech.tech.length; j++) {
-                            if (tech.tech[j].isGunTech && tech.tech[j].allowed && !tech.tech[j].isJunk && !tech.tech[j].isBadRandomOption && tech.tech[j].count < tech.tech[j].maxCount) {
+                            if (tech.tech[j].isGunTech && tech.tech[j].allowed() && !tech.tech[j].isJunk && !tech.tech[j].isBadRandomOption && tech.tech[j].count < tech.tech[j].maxCount) {
                                 const regex = tech.tech[j].requires.search(b.guns[b.inventory[i]].name) //get string index of gun name
                                 const not = tech.tech[j].requires.search(' not ') //get string index of ' not '
                                 //look for the gun name in the requirements, but the gun name needs to show up before the word ' not '
@@ -1015,15 +1015,15 @@
             },
             {
                 name: "fragmentation",
-                description: "some <strong class='color-e'>detonations</strong> and collisions eject <strong>nails</strong><br><em style = 'font-size: 90%'>blocks, railgun, grenades, missiles, slugs, harpoon</em>",
+                description: "some <strong class='color-e'>detonations</strong> and collisions eject <strong>nails</strong><br><em style = 'font-size: 90%'>blocks, grenades, missiles, slugs, harpoon</em>",
                 maxCount: 9,
                 count: 0,
                 frequency: 1,
                 frequencyDefault: 1,
                 allowed() {
-                    return tech.haveGunCheck("harpoon") || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.missileBotCount || tech.haveGunCheck("railgun") || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.throwChargeRate > 1
+                    return tech.haveGunCheck("harpoon") || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.missileBotCount || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.blockDamage > 0.075
                 },
-                requires: "grenades, missiles, railgun, shotgun slugs, harpoon, or mass driver",
+                requires: "grenades, missiles, shotgun slugs, harpoon, or mass driver",
                 effect() {
                     tech.fragments++
                 },
@@ -1700,8 +1700,26 @@
                 }
             },
             {
+                name: "capacitor bank",
+                description: "<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, foam, railgun, pulse, tokamak</em>",
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.blockDamage > 0.075 || tech.haveGunCheck("foam") || tech.isRailGun || tech.isTokamak || tech.isPulseLaser
+                },
+                requires: "throwing blocks, foam, railgun, pulse, tokamak",
+                effect() {
+                    tech.isCapacitor = true;
+                },
+                remove() {
+                    tech.isCapacitor = false;
+                }
+            },
+            {
                 name: "mass driver",
-                description: "charge <strong>throws</strong> more <strong>quickly</strong> for less <strong class='color-f'>energy</strong><br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>200%</strong>",
+                description: "increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>300%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -1711,22 +1729,22 @@
                 },
                 requires: "not wormhole",
                 effect() {
-                    tech.throwChargeRate = 3
+                    tech.blockDamage = 0.3
                 },
                 remove() {
-                    tech.throwChargeRate = 1
+                    tech.blockDamage = 0.075
                 }
             },
             {
                 name: "inflation",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Inflation_(cosmology)' class="link">inflation</a>`,
-                description: "<strong>throwing</strong> a <strong class='color-block'>block</strong> expands it by <strong>300%</strong><br>increase <strong>throw</strong> charge rate by <strong>200%</strong>",
+                description: "<strong>throwing</strong> a <strong class='color-block'>block</strong> expands it by <strong>300%</strong><br><strong>holding</strong> a <strong class='color-block'>block</strong> reduces <strong class='color-harm'>harm</strong> by <strong>85%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
+                    return tech.blockDamage > 0.075 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
                 },
                 requires: "mass driver, not pilot wave, tokamak, wormhole",
                 effect() {
@@ -1744,7 +1762,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
+                    return tech.blockDamage > 0.075 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
                 },
                 requires: "mass driver, not pilot wave not tokamak, wormhole",
                 effect() {
@@ -1762,7 +1780,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.iceIXOnDeath
+                    return tech.blockDamage > 0.075 && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.iceIXOnDeath
                 },
                 requires: "mass driver, no other mob death tech",
                 effect() {
@@ -1780,7 +1798,7 @@
             //     frequency: 2,
             //     frequencyDefault: 2,
             //     allowed() {
-            //         return (tech.throwChargeRate > 1 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isTokamak
+            //         return (tech.blockDamage > 0.075 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isTokamak
             //     },
             //     requires: "mass driver or pilot wave, not tokamak",
             //     effect() {
@@ -1790,24 +1808,24 @@
             //         tech.isBlockBullets = false
             //     }
             // },
-            {
-                name: "inelastic collision",
-                description: "<strong>holding</strong> a <strong class='color-block'>block</strong> reduces <strong class='color-harm'>harm</strong> by <strong>85%</strong><br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>150%</strong>",
-                maxCount: 1,
-                count: 0,
-                frequency: 3,
-                frequencyDefault: 3,
-                allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isEnergyHealth
-                },
-                requires: "mass driver, a field that can hold things, not mass-energy",
-                effect() {
-                    tech.isBlockHarm = true
-                },
-                remove() {
-                    tech.isBlockHarm = false
-                }
-            },
+            // {
+            //     name: "inelastic collision",
+            //     description: "<strong>holding</strong> a <strong class='color-block'>block</strong> reduces <strong class='color-harm'>harm</strong> by <strong>85%</strong><br>increase <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> by <strong>150%</strong>",
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 3,
+            //     frequencyDefault: 3,
+            //     allowed() {
+            //         return tech.blockDamage > 0.075 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isEnergyHealth
+            //     },
+            //     requires: "mass driver, a field that can hold things, not mass-energy",
+            //     effect() {
+            //         tech.isBlockHarm = true
+            //     },
+            //     remove() {
+            //         tech.isBlockHarm = false
+            //     }
+            // },
             {
                 name: "buckling",
                 description: `if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn <strong>1</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`,
@@ -1816,7 +1834,7 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return tech.throwChargeRate > 1 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && !tech.isTokamak
+                    return tech.blockDamage > 0.075 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && !tech.isTokamak
                 },
                 requires: "mass driver, not pilot wave, tokamak",
                 effect() {
@@ -2306,7 +2324,7 @@
                 requires: "not mass-energy",
                 effect() {
                     tech.isPiezo = true;
-                    m.energy += 20.48;
+                    if (simulation.isTextLogOpen) m.energy += 20.48;
                 },
                 remove() {
                     tech.isPiezo = false;
@@ -2342,7 +2360,7 @@
                 allowed() {
                     return !tech.isZeno && !tech.isNoHeals && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isTechDamage && !tech.isMutualism //&& !tech.isAmmoFromHealth && !tech.isRewindGun
                 },
-                requires: "not Zeno, ergodicity, piezoelectricity, CPT, rewind gun, antiscience, mutualism",
+                requires: "not Zeno, ergodicity, piezoelectricity, CPT, antiscience, mutualism",
                 effect: () => {
                     m.health = 0
                     document.getElementById("health").style.display = "none"
@@ -2572,7 +2590,7 @@
             },
             {
                 name: "inductive coupling",
-                description: "passive <strong class='color-f'>energy</strong> regen is increased by <strong>500%</strong><br>but you only regen when <strong>crouched</strong>",
+                description: "passive <strong class='color-f'>energy</strong> regen is increased by <strong>600%</strong><br>but you only regen when <strong>crouched</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -2584,7 +2602,7 @@
                 effect() {
                     tech.isCrouchRegen = true; //only used to check for requirements
                     m.regenEnergy = function() {
-                        if (m.immuneCycle < m.cycle && m.crouch) m.energy += 5 * m.fieldRegen; //m.fieldRegen = 0.001
+                        if (m.immuneCycle < m.cycle && m.crouch) m.energy += 6 * m.fieldRegen; //m.fieldRegen = 0.001
                         if (m.energy < 0) m.energy = 0
                     }
                 },
@@ -3227,7 +3245,7 @@
                 effect() {
                     tech.duplicateChance += 0.1
                     powerUps.setDupChance(); //needed after adjusting duplication chance
-                    if (!build.isExperimentSelection) simulation.circleFlare(0.1);
+                    if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.1);
                     this.refundAmount += tech.addJunkTechToPool(0.4)
                 },
                 refundAmount: 0,
@@ -3254,7 +3272,7 @@
                 effect: () => {
                     tech.isStimulatedEmission = true
                     powerUps.setDupChance(); //needed after adjusting duplication chance
-                    if (!build.isExperimentSelection) simulation.circleFlare(0.15);
+                    if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.15);
                 },
                 remove() {
                     tech.isStimulatedEmission = false
@@ -3275,7 +3293,7 @@
                 effect: () => {
                     tech.isPowerUpsVanish = true
                     powerUps.setDupChance(); //needed after adjusting duplication chance
-                    if (!build.isExperimentSelection) simulation.circleFlare(0.12);
+                    if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.12);
                 },
                 remove() {
                     tech.isPowerUpsVanish = false
@@ -3611,15 +3629,15 @@
                     for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
                 },
                 remove() {
-                    if (tech.isDeterminism) {
-                        tech.isDeterminism = false;
+                    tech.isDeterminism = false;
+                    if (this.count > 0) {
                         for (let i = 0; i < 5; i++) {
                             const numberRemoved = tech.removeTech()
                             if (numberRemoved === 0) { //if the player didn't remove a power up then remove 1 tech for the map
-                                for (let i = 0; i < powerUp.length; i++) {
-                                    if (powerUp[i].name === "tech") {
-                                        Matter.Composite.remove(engine.world, powerUp[i]);
-                                        powerUp.splice(i, 1);
+                                for (let j = 0; j < powerUp.length; j++) {
+                                    if (powerUp[j].name === "tech") {
+                                        Matter.Composite.remove(engine.world, powerUp[j]);
+                                        powerUp.splice(j, 1);
                                         break;
                                     }
                                 }
@@ -4121,16 +4139,16 @@
             {
                 name: "Noether violation",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Noether%27s_theorem' class="link">Noether violation</a>`,
-                description: "increase <strong>shotgun</strong> and <strong>railgun</strong> <strong class='color-d'>damage</strong> <strong>60%</strong><br>their <strong>recoil</strong> is increased and <strong>reversed</strong>",
+                description: "increase <strong>shotgun</strong> <strong class='color-d'>damage</strong> <strong>60%</strong><br>their <strong>recoil</strong> is increased and <strong>reversed</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (tech.haveGunCheck("shotgun") || tech.haveGunCheck("railgun")) && !tech.isShotgunRecoil
+                    return (tech.haveGunCheck("shotgun")) && !tech.isShotgunRecoil
                 },
-                requires: "shotgun, railgun, not Newton's 3rd law",
+                requires: "shotgun, not Newton's 3rd law",
                 effect() {
                     tech.isShotgunReversed = true;
                 },
@@ -5260,7 +5278,7 @@
             {
                 name: "unaaq",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Harpoon#/media/File:Harpon_Unaaq_MHNT_ETH_AC_198.jpg' class="link">unaaq</a>`, //https://en.wikipedia.org/wiki/Weapon
-                description: "increase the <strong>length</strong> of your <strong>harpoon</strong><br>by <strong>10%</strong> of the square root of its <strong class='color-ammo'>ammo</strong>",
+                description: "increase the <strong>size</strong> of your <strong>harpoon</strong><br>by <strong>10%</strong> of the square root of its <strong class='color-ammo'>ammo</strong>",
                 isGunTech: true,
                 maxCount: 1,
                 count: 0,
@@ -5316,25 +5334,25 @@
                     tech.extraHarpoons = 0;
                 }
             },
-            // {
-            //     name: "spear",
-            //     description: "<strong>harpoons</strong> fired while <strong>crouched</strong><br>have no <strong>rope</strong> and improved <strong>steering</strong>",
-            //     isGunTech: true,
-            //     maxCount: 1,
-            //     count: 0,
-            //     frequency: 2,
-            //     frequencyDefault: 2,
-            //     allowed() {
-            //         return tech.haveGunCheck("harpoon") && !tech.isFilament
-            //     },
-            //     requires: "harpoon, not filament",
-            //     effect() {
-            //         tech.isSpear = true;
-            //     },
-            //     remove() {
-            //         tech.isSpear = false;
-            //     }
-            // },
+            {
+                name: "railgun",
+                description: "firing the <strong>harpoon</strong> while crouched launches<br>a rod that is <strong>faster</strong>, <strong>larger</strong>, and more <strong>dense</strong>",
+                isGunTech: true,
+                maxCount: 1,
+                count: 0,
+                frequency: 2,
+                frequencyDefault: 2,
+                allowed() {
+                    return tech.haveGunCheck("harpoon")
+                },
+                requires: "railgun",
+                effect() {
+                    tech.isRailGun = true;
+                },
+                remove() {
+                    tech.isRailGun = false;
+                }
+            },
             {
                 name: "half-wave rectifier",
                 description: "charging the <strong>railgun</strong> gives you <strong class='color-f'>energy</strong><br><em>instead of draining it</em>",
@@ -5344,9 +5362,9 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return tech.haveGunCheck("railgun")
+                    return tech.isRailGun
                 },
-                requires: "railgun",
+                requires: "harpoon, railgun",
                 effect() {
                     tech.isRailEnergyGain = true;
                 },
@@ -5354,25 +5372,25 @@
                     tech.isRailEnergyGain = false;
                 }
             },
-            {
-                name: "dielectric polarization",
-                description: "firing the <strong>railgun</strong> <strong class='color-d'>damages</strong> nearby <strong>mobs</strong>",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("railgun")
-                },
-                requires: "railgun",
-                effect() {
-                    tech.isRailAreaDamage = true;
-                },
-                remove() {
-                    tech.isRailAreaDamage = false;
-                }
-            },
+            // {
+            //     name: "dielectric polarization",
+            //     description: "firing the <strong>railgun</strong> <strong class='color-d'>damages</strong> nearby <strong>mobs</strong>",
+            //     isGunTech: true,
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 2,
+            //     frequencyDefault: 2,
+            //     allowed() {
+            //         return tech.haveGunCheck("railgun")
+            //     },
+            //     requires: "railgun",
+            //     effect() {
+            //         tech.isRailAreaDamage = true;
+            //     },
+            //     remove() {
+            //         tech.isRailAreaDamage = false;
+            //     }
+            // },
             // {
             //     name: "aerodynamic heating",
             //     description: "<strong>railgun</strong> rod <strong class='color-d'>damage</strong> nearby mobs",
@@ -5392,25 +5410,6 @@
             //         tech.isRodAreaDamage = false;
             //     }
             // },
-            {
-                name: "capacitor bank",
-                description: "the <strong>railgun</strong> no longer takes time to <strong>charge</strong><br><strong>railgun</strong> rods are <strong>66%</strong> less massive",
-                isGunTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return tech.haveGunCheck("railgun")
-                },
-                requires: "railgun",
-                effect() {
-                    tech.isCapacitor = true;
-                },
-                remove() {
-                    tech.isCapacitor = false;
-                }
-            },
             {
                 name: "laser diode",
                 description: "all <strong class='color-laser'>lasers</strong> drain <strong>30%</strong> less <strong class='color-f'>energy</strong><br><em>affects laser-gun, laser-bot, laser-mines, pulse</em>",
@@ -6373,9 +6372,9 @@
                 frequency: 3,
                 frequencyDefault: 3,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "time dilation") && (build.isExperimentSelection || powerUps.research.count > 2)
+                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation") && (build.isExperimentSelection || powerUps.research.count > 2)
                 },
-                requires: "time dilation, pilot wave",
+                requires: "time dilation",
                 effect() {
                     tech.isFastTime = true
                     m.setMovement();
@@ -6421,13 +6420,13 @@
                 frequency: 2,
                 frequencyDefault: 2,
                 allowed() {
-                    return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking")
+                    return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking")
                 },
-                requires: "cloaking, time dilation, or pilot wave",
+                requires: "cloaking, time dilation",
                 effect() {
                     tech.cloakDuplication = 0.4
                     powerUps.setDupChance(); //needed after adjusting duplication chance
-                    if (!build.isExperimentSelection) simulation.circleFlare(0.4);
+                    if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.4);
                 },
                 remove() {
                     tech.cloakDuplication = 0
@@ -6603,25 +6602,25 @@
                     b.setFireCD();
                 }
             },
-            {
-                name: "potential well",
-                description: "the force that <strong>pilot wave</strong> generates<br>to trap <strong class='color-block'>blocks</strong> is greatly increased",
-                isFieldTech: true,
-                maxCount: 1,
-                count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
-                allowed() {
-                    return m.fieldUpgrades[m.fieldMode].name === "pilot wave"
-                },
-                requires: "pilot wave",
-                effect() {
-                    tech.pilotForce = 0.0006
-                },
-                remove() {
-                    tech.pilotForce = 0.00002
-                }
-            },
+            // {
+            //     name: "potential well",
+            //     description: "the force that <strong>pilot wave</strong> generates<br>to trap <strong class='color-block'>blocks</strong> is greatly increased",
+            //     isFieldTech: true,
+            //     maxCount: 1,
+            //     count: 0,
+            //     frequency: 2,
+            //     frequencyDefault: 2,
+            //     allowed() {
+            //         return m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+            //     },
+            //     requires: "pilot wave",
+            //     effect() {
+            //         tech.pilotForce = 0.0006
+            //     },
+            //     remove() {
+            //         tech.pilotForce = 0.00002
+            //     }
+            // },
             {
                 name: "WIMPs",
                 description: `at the end of each <strong>level</strong> spawn ${powerUps.orb.research(5)}<br> and a <strong class='color-harm'>harmful</strong> particle that slowly <strong>chases</strong> you`,
@@ -6677,7 +6676,7 @@
                 effect() {
                     tech.wormDuplicate = 0.13
                     powerUps.setDupChance(); //needed after adjusting duplication chance
-                    if (!build.isExperimentSelection) simulation.circleFlare(0.13);
+                    if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.13);
                     for (let i = 0; i < 4; i++) {
                         if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                     }
@@ -8577,7 +8576,7 @@
             },
             {
                 name: "black hole cluster",
-                description: `spawn ${powerUps.orb.research(2)}<br><strong>spawn</strong> 40 nearby <strong>black holes</strong>`,
+                description: `<strong>spawn</strong> 100 nearby <strong>black holes</strong>`,
                 maxCount: 9,
                 count: 0,
                 frequency: 0,
@@ -8589,13 +8588,9 @@
                 },
                 requires: "",
                 effect() {
-                    for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
-                    const unit = {
-                        x: 1,
-                        y: 0
-                    }
-                    for (let i = 0; i < 40; i++) {
-                        const where = Vector.add(m.pos, Vector.mult(Vector.rotate(unit, Math.random() * 2 * Math.PI), 600 + 800 * Math.random()))
+                    const unit = { x: 1, y: 0 }
+                    for (let i = 0; i < 100; i++) {
+                        const where = Vector.add(m.pos, Vector.mult(Vector.rotate(unit, Math.random() * 2 * Math.PI), 500 + 200 * Math.random()))
                         spawn.sucker(where.x, where.y)
                     }
                 },
@@ -8734,7 +8729,7 @@
         isPlasmaRange: null,
         isFreezeMobs: null,
         isIceCrystals: null,
-        throwChargeRate: null,
+        blockDamage: null,
         isBlockStun: null,
         isStunField: null,
         isHarmDamage: null,
@@ -8832,7 +8827,7 @@
         isIncendiary: null,
         overfillDrain: null,
         isNeutronSlow: null,
-        isRailAreaDamage: null,
+        // isRailAreaDamage: null,
         historyLaser: null,
         isSpeedHarm: null,
         isSpeedDamage: null,
@@ -8848,7 +8843,6 @@
         isRewindGrenade: null,
         isExtruder: null,
         isEndLevelPowerUp: null,
-        // isRewindGun: null,
         missileSize: null,
         isLaserMine: null,
         isAmmoFoamSize: null,
@@ -8868,7 +8862,6 @@
         is111Duplicate: null,
         isDynamoBotUpgrade: null,
         isBlockPowerUps: null,
-        isBlockHarm: null,
         foamFutureFire: null,
         isDamageAfterKill: null,
         isHarmReduceAfterKill: null,
@@ -8953,7 +8946,7 @@
         isSpawnExitTech: null,
         cloakDuplication: null,
         extruderRange: null,
-        isRodAreaDamage: null,
+        // isRodAreaDamage: null,
         isForeverDrones: null,
         isMoreMobs: null,
         nailRecoil: null,
