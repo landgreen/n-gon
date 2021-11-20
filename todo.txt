@@ -1,48 +1,51 @@
 ******************************************************** NEXT PATCH **************************************************
 
-railgun is now a tech for harpoon
-  railgun tech: dielectric polarization has been removed
-unaaq increases the size not length of harpoons
+tech: Occam's razor - remove 50% of your tech and guns; `for each removed get 36% damage
 
-capacitor bank applies charging effects: throwing blocks, foam, railgun, pulse, tokamak
-  fire cooldown reduction no longer effects these charging abilities, but it does reduce cooldown between discharges
+tech dormancy removed
+tech: predator - if you have killed a mob in the last 5 seconds increase damage by 50% and disable energy regen
+tech: torpor - gives the opposite of it's previous effect
+  if you have NOT killed a mob in the last 5 seconds reduce harm by 72%, else increase it by 10%
 
-foam now has a short delay between each discharge
-foam charges ~10% faster
-tokamak graphics indicate charging and max charge better
-pulse laser can now regen energy passively while charging
+relativistic momentum - pushes blocks in addition to mobs
+  not much benefit, but it's fun
+supply chain:  still doubles ammo, but now also adds 5% JUNK (yay)
+  it no longer has any tech requirements
+inductive coupling: 600% -> 700% regen while crouched
 
-tech: mass driver no longer gives improved block charge rate,
-  but it gives 200% -> 300% damage for blocks
-tech: inflation no longer gives improved block charge rate
-  it gives harm reduction when holding a block and makes block expand when you throw them
-tech: inelastic collision was removed it used to give harm reduction when holding a block
+JUNK tech: density - blocks are 100x times less dense
 
-pilot wave uses 66% less energy to fling blocks
-pilot wave can fling block effectively at much higher speeds now (which happens to use much more energy)
-tech potential well is removed, because it isn't really needed anymore
-
-inductive coupling: 500% -> 600% regen while crouched
-molecular assembler now works with inductive coupling regen properly
-
-bug fixes (superdeterminism, wormhole, applied science)
-I probably added several new bugs, let me know if you find any
+tech descriptions can change their text dynamically now
+  only a few tech are using this option so far
 
 ******************************************************** TODO ********************************************************
 
-tech: instead of throwing a block, give bots that last for 20 seconds
+if a mob has died in the last 5 seconds 100% damage and no energy regen
 
-tech: Occam's razor - remove 66% of your tech and guns;   for each removed get 20% damage
-  remove first half of guns and tech,  it's not random
-    this is going to leave field and gun tech, but also remove the first gun, which is probably the main one
-  make 20% damage additive, so it's worse with more tech
-  remove upto 66% of guns and tech
-    and 10% harm reduction?
+dart: a new bullet type for string-less harpoons
+  can turn harder
+  can get new targets?
+
+convert tech descriptions into a method()
+  this means the text would generate when you: press pause, or display options, or open experiment mode
+  this would allow the description to reference variables inside it, like this.count
+  who could use this: 
+    Occam's razor
+    
+tech: dart - alt fire several small harpoons, with guidance
+  requires not railgun
 
 tech: after bullets hit a mob, the mob takes 1% more damage
   this.damageReduction *= 1.01
   only for drones?
   only for drones, spores, worms, ice-IX?
+
+
+make it easier to push blocks around with your body
+  part of negative mass?
+  link to other block tech
+
+tech: instead of throwing a block, give bots that last for 20 seconds
 
 tech: open a new tab for n-gon, spawn things in the original game based on events in new game
   if you die in new die in original?
@@ -50,9 +53,9 @@ tech: open a new tab for n-gon, spawn things in the original game based on event
   make a JUNK tech?
 if you die in original open a tab with a new n-gon that starts on a random level with a random load out.  if you clear the level you come back to life in the original?
 
-bug - death while paused crashes game?
+tech or field aspect - Firing now doesn't alert any mob but the mob you hit
 
-tech: aerodynamic heating - railgun rods super heat the air around it doing AoE damage
+bug - death while paused crashes game?
 
 tech rocket jump - jumping produces an explosion at your feet that lets you jump extra high, but does some damage
   require electric reactive armor?
@@ -457,6 +460,7 @@ level boss: fires a line intersection in a random direction every few seconds.
 possible names for tech
   astrophage
   strange loop
+  homeostasis
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   swarm intelligence - for a drone tech

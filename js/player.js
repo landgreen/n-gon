@@ -325,7 +325,9 @@ const m = {
                     !tech.tech[i].isNonRefundable &&
                     tech.tech[i].name !== "many-worlds" &&
                     tech.tech[i].name !== "Ψ(t) collapse" &&
-                    tech.tech[i].name !== "non-unitary operator"
+                    tech.tech[i].name !== "non-unitary operator" &&
+                    tech.tech[i].name !== "-quantum leap-"
+
                 ) {
                     totalTech += tech.tech[i].count
                     tech.tech[i].remove();
@@ -504,7 +506,7 @@ const m = {
         if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.33
         if (tech.isImmortal) dmg *= 0.66
-        if (tech.isHarmReduceAfterKill) dmg *= (m.lastKillCycle + 300 > m.cycle) ? 0.33 : 1.15
+        if (tech.isHarmReduceNoKill) dmg *= (m.lastKillCycle + 300 < m.cycle) ? 0.28 : 1.1
         if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.15
@@ -2819,7 +2821,7 @@ const m = {
                                             // body[i].force.y -= body[i].mass * simulation.g; //remove gravity effects
                                             //blocks drift towards center of pilot wave
                                             const sub = Vector.sub(m.fieldPosition, body[i].position)
-                                            const push = Vector.mult(Vector.normalise(sub), 0.0007 * body[i].mass * Vector.magnitude(sub))
+                                            const push = Vector.mult(Vector.normalise(sub), 0.0001 * body[i].mass * Vector.magnitude(sub))
                                             body[i].force.x += push.x
                                             body[i].force.y += push.y - body[i].mass * simulation.g //remove gravity effects
                                             // if (body[i].collisionFilter.category !== cat.bullet) {

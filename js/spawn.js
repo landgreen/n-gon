@@ -1710,7 +1710,7 @@ const spawn = {
         Composite.add(engine.world, cons[cons.length - 1]);
         cons[len2].length = 100 + 1.5 * radius;
         me.cons2 = cons[len2];
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) //normal is 1,  most bosses have 0.25
+        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) //normal is 1,  most bosses have 0.25
         me.do = function() {
             // this.armor();
             this.gravity();
@@ -1733,11 +1733,12 @@ const spawn = {
 
         for (let i = 0; i < nodes; ++i) {
             spawn.stabber(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius, 12);
-            Matter.Body.setDensity(mob[mob.length - 1], 0.004); //extra dense //normal is 0.001 //makes effective life much larger
+            Matter.Body.setDensity(mob[mob.length - 1], 0.003); //extra dense //normal is 0.001 //makes effective life much larger
+            mob[mob.length - 1].damageReduction = 0.5
             targets.push(mob[mob.length - 1].id) //track who is in the node boss, for shields
         }
 
-        const attachmentStiffness = 0.05
+        const attachmentStiffness = 0.02
         spawn.constrain2AdjacentMobs(nodes, attachmentStiffness, true); //loop mobs together
 
         for (let i = 0; i < nodes; ++i) { //attach to center mob
@@ -1745,7 +1746,7 @@ const spawn = {
                 bodyA: me,
                 bodyB: mob[mob.length - i - 1],
                 stiffness: attachmentStiffness,
-                damping: 0.01
+                damping: 0.03
             });
             Composite.add(engine.world, consBB[consBB.length - 1]);
         }
@@ -2942,9 +2943,9 @@ const spawn = {
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
         me.accelMag = 0.00038 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.01;
-        me.swordRadiusMax = 450 + 7 * simulation.difficulty;
+        me.swordRadiusMax = 500 + 8 * simulation.difficulty;
         me.laserAngle = 0;
-        me.swordDamage = 0.0015 * simulation.dmgScale
+        me.swordDamage = 0.002 * simulation.dmgScale
 
         spawn.shield(me, x, y, 1);
         Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger

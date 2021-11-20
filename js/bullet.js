@@ -741,7 +741,6 @@ const b = {
             bullet[me].endCycle = simulation.cycle + Math.floor(input.down ? 120 : 80);
             bullet[me].restitution = 0.4;
             bullet[me].do = function() {
-                // console.log(this.mass * 0.0025)
                 this.force.y += this.mass * 0.0025; //extra gravity for harder arcs
             };
             Composite.add(engine.world, bullet[me]); //add bullet to world
@@ -1171,6 +1170,150 @@ const b = {
             }
         }
     },
+    dart(where, angle = m.angle, size = 0.8) {
+        //find a target
+        const closest = {
+            score: 10000,
+            position: null
+        }
+        for (let i = 0, len = mob.length; i < len; ++i) {
+            if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, where, mob[i].position).length === 0) {
+                const dot = Vector.dot({ x: Math.cos(angle), y: Math.sin(angle) }, Vector.normalise(Vector.sub(mob[i].position, where))) //the dot product of diff and dir will return how much over lap between the vectors
+                const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
+                // if (dist < closest.score && ((dist > 500 && dot > 0) || (dot > 0.9))) { //target closest mob that player is looking at and isn't too close to target
+                if (dist < closest.score && dot > 0.9 - 0.0004 * dist) { //target closest mob that player is looking at and isn't too close to target
+                    closest.score = dist
+                    closest.position = mob[i].position
+                }
+            }
+        }
+        if (!closest.position) {
+            // const unit = Vector.mult(sub(simulation.mouseInGame, where), 10000)
+            closest.position = Vector.mult(Vector.sub(simulation.mouseInGame, where), 10000)
+        }
+        const me = bullet.length;
+        bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -20 * size, y: 2 * size, index: 0, isInternal: false }, { x: -20 * size, y: -2 * size, index: 1, isInternal: false }, { x: 5 * size, y: -2 * size, index: 4, isInternal: false }, { x: 20 * size, y: 0, index: 3, isInternal: false }, { x: 5 * size, y: 2 * size, index: 4, isInternal: false }], {
+            cycle: 0,
+            angle: angle,
+            friction: 1,
+            frictionAir: 0.15,
+            thrustMag: 0.03,
+            turnRate: 0.15, //0.015
+            drawStringControlMagnitude: 3000 + 5000 * Math.random(),
+            drawStringFlip: (Math.round(Math.random()) ? 1 : -1),
+            dmg: 7, //damage done in addition to the damage from momentum
+            classType: "bullet",
+            endCycle: simulation.cycle + 120,
+            collisionFilter: {
+                category: cat.bullet,
+                mask: tech.isShieldPierce ? cat.body | cat.mob | cat.mobBullet : cat.body | cat.mob | cat.mobBullet | cat.mobShield,
+            },
+            minDmgSpeed: 0,
+            lookFrequency: Math.floor(7 + Math.random() * 3),
+            density: 0.001, //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.035 when buffed
+            beforeDmg(who) {
+                if (tech.isShieldPierce && who.isShielded) { //disable shields
+                    who.isShielded = false
+                    requestAnimationFrame(() => { who.isShielded = true });
+                }
+                if (tech.fragments) {
+                    b.targetedNail(this.vertices[2], tech.fragments * 4)
+                    this.endCycle = 0;
+                }
+                if (!who.isBadTarget) {
+                    this.frictionAir = 0.01
+                    this.do = this.doNoTargeting
+                }
+            },
+            onEnd() {},
+            doNoTargeting: function() {
+                // this.force.y += this.mass * 0.001;
+                if (Matter.Query.collides(this, map).length) { //stick in walls
+                    this.collisionFilter.mask = 0;
+                    Matter.Body.setAngularVelocity(this, 0)
+                    Matter.Body.setVelocity(this, {
+                        x: 0,
+                        y: 0
+                    });
+                    this.do = () => {
+                        // if (!Matter.Query.collides(this, map).length) this.force.y += this.mass * 0.001;
+                    }
+                }
+            },
+            do() {
+                if (!m.isBodiesAsleep) {
+                    this.cycle++
+                    // if (this.cycle > 40) {
+                    //     this.frictionAir = 0.003
+                    //     this.do = this.doNoTargeting
+                    // }
+                    // if (closest.target) { //rotate towards the target
+                    const face = { x: Math.cos(this.angle), y: Math.sin(this.angle) };
+                    const vectorGoal = Vector.normalise(Vector.sub(this.position, closest.position));
+                    const cross = Vector.cross(vectorGoal, face)
+                    if (cross > 0.01) {
+                        Matter.Body.rotate(this, this.turnRate * Math.sqrt(cross));
+                    } else if (cross < 0.01) {
+                        Matter.Body.rotate(this, -this.turnRate * Math.sqrt(Math.abs(cross)));
+                    }
+                    this.force.x += this.thrustMag * this.mass * Math.cos(this.angle);
+                    this.force.y += this.thrustMag * this.mass * Math.sin(this.angle);
+                    // }
+                    if (Matter.Query.collides(this, map).length) { //stick in walls
+                        this.collisionFilter.mask = 0;
+                        Matter.Body.setAngularVelocity(this, 0)
+                        Matter.Body.setVelocity(this, {
+                            x: 0,
+                            y: 0
+                        });
+                        this.do = this.doNoTargeting
+                    }
+                    // else if (!(this.cycle % 2)) { //look for a target if you don't have one
+                    //     simulation.drawList.push({ //add dmg to draw queue
+                    //         x: this.position.x,
+                    //         y: this.position.y,
+                    //         radius: 10,
+                    //         color: simulation.mobDmgColor,
+                    //         time: simulation.drawTime
+                    //     });
+                    //     let closest = {
+                    //         distance: 2000,
+                    //         target: null
+                    //     }
+                    //     const dir = Vector.normalise(this.velocity) //make a vector for direction of length 1
+                    //     for (let i = 0, len = mob.length; i < len; ++i) {
+                    //         if (
+                    //             mob[i].alive && !mob[i].isBadTarget &&
+                    //             Matter.Query.ray(map, this.position, mob[i].position).length === 0 && //check for map in Line of sight
+                    //             Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, this.position))) > 0.55 //the dot product of diff and dir will return how much over lap between the vectors
+                    //         ) {
+                    //             const dist = Vector.magnitude(Vector.sub(this.position, mob[i].position))
+                    //             if (dist < closest.distance) {
+                    //                 closest.distance = dist
+                    //                 closest.target = mob[i]
+                    //             }
+                    //         }
+                    //     }
+                    //     if (closest.target) {
+                    //         target = closest.target
+                    //         this.turnRate = 0.05
+                    //         this.frictionAir = 0.8
+                    //     }
+                    // }
+                }
+            },
+        });
+        Matter.Body.setVelocity(bullet[me], {
+            x: m.Vx / 2 + 40 * Math.cos(bullet[me].angle),
+            y: m.Vy / 2 + 40 * Math.sin(bullet[me].angle)
+        });
+        // if (!closest.target) {
+        //     bullet[me].frictionAir = 0.002
+        //     bullet[me].do = bullet[me].doNoTargeting
+        // }
+        Composite.add(engine.world, bullet[me]); //add bullet to world
+
+    },
     harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 15) {
         const me = bullet.length;
         const returnRadius = 100 * Math.sqrt(harpoonSize)
@@ -1188,13 +1331,13 @@ const b = {
             endCycle: simulation.cycle + totalCycles * 2.5 + 15,
             collisionFilter: {
                 category: cat.bullet,
-                mask: tech.isNeedleShieldPierce ? cat.map | cat.body | cat.mob | cat.mobBullet : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield,
+                mask: tech.isShieldPierce ? cat.map | cat.body | cat.mob | cat.mobBullet : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield,
             },
             minDmgSpeed: 0,
             lookFrequency: Math.floor(7 + Math.random() * 3),
             density: tech.harpoonDensity, //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.035 when buffed
             beforeDmg(who) {
-                if (tech.isNeedleShieldPierce && who.isShielded) { //disable shields
+                if (tech.isShieldPierce && who.isShielded) { //disable shields
                     who.isShielded = false
                     requestAnimationFrame(() => { who.isShielded = true });
                 }
@@ -1892,6 +2035,11 @@ const b = {
                     const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.006 * push * Math.min(6, best.who.mass))
                     Matter.Body.applyForce(best.who, path[index], force)
                 }
+            } else if (tech.isLaserPush && best.who.classType === "body") {
+                const index = path.length - 1
+                Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.94, y: best.who.velocity.y * 0.94 });
+                const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.006 * push * Math.min(6, best.who.mass))
+                Matter.Body.applyForce(best.who, path[index], force)
             }
         };
         const reflection = function() { // https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
@@ -1923,7 +2071,7 @@ const b = {
                     };
                     damage *= reflectivity
                     laserHitMob();
-                    //I'm not clear on how this works, but it gets ride of a bug where the laser reflects inside a block, often vertically.
+                    //I'm not clear on how this works, but it gets rid of a bug where the laser reflects inside a block, often vertically.
                     //I think it checks to see if the laser is reflecting off a different part of the same block, if it is "inside" a block
                     if (i % 2) {
                         if (lastBestOdd === best.who) break
@@ -2487,7 +2635,7 @@ const b = {
             //total 0.24 + 0.3 average
             dmg: 0.34 + 0.12 * tech.isDroneTeleport + 0.15 * tech.isDroneFastLook, //damage done in addition to the damage from momentum
             lookFrequency: (tech.isDroneFastLook ? 20 : 70) + Math.floor(17 * Math.random()),
-            endCycle: simulation.cycle + Math.floor((950 + 400 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction) + 5 * RADIUS + Math.max(0, 150 - b.length),
+            endCycle: simulation.cycle + Math.floor((950 + 400 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction) + 5 * RADIUS + Math.max(0, 150 - bullet.length),
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -2507,7 +2655,6 @@ const b = {
                         b.drone({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
                         bullet[bullet.length - 1].endCycle = Infinity
                     } else {
-
                         this.endCycle -= max
                     }
                 } else {
@@ -2692,7 +2839,7 @@ const b = {
             restitution: 0.4 + 0.199 * Math.random(),
             dmg: 0, //0.24   damage done in addition to the damage from momentum   and radiation
             lookFrequency: 120 + Math.floor(23 * Math.random()),
-            endCycle: simulation.cycle + Math.floor((900 + 110 * Math.random()) * tech.isBulletsLastLonger / tech.droneRadioDamage) + 5 * RADIUS + Math.max(0, 150 - 2 * b.length),
+            endCycle: simulation.cycle + Math.floor((900 + 110 * Math.random()) * tech.isBulletsLastLonger / tech.droneRadioDamage) + 5 * RADIUS + Math.max(0, 150 - 2 * bullet.length),
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -3123,7 +3270,7 @@ const b = {
     needle(angle = m.angle) {
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(m.pos.x + 40 * Math.cos(m.angle), m.pos.y + 40 * Math.sin(m.angle), 75, 0.75, b.fireAttributes(angle));
-        bullet[me].collisionFilter.mask = tech.isNeedleShieldPierce ? cat.body : cat.body | cat.mobShield
+        bullet[me].collisionFilter.mask = tech.isShieldPierce ? cat.body : cat.body | cat.mobShield
         Matter.Body.setDensity(bullet[me], 0.00001); //0.001 is normal
         bullet[me].endCycle = simulation.cycle + 100;
         bullet[me].immuneList = []
@@ -3151,7 +3298,7 @@ const b = {
                                 dmg *= 0.25
                             }
                             if (tech.isCrit && who.isStunned) dmg *= 4
-                            who.damage(dmg, tech.isNeedleShieldPierce);
+                            who.damage(dmg, tech.isShieldPierce);
                             if (who.alive) who.foundPlayer();
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: this.position.x,
@@ -4115,6 +4262,8 @@ const b = {
                     }
                 } else if (tech.isRivets) {
                     this.fire = this.fireRivets
+                } else if (tech.isDarts) {
+                    this.fire = this.fireDarts
                 } else if (tech.isNeedles) {
                     this.fire = this.fireNeedles
                 } else if (tech.nailInstantFireRate) {
@@ -4127,6 +4276,22 @@ const b = {
             },
             do() {},
             fire() {},
+            // for (let i = 0; i < 5; i++) {
+            //     b.dart(where, m.angle + 0.1 * i)
+            //     b.dart(where, m.angle - 0.1 * i)
+            // }
+            fireDarts() {
+                const where = {
+                    x: m.pos.x + 30 * Math.cos(m.angle),
+                    y: m.pos.y + 30 * Math.sin(m.angle)
+                }
+                m.fireCDcycle = m.cycle + 10 * b.fireCDscale; // cool down
+                b.dart(where, m.angle) //+ 0.6 * (Math.random() - 0.5)
+                // const spread = 0.5
+                // b.dart(where, m.angle + spread)
+                // b.dart(where, m.angle)
+                // b.dart(where, m.angle - spread)
+            },
             fireRecoilNails() {
                 if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
                 const CD = Math.max(11 - 0.08 * (m.cycle - this.startingHoldCycle), 1) //CD scales with cycles fire is held down
@@ -5172,7 +5337,7 @@ const b = {
                 bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 20, 4.5, b.fireAttributes(dir, false));
                 b.fireProps(input.down ? 45 : 25, input.down ? 30 : 16, dir, me); //cd , speed
                 Matter.Body.setDensity(bullet[me], 0.000001);
-                bullet[me].endCycle = simulation.cycle + 480 + Math.max(0, 120 - 2 * b.length);
+                bullet[me].endCycle = simulation.cycle + 480 + Math.max(0, 120 - 2 * bullet.length);
                 bullet[me].frictionAir = 0;
                 bullet[me].friction = 0.5;
                 bullet[me].radius = 4.5;
@@ -5415,6 +5580,7 @@ const b = {
                 const harpoonSize = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
                 const totalCycles = 7 * (tech.isFilament ? 1 + 0.01 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
                 if (input.down) {
+
                     if (tech.isRailGun) {
                         function pushAway(range) { //push away blocks when firing
                             for (let i = 0, len = mob.length; i < len; ++i) {
@@ -5443,7 +5609,7 @@ const b = {
                         const size = 3 + tech.isLargeHarpoon * 0.1 * Math.sqrt(this.ammo)
                         bullet[me] = Bodies.rectangle(0, 0, 0.015, 0.0015, { //start as a small shape that can't even be seen
                             vertexGoal: [{ x: -40 * size, y: 2 * size, index: 0, isInternal: false }, { x: -40 * size, y: -2 * size, index: 1, isInternal: false }, { x: 50 * size, y: -3 * size, index: 3, isInternal: false }, { x: 30 * size, y: 2 * size, index: 4, isInternal: false }],
-                            density: 0.008, //0.001 is normal
+                            density: 0.015, //0.001 is normal
                             restitution: 0,
                             frictionAir: 0,
                             dmg: 0, //damage done in addition to the damage from momentum
@@ -5454,17 +5620,18 @@ const b = {
                             },
                             minDmgSpeed: 5,
                             beforeDmg(who) {
-                                if (who.shield) {
+                                if (tech.isShieldPierce && who.isShielded) { //disable shields
+                                    who.isShielded = false
+                                    requestAnimationFrame(() => { who.isShielded = true });
+                                }
+                                if (who.shield && !tech.isShieldPierce) {
                                     for (let i = 0, len = mob.length; i < len; i++) {
                                         if (mob[i].id === who.shieldTargetID) { //apply some knock back to shield mob before shield breaks
                                             Matter.Body.setVelocity(mob[i], Vector.mult(Vector.normalise(this.velocity), 10));
                                             break
                                         }
                                     }
-                                    Matter.Body.setVelocity(this, {
-                                        x: -0.4 * this.velocity.x,
-                                        y: -0.4 * this.velocity.y
-                                    });
+                                    Matter.Body.setVelocity(this, { x: -0.4 * this.velocity.x, y: -0.4 * this.velocity.y });
                                 } else {
                                     if (tech.fragments && this.speed > 10) {
                                         b.targetedNail(this.position, tech.fragments * 17)
@@ -5488,6 +5655,12 @@ const b = {
                             }
 
                             if ((!input.fire && this.charge > 0.6)) { //fire on mouse release or on low energy
+                                // if (tech.isDarts) {
+                                //     for (let i = 0; i < 5; i++) {
+                                //         b.dart(where, m.angle + 0.1 * i)
+                                //         b.dart(where, m.angle - 0.1 * i)
+                                //     }
+                                // }
                                 Matter.Body.setVertices(this, this.vertexGoal) //take on harpoon shape
                                 m.fireCDcycle = m.cycle + 2; // set fire cool down
                                 //normal bullet behavior occurs after firing, overwrites this function
@@ -5623,7 +5796,7 @@ const b = {
                         }
                     } else {
 
-                        // if (true) {
+                        // if (true) { //grappling hook,  not working really
                         //     if (m.immuneCycle < m.cycle + 60) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                         //     b.harpoon(where, closest.target, m.angle, harpoonSize, false, 15)
                         //     m.fireCDcycle = m.cycle + 50 * b.fireCDscale; // cool down
@@ -5645,7 +5818,6 @@ const b = {
                         }
                         b.harpoon(where, closest.target, m.angle, harpoonSize, false, 15)
                         m.fireCDcycle = m.cycle + 50 * b.fireCDscale; // cool down
-                        // }
                     }
                 } else if (tech.extraHarpoons) {
                     const range = 450 * (tech.isFilament ? 1 + 0.005 * Math.min(110, this.ammo) : 1)

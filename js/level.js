@@ -12,14 +12,17 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
+            // m.immuneCycle = Infinity //you can't take damage
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.setField("molecular assembler")
+            // b.giveGuns("laser")
+            // b.giveGuns("nail gun")
             // b.giveGuns("harpoon")
-            // tech.giveTech("railgun")
-            // tech.giveTech("capacitor bank")
-            // tech.giveTech("half-wave rectifier")
+            // tech.giveTech("darts")
+            // tech.giveTech("incendiary ammunition")
+            // tech.giveTech("relativistic momentum")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("antiscience")
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
@@ -210,6 +213,30 @@ const level = {
         tech.isDeathAvoidedThisLevel = false;
         simulation.updateTechHUD();
         simulation.clearNow = true; //triggers in simulation.clearMap to remove all physics bodies and setup for new map
+    },
+    populateLevels() {
+        simulation.isHorizontalFlipped = (Math.random() < 0.5) ? true : false //if true, some maps are flipped horizontally
+        level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
+        if (simulation.isCommunityMaps) {
+            level.levels.push("stronghold");
+            level.levels.push("basement");
+            level.levels.push("crossfire");
+            level.levels.push("vats")
+            level.levels.push("n-gon")
+            level.levels.push("house");
+            level.levels.push("perplex");
+            level.levels.push("coliseum");
+            level.levels.push("tunnel");
+            level.levels = shuffle(level.levels); //shuffles order of maps
+            level.levels.splice(0, 9); //remove some random levels to make up for adding the community levels
+        } else {
+            level.levels = shuffle(level.levels); //shuffles order of maps
+        }
+        if (!build.isExperimentSelection || (build.hasExperimentalMode && !simulation.isCheating)) { //experimental mode is endless, unless you only have an experiment Tech
+            level.levels.unshift("intro"); //add level to the start of the randomized levels list
+            level.levels.push("gauntlet"); //add level to the end of the randomized levels list
+            level.levels.push("final"); //add level to the end of the randomized levels list
+        }
     },
     flipHorizontal() {
         const flipX = (who) => {
@@ -2309,8 +2336,10 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
+
+        //???
         level.difficultyIncrease(40) //30 is near max on hard  //60 is near max on why
-        spawn.starter(1900, -500, 200) //big boy
+        // spawn.starter(1900, -500, 200) //big boy
 
         // spawn.spiderBoss(1700, -500)
         // spawn.launcherBoss(3200, -500)
@@ -2324,11 +2353,13 @@ const level = {
         // spawn.growBossCulture(3200, -500)
         // spawn.blinkBoss(1700, -500)
         // spawn.snakeSpitBoss(3200, -500)
-
         // spawn.laserBombingBoss(1700, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.blockBoss(1700, -500)
         // spawn.slashBoss(3200, -500)
+        // spawn.spiderBoss(3200, -500)
+        // spawn.tetherBoss(1700, -500) //go to actual level?
+
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
         // spawn.slashBoss(1900, -500)
@@ -2340,7 +2371,7 @@ const level = {
         // spawn.blinkBoss(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        // spawn.laser(1800, -120)
+        spawn.laser(1800, -320)
         // spawn.laserBombingBoss(1600, -500)
         // spawn.laserTargetingBoss(1600, -500)
         // spawn.laserBoss(1600, -500)

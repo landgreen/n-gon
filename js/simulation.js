@@ -616,28 +616,7 @@ const simulation = {
             Composite.add(engine.world, [player])
         }
 
-        simulation.isHorizontalFlipped = (Math.random() < 0.5) ? true : false //if true, some maps are flipped horizontally
-        level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
-        if (simulation.isCommunityMaps) {
-            level.levels.push("stronghold");
-            level.levels.push("basement");
-            level.levels.push("crossfire");
-            level.levels.push("vats")
-            level.levels.push("n-gon")
-            level.levels.push("house");
-            level.levels.push("perplex");
-            level.levels.push("coliseum");
-            level.levels.push("tunnel");
-            level.levels = shuffle(level.levels); //shuffles order of maps
-            level.levels.splice(0, 9); //remove some random levels to make up for adding the community levels
-        } else {
-            level.levels = shuffle(level.levels); //shuffles order of maps
-        }
-        if (!build.isExperimentSelection) { //experimental mode is endless
-            level.levels.unshift("intro"); //add level to the start of the randomized levels list
-            level.levels.push("gauntlet"); //add level to the end of the randomized levels list
-            level.levels.push("final"); //add level to the end of the randomized levels list
-        }
+        level.populateLevels()
 
         input.endKeySensing();
         b.removeAllGuns();
@@ -736,6 +715,7 @@ const simulation = {
         }
         simulation.isCheating = false
         simulation.firstRun = false;
+        build.hasExperimentalMode = false
         build.isExperimentSelection = false;
         build.isExperimentRun = false;
 
