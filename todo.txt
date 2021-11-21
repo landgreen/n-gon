@@ -1,26 +1,16 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: Occam's razor - remove 50% of your tech and guns; `for each removed get 36% damage
+change: torpor - if you have NOT killed a mob in the last 5 seconds reduce harm by 66% (no negative effect though)
 
-tech dormancy removed
-tech: predator - if you have killed a mob in the last 5 seconds increase damage by 50% and disable energy regen
-tech: torpor - gives the opposite of it's previous effect
-  if you have NOT killed a mob in the last 5 seconds reduce harm by 72%, else increase it by 10%
-
-relativistic momentum - pushes blocks in addition to mobs
-  not much benefit, but it's fun
-supply chain:  still doubles ammo, but now also adds 5% JUNK (yay)
-  it no longer has any tech requirements
-inductive coupling: 600% -> 700% regen while crouched
-
-JUNK tech: density - blocks are 100x times less dense
-
-tech descriptions can change their text dynamically now
-  only a few tech are using this option so far
 
 ******************************************************** TODO ********************************************************
 
-if a mob has died in the last 5 seconds 100% damage and no energy regen
+reduce some common in game console triggers, but lengthen default console time
+  don't log ammo?
+  don't log health
+  cap length of console?
+
+tech if you are inside the MACHO halo get a benefit
 
 dart: a new bullet type for string-less harpoons
   can turn harder

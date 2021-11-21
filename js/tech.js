@@ -601,7 +601,7 @@
                     tech.isCrouchAmmo = true
                 },
                 remove() {
-                    tech.isExtraChoice = false;
+                    tech.isCrouchAmmo = false;
                 }
             },
             {
@@ -1506,7 +1506,7 @@
             {
                 name: "dynamo-bot upgrade",
                 link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">dynamo-bot upgrade</a>`,
-                description: "<strong>convert</strong> your current bots to <strong>dynamo-bots</strong><br>increase regen to <strong>19</strong> <strong class='color-f'>energy</strong> per second",
+                description: "<strong>convert</strong> your current bots to <strong>dynamo-bots</strong><br>increase regen to <strong>20</strong> <strong class='color-f'>energy</strong> per second",
                 maxCount: 1,
                 count: 0,
                 frequency: 3,
@@ -2545,7 +2545,7 @@
             },
             {
                 name: "Maxwell's demon",
-                description: "<strong class='color-f'>energy</strong> above your max decays <strong>92%</strong> slower<br><strong>+18%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+                description: "<strong class='color-f'>energy</strong> above your max decays <strong>95%</strong> slower<br><strong>+10%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
                 maxCount: 1,
                 count: 0,
                 frequency: 2,
@@ -2555,8 +2555,8 @@
                 },
                 requires: "energy above your max",
                 effect() {
-                    tech.overfillDrain = 0.85 //70% = 1-(1-0.75)/(1-0.15) //92% = 1-(1-0.75)/(1-0.87)
-                    this.refundAmount += tech.addJunkTechToPool(0.18)
+                    tech.overfillDrain = 0.92 //70% = 1-(1-0.75)/(1-0.15) //92% = 1-(1-0.75)/(1-0.87)
+                    this.refundAmount += tech.addJunkTechToPool(0.1)
                 },
                 refundAmount: 0,
                 remove() {
@@ -2664,7 +2664,7 @@
             },
             {
                 name: "torpor",
-                description: "if a mob has <strong>not died</strong> in the last <strong>5 seconds</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>72%</strong> else increase it by <strong>10%</strong>",
+                description: "if a mob has <strong>not died</strong> in the last <strong>5 seconds</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong>",
                 maxCount: 1,
                 count: 0,
                 frequency: 1,
@@ -4931,14 +4931,14 @@
                 name: "fault tolerance",
                 description: "spawn <strong>8</strong> <strong>drones</strong> that last <strong>forever</strong><br>remove your <strong>drone gun</strong>",
                 isGunTech: true,
-                maxCount: 3,
+                maxCount: 1,
                 count: 0,
-                frequency: 2,
-                frequencyDefault: 2,
+                frequency: 1,
+                frequencyDefault: 1,
                 allowed() {
-                    return tech.haveGunCheck("drones", false) || tech.isForeverDrones
+                    return tech.haveGunCheck("drones", false)
                 },
-                requires: "drones, fault tolerance",
+                requires: "drones",
                 effect() {
                     const num = 8
                     tech.isForeverDrones += num
@@ -8552,7 +8552,10 @@
                 },
                 requires: "at least 4 research",
                 effect() {
-                    for (let i = 0; i < powerUps.research.count; i++) powerUps.directSpawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "research");
+                    const dist = 10 * powerUps.research.count + 100
+                    for (let i = 0; i < powerUps.research.count; i++) {
+                        powerUps.directSpawn(m.pos.x + dist * (Math.random() - 0.5), m.pos.y + dist * (Math.random() - 0.5), "research");
+                    }
                     powerUps.research.count = 0
                 },
                 remove() {}

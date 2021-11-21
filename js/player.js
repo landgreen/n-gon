@@ -506,7 +506,7 @@ const m = {
         if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.33
         if (tech.isImmortal) dmg *= 0.66
-        if (tech.isHarmReduceNoKill) dmg *= (m.lastKillCycle + 300 < m.cycle) ? 0.28 : 1.1
+        if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.33
         if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.15
