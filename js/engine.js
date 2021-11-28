@@ -186,6 +186,7 @@ function collisionChecks(event) {
                                 color: simulation.playerDmgColor,
                                 time: simulation.drawTime
                             });
+                            if (tech.isLessDamageReduction && !mob[k].shield) mob[k].damageReduction *= mob[k].isBoss ? 1.005 : 1.05
                             return;
                         }
                         //mob + body collisions
@@ -231,15 +232,15 @@ function collisionChecks(event) {
 }
 
 //determine if player is on the ground
-Events.on(engine, "collisionStart", function(event) {
+Events.on(engine, "collisionStart", function (event) {
     playerOnGroundCheck(event);
     // playerHeadCheck(event);
     if (m.alive) collisionChecks(event);
 });
-Events.on(engine, "collisionActive", function(event) {
+Events.on(engine, "collisionActive", function (event) {
     playerOnGroundCheck(event);
     // playerHeadCheck(event);
 });
-Events.on(engine, "collisionEnd", function(event) {
+Events.on(engine, "collisionEnd", function (event) {
     playerOffGroundCheck(event);
 });

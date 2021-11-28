@@ -321,7 +321,7 @@ const powerUps = {
             }
             if (tech.isRerollBots) {
                 let delay = 0
-                for (const cost = 2 + Math.floor(0.2 * b.totalBots()); powerUps.research.count > cost - 1; powerUps.research.count -= cost) {
+                for (const cost = 2 + Math.floor(0.1666 * b.totalBots()); powerUps.research.count > cost - 1; powerUps.research.count -= cost) {
                     delay += 500
                     setTimeout(() => {
                         b.randomBot()
@@ -469,30 +469,30 @@ const powerUps = {
                         if (tech.ammoCap) {
                             const ammoAdded = Math.ceil(target.ammoPack * 0.7 * tech.ammoCap) //0.7 is average
                             target.ammo = ammoAdded
-                            simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}`)
+                            // simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}`)
                         } else {
                             const ammoAdded = Math.ceil((0.7 * Math.random() + 0.7 * Math.random()) * target.ammoPack)
                             target.ammo += ammoAdded
-                            simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
+                            // simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
                         }
                     }
                 } else { //give ammo to all guns in inventory
-                    let textLog = ""
+                    // let textLog = ""
                     for (let i = 0, len = b.inventory.length; i < len; i++) {
                         const target = b.guns[b.inventory[i]]
                         if (target.ammo !== Infinity) {
                             if (tech.ammoCap) {
                                 const ammoAdded = Math.ceil(target.ammoPack * 0.45 * tech.ammoCap) //0.45 is average
                                 target.ammo = ammoAdded
-                                textLog += `${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}<br>`
+                                // textLog += `${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}<br>`
                             } else {
                                 const ammoAdded = Math.ceil((0.45 * Math.random() + 0.45 * Math.random()) * target.ammoPack) //Math.ceil(Math.random() * target.ammoPack)
                                 target.ammo += ammoAdded
-                                textLog += `${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}<br>`
+                                // textLog += `${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}<br>`
                             }
                         }
                     }
-                    simulation.makeTextLog(textLog)
+                    // simulation.makeTextLog(textLog)
                 }
                 // } else { //give ammo to all guns in inventory
                 //     for (let i = 0, len = b.inventory.length; i < len; i++) {

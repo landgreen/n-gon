@@ -1,49 +1,45 @@
 ******************************************************** NEXT PATCH **************************************************
 
-change: torpor - if you have NOT killed a mob in the last 5 seconds reduce harm by 66% (no negative effect though)
+tech: affine connection - wormholes can now tunnel through the map at 200% increased energy cost
+tech: regression - after bullets hit a mob, the mob takes 5% more future damage (0.5% for bosses)
+tech: axion - while inside the MACHO halo, 75% of your total harm reduction is added as damage
 
+mob: launcherOne - launches 1 big seeker bullet that chases you
+black holes boss and final boss spawn big seeker bullets that chases you during the black hole phase
+
+applied science no longer gives research (just a random tech for every gun you have)
+bot fabrication increase cost every 5 -> x6 bots
+
+average console time to disappear is 3 -> 4 seconds
+ammo power ups no longer log ammo to in game console for performance reasons
+
+JUNK tech: catabolysis - set max health to 1; double your current ammo 10 times (2^10 = 1024x ammo)
 
 ******************************************************** TODO ********************************************************
 
-reduce some common in game console triggers, but lengthen default console time
-  don't log ammo?
-  don't log health
-  cap length of console?
+new late game level that is easier if you can: platform well, jump high, immune to slime, wormhole through walls, fly fast
+  climb vertically to avoid rising slime
 
-tech if you are inside the MACHO halo get a benefit
+field tech - disable blocking, but does high damage to mobs inside field
+  and maybe slows mobs it damages
+
+mob/boss that fires a laser at player, but give player time to avoid
+  laser isn't always on
+  they target where player was 1 second ago
+  they turn to face player?
 
 dart: a new bullet type for string-less harpoons
   can turn harder
+  dart, draw quick line to indicate targeting
   can get new targets?
-
-convert tech descriptions into a method()
-  this means the text would generate when you: press pause, or display options, or open experiment mode
-  this would allow the description to reference variables inside it, like this.count
-  who could use this: 
-    Occam's razor
-    
 tech: dart - alt fire several small harpoons, with guidance
   requires not railgun
-
-tech: after bullets hit a mob, the mob takes 1% more damage
-  this.damageReduction *= 1.01
-  only for drones?
-  only for drones, spores, worms, ice-IX?
-
-
-make it easier to push blocks around with your body
-  part of negative mass?
-  link to other block tech
-
-tech: instead of throwing a block, give bots that last for 20 seconds
 
 tech: open a new tab for n-gon, spawn things in the original game based on events in new game
   if you die in new die in original?
   new is n-gon classic?
   make a JUNK tech?
 if you die in original open a tab with a new n-gon that starts on a random level with a random load out.  if you clear the level you come back to life in the original?
-
-tech or field aspect - Firing now doesn't alert any mob but the mob you hit
 
 bug - death while paused crashes game?
 
@@ -448,7 +444,6 @@ level boss: fires a line intersection in a random direction every few seconds.
 ******************************************************** LORE ********************************************************
 
 possible names for tech
-  astrophage
   strange loop
   homeostasis
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
@@ -461,7 +456,6 @@ possible names for tech
   Gödel's incompleteness
   quantum zeno effect  (perturbation of a system prevents some systems from evolving because it scrambles coherence)  (apply to lasers, fields)
   counterfactual - something false
-  axion - maybe a 3rd dark matter type tech
   Pigeonhole principle - if there are several things that are matched up
   regression to the mean
   phlogiston theory is a superseded scientific theory that postulated the existence of a fire-like element called phlogiston
@@ -469,13 +463,13 @@ possible names for tech
   evolutionary cosmology
   eternal inflation
   hypergraph
-  gnarl
   SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
   nuclear pasta - hard matter in neutron star
   nonlocal
   fine-tuned universe
   eternalism https://en.wikipedia.org/wiki/Eternalism_(philosophy_of_time)
   axial motor
+  hall effect thrusters
  
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

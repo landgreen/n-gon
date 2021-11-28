@@ -16,18 +16,17 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("molecular assembler")
+            // m.setField("wormhole")
             // b.giveGuns("laser")
             // b.giveGuns("nail gun")
             // b.giveGuns("harpoon")
-            // tech.giveTech("darts")
-            // tech.giveTech("incendiary ammunition")
+            // tech.giveTech("affine connection")
+            // tech.giveTech("regression")
             // tech.giveTech("relativistic momentum")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("antiscience")
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
-            // tech.isCancelDuplication = true
 
             level.intro(); //starting level
             // level.testing(); //not in rotation, used for testing
@@ -132,8 +131,8 @@ const level = {
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false); //start
         }
     },
-    custom() {},
-    customTopLayer() {},
+    custom() { },
+    customTopLayer() { },
     setDifficulty() {
         simulation.difficulty = 0
         b.dmgScale = 1; //damage done by player decreases each level
@@ -575,7 +574,7 @@ const level = {
         body[body.length] = rotor1
         body[body.length] = rotor2
 
-        setTimeout(function() {
+        setTimeout(function () {
             rotor.collisionFilter.category = cat.body;
             rotor.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet //| cat.map
         }, 1000);
@@ -590,7 +589,7 @@ const level = {
         Composite.add(engine.world, constraint);
 
         if (rotate) {
-            rotor.rotate = function() {
+            rotor.rotate = function () {
                 if (!m.isBodiesAsleep) {
                     Matter.Body.applyForce(rotor, {
                         x: rotor.position.x + 100,
@@ -793,7 +792,7 @@ const level = {
             y: 0
         }, angleB)
 
-        draw = function() {
+        draw = function () {
             ctx.beginPath(); //portal
             let v = this.vertices;
             ctx.moveTo(v[0].x, v[0].y);
@@ -803,7 +802,7 @@ const level = {
             ctx.fillStyle = this.color
             ctx.fill();
         }
-        query = function(isRemoveBlocks = false) {
+        query = function (isRemoveBlocks = false) {
             if (Matter.Query.collides(this, [player]).length === 0) { //not touching player
                 if (player.isInPortal === this) player.isInPortal = null
             } else if (player.isInPortal !== this) { //touching player
@@ -998,7 +997,7 @@ const level = {
             opticalQuery() {
                 if (this.isOn) {
                     //draw
-                    ctx.fillStyle = `hsla(0, 100%, 50%,${0.6+0.4*Math.random()})`
+                    ctx.fillStyle = `hsla(0, 100%, 50%,${0.6 + 0.4 * Math.random()})`
                     ctx.fillRect(this.min.x, this.min.y, this.width, this.height)
                     //collision with player
                     if (this.height > 0 && Matter.Query.region([player], this).length && !(m.isCloak)) {
@@ -1418,7 +1417,7 @@ const level = {
                                 button.isReadyToFire = true
                             } else if (button.isReadyToFire && !button.isUp) {
                                 button.isReadyToFire = false
-                                fireBlock = function(xPos, yPos) {
+                                fireBlock = function (xPos, yPos) {
                                     const index = body.length
                                     spawn.bodyRect(xPos, yPos, 35 + 50 * Math.random(), 35 + 50 * Math.random());
                                     const bodyBullet = body[body.length - 1]
@@ -1474,7 +1473,7 @@ const level = {
                                 button.isReadyToFire = true
                             } else if (button.isReadyToFire && !button.isUp) {
                                 button.isReadyToFire = false
-                                fireBlock = function(xPos, yPos) {
+                                fireBlock = function (xPos, yPos) {
                                     const index = body.length
                                     spawn.bodyRect(xPos, yPos, 35 + 50 * Math.random(), 35 + 50 * Math.random());
                                     const bodyBullet = body[body.length - 1]
@@ -1569,7 +1568,7 @@ const level = {
                                         y: -5
                                     });
                                 }
-                                ctx.fillStyle = `rgba(255,0,255,${0.2+0.7*Math.random()})`
+                                ctx.fillStyle = `rgba(255,0,255,${0.2 + 0.7 * Math.random()})`
                                 ctx.fillRect(bounds.min.x, y - 185, 38, 70);
                             }
                         }
@@ -1636,7 +1635,7 @@ const level = {
                                         y: -5
                                     });
                                 }
-                                ctx.fillStyle = `rgba(255,0,255,${0.2+0.7*Math.random()})`
+                                ctx.fillStyle = `rgba(255,0,255,${0.2 + 0.7 * Math.random()})`
                                 ctx.fillRect(bounds.min.x, y - 185, 38, 70);
                             }
                         }
@@ -1888,7 +1887,7 @@ const level = {
                                 Composite.add(engine.world, who); //add to world
                             }
                             let r = 150
-                            let hexagon = `${r} 0   ${r*Math.cos(5.236)} ${r*Math.sin(5.236)}    ${r*Math.cos(4.189)} ${r*Math.sin(4.189)}     ${-r} 0     ${r*Math.cos(2.0944)} ${r*Math.sin(2.0944)}      ${r*Math.cos(1.0472)} ${r*Math.sin(1.0472)}  `
+                            let hexagon = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
                             //450 horizontal spread //  -130-130-130 = 390 vertical
                             if (Math.random() < 0.5) {
                                 spawn.mapVertex(x + 775, y + -260, hexagon);
@@ -1977,13 +1976,13 @@ const level = {
                             }
                             //right side hexagons
                             let r = 300
-                            let hexagon = `${r} 0   ${r*Math.cos(5.236)} ${r*Math.sin(5.236)}    ${r*Math.cos(4.189)} ${r*Math.sin(4.189)}     ${-r} 0     ${r*Math.cos(2.0944)} ${r*Math.sin(2.0944)}      ${r*Math.cos(1.0472)} ${r*Math.sin(1.0472)}  `
+                            let hexagon = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
                             spawn.mapVertex(x + 1640, y + -365, hexagon);
                             // r = 275
                             // let hexagonHalf = `${r} 0   ${r*Math.cos(5.236)} ${r*Math.sin(5.236)}    ${r*Math.cos(4.189)} ${r*Math.sin(4.189)}     ${-r} 0 `
                             // spawn.mapVertex(x + 2300, y + -75, hexagonHalf);
                             r = 150
-                            const hexagon150 = `${r} 0   ${r*Math.cos(5.236)} ${r*Math.sin(5.236)}    ${r*Math.cos(4.189)} ${r*Math.sin(4.189)}     ${-r} 0     ${r*Math.cos(2.0944)} ${r*Math.sin(2.0944)}      ${r*Math.cos(1.0472)} ${r*Math.sin(1.0472)}  `
+                            const hexagon150 = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
                             // spawn.mapVertex(x + 1750, y + -550, hexagon150);
                             spawn.mapVertex(x + 1750, y + -1100, hexagon150);
                             spawn.mapVertex(x + 1750, y + -1650, hexagon150);
@@ -1991,7 +1990,7 @@ const level = {
 
                             //left side
                             r = 350
-                            let hexagonHalf = `${r} 0   ${r*Math.cos(5.236)} ${r*Math.sin(5.236)}    ${r*Math.cos(4.189)} ${r*Math.sin(4.189)}     ${-r} 0 `
+                            let hexagonHalf = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0 `
                             spawn.mapVertex(x + 425, y + -90, hexagonHalf);
 
                             spawn.mapVertex(x + 850, y + -500, hexagon150);
@@ -2338,10 +2337,10 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        level.difficultyIncrease(40) //30 is near max on hard  //60 is near max on why
-        // spawn.starter(1900, -500, 200) //big boy
+        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        spawn.starter(1900, -500, 200) //big boy
 
-        // spawn.spiderBoss(1700, -500)
+        // spawn.launcherOne(1700, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
         // spawn.powerUpBoss(3200, -500)
@@ -2371,7 +2370,7 @@ const level = {
         // spawn.blinkBoss(1600, -500)
         // spawn.laserTargetingBoss(1700, -120)
         // spawn.bomberBoss(1400, -500)
-        spawn.laser(1800, -320)
+        // spawn.laser(1800, -320)
         // spawn.laserBombingBoss(1600, -500)
         // spawn.laserTargetingBoss(1600, -500)
         // spawn.laserBoss(1600, -500)
@@ -2389,7 +2388,7 @@ const level = {
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => {};
+        level.customTopLayer = () => { };
         level.setPosToSpawn(0, -50); //normal spawn
         level.exit.x = 1500;
         level.exit.y = -1875;
@@ -5519,7 +5518,7 @@ const level = {
                 if (mob[i].isBoss) me = mob[i]
             }
             if (me) {
-                me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
+                me.onDeath = function () { //please don't edit the onDeath function this causes serious bugs
                     spawnCouloirEnHaut()
                     doorSortieSalle.isOpen = false;
                 };
@@ -5535,7 +5534,7 @@ const level = {
                 if (mob[i].isBoss) me = mob[i]
             }
             if (me) {
-                me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
+                me.onDeath = function () { //please don't edit the onDeath function this causes serious bugs
                     spawnCouloirEnHaut()
                     doorSortieSalle.isOpen = false;
                 };
@@ -5760,11 +5759,11 @@ const level = {
         body[body.length] = part4;
         body[body.length] = part5;
         body[body.length] = part6;
-        setTimeout(function() {
+        setTimeout(function () {
             chair.collisionFilter.category = cat.body;
             chair.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
         }, 1000);
-        setTimeout(function() {
+        setTimeout(function () {
             chair2.collisionFilter.category = cat.body;
             chair2.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
         }, 1000);
@@ -5819,7 +5818,7 @@ const level = {
         body[body.length] = rightUpperLeg
         body[body.length] = rightLowerArm
         body[body.length] = rightUpperArm
-        setTimeout(function() {
+        setTimeout(function () {
             person.collisionFilter.category = cat.body;
             person.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
         }, 1000);
@@ -6211,7 +6210,7 @@ const level = {
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => {};
+        level.customTopLayer = () => { };
         level.defaultZoom = 1800
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#dcdcde";
@@ -7270,7 +7269,7 @@ const level = {
                 body[body.length] = part1;
                 body[body.length] = part2;
                 body[body.length] = part3;
-                setTimeout(function() {
+                setTimeout(function () {
                     compoundParts.collisionFilter.category = cat.body;
                     compoundParts.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
                 }, 1000);
@@ -7389,8 +7388,8 @@ const level = {
 
             // prevent the user from getting into the secreter room without defeating all mobs
             if (m.pos.x > 1500 && m.pos.x < 2500 && m.pos.y > -4000 && m.pos.y < -3500 && mob.reduce((a, i) => {
-                    return a || ((Math.sqrt((i.position.x - 3600) * (i.position.x - 3600) + (i.position.y + 3600) * (i.position.y + 3600)) < 20000) && i.isDropPowerUp);
-                }, false) && !emergencyActivated) {
+                return a || ((Math.sqrt((i.position.x - 3600) * (i.position.x - 3600) + (i.position.y + 3600) * (i.position.y + 3600)) < 20000) && i.isDropPowerUp);
+            }, false) && !emergencyActivated) {
                 Matter.Body.setPosition(player, {
                     x: 2800,
                     y: m.pos.y

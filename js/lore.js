@@ -11,7 +11,6 @@ const lore = {
         } else if (simulation.difficultyMode === 6) {
             this.techGoal = 1
         }
-
     },
     talkingColor: "#dff", //set color of graphic on level.null
     isSpeech: false,
@@ -41,6 +40,17 @@ const lore = {
             lore.sentence++
             lore.conversation[lore.chapter][lore.sentence]() //go to next sentence in the chapter and play it
         }
+    },
+    unlockTesting() {
+        if (localSettings.loreCount < 1) localSettings.loreCount = 1
+        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
+        document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
+        simulation.makeTextLog(`<span class='color-var'>lore</span>.unlockTesting()`, Infinity);
+
+        sound.portamento(50)
+        sound.portamento(83.333)
+        sound.portamento(166.666)
     },
     anand: {
         color: "#e0c",
@@ -490,19 +500,6 @@ const lore = {
     // () => { lore.miriam.text("And that is why you keep running these fighting simulations.") },
     // () => { lore.miriam.text("You haven't been researching new technology.") },
     // () => { lore.miriam.text("You've are planning how to escape.") },
-
-
-    unlockTesting() {
-        if (localSettings.loreCount < 1) localSettings.loreCount = 1
-        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-        document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
-        document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
-        simulation.makeTextLog(`<span class='color-var'>lore</span>.unlockTesting()`, Infinity);
-
-        sound.portamento(50)
-        sound.portamento(83.333)
-        sound.portamento(166.666)
-    },
 }
 
 
