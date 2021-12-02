@@ -17,10 +17,10 @@ const level = {
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.setField("wormhole")
-            // b.giveGuns("laser")
+            // b.giveGuns("shotgun")
             // b.giveGuns("nail gun")
-            // b.giveGuns("harpoon")
-            // tech.giveTech("affine connection")
+            // b.giveGuns("harpoon") 
+            // tech.giveTech("slug")
             // tech.giveTech("regression")
             // tech.giveTech("relativistic momentum")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
@@ -58,7 +58,6 @@ const level = {
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
             // lore.techCount = 3
-
             // simulation.isCheating = false //true;
             // localSettings.loreCount = 3; //this sets what conversation is heard
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -131,8 +130,8 @@ const level = {
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false); //start
         }
     },
-    custom() { },
-    customTopLayer() { },
+    custom() {},
+    customTopLayer() {},
     setDifficulty() {
         simulation.difficulty = 0
         b.dmgScale = 1; //damage done by player decreases each level
@@ -574,7 +573,7 @@ const level = {
         body[body.length] = rotor1
         body[body.length] = rotor2
 
-        setTimeout(function () {
+        setTimeout(function() {
             rotor.collisionFilter.category = cat.body;
             rotor.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet //| cat.map
         }, 1000);
@@ -589,7 +588,7 @@ const level = {
         Composite.add(engine.world, constraint);
 
         if (rotate) {
-            rotor.rotate = function () {
+            rotor.rotate = function() {
                 if (!m.isBodiesAsleep) {
                     Matter.Body.applyForce(rotor, {
                         x: rotor.position.x + 100,
@@ -792,7 +791,7 @@ const level = {
             y: 0
         }, angleB)
 
-        draw = function () {
+        draw = function() {
             ctx.beginPath(); //portal
             let v = this.vertices;
             ctx.moveTo(v[0].x, v[0].y);
@@ -802,7 +801,7 @@ const level = {
             ctx.fillStyle = this.color
             ctx.fill();
         }
-        query = function (isRemoveBlocks = false) {
+        query = function(isRemoveBlocks = false) {
             if (Matter.Query.collides(this, [player]).length === 0) { //not touching player
                 if (player.isInPortal === this) player.isInPortal = null
             } else if (player.isInPortal !== this) { //touching player
@@ -1417,7 +1416,7 @@ const level = {
                                 button.isReadyToFire = true
                             } else if (button.isReadyToFire && !button.isUp) {
                                 button.isReadyToFire = false
-                                fireBlock = function (xPos, yPos) {
+                                fireBlock = function(xPos, yPos) {
                                     const index = body.length
                                     spawn.bodyRect(xPos, yPos, 35 + 50 * Math.random(), 35 + 50 * Math.random());
                                     const bodyBullet = body[body.length - 1]
@@ -1473,7 +1472,7 @@ const level = {
                                 button.isReadyToFire = true
                             } else if (button.isReadyToFire && !button.isUp) {
                                 button.isReadyToFire = false
-                                fireBlock = function (xPos, yPos) {
+                                fireBlock = function(xPos, yPos) {
                                     const index = body.length
                                     spawn.bodyRect(xPos, yPos, 35 + 50 * Math.random(), 35 + 50 * Math.random());
                                     const bodyBullet = body[body.length - 1]
@@ -2388,7 +2387,7 @@ const level = {
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => { };
+        level.customTopLayer = () => {};
         level.setPosToSpawn(0, -50); //normal spawn
         level.exit.x = 1500;
         level.exit.y = -1875;
@@ -5518,7 +5517,7 @@ const level = {
                 if (mob[i].isBoss) me = mob[i]
             }
             if (me) {
-                me.onDeath = function () { //please don't edit the onDeath function this causes serious bugs
+                me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
                     spawnCouloirEnHaut()
                     doorSortieSalle.isOpen = false;
                 };
@@ -5534,7 +5533,7 @@ const level = {
                 if (mob[i].isBoss) me = mob[i]
             }
             if (me) {
-                me.onDeath = function () { //please don't edit the onDeath function this causes serious bugs
+                me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
                     spawnCouloirEnHaut()
                     doorSortieSalle.isOpen = false;
                 };
@@ -5759,11 +5758,11 @@ const level = {
         body[body.length] = part4;
         body[body.length] = part5;
         body[body.length] = part6;
-        setTimeout(function () {
+        setTimeout(function() {
             chair.collisionFilter.category = cat.body;
             chair.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
         }, 1000);
-        setTimeout(function () {
+        setTimeout(function() {
             chair2.collisionFilter.category = cat.body;
             chair2.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
         }, 1000);
@@ -5818,7 +5817,7 @@ const level = {
         body[body.length] = rightUpperLeg
         body[body.length] = rightLowerArm
         body[body.length] = rightUpperArm
-        setTimeout(function () {
+        setTimeout(function() {
             person.collisionFilter.category = cat.body;
             person.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
         }, 1000);
@@ -6210,7 +6209,7 @@ const level = {
             level.exit.draw();
             level.enter.draw();
         };
-        level.customTopLayer = () => { };
+        level.customTopLayer = () => {};
         level.defaultZoom = 1800
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#dcdcde";
@@ -7269,7 +7268,7 @@ const level = {
                 body[body.length] = part1;
                 body[body.length] = part2;
                 body[body.length] = part3;
-                setTimeout(function () {
+                setTimeout(function() {
                     compoundParts.collisionFilter.category = cat.body;
                     compoundParts.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
                 }, 1000);
@@ -7388,8 +7387,8 @@ const level = {
 
             // prevent the user from getting into the secreter room without defeating all mobs
             if (m.pos.x > 1500 && m.pos.x < 2500 && m.pos.y > -4000 && m.pos.y < -3500 && mob.reduce((a, i) => {
-                return a || ((Math.sqrt((i.position.x - 3600) * (i.position.x - 3600) + (i.position.y + 3600) * (i.position.y + 3600)) < 20000) && i.isDropPowerUp);
-            }, false) && !emergencyActivated) {
+                    return a || ((Math.sqrt((i.position.x - 3600) * (i.position.x - 3600) + (i.position.y + 3600) * (i.position.y + 3600)) < 20000) && i.isDropPowerUp);
+                }, false) && !emergencyActivated) {
                 Matter.Body.setPosition(player, {
                     x: 2800,
                     y: m.pos.y

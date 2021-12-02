@@ -1,24 +1,35 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: affine connection - wormholes can now tunnel through the map at 200% increased energy cost
-tech: regression - after bullets hit a mob, the mob takes 5% more future damage (0.5% for bosses)
-tech: axion - while inside the MACHO halo, 75% of your total harm reduction is added as damage
-
-mob: launcherOne - launches 1 big seeker bullet that chases you
-black holes boss and final boss spawn big seeker bullets that chases you during the black hole phase
-
-applied science no longer gives research (just a random tech for every gun you have)
-bot fabrication increase cost every 5 -> x6 bots
-
-average console time to disappear is 3 -> 4 seconds
-ammo power ups no longer log ammo to in game console for performance reasons
-
-JUNK tech: catabolysis - set max health to 1; double your current ammo 10 times (2^10 = 1024x ammo)
+pneumatic hammer (20 -> +18% size and damage effects)
+  now applies to nails, slugs, needles, in addition to rivets
+integrated armament 20->25% damage, also if you switch guns converts guntech to new gun 
+backward induction removed
+symbiosis removes 1 -> 0.5 max health per mob kill
+plasma jet - costs 1 -> 2 research, and goes a bit farther
+Occam's razor gives 36 -> 40% damage per removed tech
 
 ******************************************************** TODO ********************************************************
 
+needle benefit from pneumatic hammer?
+all nails?
+
+total guntech:
+  nail gun needle @ 4
+  base nail gun @ 5
+
 new late game level that is easier if you can: platform well, jump high, immune to slime, wormhole through walls, fly fast
   climb vertically to avoid rising slime
+  populate with multiple boss mobs that can't drop tech
+    bosses spawn in pairs
+
+antimatter (assuming something else isn't already named this); requires negative mass, causes damage to self and enemies within range while active
+
+increase mass and movement speed at the same time
+  increase jump differently because it scales extra with mass
+    m.defaultMass = 4.5
+    m.definePlayerMass()
+
+give history boss legs?
 
 field tech - disable blocking, but does high damage to mobs inside field
   and maybe slows mobs it damages
