@@ -256,8 +256,8 @@ const powerUps = {
             if (tech.isCancelDuplication) {
                 tech.cancelCount++
                 tech.maxDuplicationEvent()
-                simulation.makeTextLog(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${0.045}`)
-                simulation.circleFlare(0.045);
+                simulation.makeTextLog(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${0.042}`)
+                simulation.circleFlare(0.042);
             }
             if (tech.isCancelRerolls) {
                 for (let i = 0, len = 5 + 5 * Math.random(); i < len; i++) {
@@ -550,7 +550,7 @@ const powerUps = {
             let choice3 = -1
             if (choice1 > -1) {
                 let text = ""
-                if (!tech.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("field",true)'>✕</div>`
+                if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("field",true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>field</h3>`
                 text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice1].name}</div> ${m.fieldUpgrades[choice1].description}</div>`
                 if (!tech.isDeterminism) {
@@ -665,7 +665,7 @@ const powerUps = {
                 }
 
                 let text = ""
-                if (!tech.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("tech",true)'>✕</div>`
+                if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("tech",true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>tech</h3>`
                 let choice1 = pick()
                 let choice2 = -1
@@ -770,7 +770,7 @@ const powerUps = {
             let choice3 = -1
             if (choice1 > -1) {
                 let text = ""
-                if (!tech.isDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("gun",true)'>✕</div>`
+                if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("gun",true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>gun</h3>`
                 text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
                 if (!tech.isDeterminism) {
@@ -873,7 +873,7 @@ const powerUps = {
     randomPowerUpCounter: 0,
     spawnBossPowerUp(x, y) { //boss spawns field and gun tech upgrades
         if (level.levels[level.onLevel] !== "final") {
-            if (m.fieldMode === 0 && !tech.isSuperDeterminism) {
+            if (m.fieldMode === 0) {
                 powerUps.spawn(x, y, "field")
             } else {
                 powerUps.randomPowerUpCounter++;
@@ -1026,7 +1026,7 @@ const powerUps = {
     },
     spawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
         if (
-            (!tech.isSuperDeterminism || (target === 'tech' || target === 'heal' || target === 'ammo')) &&
+            (!tech.isSuperDeterminism || (target !== 'research')) &&
             !(tech.isEnergyNoAmmo && target === 'ammo') &&
             (!simulation.isNoPowerUps || (target === 'research' || target === 'heal' || target === 'ammo'))
         ) {

@@ -878,7 +878,7 @@ window.addEventListener("keydown", function(event) {
                     build.pauseGrid()
                     document.body.style.cursor = "auto";
 
-                    if (tech.isGunSwitchField || simulation.testing) {
+                    if (tech.isPauseSwitchField || simulation.testing) {
                         document.getElementById("pause-field").addEventListener("click", () => {
                             const energy = m.energy
                             m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field

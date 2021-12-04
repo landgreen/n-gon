@@ -1,14 +1,38 @@
 ******************************************************** NEXT PATCH **************************************************
 
-pneumatic hammer (20 -> +18% size and damage effects)
-  now applies to nails, slugs, needles, in addition to rivets
-integrated armament 20->25% damage, also if you switch guns converts guntech to new gun 
-backward induction removed
-symbiosis removes 1 -> 0.5 max health per mob kill
-plasma jet - costs 1 -> 2 research, and goes a bit farther
-Occam's razor gives 36 -> 40% damage per removed tech
+intro screen is more grey
+experiment button is larger and darker
+
+tech: nanowires - needles tunnel through blocks and map, +20% damage
+
+Occam's razor gives 40->50% damage for each removed tech
+determinism no longer removes the cancel button
+superdeterminism now removes the cancel button and research, but doesn't remove gun and field power ups
+railgun damage is doubled
+regression does more damage per hit: 5->6% vs. mobs and 0.5->1% vs. bosses
+
+bug fixes
 
 ******************************************************** TODO ********************************************************
+
+some boss mobs need invulnerability phases
+  maybe trigger immunity to damage for 5-10s after taking the first hit?
+
+static electricity: walking on the ground does something
+  regen energy
+  build charge, and discharge to damage mobs
+
+suggestion: particle accelerator: perfect diamagneticism accelerates projectiles passing through it, increasing their damage and velocity. Alternatively, matter wave's projectiles accelerate, with increased damage the faster they're travelling
+
+don't in game console log scrap bots
+
+increase mass and movement speed at the same time
+  increase jump differently because it scales extra with mass
+    m.defaultMass = 4.5
+    m.definePlayerMass()
+
+tech selection menu choices randomize every second
+  JUNK tech?
 
 needle benefit from pneumatic hammer?
 all nails?
@@ -23,11 +47,6 @@ new late game level that is easier if you can: platform well, jump high, immune 
     bosses spawn in pairs
 
 antimatter (assuming something else isn't already named this); requires negative mass, causes damage to self and enemies within range while active
-
-increase mass and movement speed at the same time
-  increase jump differently because it scales extra with mass
-    m.defaultMass = 4.5
-    m.definePlayerMass()
 
 give history boss legs?
 
@@ -481,6 +500,7 @@ possible names for tech
   eternalism https://en.wikipedia.org/wiki/Eternalism_(philosophy_of_time)
   axial motor
   hall effect thrusters
+  spaghettification
  
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players
@@ -637,3 +657,11 @@ add sounds
     // tone(396)
     // tone(445.50)
     // tone(495)
+
+
+
+
+
+
+
+

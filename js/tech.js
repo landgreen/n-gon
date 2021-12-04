@@ -229,7 +229,7 @@ const tech = {
         if (tech.isEnergyDamage) dmg *= 1 + m.energy / 11;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
         if (tech.isRerollDamage) dmg *= 1 + 0.037 * powerUps.research.count
-        if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.1995
+        if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
         if (tech.isBotDamage) dmg *= 1 + 0.07 * b.totalBots()
@@ -237,7 +237,7 @@ const tech = {
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
-        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.04 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.45 : 0))
+        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.042 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.45 : 0))
     },
     isScaleMobsWithDuplication: false,
     maxDuplicationEvent() {
@@ -729,7 +729,7 @@ const tech = {
         },
         {
             name: "regression",
-            description: "bullet <strong>collisions</strong> increase <strong>vulnerability</strong> to<br><strong class='color-d'>damage</strong> by <strong>5%</strong> for mobs <em>(0.5% for bosses)</em>",
+            description: "bullet <strong>collisions</strong> increase <strong>vulnerability</strong> to<br><strong class='color-d'>damage</strong> by <strong>6%</strong> for mobs <em>(1% for bosses)</em>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3039,7 +3039,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (powerUps.research.count > 2 || build.isExperimentSelection) && !tech.isDeterminism
+                return (powerUps.research.count > 2 || build.isExperimentSelection) && !tech.isSuperDeterminism
             },
             requires: "not determinism, at least 3 research",
             effect() {
@@ -3197,7 +3197,7 @@ const tech = {
             },
             requires: "NOT EXPERIMENT MODE, more than 6 tech",
             removePercent: 0.5,
-            damagePerRemoved: 0.4,
+            damagePerRemoved: 0.5,
             effect() {
                 let pool = []
                 for (let i = 0, len = tech.tech.length; i < len; i++) { // spawn new tech power ups
@@ -3207,6 +3207,7 @@ const tech = {
                 let removeCount = 0
                 for (let i = 0, len = pool.length * this.removePercent; i < len; i++) removeCount += tech.removeTech(pool[i])
                 tech.OccamDamage = 1 + this.damagePerRemoved * removeCount
+                // tech.OccamDamage = Math.pow(1.25, removeCount)
             },
             remove() {
                 tech.OccamDamage = 0;
@@ -3333,15 +3334,15 @@ const tech = {
         },
         {
             name: "futures exchange",
-            description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.2%</strong> power up <strong class='color-dup'>duplication</strong> chance",
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return tech.duplicationChance() < 1 && !tech.isDeterminism
+                return tech.duplicationChance() < 1 && !tech.isSuperDeterminism
             },
-            requires: "below 100% duplication chance, not determinism",
+            requires: "below 100% duplication chance, not superdeterminism",
             effect() {
                 tech.isCancelDuplication = true //search for tech.cancelCount  to balance
                 powerUps.setDupChance(); //needed after adjusting duplication chance
@@ -3359,9 +3360,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !tech.isDeterminism
+                return !tech.isSuperDeterminism
             },
-            requires: "not determinism",
+            requires: "not superdeterminism",
             effect() {
                 tech.isCancelRerolls = true
             },
@@ -3498,7 +3499,7 @@ const tech = {
         },
         {
             name: "vector fields",
-            description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong> <strong class='color-m'>tech</strong><br>spawn a <strong class='color-f'>field</strong>",
+            description: "</strong>triple</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong> <strong class='color-m'>tech</strong><br>spawn a <strong class='color-f'>field</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3512,13 +3513,13 @@ const tech = {
             effect() {
                 powerUps.spawn(m.pos.x, m.pos.y, "field");
                 for (let i = 0, len = tech.tech.length; i < len; i++) {
-                    if (tech.tech[i].isFieldTech) tech.tech[i].frequency *= 2
+                    if (tech.tech[i].isFieldTech) tech.tech[i].frequency *= 3
                 }
             },
             remove() {
                 // if (this.count > 1) {
                 //     for (let i = 0, len = tech.tech.length; i < len; i++) {
-                //         if (tech.tech[i].isFieldTech) tech.tech[i].frequency /= 2
+                //         if (tech.tech[i].isFieldTech) tech.tech[i].frequency /= 3
                 //     }
                 // }
             }
@@ -3598,16 +3599,16 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !tech.isSuperDeterminism
+                return true
             },
             requires: "not superdeterminism",
             effect() {
-                tech.isGunSwitchField = true;
+                tech.isPauseSwitchField = true;
                 for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
             },
             remove() {
-                if (tech.isGunSwitchField) {
-                    tech.isGunSwitchField = false;
+                if (tech.isPauseSwitchField) {
+                    tech.isPauseSwitchField = false;
                     powerUps.research.changeRerolls(-6)
                 }
             }
@@ -3659,7 +3660,7 @@ const tech = {
         },
         {
             name: "determinism",
-            description: "spawn <strong>5</strong> <strong class='color-m'>tech</strong>, but you have <strong>no cancel</strong><br>and <strong>1 choice</strong> for <strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong>",
+            description: "spawn <strong>5</strong> <strong class='color-m'>tech</strong>, but you have only<br> <strong>1 choice</strong> for <strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3667,9 +3668,9 @@ const tech = {
             isBadRandomOption: true,
             isNonRefundable: true,
             allowed() {
-                return !tech.isExtraChoice && !tech.isCancelDuplication && !tech.isCancelRerolls
+                return !tech.isExtraChoice && !tech.isExtraGunField
             },
-            requires: "not emergence, not futures or commodities exchanges",
+            requires: "not emergence, cross disciplinary",
             effect: () => {
                 tech.isDeterminism = true;
                 //if you change the number spawned also change it in Born rule
@@ -3696,17 +3697,17 @@ const tech = {
         },
         {
             name: "superdeterminism",
-            description: `spawn <strong>5</strong> <strong class='color-m'>tech</strong><br>${powerUps.orb.research(1)}, <strong class='color-g'>guns</strong>, and <strong class='color-f'>fields</strong> no longer <strong>spawn</strong>`,
+            description: `spawn <strong>5</strong> <strong class='color-m'>tech</strong>, but you have <strong>no cancel</strong><br>and ${powerUps.orb.research(1)}, no longer <strong>spawn</strong>`,
             maxCount: 1,
             count: 0,
-            frequency: 3,
-            frequencyDefault: 3,
+            frequency: 4,
+            frequencyDefault: 4,
             isBadRandomOption: true,
             isNonRefundable: true,
             allowed() {
-                return tech.isDeterminism && !tech.isAnsatz && !tech.isGunSwitchField
+                return tech.isDeterminism && !tech.isAnsatz
             },
-            requires: "determinism, not unified field theory, not ansatz",
+            requires: "determinism, not ansatz",
             effect: () => {
                 tech.isSuperDeterminism = true;
                 //if you change the number spawned also change it in Born rule
@@ -3835,9 +3836,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isNeedles || tech.isNeedleShot
+                return (tech.isNeedles || tech.isNeedleShot) && !tech.needleTunnel
             },
-            requires: "nail gun, needle gun, needle-shot",
+            requires: "nail gun, needle gun, needle-shot, not nanowires",
             effect() {
                 tech.isNeedleIce = true
             },
@@ -3862,6 +3863,25 @@ const tech = {
             },
             remove() {
                 tech.isShieldPierce = false
+            }
+        },
+        {
+            name: "nanowires",
+            description: `<strong>needles</strong> tunnel through <strong class='color-block'>blocks</strong> and <strong>map</strong><br>increase needle <strong class='color-d'>damage</strong> by <strong>20%</strong>`,
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return (tech.isNeedles || tech.isNeedleShot) && !tech.isNeedleIce
+            },
+            requires: "needle gun, needle-shot, not needle ice",
+            effect() {
+                tech.needleTunnel = true
+            },
+            remove() {
+                tech.needleTunnel = false
             }
         },
         {
@@ -8980,7 +9000,7 @@ const tech = {
     isRivets: null,
     isNeedles: null,
     isExplodeRadio: null,
-    isGunSwitchField: null,
+    isPauseSwitchField: null,
     isShieldPierce: null,
     isDuplicateBoss: null,
     is111Duplicate: null,
@@ -9084,5 +9104,6 @@ const tech = {
     isAxion: null,
     isWormholeMapIgnore: null,
     isLessDamageReduction: null,
-    nailSize: null
+    nailSize: null,
+    needleTunnel: null
 }
