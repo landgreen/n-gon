@@ -1,8 +1,9 @@
 //main object for spawning things in a level
 const spawn = {
-    nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture", "growBossCulture"],
+    nonCollideBossList: ["snakeBoss"], //"cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture", "growBossCulture"
     // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
-    randomLevelBoss(x, y, options = ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "powerUpBoss", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss", "snakeSpitBoss", "laserBombingBoss", "blockBoss", "slashBoss"]) {
+    // "shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",, , "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss", "snakeSpitBoss", "laserBombingBoss", , "slashBoss"
+    randomLevelBoss(x, y, options = ["snakeBoss", "powerUpBoss", "blockBoss"]) {
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
     pickList: ["starter", "starter"],
@@ -2541,6 +2542,8 @@ const spawn = {
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
         me.radius *= 2
+        // me.frictionAir = 0.02
+
         me.vertices[1].x = me.position.x + Math.cos(me.angle) * me.radius; //make one end of the triangle longer
         me.vertices[1].y = me.position.y + Math.sin(me.angle) * me.radius;
         // me.homePosition = { x: x, y: y };
@@ -2972,9 +2975,9 @@ const spawn = {
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
         me.accelMag = 0.00038 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.01;
-        me.swordRadiusMax = 500 + 8 * simulation.difficulty;
+        me.swordRadiusMax = 550 + 10 * simulation.difficulty;
         me.laserAngle = 0;
-        me.swordDamage = 0.002 * simulation.dmgScale
+        me.swordDamage = 0.0025 * simulation.dmgScale
 
         spawn.shield(me, x, y, 1);
         Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger
@@ -2984,7 +2987,49 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
+
+
+
+        me.startingDamageReduction = me.damageReduction
+        me.isInvulnerable = false
+        me.isNextInvulnerability = 0.75
+        me.invulnerabilityCountDown = 0
+        me.invulnerable = function() {
+            if (this.health < this.isNextInvulnerability) {
+                this.isNextInvulnerability = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
+                this.isInvulnerable = true
+                this.damageReduction = 0
+                this.invulnerabilityCountDown = 180
+            }
+            if (this.isInvulnerable) {
+                if (this.invulnerabilityCountDown > 0) {
+                    this.invulnerabilityCountDown--
+                    //graphics //draw a super shield?
+
+                    ctx.beginPath();
+
+                    let vertices = this.vertices;
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                    ctx.lineTo(vertices[0].x, vertices[0].y);
+                    ctx.lineWidth = 20;
+                    // ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
+                    // ctx.fill();
+                    ctx.strokeStyle = "rgba(255,255,255,0.4)";
+                    ctx.stroke();
+
+
+
+
+                } else {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                }
+            }
+        }
+
         me.do = function() {
+            this.invulnerable();
             this.checkStatus();
             this.seePlayerByHistory(60);
             this.attraction();
@@ -4266,7 +4311,7 @@ const spawn = {
                 if (mob[i].isSnakeTail && mob[i].alive) {
                     mob[i].isSnakeTail = false;
                     mob[i].do = mob[i].doActive
-                    mob[i].removeConsBB();
+                    // mob[i].removeConsBB();
                 }
             }
         };
@@ -4384,7 +4429,7 @@ const spawn = {
                 if (mob[i].isSnakeTail && mob[i].alive) {
                     mob[i].isSnakeTail = false;
                     mob[i].do = mob[i].doActive
-                    mob[i].removeConsBB();
+                    // mob[i].removeConsBB();
                 }
             }
         };
@@ -4438,24 +4483,24 @@ const spawn = {
         mobs.spawn(x, y, 8, radius, "rgba(0,180,180,0.4)");
         let me = mob[mob.length - 1];
         me.collisionFilter.mask = cat.bullet | cat.player | cat.mob //| cat.body
-        me.accelMag = 0.0004 * simulation.accelScale;
+        me.accelMag = 0.0006 * simulation.accelScale;
         me.leaveBody = false;
         me.showHealthBar = false;
         me.isDropPowerUp = false;
         // Matter.Body.setDensity(me, 0.00004); //normal is 0.001
-        me.frictionAir = 0.02;
+        me.frictionAir = 0.015;
         me.isSnakeTail = true;
         me.stroke = "transparent"
         me.onDeath = function() {
-            if (this.isSnakeTail) { //wake up tail mobs
-                for (let i = 0; i < mob.length; i++) {
-                    if (mob[i].isSnakeTail && mob[i].alive) {
-                        mob[i].isSnakeTail = false;
-                        mob[i].do = mob[i].doActive
-                        mob[i].removeConsBB();
-                    }
-                }
-            }
+            // if (this.isSnakeTail) { //wake up tail mobs
+            //     for (let i = 0; i < mob.length; i++) {
+            //         if (mob[i].isSnakeTail && mob[i].alive) {
+            //             mob[i].isSnakeTail = false;
+            //             mob[i].do = mob[i].doActive
+            //             mob[i].removeConsBB();
+            //         }
+            //     }
+            // }
         };
         me.do = function() {
             this.checkStatus();

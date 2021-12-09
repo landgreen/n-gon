@@ -518,7 +518,7 @@ const m = {
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.energyRegen === 0) dmg *= 0.34
-        if (tech.isTurret && m.crouch) dmg *= 0.4;
+        if (tech.isTurret && m.crouch) dmg *= 0.34;
         if (tech.isEntanglement && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
         }

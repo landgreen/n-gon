@@ -27,6 +27,7 @@ const level = {
             // tech.giveTech("antiscience")
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
+            // tech.tech[297].frequency = 100
 
             level.intro(); //starting level
             // level.testing(); //not in rotation, used for testing
@@ -95,7 +96,7 @@ const level = {
             }
         }
         if (tech.isExtraMaxEnergy) {
-            tech.healMaxEnergyBonus += 0.04 * powerUps.totalPowerUps //Math.min(0.02 * powerUps.totalPowerUps, 0.51)
+            tech.healMaxEnergyBonus += 0.05 * powerUps.totalPowerUps //Math.min(0.02 * powerUps.totalPowerUps, 0.51)
             m.setMaxEnergy();
         }
         if (tech.isGunCycle) {
@@ -2336,8 +2337,8 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
-        spawn.starter(1900, -500, 200) //big boy
+        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        // spawn.starter(1900, -500, 200) //big boy
 
         // spawn.launcherOne(1700, -500)
         // spawn.launcherBoss(3200, -500)
@@ -2361,7 +2362,7 @@ const level = {
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
         // spawn.slashBoss(1900, -500)
-        // spawn.sucker(1900, -500)
+        spawn.pulsar(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.growBossCulture(1200, -500)

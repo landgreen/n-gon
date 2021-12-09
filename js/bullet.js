@@ -3532,22 +3532,22 @@ const b = {
     },
     randomBot(where = player.position, isKeep = true, isLaser = true) {
         if (Math.random() < 0.166 && isLaser) {
-            b.laserBot(where)
+            b.laserBot(where, isKeep)
             if (isKeep) tech.laserBotCount++;
         } else if (Math.random() < 0.2) {
-            b.dynamoBot(where)
+            b.dynamoBot(where, isKeep)
             if (isKeep) tech.dynamoBotCount++;
         } else if (Math.random() < 0.25) {
-            b.orbitBot(where);
+            b.orbitBot(where, isKeep);
             if (isKeep) tech.orbitBotCount++;
         } else if (Math.random() < 0.33) {
-            b.nailBot(where)
+            b.nailBot(where, isKeep)
             if (isKeep) tech.nailBotCount++;
         } else if (Math.random() < 0.5) {
-            b.foamBot(where)
+            b.foamBot(where, isKeep)
             if (isKeep) tech.foamBotCount++;
         } else {
-            b.boomBot(where)
+            b.boomBot(where, isKeep)
             if (isKeep) tech.boomBotCount++;
         }
     },

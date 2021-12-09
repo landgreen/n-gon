@@ -1,30 +1,26 @@
 ******************************************************** NEXT PATCH **************************************************
 
-intro screen is more grey
-experiment button is larger and darker
-
-tech: nanowires - needles tunnel through blocks and map, +20% damage
-
-Occam's razor gives 40->50% damage for each removed tech
-determinism no longer removes the cancel button
-superdeterminism now removes the cancel button and research, but doesn't remove gun and field power ups
-railgun damage is doubled
-regression does more damage per hit: 5->6% vs. mobs and 0.5->1% vs. bosses
+several tech now have fewer requirements to unlock
+some normal tech is now considered gun tech (mostly explosion stuff)
+snakeBoss tails, stay attached to each other
+"snakeBoss", "blockBoss", "powerupBoss" are now the only bosses
 
 bug fixes
 
 ******************************************************** TODO ********************************************************
 
+suggestion: quasarBoss: inverted pulsar boss that hits everything except where its aiming
+
+pulsar mobs retarget too easily
+also they drift around too much
+
+intro map: diegeticly draw a mouse with field highlighted
+  also indicate space?
+  dynamically adjust drawing after picking up a gun 
+
 some boss mobs need invulnerability phases
   maybe trigger immunity to damage for 5-10s after taking the first hit?
 
-static electricity: walking on the ground does something
-  regen energy
-  build charge, and discharge to damage mobs
-
-suggestion: particle accelerator: perfect diamagneticism accelerates projectiles passing through it, increasing their damage and velocity. Alternatively, matter wave's projectiles accelerate, with increased damage the faster they're travelling
-
-don't in game console log scrap bots
 
 increase mass and movement speed at the same time
   increase jump differently because it scales extra with mass
@@ -33,13 +29,6 @@ increase mass and movement speed at the same time
 
 tech selection menu choices randomize every second
   JUNK tech?
-
-needle benefit from pneumatic hammer?
-all nails?
-
-total guntech:
-  nail gun needle @ 4
-  base nail gun @ 5
 
 new late game level that is easier if you can: platform well, jump high, immune to slime, wormhole through walls, fly fast
   climb vertically to avoid rising slime

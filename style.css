@@ -27,6 +27,10 @@ select {
   top: "-15px"; */
 }
 
+select option {
+    background-color: #fff;
+}
+
 input {
     /* font-family: Monaco, monospace; */
     padding: 0px 4px;
@@ -369,7 +373,8 @@ summary {
     padding: 10px;
     border-radius: 8px;
     border: 2px #333 solid;
-    background-color: #eee;
+    /* background-color: #eee; */
+    background-color: #fff;
 }
 
 #dmg {
