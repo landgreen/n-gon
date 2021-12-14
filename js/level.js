@@ -16,8 +16,8 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("wormhole")
-            // b.giveGuns("shotgun")
+            // m.setField("plasma torch")
+            // b.giveGuns("drones")
             // b.giveGuns("nail gun")
             // b.giveGuns("harpoon") 
             // tech.giveTech("needle gun")
@@ -2337,13 +2337,15 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        level.difficultyIncrease(1) //30 is near max on hard  //60 is near max on why
+        m.addHealth(Infinity)
+
         // spawn.starter(1900, -500, 200) //big boy
 
-        // spawn.launcherOne(1700, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
         // spawn.powerUpBoss(3200, -500)
+        // spawn.powerUpBossBaby(3200, -500)
         // spawn.snakeBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
         // spawn.pulsarBoss(1700, -500)
@@ -2355,28 +2357,19 @@ const level = {
         // spawn.laserBombingBoss(1700, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.blockBoss(1700, -500)
-        // spawn.slashBoss(3200, -500)
-        // spawn.spiderBoss(3200, -500)
+        // spawn.blinkBoss(3200, -500)
+        // spawn.mantisBoss(1700, -500)
         // spawn.tetherBoss(1700, -500) //go to actual level?
+        spawn.revolutionBoss(1900, -500)
+        // spawn.bomberBoss(1400, -500)
+        // spawn.cellBossCulture(1600, -500)
 
+        // spawn.launcherOne(1700, -500)
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
-        // spawn.slashBoss(1900, -500)
-        spawn.pulsar(1900, -500)
+        // spawn.pulsar(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
-        // spawn.growBossCulture(1200, -500)
-        // spawn.laserTargetingBoss(1600, -400)
-        // spawn.blinkBoss(1600, -500)
-        // spawn.laserTargetingBoss(1700, -120)
-        // spawn.bomberBoss(1400, -500)
-        // spawn.laser(1800, -320)
-        // spawn.laserBombingBoss(1600, -500)
-        // spawn.laserTargetingBoss(1600, -500)
-        // spawn.laserBoss(1600, -500)
-        // spawn.cellBossCulture(1600, -500)
-        // spawn.nodeGroup(1200, -500, "grenadier")
-        // spawn.nodeGroup(1800, -500, "grenadier")
         // spawn.nodeGroup(1200, 0, "grenadier")
         // spawn.blinkBoss(1200, -500)
         // spawn.suckerBoss(2900, -500)

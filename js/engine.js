@@ -155,7 +155,7 @@ function collisionChecks(event) {
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: pairs[i].activeContacts[0].vertex.x,
                                 y: pairs[i].activeContacts[0].vertex.y,
-                                radius: dmg * 2000,
+                                radius: Math.sqrt(dmg) * 500,
                                 color: "rgba(255,0,255,0.2)",
                                 time: simulation.drawTime
                             });
@@ -163,7 +163,7 @@ function collisionChecks(event) {
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: pairs[i].activeContacts[0].vertex.x,
                                 y: pairs[i].activeContacts[0].vertex.y,
-                                radius: dmg * 500,
+                                radius: Math.sqrt(dmg) * 200,
                                 color: simulation.mobDmgColor,
                                 time: simulation.drawTime
                             });
@@ -182,7 +182,7 @@ function collisionChecks(event) {
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: pairs[i].activeContacts[0].vertex.x,
                                 y: pairs[i].activeContacts[0].vertex.y,
-                                radius: Math.log(2 * dmg + 1.1) * 40,
+                                radius: Math.log(2 * dmg + 1.1) * 40 * mob[k].damageReduction,
                                 color: simulation.playerDmgColor,
                                 time: simulation.drawTime
                             });
@@ -217,7 +217,7 @@ function collisionChecks(event) {
                                 simulation.drawList.push({
                                     x: pairs[i].activeContacts[0].vertex.x,
                                     y: pairs[i].activeContacts[0].vertex.y,
-                                    radius: Math.log(2 * dmg + 1.1) * 40,
+                                    radius: Math.log(2 * dmg + 1.1) * 40 * mob[k].damageReduction,
                                     color: simulation.playerDmgColor,
                                     time: simulation.drawTime
                                 });

@@ -1,6 +1,36 @@
 let powerUp = [];
 
 const powerUps = {
+    ejectGraphic(color = "68, 102, 119") {
+        simulation.drawList.push({
+            x: m.pos.x,
+            y: m.pos.y,
+            radius: 100,
+            color: `rgba(${color}, 0.8)`,
+            time: 4
+        });
+        simulation.drawList.push({
+            x: m.pos.x,
+            y: m.pos.y,
+            radius: 75,
+            color: `rgba(${color}, 0.6)`,
+            time: 8
+        });
+        simulation.drawList.push({
+            x: m.pos.x,
+            y: m.pos.y,
+            radius: 50,
+            color: `rgba(${color}, 0.3)`,
+            time: 12
+        });
+        simulation.drawList.push({
+            x: m.pos.x,
+            y: m.pos.y,
+            radius: 25,
+            color: `rgba(${color}, 0.15)`,
+            time: 16
+        });
+    },
     orb: {
         research(num = 1) {
             switch (num) {
@@ -963,8 +993,11 @@ const powerUps = {
                 tech.tech[choose].isLost = true;
                 simulation.updateTechHUD();
                 m.fieldCDcycle = m.cycle + 30; //disable field so you can't pick up the ejected tech
+                return true
+            } else {
+                return false
             }
-        } else {
+        } else if (tech.tech[choose].count) {
             // simulation.makeTextLog(`<div class='circle tech'></div> &nbsp; <strong>${tech.tech[choose].name}</strong> was ejected`, 600) //message about what tech was lost
             simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
 
@@ -978,6 +1011,9 @@ const powerUps = {
             tech.tech[choose].isLost = true;
             simulation.updateTechHUD();
             m.fieldCDcycle = m.cycle + 30; //disable field so you can't pick up the ejected tech
+            return true
+        } else {
+            return false
         }
     },
     // removeRandomTech() {

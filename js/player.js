@@ -327,7 +327,6 @@ const m = {
                     tech.tech[i].name !== "Ψ(t) collapse" &&
                     tech.tech[i].name !== "non-unitary operator" &&
                     tech.tech[i].name !== "-quantum leap-"
-
                 ) {
                     totalTech += tech.tech[i].count
                     tech.tech[i].remove();

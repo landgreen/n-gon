@@ -1980,9 +1980,7 @@ const tech = {
             requires: "",
             effect() {
                 tech.isDroneOnDamage = true;
-                for (let i = 0; i < 4; i++) {
-                    b.drone() //spawn drone
-                }
+                // for (let i = 0; i < 4; i++) b.drone()
             },
             remove() {
                 tech.isDroneOnDamage = false;
@@ -5028,9 +5026,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return tech.haveGunCheck("drones", false)
+                return tech.haveGunCheck("drones", false) && !tech.isDroneRespawn && tech.isBulletsLastLonger === 1
             },
-            requires: "drones",
+            requires: "drones, not drone repair, anti-shear topology",
             effect() {
                 const num = 8
                 tech.isForeverDrones += num
@@ -5385,9 +5383,9 @@ const tech = {
             isBot: true,
             isBotTech: true,
             isNonRefundable: true,
-            requires: "foam gun, not bot upgrades NOT EXPERIMENT MODE,",
+            requires: "foam gun, NOT EXPERIMENT MODE, bot upgrades, fractionation, quantum foam",
             allowed() {
-                return tech.haveGunCheck("foam", false) && !b.hasBotUpgrade()
+                return tech.haveGunCheck("foam", false) && !b.hasBotUpgrade() && !tech.isAmmoFoamSize && !tech.foamFutureFire
             },
             effect() {
                 tech.giveTech("foam-bot upgrade")

@@ -59,7 +59,7 @@ const mobs = {
         }
 
         function applySlow(whom) {
-            if (!whom.shield && !whom.isShielded && !m.isBodiesAsleep) {
+            if (!whom.shield && !whom.isShielded && !m.isBodiesAsleep && who.damageReduction > 0) {
                 if (whom.isBoss) cycles = Math.floor(cycles * 0.25)
                 let i = whom.status.length
                 while (i--) {
@@ -98,7 +98,7 @@ const mobs = {
         }
     },
     statusStun(who, cycles = 180) {
-        if (!who.shield && !who.isShielded && !m.isBodiesAsleep) {
+        if (!who.shield && !who.isShielded && !m.isBodiesAsleep && who.damageReduction > 0) {
             Matter.Body.setVelocity(who, {
                 x: who.velocity.x * 0.8,
                 y: who.velocity.y * 0.8
@@ -150,7 +150,7 @@ const mobs = {
         }
     },
     statusDoT(who, tickDamage, cycles = 180) {
-        if (!who.isShielded && who.alive) {
+        if (!who.isShielded && who.alive && who.damageReduction > 0) {
             who.status.push({
                 effect() {
                     if ((simulation.cycle - this.startCycle) % 30 === 0 && !m.isBodiesAsleep) {
@@ -579,7 +579,7 @@ const mobs = {
             springAttack() {
                 // set new values of the ends of the spring constraints
                 const stepRange = 600
-                if (this.seePlayer.recall && Matter.Query.ray(map, this.position, player.position).length === 0) {
+                if (this.seePlayer.recall && Matter.Query.ray(map, this.position, this.seePlayer.position).length === 0) {
                     if (!(simulation.cycle % (this.seePlayerFreq * 2))) {
                         const unit = Vector.normalise(Vector.sub(this.seePlayer.position, this.position))
                         const goal = Vector.add(this.position, Vector.mult(unit, stepRange))
@@ -650,7 +650,7 @@ const mobs = {
                         }
                     };
                     //move to a random location
-                    if (!(simulation.cycle % (this.seePlayerFreq * 5))) {
+                    if (!(simulation.cycle % (this.seePlayerFreq * 4))) {
                         best = {
                             x: null,
                             y: null,
@@ -794,6 +794,27 @@ const mobs = {
                         this.force.x -= this.accelMag * this.mass;
                     } else if (this.position.x < this.seePlayer.position.x + this.hoverXOff - rangeX) {
                         this.force.x += this.accelMag * this.mass;
+                    }
+                }
+            },
+            invulnerability() {
+                if (this.isInvulnerable) {
+                    if (this.invulnerabilityCountDown > 0) {
+                        this.invulnerabilityCountDown--
+                        //graphics //draw a super shield?
+                        ctx.beginPath();
+                        let vertices = this.vertices;
+                        ctx.moveTo(vertices[0].x, vertices[0].y);
+                        for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                        ctx.lineTo(vertices[0].x, vertices[0].y);
+                        ctx.lineWidth = 20;
+                        // ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
+                        // ctx.fill();
+                        ctx.strokeStyle = "rgba(255,255,255,0.4)";
+                        ctx.stroke();
+                    } else {
+                        this.isInvulnerable = false
+                        this.damageReduction = this.startingDamageReduction
                     }
                 }
             },

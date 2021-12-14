@@ -215,32 +215,30 @@ const build = {
         if (tech.missileBotCount) botText += `<br>missile-bots: ${tech.missileBotCount}`
 
         const harm = (1 - m.harmReduction()) * 100
-        let text = ""
-        if (!simulation.isChoosing) text += `<div class="pause-grid-module">
-      <span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume</div>`
-        text += `<div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">
-        ${simulation.isCheating? "<em>lore disabled</em><br><br>": ""}
-      <strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}%
-      <br><strong class='color-harm'>harm</strong> reduction: ${harm.toFixed(harm > 90 ? 2 : 0)}%
-      <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
-      <br><strong class='color-dup'>duplication</strong> chance: ${(tech.duplicationChance()*100).toFixed(0)}%
-      ${botText}
-      <br>
-      <br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
-      <br><strong class='color-h'>health</strong>: (${(m.health*100).toFixed(0)} / ${(m.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(m.energy*100).toFixed(0)} / ${(m.maxEnergy*100).toFixed(0)})
-      <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
-      <br>mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
-      <br>
-      <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${m.cycle} cycles
-      <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
+        let text = `<div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">`
+        if (!simulation.isChoosing) text += `<br><span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume
+<br><br><svg class="SVG-button" onclick="build.shareURL(false)" width="92" height="20" style="padding:0px; margin: 1px;">
+    <g stroke='none' fill='#333' stroke-width="2" font-size="14px" font-family="Ariel, sans-serif"> <text x="5" y="15">copy build url</text></g>
+</svg><br>`
+        text += `<strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}%
+<br><strong class='color-harm'>harm</strong> reduction: ${harm.toFixed(harm > 90 ? 2 : 0)}%
+<br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
+<br><strong class='color-dup'>duplication</strong> chance: ${(tech.duplicationChance()*100).toFixed(0)}%
+${botText}
+<br>
+<br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
+<br><strong class='color-h'>health</strong>: (${(m.health*100).toFixed(0)} / ${(m.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(m.energy*100).toFixed(0)} / ${(m.maxEnergy*100).toFixed(0)})
+<br><strong class='color-g'>gun</strong>: ${b.activeGun !== null ? b.guns[b.activeGun].name: "null"} &nbsp; <strong class='color-g'>ammo</strong>: ${b.activeGun !== null ? b.guns[b.activeGun].ammo: "0"}
+<br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
+<br>mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
+<br>
+<br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${m.cycle} cycles
+<br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
 
-      <br>damage difficulty scale: ${(b.dmgScale*100).toFixed(2) }%
-      <br>harm difficulty scale: ${(simulation.dmgScale*100).toFixed(0)}%
-      <br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%
-      <br>
-      <svg class="SVG-button" onclick="build.shareURL(false)" width="110" height="25" style="padding:2px; margin: 10px;">
-        <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif"> <text x="5" y="18">copy build url</text> </g>
-      </svg>
+<br>damage difficulty scale: ${(b.dmgScale*100).toFixed(2) }%
+<br>harm difficulty scale: ${(simulation.dmgScale*100).toFixed(0)}%
+<br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%
+${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
 </div>`;
         for (let i = 0, len = b.inventory.length; i < len; i++) {
             text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div> ${b.guns[b.inventory[i]].description}</div>`

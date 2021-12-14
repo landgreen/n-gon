@@ -1932,7 +1932,7 @@ const b = {
                     simulation.drawList.push({
                         x: path[1].x,
                         y: path[1].y,
-                        radius: Math.sqrt(dmg) * 50,
+                        radius: 600 * dmg * best.who.damageReduction,
                         color: "rgba(255,0,255,0.2)",
                         time: simulation.drawTime * 4
                     });
@@ -2058,7 +2058,8 @@ const b = {
                 simulation.drawList.push({ //add dmg to draw queue
                     x: path[path.length - 1].x,
                     y: path[path.length - 1].y,
-                    radius: Math.sqrt(damage) * 100,
+                    // radius: Math.sqrt(damage) * 100 * mob[k].damageReduction,
+                    radius: 600 * damage * best.who.damageReduction,
                     color: tech.laserColorAlpha,
                     time: simulation.drawTime
                 });
@@ -2705,7 +2706,7 @@ const b = {
                 }
             },
             onEnd() {
-                if (tech.isDroneRespawn) {
+                if (tech.isDroneRespawn && b.inventory.length) {
                     const who = b.guns[b.activeGun]
                     if (who.name === "drones" && who.ammo > 0 && mob.length) {
                         b.drone({ x: this.position.x, y: this.position.y }, 0)
@@ -3178,7 +3179,7 @@ const b = {
                             for (let i = 0; i < len; i++) {
                                 if (targets.length - i > 0) {
                                     const index = Math.floor(Math.random() * targets.length)
-                                    const speed = 10 + 10 * Math.random()
+                                    const speed = 6 + 6 * Math.random()
                                     const velocity = Vector.mult(Vector.normalise(Vector.sub(targets[index].position, this.position)), speed)
                                     b.foam(this.position, Vector.rotate(velocity, 0.5 * (Math.random() - 0.5)), radius)
                                 } else {
@@ -3342,7 +3343,7 @@ const b = {
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: this.position.x,
                                     y: this.position.y,
-                                    radius: Math.log(2 * dmg + 1.1) * 40,
+                                    radius: Math.log(2 * dmg + 1.1) * 40 * who.damageReduction,
                                     color: simulation.playerDmgColor,
                                     time: simulation.drawTime
                                 });
@@ -3395,7 +3396,7 @@ const b = {
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: this.position.x,
                                     y: this.position.y,
-                                    radius: Math.log(2 * dmg + 1.1) * 40,
+                                    radius: Math.log(2 * dmg + 1.1) * 40 * who.damageReduction,
                                     color: simulation.playerDmgColor,
                                     time: simulation.drawTime
                                 });
@@ -3651,7 +3652,7 @@ const b = {
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: this.position.x,
                                     y: this.position.y,
-                                    radius: Math.log(2 * dmg + 1.1) * 40,
+                                    radius: 600 * dmg * q[i].damageReduction,
                                     color: 'rgba(0,0,0,0.4)',
                                     time: simulation.drawTime
                                 });
@@ -4204,7 +4205,8 @@ const b = {
                                 simulation.drawList.push({
                                     x: path[1].x,
                                     y: path[1].y,
-                                    radius: Math.sqrt(dmg) * 50,
+                                    // radius: Math.sqrt(dmg) * 50 * mob[k].damageReduction,
+                                    radius: 600 * dmg * best.who.damageReduction,
                                     color: "rgba(255,0,255,0.2)",
                                     time: simulation.drawTime * 4
                                 });
@@ -4297,7 +4299,7 @@ const b = {
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: this.position.x,
                                 y: this.position.y,
-                                radius: Math.log(2 * dmg + 1.1) * 40,
+                                radius: 600 * dmg * q[i].damageReduction,
                                 color: 'rgba(0,0,0,0.4)',
                                 time: simulation.drawTime
                             });
@@ -5211,7 +5213,7 @@ const b = {
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: this.position.x,
                                 y: this.position.y,
-                                radius: Math.log(2 * dmg + 1.1) * 40,
+                                radius: Math.log(2 * dmg + 1.1) * 40 * q[i].damageReduction,
                                 color: 'rgba(0,0,0,0.4)',
                                 time: simulation.drawTime
                             });
