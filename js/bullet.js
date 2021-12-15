@@ -1929,10 +1929,11 @@ const b = {
                         y: best.who.velocity.y * 0.7
                     });
                     //draw mob damage circle
+                    console.log(dmg)
                     simulation.drawList.push({
                         x: path[1].x,
                         y: path[1].y,
-                        radius: 600 * dmg * best.who.damageReduction,
+                        radius: Math.sqrt(2000 * dmg * best.who.damageReduction),
                         color: "rgba(255,0,255,0.2)",
                         time: simulation.drawTime * 4
                     });
@@ -2055,14 +2056,17 @@ const b = {
             if (best.who.alive) {
                 best.who.damage(damage);
                 best.who.locatePlayer();
-                simulation.drawList.push({ //add dmg to draw queue
-                    x: path[path.length - 1].x,
-                    y: path[path.length - 1].y,
-                    // radius: Math.sqrt(damage) * 100 * mob[k].damageReduction,
-                    radius: 600 * damage * best.who.damageReduction,
-                    color: tech.laserColorAlpha,
-                    time: simulation.drawTime
-                });
+                if (best.who.damageReduction) {
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: path[path.length - 1].x,
+                        y: path[path.length - 1].y,
+                        // radius: Math.sqrt(damage) * 100 * mob[k].damageReduction,
+                        // radius: 600 * damage * best.who.damageReduction,
+                        radius: Math.sqrt(2000 * damage * best.who.damageReduction) + 2,
+                        color: tech.laserColorAlpha,
+                        time: simulation.drawTime
+                    });
+                }
                 if (tech.isLaserPush) { //push mobs away
                     const index = path.length - 1
                     Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.94, y: best.who.velocity.y * 0.94 });
@@ -3340,13 +3344,15 @@ const b = {
                                 if (tech.isCrit && who.isStunned) dmg *= 4
                                 who.damage(dmg, tech.isShieldPierce);
                                 if (who.alive) who.foundPlayer();
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: this.position.x,
-                                    y: this.position.y,
-                                    radius: Math.log(2 * dmg + 1.1) * 40 * who.damageReduction,
-                                    color: simulation.playerDmgColor,
-                                    time: simulation.drawTime
-                                });
+                                if (who.damageReduction) {
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: this.position.x,
+                                        y: this.position.y,
+                                        radius: Math.log(dmg + 1.1) * 40 * who.damageReduction + 3,
+                                        color: simulation.playerDmgColor,
+                                        time: simulation.drawTime
+                                    });
+                                }
                             }
                         }
                     }
@@ -3393,13 +3399,15 @@ const b = {
                                 if (tech.isCrit && who.isStunned) dmg *= 4
                                 who.damage(dmg, tech.isShieldPierce);
                                 if (who.alive) who.foundPlayer();
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: this.position.x,
-                                    y: this.position.y,
-                                    radius: Math.log(2 * dmg + 1.1) * 40 * who.damageReduction,
-                                    color: simulation.playerDmgColor,
-                                    time: simulation.drawTime
-                                });
+                                if (who.damageReduction) {
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: this.position.x,
+                                        y: this.position.y,
+                                        radius: Math.log(dmg + 1.1) * 40 * who.damageReduction + 3,
+                                        color: simulation.playerDmgColor,
+                                        time: simulation.drawTime
+                                    });
+                                }
                             }
                         }
                     }
@@ -3649,13 +3657,16 @@ const b = {
                                 const dmg = 0.5 * b.dmgScale
                                 q[i].damage(dmg);
                                 if (q[i].alive) q[i].foundPlayer();
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: this.position.x,
-                                    y: this.position.y,
-                                    radius: 600 * dmg * q[i].damageReduction,
-                                    color: 'rgba(0,0,0,0.4)',
-                                    time: simulation.drawTime
-                                });
+                                if (q[i].damageReduction) {
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: this.position.x,
+                                        y: this.position.y,
+                                        // radius: 600 * dmg * q[i].damageReduction,
+                                        radius: Math.sqrt(2000 * dmg * q[i].damageReduction) + 2,
+                                        color: 'rgba(0,0,0,0.4)',
+                                        time: simulation.drawTime
+                                    });
+                                }
                             }
                         }
                     }
@@ -4202,14 +4213,17 @@ const b = {
                                     y: best.who.velocity.y * 0.7
                                 });
                                 //draw mob damage circle
-                                simulation.drawList.push({
-                                    x: path[1].x,
-                                    y: path[1].y,
-                                    // radius: Math.sqrt(dmg) * 50 * mob[k].damageReduction,
-                                    radius: 600 * dmg * best.who.damageReduction,
-                                    color: "rgba(255,0,255,0.2)",
-                                    time: simulation.drawTime * 4
-                                });
+                                if (best.who.damageReduction) {
+                                    simulation.drawList.push({
+                                        x: path[1].x,
+                                        y: path[1].y,
+                                        // radius: Math.sqrt(dmg) * 50 * mob[k].damageReduction,
+                                        // radius: 600 * dmg * best.who.damageReduction,
+                                        radius: Math.sqrt(2000 * dmg * best.who.damageReduction) + 2,
+                                        color: "rgba(255,0,255,0.2)",
+                                        time: simulation.drawTime * 4
+                                    });
+                                }
                             } else if (!best.who.isStatic) {
                                 //push blocks away
                                 const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.007 * Math.sqrt(Math.sqrt(best.who.mass)))
@@ -4296,13 +4310,16 @@ const b = {
                             const dmg = 0.4 * b.dmgScale * (this.isUpgraded ? 4 : 1) * (tech.isCrit ? 4 : 1)
                             q[i].damage(dmg);
                             if (q[i].alive) q[i].foundPlayer();
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: this.position.x,
-                                y: this.position.y,
-                                radius: 600 * dmg * q[i].damageReduction,
-                                color: 'rgba(0,0,0,0.4)',
-                                time: simulation.drawTime
-                            });
+                            if (q[i].damageReduction) {
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: this.position.x,
+                                    y: this.position.y,
+                                    // radius: 600 * dmg * q[i].damageReduction,
+                                    radius: Math.sqrt(2000 * dmg * q[i].damageReduction) + 2,
+                                    color: 'rgba(0,0,0,0.4)',
+                                    time: simulation.drawTime
+                                });
+                            }
                         }
                     }
                 }
@@ -5210,13 +5227,15 @@ const b = {
                             Matter.Body.setVelocity(q[i], Vector.mult(q[i].velocity, 0.9))
 
                             this.endCycle = 0; //bullet ends cycle after doing damage
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: this.position.x,
-                                y: this.position.y,
-                                radius: Math.log(2 * dmg + 1.1) * 40 * q[i].damageReduction,
-                                color: 'rgba(0,0,0,0.4)',
-                                time: simulation.drawTime
-                            });
+                            if (q[i].damageReduction) {
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: this.position.x,
+                                    y: this.position.y,
+                                    radius: Math.log(dmg + 1.1) * 40 * q[i].damageReduction + 3,
+                                    color: 'rgba(0,0,0,0.4)',
+                                    time: simulation.drawTime
+                                });
+                            }
                         }
                     },
                     wiggle() {

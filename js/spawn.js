@@ -1102,11 +1102,9 @@ const spawn = {
         mobs.spawn(x + Math.random(), y + Math.random(), 6, radius, "hsl(144, 15%, 50%)") //);
         let me = mob[mob.length - 1];
         me.isBoss = true;
-
         me.isBuffBoss = true;
         me.buffID = buffID
         me.memory = Infinity;
-        // me.showHealthBar = false;
         me.isVerticesChange = true
         me.frictionAir = 0.012
         me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
@@ -1118,14 +1116,16 @@ const spawn = {
         me.accelMag = 0.00005 //* simulation.accelScale;
         me.setBuffed = function() {
             this.buffCount++
-            this.accelMag += 0.000035 //* Math.sqrt(simulation.accelScale)
-            // Matter.Body.setDensity(this, 0.001 + 0.0003 * this.buffCount) // normal density is 0.001   //+ 0.0005 * Math.sqrt(simulation.difficulty)
+            this.accelMag += 0.000024 //* Math.sqrt(simulation.accelScale)  
             this.fill = `hsl(144, ${5 + 10 * this.buffCount}%, 50%)`
-            const scale = 1.132;
+            const scale = 1.135;
             Matter.Body.scale(this, scale, scale);
             this.radius *= scale;
-            // this.health += 0.03
-            // if (this.health > 1) this.health = 1
+
+            this.isInvulnerable = true
+            if (this.damageReduction) this.startingDamageReduction = this.damageReduction
+            this.damageReduction = 0
+            this.invulnerabilityCountDown = simulation.difficulty * 2
         }
         me.onDeath = function() {
             this.isBuffBoss = false;
@@ -1144,13 +1144,30 @@ const spawn = {
                 powerUps.spawnRandomPowerUp(this.position.x, this.position.y) // manual power up spawn to avoid spawning too many tech with "symbiosis"
             }
         }
-        me.damageReduction = 0.18 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        //required setup for invulnerable
+        me.isInvulnerable = false
+        me.invulnerabilityCountDown = 0
         me.do = function() {
-            // this.armor();
+            if (this.isInvulnerable) {
+                if (this.invulnerabilityCountDown > 0) {
+                    this.invulnerabilityCountDown--
+                    ctx.beginPath();
+                    let vertices = this.vertices;
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                    ctx.lineTo(vertices[0].x, vertices[0].y);
+                    ctx.lineWidth = 20;
+                    ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                    ctx.stroke();
+                } else {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                }
+            }
             this.alwaysSeePlayer();
             this.checkStatus();
             this.attraction();
-
             // if (!(simulation.cycle % this.seePlayerFreq)) { //move away from other mobs
             //     const repelRange = 100 + 4 * this.radius
             //     const attractRange = 240
@@ -1168,17 +1185,17 @@ const spawn = {
             // }
         }
     },
-    powerUpBossBaby(x, y, vertices = 9, radius = 70) {
-        mobs.spawn(x, y, vertices, radius, "transparent");
+    powerUpBossBaby(x, y, vertices = 9, radius = 60) {
+        mobs.spawn(x, y, vertices, radius, "rgba(225,240,245,0.4)"); //"rgba(120,140,150,0.4)"
         let me = mob[mob.length - 1];
         me.isBoss = true;
         me.frictionAir = 0.006
         me.seeAtDistance2 = 1000000;
-        me.accelMag = 0.0007 * simulation.accelScale;
-        Matter.Body.setDensity(me, 0.0008); //normal is 0.001
+        me.accelMag = 0.0004 + 0.0003 * simulation.accelScale;
+        // Matter.Body.setDensity(me, 0.001); //normal is 0.001
         me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map
         me.memory = Infinity;
-        me.seePlayerFreq = 30
+        me.seePlayerFreq = 20
         me.lockedOn = null;
         if (vertices === 9) {
             //on primary spawn
@@ -1188,6 +1205,11 @@ const spawn = {
         } else if (!m.isCloak) {
             me.foundPlayer();
         }
+        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.isInvulnerable = true
+        me.startingDamageReduction = me.damageReduction
+        me.damageReduction = 0
+        me.invulnerabilityCountDown = 60 + simulation.difficulty * 2
         me.onHit = function() { //run this function on hitting player
             if (powerUps.ejectTech()) {
                 powerUps.ejectGraphic("150, 138, 255");
@@ -1207,10 +1229,25 @@ const spawn = {
             }
             for (let i = 0; i < powerUp.length; i++) powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
         };
-        me.damageReduction = 0.15 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
-            // this.armor();
-            this.stroke = `hsl(0,0%,${80 + 25 * Math.sin(simulation.cycle * 0.01)}%)`
+            if (this.isInvulnerable) {
+                if (this.invulnerabilityCountDown > 0) {
+                    this.invulnerabilityCountDown--
+                    ctx.beginPath();
+                    let vertices = this.vertices;
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                    ctx.lineTo(vertices[0].x, vertices[0].y);
+                    ctx.lineWidth = 20;
+                    ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                    ctx.stroke();
+                } else {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                }
+            }
+            // this.stroke = `hsl(0,0%,${80 + 25 * Math.sin(simulation.cycle * 0.01)}%)`
+            // this.fill = `hsla(0,0%,${80 + 25 * Math.sin(simulation.cycle * 0.01)}%,0.3)`
 
             //steal all power ups
             for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
@@ -1246,6 +1283,13 @@ const spawn = {
         } else if (!m.isCloak) {
             me.foundPlayer();
         }
+
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.isInvulnerable = true
+        me.startingDamageReduction = me.damageReduction
+        me.damageReduction = 0
+        me.invulnerabilityCountDown = 60 + simulation.difficulty * 2
+
         me.onHit = function() { //run this function on hitting player
             if (powerUps.ejectTech()) {
                 powerUps.ejectGraphic("150, 138, 255");
@@ -1265,11 +1309,24 @@ const spawn = {
             }
             for (let i = 0; i < powerUp.length; i++) powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
         };
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
-            // this.armor();
+            if (this.isInvulnerable) {
+                if (this.invulnerabilityCountDown > 0) {
+                    this.invulnerabilityCountDown--
+                    ctx.beginPath();
+                    let vertices = this.vertices;
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                    ctx.lineTo(vertices[0].x, vertices[0].y);
+                    ctx.lineWidth = 20;
+                    ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                    ctx.stroke();
+                } else {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                }
+            }
             this.stroke = `hsl(0,0%,${80 + 25 * Math.sin(simulation.cycle * 0.01)}%)`
-
             //steal all power ups
             for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
                 powerUp[i].collisionFilter.mask = 0
@@ -1279,7 +1336,6 @@ const spawn = {
                     y: 0
                 })
             }
-
             this.seePlayerCheckByDistance();
             this.attraction();
             this.checkStatus();
@@ -1926,7 +1982,7 @@ const spawn = {
                 this.invulnerabilityCountDown--
             } else {
                 this.isInvulnerable = true
-                this.startingDamageReduction = this.damageReduction
+                if (this.damageReduction) this.startingDamageReduction = this.damageReduction
                 this.damageReduction = 0
                 for (let i = 0; i < this.babyList.length; i++) {
                     if (this.babyList[i].alive) {
@@ -3363,10 +3419,20 @@ const spawn = {
         //invulnerable every other revolution
         me.isInvulnerable = false
         me.invulnerable = function() {
+            //draw trigger angle
+            // ctx.beginPath();
+            // ctx.moveTo(this.position.x, this.position.y);
+            // const a = this.angle + Math.PI / 2
+            // const unit = { x: Math.cos(a), y: Math.sin(a) }
+            // const edge = Vector.add(this.position, Vector.mult(unit, this.radius))
+            // ctx.lineTo(edge.x, edge.y);
+            // ctx.lineWidth = 5;
+            // ctx.strokeStyle = "#000";
+            // ctx.stroke();
             if (this.laserAngle % (4 * Math.PI) > 2 * Math.PI) {
                 if (!this.isInvulnerable) {
                     this.isInvulnerable = true
-                    this.startingDamageReduction = this.damageReduction
+                    if (this.damageReduction) this.startingDamageReduction = this.damageReduction
                     this.damageReduction = 0
                 }
             } else if (this.isInvulnerable) {
@@ -4397,7 +4463,7 @@ const spawn = {
         me.onDamage = function() {
             this.cycle = 0
         };
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.35 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
             // this.armor();
             this.checkStatus();
@@ -4422,6 +4488,8 @@ const spawn = {
                             ctx.moveTo(this.position.x, this.position.y)
                             ctx.lineTo(mob[i].position.x, mob[i].position.y)
                             spawn.shield(mob[i], mob[i].position.x, mob[i].position.y, 1, true);
+                            // me.damageReduction = 0.075 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+                            mob[mob.length - 1].damageReduction = 0.5 * 0.075 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) //shields are extra strong
                         }
                     }
                     if (!this.isShielded && this.alive) spawn.shield(this, this.position.x, this.position.y, 1, true);

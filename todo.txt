@@ -1,36 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-
-mantisBoss:  3 punching mobs, eject your ammo when you get punched
-  invulnerable except for 1 second after moving
-
-powerUpBossBaby: smaller, cuter, faster, can't move through walls
-
-slashBoss renamed revolutionBoss
-  invulnerable every other revolution of it's blades
-
-new mob state: invulnerable - immune to damage and status effects (stun, dots, freeze)
-damage and harm circle graphic size have been made more consistent
-
-bug fixes
-
+powerUpBoss & powerUpBossBaby go invulnerable for a second after they die
+powerUpBossBaby is even smaller, and a bit slower
+growBoss goes invulnerable for a second after one of it dies
+shieldingBoss makes shields that are 50% stronger, shieldingBoss has 40% lower health
 
 ******************************************************** TODO ********************************************************
 
-history vision messes up when drones hit boss?
-  for babypowerupboss
-
-some boss mobs need invulnerability phases
-  powerUpBoss after death?
-    nerf powerup boss health or acceleration to balance
-  growboss
-    after one dies
+tech: heal power ups spawn as research instead
+  research heals for 10 health
+  using research does 10 damage
 
 electric motors: increases movement speed and jump height, but jumping and moving costs energy
   overwrite the key event listeners?
   JUNK tech?
-
-make the shields that shieldBoss adds twice as damage resistant
 
 mob that fires bullets in 4,5,6,7 different directions at once,  no aiming
 
@@ -515,6 +498,7 @@ possible names for tech
   axial motor
   hall effect thrusters
   spaghettification
+  particle accelerator
  
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

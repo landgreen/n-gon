@@ -3618,13 +3618,15 @@ const m = {
                                     if (tech.isCrit && mob[k].isStunned) dmg *= 4
                                     mob[k].damage(dmg);
                                     if (mob[k].alive) mob[k].foundPlayer();
-                                    simulation.drawList.push({ //add dmg to draw queue
-                                        x: pairs[i].activeContacts[0].vertex.x,
-                                        y: pairs[i].activeContacts[0].vertex.y,
-                                        radius: Math.log(2 * dmg + 1.1) * 40,
-                                        color: simulation.playerDmgColor,
-                                        time: simulation.drawTime
-                                    });
+                                    if (mob[k].damageReduction) {
+                                        simulation.drawList.push({ //add dmg to draw queue
+                                            x: pairs[i].activeContacts[0].vertex.x,
+                                            y: pairs[i].activeContacts[0].vertex.y,
+                                            radius: Math.log(dmg + 1.1) * 40 * mob[k].damageReduction + 3,
+                                            color: simulation.playerDmgColor,
+                                            time: simulation.drawTime
+                                        });
+                                    }
                                     return;
                                 }
                                 //mob + body collisions
@@ -3652,13 +3654,15 @@ const m = {
                                             obj.hasFragmented = true;
                                             b.targetedNail(obj.position, tech.fragments * 4)
                                         }
-                                        simulation.drawList.push({
-                                            x: pairs[i].activeContacts[0].vertex.x,
-                                            y: pairs[i].activeContacts[0].vertex.y,
-                                            radius: Math.log(2 * dmg + 1.1) * 40,
-                                            color: simulation.playerDmgColor,
-                                            time: simulation.drawTime
-                                        });
+                                        if (mob[k].damageReduction) {
+                                            simulation.drawList.push({
+                                                x: pairs[i].activeContacts[0].vertex.x,
+                                                y: pairs[i].activeContacts[0].vertex.y,
+                                                radius: Math.log(dmg + 1.1) * 40 * mob[k].damageReduction + 3,
+                                                color: simulation.playerDmgColor,
+                                                time: simulation.drawTime
+                                            });
+                                        }
                                         return;
                                     }
                                 }

@@ -179,13 +179,15 @@ function collisionChecks(event) {
                             // console.log(dmg)
                             mob[k].damage(dmg);
                             if (mob[k].alive) mob[k].foundPlayer();
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: pairs[i].activeContacts[0].vertex.x,
-                                y: pairs[i].activeContacts[0].vertex.y,
-                                radius: Math.log(2 * dmg + 1.1) * 40 * mob[k].damageReduction,
-                                color: simulation.playerDmgColor,
-                                time: simulation.drawTime
-                            });
+                            if (mob[k].damageReduction) {
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: pairs[i].activeContacts[0].vertex.x,
+                                    y: pairs[i].activeContacts[0].vertex.y,
+                                    radius: Math.log(dmg + 1.1) * 40 * mob[k].damageReduction + 3,
+                                    color: simulation.playerDmgColor,
+                                    time: simulation.drawTime
+                                });
+                            }
                             if (tech.isLessDamageReduction && !mob[k].shield) mob[k].damageReduction *= mob[k].isBoss ? 1.01 : 1.06
                             return;
                         }
@@ -214,13 +216,15 @@ function collisionChecks(event) {
                                     obj.hasFragmented = true;
                                     b.targetedNail(obj.position, tech.fragments * 4)
                                 }
-                                simulation.drawList.push({
-                                    x: pairs[i].activeContacts[0].vertex.x,
-                                    y: pairs[i].activeContacts[0].vertex.y,
-                                    radius: Math.log(2 * dmg + 1.1) * 40 * mob[k].damageReduction,
-                                    color: simulation.playerDmgColor,
-                                    time: simulation.drawTime
-                                });
+                                if (mob[k].damageReduction) {
+                                    simulation.drawList.push({
+                                        x: pairs[i].activeContacts[0].vertex.x,
+                                        y: pairs[i].activeContacts[0].vertex.y,
+                                        radius: Math.log(dmg + 1.1) * 40 * mob[k].damageReduction + 3,
+                                        color: simulation.playerDmgColor,
+                                        time: simulation.drawTime
+                                    });
+                                }
                                 return;
                             }
                         }

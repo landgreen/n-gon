@@ -59,7 +59,7 @@ const mobs = {
         }
 
         function applySlow(whom) {
-            if (!whom.shield && !whom.isShielded && !m.isBodiesAsleep && who.damageReduction > 0) {
+            if (!whom.shield && !whom.isShielded && !m.isBodiesAsleep) {
                 if (whom.isBoss) cycles = Math.floor(cycles * 0.25)
                 let i = whom.status.length
                 while (i--) {
@@ -98,7 +98,7 @@ const mobs = {
         }
     },
     statusStun(who, cycles = 180) {
-        if (!who.shield && !who.isShielded && !m.isBodiesAsleep && who.damageReduction > 0) {
+        if (!who.shield && !who.isShielded && !m.isBodiesAsleep) {
             Matter.Body.setVelocity(who, {
                 x: who.velocity.x * 0.8,
                 y: who.velocity.y * 0.8
@@ -156,13 +156,15 @@ const mobs = {
                     if ((simulation.cycle - this.startCycle) % 30 === 0 && !m.isBodiesAsleep) {
                         let dmg = b.dmgScale * this.dmg
                         who.damage(dmg);
-                        simulation.drawList.push({ //add dmg to draw queue
-                            x: who.position.x + (Math.random() - 0.5) * who.radius * 0.5,
-                            y: who.position.y + (Math.random() - 0.5) * who.radius * 0.5,
-                            radius: Math.log(2 * dmg + 1.1) * 40,
-                            color: "rgba(0,80,80,0.9)",
-                            time: simulation.drawTime
-                        });
+                        if (who.damageReduction) {
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: who.position.x + (Math.random() - 0.5) * who.radius * 0.5,
+                                y: who.position.y + (Math.random() - 0.5) * who.radius * 0.5,
+                                radius: Math.log(dmg + 1.1) * 40 * who.damageReduction + 3,
+                                color: "rgba(0,80,80,0.9)",
+                                time: simulation.drawTime
+                            });
+                        }
                     }
                 },
                 endEffect() {},
