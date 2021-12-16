@@ -1269,7 +1269,7 @@ const spawn = {
         me.isBoss = true;
         me.frictionAir = 0.01
         me.seeAtDistance2 = 1000000;
-        me.accelMag = 0.0005 * simulation.accelScale;
+        me.accelMag = 0.0002 + 0.0004 * simulation.accelScale;
         Matter.Body.setDensity(me, 0.00035); //normal is 0.001
         me.collisionFilter.mask = cat.bullet | cat.player //| cat.body
         me.memory = Infinity;
@@ -1284,11 +1284,11 @@ const spawn = {
             me.foundPlayer();
         }
 
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
-        me.isInvulnerable = true
-        me.startingDamageReduction = me.damageReduction
-        me.damageReduction = 0
-        me.invulnerabilityCountDown = 60 + simulation.difficulty * 2
+        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        // me.isInvulnerable = true
+        // me.startingDamageReduction = me.damageReduction
+        // me.damageReduction = 0
+        // me.invulnerabilityCountDown = 60 + simulation.difficulty * 2
 
         me.onHit = function() { //run this function on hitting player
             if (powerUps.ejectTech()) {
@@ -1310,22 +1310,22 @@ const spawn = {
             for (let i = 0; i < powerUp.length; i++) powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
         };
         me.do = function() {
-            if (this.isInvulnerable) {
-                if (this.invulnerabilityCountDown > 0) {
-                    this.invulnerabilityCountDown--
-                    ctx.beginPath();
-                    let vertices = this.vertices;
-                    ctx.moveTo(vertices[0].x, vertices[0].y);
-                    for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
-                    ctx.lineTo(vertices[0].x, vertices[0].y);
-                    ctx.lineWidth = 20;
-                    ctx.strokeStyle = "rgba(255,255,255,0.7)";
-                    ctx.stroke();
-                } else {
-                    this.isInvulnerable = false
-                    this.damageReduction = this.startingDamageReduction
-                }
-            }
+            // if (this.isInvulnerable) {
+            //     if (this.invulnerabilityCountDown > 0) {
+            //         this.invulnerabilityCountDown--
+            //         ctx.beginPath();
+            //         let vertices = this.vertices;
+            //         ctx.moveTo(vertices[0].x, vertices[0].y);
+            //         for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+            //         ctx.lineTo(vertices[0].x, vertices[0].y);
+            //         ctx.lineWidth = 20;
+            //         ctx.strokeStyle = "rgba(255,255,255,0.7)";
+            //         ctx.stroke();
+            //     } else {
+            //         this.isInvulnerable = false
+            //         this.damageReduction = this.startingDamageReduction
+            //     }
+            // }
             this.stroke = `hsl(0,0%,${80 + 25 * Math.sin(simulation.cycle * 0.01)}%)`
             //steal all power ups
             for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {

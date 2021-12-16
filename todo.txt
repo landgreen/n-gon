@@ -1,15 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-powerUpBoss & powerUpBossBaby go invulnerable for a second after they die
-powerUpBossBaby is even smaller, and a bit slower
-growBoss goes invulnerable for a second after one of it dies
-shieldingBoss makes shields that are 50% stronger, shieldingBoss has 40% lower health
+powerUpBoss no longer gets invulnerability after death
+  but powerUpBossBaby still has it
+
+tech: brainstorming - randomize your tech choice menu every 2s for 10s
+JUNK tech: brainstorm - randomize your tech choice menu every 0.5s for 10s
+
 
 ******************************************************** TODO ********************************************************
 
-tech: heal power ups spawn as research instead
-  research heals for 10 health
-  using research does 10 damage
+tech: basic research - heal power ups spawn as research power ups instead, and using research heals you (needs to be pretty low, like 3% health)
+tech: maintenance - heals no longer spawn, but using research heals you 100%
+
+pulsar mobs retarget too easily
+also they drift around too much
 
 electric motors: increases movement speed and jump height, but jumping and moving costs energy
   overwrite the key event listeners?
@@ -22,9 +26,6 @@ bug once:  switching from shotgun to harpoon somehow set b.activeGun to not defi
 
 quasarBoss: inverted pulsar boss that hits everything except where its aiming
 
-pulsar mobs retarget too easily
-also they drift around too much
-
 intro map: diegeticly draw a mouse with field highlighted
   also indicate space?
   dynamically adjust drawing after picking up a gun 
@@ -35,8 +36,8 @@ increase mass and movement speed at the same time
     m.defaultMass = 4.5
     m.definePlayerMass()
 
-tech selection menu choices randomize every second
-  JUNK tech?
+tech selection menu choices randomize every 1 second
+  cycles for 10 cycles before it stops cycling
 
 new late game level that is easier if you can: platform well, jump high, immune to slime, wormhole through walls, fly fast
   climb vertically to avoid rising slime

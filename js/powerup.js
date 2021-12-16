@@ -734,7 +734,28 @@ const powerUps = {
                         }
                     }
 
+                    if (tech.isBrainstorm && !tech.isBrainstormActive && !simulation.isChoosing) {
+                        tech.isBrainstormActive = true
+                        let count = 0
+                        requestAnimationFrame(cycle);
 
+                        function cycle() {
+                            count++
+                            if (count < 600 && simulation.isChoosing) {
+                                if (!(count % tech.brainStormDelay)) {
+                                    powerUps.tech.effect();
+                                    document.getElementById("choose-grid").style.pointerEvents = "auto"; //turn off the normal 500ms delay
+                                    document.body.style.cursor = "auto";
+                                    document.getElementById("choose-grid").style.transitionDuration = "0s";
+                                }
+                                requestAnimationFrame(cycle);
+                            } else {
+                                tech.isBrainstormActive = false
+                            }
+                        }
+                    }
+
+                    //add in research button or pseudoscience button
                     if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
                         tech.junkResearchNumber = Math.floor(5 * Math.random())
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"> <span style="position:relative;">`
@@ -747,8 +768,26 @@ const powerUps = {
                         text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality?"<span class='alt'>alternate reality</span>": "research"}</span></div></div>`
                     }
 
+                    // if (tech.isBrainstorm && tech.isBrainstormActive < 4) {
+                    //     setTimeout(() => {
+                    //         if (simulation.isChoosing) {
+                    //             tech.isBrainstormActive++
+                    //             powerUps.tech.effect();
+                    //             //turn off the normal 500ms delay
+                    //             document.getElementById("choose-grid").style.pointerEvents = "auto";
+                    //             document.body.style.cursor = "auto";
+                    //             document.getElementById("choose-grid").style.transitionDuration = "0s";
+                    //         } else {
+                    //             tech.isBrainstormActive = 0;
+                    //         }
+                    //     }, 1000);
+                    // } else {
+                    //     tech.isBrainstormActive = 0;
+                    // }
+
                     document.getElementById("choose-grid").innerHTML = text
                     powerUps.showDraft();
+
                 } else if (tech.isBanish) {
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
                         if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i)

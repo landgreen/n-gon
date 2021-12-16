@@ -20,7 +20,7 @@ const level = {
             // b.giveGuns("drones")
             // b.giveGuns("nail gun")
             // b.giveGuns("harpoon") 
-            // tech.giveTech("needle gun")
+            // tech.giveTech("brainstorming")
             // tech.giveTech("nanowires")
             // tech.giveTech("relativistic momentum")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
@@ -2344,8 +2344,8 @@ const level = {
 
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
-        spawn.powerUpBoss(3200, -500)
-        spawn.powerUpBossBaby(3200, -500)
+        // spawn.powerUpBoss(3200, -500)
+        // spawn.powerUpBossBaby(3200, -500)
         // spawn.snakeBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
         // spawn.pulsarBoss(1700, -500)
@@ -2367,7 +2367,7 @@ const level = {
 
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
-        spawn.pulsar(1900, -500)
+        // spawn.pulsar(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.nodeGroup(1200, 0, "grenadier")

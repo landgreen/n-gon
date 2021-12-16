@@ -2093,7 +2093,7 @@ const tech = {
             requires: "not mass-energy",
             effect() {
                 tech.isPiezo = true;
-                if (simulation.isTextLogOpen) m.energy += 20.48;
+                // if (simulation.isTextLogOpen) m.energy += 20.48;
             },
             remove() {
                 tech.isPiezo = false;
@@ -2485,8 +2485,8 @@ const tech = {
             description: "increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>for every <strong>10</strong> <strong class='color-h'>health</strong> below <strong>100</strong>",
             maxCount: 1,
             count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
+            frequency: 1,
+            frequencyDefault: 1,
             allowed() {
                 return m.health < 0.6 || build.isExperimentSelection
             },
@@ -2521,8 +2521,8 @@ const tech = {
             description: "<strong class='color-h'>heal</strong> for <strong>3%</strong> of <strong class='color-d'>damage</strong> done<br>take <strong>10%</strong> more <strong class='color-harm'>harm</strong>",
             maxCount: 9,
             count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
+            frequency: 1,
+            frequencyDefault: 1,
             isHealTech: true,
             allowed() {
                 return !tech.isEnergyHealth
@@ -2789,12 +2789,12 @@ const tech = {
             description: `<strong class='color-r'>researched</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> won't <strong>reoccur</strong> <br>spawn ${powerUps.orb.research(9)}`,
             maxCount: 1,
             count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
+            frequency: 1,
+            frequencyDefault: 1,
             allowed() {
-                return (powerUps.research.count > 2 || build.isExperimentSelection) && !tech.isSuperDeterminism
+                return !tech.isSuperDeterminism
             },
-            requires: "not determinism, at least 3 research",
+            requires: "not superdeterminism",
             effect() {
                 tech.isBanish = true
                 for (let i = 0; i < 9; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
@@ -2815,9 +2815,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (powerUps.research.count > 2 || build.isExperimentSelection) && !tech.isSuperDeterminism
+                return (powerUps.research.count > 3 || build.isExperimentSelection) && !tech.isSuperDeterminism
             },
-            requires: "at least 3 research and not superdeterminism",
+            requires: "at least 4 research and not superdeterminism",
             effect() {
                 tech.renormalization = true;
             },
@@ -2873,9 +2873,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return powerUps.research.count > 3 || build.isExperimentSelection
+                return powerUps.research.count > 5 || build.isExperimentSelection
             },
-            requires: "at least 4 research",
+            requires: "at least 6 research",
             effect() {
                 tech.isRerollDamage = true;
             },
@@ -2899,6 +2899,27 @@ const tech = {
             },
             remove() {
                 tech.isJunkResearch = false;
+            }
+        },
+        {
+            name: "brainstorming",
+            description: "the <strong class='color-m'>tech</strong> choice menu <strong>randomizes</strong><br>every <strong>2</strong> seconds for <strong>10</strong> seconds",
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                tech.isBrainstorm = true
+                tech.isBrainstormActive = false
+                tech.brainStormDelay = 120
+            },
+            remove() {
+                tech.isBrainstorm = false
+                tech.isBrainstormActive = false
             }
         },
         {
@@ -3352,9 +3373,9 @@ const tech = {
             isNonRefundable: true,
             isBadRandomOption: true,
             allowed() {
-                return (tech.totalCount > 3) && !tech.isSuperDeterminism
+                return (tech.totalCount > 3) && tech.duplicationChance() > 0 && !tech.isSuperDeterminism
             },
-            requires: "NOT EXPERIMENT MODE, at least 4 tech, not superdeterminism",
+            requires: "NOT EXPERIMENT MODE, some duplication, at least 4 tech, not superdeterminism",
             effect: () => {
                 const removeTotal = tech.removeTech()
                 for (let i = 0; i < removeTotal + 1; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
@@ -3628,7 +3649,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (tech.isNeedles || tech.isNeedleShot) && !tech.isNeedleIce
+                return ((tech.haveGunCheck("nail gun") && tech.isNeedles) || (tech.isNeedleShot && tech.haveGunCheck("shotgun"))) && !tech.isNeedleIce
             },
             requires: "needle gun, needle-shot, not needle ice",
             effect() {
@@ -7179,6 +7200,29 @@ const tech = {
         //     remove() {}
         // },
         {
+            name: "brainstorm",
+            description: "the <strong class='color-m'>tech</strong> choice menu <strong>randomizes</strong><br>every <strong>0.5</strong> seconds for <strong>10</strong> seconds",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            frequencyDefault: 0,
+            isExperimentHide: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                tech.isBrainstorm = true
+                tech.isBrainstormActive = false
+                tech.brainStormDelay = 30
+            },
+            remove() {
+                tech.isBrainstorm = false
+                tech.isBrainstormActive = false
+            }
+        },
+        {
             name: "catabolysis",
             description: `set your <strong>maximum</strong> <strong class='color-h'>health</strong> to <strong>1</strong><br><strong>double</strong> your current <strong class='color-ammo'>ammo</strong> <strong>10</strong> times`,
             maxCount: 1,
@@ -9116,5 +9160,8 @@ const tech = {
     isWormholeMapIgnore: null,
     isLessDamageReduction: null,
     nailSize: null,
-    needleTunnel: null
+    needleTunnel: null,
+    isBrainstorm: null,
+    isBrainstormActive: null,
+    brainStormDelay: null
 }
