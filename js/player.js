@@ -647,7 +647,7 @@ const m = {
         }
 
         if (tech.isEnergyHealth) {
-            m.energy -= dmg * 1.1;
+            m.energy -= dmg
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
                     tech.isDeathAvoidedThisLevel = true
@@ -1248,7 +1248,6 @@ const m = {
         ctx.beginPath();
         ctx.arc(m.pos.x, m.pos.y, range, m.angle - Math.PI * m.fieldArc, m.angle + Math.PI * m.fieldArc, false);
         ctx.lineWidth = 2;
-        ctx.lineCap = "butt"
         ctx.stroke();
         let eye = 13;
         let aMag = 0.75 * Math.PI * m.fieldArc
@@ -1741,7 +1740,6 @@ const m = {
                         ctx.beginPath();
                         ctx.arc(m.pos.x, m.pos.y, m.fieldRange, m.angle - Math.PI * m.fieldArc, m.angle + Math.PI * m.fieldArc, false);
                         ctx.lineWidth = 2.5 - 1.5 * wave;
-                        ctx.lineCap = "butt"
                         ctx.stroke();
                         const curve = 0.57 + 0.04 * wave
                         const aMag = (1 - curve * 1.2) * Math.PI * m.fieldArc
@@ -1766,7 +1764,6 @@ const m = {
                             ctx.beginPath();
                             ctx.arc(m.fieldPosition.x, m.fieldPosition.y, m.fieldRange, m.fieldAngle - Math.PI * m.fieldArc, m.fieldAngle + Math.PI * m.fieldArc, false);
                             ctx.lineWidth = 2.5 - 1.5 * wave;
-                            ctx.lineCap = "butt"
                             ctx.stroke();
                             const curve = 0.8 + 0.06 * wave
                             const aMag = (1 - curve * 1.2) * Math.PI * m.fieldArc
@@ -3564,7 +3561,7 @@ const m = {
                                     m.immuneCycle < m.cycle &&
                                     // (obj === playerBody || obj === playerHead) &&
                                     (obj === player) &&
-                                    !(tech.isFreezeHarmImmune && (mob[k].isSlowed || mob[k].isStunned))
+                                    !mob[k].isSlowed && !mob[k].isStunned
                                 ) {
                                     mob[k].foundPlayer();
                                     let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * simulation.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0

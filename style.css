@@ -129,6 +129,14 @@ summary {
     transition: opacity 5s ease-in;
 }
 
+#training-button {
+    position: absolute;
+    bottom: 58px;
+    right: 4px;
+    z-index: 12;
+    transition: opacity 5s ease-in;
+}
+
 #construct {
     display: none;
     position: absolute;

@@ -140,7 +140,9 @@ const spawn = {
         me.chaseSpeed = 3.3
         me.isMACHO = true;
         me.frictionAir = 0.006
-
+        me.onDeath = function() {
+            tech.isHarmMACHO = false;
+        }
         me.do = function() {
             const sine = Math.sin(simulation.cycle * 0.015)
             this.radius = 370 * (1 + 0.1 * sine)

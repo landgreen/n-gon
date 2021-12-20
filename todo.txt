@@ -1,19 +1,66 @@
 ******************************************************** NEXT PATCH **************************************************
 
-powerUpBoss no longer gets invulnerability after death
-  but powerUpBossBaby still has it
+first 4 levels of the training maps are live
+  this is very much a work in progress, but I'm putting it up for feedback
 
-tech: brainstorming - randomize your tech choice menu every 2s for 10s
-JUNK tech: brainstorm - randomize your tech choice menu every 0.5s for 10s
+stunned and frozen mobs do no harm by default
+  removed tech: osmoprotectant - stunned and frozen mobs do no harm 
 
+tech: annelids - randomly increase worm size and damage up to 100%
+
+weak anthropic principle gives 45->50% duplication chance after almost dieing
+complex spin-statistics immune to harm for 1.5->1.8 s every 7 s
+exciton gives 60->66% damage
+electronegativity gives 1% dmg for every 11->10 stored energy
+arsenal gives 14->12% more damage per gun
+pair production is now also a standing wave field tech
+mass-energy takes 10% less damage
+JUNK tech black hole cluster spawns mobs farther away, so you have a better chance to survive
+undefinded tech no longer shows up on your first couple times playing, since it's a distraction for new players
 
 ******************************************************** TODO ********************************************************
+
+door.openClose();  is flipped T/F
+
+balance time dilation with bose einstein  (you can freeze everything and take no damage)
+
+training
+  button takes you to a series of levels that teach simple game mechanics
+    make the button more obvious if the account has only played 1-2 times
+  at high levels has some puzzle aspects?
+  uses the lore voice/text code?
+  save training level progress as local variable
+  rooms:
+    jump over wall and gap
+    crouch through tunnel
+    push block onto button to open door
+    pick up a block an drop onto a button to open door
+    fire block at button to open door
+    fire block at mob to open door
+    pick up power ups with field to open door
+    use gun to kill a mob and use it's block body to activate a button to open a door
+    use field to deflect a mob that is stationary, but blocking a passage
+      set health to very low
+    final room, takes you back to the menu, like when winning the game
+  puzzle or combat rooms?
+    boss gauntlet, spawn with nothing but a few power ups and fight 10 bosses
+
 
 tech: basic research - heal power ups spawn as research power ups instead, and using research heals you (needs to be pretty low, like 3% health)
 tech: maintenance - heals no longer spawn, but using research heals you 100%
 
+tech reversed regression - mobs take less damage after each time you hit them,  but you get +100% damage
+  maybe a gun tech only?
+    what gun?
+
+tech  extend fracture analysis to give bonus damage to frozen also, but reduce the 400%->300%?
+
 pulsar mobs retarget too easily
 also they drift around too much
+
+convert blocked mobs into bullets
+  only for the very small bullets that move fast after being blocked
+  delete bulletmob and spawn a nail-like bullet with the same properties as the bulletmob
 
 electric motors: increases movement speed and jump height, but jumping and moving costs energy
   overwrite the key event listeners?
@@ -81,8 +128,7 @@ animate going to next level?
 Plasma Burner: upgrade for plasma torch, basically just a jet engine. does high damage, but short range, mostly for player movement.
   maybe reduce gravity to really low then apply a vector away from mouse direction
 
-game idea - auto battler with n-gon mob AI and tech
-  name: auto-gon
+auto-gon - auto battler with n-gon mob AI and tech
   you build a group of mobs and bosses from n-gon
     they fight other mobs and bosses
   similar research and tech system to n-gon

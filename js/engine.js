@@ -103,7 +103,7 @@ function collisionChecks(event) {
                     if (
                         m.immuneCycle < m.cycle &&
                         (obj === playerBody || obj === playerHead) &&
-                        !(tech.isFreezeHarmImmune && (mob[k].isSlowed || mob[k].isStunned))
+                        !mob[k].isSlowed && !mob[k].isStunned
                     ) {
                         let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * simulation.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
                         if (m.isCloak) dmg *= 0.5

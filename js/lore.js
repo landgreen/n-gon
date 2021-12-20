@@ -45,7 +45,7 @@ const lore = {
         if (localSettings.loreCount < 1) localSettings.loreCount = 1
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
-        document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
+        // document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
         simulation.makeTextLog(`<span class='color-var'>lore</span>.unlockTesting()`, Infinity);
 
         sound.portamento(50)

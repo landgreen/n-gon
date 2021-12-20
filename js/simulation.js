@@ -110,6 +110,7 @@ const simulation = {
     g: 0.0024, // applies to player, bodies, and power ups  (not mobs)
     onTitlePage: true,
     isCheating: false,
+    isTraining: false,
     paused: false,
     isChoosing: false,
     testing: false, //testing mode: shows wire frame and some variables
@@ -530,6 +531,8 @@ const simulation = {
         document.getElementById("info").style.opacity = "0";
         document.getElementById("experiment-button").style.display = "inline"
         document.getElementById("experiment-button").style.opacity = "0";
+        document.getElementById("training-button").style.display = "inline"
+        document.getElementById("training-button").style.opacity = "0";
         document.getElementById("experiment-grid").style.display = "none"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"
@@ -540,6 +543,7 @@ const simulation = {
         document.body.style.cursor = "auto";
         setTimeout(() => {
             document.getElementById("experiment-button").style.opacity = "1";
+            document.getElementById("training-button").style.opacity = "1";
             document.getElementById("info").style.opacity = "1";
             document.getElementById("splash").style.opacity = "1";
         }, 200);
@@ -588,7 +592,7 @@ const simulation = {
             requestAnimationFrame(cycle)
         }, 1000);
     },
-    startGame(isBuildRun = false) {
+    startGame(isBuildRun = false, isTrainingRun = false) {
         simulation.clearMap()
         if (!isBuildRun) { //if a build run logic flow returns to "experiment-button").addEventListener
             document.body.style.cursor = "none";
@@ -601,6 +605,7 @@ const simulation = {
         document.getElementById("experiment-grid").style.display = "none"
         document.getElementById("info").style.display = "none";
         document.getElementById("experiment-button").style.display = "none";
+        document.getElementById("training-button").style.display = "none";
         // document.getElementById("experiment-button").style.opacity = "0";
         document.getElementById("splash").onclick = null; //removes the onclick effect so the function only runs once
         document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
@@ -616,7 +621,7 @@ const simulation = {
         } else {
             Composite.add(engine.world, [player])
         }
-
+        if (isTrainingRun) simulation.isTraining = true
         level.populateLevels()
 
         input.endKeySensing();
@@ -694,6 +699,7 @@ const simulation = {
         tech.healMaxEnergyBonus = 0
         m.setMaxEnergy();
         m.energy = 0
+        m.immuneCycle = 0;
         // simulation.makeTextLog(`${simulation.SVGrightMouse}<strong style='font-size:30px;'> ${m.fieldUpgrades[m.fieldMode].name}</strong><br><span class='faded'></span><br>${m.fieldUpgrades[m.fieldMode].description}`, 600);
         // simulation.makeTextLog(`
         // input.key.up <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]
@@ -751,6 +757,7 @@ const simulation = {
                 if (b.guns[i].name === "mine") {
                     if (tech.isCrouchAmmo) count = Math.ceil(count / 2)
                     b.guns[i].ammo += count
+                    if (tech.ammoCap) b.guns[i].ammo = Math.min(tech.ammoCap, b.guns[i].ammo)
                     simulation.updateGunHUD();
                     break;
                 }
@@ -779,6 +786,7 @@ const simulation = {
                 }
             }
         }
+        simulation.lastLogTime = 0; //clear previous messages
         powerUps.totalPowerUps = powerUp.length
         let holdTarget = (m.holdingTarget) ? m.holdingTarget : undefined //if player is holding something this remembers it before it gets deleted
         tech.deathSpawnsFromBoss = 0;

@@ -2361,9 +2361,9 @@ const b = {
     },
     worm(where, isFreeze = tech.isSporeFreeze) { //used with the tech upgrade in mob.death()
         const bIndex = bullet.length;
-        const size = 3
+        const wormSize = 6 + tech.wormSize * 7.2 * Math.random()
         if (bIndex < 500) { //can't make over 500 spores
-            bullet[bIndex] = Bodies.polygon(where.x, where.y, size, size, {
+            bullet[bIndex] = Bodies.polygon(where.x, where.y, 3, 3, {
                 inertia: Infinity,
                 isFreeze: isFreeze,
                 restitution: 0.5,
@@ -2371,7 +2371,9 @@ const b = {
                 friction: 0,
                 frictionAir: 0.025,
                 thrust: (tech.isFastSpores ? 0.001 : 0.0005) * (1 + 0.5 * (Math.random() - 0.5)),
-                dmg: (tech.isMutualism ? 16.8 : 7) * 2.5, //bonus damage from tech.isMutualism //2.5 is extra damage as worm
+                wormSize: wormSize,
+                wormTail: 1 + wormSize,
+                dmg: (tech.isMutualism ? 7 : 2.9) * wormSize, //bonus damage from tech.isMutualism //2.5 is extra damage as worm
                 lookFrequency: 100 + Math.floor(37 * Math.random()),
                 classType: "bullet",
                 collisionFilter: {
@@ -2408,10 +2410,10 @@ const b = {
                 do() {
                     ctx.beginPath(); //draw nematode
                     ctx.moveTo(this.position.x, this.position.y);
-                    const dir = Vector.mult(Vector.normalise(this.velocity), -Math.min(45, 7 * this.speed))
+                    const dir = Vector.mult(Vector.normalise(this.velocity), -Math.min(100, this.wormTail * this.speed))
                     const tail = Vector.add(this.position, dir)
                     ctx.lineTo(tail.x, tail.y);
-                    ctx.lineWidth = 6;
+                    ctx.lineWidth = this.wormSize;
                     ctx.strokeStyle = "#000";
                     ctx.stroke();
 

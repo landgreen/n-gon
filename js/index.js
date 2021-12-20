@@ -622,6 +622,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
 
 function openExperimentMenu() {
     document.getElementById("experiment-button").style.display = "none";
+    document.getElementById("training-button").style.display = "none";
     const el = document.getElementById("experiment-grid")
     el.style.display = "grid"
     document.body.style.overflowY = "scroll";
@@ -1295,16 +1296,5 @@ function cycle() {
             level.start();
         }
         simulation.loop();
-        // if (isNaN(m.health) || isNaN(m.energy)) {
-        //   console.log(`m.health = ${m.health}`)
-        //   simulation.paused = true;
-        //   build.pauseGrid()
-        //   document.body.style.cursor = "auto";
-        //   alert("health is NaN, please report this bug to the discord  \n https://discordapp.com/invite/2eC9pgJ")
-        // }
-        // for (let i = 0, len = loop.length; i < len; i++) {
-        //   loop[i]()
-        // }
     }
 }
-// simulation.introPlayer()
