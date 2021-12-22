@@ -1,50 +1,41 @@
 ******************************************************** NEXT PATCH **************************************************
 
-first 4 levels of the training maps are live
-  this is very much a work in progress, but I'm putting it up for feedback
+more training levels: "trainingWalk", "trainingCrouch", "trainingJump", "trainingHold", "trainingThrow", "trainingHit", "trainingHeal", "trainingFire", "trainingDeflect"
 
-stunned and frozen mobs do no harm by default
-  removed tech: osmoprotectant - stunned and frozen mobs do no harm 
+tech: Bose Einstein condensate is removed until I can balance it
 
-tech: annelids - randomly increase worm size and damage up to 100%
-
-weak anthropic principle gives 45->50% duplication chance after almost dieing
-complex spin-statistics immune to harm for 1.5->1.8 s every 7 s
-exciton gives 60->66% damage
-electronegativity gives 1% dmg for every 11->10 stored energy
-arsenal gives 14->12% more damage per gun
-pair production is now also a standing wave field tech
-mass-energy takes 10% less damage
-JUNK tech black hole cluster spawns mobs farther away, so you have a better chance to survive
-undefinded tech no longer shows up on your first couple times playing, since it's a distraction for new players
+bug fixes
 
 ******************************************************** TODO ********************************************************
 
-door.openClose();  is flipped T/F
-
 balance time dilation with bose einstein  (you can freeze everything and take no damage)
+  code is still there, need to balance
+  balance with energy drain?
 
 training
-  button takes you to a series of levels that teach simple game mechanics
-    make the button more obvious if the account has only played 1-2 times
-  at high levels has some puzzle aspects?
+  make the button more obvious if the account has only played 1-2 times
   uses the lore voice/text code?
-  save training level progress as local variable
-  rooms:
-    jump over wall and gap
-    crouch through tunnel
-    push block onto button to open door
-    pick up a block an drop onto a button to open door
-    fire block at button to open door
-    fire block at mob to open door
-    pick up power ups with field to open door
-    use gun to kill a mob and use it's block body to activate a button to open a door
-    use field to deflect a mob that is stationary, but blocking a passage
-      set health to very low
-    final room, takes you back to the menu, like when winning the game
-  puzzle or combat rooms?
+  add vertical tunnels for power ups spawns like in intro?
+  tutorial rooms:
+      done  walk forwards and backwards
+      done  crouch through tunnel
+      done  jump over wall and gap
+      done  pick up a block an drop onto a button to open door
+      done  fire block at button to open door
+      done  fire block at mob to open door
+      done  pick up heal power ups with field to open door
+      done  use a gun to kill a mob and use it's block body to activate a button to open a door
+      done  use field to deflect bullets
+      use field to pick up a field and research
+        research once to open door
+  puzzle rooms
+    save training level progress as local variable if puzzles are added
+  combat rooms:
     boss gauntlet, spawn with nothing but a few power ups and fight 10 bosses
 
+JUNK tech  disable level exit for 5 minutes
+  level.disableExit = true
+  setTimeout( () => {level.disableExit = false;}, 5*60000);
 
 tech: basic research - heal power ups spawn as research power ups instead, and using research heals you (needs to be pretty low, like 3% health)
 tech: maintenance - heals no longer spawn, but using research heals you 100%
@@ -67,6 +58,7 @@ electric motors: increases movement speed and jump height, but jumping and movin
   JUNK tech?
 
 mob that fires bullets in 4,5,6,7 different directions at once,  no aiming
+  grow a bit before it fires to indicate state
 
 bug once:  switching from shotgun to harpoon somehow set b.activeGun to not defined
   https://discord.com/channels/645222059647172618/646505973610971165/919116288008290324
@@ -102,13 +94,6 @@ mob/boss that fires a laser at player, but give player time to avoid
   laser isn't always on
   they target where player was 1 second ago
   they turn to face player?
-
-dart: a new bullet type for string-less harpoons
-  can turn harder
-  dart, draw quick line to indicate targeting
-  can get new targets?
-tech: dart - alt fire several small harpoons, with guidance
-  requires not railgun
 
 tech: open a new tab for n-gon, spawn things in the original game based on events in new game
   if you die in new die in original?
@@ -361,7 +346,7 @@ blue triangle boss can move backwards and aim away from you if set up properly
 
 mouse event e.which is deprecated
 
-fix door.isOpen actually meaning isClosed?
+fix door.isClosing actually meaning isClosed?
 
 make it so that when you are immune to harm you can either jump on mobs or you pass through them
 

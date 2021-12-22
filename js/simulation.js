@@ -598,6 +598,13 @@ const simulation = {
             document.body.style.cursor = "none";
             document.body.style.overflow = "hidden"
         }
+        if (isTrainingRun) {
+            simulation.isTraining = true
+            simulation.isNoPowerUps = true
+        } else {
+            simulation.isTraining = false
+            simulation.isNoPowerUps = false;
+        }
         simulation.onTitlePage = false;
         // document.getElementById("choose-grid").style.display = "none"
         document.getElementById("choose-grid").style.visibility = "hidden"
@@ -621,12 +628,11 @@ const simulation = {
         } else {
             Composite.add(engine.world, [player])
         }
-        if (isTrainingRun) simulation.isTraining = true
         level.populateLevels()
 
         input.endKeySensing();
         b.removeAllGuns();
-        simulation.isNoPowerUps = false;
+
         tech.setupAllTech(); //sets tech to default values
         tech.cancelCount = 0;
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 

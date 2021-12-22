@@ -8,7 +8,7 @@ const level = {
     onLevel: -1,
     levelsCleared: 0,
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"],
-    trainingLevels: ["trainingHold", "trainingThrow", "trainingCrouch", "trainingJump"],
+    trainingLevels: ["trainingWalk", "trainingCrouch", "trainingJump", "trainingHold", "trainingThrow", "trainingHit", "trainingHeal", "trainingFire", "trainingDeflect"],
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
@@ -17,11 +17,9 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("plasma torch")
-            // b.giveGuns("spores")
-            // b.giveGuns("nail gun")
+            // m.setField("pilot wave")
             // b.giveGuns("harpoon") 
-            // tech.giveTech("nematodes")
+            // tech.giveTech("Bose Einstein condensate")
             // for (let i = 0; i < 9; i++) tech.giveTech("annelids")
             // tech.giveTech("tinsellated flagella")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
@@ -29,9 +27,9 @@ const level = {
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.tech[297].frequency = 100
-            // level.trainingThrow();
+            // level.trainingDeflect();
             if (simulation.isTraining) {
-                level.trainingHold();
+                level.trainingWalk();
             } else {
                 level.intro(); //starting level
             }
@@ -136,7 +134,13 @@ const level = {
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false); //start
         }
     },
-    trainingJump() { //learn to crouch
+    trainingText(say) {
+        simulation.lastLogTime = 0; //clear previous messages
+        simulation.makeTextLog(`<span style="font-size: 110%;line-height: 110%;"><span style="color:#51f;">supervised.learning</span>(<span style="color:#777; font-size: 80%;">${(Date.now()/1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span><br>${say}</span>`, Infinity)
+        // lore.trainer.text("Wow. Just a platform.")
+    },
+    trainingBackgroundColor: "#e1e1e1",
+    trainingWalk() { //learn to walk
         m.addHealth(Infinity)
         document.getElementById("health").style.display = "none" //hide your health bar
         document.getElementById("health-bg").style.display = "none"
@@ -149,20 +153,18 @@ const level = {
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
-        document.body.style.backgroundColor = "#e1e1e1";
+        document.body.style.backgroundColor = level.trainingBackgroundColor
 
         simulation.lastLogTime = 0; //clear previous messages
         let instruction = 0
-        simulation.makeTextLog(`hold down <strong>${input.key.up}</strong> longer to jump higher`, Infinity)
+        level.trainingText(`move <strong>↔</strong> with <strong>${input.key.left.replace('Key', '').replace('Digit', '')}</strong> and <strong>${input.key.right.replace('Key', '').replace('Digit', '')}</strong>`)
 
         level.custom = () => {
-            if (instruction === 0 && m.pos.x > 300) {
+            if (instruction === 0 && input.right) {
                 instruction++
-                simulation.lastLogTime = 0; //clear previous messages
-                simulation.makeTextLog(`<s>hold down <strong>${input.key.up}</strong> longer to jump higher</s>`, Infinity)
+                level.trainingText(`<s>move <strong>↔</strong> with <strong>${input.key.left.replace('Key', '').replace('Digit', '')}</strong> and <strong>${input.key.right.replace('Key', '').replace('Digit', '')}</strong></s>
+                <br>exit through the blue door`)
             }
-
-            m.health = 1 //can't die
             //exit room
             ctx.fillStyle = "#f2f2f2"
             ctx.fillRect(1600, -400, 400, 400)
@@ -171,21 +173,20 @@ const level = {
             level.playerExitCheck();
         };
         level.customTopLayer = () => {
-            //dark
-            ctx.fillStyle = "rgba(0,0,0,0.2)"
-            ctx.fillRect(1000, 0, 450, 1800)
             //exit room glow
             ctx.fillStyle = "rgba(0,255,255,0.05)"
             ctx.fillRect(1600, -400, 400, 400)
         };
-
         spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
         spawn.mapRect(2000, -2800, 2600, 4600); //right wall
-        spawn.mapRect(275, -350, 200, 375);
-        spawn.mapRect(-250, 0, 1250, 1800);
-        spawn.mapRect(1450, 0, 1075, 1800);
+        spawn.mapRect(-250, 0, 3500, 1800); //floor
+        spawn.mapRect(1575, 0, 500, 100);
         spawn.mapRect(-250, -2800, 3500, 2200); //roof
-
+        spawn.mapRect(700, -8, 50, 25);
+        spawn.mapRect(725, -16, 75, 25);
+        spawn.mapRect(1375, -16, 50, 50);
+        spawn.mapRect(1400, -8, 50, 25);
+        spawn.mapRect(750, -24, 650, 100);
         spawn.mapRect(1600, -1200, 500, 850); //exit roof
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
@@ -203,17 +204,14 @@ const level = {
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
-        document.body.style.backgroundColor = "#e1e1e1";
+        document.body.style.backgroundColor = level.trainingBackgroundColor
 
-        simulation.lastLogTime = 0; //clear previous messages
         let instruction = 0
-        simulation.makeTextLog(`press <strong>${input.key.down}</strong> to crouch`, Infinity)
-
+        level.trainingText(`press <strong>${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch`)
         level.custom = () => {
             if (instruction === 0 && input.down) {
                 instruction++
-                simulation.lastLogTime = 0; //clear previous messages
-                simulation.makeTextLog(`<s>press <strong>${input.key.down}</strong> to crouch</s>`, Infinity)
+                level.trainingText(`<s>press <strong>${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch</s>`)
             }
             //exit room
             ctx.fillStyle = "#f2f2f2"
@@ -251,6 +249,131 @@ const level = {
         spawn.mapRect(1600, -1200, 500, 850); //exit roof
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
+    trainingJump() { //learn to jump
+        m.addHealth(Infinity)
+        document.getElementById("health").style.display = "none" //hide your health bar
+        document.getElementById("health-bg").style.display = "none"
+
+        level.setPosToSpawn(60, -50); //normal spawn
+        spawn.mapRect(10, -10, 100, 20); //small platform for player
+        level.exit.x = 1775;
+        level.exit.y = -35;
+        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        simulation.zoomScale = 1400 //1400 is normal
+        level.defaultZoom = 1400
+        simulation.zoomTransition(level.defaultZoom, 1)
+        document.body.style.backgroundColor = level.trainingBackgroundColor
+
+        let instruction = 0
+        level.trainingText(`hold down <strong>${input.key.up.replace('Key', '').replace('Digit', '')}</strong> longer to jump higher`)
+
+        level.custom = () => {
+            if (instruction === 0 && m.pos.x > 300) {
+                instruction++
+                level.trainingText(`<s>hold down <strong>${input.key.up.replace('Key', '').replace('Digit', '')}</strong> longer to jump higher</s>`)
+            }
+            m.health = 1 //can't die
+            //exit room
+            ctx.fillStyle = "#f2f2f2"
+            ctx.fillRect(1600, -400, 400, 400)
+            level.exit.draw();
+            level.enter.draw();
+            level.playerExitCheck();
+        };
+        level.customTopLayer = () => {
+            //dark
+            ctx.fillStyle = "rgba(0,0,0,0.05)"
+            ctx.fillRect(1000, 0, 450, 1800)
+            ctx.fillRect(1000, -2800, 450, 2200)
+            //exit room glow
+            ctx.fillStyle = "rgba(0,255,255,0.05)"
+            ctx.fillRect(1600, -400, 400, 400)
+        };
+
+        spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
+        spawn.mapRect(2000, -2800, 2600, 4600); //right wall
+        spawn.mapRect(275, -350, 200, 375);
+        spawn.mapRect(-250, 0, 1250, 1800); //floor
+        spawn.mapRect(1450, 0, 1075, 1800); //floor
+        spawn.mapRect(-250, -2800, 1250, 2200); //roof
+        spawn.mapRect(1450, -2800, 1075, 2200); //roof
+        spawn.mapVertex(375, 0, "150 0  -150 0  -100 -50  100 -50"); //base
+
+        spawn.mapRect(1600, -1200, 500, 850); //exit roof
+        spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
+    },
+    trainingHold() { //put block on button to open door
+        m.addHealth(Infinity)
+        //hide your health bar
+        document.getElementById("health").style.display = "none"
+        document.getElementById("health-bg").style.display = "none"
+
+        level.setPosToSpawn(60, -50); //normal spawn
+        spawn.mapRect(10, -10, 100, 20); //small platform for player
+        level.exit.x = 1775;
+        level.exit.y = -35;
+        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        simulation.zoomScale = 1400 //1400 is normal
+        level.defaultZoom = 1400
+        simulation.zoomTransition(level.defaultZoom, 1)
+        document.body.style.backgroundColor = level.trainingBackgroundColor
+
+        spawn.bodyRect(1025, -75, 50, 50); //block to go on button
+        const buttonDoor = level.button(500, 0)
+        const door = level.door(1612.5, -175, 25, 190, 185, 3)
+
+        let instruction = 0
+        level.trainingText(`activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong>`)
+
+        level.custom = () => {
+            if (instruction === 0 && input.field) {
+                instruction++
+                level.trainingText(`<s>activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong></s><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up`)
+            } else if (instruction === 1 && m.isHolding) {
+                instruction++
+                level.trainingText(`<s>activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up</s><br>drop the <strong class='color-block'>block</strong> on the red button to open the door`)
+            } else if (instruction === 2 && !buttonDoor.isUp && Vector.magnitudeSquared(Vector.sub(body[0].position, buttonDoor.min)) < 10000) {
+                instruction++
+                level.trainingText(`<s>activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up<br>drop the <strong class='color-block'>block</strong> on the red button to open the door</s>`)
+            }
+            //exit room
+            ctx.fillStyle = "#f2f2f2"
+            ctx.fillRect(1600, -400, 400, 400)
+            level.exit.draw();
+            level.enter.draw();
+            level.playerExitCheck();
+        };
+        level.customTopLayer = () => {
+            buttonDoor.query();
+            buttonDoor.draw();
+            if (buttonDoor.isUp) {
+                door.isClosing = true
+            } else {
+                door.isClosing = false
+            }
+            door.openClose();
+            door.draw();
+            //exit room glow
+            ctx.fillStyle = "rgba(0,255,255,0.05)"
+            ctx.fillRect(1600, -400, 400, 400)
+        };
+
+        spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
+        spawn.mapRect(2000, -2800, 2600, 4600); //right wall
+        spawn.mapRect(-250, 50, 3500, 1750); //floor
+        spawn.mapRect(-200, 0, 950, 100);
+        spawn.mapRect(1575, 0, 500, 100);
+        spawn.mapRect(-250, -2800, 3500, 2200); //roof
+
+        spawn.mapRect(725, 12, 50, 25);
+        spawn.mapRect(725, 25, 75, 25);
+        spawn.mapRect(750, 38, 75, 25);
+        spawn.mapRect(1525, 25, 75, 50);
+        spawn.mapRect(1500, 38, 50, 25);
+        spawn.mapRect(1550, 12, 50, 25);
+        spawn.mapRect(1600, -1200, 500, 850); //exit roof
+        spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
+    },
     trainingThrow() { //throw a block on button to open door
         m.addHealth(Infinity)
         //hide your health bar
@@ -265,37 +388,32 @@ const level = {
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
-        document.body.style.backgroundColor = "#e1e1e1";
+        document.body.style.backgroundColor = level.trainingBackgroundColor
 
         spawn.bodyRect(1025, -75, 50, 50); //block to go on button
         const buttonDoor = level.button(1635, -400)
         const door = level.door(1612.5, -175, 25, 190, 185, 3)
 
-        simulation.lastLogTime = 0; //clear previous messages
         let instruction = 0
-        simulation.makeTextLog(`activate your <strong class='color-f'>field</strong> with <strong>space</strong> or <strong>right mouse</strong>
-        <br>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong>`, Infinity)
+        level.trainingText(`activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong>
+        <br>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong>`)
 
         level.custom = () => {
-            console.log(m.throwCharge)
             if (instruction === 0 && m.isHolding) {
                 instruction++
-                simulation.lastLogTime = 0; //clear previous messages
-                simulation.makeTextLog(`<s>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong></s>
-                <br>hold your <strong class='color-f'>field</strong> down to charge up then release to throw a <strong class='color-block'>block</strong>`, Infinity)
+                level.trainingText(`<s>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong></s>
+                <br>hold your <strong class='color-f'>field</strong> down to charge up then release to throw a <strong class='color-block'>block</strong>`)
             } else if (instruction === 1 && m.throwCharge > 2) {
                 instruction++
-                simulation.lastLogTime = 0; //clear previous messages
-                simulation.makeTextLog(`<s>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong>
+                level.trainingText(`<s>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong>
                 <br>hold your <strong class='color-f'>field</strong> down to charge up then release to throw a <strong class='color-block'>block</strong></s>
-                <br>throw the <strong class='color-block'>block</strong> onto the button`, Infinity)
+                <br>throw the <strong class='color-block'>block</strong> onto the button`)
                 // the <strong class='color-block'>block</strong> at the button
             } else if (instruction === 2 && !buttonDoor.isUp && Vector.magnitudeSquared(Vector.sub(body[0].position, buttonDoor.min)) < 10000) {
                 instruction++
-                simulation.lastLogTime = 0; //clear previous messages
-                simulation.makeTextLog(`<s>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong>
+                level.trainingText(`<s>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong>
                 <br>hold your <strong class='color-f'>field</strong> down to charge up then release to throw a <strong class='color-block'>block</strong>
-                <br>throw the <strong class='color-block'>block</strong> onto the button</s>`, Infinity)
+                <br>throw the <strong class='color-block'>block</strong> onto the button</s>`)
             }
             //exit room
             ctx.fillStyle = "#f2f2f2"
@@ -308,9 +426,9 @@ const level = {
             buttonDoor.query();
             buttonDoor.draw();
             if (buttonDoor.isUp) {
-                door.isOpen = true
+                door.isClosing = true
             } else {
-                door.isOpen = false
+                door.isClosing = false
             }
             door.openClose();
             door.draw();
@@ -337,7 +455,7 @@ const level = {
         spawn.mapRect(1625, -400, 400, 50);
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
-    trainingHold() { //put block on button to open door
+    trainingHit() { //throw a block at mob to open door
         m.addHealth(Infinity)
         //hide your health bar
         document.getElementById("health").style.display = "none"
@@ -351,29 +469,17 @@ const level = {
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
-        document.body.style.backgroundColor = "#e1e1e1";
+        document.body.style.backgroundColor = level.trainingBackgroundColor
 
-        spawn.bodyRect(1025, -75, 50, 50); //block to go on button
-        const buttonDoor = level.button(500, 0)
         const door = level.door(1612.5, -175, 25, 190, 185, 3)
 
-        simulation.lastLogTime = 0; //clear previous messages
         let instruction = 0
-        simulation.makeTextLog(`activate your <strong class='color-f'>field</strong> with <strong>space</strong> or <strong>right mouse</strong>`, Infinity)
+        level.trainingText(`throw the <strong class='color-block'>block</strong> at the <strong>mobs</strong> to open the door`)
 
         level.custom = () => {
-            if (instruction === 0 && input.field) {
+            if (instruction === 0 && !mob.length) {
                 instruction++
-                simulation.lastLogTime = 0; //clear previous messages
-                simulation.makeTextLog(`<s>activate your <strong class='color-f'>field</strong> with <strong>space</strong> or <strong>right mouse</strong></s><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up`, Infinity)
-            } else if (instruction === 1 && m.isHolding) {
-                instruction++
-                simulation.lastLogTime = 0; //clear previous messages
-                simulation.makeTextLog(`<s>activate your <strong class='color-f'>field</strong> with <strong>space</strong> or <strong>right mouse</strong><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up</s><br>drop the <strong class='color-block'>block</strong> on the red button to open the door`, Infinity)
-            } else if (instruction === 2 && !buttonDoor.isUp && Vector.magnitudeSquared(Vector.sub(body[0].position, buttonDoor.min)) < 10000) {
-                instruction++
-                simulation.lastLogTime = 0; //clear previous messages
-                simulation.makeTextLog(`<s>activate your <strong class='color-f'>field</strong> with <strong>space</strong> or <strong>right mouse</strong><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up<br>drop the <strong class='color-block'>block</strong> on the red button to open the door</s>`, Infinity)
+                level.trainingText(`<s>throw the <strong class='color-block'>block</strong> at the <strong>mobs</strong> to open the door</s>`)
             }
             //exit room
             ctx.fillStyle = "#f2f2f2"
@@ -383,12 +489,10 @@ const level = {
             level.playerExitCheck();
         };
         level.customTopLayer = () => {
-            buttonDoor.query();
-            buttonDoor.draw();
-            if (buttonDoor.isUp) {
-                door.isOpen = true
+            if (mob.length > 0) {
+                door.isClosing = true
             } else {
-                door.isOpen = false
+                door.isClosing = false
             }
             door.openClose();
             door.draw();
@@ -410,8 +514,250 @@ const level = {
         spawn.mapRect(1525, 25, 75, 50);
         spawn.mapRect(1500, 38, 50, 25);
         spawn.mapRect(1550, 12, 50, 25);
+        // spawn.mapRect(1600, -1200, 500, 850); //exit roof
+        // spawn.mapRect(1790, -600, 250, 225); //button left wall
+        // spawn.mapRect(1625, -400, 400, 50);
+        spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
+        spawn.mapRect(1600, -600, 425, 250);
+
+        spawn.bodyRect(1025, -75, 50, 50); //block to go on button
+        spawn.starter(425, -350, 35)
+        spawn.starter(800, -350, 44)
+    },
+    trainingHeal() { //learn to heal
+        m.addHealth(Infinity)
+        m.health = 0;
+        m.addHealth(0.25)
+        document.getElementById("health").style.display = "inline" //show your health bar
+        document.getElementById("health-bg").style.display = "inline"
+
+        level.setPosToSpawn(60, -50); //normal spawn
+        spawn.mapRect(10, -10, 100, 20); //small platform for player
+        level.exit.x = 1775;
+        level.exit.y = -35;
+        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        simulation.zoomScale = 1400 //1400 is normal
+        level.defaultZoom = 1400
+        simulation.zoomTransition(level.defaultZoom, 1)
+        document.body.style.backgroundColor = level.trainingBackgroundColor
+
+
+        let instruction = 0
+        level.trainingText(`your <strong>health</strong> is displayed in the top left corner
+        <br>use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.heal(3)} until your <strong>health</strong> is full`)
+
+        level.custom = () => {
+            if (instruction === 0 && m.health === 1) {
+                instruction++
+                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.heal(3)} until your <strong>health</strong> is full</s>`)
+            }
+            //exit room
+            ctx.fillStyle = "#f2f2f2"
+            ctx.fillRect(1600, -400, 400, 400)
+            level.exit.draw();
+            level.enter.draw();
+            level.playerExitCheck();
+        };
+        level.customTopLayer = () => {
+            if (m.health !== 1) {
+                door.isClosing = true
+            } else {
+                door.isClosing = false
+            }
+            door.openClose();
+            door.draw();
+            //exit room glow
+            ctx.fillStyle = "rgba(0,255,255,0.05)"
+            ctx.fillRect(1600, -400, 400, 400)
+        };
+
+        spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
+        spawn.mapRect(2000, -2800, 2600, 4600); //right wall
+        spawn.mapRect(-250, 0, 3500, 1800); //floor
+
+        spawn.mapRect(1575, 0, 500, 100);
+        spawn.mapRect(-250, -2800, 3500, 2200); //roof
+
+        spawn.mapRect(700, -8, 50, 25);
+        spawn.mapRect(725, -16, 75, 25);
+        spawn.mapRect(1375, -16, 50, 50);
+        spawn.mapRect(1400, -8, 50, 25);
+        spawn.mapRect(750, -24, 650, 100);
+        powerUps.directSpawn(875, -500, "heal", false, null, 15);
+        powerUps.directSpawn(1075, -500, "heal", false, null, 25);
+        powerUps.directSpawn(1275, -500, "heal", false, null, 35);
+
+        const door = level.door(1612.5, -175, 25, 190, 185, 3)
+
         spawn.mapRect(1600, -1200, 500, 850); //exit roof
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
+    },
+    trainingFire() { //throw a block at mob to open door
+        level.setPosToSpawn(60, -50); //normal spawn
+        spawn.mapRect(10, -10, 100, 20); //small platform for player
+        level.exit.x = 1775;
+        level.exit.y = 15;
+        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        simulation.zoomScale = 1400 //1400 is normal
+        level.defaultZoom = 1400
+        simulation.zoomTransition(level.defaultZoom, 1)
+        document.body.style.backgroundColor = level.trainingBackgroundColor
+
+        const door = level.door(1612.5, -125, 25, 190, 185, 3)
+        const buttonDoor = level.button(400, 0)
+
+
+        let instruction = 0
+        level.trainingText(`use your <strong class='color-f'>field</strong> to pick up the gun power up`)
+
+        level.custom = () => {
+            if (instruction === 0 && simulation.isChoosing) {
+                instruction++
+                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up the gun power up</s>
+                <br>choose a <strong class='color-g'>gun</strong>`)
+            } else if (instruction === 1 && !simulation.isChoosing) {
+                instruction++
+                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up the gun power up
+                <br>choose a <strong class='color-g'>gun</strong></s>
+                <br>use the <strong>left mouse</strong> button to shoot the <strong>mobs</strong>`)
+            } else if (instruction === 2 && mob.length === 0) {
+                instruction++
+                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up the gun power up
+                <br>choose a <strong class='color-g'>gun</strong>
+                <br>use the <strong>left mouse</strong> button to shoot the <strong>mobs</strong></s>
+                <br>drop a <strong class='color-block'>block</strong> on the red button to open the door`)
+            } else if (instruction === 3 && !door.isClosing) {
+                instruction++
+                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up the gun power up
+                <br>choose a <strong class='color-g'>gun</strong>
+                <br>use the <strong>left mouse</strong> button to shoot the <strong>mobs</strong>
+                <br>put a <strong class='color-block'>block</strong> on the red button to open the door</s>`)
+            }
+            //spawn ammo if you run out
+            if (!powerUp.length && b.activeGun && b.guns[b.activeGun].ammo === 0 && door.isClosing) {
+                powerUps.directSpawn(1275, -500, "ammo");
+            }
+            //exit room
+            ctx.fillStyle = "#f2f2f2"
+            ctx.fillRect(1600, -350, 400, 400)
+            level.exit.draw();
+            level.enter.draw();
+            level.playerExitCheck();
+        };
+        level.customTopLayer = () => {
+            buttonDoor.query();
+            buttonDoor.draw();
+            if (buttonDoor.isUp) {
+                door.isClosing = true
+            } else {
+                door.isClosing = false
+            }
+            door.openClose();
+            door.draw();
+            //exit room glow
+            ctx.fillStyle = "rgba(0,255,255,0.05)"
+            ctx.fillRect(1600, -350, 400, 400)
+        };
+
+        spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
+        spawn.mapRect(2000, -2800, 2600, 4600); //right wall
+        spawn.mapRect(-250, 50, 3500, 1750); //floor
+        spawn.mapRect(-200, 0, 950, 100);
+        spawn.mapRect(-250, -2800, 3500, 2200); //roof
+
+        //ceiling steps
+        spawn.mapRect(725, -588, 50, 25);
+        spawn.mapRect(725, -600, 75, 25);
+        spawn.mapRect(750, -612, 75, 25);
+        spawn.mapRect(-275, -650, 1025, 87);
+
+        spawn.mapRect(725, 12, 50, 25);
+        spawn.mapRect(725, 25, 75, 25);
+        spawn.mapRect(750, 38, 75, 25);
+
+        spawn.mapRect(1600, -600, 425, 300);
+        spawn.mapRect(1600, -400, 50, 275);
+
+        powerUps.directSpawn(1275, -500, "gun", false);
+        spawn.starter(900, -300, 35)
+        spawn.starter(1400, -400, 44)
+    },
+    trainingDeflect() { //learn to jump
+        m.addHealth(Infinity)
+        m.health = 1;
+        document.getElementById("health").style.display = "inline" //show your health bar
+        document.getElementById("health-bg").style.display = "inline"
+
+        level.setPosToSpawn(60, -50); //normal spawn
+        spawn.mapRect(10, -10, 100, 20); //small platform for player
+        level.exit.x = 1775;
+        level.exit.y = -35;
+        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        simulation.zoomScale = 1400 //1400 is normal
+        level.defaultZoom = 1400
+        simulation.zoomTransition(level.defaultZoom, 1)
+        document.body.style.backgroundColor = level.trainingBackgroundColor
+
+
+        let instruction = 0
+        // activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong>
+        level.trainingText(`use your <strong class='color-f'>field</strong> to <strong>deflect</strong> the <strong style="color:rgb(215,0,145);">mobs</strong>`)
+
+        level.custom = () => {
+            if (instruction === 0 && m.pos.x > 1350) {
+                instruction++
+                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to <strong>deflect</strong> the <strong style="color:rgb(215,0,145);">mobs</strong></s>`)
+            }
+            //teleport to start if hit
+            if (m.immuneCycle > m.cycle) {
+                m.energy = m.maxEnergy
+                Matter.Body.setPosition(player, { x: 60, y: -50 })
+            }
+            //spawn bullets
+            if (!(simulation.cycle % 5)) {
+                spawn.sniperBullet(660 + 580 * Math.random(), -2000, 10, 4);
+                const who = mob[mob.length - 1]
+                Matter.Body.setVelocity(who, { x: 0, y: 8 });
+                who.timeLeft = 300
+            }
+
+
+            //exit room
+            ctx.fillStyle = "#f2f2f2"
+            ctx.fillRect(1600, -400, 400, 400)
+            level.exit.draw();
+            level.enter.draw();
+            level.playerExitCheck();
+        };
+        level.customTopLayer = () => {
+            //dark
+            ctx.fillStyle = "rgba(0,0,0,0.05)"
+            // ctx.fillRect(450, -2800, 1025, 2200)
+            //exit room glow
+            ctx.fillStyle = "rgba(0,255,255,0.05)"
+            ctx.fillRect(1600, -400, 400, 400)
+        };
+
+        spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
+        spawn.mapRect(2000, -2800, 2600, 4600); //right wall
+
+        spawn.mapRect(-250, 0, 3000, 1800); //floor
+        spawn.mapRect(-250, -2800, 900, 2200); //roof
+        spawn.mapRect(1250, -2800, 1275, 2200); //roof
+        spawn.mapVertex(950, 0, "400 0  -400 0  -300 -50  300 -50"); //base
+
+        spawn.mapRect(1600, -1200, 500, 850); //exit roof
+        spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
+
+        //spawn bullets on load to avoid sprint
+        //spawn bullets
+        for (let i = 0; i < 32; i++) {
+            spawn.sniperBullet(660 + 580 * Math.random(), -2000 + 40 * i, 10, 4);
+            const who = mob[mob.length - 1]
+            Matter.Body.setVelocity(who, { x: 0, y: 8 });
+            who.timeLeft = 300
+        }
+
     },
     trainingTemplate() { //learn to crouch
         m.addHealth(Infinity)
@@ -426,17 +772,17 @@ const level = {
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
-        document.body.style.backgroundColor = "#e1e1e1";
+        document.body.style.backgroundColor = level.trainingBackgroundColor
 
-        simulation.lastLogTime = 0; //clear previous messages
+
         let instruction = 0
-        simulation.makeTextLog(`press <strong>${input.key.down}</strong> to crouch`, Infinity)
+        level.trainingText(`press <strong>${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch`)
 
         level.custom = () => {
             if (instruction === 0 && input.down) {
                 instruction++
-                simulation.lastLogTime = 0; //clear previous messages
-                simulation.makeTextLog(`<s>press <strong>${input.key.down}</strong> to crouch</s>`, Infinity)
+
+                level.trainingText(`<s>press <strong>${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch</s>`)
             }
             //exit room
             ctx.fillStyle = "#f2f2f2"
@@ -530,24 +876,42 @@ const level = {
         // <br><span class='color-var'>m</span>.field.description = "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].description}</span>"
         // `, 1200);
     },
+    disableExit: false,
     nextLevel() {
-        level.levelsCleared++;
-        // level.difficultyIncrease(simulation.difficultyMode) //increase difficulty based on modes
+        if (!level.disableExit) {
+            level.levelsCleared++;
+            level.onLevel++; //cycles map to next level
+            if (simulation.isTraining) {
+                if (level.onLevel > level.levels.length - 1) {
+                    level.disableExit = true
+                    document.getElementById("health").style.display = "none"
+                    document.getElementById("health-bg").style.display = "none"
+                    document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
+                    document.getElementById("fade-out").style.opacity = 1; //slowly fades out
+                    setTimeout(function() {
+                        simulation.paused = true;
+                        level.disableExit = false;
+                        engine.world.bodies.forEach((body) => { Matter.Composite.remove(engine.world, body) })
+                        Engine.clear(engine);
+                        simulation.splashReturn();
+                    }, 6000);
+                    return
+                } else {
+                    level.setDifficulty()
+                }
+            } else {
+                if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
+                level.difficultyIncrease(simulation.difficultyMode)
+            }
 
-        //difficulty is increased 5 times when finalBoss dies
-        // const len = level.levelsCleared / level.levels.length //add 1 extra difficulty step for each time you have cleared all the levels
-        // for (let i = 0; i < len; i++) 
-        level.difficultyIncrease(simulation.difficultyMode)
-
-        level.onLevel++; //cycles map to next level
-        if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
-        //reset lost tech display
-        for (let i = 0; i < tech.tech.length; i++) {
-            if (tech.tech[i].isLost) tech.tech[i].isLost = false;
+            //reset lost tech display
+            for (let i = 0; i < tech.tech.length; i++) {
+                if (tech.tech[i].isLost) tech.tech[i].isLost = false;
+            }
+            tech.isDeathAvoidedThisLevel = false;
+            simulation.updateTechHUD();
+            simulation.clearNow = true; //triggers in simulation.clearMap to remove all physics bodies and setup for new map
         }
-        tech.isDeathAvoidedThisLevel = false;
-        simulation.updateTechHUD();
-        simulation.clearNow = true; //triggers in simulation.clearMap to remove all physics bodies and setup for new map
     },
     populateLevels() {
         if (simulation.isTraining) {
@@ -1076,18 +1440,10 @@ const level = {
             friction: 1,
             frictionStatic: 1,
             restitution: 0,
-            isOpen: false,
+            isClosing: false,
             openClose() {
                 if (!m.isBodiesAsleep) {
-                    if (!this.isOpen) {
-                        if (this.position.y > y - distance) { //try to open 
-                            const position = {
-                                x: this.position.x,
-                                y: this.position.y - speed
-                            }
-                            Matter.Body.setPosition(this, position)
-                        }
-                    } else {
+                    if (this.isClosing) {
                         if (this.position.y < y) { //try to close
                             if (
                                 Matter.Query.collides(this, [player]).length === 0 &&
@@ -1100,6 +1456,14 @@ const level = {
                                 }
                                 Matter.Body.setPosition(this, position)
                             }
+                        }
+                    } else {
+                        if (this.position.y > y - distance) { //try to open 
+                            const position = {
+                                x: this.position.x,
+                                y: this.position.y - speed
+                            }
+                            Matter.Body.setPosition(this, position)
                         }
                     }
                 }
@@ -3178,9 +3542,9 @@ const level = {
             buttonDoor.query();
             buttonDoor.draw();
             if (buttonDoor.isUp) {
-                door.isOpen = true
+                door.isClosing = true
             } else {
-                door.isOpen = false
+                door.isClosing = false
             }
             door.openClose();
 
@@ -4927,9 +5291,9 @@ const level = {
             button.query();
             button.draw();
             if (button.isUp) {
-                door.isOpen = true
+                door.isClosing = true
             } else {
-                door.isOpen = false
+                door.isClosing = false
             }
             door.openClose();
             ctx.fillStyle = "#ccc"
@@ -5064,9 +5428,9 @@ const level = {
                 button.query();
                 button.draw();
                 if (button.isUp) {
-                    door.isOpen = true
+                    door.isClosing = true
                 } else {
-                    door.isOpen = false
+                    door.isClosing = false
                 }
                 door.openClose();
                 ctx.fillStyle = "#ccc"
@@ -5320,15 +5684,15 @@ const level = {
                 buttonPlateformEnd.query();
                 // hazard.query(); //bug reported from discord?
                 if (buttonDoor.isUp) {
-                    door.isOpen = false
+                    door.isClosing = false
                 } else {
-                    door.isOpen = true
+                    door.isClosing = true
                 }
                 door.openClose();
                 if (buttonPlateformEnd.isUp) {
-                    doorPlateform.isOpen = true;
+                    doorPlateform.isClosing = true;
                 } else {
-                    doorPlateform.isOpen = false;
+                    doorPlateform.isClosing = false;
                 }
                 door.openClose();
                 doorPlateform.openClose();
@@ -5616,7 +5980,7 @@ const level = {
         let buttonSortieSalle
         let portalEnBas
         let portalEnHaut
-        let door3isOpen = false;
+        let door3isClosing = false;
 
         function drawOnTheMapMapRect(x, y, dx, dy) {
             spawn.mapRect(x, y, dx, dy);
@@ -5839,7 +6203,7 @@ const level = {
             //     me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
             //         this.removeCons(); //remove constraint
             //         spawnCouloirEnHaut()
-            //         doorSortieSalle.isOpen = false;
+            //         doorSortieSalle.isClosing = false;
             //     };
             //     if (simulation.difficulty > 4) spawn.nodeGroup(8000, 630, "spawns", 8, 20, 105);
             // } else {
@@ -5853,11 +6217,11 @@ const level = {
             if (me) {
                 me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
                     spawnCouloirEnHaut()
-                    doorSortieSalle.isOpen = false;
+                    doorSortieSalle.isClosing = false;
                 };
             } else {
                 spawnCouloirEnHaut()
-                doorSortieSalle.isOpen = false;
+                doorSortieSalle.isClosing = false;
             }
             // }
         } else {
@@ -5869,11 +6233,11 @@ const level = {
             if (me) {
                 me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
                     spawnCouloirEnHaut()
-                    doorSortieSalle.isOpen = false;
+                    doorSortieSalle.isClosing = false;
                 };
             } else {
                 spawnCouloirEnHaut()
-                doorSortieSalle.isOpen = false;
+                doorSortieSalle.isClosing = false;
             }
         }
     },
@@ -5982,24 +6346,24 @@ const level = {
             buttonBedroom.draw();
             if (buttonBedroom.isUp) {
                 if (hasAlreadyBeenActivated == false) {
-                    doorBedroom.isOpen = true;
-                    doorGrenier.isOpen = true;
-                    voletLucarne1.isOpen = true;
-                    voletLucarne2.isOpen = true;
-                    voletLucarne3.isOpen = true;
-                    voletLucarne4.isOpen = true;
-                    voletLucarne5.isOpen = true;
-                    voletLucarne6.isOpen = true;
+                    doorBedroom.isClosing = true;
+                    doorGrenier.isClosing = true;
+                    voletLucarne1.isClosing = true;
+                    voletLucarne2.isClosing = true;
+                    voletLucarne3.isClosing = true;
+                    voletLucarne4.isClosing = true;
+                    voletLucarne5.isClosing = true;
+                    voletLucarne6.isClosing = true;
                 }
             } else {
-                doorBedroom.isOpen = false;
-                doorGrenier.isOpen = false;
-                voletLucarne1.isOpen = false;
-                voletLucarne2.isOpen = false;
-                voletLucarne3.isOpen = false;
-                voletLucarne4.isOpen = false;
-                voletLucarne5.isOpen = false;
-                voletLucarne6.isOpen = false;
+                doorBedroom.isClosing = false;
+                doorGrenier.isClosing = false;
+                voletLucarne1.isClosing = false;
+                voletLucarne2.isClosing = false;
+                voletLucarne3.isClosing = false;
+                voletLucarne4.isClosing = false;
+                voletLucarne5.isClosing = false;
+                voletLucarne6.isClosing = false;
                 if (hasAlreadyBeenActivated == false) {
                     hasAlreadyBeenActivated = true;
                 }
@@ -6891,8 +7255,8 @@ const level = {
         const drip1 = level.drip(1875, -660, -400, 70)
         const drip2 = level.drip(3525, -940, -400, 150)
         const drip3 = level.drip(1975, 100, 1200, 100)
-        door.isOpen = true;
-        exitDoor.isOpen = true;
+        door.isClosing = true;
+        exitDoor.isClosing = true;
 
         // UPPER AREA //
         spawn.mapRect(4500, -2400, 1700, 2050)
@@ -7031,7 +7395,7 @@ const level = {
         if (simulation.difficulty > 3) {
             spawn.randomLevelBoss(1900, 400, ["shieldingBoss", "shooterBoss", "launcherBoss", "streamBoss"])
         } else {
-            exitDoor.isOpen = false;
+            exitDoor.isClosing = false;
         }
         spawn.secondaryBossChance(800, -800)
 
@@ -7103,9 +7467,9 @@ const level = {
             }
 
             if (g && y && r) {
-                door.isOpen = false;
+                door.isClosing = false;
             } else {
-                door.isOpen = true;
+                door.isClosing = true;
             }
 
             door.openClose()
@@ -7146,11 +7510,11 @@ const level = {
                 nextBlockSpawn = simulation.cycle + Math.floor(Math.random() * 60 + 30)
             }
 
-            if (exitDoor.isOpen) {
-                exitDoor.isOpen = false;
+            if (exitDoor.isClosing) {
+                exitDoor.isClosing = false;
                 for (i = 0; i < mob.length; i++) {
                     if (mob[i].isBoss && 525 < mob[i].position.x < 3200 && -2500 < mob[i].position.y < 100) {
-                        exitDoor.isOpen = true;
+                        exitDoor.isClosing = true;
                     }
                 }
             }
@@ -7858,7 +8222,7 @@ const level = {
                 return a || ((Math.sqrt((i.position.x - 3600) * (i.position.x - 3600) + (i.position.y + 3600) * (i.position.y + 3600)) < 20000) && i.isDropPowerUp);
             }, false) && !emergencyActivated;
 
-            door.isOpen = hasMob;
+            door.isClosing = hasMob;
 
             door.openClose();
             ctx.fillStyle = "#444444" + secretRoomTrans.toString(16);

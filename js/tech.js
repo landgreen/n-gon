@@ -3374,7 +3374,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 1,
-            frequencyDefault: 100,
+            frequencyDefault: 1,
             isNonRefundable: true,
             isBadRandomOption: true,
             allowed() {
@@ -4972,7 +4972,7 @@ const tech = {
         },
         {
             name: "mutualism",
-            description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>150%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>",
+            description: "increase <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong> by <strong>150%</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong>health</strong> until they <strong>die</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6114,25 +6114,25 @@ const tech = {
                 tech.isFlyFaster = false;
             }
         },
-        {
-            name: "Bose Einstein condensate",
-            description: "<strong>mobs</strong> inside your <strong class='color-f'>field</strong> are <strong class='color-s'>frozen</strong><br><em style = 'font-size: 100%'>pilot wave, negative mass, time dilation</em>",
-            isFieldTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass" || (m.fieldUpgrades[m.fieldMode].name === "time dilation" && !tech.isRewindField)
-            },
-            requires: "pilot wave, negative mass, time dilation, not retrocausality",
-            effect() {
-                tech.isFreezeMobs = true
-            },
-            remove() {
-                tech.isFreezeMobs = false
-            }
-        },
+        // {
+        //     name: "Bose Einstein condensate",
+        //     description: "use <strong class='color-f'>energy</strong> to <strong class='color-s'>freeze</strong> <strong>mobs</strong> in your <strong class='color-f'>field</strong><br><em style = 'font-size: 100%'>pilot wave, negative mass, time dilation</em>",
+        //     isFieldTech: true,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass" || (m.fieldUpgrades[m.fieldMode].name === "time dilation" && !tech.isRewindField)
+        //     },
+        //     requires: "pilot wave, negative mass, time dilation, not retrocausality",
+        //     effect() {
+        //         tech.isFreezeMobs = true
+        //     },
+        //     remove() {
+        //         tech.isFreezeMobs = false
+        //     }
+        // },
         {
             name: "pair production",
             description: "picking up a <strong>power up</strong> gives you <strong>200</strong> <strong class='color-f'>energy</strong>",
@@ -7272,7 +7272,7 @@ const tech = {
         },
         {
             name: "density",
-            description: `<strong class='color-block'>block</strong> are <strong>100</strong> times less <strong>dense</strong>`,
+            description: `<strong class='color-block'>block</strong> are <strong>10</strong> times less <strong>dense</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -7282,14 +7282,15 @@ const tech = {
             allowed() { return true },
             requires: "",
             effect() {
-                for (let i = 0; i < body.length; i++) Matter.Body.setDensity(body[i], 0.00001) //set current blocks to low density
+                for (let i = 0; i < body.length; i++) Matter.Body.setDensity(body[i], 0.0001) //set current blocks to low density
+
                 level.addToWorld = () => {
                     for (let i = 0; i < body.length; i++) {
                         if (body[i] !== m.holdingTarget && !body[i].isNoSetCollision) {
                             body[i].collisionFilter.category = cat.body;
                             body[i].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
                         }
-                        Matter.Body.setDensity(body[i], 0.00001) //THIS IS THE ONLY ADDED LINE OF CODE
+                        Matter.Body.setDensity(body[i], 0.0001) //THIS IS THE ONLY ADDED LINE OF CODE
                         body[i].classType = "body";
                         Composite.add(engine.world, body[i]); //add to world
                     }

@@ -376,7 +376,7 @@ const b = {
                 if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 if (m.energy < 0) {
                     m.energy = 0
-                    m.damage(0.03 * (tech.isRadioactiveResistance ? 0.25 : 1));
+                    if (simulation.dmgScale) m.damage(0.03 * (tech.isRadioactiveResistance ? 0.25 : 1));
                 }
             }
 
@@ -423,9 +423,9 @@ const b = {
                     const harm = radius * (tech.isExplosionHarm ? 0.00055 : 0.00018)
                     if (tech.isImmuneExplosion) {
                         const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
-                        m.damage(mitigate * harm);
+                        if (simulation.dmgScale) m.damage(mitigate * harm);
                     } else {
-                        m.damage(harm);
+                        if (simulation.dmgScale) m.damage(harm);
                     }
                     knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
                     player.force.x += knock.x;
@@ -1084,7 +1084,7 @@ const b = {
                                 if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                             } else {
                                 m.energy = 0;
-                                m.damage(tech.isRadioactiveResistance ? 0.00016 * 0.25 : 0.00016) //0.00015
+                                if (simulation.dmgScale) m.damage(tech.isRadioactiveResistance ? 0.00016 * 0.25 : 0.00016) //0.00015
                             }
                         }
                         //aoe damage to mobs
@@ -1929,7 +1929,6 @@ const b = {
                         y: best.who.velocity.y * 0.7
                     });
                     //draw mob damage circle
-                    console.log(dmg)
                     simulation.drawList.push({
                         x: path[1].x,
                         y: path[1].y,
@@ -2928,7 +2927,7 @@ const b = {
                         if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                     } else {
                         m.energy = 0;
-                        m.damage(tech.isRadioactiveResistance ? 0.00015 * 0.25 : 0.00015) //0.00015
+                        if (simulation.dmgScale) m.damage(tech.isRadioactiveResistance ? 0.00015 * 0.25 : 0.00015) //0.00015
                     }
                 }
                 //aoe damage to mobs

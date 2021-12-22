@@ -52,6 +52,18 @@ const lore = {
         sound.portamento(83.333)
         sound.portamento(166.666)
     },
+    trainer: {
+        color: "#f20",
+        voice: undefined,
+        text: function(say) {
+            simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now()/1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
+            lore.talkingColor = this.color
+            const utterance = new SpeechSynthesisUtterance(say);
+            utterance.lang = "en-AU" //"en-IN"; //de-DE  en-GB  fr-FR  en-US en-AU
+            utterance.volume = 0.2; // 0 to 1
+            speechSynthesis.speak(utterance);
+        },
+    },
     anand: {
         color: "#e0c",
         voice: undefined,

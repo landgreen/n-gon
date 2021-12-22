@@ -1446,14 +1446,17 @@ const m = {
                     }
                 }
             }
-            if (tech.isFreezeMobs) {
-                for (let i = 0, len = mob.length; i < len; ++i) {
-                    Matter.Sleeping.set(mob[i], false)
-                    mobs.statusSlow(mob[i], 60)
-                }
-            } else {
-                wake(mob);
-            }
+            // if (tech.isFreezeMobs) {
+            //     for (let i = 0, len = mob.length; i < len; ++i) {
+            //         const ICE_DRAIN = 0.0005
+            //         if (m.energy > ICE_DRAIN) m.energy -= ICE_DRAIN;
+            //         Matter.Sleeping.set(mob[i], false)
+            //         mobs.statusSlow(mob[i], 60)
+            //     }
+            // } else {
+            //     wake(mob);
+            // }
+            wake(mob);
             wake(body);
             wake(bullet);
             for (let i = 0, len = cons.length; i < len; i++) {
@@ -1909,20 +1912,20 @@ const m = {
                                     y: player.velocity.y * 0.98
                                 });
                             }
-                            if (tech.isFreezeMobs) {
-                                const ICE_DRAIN = 0.0002
-                                for (let i = 0, len = mob.length; i < len; i++) {
-                                    if (((mob[i].distanceToPlayer() + mob[i].radius) < this.fieldDrawRadius) && !mob[i].shield && !mob[i].isShielded) {
-                                        if (m.energy > ICE_DRAIN * 2) {
-                                            m.energy -= ICE_DRAIN;
-                                            this.fieldDrawRadius -= 2;
-                                            mobs.statusSlow(mob[i], 60)
-                                        } else {
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
+                            // if (tech.isFreezeMobs) {
+                            //     const ICE_DRAIN = 0.0005
+                            //     for (let i = 0, len = mob.length; i < len; i++) {
+                            //         if (!mob[i].isMobBullet && !mob[i].shield && !mob[i].isShielded && ((mob[i].distanceToPlayer() + mob[i].radius) < this.fieldDrawRadius)) {
+                            //             if (m.energy > ICE_DRAIN * 2) {
+                            //                 m.energy -= ICE_DRAIN;
+                            //                 this.fieldDrawRadius -= 2;
+                            //                 mobs.statusSlow(mob[i], 60)
+                            //             } else {
+                            //                 break;
+                            //             }
+                            //         }
+                            //     }
+                            // }
 
                             //draw zero-G range
                             ctx.beginPath();
@@ -2809,13 +2812,15 @@ const m = {
 
 
 
-                                if (tech.isFreezeMobs) {
-                                    for (let i = 0, len = mob.length; i < len; ++i) {
-                                        if (Vector.magnitude(Vector.sub(mob[i].position, m.fieldPosition)) < m.fieldRadius) {
-                                            mobs.statusSlow(mob[i], 180)
-                                        }
-                                    }
-                                }
+                                // if (tech.isFreezeMobs) {
+                                //     for (let i = 0, len = mob.length; i < len; ++i) {
+                                //         if (!mob[i].isMobBullet && !mob[i].shield && !mob[i].isShielded && Vector.magnitude(Vector.sub(mob[i].position, m.fieldPosition)) < m.fieldRadius + mob[i].radius) {
+                                //             const ICE_DRAIN = 0.0005
+                                //             if (m.energy > ICE_DRAIN) m.energy -= ICE_DRAIN;
+                                //             mobs.statusSlow(mob[i], 180)
+                                //         }
+                                //     }
+                                // }
 
                                 ctx.beginPath();
                                 const rotate = m.cycle * 0.008;

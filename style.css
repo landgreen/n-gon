@@ -131,10 +131,15 @@ summary {
 
 #training-button {
     position: absolute;
-    bottom: 58px;
-    right: 4px;
+    bottom: 4px;
+    right: 0px;
+    left: 0px;
+    margin: auto;
+    /* bottom: 58px; */
+    /* right: 4px; */
     z-index: 12;
     transition: opacity 5s ease-in;
+
 }
 
 #construct {
