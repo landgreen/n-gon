@@ -1443,6 +1443,7 @@ const spawn = {
         me.delay = 120 * simulation.CDScale;
         me.randomHopFrequency = 200 + Math.floor(Math.random() * 150);
         me.randomHopCD = simulation.cycle + me.randomHopFrequency;
+        Matter.Body.rotate(me, Math.random() * Math.PI);
         spawn.shield(me, x, y);
         me.do = function() {
             this.gravity();

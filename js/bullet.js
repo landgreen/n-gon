@@ -5392,49 +5392,6 @@ const b = {
                 }
             },
         }, {
-            name: "mine",
-            description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>refund <strong>undetonated</strong> mines on <strong>exiting</strong> a level", //fires <strong>nails</strong> at mobs within range
-            ammo: 0,
-            ammoPack: 1.25,
-            have: false,
-            do() {
-                if (!input.field && input.down && !tech.isLaserMine) {
-                    const cycles = 60 //30
-                    const speed = 40
-                    const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) } //m.Vy / 2 + removed to make the path less jerky
-                    ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
-                    ctx.lineWidth = 2
-                    ctx.beginPath()
-                    for (let i = 1.5, len = 19; i < len + 1; i++) {
-                        const time = cycles * i / len
-                        ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
-                    }
-                    ctx.stroke()
-                }
-            },
-            fire() {
-                if (input.down) {
-                    if (tech.isLaserMine) {
-                        const speed = 30
-                        const velocity = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
-                        b.laserMine(m.pos, velocity)
-                        m.fireCDcycle = m.cycle + Math.floor(65 * b.fireCDscale); // cool down
-                    } else {
-                        const pos = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
-                        let speed = 36
-                        if (Matter.Query.point(map, pos).length > 0) speed = -2 //don't launch if mine will spawn inside map
-                        b.mine(pos, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }, 0)
-                        m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCDscale); // cool down
-                    }
-                } else {
-                    const pos = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
-                    let speed = 23
-                    if (Matter.Query.point(map, pos).length > 0) speed = -2 //don't launch if mine will spawn inside map
-                    b.mine(pos, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }, 0)
-                    m.fireCDcycle = m.cycle + Math.floor(35 * b.fireCDscale); // cool down
-                }
-            }
-        }, {
             name: "spores",
             description: "fire a <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> that discharges <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> seek out nearby mobs",
             ammo: 0,
@@ -5980,6 +5937,49 @@ const b = {
                 player.force.x -= recoil.x
                 player.force.y -= recoil.y
                 tech.harpoonDensity = 0.008
+            }
+        }, {
+            name: "mine",
+            description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>refund <strong>undetonated</strong> mines on <strong>exiting</strong> a level", //fires <strong>nails</strong> at mobs within range
+            ammo: 0,
+            ammoPack: 1.25,
+            have: false,
+            do() {
+                if (!input.field && input.down && !tech.isLaserMine) {
+                    const cycles = 60 //30
+                    const speed = 40
+                    const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) } //m.Vy / 2 + removed to make the path less jerky
+                    ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
+                    ctx.lineWidth = 2
+                    ctx.beginPath()
+                    for (let i = 1.5, len = 19; i < len + 1; i++) {
+                        const time = cycles * i / len
+                        ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
+                    }
+                    ctx.stroke()
+                }
+            },
+            fire() {
+                if (input.down) {
+                    if (tech.isLaserMine) {
+                        const speed = 30
+                        const velocity = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
+                        b.laserMine(m.pos, velocity)
+                        m.fireCDcycle = m.cycle + Math.floor(65 * b.fireCDscale); // cool down
+                    } else {
+                        const pos = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
+                        let speed = 36
+                        if (Matter.Query.point(map, pos).length > 0) speed = -2 //don't launch if mine will spawn inside map
+                        b.mine(pos, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }, 0)
+                        m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCDscale); // cool down
+                    }
+                } else {
+                    const pos = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
+                    let speed = 23
+                    if (Matter.Query.point(map, pos).length > 0) speed = -2 //don't launch if mine will spawn inside map
+                    b.mine(pos, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }, 0)
+                    m.fireCDcycle = m.cycle + Math.floor(35 * b.fireCDscale); // cool down
+                }
             }
         },
         // {

@@ -16,7 +16,7 @@ const tech = {
         //remove lore if it's your first time playing since it's confusing
         //also remove lore if cheating
         lore.techCount = 0;
-        if (simulation.isCheating || localSettings.runCount > 1) { //simulation.isCommunityMaps ||
+        if (simulation.isCheating || localSettings.runCount < 1) { //simulation.isCommunityMaps ||
             for (let i = 0, len = tech.tech.length; i < len; i++) {
                 if (tech.tech[i].isLore) {
                     tech.tech[i].frequency = 0;
@@ -228,7 +228,7 @@ const tech = {
         if (tech.isEnergyLoss) dmg *= 1.55;
         if (tech.isAcidDmg && m.health > 1) dmg *= 1.35;
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
-        if (tech.isEnergyDamage) dmg *= 1 + m.energy * 0.1;
+        if (tech.isEnergyDamage) dmg *= 1 + m.energy * 0.11;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
         if (tech.isRerollDamage) dmg *= 1 + 0.037 * powerUps.research.count
         if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
@@ -2225,7 +2225,7 @@ const tech = {
         },
         {
             name: "electronegativity",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>9</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2617,6 +2617,10 @@ const tech = {
             effect() {
                 tech.largerHeals++;
                 this.refundAmount += tech.addJunkTechToPool(0.05)
+                //update current heals
+                for (let i = 0; i < powerUp.length; i++) {
+                    if (powerUp[i].name === "heal") powerUp[i].size = powerUps.heal.size()
+                }
             },
             refundAmount: 0,
             remove() {

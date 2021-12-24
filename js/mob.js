@@ -667,6 +667,7 @@ const mobs = {
                             y: this.position.y + seeRange * Math.sin(this.angle)
                         };
                         vertexCollision(this.position, look, map);
+                        vertexCollision(this.position, look, body);
                         if (best.dist2 != Infinity) {
                             this.springTarget.x = best.x;
                             this.springTarget.y = best.y;

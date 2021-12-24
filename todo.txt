@@ -1,41 +1,80 @@
 ******************************************************** NEXT PATCH **************************************************
 
-more training levels: "trainingWalk", "trainingCrouch", "trainingJump", "trainingHold", "trainingThrow", "trainingHit", "trainingHeal", "trainingFire", "trainingDeflect"
+new community level "run" (by iSuggestedThatAlready / iNoobBoi)!!!!!!
+  try it out by enabling community levels in the settings
 
-tech: Bose Einstein condensate is removed until I can balance it
+more training levels: "trainingNailGun", "trainingShotGun", "trainingSuperBall", "trainingMatterWave", "trainingMissile"
 
-bug fixes
+no power ups check box in experiment mode now disables all types of power ups, not just tech
+  simulation.isNoPowerUps
+powerUps can no longer move through doors
+  this might lead to problems that I haven't thought about, but let's see
+adiabatic healing now updates active heal power ups as well as future ones
+
+fixed bug with undefined tech not showing up
 
 ******************************************************** TODO ********************************************************
 
-balance time dilation with bose einstein  (you can freeze everything and take no damage)
-  code is still there, need to balance
-  balance with energy drain?
+decoherence rewrite with flags instead of a banish array, to fix bugs
 
 training
-  make the button more obvious if the account has only played 1-2 times
+  save training level progress as local variable
+    reset progress to zero if you clear all training levels
+    maybe only save progress if you made if past the trainingHeal level
+  make the training button more obvious if the account has only played 1-2 times
   uses the lore voice/text code?
-  add vertical tunnels for power ups spawns like in intro?
+  replace all mob clear triggers with button triggers?
   tutorial rooms:
       done  walk forwards and backwards
       done  crouch through tunnel
       done  jump over wall and gap
+      look around with your mouse
       done  pick up a block an drop onto a button to open door
       done  fire block at button to open door
       done  fire block at mob to open door
+      done  use field to deflect bullets
       done  pick up heal power ups with field to open door
       done  use a gun to kill a mob and use it's block body to activate a button to open a door
-      done  use field to deflect bullets
-      use field to pick up a field and research
-        research once to open door
-  puzzle rooms
-    save training level progress as local variable if puzzles are added
+  gun rooms: (different mobs type in each room)
+    different mobs in each room 
+      how to introduce shields?
+      "hopper" "slasher" "shooter "grenadier" "striker" "laser" "stabber" "springer" "pulsar" "launcher" "launcherOne" "exploder" "sneaker" "sucker" "sniper" "spinner" "grower" "beamer" "focuser" "spawner" "ghoster"
+    done nailgun - start with no ammo collect ammo and shoot at mobs
+    done shotgun - some simple close range combat
+    done superball - use 1 ammo to take out several mobs
+    done matter wave - kill a mob inside a map element
+    done missiles - take out mobs that are around corner and have them drop on a button
+    grenades - use 1 ammo to take out several mobs at once
+    spores - use 1 ammo to take out several mobs at once
+    drones - use mouse to bring drones around a corner
+    foam - slow boss mob, and run away
+    harpoon - kill one close mob, pick up ammo that is out of reach, first at several far away mobs with crouch
+    mine - built kill zone, get mobs to follow into mine kill zone
+    laser - reflect off walls to hit mob
+  field rooms:
+    standing wave - bullets come from every direction
+    perfect diamagnetism - drop field to rapid stream of bullets and fire gun at them
+    negative mass - fly over a bunch of ground based mobs , hoppers
+    molecular assembler - guide drones around the corner
+    plasma torch - nothing fancy, just kill mobs
+    time dilation - get past some mobs
+    cloaking - sneak past mobs to collect some heals
+    pilot wave - toss blocks at mobs
+    worm hole - teleport past lasers
+  puzzle rooms:
+    close a door to trigger a button
   combat rooms:
+    kill so many mobs that the mob bodies pile up and you can get over a wall by jumping on them
     boss gauntlet, spawn with nothing but a few power ups and fight 10 bosses
+    use no gun, just bots to kil stuff
 
 JUNK tech  disable level exit for 5 minutes
   level.disableExit = true
   setTimeout( () => {level.disableExit = false;}, 5*60000);
+
+balance time dilation with bose einstein  (you can freeze everything and take no damage)
+  code is still there, need to balance
+  balance with energy drain?
 
 tech: basic research - heal power ups spawn as research power ups instead, and using research heals you (needs to be pretty low, like 3% health)
 tech: maintenance - heals no longer spawn, but using research heals you 100%
@@ -43,6 +82,9 @@ tech: maintenance - heals no longer spawn, but using research heals you 100%
 tech reversed regression - mobs take less damage after each time you hit them,  but you get +100% damage
   maybe a gun tech only?
     what gun?
+
+foam tech - make it move slower, last much longer, and push away other foam bullets
+  not sure about bouncing off walls,  but that might be fun too
 
 tech  extend fracture analysis to give bonus damage to frozen also, but reduce the 400%->300%?
 

@@ -1103,7 +1103,7 @@ const powerUps = {
         if (
             (!tech.isSuperDeterminism || (target !== 'research')) &&
             !(tech.isEnergyNoAmmo && target === 'ammo') &&
-            (!simulation.isNoPowerUps || (target === 'research' || target === 'heal' || target === 'ammo'))
+            (!simulation.isNoPowerUps)
         ) {
             powerUps.directSpawn(x, y, target, moving, mode, size)
             if (Math.random() < tech.duplicationChance()) {
