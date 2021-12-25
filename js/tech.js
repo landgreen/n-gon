@@ -1809,7 +1809,7 @@ const tech = {
         },
         {
             name: "thermocouple",
-            description: "if  <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>condense <strong>1-9</strong> <strong class='color-s'>ice IX</strong> crystals every second",
+            description: "if  <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>condense <strong>4-13</strong> <strong class='color-s'>ice IX</strong> crystals every second",
             maxCount: 9,
             count: 0,
             frequency: 4,
@@ -2813,8 +2813,11 @@ const tech = {
             remove() {
                 if (tech.isBanish) {
                     tech.isBanish = false
-                    powerUps.tech.banishLog = [] //reset banish log
-                    powerUps.research.changeRerolls(-10)
+                    //reset banish list
+                    for (let i = 0; i < tech.tech.length; i++) {
+                        if (tech.tech[i].isBanished) tech.tech[i].isBanished = false
+                    }
+                    // powerUps.research.changeRerolls(-10)
                 }
             }
         },

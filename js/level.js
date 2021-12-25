@@ -8,7 +8,7 @@ const level = {
     onLevel: -1,
     levelsCleared: 0,
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"], //intro, gauntlet, final  are added in at the start and end of level order
-    trainingLevels: ["trainingWalk", "trainingCrouch", "trainingJump", "trainingHold", "trainingThrow", "trainingThrowAt", "trainingDeflect", "trainingHeal", "trainingFire", "trainingNailGun", "trainingShotGun", "trainingSuperBall", "trainingMatterWave", "trainingMissile"],
+    trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "dhotGun", "superBall", "matterWave", "missile"],
     communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel"],
     levels: [],
     start() {
@@ -20,7 +20,9 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // m.setField("pilot wave")
             // b.giveGuns("harpoon") 
-            // tech.giveTech("Bose Einstein condensate")
+            tech.giveTech("relay switch")
+            tech.giveTech("thermocouple")
+            // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 9; i++) tech.giveTech("annelids")
             // tech.giveTech("tinsellated flagella")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
@@ -28,9 +30,9 @@ const level = {
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.tech[297].frequency = 100
-            // level.run();
+            // level.crouch();
 
-            if (simulation.isTraining) { level.trainingWalk(); } else { level.intro(); }
+            if (simulation.isTraining) { level.walk(); } else { level.intro(); }
             // level.testing(); //not in rotation, used for testing
             // level.template(); //not in rotation, blank start new map development
             // level.final() //final boss level  
@@ -138,7 +140,12 @@ const level = {
         // lore.trainer.text("Wow. Just a platform.")
     },
     trainingBackgroundColor: "#e1e1e1",
-    trainingWalk() { //learn to walk
+    walk() { //learn to walk
+
+        var img = new Image(); // Create new img element
+        img.src = 'myImage.png'; // Set source path
+
+
         m.addHealth(Infinity)
         document.getElementById("health").style.display = "none" //hide your health bar
         document.getElementById("health-bg").style.display = "none"
@@ -155,12 +162,12 @@ const level = {
 
         simulation.lastLogTime = 0; //clear previous messages
         let instruction = 0
-        level.trainingText(`move <strong>↔</strong> with <strong>${input.key.left.replace('Key', '').replace('Digit', '')}</strong> and <strong>${input.key.right.replace('Key', '').replace('Digit', '')}</strong>`)
+        level.trainingText(`move <strong>↔</strong> with <strong class="key-input-train">${input.key.left.replace('Key', '').replace('Digit', '')}</strong> and <strong class="key-input-train">${input.key.right.replace('Key', '').replace('Digit', '')}</strong>`)
 
         level.custom = () => {
             if (instruction === 0 && input.right) {
                 instruction++
-                level.trainingText(`<s>move <strong>↔</strong> with <strong>${input.key.left.replace('Key', '').replace('Digit', '')}</strong> and <strong>${input.key.right.replace('Key', '').replace('Digit', '')}</strong></s>
+                level.trainingText(`<s>move <strong>↔</strong> with <strong class="key-input-train">${input.key.left.replace('Key', '').replace('Digit', '')}</strong> and <strong class="key-input-train">${input.key.right.replace('Key', '').replace('Digit', '')}</strong></s>
                 <br>exit through the blue door`)
             }
             //exit room
@@ -188,10 +195,17 @@ const level = {
         spawn.mapRect(1600, -1200, 500, 850); //exit roof
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
-    trainingCrouch() { //learn to crouch
+    crouch() { //learn to crouch
         m.addHealth(Infinity)
-        level.setPosToSpawn(60, -50); //normal spawn
-        spawn.mapRect(10, -10, 100, 20); //small platform for player
+        level.setPosToSpawn(75, -100); //normal spawn
+        spawn.mapRect(25, -60, 100, 20); //small platform for player
+        spawn.mapRect(0, -50, 150, 25); //stairs
+        spawn.mapRect(-25, -40, 200, 25);
+        spawn.mapRect(-50, -30, 250, 25);
+        spawn.mapRect(-75, -20, 300, 25);
+        spawn.mapRect(-100, -10, 350, 25);
+        spawn.mapRect(-150, -50, 175, 75);
+
         level.exit.x = 1775;
         level.exit.y = -35;
         spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
@@ -201,15 +215,15 @@ const level = {
         document.body.style.backgroundColor = level.trainingBackgroundColor
 
         let instruction = 0
-        level.trainingText(`press <strong>${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch`)
+        level.trainingText(`press <strong class="key-input-train">${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch`)
         level.custom = () => {
             if (instruction === 0 && input.down) {
                 instruction++
-                level.trainingText(`<s>press <strong>${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch</s>`)
+                level.trainingText(`<s>press <strong class="key-input-train">${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch</s>`)
             }
             //exit room
             ctx.fillStyle = "#f2f2f2"
-            ctx.fillRect(1650, -400, 400, 400)
+            ctx.fillRect(1625, -350, 375, 350)
             level.exit.draw();
             level.enter.draw();
             level.playerExitCheck();
@@ -217,14 +231,15 @@ const level = {
         level.customTopLayer = () => {
             //exit room glow
             ctx.fillStyle = "rgba(0,255,255,0.05)"
-            ctx.fillRect(1650, -400, 400, 400)
+            ctx.fillRect(1625, -350, 375, 350)
             //dark
             ctx.fillStyle = "rgba(0,0,0,0.2)"
-            ctx.fillRect(625, -100, 1025, 175)
+            ctx.fillRect(500, -100, 1125, 175);
         };
 
         // spawn.mapRect(1025, -675, 300, 623); //crouch wall
-        spawn.mapRect(625, -650, 1025, 550);
+        // spawn.mapRect(625, -650, 1025, 550);
+        spawn.mapRect(500, -650, 1125, 550);
         spawn.mapRect(-200, -650, 875, 300);
 
         spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
@@ -234,6 +249,7 @@ const level = {
         spawn.mapRect(1575, 0, 500, 100);
         spawn.mapRect(-250, -2800, 3500, 2200); //roof
 
+
         spawn.mapRect(725, 12, 50, 25);
         spawn.mapRect(725, 25, 75, 25);
         spawn.mapRect(750, 38, 75, 25);
@@ -241,9 +257,8 @@ const level = {
         spawn.mapRect(1500, 38, 50, 25);
         spawn.mapRect(1550, 12, 50, 25);
         spawn.mapRect(1600, -1200, 500, 850); //exit roof
-        spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
-    trainingJump() { //learn to jump
+    jump() { //learn to jump
         m.addHealth(Infinity)
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -256,12 +271,12 @@ const level = {
         document.body.style.backgroundColor = level.trainingBackgroundColor
 
         let instruction = 0
-        level.trainingText(`hold down <strong>${input.key.up.replace('Key', '').replace('Digit', '')}</strong> longer to jump higher`)
+        level.trainingText(`hold down <strong class="key-input-train">${input.key.up.replace('Key', '').replace('Digit', '')}</strong> longer to jump higher`)
 
         level.custom = () => {
             if (instruction === 0 && m.pos.x > 300) {
                 instruction++
-                level.trainingText(`<s>hold down <strong>${input.key.up.replace('Key', '').replace('Digit', '')}</strong> longer to jump higher</s>`)
+                level.trainingText(`<s>hold down <strong class="key-input-train">${input.key.up.replace('Key', '').replace('Digit', '')}</strong> longer to jump higher</s>`)
             }
             m.health = 1 //can't die
             //exit room
@@ -308,7 +323,7 @@ const level = {
         spawn.mapRect(975, -2800, 200, 2025);
         spawn.mapRect(1000, -775, 150, 25);
     },
-    trainingHold() { //put block on button to open door
+    hold() { //put block on button to open door
         m.addHealth(Infinity)
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -325,18 +340,18 @@ const level = {
         const door = level.door(1612.5, -175, 25, 190, 185, 3)
 
         let instruction = 0
-        level.trainingText(`activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong>`)
+        level.trainingText(`activate your <strong class='color-f'>field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong>`)
 
         level.custom = () => {
             if (instruction === 0 && input.field) {
                 instruction++
-                level.trainingText(`<s>activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong></s><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up`)
+                level.trainingText(`<s>activate your <strong class='color-f'>field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong></s><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up`)
             } else if (instruction === 1 && m.isHolding) {
                 instruction++
-                level.trainingText(`<s>activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up</s><br>drop the <strong class='color-block'>block</strong> on the red button to open the door`)
+                level.trainingText(`<s>activate your <strong class='color-f'>field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up</s><br>drop the <strong class='color-block'>block</strong> on the red button to open the door`)
             } else if (instruction === 2 && !buttonDoor.isUp && Vector.magnitudeSquared(Vector.sub(body[0].position, buttonDoor.min)) < 10000) {
                 instruction++
-                level.trainingText(`<s>activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up<br>drop the <strong class='color-block'>block</strong> on the red button to open the door</s>`)
+                level.trainingText(`<s>activate your <strong class='color-f'>field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up<br>drop the <strong class='color-block'>block</strong> on the red button to open the door</s>`)
             }
             //exit room
             ctx.fillStyle = "#f2f2f2"
@@ -376,7 +391,7 @@ const level = {
         spawn.mapRect(1600, -1200, 500, 850); //exit roof
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
-    trainingThrow() { //throw a block on button to open door
+    throw () { //throw a block on button to open door
         m.addHealth(Infinity)
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -392,9 +407,9 @@ const level = {
         const buttonDoor = level.button(1635, -400)
         const door = level.door(1612.5, -175, 25, 190, 185, 3)
 
+        // activate your <strong class='color-f'>field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong>
         let instruction = 0
-        level.trainingText(`activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong>
-        <br>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong>`)
+        level.trainingText(`pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong>`)
 
         level.custom = () => {
             if (instruction === 0 && m.isHolding) {
@@ -453,7 +468,7 @@ const level = {
         spawn.mapRect(1625, -400, 400, 50);
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
-    trainingThrowAt() { //throw a block at mob to open door
+    throwAt() { //throw a block at mob to open door
         m.addHealth(Infinity)
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -518,7 +533,7 @@ const level = {
         spawn.starter(425, -350, 35)
         spawn.starter(800, -350, 44)
     },
-    trainingFire() { //throw a block at mob to open door
+    fire() { //throw a block at mob to open door
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
@@ -610,7 +625,7 @@ const level = {
         spawn.starter(900, -300, 35)
         spawn.starter(1400, -400, 44)
     },
-    trainingDeflect() { //learn to jump
+    deflect() { //learn to jump
         m.addHealth(Infinity)
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -677,7 +692,7 @@ const level = {
             who.timeLeft = 300
         }
     },
-    trainingHeal() { //learn to heal
+    heal() { //learn to heal
         m.addHealth(Infinity)
         m.health = 0;
         m.addHealth(0.25)
@@ -743,7 +758,7 @@ const level = {
         spawn.mapRect(1600, -1200, 500, 850); //exit roof
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
-    trainingNailGun() { //throw a block on button to open door
+    nailGun() { //throw a block on button to open door
         level.difficultyIncrease(1) //difficulty on training mode resets to zero with each new level
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -835,7 +850,7 @@ const level = {
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
         spawn.mapRect(1600, -600, 425, 250);
     },
-    trainingShotGun() { //throw a block on button to open door
+    shotGun() { //throw a block on button to open door
         level.difficultyIncrease(1) //difficulty on training mode resets to zero with each new level
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -917,7 +932,7 @@ const level = {
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
         spawn.mapRect(1600, -600, 425, 250);
     },
-    trainingSuperBall() { //throw a block on button to open door
+    superBall() { //throw a block on button to open door
         level.difficultyIncrease(1) //difficulty on training mode resets to zero with each new level
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -1001,7 +1016,7 @@ const level = {
         spawn.mapRect(1550, 12, 50, 25);
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
-    trainingMatterWave() { //throw a block on button to open door
+    matterWave() { //throw a block on button to open door
         level.difficultyIncrease(1) //difficulty on training mode resets to zero with each new level
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -1088,7 +1103,7 @@ const level = {
         spawn.mapRect(1550, 12, 50, 25);
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
-    trainingMissile() { //throw a block on button to open door
+    missile() { //throw a block on button to open door
         level.difficultyIncrease(1) //difficulty on training mode resets to zero with each new level
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -1196,13 +1211,13 @@ const level = {
 
 
         let instruction = 0
-        level.trainingText(`press <strong>${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch`)
+        level.trainingText(`press <strong class="key-input-train">${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch`)
 
         level.custom = () => {
             if (instruction === 0 && input.down) {
                 instruction++
 
-                level.trainingText(`<s>press <strong>${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch</s>`)
+                level.trainingText(`<s>press <strong class="key-input-train">${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch</s>`)
             }
             //exit room
             ctx.fillStyle = "#f2f2f2"
@@ -3455,7 +3470,7 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        level.difficultyIncrease(1) //30 is near max on hard  //60 is near max on why
+        level.difficultyIncrease(20) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
         // spawn.starter(1900, -500, 200) //big boy
@@ -3478,7 +3493,7 @@ const level = {
         // spawn.blinkBoss(3200, -500)
         // spawn.mantisBoss(1700, -500)
         // spawn.tetherBoss(1700, -500) //go to actual level?
-        // spawn.revolutionBoss(1900, -500)
+        spawn.revolutionBoss(1900, -500)
         // spawn.bomberBoss(1400, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.shieldingBoss(1700, -500)

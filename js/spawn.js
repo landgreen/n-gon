@@ -3377,7 +3377,7 @@ const spawn = {
 
         // spawn.shield(me, x, y, 1);
         Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.11 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.isBoss = true;
         me.onDamage = function() {};
         me.onDeath = function() {
@@ -3387,72 +3387,63 @@ const spawn = {
 
         //invulnerability every 1/4 fraction of life lost
         //required setup for invulnerable
-        // me.isInvulnerable = false
-        // me.isNextInvulnerability = 0.75
-        // me.invulnerabilityCountDown = 0
-        // me.invulnerable = function() {
-        //     if (this.health < this.isNextInvulnerability) {
-        //         this.isNextInvulnerability = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
-        //         this.isInvulnerable = true
-        //         this.startingDamageReduction = this.damageReduction
-        //         this.damageReduction = 0
-        //         this.invulnerabilityCountDown = 240
-        //     }
-        //     if (this.isInvulnerable) {
-        //         if (this.invulnerabilityCountDown > 0) {
-        //             this.invulnerabilityCountDown--
-        //             //graphics //draw a super shield?
-        //             ctx.beginPath();
-        //             let vertices = this.vertices;
-        //             ctx.moveTo(vertices[0].x, vertices[0].y);
-        //             for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
-        //             ctx.lineTo(vertices[0].x, vertices[0].y);
-        //             ctx.lineWidth = 20;
-        //             // ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
-        //             // ctx.fill();
-        //             ctx.strokeStyle = "rgba(255,255,255,0.7)";
-        //             ctx.stroke();
-        //         } else {
-        //             this.isInvulnerable = false
-        //             this.damageReduction = this.startingDamageReduction
-        //         }
-        //     }
-        // }
-
-        //invulnerable every other revolution
         me.isInvulnerable = false
+        me.isNextInvulnerability = 0.75
+        me.invulnerabilityCountDown = 0
         me.invulnerable = function() {
-            //draw trigger angle
-            // ctx.beginPath();
-            // ctx.moveTo(this.position.x, this.position.y);
-            // const a = this.angle + Math.PI / 2
-            // const unit = { x: Math.cos(a), y: Math.sin(a) }
-            // const edge = Vector.add(this.position, Vector.mult(unit, this.radius))
-            // ctx.lineTo(edge.x, edge.y);
-            // ctx.lineWidth = 5;
-            // ctx.strokeStyle = "#000";
-            // ctx.stroke();
-            if (this.laserAngle % (4 * Math.PI) > 2 * Math.PI) {
-                if (!this.isInvulnerable) {
-                    this.isInvulnerable = true
-                    if (this.damageReduction) this.startingDamageReduction = this.damageReduction
-                    this.damageReduction = 0
-                }
-            } else if (this.isInvulnerable) {
-                this.isInvulnerable = false
-                this.damageReduction = this.startingDamageReduction
+            if (this.health < this.isNextInvulnerability) {
+                this.isNextInvulnerability = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
+                this.isInvulnerable = true
+                this.startingDamageReduction = this.damageReduction
+                this.damageReduction = 0
+                this.invulnerabilityCountDown = 106
             }
             if (this.isInvulnerable) {
-                ctx.beginPath();
-                let vertices = this.vertices;
-                ctx.moveTo(vertices[0].x, vertices[0].y);
-                for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
-                ctx.lineTo(vertices[0].x, vertices[0].y);
-                ctx.lineWidth = 20;
-                ctx.strokeStyle = "rgba(255,255,255,0.7)";
-                ctx.stroke();
+                if (this.invulnerabilityCountDown > 0) {
+                    this.invulnerabilityCountDown--
+                    //graphics //draw a super shield?
+                    ctx.beginPath();
+                    let vertices = this.vertices;
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                    ctx.lineTo(vertices[0].x, vertices[0].y);
+                    ctx.lineWidth = 20;
+                    // ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
+                    // ctx.fill();
+                    ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                    ctx.stroke();
+                } else {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                }
             }
         }
+
+        //invulnerable every other revolution
+        // me.isInvulnerable = false
+        // me.invulnerable = function() {
+        //     //draw trigger angle
+        //     if (this.laserAngle % (4 * Math.PI) > 2 * Math.PI) {
+        //         if (!this.isInvulnerable) {
+        //             this.isInvulnerable = true
+        //             if (this.damageReduction) this.startingDamageReduction = this.damageReduction
+        //             this.damageReduction = 0
+        //         }
+        //     } else if (this.isInvulnerable) {
+        //         this.isInvulnerable = false
+        //         this.damageReduction = this.startingDamageReduction
+        //     }
+        //     if (this.isInvulnerable) {
+        //         ctx.beginPath();
+        //         let vertices = this.vertices;
+        //         ctx.moveTo(vertices[0].x, vertices[0].y);
+        //         for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+        //         ctx.lineTo(vertices[0].x, vertices[0].y);
+        //         ctx.lineWidth = 20;
+        //         ctx.strokeStyle = "rgba(255,255,255,0.7)";
+        //         ctx.stroke();
+        //     }
+        // }
 
         me.do = function() {
             this.invulnerable();
@@ -3460,7 +3451,7 @@ const spawn = {
             this.seePlayerByHistory(60);
             this.attraction();
             //traveling laser
-            if (!m.isBodiesAsleep) this.laserAngle += 0.03
+            if (!m.isBodiesAsleep) this.laserAngle += this.isInvulnerable ? 0.06 : 0.015
             for (let i = 0, len = this.vertices.length; i < len; i++) {
                 // this.laserSword(this.vertices[1], this.angle + laserAngle);
                 const bend = bendFactor * Math.cos(this.laserAngle + 2 * Math.PI * i / len)

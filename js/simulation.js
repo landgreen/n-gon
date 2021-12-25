@@ -885,7 +885,7 @@ const simulation = {
             }
             if (tech.relayIce && tech.isFlipFlopOn) {
                 for (let j = 0; j < tech.relayIce; j++) {
-                    for (let i = 0, len = Math.ceil(9 * Math.random()); i < len; i++) b.iceIX(2)
+                    for (let i = 0, len = 3 + Math.ceil(9 * Math.random()); i < len; i++) b.iceIX(2)
                 }
             }
 

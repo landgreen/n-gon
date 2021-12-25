@@ -1,21 +1,18 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community level "run" (by iSuggestedThatAlready / iNoobBoi)!!!!!!
-  try it out by enabling community levels in the settings
+revolutionBoss is immune to damage at 1/4,1/2,3/4 health until it's laser spins around one revolution
 
-more training levels: "trainingNailGun", "trainingShotGun", "trainingSuperBall", "trainingMatterWave", "trainingMissile"
+thermocouple produces 1-9 -> 4-13 ice nine bullet
+thermocouple is on by default until next patch
 
-no power ups check box in experiment mode now disables all types of power ups, not just tech
-  simulation.isNoPowerUps
-powerUps can no longer move through doors
-  this might lead to problems that I haven't thought about, but let's see
-adiabatic healing now updates active heal power ups as well as future ones
+decoherence rewrite with flags instead of a banish array, to fix bugs
 
-fixed bug with undefined tech not showing up
+
 
 ******************************************************** TODO ********************************************************
 
-decoherence rewrite with flags instead of a banish array, to fix bugs
+
+merge various multi bullet tech under one name
 
 training
   save training level progress as local variable
@@ -32,6 +29,7 @@ training
       done  pick up a block an drop onto a button to open door
       done  fire block at button to open door
       done  fire block at mob to open door
+      easier deflecting level, with 1-2 attacking mobs
       done  use field to deflect bullets
       done  pick up heal power ups with field to open door
       done  use a gun to kill a mob and use it's block body to activate a button to open a door
@@ -61,8 +59,11 @@ training
     cloaking - sneak past mobs to collect some heals
     pilot wave - toss blocks at mobs
     worm hole - teleport past lasers
-  puzzle rooms:
-    close a door to trigger a button
+  puzzle/platforming rooms:
+    stack blocks to get to high ground
+      also make a harder version of stacking blocks
+    portal rooms
+    jump at the top of a elevator to jump high
   combat rooms:
     kill so many mobs that the mob bodies pile up and you can get over a wall by jumping on them
     boss gauntlet, spawn with nothing but a few power ups and fight 10 bosses

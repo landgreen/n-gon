@@ -81,6 +81,16 @@ td {
     padding-left: 10px;
 }
 
+.key-input-train {
+    padding: 0px 5px;
+    border: 2px solid #444;
+    color: #444;
+    border-radius: 4px;
+    background-color: #d0d0d0;
+    text-align: center;
+    font-weight: 400;
+}
+
 .key-input {
     padding: 3px 8px;
     border: 2px solid #333;

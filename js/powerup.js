@@ -302,12 +302,11 @@ const powerUps = {
             }
             if (tech.isBanish && type === 'tech') { // banish researched tech by adding them to the list of banished tech
                 const banishLength = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
-                if (powerUps.tech.choiceLog.length > banishLength || powerUps.tech.choiceLog.length === banishLength) { //I'm not sure this check is needed
-                    for (let i = 0; i < banishLength; i++) {
-                        powerUps.tech.banishLog.push(powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - 1 - i])
-                    }
+                for (let i = 0; i < banishLength; i++) {
+                    const index = powerUps.tech.choiceLog.length - i - 1
+                    if (powerUps.tech.choiceLog[index] !== undefined) tech.tech[powerUps.tech.choiceLog[index]].isBanished = true
                 }
-                simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
+                simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - banishLength)}`)
             }
         }
         if (tech.isAnsatz && powerUps.research.count === 0) {
@@ -393,17 +392,14 @@ const powerUps = {
                 powerUps.research.changeRerolls(-1)
             }
             powerUps.research.currentRerollCount++
-            // simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
-            // <br>${powerUps.research.count}`)
             if (tech.isBanish && type === 'tech') { // banish researched tech
                 const banishLength = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
-                if (powerUps.tech.choiceLog.length > banishLength || powerUps.tech.choiceLog.length === banishLength) { //I'm not sure this check is needed
-                    for (let i = 0; i < banishLength; i++) {
-                        powerUps.tech.banishLog.push(powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - 1 - i])
-                    }
+                for (let i = 0; i < banishLength; i++) {
+                    const index = powerUps.tech.choiceLog.length - i - 1
+                    // console.log(index, powerUps.tech.choiceLog[index], tech.tech[powerUps.tech.choiceLog[index]].name)
+                    if (powerUps.tech.choiceLog[index] !== undefined) tech.tech[powerUps.tech.choiceLog[index]].isBanished = true
                 }
-                // simulation.makeTextLog(`${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)} estimated <strong class='color-m'>tech</strong> choices remaining`)
-                simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
+                simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - banishLength)}`)
             }
             if (tech.isResearchReality) {
                 m.switchWorlds()
@@ -627,36 +623,26 @@ const powerUps = {
         },
         choiceLog: [], //records all previous choice options
         lastTotalChoices: 0, //tracks how many tech were available for random selection last time a tech was picked up
-        banishLog: [], //records all tech permanently removed from the selection pool
+        // banishLog: [], //records all tech permanently removed from the selection pool
         effect() {
             if (m.alive) {
                 function pick(skip1 = -1, skip2 = -1, skip3 = -1, skip4 = -1) {
                     let options = [];
                     for (let i = 0; i < tech.tech.length; i++) {
-                        if (tech.tech[i].count < tech.tech[i].maxCount && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4 && tech.tech[i].allowed()) {
+                        if (tech.tech[i].count < tech.tech[i].maxCount && i !== skip1 && i !== skip2 && i !== skip3 && i !== skip4 && tech.tech[i].allowed() && !tech.tech[i].isBanished) {
                             for (let j = 0, len = tech.tech[i].frequency; j < len; j++) options.push(i);
                         }
                     }
                     powerUps.tech.lastTotalChoices = options.length //this is recorded so that banish can know how many tech were available
-                    if (tech.isBanish) { //remove banished tech from last selection
-                        for (let i = 0; i < powerUps.tech.banishLog.length; i++) {
-                            for (let j = 0; j < options.length; j++) {
-                                if (powerUps.tech.banishLog[i] === options[j]) {
-                                    options.splice(j, 1)
-                                    break
-                                }
-                            }
-                        }
-                    } else { //remove repeats from last selection
-                        const totalChoices = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
-                        if (powerUps.tech.choiceLog.length > totalChoices || powerUps.tech.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
-                            for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
-                                if (options.length > totalChoices) {
-                                    for (let j = 0, len = options.length; j < len; j++) {
-                                        if (powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - 1 - i] === options[j]) {
-                                            options.splice(j, 1) //remove previous choice from option pool
-                                            break;
-                                        }
+
+                    const totalChoices = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
+                    if (powerUps.tech.choiceLog.length > totalChoices || powerUps.tech.choiceLog.length === totalChoices) { //make sure this isn't the first time getting a power up and there are previous choices to remove
+                        for (let i = 0; i < totalChoices; i++) { //repeat for each choice from the last selection
+                            if (options.length > totalChoices) {
+                                for (let j = 0, len = options.length; j < len; j++) {
+                                    if (powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - 1 - i] === options[j]) {
+                                        options.splice(j, 1) //remove previous choice from option pool
+                                        break;
                                     }
                                 }
                             }
@@ -788,13 +774,11 @@ const powerUps = {
                     document.getElementById("choose-grid").innerHTML = text
                     powerUps.showDraft();
 
-                } else if (tech.isBanish) {
+                } else if (tech.isBanish) { //if no tech options available eject banish tech
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
                         if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i)
                     }
-                    // simulation.makeTextLog(`No <strong class='color-m'>tech</strong> left<br>erased <strong class='color-m'>tech</strong> have been recovered`)
-                    simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
-                    // powerUps.spawn(m.pos.x, m.pos.y, "tech");
+                    // simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
                     powerUps.endDraft("tech");
                 }
             }
