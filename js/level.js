@@ -20,8 +20,8 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // m.setField("pilot wave")
             // b.giveGuns("harpoon") 
-            tech.giveTech("relay switch")
-            tech.giveTech("thermocouple")
+            // tech.giveTech("relay switch")
+            // tech.giveTech("thermocouple")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 9; i++) tech.giveTech("annelids")
             // tech.giveTech("tinsellated flagella")
