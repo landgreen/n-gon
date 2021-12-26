@@ -1911,14 +1911,14 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "#6ba");
         let me = mob[mob.length - 1];
         me.babyList = [] //list of mobs that are apart of this boss
-        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
-        me.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) //normal is 1,  most bosses have 0.25
+        Matter.Body.setDensity(me, 0.001); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
+        me.damageReduction = 0.15 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) //normal is 1,  most bosses have 0.25
         me.isBoss = true;
         me.friction = 0;
         me.frictionAir = 0.0067;
         me.g = 0.0002; //required if using this.gravity
         me.seePlayerFreq = 300;
-        const springStiffness = 0.0004; //simulation.difficulty
+        const springStiffness = 0.0001; //simulation.difficulty
         const springDampening = 0.005;
 
         me.springTarget = {
@@ -2006,7 +2006,7 @@ const spawn = {
                     this.cons2.length = 100 + 1.5 * this.radius;
 
                     this.isInvulnerable = false
-                    this.invulnerabilityCountDown = 40 + Math.max(0, 70 - simulation.difficulty * 2)
+                    this.invulnerabilityCountDown = 45 + Math.max(0, 70 - simulation.difficulty)
                     this.damageReduction = this.startingDamageReduction
                     for (let i = 0; i < this.babyList.length; i++) {
                         if (this.babyList[i].alive) this.babyList[i].damageReduction = this.startingDamageReduction
@@ -2020,7 +2020,7 @@ const spawn = {
                     this.cons2.length = -200;
 
                     this.isInvulnerable = false
-                    this.invulnerabilityCountDown = 40 + Math.max(0, 70 - simulation.difficulty * 2)
+                    this.invulnerabilityCountDown = 45 + Math.max(0, 70 - simulation.difficulty)
                     this.damageReduction = this.startingDamageReduction
                     for (let i = 0; i < this.babyList.length; i++) {
                         if (this.babyList[i].alive) this.babyList[i].damageReduction = this.startingDamageReduction
@@ -2100,6 +2100,7 @@ const spawn = {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             for (let i = 0; i < this.babyList.length; i++) {
                 if (this.babyList[i].alive) {
+                    this.babyList[i].collisionFilter.mask = cat.map | cat.bullet | cat.player
                     this.babyList[i].isInvulnerable = false
                     this.babyList[i].damageReduction = this.startingDamageReduction
                     this.babyList[i].collisionFilter.mask = cat.bullet | cat.player | cat.map | cat.body
@@ -2107,7 +2108,7 @@ const spawn = {
             }
         };
 
-        const sideLength = 120 // distance between each node mob
+        const sideLength = 80 // distance between each node mob
         const nodes = 3
         const angle = 2 * Math.PI / nodes
         spawn.allowShields = false; //don't want shields on individual mobs, it messes with the constraints
@@ -2118,10 +2119,10 @@ const spawn = {
             babyMob.fill = "rgb(68, 102, 119)"
             babyMob.isBoss = true;
             // Matter.Body.setDensity(babyMob, 0.001); //extra dense //normal is 0.001 //makes effective life much larger and increases damage
-            babyMob.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+            babyMob.damageReduction = this.startingDamageReduction
             babyMob.collisionFilter.mask = cat.bullet | cat.player //can't touch other mobs //cat.map | cat.body |
-            babyMob.delay = 60 + 50 * simulation.CDScale;
-            babyMob.strikeRange = 600
+            babyMob.delay = 60 + 55 * simulation.CDScale + Math.floor(Math.random() * 20);
+            babyMob.strikeRange = 400
             babyMob.onHit = function() {
                 this.cd = simulation.cycle + this.delay;
                 //dislodge ammo

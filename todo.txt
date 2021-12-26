@@ -1,16 +1,12 @@
 ******************************************************** NEXT PATCH **************************************************
 
-revolutionBoss is immune to damage at 1/4,1/2,3/4 health until it's laser spins around one revolution
+tech: super duper - fire +0-2 extra super balls
+  super balls no longer part of MIRV
 
-thermocouple produces 1-9 -> 4-13 ice nine bullet
-thermocouple is on by default until next patch
-
-decoherence rewrite with flags instead of a banish array, to fix bugs
-
-
+bug fix for plasma extruder interaction with doors that collide with power ups
+mantisBoss moves slower, can be damaged for longer time, has less total life, has a smaller punch range
 
 ******************************************************** TODO ********************************************************
-
 
 merge various multi bullet tech under one name
 
@@ -42,13 +38,15 @@ training
     done superball - use 1 ammo to take out several mobs
     done matter wave - kill a mob inside a map element
     done missiles - take out mobs that are around corner and have them drop on a button
-    grenades - use 1 ammo to take out several mobs at once
-    spores - use 1 ammo to take out several mobs at once
-    drones - use mouse to bring drones around a corner
+    grenades - use 1 ammo to take out a ring of mob`s
+    spores - use 1 ammo to take out several mobs at once,  you have to block with your shield until the mobs die
+    drones - use mouse to bring drones around a couple corners
     foam - slow boss mob, and run away
     harpoon - kill one close mob, pick up ammo that is out of reach, first at several far away mobs with crouch
+      or just some hard melee combat
     mine - built kill zone, get mobs to follow into mine kill zone
-    laser - reflect off walls to hit mob
+      maybe a boss mob?
+    laser - reflect off walls to hit mobs
   field rooms:
     standing wave - bullets come from every direction
     perfect diamagnetism - drop field to rapid stream of bullets and fire gun at them
@@ -64,6 +62,7 @@ training
       also make a harder version of stacking blocks
     portal rooms
     jump at the top of a elevator to jump high
+     use the double constrained platforms
   combat rooms:
     kill so many mobs that the mob bodies pile up and you can get over a wall by jumping on them
     boss gauntlet, spawn with nothing but a few power ups and fight 10 bosses

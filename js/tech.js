@@ -4231,33 +4231,6 @@ const tech = {
             }
         },
         {
-            name: "super ball",
-            description: "fire just <strong>1 large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>3</strong> second",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.haveGunCheck("super balls") && tech.missileCount === 1 && !tech.superBallDelay
-            },
-            requires: "super balls, but not MIRV or supertemporal",
-            effect() {
-                tech.oneSuperBall = true;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
-                }
-            },
-            remove() {
-                if (tech.oneSuperBall) {
-                    tech.oneSuperBall = false;
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
-                    }
-                }
-            }
-        },
-        {
             name: "super sized",
             description: `increase <strong>super ball</strong> radius by <strong>14%</strong><br>increases <strong class='color-d'>damage</strong> by about <strong>27%</strong>`,
             isGunTech: true,
@@ -4274,6 +4247,52 @@ const tech = {
             },
             remove() {
                 tech.bulletSize = 1;
+            }
+        },
+        {
+            name: "super duper",
+            description: `randomly fire <strong>+0</strong>, <strong>+1</strong>, or <strong>+2</strong> extra <strong>super balls</strong>`,
+            isGunTech: true,
+            maxCount: 9,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("super balls") && !tech.oneSuperBall
+            },
+            requires: "super balls, not super ball",
+            effect() {
+                tech.extraSuperBalls += 3
+            },
+            remove() {
+                tech.extraSuperBalls = 0;
+            }
+        },
+        {
+            name: "super ball",
+            description: "fire just <strong>1 large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>3</strong> second",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("super balls") && !tech.extraSuperBalls && !tech.superBallDelay
+            },
+            requires: "super balls, not super duper or supertemporal",
+            effect() {
+                tech.oneSuperBall = true;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
+                }
+            },
+            remove() {
+                if (tech.oneSuperBall) {
+                    tech.oneSuperBall = false;
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
+                    }
+                }
             }
         },
         {
@@ -4486,9 +4505,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("missiles") || tech.missileBotCount || tech.haveGunCheck("grenades") || (tech.haveGunCheck("super balls") && !tech.oneSuperBall)
+                return tech.haveGunCheck("missiles") || tech.missileBotCount || tech.haveGunCheck("grenades")
             },
-            requires: "missiles, grenades, super balls, not super ball",
+            requires: "missiles, grenades",
             effect() {
                 tech.missileCount++;
             },
@@ -8861,7 +8880,7 @@ const tech = {
                         this.frequency = 0;
                         this.description = `<strong class="lore-text">null</strong> is open at level.final()`
                     } else {
-                        this.frequency += lore.techGoal
+                        this.frequency += lore.techGoal * 2
                         // for (let i = 0; i < tech.tech.length; i++) { //set name for all unchosen copies of this tech
                         //     if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech[i].description = `${lore.techCount+1}/${lore.techGoal}<br><em>add copies of <strong class="lore-text">this</strong> to the potential <strong class='color-m'>tech</strong> pool</em>`
                         // }
@@ -9203,5 +9222,6 @@ const tech = {
     isBrainstorm: null,
     isBrainstormActive: null,
     brainStormDelay: null,
-    wormSize: null
+    wormSize: null,
+    extraSuperBalls: null
 }

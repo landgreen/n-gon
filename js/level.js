@@ -18,10 +18,10 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("pilot wave")
+            // m.setField("plasma torch")
             // b.giveGuns("harpoon") 
-            tech.giveTech("relay switch")
-            tech.giveTech("thermocouple")
+            // tech.giveTech("extruder")
+            // tech.giveTech("thermocouple")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 9; i++) tech.giveTech("annelids")
             // tech.giveTech("tinsellated flagella")
@@ -30,7 +30,7 @@ const level = {
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.tech[297].frequency = 100
-            // level.crouch();
+            // level.deflect();
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); }
             // level.testing(); //not in rotation, used for testing
@@ -671,6 +671,9 @@ const level = {
             //exit room glow
             ctx.fillStyle = "rgba(0,255,255,0.05)"
             ctx.fillRect(1600, -400, 400, 400)
+            //center falling bullets
+            ctx.fillStyle = "rgba(255,0,255,0.013)" //pink?
+            ctx.fillRect(650, -2800, 600, 2800)
         };
 
         spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
@@ -3491,9 +3494,9 @@ const level = {
         // spawn.launcherBoss(3200, -500)
         // spawn.blockBoss(1700, -500)
         // spawn.blinkBoss(3200, -500)
-        // spawn.mantisBoss(1700, -500)
+        spawn.mantisBoss(1700, -500)
         // spawn.tetherBoss(1700, -500) //go to actual level?
-        spawn.revolutionBoss(1900, -500)
+        // spawn.revolutionBoss(1900, -500)
         // spawn.bomberBoss(1400, -500)
         // spawn.cellBossCulture(1600, -500)
         // spawn.shieldingBoss(1700, -500)

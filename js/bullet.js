@@ -1789,8 +1789,8 @@ const b = {
                 collisionFilter: {
                     // category: 0,
                     // mask: 0, //cat.mob | cat.mobBullet | cat.mobShield
-                    category: cat.bullet,
-                    mask: cat.map, //cat.mob | cat.mobBullet | cat.mobShield
+                    category: 0, //cat.bullet,
+                    mask: 0, //cat.map, //cat.mob | cat.mobBullet | cat.mobShield
                 },
                 beforeDmg() {},
                 onEnd() {},
@@ -4879,7 +4879,7 @@ const b = {
                 const SPEED = input.down ? 43 : 36
                 m.fireCDcycle = m.cycle + Math.floor((input.down ? 23 : 15) * b.fireCDscale); // cool down
                 const SPREAD = input.down ? 0.08 : 0.13
-                const num = tech.missileCount + 2
+                const num = 3 + Math.floor(tech.extraSuperBalls * Math.random())
                 const radius = 11 * tech.bulletSize
                 let dir = m.angle - SPREAD * (num - 1) / 2;
                 for (let i = 0; i < num; i++) {
@@ -4912,7 +4912,7 @@ const b = {
                 const dir = m.angle
                 const x = m.pos.x
                 const y = m.pos.y
-                const num = tech.missileCount + 2
+                const num = 3 + Math.floor(tech.extraSuperBalls * Math.random())
                 const delay = Math.floor((input.down ? 18 : 12) * b.fireCDscale)
                 m.fireCDcycle = m.cycle + delay; // cool down
 
