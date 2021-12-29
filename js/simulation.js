@@ -593,6 +593,7 @@ const simulation = {
         }, 1000);
     },
     startGame(isBuildRun = false, isTrainingRun = false) {
+        simulation.isTextLogOpen = true
         simulation.clearMap()
         if (!isBuildRun) { //if a build run logic flow returns to "experiment-button").addEventListener
             document.body.style.cursor = "none";

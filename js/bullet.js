@@ -5453,7 +5453,7 @@ const b = {
                     } else {
                         const bodyCollisions = Matter.Query.collides(this, body)
                         if (bodyCollisions.length) {
-                            if (!bodyCollisions[0].bodyA.isComposite) {
+                            if (!bodyCollisions[0].bodyA.isNonStick) {
                                 onCollide(this)
                                 this.stuckTo = bodyCollisions[0].bodyA
                                 //find the relative position for when the mob is at angle zero by undoing the mobs rotation

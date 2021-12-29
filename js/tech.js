@@ -4498,7 +4498,7 @@ const tech = {
         },
         {
             name: "MIRV",
-            description: "fire <strong>+1</strong> <strong>missile</strong>, <strong>grenade</strong>, and <strong>super ball</strong><br>decrease <strong class='color-e'>explosion</strong> <strong>radius</strong> up to <strong>10%</strong>",
+            description: "fire <strong>+1</strong> <strong>missile</strong> and <strong>grenade</strong><br>decrease <strong class='color-e'>explosion</strong> <strong>radius</strong> up to <strong>10%</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -8834,7 +8834,7 @@ const tech = {
         },
         {
             name: "black hole cluster",
-            description: `<strong>spawn</strong> nearby <strong>black holes</strong>`,
+            description: `spawn <strong>30</strong> nearby <strong>black holes</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -8847,7 +8847,7 @@ const tech = {
                 const unit = { x: 1, y: 0 }
                 for (let i = 0; i < 30; i++) {
                     const where = Vector.add(m.pos, Vector.mult(Vector.rotate(unit, Math.random() * 2 * Math.PI), 2000 + 1200 * Math.random()))
-                    spawn.sucker(where.x, where.y, 200)
+                    spawn.sucker(where.x, where.y, 140)
                     const who = mob[mob.length - 1]
                     who.locatePlayer()
                     // who.damageReduction = 0.2

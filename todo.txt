@@ -1,14 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: super duper - fire +0-2 extra super balls
-  super balls no longer part of MIRV
+new training levels "stack", "mine", "grenades", "harpoon"
 
-bug fix for plasma extruder interaction with doors that collide with power ups
-mantisBoss moves slower, can be damaged for longer time, has less total life, has a smaller punch range
+new map element vanish goes away after you touch it, returns in 3 seconds
+bug fixes
 
 ******************************************************** TODO ********************************************************
 
-merge various multi bullet tech under one name
+shrink crumble width as it fades out
+  player moves through a grid of stacked crumble blocks
+
+boss that gives nearby mobs invulnerability
+  boss is only mildly aggressive
+  repulsed by player upto a point
+  attracted to mobs
 
 training
   save training level progress as local variable
@@ -18,34 +23,17 @@ training
   uses the lore voice/text code?
   replace all mob clear triggers with button triggers?
   tutorial rooms:
-      done  walk forwards and backwards
-      done  crouch through tunnel
-      done  jump over wall and gap
-      look around with your mouse
-      done  pick up a block an drop onto a button to open door
-      done  fire block at button to open door
-      done  fire block at mob to open door
+      look around with your mouse?
       easier deflecting level, with 1-2 attacking mobs
-      done  use field to deflect bullets
-      done  pick up heal power ups with field to open door
-      done  use a gun to kill a mob and use it's block body to activate a button to open a door
   gun rooms: (different mobs type in each room)
     different mobs in each room 
-      how to introduce shields?
+      how to introduce mob shields?
       "hopper" "slasher" "shooter "grenadier" "striker" "laser" "stabber" "springer" "pulsar" "launcher" "launcherOne" "exploder" "sneaker" "sucker" "sniper" "spinner" "grower" "beamer" "focuser" "spawner" "ghoster"
-    done nailgun - start with no ammo collect ammo and shoot at mobs
-    done shotgun - some simple close range combat
-    done superball - use 1 ammo to take out several mobs
-    done matter wave - kill a mob inside a map element
-    done missiles - take out mobs that are around corner and have them drop on a button
-    grenades - use 1 ammo to take out a ring of mob`s
     spores - use 1 ammo to take out several mobs at once,  you have to block with your shield until the mobs die
     drones - use mouse to bring drones around a couple corners
     foam - slow boss mob, and run away
     harpoon - kill one close mob, pick up ammo that is out of reach, first at several far away mobs with crouch
       or just some hard melee combat
-    mine - built kill zone, get mobs to follow into mine kill zone
-      maybe a boss mob?
     laser - reflect off walls to hit mobs
   field rooms:
     standing wave - bullets come from every direction
@@ -58,23 +46,20 @@ training
     pilot wave - toss blocks at mobs
     worm hole - teleport past lasers
   puzzle/platforming rooms:
-    stack blocks to get to high ground
-      also make a harder version of stacking blocks
-    portal rooms
-    jump at the top of a elevator to jump high
-     use the double constrained platforms
+    use the double constrained platforms
   combat rooms:
-    kill so many mobs that the mob bodies pile up and you can get over a wall by jumping on them
     boss gauntlet, spawn with nothing but a few power ups and fight 10 bosses
     use no gun, just bots to kil stuff
-
-JUNK tech  disable level exit for 5 minutes
-  level.disableExit = true
-  setTimeout( () => {level.disableExit = false;}, 5*60000);
 
 balance time dilation with bose einstein  (you can freeze everything and take no damage)
   code is still there, need to balance
   balance with energy drain?
+
+overflowing energy does harm?
+  or just reduces harm reduction?
+
+make a line of constained mobs move like a snake 
+  apply forces with directions determined by time and position on the snake
 
 tech: basic research - heal power ups spawn as research power ups instead, and using research heals you (needs to be pretty low, like 3% health)
 tech: maintenance - heals no longer spawn, but using research heals you 100%

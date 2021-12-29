@@ -1146,14 +1146,14 @@ const spawn = {
                 powerUps.spawnRandomPowerUp(this.position.x, this.position.y) // manual power up spawn to avoid spawning too many tech with "symbiosis"
             }
         }
-        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.23 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         //required setup for invulnerable
         me.isInvulnerable = false
         me.invulnerabilityCountDown = 0
         me.do = function() {
             if (this.isInvulnerable) {
                 if (this.invulnerabilityCountDown > 0) {
-                    this.invulnerabilityCountDown--
+                    if (!m.isBodiesAsleep) this.invulnerabilityCountDown--
                     ctx.beginPath();
                     let vertices = this.vertices;
                     ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -1234,7 +1234,7 @@ const spawn = {
         me.do = function() {
             if (this.isInvulnerable) {
                 if (this.invulnerabilityCountDown > 0) {
-                    this.invulnerabilityCountDown--
+                    if (!m.isBodiesAsleep) this.invulnerabilityCountDown--
                     ctx.beginPath();
                     let vertices = this.vertices;
                     ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -1982,7 +1982,7 @@ const spawn = {
                 ctx.strokeStyle = "rgba(255,255,255,0.7)";
                 ctx.stroke();
             } else if (this.invulnerabilityCountDown > 0) {
-                this.invulnerabilityCountDown--
+                if (!m.isBodiesAsleep) this.invulnerabilityCountDown--
             } else {
                 this.isInvulnerable = true
                 if (this.damageReduction) this.startingDamageReduction = this.damageReduction
@@ -3401,7 +3401,7 @@ const spawn = {
             }
             if (this.isInvulnerable) {
                 if (this.invulnerabilityCountDown > 0) {
-                    this.invulnerabilityCountDown--
+                    if (!m.isBodiesAsleep) this.invulnerabilityCountDown--
                     //graphics //draw a super shield?
                     ctx.beginPath();
                     let vertices = this.vertices;
