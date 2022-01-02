@@ -7,7 +7,7 @@ const level = {
     defaultZoom: 1400,
     onLevel: -1,
     levelsCleared: 0,
-    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"], //intro, gauntlet, final  are added in at the start and end of level order
+    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "ruins"], //intro, gauntlet, final  are added in at the start and end of level order
     communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel"],
     trainingLevels: [
         "walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect",
@@ -20,7 +20,7 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // m.immuneCycle = Infinity //you can't take damage
             // localSettings.levelsClearedLastGame = 10
-            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(1) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.setField("plasma torch")
             // b.giveGuns("harpoon") 
@@ -34,7 +34,7 @@ const level = {
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.tech[297].frequency = 100
-            // level.harpoon();
+            // level.ruins();
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); }
             // level.testing(); //not in rotation, used for testing
@@ -45,7 +45,7 @@ const level = {
             // level.testChamber()
             // level.sewers();
             // level.satellite();
-            // level.skyscrapers(); 
+            // level.skyscrapers();
             // level.aerie(); 
             // level.rooftops(); 
             // level.warehouse();
@@ -753,10 +753,12 @@ const level = {
             }
         }
     },
-    vanish(x, y, width, height, hide = { x: 0, y: 100 }) {
+    vanish(x, y, width, height, hide = { x: 0, y: 150 }) {
         x = x + width / 2
         y = y + height / 2
-        const block = body[body.length] = Bodies.rectangle(x, y, width, height, {
+        const vertices = [{ x: x, y: y, index: 0, isInternal: false }, { x: x + width, y: y, index: 1, isInternal: false }, { x: x + width, y: y + height, index: 4, isInternal: false }, { x: x, y: y + height, index: 3, isInternal: false }]
+        const block = body[body.length] = Bodies.fromVertices(x, y, vertices, {
+            // const block = body[body.length] = Bodies.rectangle(x, y, width, height, {
             collisionFilter: {
                 category: cat.map,
                 mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
@@ -766,21 +768,29 @@ const level = {
             isNotHoldable: true,
             isNonStick: true, //this keep sporangium from sticking
             isTouched: false,
-            fadeTime: 30,
-            fadeCount: 30,
+            fadeTime: 60,
+            fadeCount: 60,
             isThere: true,
-            returnTime: 180,
+            returnTime: 120,
             returnCount: 0,
             query() {
                 if (this.isThere) {
                     if (this.isTouched) {
-                        if (!m.isBodiesAsleep) this.fadeCount--
+                        if (!m.isBodiesAsleep) {
+                            this.fadeCount--
+                            const size = Math.max(this.fadeCount / this.fadeTime, 0.03)
+                            const vertices = [{ x: x * size, y: y, index: 0, isInternal: false }, { x: (x + width) * size, y: y, index: 1, isInternal: false }, { x: (x + width) * size, y: y + height, index: 4, isInternal: false }, { x: x * size, y: y + height, index: 3, isInternal: false }]
+                            Matter.Body.setVertices(this, vertices) //take on harpoon shape
+                        }
                         if (this.fadeCount < 1) {
                             Matter.Body.setPosition(this, hide)
                             this.isThere = false
                             this.isTouched = false
                             this.collisionFilter.mask = 0 //cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
                             this.returnCount = this.returnTime
+                            const size = 1
+                            const vertices = [{ x: x * size, y: y, index: 0, isInternal: false }, { x: (x + width) * size, y: y, index: 1, isInternal: false }, { x: (x + width) * size, y: y + height, index: 4, isInternal: false }, { x: x * size, y: y + height, index: 3, isInternal: false }]
+                            Matter.Body.setVertices(this, vertices) //take on harpoon shape
                         }
                     } else if (Matter.Query.collides(this, [player]).length) { // || (Matter.Query.collides(this, body).length)) {
                         this.isTouched = true
@@ -808,15 +818,17 @@ const level = {
                 for (let i = 1; i < v.length; ++i) ctx.lineTo(v[i].x, v[i].y);
                 ctx.lineTo(v[0].x, v[0].y);
                 const color = 220 * (1 - this.fadeCount / this.fadeTime)
-                ctx.fillStyle = `rgb(${color},220, 200)`
+                // ctx.fillStyle = `rgb(${color},220, 200)`
                 // ctx.fillStyle = `rgba(0,220,200,${this.fadeCount/this.fadeTime+0.05})` 
+                ctx.fillStyle = "#586370"
                 ctx.fill();
                 // ctx.strokeStyle = `#bff`
                 // ctx.stroke();
             },
         });
         Matter.Body.setStatic(block, true); //make static
-        Composite.add(engine.world, block); //add to world
+        // Composite.add(engine.world, block); //add to world
+        if (simulation.isHorizontalFlipped) x *= -1
         return block
     },
     door(x, y, width, height, distance, speed = 1) {
@@ -2494,7 +2506,7 @@ const level = {
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         level.defaultZoom = 1800
         simulation.zoomTransition(level.defaultZoom)
-        document.body.style.backgroundColor = "#dcdcde";
+        document.body.style.backgroundColor = "#d8dadf";
         // powerUps.spawnStartingPowerUps(1475, -1175);
         // spawn.debris(750, -2200, 3700, 16); //16 debris per level
 
@@ -2894,6 +2906,155 @@ const level = {
         spawn.bodyRect(2425, -120, 70, 50);
         spawn.bodyRect(2400, -100, 100, 60);
         spawn.bodyRect(2500, -150, 100, 150); //exit step
+    },
+    ruins() {
+        const vanish = []
+        level.exit.x = -390;
+        level.exit.y = -1835;
+        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 25);
+        level.setPosToSpawn(-25, -50); //normal spawn
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#dcdcde";
+        spawn.debris(-150, -775, 1425, 3); //16 debris per level
+        spawn.debris(1525, -25, 950, 3); //16 debris per level
+        spawn.debris(-650, -2100, 575, 2); //16 debris per level
+
+        //bottom floor
+        powerUps.spawnStartingPowerUps(1175, -50);
+        spawn.mapRect(2475, -1800, 275, 2300);
+        spawn.mapRect(-200, -750, 1500, 450);
+        spawn.mapRect(150, -425, 1150, 325);
+        vanish.push(level.vanish(1300, -225, 200, 225))
+        vanish.push(level.vanish(1300, -450, 200, 223))
+        spawn.mapRect(-700, 0, 3400, 500);
+        vanish.push(level.vanish(-300, -500, 100, 25))
+        vanish.push(level.vanish(-450, -200, 100, 25))
+        spawn.bodyRect(-450, -175, 100, 175, 0.7);
+        spawn.bodyRect(-250, -550, 50, 50, 0.7);
+
+        //middle floor
+        spawn.bodyRect(215, -1175, 100, 100, 0.3);
+        spawn.mapRect(-700, -2075, 250, 2575);
+        if (Math.random() < 0.5) {
+            spawn.mapRect(550, -1350, 425, 425);
+            spawn.mapRect(25, -1075, 300, 222);
+        } else {
+            spawn.mapRect(25, -1075, 300, 150);
+            spawn.mapRect(550, -1350, 425, 497);
+        }
+        spawn.bodyRect(225, -850, 50, 100, 0.4);
+        spawn.mapRect(600, -1800, 325, 225);
+        spawn.mapRect(1900, -1500, 325, 25);
+        vanish.push(level.vanish(1100, -1800, 225, 25))
+        vanish.push(level.vanish(1500, -1800, 225, 25))
+        if (simulation.difficulty > 20) vanish.push(level.vanish(975, -2275, 150, 25))
+        if (Math.random() < 0.5) {
+            vanish.push(level.vanish(750, -1575, 25, 225))
+        } else {
+            vanish.push(level.vanish(848, -1575, 75, 225))
+        }
+        spawn.bodyRect(1000, -1825, 250, 20, 0.2);
+        if (Math.random() < 0.5) {
+            vanish.push(level.vanish(1400, -1000, 200, 25))
+            vanish.push(level.vanish(1625, -1250, 200, 25))
+        } else {
+            vanish.push(level.vanish(1400, -1075, 175, 175))
+            vanish.push(level.vanish(1575, -1250, 175, 175))
+        }
+        if (Math.random() < 0.5) {
+            vanish.push(level.vanish(750, -2075, 200, 25))
+            vanish.push(level.vanish(450, -2425, 200, 25))
+        } else {
+            vanish.push(level.vanish(400, -2150, 150, 25))
+        }
+        spawn.bodyRect(2100, -1625, 75, 125, 0.3);
+        vanish.push(level.vanish(100, -2250, 225, 25))
+        if (simulation.difficulty > 20) {
+            vanish.push(level.vanish(-225, -1800, 200, 25))
+            spawn.mapRect(-475, -1800, 250, 25);
+        } else {
+            spawn.mapRect(-475, -1800, 450, 25);
+        }
+
+        spawn.bodyRect(-150, -1825, 200, 20, 0.2);
+        spawn.bodyRect(175, -2325, 75, 75, 0.3);
+        spawn.mapRect(-475, -2075, 250, 25);
+        spawn.mapRect(-250, -2075, 25, 75);
+
+        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        // m.immuneCycle = Infinity //you can't take damage
+        spawn.randomMob(725, -850, -0.3);
+        spawn.randomMob(275, -1125, 0.2);
+        spawn.randomMob(700, -1875, 0);
+        spawn.randomMob(-150, -1975, 0.5);
+        spawn.randomMob(2025, -1600, 0.3);
+        spawn.randomMob(1650, -100, 0.2);
+        spawn.randomMob(1425, -525, 0.1);
+        spawn.randomMob(1625, -1875, 0.3);
+        spawn.randomMob(1125, -850, 0.3)
+        spawn.randomLevelBoss(2050, -2025)
+        spawn.randomGroup(1750, -650, 0.4)
+        if (simulation.difficulty > 15) {
+            spawn.randomMob(2600, -1850, 0.2);
+            spawn.randomMob(850, -1400, 0.2);
+            spawn.randomMob(2000, -800, -0.1);
+            spawn.randomMob(175, -1125, -0.2);
+            spawn.randomGroup(1225, -1475, 0.3);
+            spawn.randomGroup(-375, -2400, 0.3);
+        }
+        spawn.secondaryBossChance(100, -1500)
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+        if (simulation.isHorizontalFlipped) { //flip the map horizontally
+            level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
+            level.custom = () => {
+                level.playerExitCheck();
+                ctx.fillStyle = "#d0d3d9"
+                ctx.fillRect(-2500, -1800, 2975, 1825);
+                ctx.fillStyle = "#c0c3c9"
+                ctx.fillRect(-2075, -1475, 25, 1500);
+                ctx.fillStyle = "#cff" //exit
+                ctx.fillRect(225, -2050, 225, 250)
+                level.exit.draw();
+                level.enter.draw();
+            };
+            level.customTopLayer = () => {
+                //shadow
+                ctx.fillStyle = "rgba(0,10,30,0.1)"
+                ctx.fillRect(-1300, -125, 1150, 150)
+                ctx.fillRect(-1300, -325, 1500, 350)
+                ctx.fillRect(-325, -950, 300, 225)
+                ctx.fillRect(-975, -950, 425, 225);
+                ctx.fillRect(-925, -1600, 325, 275);
+                for (let i = 0, len = vanish.length; i < len; i++) vanish[i].query()
+            };
+
+        } else {
+            level.custom = () => {
+                level.playerExitCheck();
+                ctx.fillStyle = "#d0d3d9"
+                ctx.fillRect(-475, -1800, 2975, 1825);
+                ctx.fillStyle = "#c0c3c9"
+                ctx.fillRect(2050, -1475, 25, 1500);
+                ctx.fillStyle = "#cff" //exit
+                ctx.fillRect(-450, -2050, 225, 250)
+
+                level.exit.draw();
+                level.enter.draw();
+            };
+            level.customTopLayer = () => {
+                //shadow
+                // ctx.fillStyle = "rgba(0,10,30,0.2)"
+                ctx.fillStyle = "rgba(0,10,30,0.1)"
+                ctx.fillRect(150, -125, 1150, 150)
+                ctx.fillRect(550, -950, 425, 225);
+                ctx.fillRect(600, -1600, 325, 275);
+                ctx.fillRect(-200, -325, 1500, 350)
+                ctx.fillRect(25, -950, 300, 225)
+                for (let i = 0, len = vanish.length; i < len; i++) vanish[i].query()
+            };
+        }
     },
     testChamber() {
         level.setPosToSpawn(0, -50); //lower start
@@ -8105,7 +8266,7 @@ const level = {
         };
 
         if (!initialSpawn) {
-            level.defaultZoom = 1000 //was 800 I changed this
+            level.defaultZoom = 1300 //was 800 I changed this
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#dcdcde";
             //Level
@@ -9597,7 +9758,6 @@ const level = {
         document.body.style.backgroundColor = level.trainingBackgroundColor
         b.removeAllGuns();
         b.giveGuns("harpoon")
-
 
         let instruction = 0
         level.trainingText(`climb up to the exit`)

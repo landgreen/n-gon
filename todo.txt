@@ -1,14 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new training levels "stack", "mine", "grenades", "harpoon"
+new level: ruins, let me know about combat and platforming difficulty balance
 
-new map element vanish goes away after you touch it, returns in 3 seconds
-bug fixes
+vanish elements now shrink horizontally
+  now colored dark blue to not look like mobs
 
 ******************************************************** TODO ********************************************************
 
-shrink crumble width as it fades out
-  player moves through a grid of stacked crumble blocks
+vanish element
+  grow as it returns?
+
+pull bullets back to player with crouch/field
+  bullets type?:  drones, spores, missiles, 
+  works for all bullets, write custom code based on bullet type
+    bad for: laser, harpoon?, missile and grenade?
 
 boss that gives nearby mobs invulnerability
   boss is only mildly aggressive
@@ -32,8 +37,6 @@ training
     spores - use 1 ammo to take out several mobs at once,  you have to block with your shield until the mobs die
     drones - use mouse to bring drones around a couple corners
     foam - slow boss mob, and run away
-    harpoon - kill one close mob, pick up ammo that is out of reach, first at several far away mobs with crouch
-      or just some hard melee combat
     laser - reflect off walls to hit mobs
   field rooms:
     standing wave - bullets come from every direction
@@ -47,6 +50,8 @@ training
     worm hole - teleport past lasers
   puzzle/platforming rooms:
     use the double constrained platforms
+    stealth room
+      probably should make 2+
   combat rooms:
     boss gauntlet, spawn with nothing but a few power ups and fight 10 bosses
     use no gun, just bots to kil stuff
@@ -58,7 +63,7 @@ balance time dilation with bose einstein  (you can freeze everything and take no
 overflowing energy does harm?
   or just reduces harm reduction?
 
-make a line of constained mobs move like a snake 
+make a line of constrained mobs move like a snake 
   apply forces with directions determined by time and position on the snake
 
 tech: basic research - heal power ups spawn as research power ups instead, and using research heals you (needs to be pretty low, like 3% health)
@@ -96,21 +101,10 @@ intro map: diegeticly draw a mouse with field highlighted
   also indicate space?
   dynamically adjust drawing after picking up a gun 
 
-
 increase mass and movement speed at the same time
   increase jump differently because it scales extra with mass
     m.defaultMass = 4.5
     m.definePlayerMass()
-
-tech selection menu choices randomize every 1 second
-  cycles for 10 cycles before it stops cycling
-
-new late game level that is easier if you can: platform well, jump high, immune to slime, wormhole through walls, fly fast
-  climb vertically to avoid rising slime
-  populate with multiple boss mobs that can't drop tech
-    bosses spawn in pairs
-
-antimatter (assuming something else isn't already named this); requires negative mass, causes damage to self and enemies within range while active
 
 give history boss legs?
 
@@ -366,8 +360,6 @@ player can become crouched while not touching the ground if they exit the ground
 
 a couple times people have reported the final boss dropping extra bodies on death
 
-Why does micro-extruder lag so much
-
 blue triangle boss can move backwards and aim away from you if set up properly
   issues with dot product probably, but might not be worth fixing
 
@@ -384,10 +376,15 @@ is there a way to check if the player is stuck inside the map or block
 
 ******************************************************** LEVELS ********************************************************
 
-level element that goes away after touching player (also bullets?)
-  returns after a set time,  or doesn't
-  applications:
-    doors, quick jumping platforming, secrets, 
+new late game level that is easier if you can: platform well, jump high, immune to slime, wormhole through walls, fly fast
+  climb vertically to avoid rising slime
+  populate with multiple boss mobs that can't drop tech
+    bosses spawn in pairs
+
+map: observatory
+  button controls rotation of telescope
+  laser beam shoots out of telescope
+  button opens the dome
 
 level with mobs that follow a genetic algorithm
   mobs have genes
@@ -427,39 +424,6 @@ level with mobs that follow a genetic algorithm
 
 rename intro level to something lore related
 
-labs - procedural generation
-  bugs
-    mob spawns shouldn't be based on probability?
-  style
-    graphics look too bright?
-    add shadows and lighting and graphic details?
-      what about performance?
-        with the mobs staggered spawning it should be fine
-  feel
-      disrupt the flat ground
-      less platforming / easier platforming
-        the spinners on exit are still too hard...
-      make combat more interesting
-      is it laggy?
-      in loot room, spawn mobs after power up is grabbed
-      more background graphics, better colors
-  loot room:
-    make it more interesting to get the power up
-      slow player and reduce damage in region
-      increase the size of the region
-        don't have space for much
-      make graphics more unique
-      push player away, so that normal pick up methods don't work, but add a button to disable region
-  room ideas - 
-    portal room 
-    endlessly falling blocks down a slide, that the player has to climb up
-    portal + rotor + falling blocks = perpetual motion
-    slime room
-    sound room, with buttons to control sound
-    color room with r,g,b buttons to control color
-    mob buff zone: Map element: "Orbital Pickup Zone": Mobs that enter a specific area of the map gain +1 orbital per second, or a shield
-      could put in the loot room
-
 buttons can now on/off boosts
 
 repeat map in vertical when you fall teleport to above the mab, as if the map repeats
@@ -469,11 +433,6 @@ map element - player rotates a rotor that makes a platform go up or down
 
 level element:  a zone with wind, anti-gravity, extra gravity
   control with button
-
-map: observatory
-  button controls rotation of telescope
-  laser beam shoots out of telescope
-  button opens the dome
 
 ******************************************************** MOBS ********************************************************
 

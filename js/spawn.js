@@ -5161,7 +5161,7 @@ const spawn = {
         spawn = "striker",
         nodes = Math.min(2 + Math.ceil(Math.random() * (simulation.difficulty + 2)), 8),
         //Math.ceil(Math.random() * 3) + Math.min(4,Math.ceil(simulation.difficulty/2)),
-        radius = Math.ceil(Math.random() * 10) + 17, // radius of each node mob
+        radius = Math.ceil(Math.random() * 10) + 18, // radius of each node mob
         sideLength = Math.ceil(Math.random() * 100) + 70, // distance between each node mob
         stiffness = Math.random() * 0.03 + 0.005
     ) {

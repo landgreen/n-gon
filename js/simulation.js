@@ -1243,9 +1243,9 @@ const simulation = {
 
                 if (e.which === 2) {
                     if (level.isProcedural) {
-                        simulation.outputMapString(`spawn.randomMob(x+${x}, y+${y},0.5);`);
+                        simulation.outputMapString(`spawn.randomMob(x+${x}, y+${y}, 0);`);
                     } else {
-                        simulation.outputMapString(`spawn.randomMob(${x}, ${y},0.5);`);
+                        simulation.outputMapString(`spawn.randomMob(${x}, ${y}, 0);`);
                     }
 
                 } else if (simulation.mouseInGame.x > simulation.constructMouseDownPosition.x && simulation.mouseInGame.y > simulation.constructMouseDownPosition.y) { //make sure that the width and height are positive
