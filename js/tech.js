@@ -239,7 +239,7 @@ const tech = {
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
-        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.042 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0))
+        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.043 + tech.duplicateChance + m.duplicateChance + tech.wormDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0))
     },
     isScaleMobsWithDuplication: false,
     maxDuplicationEvent() {
@@ -3194,7 +3194,7 @@ const tech = {
         },
         {
             name: "futures exchange",
-            description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.2%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.3%</strong> power up <strong class='color-dup'>duplication</strong> chance",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3214,7 +3214,7 @@ const tech = {
         },
         {
             name: "replication",
-            description: "<strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+40%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+            description: "<strong>10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+30%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
             maxCount: 9,
             count: 0,
             frequency: 1,
@@ -3227,7 +3227,7 @@ const tech = {
                 tech.duplicateChance += 0.1
                 powerUps.setDupChance(); //needed after adjusting duplication chance
                 if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.1);
-                this.refundAmount += tech.addJunkTechToPool(0.4)
+                this.refundAmount += tech.addJunkTechToPool(0.3)
             },
             refundAmount: 0,
             remove() {

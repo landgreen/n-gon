@@ -1,14 +1,30 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new level: ruins, let me know about combat and platforming difficulty balance
+ruins level is larger, more balanced for combat, with easier platforming
 
-vanish elements now shrink horizontally
-  now colored dark blue to not look like mobs
+vanish element
+  vanish slower if they are wider
+  delete blocks caught inside it as it returns
 
 ******************************************************** TODO ********************************************************
 
-vanish element
+set damage reduction equal to how much mana you have below 95
+  override all other harm reduction effects?
+
+make shields not able to get radioactive
+
+wormhole tech - pause while placing the wormhole
+tech requires cache - ammo automatically regenerates every second,  ammo is capped even lower
+
+new level climb
+  3 vertical climb sections
+  use vanish elements
+
+ruins: mobs can see you too easily at the start
+
+vanish element:
   grow as it returns?
+  option to shrink in vertical
 
 pull bullets back to player with crouch/field
   bullets type?:  drones, spores, missiles, 

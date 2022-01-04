@@ -1918,8 +1918,8 @@ const spawn = {
         me.frictionAir = 0.0067;
         me.g = 0.0002; //required if using this.gravity
         me.seePlayerFreq = 300;
-        const springStiffness = 0.0001; //simulation.difficulty
-        const springDampening = 0.005;
+        const springStiffness = 0.00008; //simulation.difficulty
+        const springDampening = 0.01;
 
         me.springTarget = {
             x: me.position.x,
@@ -2006,7 +2006,7 @@ const spawn = {
                     this.cons2.length = 100 + 1.5 * this.radius;
 
                     this.isInvulnerable = false
-                    this.invulnerabilityCountDown = 45 + Math.max(0, 70 - simulation.difficulty)
+                    this.invulnerabilityCountDown = 60 + Math.max(0, 70 - simulation.difficulty * 0.5)
                     this.damageReduction = this.startingDamageReduction
                     for (let i = 0; i < this.babyList.length; i++) {
                         if (this.babyList[i].alive) this.babyList[i].damageReduction = this.startingDamageReduction
