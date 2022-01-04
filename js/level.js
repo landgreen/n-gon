@@ -7,8 +7,8 @@ const level = {
     defaultZoom: 1400,
     onLevel: -1,
     levelsCleared: 0,
-    // playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "ruins"], //intro, gauntlet, final  are added in at the start and end of level order
-    playableLevels: ["ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins"], //intro, gauntlet, final  are added in at the start and end of level order
+    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "ruins"], //intro, gauntlet, final  are added in at the start and end of level order
+    // playableLevels: ["ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins"], //intro, gauntlet, final  are added in at the start and end of level order
     communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel"],
     trainingLevels: [
         "walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect",

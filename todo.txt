@@ -1,10 +1,6 @@
 ******************************************************** NEXT PATCH **************************************************
 
-ruins level is larger, more balanced for combat, with easier platforming
 
-vanish element
-  vanish slower if they are wider
-  delete blocks caught inside it as it returns
 
 ******************************************************** TODO ********************************************************
 
