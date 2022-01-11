@@ -29,35 +29,13 @@ const level = {
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.tech[297].frequency = 100
-            // level.reservoir();
+
             // simulation.enableConstructMode() //used to build maps in testing mode
+            // level.reservoir();
+            // level.testing(); //not in rotation, used for testing
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); }
-            // level.testing(); //not in rotation, used for testing
-            // level.template(); //not in rotation, blank start new map development
-            // level.final() //final boss level  
-            // level.gauntlet(); //before final boss level  
-            // level.labs();
-            // level.testChamber()
-            // level.sewers();
-            // level.satellite();
-            // level.skyscrapers();
-            // level.aerie(); 
-            // level.rooftops(); 
-            // level.warehouse();
-            // level.highrise();
-            // level.office();
-            // level.gauntlet(); //only fighting, very simple map, before final boss
-            // level.house() //community level
-            // level.detours() //community level
-            // level.basement(); //community level
-            // level.stronghold() //community level
-            // level.perplex() //community level
-            // level.coliseum() //community level
-            // level.crossfire() //community level
-            // level.vats() //community level
-            // level["n-gon"]() //community level
-            // level.tunnel() //community level
+
             // powerUps.research.changeRerolls(3000)
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
@@ -3115,18 +3093,20 @@ const level = {
             if (isWaterfallFilling) {
                 if (slime.height < 5500) {
                     //draw slime fill
-                    waterFallWidth = 0.98 * waterFallWidth + 4.7 * Math.random()
-                    waterFallSmoothX = 0.98 * waterFallSmoothX + 3.5 * Math.random()
-                    waterFallX = waterFallSmoothX - 1985
                     ctx.fillStyle = `hsla(160, 100%, 43%,${0.3+0.07*Math.random()})`
                     ctx.fillRect(waterFallX, -5050, waterFallWidth, 6175 - slime.height)
-                    ctx.fillRect(waterFallX + waterFallWidth * Math.random(), -5050, 4, 6175 - slime.height)
-                    //push player down if they go under waterfall
-                    if (player.position.x > waterFallX && player.position.x < waterFallX + waterFallWidth && player.position.y < slime.height) {
-                        Matter.Body.setVelocity(player, {
-                            x: player.velocity.x,
-                            y: player.velocity.y + 2
-                        });
+                    if (!m.isBodiesAsleep) {
+                        waterFallWidth = 0.98 * waterFallWidth + 4.7 * Math.random()
+                        waterFallSmoothX = 0.98 * waterFallSmoothX + 3.5 * Math.random()
+                        waterFallX = waterFallSmoothX - 1985
+                        ctx.fillRect(waterFallX + waterFallWidth * Math.random(), -5050, 4, 6175 - slime.height)
+                        //push player down if they go under waterfall
+                        if (player.position.x > waterFallX && player.position.x < waterFallX + waterFallWidth && player.position.y < slime.height) {
+                            Matter.Body.setVelocity(player, {
+                                x: player.velocity.x,
+                                y: player.velocity.y + 2
+                            });
+                        }
                     }
                     slime.levelRise(riseRate)
                 }
@@ -5444,7 +5424,7 @@ const level = {
         } else {
             isLevelReversed = true;
         }
-        const elevator = level.platform(4545, -200, 110, 30, -20)
+        const elevator = level.elevator(4545, -220, 110, 30, -3000)
         const hazard = level.hazard(1675, -1050, 800, 150);
         const portal = level.portal({
             x: -620,
@@ -5510,6 +5490,8 @@ const level = {
 
             level.exit.draw();
             level.enter.draw();
+            elevator.move();
+            elevator.drawTrack();
         };
 
         level.customTopLayer = () => {
@@ -5525,21 +5507,6 @@ const level = {
             portal[2].draw();
             portal[3].draw();
             hazard.query();
-            //elevator
-            if (elevator.pauseUntilCycle < simulation.cycle && !m.isBodiesAsleep) {
-                if (elevator.plat.position.y > -200) { //bottom
-                    elevator.plat.speed = -20
-                    elevator.pauseUntilCycle = simulation.cycle + 90
-                } else if (elevator.plat.position.y < -3000) { //top
-                    elevator.plat.speed = 30
-                    elevator.pauseUntilCycle = simulation.cycle + 90
-                }
-                elevator.plat.position = {
-                    x: elevator.plat.position.x,
-                    y: elevator.plat.position.y + elevator.plat.speed
-                }
-                elevator.pointA = elevator.plat.position
-            }
         };
 
         level.defaultZoom = 1300

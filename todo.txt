@@ -1,15 +1,6 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new map reservoir - still in development, but putting it out for feedback
 
-tech: optical amplifier - get 3 random laser tech, but you can't turn off your laser until you run out of energy
-
-slow light - lasers are slightly closer together at higher stacks of this tech
-research power ups no longer log to the "in game console" to prevent spam
-dynamo-bots give 6->7 more energy (upgraded 20->23)
-some Boss invulnerability times are very slightly shorter
-music tech now links to actual n-gon music
-  https://www.youtube.com/watch?v=lEbHeSdmS-k&list=PL9Z5wjoBiPKEDhwCW2RN-VZoCpmhIojdn
 
 
 ******************************************************** TODO ********************************************************
