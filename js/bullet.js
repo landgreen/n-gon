@@ -3617,7 +3617,7 @@ const b = {
                         if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250 && m.immuneCycle < m.cycle) { //give energy
                             Matter.Body.setAngularVelocity(this, this.spin)
                             if (this.isUpgraded) {
-                                m.energy += 0.1
+                                m.energy += 0.115
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: this.position.x,
                                     y: this.position.y,
@@ -3626,7 +3626,7 @@ const b = {
                                     time: simulation.drawTime
                                 });
                             } else {
-                                m.energy += 0.03
+                                m.energy += 0.035
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: this.position.x,
                                     y: this.position.y,
@@ -6374,10 +6374,20 @@ const b = {
             ammoPack: Infinity,
             have: false,
             charge: 0,
+            isStuckOn: false,
             do() {},
             fire() {},
             chooseFireMethod() {
-                this.do = () => {};
+                this.do = () => {
+                    if (tech.isStuckOn) {
+                        if (this.isStuckOn) {
+                            if (!input.fire) this.fire();
+                            if (m.energy < tech.laserFieldDrain * tech.isLaserDiode) this.isStuckOn = false
+                        } else if (input.fire) {
+                            this.isStuckOn = true
+                        }
+                    }
+                };
                 if (tech.isPulseLaser) {
                     this.fire = () => {
                         const drain = 0.01 * tech.isLaserDiode * (tech.isCapacitor ? 10 : 1)
@@ -6455,7 +6465,6 @@ const b = {
                 } else {
                     this.fire = this.fireLaser
                 }
-
                 // this.fire = this.firePhoton
             },
             // firePhoton() {
@@ -6569,7 +6578,7 @@ const b = {
                     m.fireCDcycle = m.cycle
                     m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode
                     const dmg = 0.4 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
-                    const spacing = Math.ceil(5.2 - 0.2 * tech.historyLaser)
+                    const spacing = Math.ceil(5.2 - 0.4 * tech.historyLaser)
                     ctx.beginPath();
                     b.laser({
                         x: m.pos.x + 20 * Math.cos(m.angle),

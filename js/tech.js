@@ -354,22 +354,15 @@ const tech = {
             requires: "NOT EXPERIMENT MODE, at least 2 guns",
             effect() {
                 for (let i = b.inventory.length - 1; i > -1; i--) {
-                    //spawn a research for each gun
-                    // powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
-                    //find a gun tech for this gun
-                    const gunTechPool = []
+                    const gunTechPool = [] //find gun tech for this gun
                     for (let j = 0, len = tech.tech.length; j < len; j++) {
                         // console.log(j, tech.tech[j].isGunTech, tech.tech[j].allowed(), !tech.tech[j].isJunk, !tech.tech[j].isBadRandomOption, tech.tech[j].count < tech.tech[j].maxCount)
-                        //set current gun to active so allowed works
-                        const originalActiveGunIndex = b.activeGun
+                        const originalActiveGunIndex = b.activeGun //set current gun to active so allowed works
                         b.activeGun = b.inventory[i] //to make the .allowed work for guns that aren't active
                         if (tech.tech[j].isGunTech && tech.tech[j].allowed() && !tech.tech[j].isJunk && !tech.tech[j].isBadRandomOption && tech.tech[j].count < tech.tech[j].maxCount) {
                             const regex = tech.tech[j].requires.search(b.guns[b.inventory[i]].name) //get string index of gun name
                             const not = tech.tech[j].requires.search(' not ') //get string index of ' not '
-                            //look for the gun name in the requirements, but the gun name needs to show up before the word ' not '
-                            if (regex !== -1 && (not === -1 || not > regex)) {
-                                gunTechPool.push(j)
-                            }
+                            if (regex !== -1 && (not === -1 || not > regex)) gunTechPool.push(j) //look for the gun name in the requirements, but the gun name needs to show up before the word ' not '                        
                         }
                         b.activeGun = originalActiveGunIndex
                     }
@@ -1290,7 +1283,7 @@ const tech = {
         {
             name: "dynamo-bot",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">dynamo-bot</a>`,
-            description: "a <strong class='color-bot'>bot</strong> <strong class='color-d'>damages</strong> mobs while it <strong>traces</strong> your path<br>regen <strong>6</strong> <strong class='color-f'>energy</strong> per second when it's near",
+            description: "a <strong class='color-bot'>bot</strong> <strong class='color-d'>damages</strong> mobs while it <strong>traces</strong> your path<br>regen <strong>7</strong> <strong class='color-f'>energy</strong> per second when it's near",
             maxCount: 9,
             count: 0,
             frequency: 1,
@@ -1314,7 +1307,7 @@ const tech = {
         {
             name: "dynamo-bot upgrade",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">dynamo-bot upgrade</a>`,
-            description: "<strong>convert</strong> your current bots to <strong>dynamo-bots</strong><br>increase regen to <strong>20</strong> <strong class='color-f'>energy</strong> per second",
+            description: "<strong>convert</strong> your current bots to <strong>dynamo-bots</strong><br>increase regen to <strong>23</strong> <strong class='color-f'>energy</strong> per second",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -5635,6 +5628,53 @@ const tech = {
         //     }
         // },
         {
+            name: "optical amplifier",
+            description: "gain <strong>3</strong> random <strong class='color-laser'>laser</strong> <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong><br><strong class='color-laser'>laser</strong> only turns <strong>off</strong> if you have no <strong class='color-f'>energy</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            isNonRefundable: true,
+            allowed() {
+                return tech.haveGunCheck("laser") && !tech.isPulseLaser
+            },
+            requires: "laser gun, not pulse",
+            effect() {
+                tech.isStuckOn = true
+
+                for (let j = 0; j < 3; j++) {
+                    const names = ["laser diode", "free-electron laser", "relativistic momentum", "specular reflection", "diffraction grating", "diffuse beam", "output coupler", "slow light"]
+                    //convert names into indexes
+                    const options = []
+                    for (let i = 0; i < names.length; i++) {
+                        for (let k = 0; k < tech.tech.length; k++) {
+                            if (tech.tech[k].name === names[i]) {
+                                options.push(k)
+                                break
+                            }
+                        }
+                    }
+                    //remove options that don't meet requirements
+                    for (let i = options.length - 1; i > -1; i--) {
+                        const index = options[i]
+                        if (!(tech.tech[index].count < tech.tech[index].maxCount) || !tech.tech[index].allowed()) {
+                            options.splice(i, 1);
+                        }
+                    }
+                    //pick one option
+                    if (options.length) {
+                        const index = options[Math.floor(Math.random() * options.length)]
+                        simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>") <em>//optical amplifier</em>`);
+                        tech.giveTech(index)
+                    }
+                }
+            },
+            remove() {
+                tech.isStuckOn = false
+            }
+        },
+        {
             name: "laser diode",
             description: "all <strong class='color-laser'>lasers</strong> drain <strong>30%</strong> less <strong class='color-f'>energy</strong><br><em>affects laser-gun, laser-bot, laser-mines, pulse</em>",
             isGunTech: true,
@@ -5844,9 +5884,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.17
+                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.17 && !tech.isStuckOn
             },
-            requires: "laser gun, not specular reflection, diffuse, free-electron laser",
+            requires: "laser gun, not specular reflection, diffuse, free-electron laser, optical amplifier",
             effect() {
                 tech.isPulseLaser = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -8147,7 +8187,7 @@ const tech = {
             allowed() { return true },
             requires: "",
             effect() {
-                window.open('https://www.youtube.com/results?search_query=music', '_blank')
+                window.open('https://www.youtube.com/watch?v=lEbHeSdmS-k&list=PL9Z5wjoBiPKEDhwCW2RN-VZoCpmhIojdn', '_blank')
             },
             remove() {}
         },

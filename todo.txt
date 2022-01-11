@@ -1,26 +1,45 @@
 ******************************************************** NEXT PATCH **************************************************
 
+new map reservoir - still in development, but putting it out for feedback
+
+tech: optical amplifier - get 3 random laser tech, but you can't turn off your laser until you run out of energy
+
+slow light - lasers are slightly closer together at higher stacks of this tech
+research power ups no longer log to the "in game console" to prevent spam
+dynamo-bots give 6->7 more energy (upgraded 20->23)
+some Boss invulnerability times are very slightly shorter
+music tech now links to actual n-gon music
+  https://www.youtube.com/watch?v=lEbHeSdmS-k&list=PL9Z5wjoBiPKEDhwCW2RN-VZoCpmhIojdn
 
 
 ******************************************************** TODO ********************************************************
 
-set damage reduction equal to how much mana you have below 95
-  override all other harm reduction effects?
+reversed version of reservoir level, start at top and press buttons to lower slime
 
-make shields not able to get radioactive
+tech immune to harm after mob kill
+  require no other mob kill tech?
+  cloaking field tech?
+
+final boss invulnerability
+  until mobs are cleared?
+  in between phases
+  for all of one phase
+
+JUNK tech - do something to the mob display health method
+
+new platform element, spring
+  toggle to on when player touches platform    
+  platform extends in any direction
+
+start toggled elevators in the high or middle state, not low
 
 wormhole tech - pause while placing the wormhole
-tech requires cache - ammo automatically regenerates every second,  ammo is capped even lower
 
-new level climb
-  3 vertical climb sections
-  use vanish elements
-
-ruins: mobs can see you too easily at the start
+tech - set damage reduction equal to how much mana you have below 95
+  override all other harm reduction effects?
 
 vanish element:
   grow as it returns?
-  option to shrink in vertical
 
 pull bullets back to player with crouch/field
   bullets type?:  drones, spores, missiles, 
@@ -37,6 +56,9 @@ training
     reset progress to zero if you clear all training levels
     maybe only save progress if you made if past the trainingHeal level
   make the training button more obvious if the account has only played 1-2 times
+    larger?
+    position?
+    animated text?
   uses the lore voice/text code?
   replace all mob clear triggers with button triggers?
   tutorial rooms:

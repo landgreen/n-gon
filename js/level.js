@@ -7,35 +7,30 @@ const level = {
     defaultZoom: 1400,
     onLevel: -1,
     levelsCleared: 0,
-    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "ruins"], //intro, gauntlet, final  are added in at the start and end of level order
-    // playableLevels: ["ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins", "ruins"], //intro, gauntlet, final  are added in at the start and end of level order
+    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "ruins"], //see level.populateLevels:   (intro, ... , reservoir, ... , gauntlet, final)    added later
     communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel"],
-    trainingLevels: [
-        "walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect",
-        "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile",
-        "stack", "mine", "grenades", "harpoon"
-    ],
+    trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
-            // simulation.enableConstructMode() //used to build maps in testing mode
             // m.immuneCycle = Infinity //you can't take damage
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(1) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.setField("plasma torch")
-            // b.giveGuns("harpoon") 
-            // tech.giveTech("extruder")
+            // b.giveGuns("laser")
+            // for (let i = 0; i < 9; i++) tech.giveTech("slow light")
             // tech.giveTech("thermocouple")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
-            // for (let i = 0; i < 9; i++) tech.giveTech("annelids")
+            //  tech.giveTech("annelids")
             // tech.giveTech("tinsellated flagella")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("antiscience")
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.tech[297].frequency = 100
-            // level.ruins();
+            // level.reservoir();
+            // simulation.enableConstructMode() //used to build maps in testing mode
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); }
             // level.testing(); //not in rotation, used for testing
@@ -261,6 +256,7 @@ const level = {
             } else {
                 level.levels = shuffle(level.levels); //shuffles order of maps
             }
+            level.levels.splice(Math.floor(level.levels.length * (0.4 + 0.6 * Math.random())), 0, "reservoir"); //add level to the back half of the randomized levels list
             if (!build.isExperimentSelection || (build.hasExperimentalMode && !simulation.isCheating)) { //experimental mode is endless, unless you only have an experiment Tech
                 level.levels.unshift("intro"); //add level to the start of the randomized levels list
                 level.levels.push("gauntlet"); //add level to the end of the randomized levels list
@@ -451,13 +447,13 @@ const level = {
         });
         return who
     },
-    elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+    elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }, isAtTop = false) {
         x += width / 2
         y += height / 2
         maxHeight += height / 2
         const yTravel = maxHeight - y
         force += simulation.g
-        const who = body[body.length] = Bodies.rectangle(x, y, width, height, {
+        const who = body[body.length] = Bodies.rectangle(x, isAtTop ? maxHeight : y, width, height, {
             collisionFilter: {
                 category: cat.body,
                 mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
@@ -543,10 +539,8 @@ const level = {
         Matter.Body.setDensity(who, 0.01) //10x density for added stability
         return who
     },
-    platform(x, y, width, height, speed = 0, density = 0.001) {
-        x = x + width / 2
-        y = y + height / 2
-        const who = body[body.length] = Bodies.rectangle(x, y, width, height, {
+    spring(x, y, v = "-100 0  100 0  70 40  0 50  -70 40", force = 0.01, distance = 300, angle = 0) {
+        const who = body[body.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(v), {
             collisionFilter: {
                 category: cat.body,
                 mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
@@ -556,26 +550,52 @@ const level = {
             friction: 1,
             frictionStatic: 1,
             restitution: 0,
-        });
+            frictionAir: 1,
+            density: 0.1,
+            isReady: true,
+            isResetting: false,
+            query() {
+                if (this.isReady) {
+                    if (Matter.Query.collides(this, [player]).length) {
+                        this.isReady = false
+                        this.constraint.stiffness = 0
+                        this.constraint.damping = 0 //0.3
+                        this.frictionAir = 0
+                        Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                        //show graphically  being ready?
 
-        Matter.Body.setDensity(who, density)
-        const constraint = Constraint.create({ //fix rotor in place, but allow rotation
+                    }
+                } else {
+                    if (this.isResetting) {
+                        this.constraint.stiffness += 0.0005
+                        if (this.constraint.stiffness > 0.1) {
+                            this.isResetting = false
+                            this.isReady = true
+                        }
+                    } else {
+                        if (Vector.magnitudeSquared(Vector.sub(this.position, { x: x, y: y })) < distance * distance) {
+                            this.force.y -= force * this.mass
+                        } else {
+                            this.constraint.damping = 1
+                            this.frictionAir = 1
+                            this.isResetting = true
+                            Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                        }
+                    }
+                }
+            }
+        });
+        who.constraint = Constraint.create({
             pointA: {
-                x: x,
-                y: y
+                x: who.position.x,
+                y: who.position.y
             },
             bodyB: who,
-            stiffness: 0.1,
-            damping: 0.3
+            stiffness: 1,
+            damping: 1
         });
-        Composite.add(engine.world, constraint);
-        constraint.plat = {
-            position: who.position,
-            speed: speed,
-        }
-        constraint.pauseUntilCycle = 0 //to to pause platform at top and bottom
-
-        return constraint
+        Composite.add(engine.world, who.constraint);
+        return who
     },
     rotor(x, y, rotate = 0, radius = 800, width = 40, density = 0.0005) {
         const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
@@ -1174,10 +1194,10 @@ const level = {
                     for (let i = 0, len = powerUpCollide.length; i < len; i++) {
                         const diameter = 2 * powerUpCollide[i].size
                         const buoyancy = 1 - 0.2 * Math.max(0, Math.min(diameter, this.min.y - powerUpCollide[i].position.y + powerUpCollide[i].size)) / diameter
-                        powerUpCollide[i].force.y -= buoyancy * 1.1 * powerUpCollide[i].mass * simulation.g;
+                        powerUpCollide[i].force.y -= buoyancy * 1.14 * powerUpCollide[i].mass * simulation.g;
                         Matter.Body.setVelocity(powerUpCollide[i], {
                             x: powerUpCollide[i].velocity.x,
-                            y: 0.95 * powerUpCollide[i].velocity.y
+                            y: 0.96 * powerUpCollide[i].velocity.y
                         });
                     }
                 }
@@ -1188,9 +1208,22 @@ const level = {
             //         ctx.fillRect(this.min.x, this.min.y, this.width, this.height)
             //     }
             // },
-            level(isFill) {
+            levelRise(growRate = 1) {
+                if (this.height < this.maxHeight && !m.isBodiesAsleep) {
+                    this.height += growRate
+                    this.min.y -= growRate
+                    this.max.y = this.min.y + this.height
+                }
+            },
+            levelFall(fallRate = 1) {
+                if (this.height > 0 && !m.isBodiesAsleep) {
+                    this.height -= fallRate
+                    this.min.y += fallRate
+                    this.max.y = this.min.y + this.height
+                }
+            },
+            level(isFill, growSpeed = 1) {
                 if (!m.isBodiesAsleep) {
-                    const growSpeed = 1
                     if (isFill) {
                         if (this.height < this.maxHeight) {
                             this.height += growSpeed
@@ -2149,7 +2182,7 @@ const level = {
                 )
             },
             // (x = offset.x, y = offset.y) => {
-            //     const elevator1 = level.elevator(x + 1100, y - 200, 250, 30, -2100, 0.0015) // elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }, isTeleport = false) {
+            //     const elevator1 = level.elevator(x + 1100, y - 200, 250, 30, -2100, 0.0015) // x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }, isTeleport = false) {
             //     // const elevator1 = level.elevator(x + 175, y - 200, 250, 30, -1400, 0.001) 
             //     // const elevator2 = level.elevator(x + 2175, y - 200, 250, 30, -1400, 0.001)
 
@@ -2928,6 +2961,204 @@ const level = {
         spawn.bodyRect(2400, -100, 100, 60);
         spawn.bodyRect(2500, -150, 100, 150); //exit step
     },
+    reservoir() {
+        level.exit.x = 1700;
+        level.exit.y = -4510;
+        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 25);
+        level.setPosToSpawn(-500, 850); //normal spawn
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        level.defaultZoom = 2300
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d8dadf";
+        powerUps.spawnStartingPowerUps(-1175, -3875);
+
+        //no debris?
+        // spawn.debris(750, -2200, 3700, 16); //16 debris per level 
+
+        //walls
+        spawn.mapRect(-3500, -5000, 1500, 6500);
+        spawn.mapRect(2000, -5000, 1500, 6500);
+        spawn.mapRect(-2500, 1100, 5000, 400); //slime floor
+        spawn.mapRect(-3500, -5475, 7000, 600); //top
+        spawn.mapRect(-1925, -4900, 175, 375); //pipe
+        spawn.mapRect(-1950, -4550, 225, 25); //pipe
+        //top floor exit
+        spawn.mapRect(1025, -4475, 1100, 50);
+        spawn.mapRect(1475, -4900, 50, 250);
+
+        // ground
+        spawn.mapVertex(-687, 1060, "700 0  -700 0  -450 -300  450 -300"); //left base
+        spawn.mapVertex(863, 1060, "700 0  -700 0  -450 -300  450 -300"); //right base
+        //entrance
+        spawn.mapRect(-730, 525, 475, 50);
+        spawn.mapRect(-730, 550, 50, 150);
+        spawn.mapRect(-305, 550, 50, 500);
+        spawn.bodyRect(-717, 700, 25, 100); //door
+        spawn.bodyRect(-717, 800, 25, 100); //door
+
+        //1st floor
+        //left
+        spawn.mapVertex(-1125 + 435, -50, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80");
+        spawn.mapRect(-1125, -100, 870, 100);
+
+        if (Math.random() < 0.33) {
+            spawn.mapVertex(-687, -1000, "-100 -300  0 -350  100 -300  100 300  0 350  -100 300");
+        } else if (Math.random() < 0.5) {
+            spawn.mapVertex(-687, -1000, "-150 -450  0 -525  150 -450  150 450  0 525  -150 450");
+        } else {
+            spawn.mapVertex(-687, -700, "-150 0  150 0  150 450  0 525  -150 450");
+        }
+
+        const spinnerArray = []
+        spinnerArray.push(level.spinner(72, -300, 40, 500, 0.003, Math.PI / 2))
+
+        //right
+        spawn.mapVertex(425 + 435, -50, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80");
+        spawn.mapRect(425, -100, 870, 100);
+        spawn.mapRect(300, 675, 250, 25);
+        spawn.mapRect(675, 450, 375, 25);
+        spawn.mapRect(1175, 225, 240, 25);
+
+        if (Math.random() < 0.33) {
+            spawn.mapVertex(855, -1000, "-100 -300  0 -350  100 -300  100 300  0 350  -100 300");
+        } else if (Math.random() < 0.5) {
+            spawn.mapVertex(855, -1000, "-150 -450  0 -525  150 -450  150 450  0 525  -150 450");
+        } else {
+            spawn.mapVertex(855, -700, "-150 0  150 0  150 450  0 525  -150 450");
+        }
+
+        //2nd floor
+        spawn.mapVertex(855, -1936, "-612 50  0 100  612 50  612 -50 -612 -50");
+        spawn.mapVertex(-687, -1936, "-612 50  0 100  612 50  612 -50 -612 -50");
+
+        //2nd floor right building
+        const boost1 = level.boost(800, -2000, 700)
+        spawn.mapRect(550, -3050, 600, 175);
+        spawn.mapRect(550, -2700, 150, 600);
+        spawn.mapRect(1000, -2700, 150, 600);
+        spawn.mapRect(450, -2700, 250, 25);
+        spawn.mapRect(1000, -2700, 250, 25);
+        const boost2 = level.boost(800, -3050, 1500)
+        spinnerArray.push(level.spinner(50, -3325, 45, 600, 0.003, Math.PI / 2))
+
+        //2nd floor left building
+        spawn.mapRect(-875, -2350, 600, 200);
+        spawn.mapRect(-825, -2825, 425, 275);
+        spawn.mapRect(-450, -3125, 50, 350);
+        spawn.mapRect(-750, -3150, 350, 50);
+        spawn.mapRect(-650, -3400, 250, 300);
+        spawn.mapRect(-650, -3675, 200, 50);
+        spawn.bodyRect(-375, -2150, 100, 150, 0.2);
+        //2nd floor left pillar
+        spawn.mapRect(-1300, -2625, 225, 25);
+        spawn.mapRect(-1300, -3225, 225, 25);
+        spawn.mapRect(-1300, -3825, 225, 25);
+
+        const slime = level.hazard(-2000, -5000, 4000, 6060); //    hazard(x, y, width, height, damage = 0.003)
+        slime.height -= slime.maxHeight - 60 //start slime at zero
+        slime.min.y += slime.maxHeight
+        slime.max.y = slime.min.y + slime.height
+        const elevator1 = level.elevator(-1625, -90, 310, 35, -2000, 0.0025, { up: 0.1, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+        elevator1.isOn = true
+
+        level.custom = () => {
+            elevator1.drawTrack();
+
+            ctx.fillStyle = "#c0c3c9"
+            ctx.fillRect(-1200, -3825, 25, 1850); //small pillar background
+            ctx.fillStyle = "#d0d4d6"
+            ctx.fillRect(-1100, -1925, 825, 2925) //large pillar background
+            ctx.fillRect(450, -1925, 825, 2925) //large pillar background
+
+            ctx.fillStyle = "#cff" //exit
+            ctx.fillRect(1475, -4900, 525, 425)
+            level.playerExitCheck();
+            level.exit.draw();
+            level.enter.draw();
+        };
+        let waterFallWidth = 0
+        let waterFallX = 0
+        let waterFallSmoothX = 0
+        let isWaterfallFilling = false
+        const riseRate = 0.25 + Math.min(1, simulation.difficulty * 0.01)
+        level.customTopLayer = () => {
+            boost1.query();
+            boost2.query();
+
+            if (elevator1.isOn) {
+                elevator1.move();
+            } else if (Matter.Query.collides(elevator1, [player]).length) {
+                elevator1.isOn = true
+                elevator1.isUp = false
+                elevator1.removeConstraint();
+                elevator1.frictionAir = 0.2
+            }
+
+            ctx.fillStyle = "#233"
+            ctx.beginPath(); //central dot on spinners
+            ctx.arc(spinnerArray[0].pointA.x, spinnerArray[0].pointA.y, 9, 0, 2 * Math.PI);
+            for (let i = 0, len = spinnerArray.length; i < len; i++) {
+                ctx.moveTo(spinnerArray[i].pointA.x, spinnerArray[i].pointA.y)
+                ctx.arc(spinnerArray[i].pointA.x, spinnerArray[i].pointA.y, 9, 0, 2 * Math.PI);
+            }
+            ctx.fill();
+
+            //shadow
+            ctx.fillStyle = "rgba(0,10,30,0.1)"
+            ctx.fillRect(550, -2900, 600, 925);
+            ctx.fillRect(-750, -3100, 300, 275);
+            ctx.fillRect(-650, -3625, 200, 225);
+            ctx.fillRect(-825, -2575, 425, 325);
+            ctx.fillRect(-875, -2150, 600, 150);
+
+            slime.query();
+            if (isWaterfallFilling) {
+                if (slime.height < 5500) {
+                    //draw slime fill
+                    waterFallWidth = 0.98 * waterFallWidth + 4.7 * Math.random()
+                    waterFallSmoothX = 0.98 * waterFallSmoothX + 3.5 * Math.random()
+                    waterFallX = waterFallSmoothX - 1985
+                    ctx.fillStyle = `hsla(160, 100%, 43%,${0.3+0.07*Math.random()})`
+                    ctx.fillRect(waterFallX, -5050, waterFallWidth, 6175 - slime.height)
+                    ctx.fillRect(waterFallX + waterFallWidth * Math.random(), -5050, 4, 6175 - slime.height)
+                    //push player down if they go under waterfall
+                    if (player.position.x > waterFallX && player.position.x < waterFallX + waterFallWidth && player.position.y < slime.height) {
+                        Matter.Body.setVelocity(player, {
+                            x: player.velocity.x,
+                            y: player.velocity.y + 2
+                        });
+                    }
+                    slime.levelRise(riseRate)
+                }
+            } else if (Vector.magnitudeSquared(Vector.sub(player.position, level.enter)) > 100000) {
+                isWaterfallFilling = true
+            }
+        };
+        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        // m.immuneCycle = Infinity //you can't take damage
+        // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
+        // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
+
+        spawn.randomMob(1000, -275, 0.3);
+        spawn.randomMob(950, -1725, 0.2);
+        spawn.randomMob(-725, -1775, 0.2);
+        spawn.randomMob(1775, 1000, 0.1);
+        spawn.randomMob(-200, -2075, 0.1);
+        spawn.randomMob(375, -2125, 0.1);
+        spawn.randomMob(1025, -3200, 0);
+        spawn.randomMob(-525, -3750, 0);
+        spawn.randomMob(-550, -3500, 0);
+        spawn.randomMob(-700, -2450, -0.1);
+        spawn.randomMob(-1175, -2775, -0.1);
+        spawn.randomMob(1350, -2075, -0.2);
+        spawn.randomSmallMob(-575, -2925);
+        spawn.randomGroup(-400, -4400, 0);
+        if (simulation.difficulty > 1) {
+            spawn.randomLevelBoss(825, -3500);
+            spawn.secondaryBossChance(75, -1350)
+        }
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+    },
     ruins() {
         const vanish = []
         level.exit.x = -850;
@@ -3004,11 +3235,6 @@ const level = {
         spawn.mapRect(-1050, -1450, 700, 25);
         spawn.mapRect(-1050, -1800, 525, 25);
         spawn.mapRect(-550, -1800, 25, 200);
-
-        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
-        // m.immuneCycle = Infinity //you can't take damage
-        // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
-        // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
 
         spawn.randomMob(-1175, -1975, -0.4);
         spawn.randomMob(275, -1500, -0.3);
@@ -4255,12 +4481,12 @@ const level = {
         }
     },
     highrise() {
-        const elevator1 = level.elevator(-790, -190, 180, 25, -1150) //, 0.007
+        const elevator1 = level.elevator(-790, -190, 180, 25, -1150, 0.0025, { up: 0.01, down: 0.2 }, true) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
         elevator1.addConstraint();
         // const button1 = level.button(-500, -200)
         const toggle1 = level.toggle(-500, -200) //(x,y,isOn,isLockOn = true/false)
 
-        const elevator2 = level.elevator(-3630, -1000, 180, 25, -1740) //, 0.007
+        const elevator2 = level.elevator(-3630, -1000, 180, 25, -1740) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
         elevator2.addConstraint();
         // const button2 = level.button(-3100, -1330) 
         const toggle2 = level.toggle(-3100, -1330) //(x,y,isOn, isLockOn = true/false)
@@ -4295,11 +4521,10 @@ const level = {
             if (elevator1.isOn) {
                 elevator1.move();
                 ctx.fillStyle = "#444"
-                ctx.fillRect(-700, -1140, 1, 975)
             } else {
                 ctx.fillStyle = "#aaa"
-                ctx.fillRect(-700, -1140, 1, 975)
             }
+            ctx.fillRect(-700, -1140, 1, 975)
 
             toggle2.query();
             // button2.draw();
@@ -4319,11 +4544,10 @@ const level = {
             if (elevator2.isOn) {
                 elevator2.move();
                 ctx.fillStyle = "#444"
-                ctx.fillRect(-3540, -1720, 1, 740)
             } else {
                 ctx.fillStyle = "#aaa"
-                ctx.fillRect(-3540, -1720, 1, 740)
             }
+            ctx.fillRect(-3540, -1720, 1, 740)
 
             ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
             ctx.fillRect(-4450, -750, 800, 200)
@@ -4638,7 +4862,7 @@ const level = {
         let elevator1, elevator2, elevator3
         if (Math.random() < 0.5) {
             isElevators = true
-            elevator1 = level.elevator(-1780, 500, 260, 40, 7, 0.0003) //    elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+            elevator1 = level.elevator(-1780, 500, 260, 40, 7, 0.0003) //    x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
             elevator2 = level.elevator(820, 1300, 260, 40, 607, 0.0003)
             elevator3 = level.elevator(-2850, 1250, 160, 40, 600, 0.007)
             if (simulation.isHorizontalFlipped) {
@@ -8132,7 +8356,7 @@ const level = {
                 } else {
                     tech.addJunkTechToPool(0.49)
                 }
-                spawn.randomLevelBoss(x, y, ["historyBoss"]);
+                // spawn.randomLevelBoss(x, y, ["historyBoss"]);
             }
         }
 
@@ -9664,11 +9888,11 @@ const level = {
         b.removeAllGuns();
         b.giveGuns("grenades")
 
-        const elevator1 = level.elevator(550, -100, 180, 25, -840, 0.003, { up: 0.05, down: 0.2 }) //    elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+        const elevator1 = level.elevator(550, -100, 180, 25, -840, 0.003, { up: 0.05, down: 0.2 }) // x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
         elevator1.addConstraint();
         const toggle1 = level.toggle(275, 0) //(x,y,isOn,isLockOn = true/false)
 
-        const elevator2 = level.elevator(1400, -950, 180, 25, -2400, 0.0025) //    elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+        const elevator2 = level.elevator(1400, -950, 180, 25, -2400, 0.0025) // x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
         elevator2.addConstraint();
         const button2 = level.button(1000, -850)
 

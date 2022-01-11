@@ -1127,7 +1127,7 @@ const spawn = {
             this.isInvulnerable = true
             if (this.damageReduction) this.startingDamageReduction = this.damageReduction
             this.damageReduction = 0
-            this.invulnerabilityCountDown = simulation.difficulty * 2
+            this.invulnerabilityCountDown = simulation.difficulty
         }
         me.onDeath = function() {
             this.isBuffBoss = false;
@@ -2020,7 +2020,7 @@ const spawn = {
                     this.cons2.length = -200;
 
                     this.isInvulnerable = false
-                    this.invulnerabilityCountDown = 45 + Math.max(0, 70 - simulation.difficulty)
+                    this.invulnerabilityCountDown = 60 + Math.max(0, 70 - simulation.difficulty)
                     this.damageReduction = this.startingDamageReduction
                     for (let i = 0; i < this.babyList.length; i++) {
                         if (this.babyList[i].alive) this.babyList[i].damageReduction = this.startingDamageReduction

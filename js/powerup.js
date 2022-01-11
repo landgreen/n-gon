@@ -344,9 +344,10 @@ const powerUps = {
                 powerUps.research.count += amount
                 if (powerUps.research.count < 0) {
                     powerUps.research.count = 0
-                } else {
-                    simulation.makeTextLog(`powerUps.research.count <span class='color-symbol'>+=</span> ${amount}`) // <br>${powerUps.research.count}
                 }
+                // else {
+                //     simulation.makeTextLog(`powerUps.research.count <span class='color-symbol'>+=</span> ${amount}`) // <br>${powerUps.research.count}
+                // }
             }
             if (tech.isRerollBots) {
                 let delay = 0
