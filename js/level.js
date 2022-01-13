@@ -17,12 +17,12 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(1) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("plasma torch")
+            // m.setField("wormhole")
             // b.giveGuns("laser")
             // for (let i = 0; i < 9; i++) tech.giveTech("slow light")
-            // tech.giveTech("thermocouple")
+            // tech.giveTech("invariant")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
-            //  tech.giveTech("annelids")
+            // tech.giveTech("charmed baryons")
             // tech.giveTech("tinsellated flagella")
             // for (let i = 0; i < 2; i++) tech.giveTech("refractory metal")
             // tech.giveTech("antiscience")
@@ -235,11 +235,13 @@ const level = {
                 level.levels = shuffle(level.levels); //shuffles order of maps
             }
             level.levels.splice(Math.floor(level.levels.length * (0.4 + 0.6 * Math.random())), 0, "reservoir"); //add level to the back half of the randomized levels list
+            level.levels.splice(0, 2); //remove 2 levels from the start of the array
             if (!build.isExperimentSelection || (build.hasExperimentalMode && !simulation.isCheating)) { //experimental mode is endless, unless you only have an experiment Tech
                 level.levels.unshift("intro"); //add level to the start of the randomized levels list
                 level.levels.push("gauntlet"); //add level to the end of the randomized levels list
                 level.levels.push("final"); //add level to the end of the randomized levels list
             }
+            console.log(level.levels)
         }
     },
     flipHorizontal() {
@@ -2517,7 +2519,7 @@ const level = {
 
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
-        // spawn.pulsar(1900, -500)
+        spawn.pulsar(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.nodeGroup(1200, 0, "grenadier")
@@ -2948,10 +2950,8 @@ const level = {
         level.defaultZoom = 2300
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#d8dadf";
-        powerUps.spawnStartingPowerUps(-1175, -3875);
-
-        //no debris?
-        // spawn.debris(750, -2200, 3700, 16); //16 debris per level 
+        powerUps.spawnStartingPowerUps(-575, -2925)
+        // spawn.debris(750, -2200, 3700, 16); //16 debris per level            //no debris?
 
         //walls
         spawn.mapRect(-3500, -5000, 1500, 6500);
@@ -2961,8 +2961,8 @@ const level = {
         spawn.mapRect(-1925, -4900, 175, 375); //pipe
         spawn.mapRect(-1950, -4550, 225, 25); //pipe
         //top floor exit
-        spawn.mapRect(1025, -4475, 1100, 50);
         spawn.mapRect(1475, -4900, 50, 250);
+        spawn.mapRect(1400, -4475, 650, 50);
 
         // ground
         spawn.mapVertex(-687, 1060, "700 0  -700 0  -450 -300  450 -300"); //left base
@@ -2974,10 +2974,9 @@ const level = {
         spawn.bodyRect(-717, 700, 25, 100); //door
         spawn.bodyRect(-717, 800, 25, 100); //door
 
-        //1st floor
-        //left
-        spawn.mapVertex(-1125 + 435, -50, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80");
-        spawn.mapRect(-1125, -100, 870, 100);
+        //1st floor            //left
+        spawn.mapVertex(-1125 + 437, -50, "490 0  350 80  -350 80  -490 0  -350 -80  350 -80");
+        spawn.mapRect(-1225, -100, 1070, 100);
 
         if (Math.random() < 0.33) {
             spawn.mapVertex(-687, -1000, "-100 -300  0 -350  100 -300  100 300  0 350  -100 300");
@@ -2988,14 +2987,30 @@ const level = {
         }
 
         const spinnerArray = []
-        spinnerArray.push(level.spinner(72, -300, 40, 500, 0.003, Math.PI / 2))
+        if (Math.random() < 0.33) {
+            spinnerArray.push(level.spinner(65, -300, 40, 450, 0.003, Math.PI / 2))
+        } else if (Math.random() < 0.5) {
+            spinnerArray.push(level.spinner(65, -500, 40, 500, 0.003, 0, 0, -0.015)) //    spinner(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0) {
+            const r = 250
+            const hexagon = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
+            Matter.Body.setVertices(spinnerArray[spinnerArray.length - 1].bodyB, Vertices.fromPath(hexagon))
+        } else {
+            spawn.bodyRect(-200, -125, 625, 25);
+        }
+
+        spinnerArray.push(level.spinner(50, -3325, 45, 600, 0.003, 0, 0, 0.01)) //    spinner(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0) {
+        if (Math.random() < 0.5) {
+            const r = 200
+            const hexagon = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
+            Matter.Body.setVertices(spinnerArray[spinnerArray.length - 1].bodyB, Vertices.fromPath(hexagon))
+        }
 
         //right
-        spawn.mapVertex(425 + 435, -50, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80");
-        spawn.mapRect(425, -100, 870, 100);
-        spawn.mapRect(300, 675, 250, 25);
+        spawn.mapVertex(425 + 437, -50, "490 0  350 80  -350 80  -490 0  -350 -80  350 -80");
+        spawn.mapRect(325, -100, 1070, 100);
+        spawn.mapRect(225, 675, 375, 25);
         spawn.mapRect(675, 450, 375, 25);
-        spawn.mapRect(1175, 225, 240, 25);
+        spawn.mapRect(1125, 225, 375, 25);
 
         if (Math.random() < 0.33) {
             spawn.mapVertex(855, -1000, "-100 -300  0 -350  100 -300  100 300  0 350  -100 300");
@@ -3012,15 +3027,12 @@ const level = {
         //2nd floor right building
         const boost1 = level.boost(800, -2000, 700)
         spawn.mapRect(550, -3050, 600, 175);
-        spawn.mapRect(550, -2700, 150, 600);
-        spawn.mapRect(1000, -2700, 150, 600);
-        spawn.mapRect(450, -2700, 250, 25);
-        spawn.mapRect(1000, -2700, 250, 25);
-        const boost2 = level.boost(800, -3050, 1500)
-        spinnerArray.push(level.spinner(50, -3325, 45, 600, 0.003, Math.PI / 2))
+        spawn.mapVertex(584, -2435, "0 0  300 0  300 600  150 600");
+        spawn.mapVertex(1116, -2435, "0 0  300 0  150 600  0 600");
 
+        spawn.bodyRect(-125, -2025, 475, 25);
         //2nd floor left building
-        spawn.mapRect(-875, -2350, 600, 200);
+        spawn.mapRect(-925, -2350, 675, 200);
         spawn.mapRect(-825, -2825, 425, 275);
         spawn.mapRect(-450, -3125, 50, 350);
         spawn.mapRect(-750, -3150, 350, 50);
@@ -3028,22 +3040,22 @@ const level = {
         spawn.mapRect(-650, -3675, 200, 50);
         spawn.bodyRect(-375, -2150, 100, 150, 0.2);
         //2nd floor left pillar
-        spawn.mapRect(-1300, -2625, 225, 25);
-        spawn.mapRect(-1300, -3225, 225, 25);
-        spawn.mapRect(-1300, -3825, 225, 25);
+        spawn.mapRect(-1400, -2625, 325, 25);
+        spawn.mapRect(-1400, -3225, 325, 25);
+        spawn.mapRect(-1400, -3825, 325, 25);
 
         const slime = level.hazard(-2000, -5000, 4000, 6060); //    hazard(x, y, width, height, damage = 0.003)
         slime.height -= slime.maxHeight - 60 //start slime at zero
         slime.min.y += slime.maxHeight
         slime.max.y = slime.min.y + slime.height
-        const elevator1 = level.elevator(-1625, -90, 310, 35, -2000, 0.0025, { up: 0.1, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
-        elevator1.isOn = true
+        const elevator1 = level.elevator(-1625, -90, 310, 800, -2000, 0.0025, { up: 0.1, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+        const elevator2 = level.elevator(1175, -3050, 200, 300, -4475, 0.0025, { up: 0.12, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
 
         level.custom = () => {
-            elevator1.drawTrack();
-
             ctx.fillStyle = "#c0c3c9"
-            ctx.fillRect(-1200, -3825, 25, 1850); //small pillar background
+            ctx.fillRect(-1470, -1975, 2, 1915) //elevator track
+            ctx.fillRect(1276, -4460, 2, 1425) //elevator track
+            ctx.fillRect(-1250, -3825, 25, 1850); //small pillar background
             ctx.fillStyle = "#d0d4d6"
             ctx.fillRect(-1100, -1925, 825, 2925) //large pillar background
             ctx.fillRect(450, -1925, 825, 2925) //large pillar background
@@ -3061,16 +3073,8 @@ const level = {
         const riseRate = 0.25 + Math.min(1, simulation.difficulty * 0.01)
         level.customTopLayer = () => {
             boost1.query();
-            boost2.query();
-
-            if (elevator1.isOn) {
-                elevator1.move();
-            } else if (Matter.Query.collides(elevator1, [player]).length) {
-                elevator1.isOn = true
-                elevator1.isUp = false
-                elevator1.removeConstraint();
-                elevator1.frictionAir = 0.2
-            }
+            elevator1.move();
+            elevator2.move();
 
             ctx.fillStyle = "#233"
             ctx.beginPath(); //central dot on spinners
@@ -3080,14 +3084,13 @@ const level = {
                 ctx.arc(spinnerArray[i].pointA.x, spinnerArray[i].pointA.y, 9, 0, 2 * Math.PI);
             }
             ctx.fill();
-
             //shadow
             ctx.fillStyle = "rgba(0,10,30,0.1)"
             ctx.fillRect(550, -2900, 600, 925);
             ctx.fillRect(-750, -3100, 300, 275);
             ctx.fillRect(-650, -3625, 200, 225);
             ctx.fillRect(-825, -2575, 425, 325);
-            ctx.fillRect(-875, -2150, 600, 150);
+            ctx.fillRect(-925, -2150, 675, 150);
 
             slime.query();
             if (isWaterfallFilling) {
@@ -3119,18 +3122,18 @@ const level = {
         // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
         // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
 
-        spawn.randomMob(1000, -275, 0.3);
-        spawn.randomMob(950, -1725, 0.2);
-        spawn.randomMob(-725, -1775, 0.2);
-        spawn.randomMob(1775, 1000, 0.1);
-        spawn.randomMob(-200, -2075, 0.1);
-        spawn.randomMob(375, -2125, 0.1);
+        spawn.randomMob(1000, -275, 0.2);
+        spawn.randomMob(950, -1725, 0.1);
+        spawn.randomMob(-725, -1775, 0.1);
+        spawn.randomMob(-200, -2075, 0);
+        spawn.randomMob(375, -2125, 0);
         spawn.randomMob(1025, -3200, 0);
-        spawn.randomMob(-525, -3750, 0);
         spawn.randomMob(-550, -3500, 0);
         spawn.randomMob(-700, -2450, -0.1);
         spawn.randomMob(-1175, -2775, -0.1);
-        spawn.randomMob(1350, -2075, -0.2);
+        spawn.randomMob(-525, -3750, -0.2);
+        spawn.randomMob(1350, -2075, -0.3);
+        spawn.randomMob(1775, 1000, -0.4);
         spawn.randomSmallMob(-575, -2925);
         spawn.randomGroup(-400, -4400, 0);
         if (simulation.difficulty > 1) {

@@ -1,9 +1,22 @@
 ******************************************************** NEXT PATCH **************************************************
 
+the level list now has 2 levels randomly removed to bring the total back to 13
+  15 level play session felt too long
 
+tech: invariant - use energy to pause time while placing your wormhole
 
+reservoir level has wider platforms, and some other changes
+
+Zeno's paradox 83->85% harm reduction
+supply chain no longer gives 5% JUNK
+vector field renamed -> tensor field: also gives 7 research
 
 ******************************************************** TODO ********************************************************
+
+joystick support?
+
+make a new boss with similar movement to powerUpBossBaby
+  bossBaby power up boss has really smart movement
 
 reversed version of reservoir level, start at top and press buttons to lower slime
 
@@ -22,24 +35,19 @@ new platform element, spring
   toggle to on when player touches platform    
   platform extends in any direction
 
-start toggled elevators in the high or middle state, not low
-
-wormhole tech - pause while placing the wormhole
-
-tech - set damage reduction equal to how much mana you have below 95
-  override all other harm reduction effects?
-
 vanish element:
   grow as it returns?
 
 pull bullets back to player with crouch/field
-  bullets type?:  drones, spores, missiles, 
-  works for all bullets, write custom code based on bullet type
+  spores?
+  extend to all bullets?
+    write custom code based on bullet type
     bad for: laser, harpoon?, missile and grenade?
 
 boss that gives nearby mobs invulnerability
+  invulnerability needs to toggle off and on
   boss is only mildly aggressive
-  repulsed by player upto a point
+  repulsed by player up to a point
   attracted to mobs
 
 training

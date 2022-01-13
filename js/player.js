@@ -501,7 +501,7 @@ const m = {
     harmReduction() {
         let dmg = 1
         dmg *= m.fieldHarmReduction
-        if (tech.isZeno) dmg *= 0.17
+        if (tech.isZeno) dmg *= 0.15
         if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.33
         if (tech.isImmortal) dmg *= 0.66
@@ -3061,6 +3061,38 @@ const m = {
                         const mag = Vector.magnitude(sub)
 
                         if (input.field) {
+                            if (tech.isWormHolePause) {
+                                const drain = m.fieldRegen + 0.0007
+                                if (m.energy > drain) {
+                                    m.energy -= drain
+                                    if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage for 1/4 seconds // and can't regen
+                                    m.isBodiesAsleep = true;
+
+                                    function sleep(who) {
+                                        for (let i = 0, len = who.length; i < len; ++i) {
+                                            if (!who[i].isSleeping) {
+                                                who[i].storeVelocity = who[i].velocity
+                                                who[i].storeAngularVelocity = who[i].angularVelocity
+                                            }
+                                            Matter.Sleeping.set(who[i], true)
+                                        }
+                                    }
+                                    sleep(mob);
+                                    sleep(body);
+                                    sleep(bullet);
+                                    simulation.cycle--; //pause all functions that depend on game cycle increasing
+                                    Matter.Body.setVelocity(player, { //keep player frozen
+                                        x: 0,
+                                        y: -55 * player.mass * simulation.g //undo gravity before it is added
+                                    });
+                                    player.force.x = 0
+                                    player.force.y = 0
+                                } else {
+                                    m.wakeCheck();
+                                    m.energy = 0;
+                                }
+                            }
+
                             m.grabPowerUp();
                             //draw possible wormhole
                             if (tech.isWormholeMapIgnore && Matter.Query.ray(map, m.pos, justPastMouse).length !== 0) {
@@ -3108,6 +3140,8 @@ const m = {
                                 ctx.setLineDash([]);
                             }
                         } else {
+                            if (tech.isWormHolePause && m.isBodiesAsleep) m.wakeCheck();
+
                             //make new wormhole
                             if (
                                 m.hole.isReady && mag > 250 && m.energy > this.drain &&

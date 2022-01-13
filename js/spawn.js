@@ -3491,13 +3491,13 @@ const spawn = {
             if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                 // m.immuneCycle = m.cycle + tech.collisionImmuneCycles + 60; //player is immune to damage for an extra second
                 m.damage(this.swordDamage);
-                simulation.drawList.push({ //add dmg to draw queue
-                    x: best.x,
-                    y: best.y,
-                    radius: this.swordDamage * 1500,
-                    color: "rgba(80,0,255,0.5)",
-                    time: 20
-                });
+                // simulation.drawList.push({ //add dmg to draw queue
+                //     x: best.x,
+                //     y: best.y,
+                //     radius: this.swordDamage * 1500,
+                //     color: "rgba(80,0,255,0.5)",
+                //     time: 20
+                // });
             }
             if (best.dist2 === Infinity) best = look;
             ctx.beginPath(); //draw beam

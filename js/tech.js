@@ -491,7 +491,7 @@ const tech = {
         {
             name: "supply chain",
             junk: 0.05,
-            descriptionFunction() { return `double your current <strong class='color-ammo'>ammo</strong> for all <strong class='color-g'>guns</strong><br><strong>+${this.junk * 100}%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool` },
+            descriptionFunction() { return `double your current <strong class='color-ammo'>ammo</strong> for all <strong class='color-g'>guns</strong>` },
             maxCount: 9,
             count: 0,
             frequency: 1,
@@ -503,7 +503,7 @@ const tech = {
                     if (b.guns[i].have) b.guns[i].ammo = Math.floor(2 * b.guns[i].ammo)
                 }
                 simulation.makeGunHUD();
-                this.refundAmount += tech.addJunkTechToPool(this.junk)
+                // this.refundAmount += tech.addJunkTechToPool(this.junk)
             },
             refundAmount: 0,
             remove() {
@@ -513,10 +513,10 @@ const tech = {
                     }
                 }
                 simulation.makeGunHUD();
-                if (this.count > 0 && this.refundAmount > 0) {
-                    tech.removeJunkTechFromPool(this.refundAmount)
-                    this.refundAmount = 0
-                }
+                // if (this.count > 0 && this.refundAmount > 0) {
+                //     tech.removeJunkTechFromPool(this.refundAmount)
+                //     this.refundAmount = 0
+                // }
             }
         },
         {
@@ -2449,7 +2449,7 @@ const tech = {
         },
         {
             name: "Zeno's paradox",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>83%</strong>, but every <strong>5</strong> seconds<br>remove <strong>1/10</strong> of your current <strong class='color-h'>health</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>85%</strong>, but every <strong>5</strong> seconds<br>remove <strong>1/10</strong> of your current <strong class='color-h'>health</strong>",
             // description: "every <strong>5</strong> seconds remove <strong>1/10</strong> of your <strong class='color-h'>health</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong>",
             maxCount: 1,
             count: 0,
@@ -3471,8 +3471,8 @@ const tech = {
             remove() {}
         },
         {
-            name: "vector fields",
-            description: "<strong>triple</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong> <strong class='color-m'>tech</strong><br>spawn a <strong class='color-f'>field</strong>",
+            name: "tensor field",
+            description: `<strong>triple</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong> <strong class='color-m'>tech</strong><br>spawn a <strong class='color-f'>field</strong> and  ${powerUps.orb.research(7)}`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3485,11 +3485,13 @@ const tech = {
             requires: "NOT EXPERIMENT MODE, not superdeterminism",
             effect() {
                 powerUps.spawn(m.pos.x, m.pos.y, "field");
+                for (let i = 0; i < 7; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
                 for (let i = 0, len = tech.tech.length; i < len; i++) {
                     if (tech.tech[i].isFieldTech) tech.tech[i].frequency *= 3
                 }
             },
             remove() {
+                // powerUps.research.changeRerolls(-6)
                 // if (this.count > 1) {
                 //     for (let i = 0, len = tech.tech.length; i < len; i++) {
                 //         if (tech.tech[i].isFieldTech) tech.tech[i].frequency /= 3
@@ -6909,25 +6911,6 @@ const tech = {
             }
         },
         {
-            name: "cosmic string",
-            description: "<strong>stun</strong> and do <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> to <strong>mobs</strong><br>if you tunnel through them with a <strong class='color-worm'>wormhole</strong>",
-            isFieldTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "wormhole"
-            },
-            requires: "wormhole",
-            effect() {
-                tech.isWormholeDamage = true
-            },
-            remove() {
-                tech.isWormholeDamage = false
-            }
-        },
-        {
             name: "virtual particles",
             description: `use ${powerUps.orb.research(4)}to exploit your <strong class='color-worm'>wormhole</strong> for a<br><strong>13%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
             isFieldTech: true,
@@ -7018,6 +7001,44 @@ const tech = {
                     }
                     tech.isWormBullets = false;
                 }
+            }
+        },
+        {
+            name: "cosmic string",
+            description: "<strong>stun</strong> and do <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> to <strong>mobs</strong><br>if you tunnel through them with a <strong class='color-worm'>wormhole</strong>",
+            isFieldTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return m.fieldUpgrades[m.fieldMode].name === "wormhole"
+            },
+            requires: "wormhole",
+            effect() {
+                tech.isWormholeDamage = true
+            },
+            remove() {
+                tech.isWormholeDamage = false
+            }
+        },
+        {
+            name: "invariant",
+            description: "use <strong class='color-f'>energy</strong> to <strong>pause</strong> time<br>while placing your <strong class='color-worm'>wormhole</strong>",
+            isFieldTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return m.fieldUpgrades[m.fieldMode].name === "wormhole"
+            },
+            requires: "wormhole",
+            effect() {
+                tech.isWormHolePause = true
+            },
+            remove() {
+                tech.isWormHolePause = false
             }
         },
         {
