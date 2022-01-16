@@ -5,7 +5,7 @@ const spawn = {
     randomLevelBoss(x, y, options = [
         "shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
         "powerUpBoss", "powerUpBossBaby", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss",
-        "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "mantisBoss"
+        "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "mantisBoss", "slashBoss"
     ]) {
         spawn[options[Math.floor(Math.random() * options.length)]](x, y)
     },
@@ -3509,6 +3509,170 @@ const spawn = {
             ctx.strokeStyle = "rgba(100,100,255,0.5)"; // Purple path
             ctx.lineWidth = 2;
             // ctx.stroke();
+            ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+            ctx.stroke(); // Draw it
+            ctx.setLineDash([]);
+        }
+    },
+    slashBoss(x, y, radius = 80) {
+        mobs.spawn(x, y, 5, radius, "rgb(201,202,225)");
+        let me = mob[mob.length - 1];
+        Matter.Body.rotate(me, 2 * Math.PI * Math.random());
+        me.isBoss = true;
+        me.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.startingDamageReduction = me.damageReduction
+        me.isInvulnerable = false
+        me.frictionAir = 0.01
+        me.seeAtDistance2 = 1000000;
+        me.accelMag = 0.001 + 0.0003 * simulation.accelScale;
+        Matter.Body.setDensity(me, 0.0005); //normal is 0.001
+        me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map
+        me.memory = Infinity;
+        me.seePlayerFreq = 20
+        me.lockedOn = null;
+
+        me.torqueMagnitude = 0.00024 * me.inertia * (Math.random() > 0.5 ? -1 : 1);
+        me.delay = 120 * simulation.CDScale;
+        me.cd = 0;
+        me.swordRadius = 0;
+        me.swordVertex = 1
+        me.swordRadiusMax = 1100 + 20 * simulation.difficulty;
+        me.swordRadiusGrowRate = me.swordRadiusMax * (0.005 + 0.0003 * simulation.difficulty)
+        me.isSlashing = false;
+        me.swordDamage = 0.07 * simulation.dmgScale
+        me.laserAngle = 3 * Math.PI / 5
+        const seeDistance2 = 200000
+        spawn.shield(me, x, y);
+        me.onDamage = function() {};
+        me.onDeath = function() {
+            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+        };
+        me.do = function() {
+            this.seePlayerByHistory();
+            this.attraction();
+            this.checkStatus();
+            if (!m.isBodiesAsleep) this.sword() //does various things depending on what stage of the sword swing
+
+            // ctx.beginPath(); //hide map
+            // ctx.arc(this.position.x, this.position.y, 3000, 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
+            // ctx.fillStyle = "#444";
+            // ctx.fill();
+        };
+        me.swordWaiting = function() {
+            if (
+                this.seePlayer.recall &&
+                this.cd < simulation.cycle &&
+                this.distanceToPlayer2() < seeDistance2 &&
+                Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
+                Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
+            ) {
+                //find vertex farthest away from player
+                let dist = 0
+                for (let i = 0, len = this.vertices.length; i < len; i++) {
+                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
+                    if (D > dist) {
+                        dist = D
+                        this.swordVertex = i
+                    }
+                }
+                this.laserAngle = this.swordVertex / 5 * 2 * Math.PI + 0.6283
+                this.sword = this.swordGrow
+                Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                Matter.Body.setAngularVelocity(this, 0)
+                this.accelMag = 0
+                this.damageReduction = 0
+                this.isInvulnerable = true
+                this.frictionAir = 1
+            }
+        }
+        me.sword = me.swordWaiting //base function that changes during different aspects of the sword swing
+        me.swordGrow = function() {
+            this.laserSword(this.vertices[this.swordVertex], this.angle + this.laserAngle);
+            this.swordRadius += this.swordRadiusGrowRate
+            if (this.swordRadius > this.swordRadiusMax) {
+                this.sword = this.swordSlash
+                this.spinCount = 0
+            }
+
+            ctx.beginPath();
+            let vertices = this.vertices;
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+            ctx.lineTo(vertices[0].x, vertices[0].y);
+            ctx.lineWidth = 20;
+            ctx.strokeStyle = "rgba(255,255,255,0.7)";
+            ctx.stroke();
+        }
+        me.swordSlash = function() {
+            this.laserSword(this.vertices[this.swordVertex], this.angle + this.laserAngle);
+            this.torque += this.torqueMagnitude;
+            this.spinCount++
+            if (this.spinCount > 80) {
+                this.sword = this.swordWaiting
+                this.swordRadius = 0
+                this.accelMag = 0.001 * simulation.accelScale;
+                this.cd = simulation.cycle + this.delay;
+                this.damageReduction = this.startingDamageReduction
+                this.isInvulnerable = false
+                this.frictionAir = 0.01
+            }
+            ctx.beginPath();
+            let vertices = this.vertices;
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+            ctx.lineTo(vertices[0].x, vertices[0].y);
+            ctx.lineWidth = 20;
+            ctx.strokeStyle = "rgba(255,255,255,0.7)";
+            ctx.stroke();
+        }
+        me.laserSword = function(where, angle) {
+            const vertexCollision = function(v1, v1End, domain) {
+                for (let i = 0; i < domain.length; ++i) {
+                    let v = domain[i].vertices;
+                    const len = v.length - 1;
+                    for (let j = 0; j < len; j++) {
+                        results = simulation.checkLineIntersection(v1, v1End, v[j], v[j + 1]);
+                        if (results.onLine1 && results.onLine2) {
+                            const dx = v1.x - results.x;
+                            const dy = v1.y - results.y;
+                            const dist2 = dx * dx + dy * dy;
+                            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: v[j], v2: v[j + 1] };
+                        }
+                    }
+                    results = simulation.checkLineIntersection(v1, v1End, v[0], v[len]);
+                    if (results.onLine1 && results.onLine2) {
+                        const dx = v1.x - results.x;
+                        const dy = v1.y - results.y;
+                        const dist2 = dx * dx + dy * dy;
+                        if (dist2 < best.dist2) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: v[0], v2: v[len] };
+                    }
+                }
+            };
+            best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
+            const look = { x: where.x + this.swordRadius * Math.cos(angle), y: where.y + this.swordRadius * Math.sin(angle) };
+            vertexCollision(where, look, body); // vertexCollision(where, look, mob);
+            vertexCollision(where, look, map);
+            if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
+            if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
+                m.immuneCycle = m.cycle + tech.collisionImmuneCycles + 60; //player is immune to damage for an extra second
+                m.damage(this.swordDamage);
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: best.x,
+                    y: best.y,
+                    radius: this.swordDamage * 1500,
+                    color: "rgba(80,0,255,0.5)",
+                    time: 20
+                });
+            }
+            if (best.dist2 === Infinity) best = look;
+            ctx.beginPath(); //draw beam
+            ctx.moveTo(where.x, where.y);
+            ctx.lineTo(best.x, best.y);
+            ctx.strokeStyle = "rgba(100,100,255,0.1)"; // Purple path
+            ctx.lineWidth = 25;
+            ctx.stroke();
+            ctx.strokeStyle = "rgba(100,100,255,0.5)"; // Purple path
+            ctx.lineWidth = 5;
             ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
             ctx.stroke(); // Draw it
             ctx.setLineDash([]);

@@ -214,7 +214,7 @@ const tech = {
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 1 + 0.75 * (1 - m.harmReduction())
         if (tech.OccamDamage) dmg *= tech.OccamDamage
         if (tech.isCloakingDamage) dmg *= 1.35
-        if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.5
+        if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
         if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
         if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= tech.sneakAttackDmg
         if (tech.isTechDamage) dmg *= 1.9
@@ -1016,7 +1016,7 @@ const tech = {
         {
             name: "nail-bot upgrade",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">nail-bot upgrade</a>`,
-            description: "<strong>convert</strong> your current bots to <strong>nail-bots</strong><br><strong>+500%</strong> <strong>fire rate</strong> and <strong>+40%</strong> nail <strong>velocity</strong>",
+            description: "<strong>convert</strong> your bots to <strong>nail-bots</strong><br><strong>+500%</strong> <strong>fire rate</strong> and <strong>+40%</strong> nail <strong>velocity</strong>",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -1072,7 +1072,7 @@ const tech = {
         {
             name: "foam-bot upgrade",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">foam-bot upgrade</a>`,
-            description: "<strong>convert</strong> your current bots to <strong>foam-bots</strong><br><strong>300%</strong> increased foam <strong>size</strong> and <strong>fire rate</strong>",
+            description: "<strong>convert</strong> your bots to <strong>foam-bots</strong><br><strong>300%</strong> increased foam <strong>size</strong> and <strong>fire rate</strong>",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -1128,7 +1128,7 @@ const tech = {
         {
             name: "boom-bot upgrade",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">boom-bot upgrade</a>`,
-            description: "<strong>convert</strong> your current bots to <strong>boom-bots</strong><br><strong>300%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size",
+            description: "<strong>convert</strong> your bots to <strong>boom-bots</strong><br><strong>300%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -1186,7 +1186,7 @@ const tech = {
         {
             name: "laser-bot upgrade",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">laser-bot upgrade</a>`,
-            description: "<strong>convert</strong> your current bots to <strong>laser-bots</strong><br><strong>100%</strong> improved <strong class='color-d'>damage</strong>, efficiency, and range", //  <strong>400%</strong> increased <strong>laser-bot</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong>convert</strong> your bots to <strong>laser-bots</strong><br><strong>100%</strong> improved <strong class='color-d'>damage</strong>, efficiency, and range", //  <strong>400%</strong> increased <strong>laser-bot</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -1242,7 +1242,7 @@ const tech = {
         {
             name: "orbital-bot upgrade",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">orbital-bot upgrade</a>`,
-            description: "<strong>convert</strong> your current bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>300%</strong> and <strong>radius</strong> by <strong>50%</strong>",
+            description: "<strong>convert</strong> your bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>300%</strong> and <strong>radius</strong> by <strong>50%</strong>",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -1307,7 +1307,7 @@ const tech = {
         {
             name: "dynamo-bot upgrade",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">dynamo-bot upgrade</a>`,
-            description: "<strong>convert</strong> your current bots to <strong>dynamo-bots</strong><br>increase regen to <strong>23</strong> <strong class='color-f'>energy</strong> per second",
+            description: "<strong>convert</strong> your bots to <strong>dynamo-bots</strong><br>increase regen to <strong>23</strong> <strong class='color-f'>energy</strong> per second",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -1748,7 +1748,7 @@ const tech = {
         },
         {
             name: "NAND gate",
-            description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>50%</strong> more <strong class='color-d'>damage</strong>",
+            description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>55.5%</strong> more <strong class='color-d'>damage</strong>",
             maxCount: 1,
             count: 0,
             frequency: 4,
@@ -6117,6 +6117,25 @@ const tech = {
             }
         },
         {
+            name: "radiative equilibrium",
+            description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong>",
+            isFieldTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass") && (build.isExperimentSelection || powerUps.research.count > 3)
+            },
+            requires: "negative mass, pilot wave",
+            effect() {
+                tech.isHarmDamage = true;
+            },
+            remove() {
+                tech.isHarmDamage = false;
+            }
+        },
+        {
             name: "neutronium",
             description: `reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong> when your <strong class='color-f'>field</strong> is active<br><strong>move</strong> and <strong>jump</strong> <strong>33%</strong> <strong>slower</strong>`,
             isFieldTech: true,
@@ -6223,7 +6242,7 @@ const tech = {
         },
         {
             name: "bot manufacturing",
-            description: `use <strong>molecular assembler</strong> and ${powerUps.orb.research(2)}<br>to build <strong>3</strong> random <strong class='color-bot'>bots</strong>`,
+            description: `use ${powerUps.orb.research(2)} to build<br><strong>3</strong> random <strong class='color-bot'>bots</strong>`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,

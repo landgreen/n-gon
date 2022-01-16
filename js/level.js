@@ -17,10 +17,10 @@ const level = {
             // localSettings.levelsClearedLastGame = 10
             // level.difficultyIncrease(1) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.setField("wormhole")
-            // b.giveGuns("laser")
+            // m.setField("metamaterial cloaking")
+            // b.giveGuns("harpoon")
             // for (let i = 0; i < 9; i++) tech.giveTech("slow light")
-            // tech.giveTech("invariant")
+            // tech.giveTech("boson composite")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // tech.giveTech("charmed baryons")
             // tech.giveTech("tinsellated flagella")
@@ -41,7 +41,7 @@ const level = {
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
             // lore.techCount = 3
             // simulation.isCheating = false //true;
-            // localSettings.loreCount = 1; //this sets what conversation is heard
+            // localSettings.loreCount = 0; //this sets what conversation is heard
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
@@ -137,7 +137,7 @@ const level = {
             if (simulation.accelScale < 6) simulation.accelScale *= 1.025 //mob acceleration increases each level
             if (simulation.CDScale > 0.15) simulation.CDScale *= 0.965 //mob CD time decreases each level
         }
-        simulation.dmgScale = 0.41 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.4 * simulation.difficulty //damage done by mobs increases each level
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
         // console.log(`CD = ${simulation.CDScale}`)
     },
@@ -149,7 +149,7 @@ const level = {
             if (simulation.CDScale < 1) simulation.CDScale /= 0.965 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = 0.41 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.4 * simulation.difficulty //damage done by mobs increases each level
         if (simulation.dmgScale < 0.1) simulation.dmgScale = 0.1;
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055)
     },
@@ -241,7 +241,6 @@ const level = {
                 level.levels.push("gauntlet"); //add level to the end of the randomized levels list
                 level.levels.push("final"); //add level to the end of the randomized levels list
             }
-            console.log(level.levels)
         }
     },
     flipHorizontal() {
@@ -341,9 +340,10 @@ const level = {
         y += height / 2
         const who = body[body.length] = Bodies.rectangle(x, y, width, height, {
             collisionFilter: {
-                category: cat.body,
-                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                category: cat.map,
+                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
             },
+            isNoSetCollision: true,
             isNotHoldable: true,
             frictionAir: frictionAir,
             friction: 1,
@@ -435,9 +435,10 @@ const level = {
         force += simulation.g
         const who = body[body.length] = Bodies.rectangle(x, isAtTop ? maxHeight : y, width, height, {
             collisionFilter: {
-                category: cat.body,
-                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                category: cat.map,
+                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
             },
+            isNoSetCollision: true,
             inertia: Infinity, //prevents rotation
             isNotHoldable: true,
             friction: 1,
@@ -581,21 +582,32 @@ const level = {
         const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
             density: density,
             isNotHoldable: true,
-            isNonStick: true
+            isNonStick: true,
+            collisionFilter: {
+                category: cat.map,
+                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+            },
+            isNoSetCollision: true,
         });
         const rotor2 = Matter.Bodies.rectangle(x, y, width, radius, {
             angle: Math.PI / 2,
             density: density,
             isNotHoldable: true,
-            isNonStick: true
+            isNonStick: true,
+            collisionFilter: {
+                category: cat.map,
+                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+            },
+            isNoSetCollision: true,
         });
         rotor = Body.create({ //combine rotor1 and rotor2
             parts: [rotor1, rotor2],
             restitution: 0,
             collisionFilter: {
-                category: cat.body,
-                mask: cat.body | cat.mob | cat.mobBullet | cat.mobShield | cat.powerUp | cat.player | cat.bullet
+                category: cat.map,
+                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
             },
+            isNoSetCollision: true,
         });
         Matter.Body.setPosition(rotor, {
             x: x,
@@ -605,10 +617,10 @@ const level = {
         body[body.length] = rotor1
         body[body.length] = rotor2
 
-        setTimeout(function() {
-            rotor.collisionFilter.category = cat.body;
-            rotor.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet //| cat.map
-        }, 1000);
+        // setTimeout(function() {
+        //     rotor.collisionFilter.category = cat.body;
+        //     rotor.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet //| cat.map
+        // }, 1000);
 
         const constraint = Constraint.create({ //fix rotor in place, but allow rotation
             pointA: {
@@ -794,8 +806,6 @@ const level = {
                             this.isTouched = false
                             this.collisionFilter.mask = 0 //cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
                             this.returnCount = this.returnTime
-                            const size = 1
-                            // const vertices = [{ x: x * size, y: y, index: 0, isInternal: false }, { x: (x + width) * size, y: y, index: 1, isInternal: false }, { x: (x + width) * size, y: y + height, index: 4, isInternal: false }, { x: x * size, y: y + height, index: 3, isInternal: false }]
                             Matter.Body.setVertices(this, this.shrinkVertices(1)) //take on harpoon shape
                             Matter.Body.setVertices(this, vertices) //take on harpoon shape
                         }
@@ -818,7 +828,7 @@ const level = {
                                 //delete any overlapping blocks
                                 const blocks = Matter.Query.collides(this, body)
                                 for (let i = 0; i < blocks.length; i++) {
-                                    if (blocks[i].bodyB !== this) { //dont' delete yourself
+                                    if (blocks[i].bodyB !== this && blocks[i].bodyB !== m.holdingTarget) { //dont' delete yourself   <----- bug here maybe...
                                         Matter.Composite.remove(engine.world, blocks[i].bodyB);
                                         blocks[i].bodyB.isRemoveMeNow = true
                                         for (let i = 1; i < body.length; i++) { //find which index in body array it is and remove from array
@@ -1168,6 +1178,9 @@ const level = {
                             x: Math.max(0.95, 1 - 0.036 * Math.abs(player.velocity.x)) * player.velocity.x,
                             y: slowY * player.velocity.y
                         });
+                        //undo 1/2 of gravity
+                        player.force.y -= 0.5 * player.mass * simulation.g;
+
                     }
                     //float power ups
                     powerUpCollide = Matter.Query.region(powerUp, this)
@@ -2427,16 +2440,16 @@ const level = {
             button.query();
             button.draw();
             vanish1.query();
-            vanish2.query();
-            vanish3.query();
-            vanish4.query();
-            vanish5.query();
+            // vanish2.query();
+            // vanish3.query();
+            // vanish4.query();
+            // vanish5.query();
         };
         const vanish1 = level.vanish(1400, -200, 200, 50) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
-        const vanish2 = level.vanish(1825, -150, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
-        const vanish3 = level.vanish(1975, -150, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
-        const vanish4 = level.vanish(1825, -300, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
-        const vanish5 = level.vanish(1975, -300, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
+        // const vanish2 = level.vanish(1825, -150, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
+        // const vanish3 = level.vanish(1975, -150, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
+        // const vanish4 = level.vanish(1825, -300, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
+        // const vanish5 = level.vanish(1975, -300, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
         level.setPosToSpawn(0, -450); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         level.exit.x = 6500;
@@ -2489,11 +2502,11 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        level.difficultyIncrease(1) //30 is near max on hard  //60 is near max on why
+        level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
         // spawn.starter(1900, -500, 200) //big boy
-
+        spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
         // spawn.powerUpBoss(3200, -500)
@@ -2519,7 +2532,7 @@ const level = {
 
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
-        spawn.pulsar(1900, -500)
+        // spawn.pulsar(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.nodeGroup(1200, 0, "grenadier")
@@ -8598,7 +8611,7 @@ const level = {
 
             //Boss Spawning 
             if (simulation.difficulty > 5) {
-                spawn.randomLevelBoss(-2200, -700, ["historyBoss", "powerUpBossBaby", "blockBoss", "revolutionBoss"]);
+                spawn.randomLevelBoss(-2200, -700, ["powerUpBossBaby", "blockBoss", "revolutionBoss"]);
 
                 setTimeout(() => {
                     simulation.makeTextLog("<strong>UNKNOWN</strong>: \"They are coming for you.\"", 600);

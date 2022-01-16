@@ -2906,7 +2906,7 @@ const b = {
                 // }
             },
             onEnd() {
-                if (tech.isDroneRespawn) {
+                if (tech.isDroneRespawn && b.inventory.length) {
                     const who = b.guns[b.activeGun]
                     if (who.name === "drones" && who.ammo > 0 && mob.length) {
                         b.droneRadioactive({ x: this.position.x, y: this.position.y }, 0)
@@ -3320,55 +3320,57 @@ const b = {
             // bullet[me].turnRate = 0.005 * (Math.random() - 0.5)
             bullet[me].isInMap = false
             bullet[me].do = function() {
-                const whom = Matter.Query.collides(this, mob)
-                if (whom.length && this.speed > 20) { //if touching a mob 
-                    for (let i = 0, len = whom.length; i < len; i++) {
-                        who = whom[i].bodyA
-                        if (who && who.mob) {
-                            let immune = false
-                            for (let i = 0; i < this.immuneList.length; i++) { //check if this needle has hit this mob already
-                                if (this.immuneList[i] === who.id) {
-                                    immune = true
-                                    break
+                if (!m.isBodiesAsleep) {
+                    const whom = Matter.Query.collides(this, mob)
+                    if (whom.length && this.speed > 20) { //if touching a mob 
+                        for (let i = 0, len = whom.length; i < len; i++) {
+                            who = whom[i].bodyA
+                            if (who && who.mob) {
+                                let immune = false
+                                for (let i = 0; i < this.immuneList.length; i++) { //check if this needle has hit this mob already
+                                    if (this.immuneList[i] === who.id) {
+                                        immune = true
+                                        break
+                                    }
                                 }
-                            }
-                            if (!immune) {
-                                if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
-                                    b.explosion(this.position, 220 * tech.nailSize + 50 * Math.random()); //makes bullet do explosive damage at end
-                                }
-                                this.immuneList.push(who.id) //remember that this needle has hit this mob once already
-                                let dmg = this.dmg * tech.nailSize * b.dmgScale
-                                if (tech.isNailRadiation) {
-                                    mobs.statusDoT(who, (tech.isFastRadiation ? 6 : 2) * tech.nailSize, tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
-                                    dmg *= 0.25
-                                }
-                                if (tech.isCrit && who.isStunned) dmg *= 4
-                                who.damage(dmg, tech.isShieldPierce);
-                                if (who.alive) who.foundPlayer();
-                                if (who.damageReduction) {
-                                    simulation.drawList.push({ //add dmg to draw queue
-                                        x: this.position.x,
-                                        y: this.position.y,
-                                        radius: Math.log(dmg + 1.1) * 40 * who.damageReduction + 3,
-                                        color: simulation.playerDmgColor,
-                                        time: simulation.drawTime
-                                    });
+                                if (!immune) {
+                                    if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
+                                        b.explosion(this.position, 220 * tech.nailSize + 50 * Math.random()); //makes bullet do explosive damage at end
+                                    }
+                                    this.immuneList.push(who.id) //remember that this needle has hit this mob once already
+                                    let dmg = this.dmg * tech.nailSize * b.dmgScale
+                                    if (tech.isNailRadiation) {
+                                        mobs.statusDoT(who, (tech.isFastRadiation ? 6 : 2) * tech.nailSize, tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
+                                        dmg *= 0.25
+                                    }
+                                    if (tech.isCrit && who.isStunned) dmg *= 4
+                                    who.damage(dmg, tech.isShieldPierce);
+                                    if (who.alive) who.foundPlayer();
+                                    if (who.damageReduction) {
+                                        simulation.drawList.push({ //add dmg to draw queue
+                                            x: this.position.x,
+                                            y: this.position.y,
+                                            radius: Math.log(dmg + 1.1) * 40 * who.damageReduction + 3,
+                                            color: simulation.playerDmgColor,
+                                            time: simulation.drawTime
+                                        });
+                                    }
                                 }
                             }
                         }
+                    } else if (Matter.Query.collides(this, map).length) { //penetrate walls
+                        if (!this.isInMap) { //turn after entering the map, but only turn once
+                            this.isInMap = true
+                            Matter.Body.setVelocity(this, Vector.rotate(this.velocity, 0.25 * (Math.random() - 0.5)));
+                            Matter.Body.setAngle(this, Math.atan2(this.velocity.y, this.velocity.x))
+                        }
+                        Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(this.velocity, -0.98))) //move back 1/2 your velocity = moving at 1/2 speed
+                    } else if (Matter.Query.collides(this, body).length) { //penetrate blocks
+                        Matter.Body.setAngularVelocity(this, 0)
+                        Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(this.velocity, -0.94))) //move back 1/2 your velocity = moving at 1/2 speed
+                    } else if (this.speed < 30) {
+                        this.force.y += this.mass * 0.001; //no gravity until it slows down to improve aiming
                     }
-                } else if (Matter.Query.collides(this, map).length) { //penetrate walls
-                    if (!this.isInMap) { //turn after entering the map, but only turn once
-                        this.isInMap = true
-                        Matter.Body.setVelocity(this, Vector.rotate(this.velocity, 0.25 * (Math.random() - 0.5)));
-                        Matter.Body.setAngle(this, Math.atan2(this.velocity.y, this.velocity.x))
-                    }
-                    Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(this.velocity, -0.98))) //move back 1/2 your velocity = moving at 1/2 speed
-                } else if (Matter.Query.collides(this, body).length) { //penetrate blocks
-                    Matter.Body.setAngularVelocity(this, 0)
-                    Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(this.velocity, -0.94))) //move back 1/2 your velocity = moving at 1/2 speed
-                } else if (this.speed < 30) {
-                    this.force.y += this.mass * 0.001; //no gravity until it slows down to improve aiming
                 }
             };
         } else {
@@ -3541,7 +3543,25 @@ const b = {
         }
     },
     randomBot(where = player.position, isKeep = true, isLaser = true) {
-        if (Math.random() < 0.166 && isLaser) {
+        if (tech.isNailBotUpgrade) { //check for upgrades first
+            b.nailBot(where, isKeep)
+            if (isKeep) tech.nailBotCount++;
+        } else if (tech.isFoamBotUpgrade) {
+            b.foamBot(where, isKeep)
+            if (isKeep) tech.foamBotCount++;
+        } else if (tech.isBoomBotUpgrade) {
+            b.boomBot(where, isKeep)
+            if (isKeep) tech.boomBotCount++;
+        } else if (tech.isLaserBotUpgrade) {
+            b.laserBot(where, isKeep)
+            if (isKeep) tech.laserBotCount++;
+        } else if (tech.isOrbitBotUpgrade) {
+            b.orbitBot(where, isKeep);
+            if (isKeep) tech.orbitBotCount++;
+        } else if (tech.isDynamoBotUpgrade) {
+            b.dynamoBot(where, isKeep)
+            if (isKeep) tech.dynamoBotCount++;
+        } else if (Math.random() < 0.166 && isLaser) { //random
             b.laserBot(where, isKeep)
             if (isKeep) tech.laserBotCount++;
         } else if (Math.random() < 0.2) {
