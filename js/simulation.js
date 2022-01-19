@@ -21,7 +21,7 @@ const simulation = {
         mobs.draw();
         simulation.draw.cons();
         simulation.draw.body();
-        mobs.loop();
+        if (!m.isBodiesAsleep) mobs.loop();
         mobs.healthBar();
         m.draw();
         m.hold();
@@ -31,7 +31,7 @@ const simulation = {
         b.fire();
         b.bulletRemove();
         b.bulletDraw();
-        b.bulletDo();
+        if (!m.isBodiesAsleep) b.bulletDo();
         simulation.drawCircle();
         // simulation.clip();
         ctx.restore();

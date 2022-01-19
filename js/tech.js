@@ -2005,24 +2005,24 @@ const tech = {
                 tech.isHarmArmor = false;
             }
         },
-        {
-            name: "radiative equilibrium",
-            description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong>",
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                tech.isHarmDamage = true;
-            },
-            remove() {
-                tech.isHarmDamage = false;
-            }
-        },
+        // {
+        //     name: "radiative equilibrium",
+        //     description: "for <strong>10 seconds</strong> after receiving <strong class='color-harm'>harm</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong>",
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 1,
+        //     frequencyDefault: 1,
+        //     allowed() {
+        //         return true
+        //     },
+        //     requires: "",
+        //     effect() {
+        //         tech.isHarmDamage = true;
+        //     },
+        //     remove() {
+        //         tech.isHarmDamage = false;
+        //     }
+        // },
         {
             name: "CPT symmetry",
             description: "<strong>charge</strong>, <strong>parity</strong>, and <strong>time</strong> invert to undo <strong class='color-harm'>harm</strong><br><strong class='color-rewind'>rewind</strong> <strong>(1.5—5)</strong> seconds for <strong>(66—220)</strong> <strong class='color-f'>energy</strong>",
@@ -3414,7 +3414,7 @@ const tech = {
             effect: () => {
                 const have = [] //find which tech you have
                 for (let i = 0; i < tech.tech.length; i++) {
-                    if (tech.tech[i].count > 0) have.push(i)
+                    if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) have.push(i)
                 }
                 const choose = have[Math.floor(Math.random() * have.length)]
                 simulation.makeTextLog(`<span class='color-var'>tech</span>.removeTech("<span class='color-text'>${tech.tech[choose].name}</span>")`)

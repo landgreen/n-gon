@@ -843,7 +843,7 @@ const b = {
             }
             bullet[me].do = function() {
                 const suckCycles = 40
-                if (!m.isBodiesAsleep && simulation.cycle > this.endCycle - suckCycles || Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length) { //suck
+                if (simulation.cycle > this.endCycle - suckCycles || Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length) { //suck
                     const that = this
 
                     function suck(who, radius = that.explodeRad * 3.2) {
@@ -907,7 +907,7 @@ const b = {
                 this.force.y += this.mass * 0.0025; //extra gravity for harder arcs
 
                 const suckCycles = 40
-                if (!m.isBodiesAsleep && simulation.cycle > this.endCycle - suckCycles) { //suck
+                if (simulation.cycle > this.endCycle - suckCycles) { //suck
                     const that = this
 
                     function suck(who, radius = that.explodeRad * 3.2) {
@@ -1071,61 +1071,59 @@ const b = {
             }
             bullet[me].radiationMode = function() { //the do code after the bullet is stuck on something,  projects a damaging radiation field
                 this.stuck(); //runs different code based on what the bullet is stuck to
-                if (!m.isBodiesAsleep) {
-                    this.damageRadius = this.damageRadius * 0.85 + 0.15 * this.maxDamageRadius //smooth radius towards max
-                    this.maxDamageRadius -= this.radiusDecay
-                    if (this.damageRadius < 15) {
-                        this.endCycle = 0;
-                    } else {
-                        //aoe damage to player
-                        if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
-                            const DRAIN = tech.isRadioactiveResistance ? 0.0025 * 0.25 : 0.0025
-                            if (m.energy > DRAIN) {
-                                if (m.immuneCycle < m.cycle) m.energy -= DRAIN
-                            } else {
-                                m.energy = 0;
-                                if (simulation.dmgScale) m.damage(tech.isRadioactiveResistance ? 0.00016 * 0.25 : 0.00016) //0.00015
+                this.damageRadius = this.damageRadius * 0.85 + 0.15 * this.maxDamageRadius //smooth radius towards max
+                this.maxDamageRadius -= this.radiusDecay
+                if (this.damageRadius < 15) {
+                    this.endCycle = 0;
+                } else {
+                    //aoe damage to player
+                    if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
+                        const DRAIN = tech.isRadioactiveResistance ? 0.0025 * 0.25 : 0.0025
+                        if (m.energy > DRAIN) {
+                            if (m.immuneCycle < m.cycle) m.energy -= DRAIN
+                        } else {
+                            m.energy = 0;
+                            if (simulation.dmgScale) m.damage(tech.isRadioactiveResistance ? 0.00016 * 0.25 : 0.00016) //0.00015
+                        }
+                    }
+                    //aoe damage to mobs
+                    for (let i = 0, len = mob.length; i < len; i++) {
+                        if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius + mob[i].radius) {
+                            let dmg = b.dmgScale * 0.11
+                            if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
+                            if (mob[i].shield) dmg *= 3 //to make up for the /5 that shields normally take
+                            mob[i].damage(dmg);
+                            mob[i].locatePlayer();
+                            if (tech.isNeutronSlow) {
+                                Matter.Body.setVelocity(mob[i], {
+                                    x: mob[i].velocity.x * 0.97,
+                                    y: mob[i].velocity.y * 0.97
+                                });
                             }
                         }
-                        //aoe damage to mobs
-                        for (let i = 0, len = mob.length; i < len; i++) {
-                            if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius + mob[i].radius) {
-                                let dmg = b.dmgScale * 0.11
-                                if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
-                                if (mob[i].shield) dmg *= 3 //to make up for the /5 that shields normally take
-                                mob[i].damage(dmg);
-                                mob[i].locatePlayer();
-                                if (tech.isNeutronSlow) {
-                                    Matter.Body.setVelocity(mob[i], {
-                                        x: mob[i].velocity.x * 0.97,
-                                        y: mob[i].velocity.y * 0.97
+                    }
+                    ctx.beginPath();
+                    ctx.arc(this.position.x, this.position.y, this.damageRadius, 0, 2 * Math.PI);
+                    ctx.globalCompositeOperation = "lighter"
+                    ctx.fillStyle = `rgba(25,139,170,${0.2+0.06*Math.random()})`;
+                    ctx.fill();
+                    ctx.globalCompositeOperation = "source-over"
+                    if (tech.isNeutronSlow) {
+
+                        let slow = (who, radius = this.explodeRad * 3.2) => {
+                            for (i = 0, len = who.length; i < len; i++) {
+                                const sub = Vector.sub(this.position, who[i].position);
+                                const dist = Vector.magnitude(sub);
+                                if (dist < radius) {
+                                    Matter.Body.setVelocity(who[i], {
+                                        x: who[i].velocity.x * 0.975,
+                                        y: who[i].velocity.y * 0.975
                                     });
                                 }
                             }
                         }
-                        ctx.beginPath();
-                        ctx.arc(this.position.x, this.position.y, this.damageRadius, 0, 2 * Math.PI);
-                        ctx.globalCompositeOperation = "lighter"
-                        ctx.fillStyle = `rgba(25,139,170,${0.2+0.06*Math.random()})`;
-                        ctx.fill();
-                        ctx.globalCompositeOperation = "source-over"
-                        if (tech.isNeutronSlow) {
-
-                            let slow = (who, radius = this.explodeRad * 3.2) => {
-                                for (i = 0, len = who.length; i < len; i++) {
-                                    const sub = Vector.sub(this.position, who[i].position);
-                                    const dist = Vector.magnitude(sub);
-                                    if (dist < radius) {
-                                        Matter.Body.setVelocity(who[i], {
-                                            x: who[i].velocity.x * 0.975,
-                                            y: who[i].velocity.y * 0.975
-                                        });
-                                    }
-                                }
-                            }
-                            slow(body, this.damageRadius)
-                            slow([player], this.damageRadius)
-                        }
+                        slow(body, this.damageRadius)
+                        slow([player], this.damageRadius)
                     }
                 }
             }

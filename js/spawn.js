@@ -926,7 +926,7 @@ const spawn = {
         }
     },
     cellBoss(x, y, radius = 20, cellID) {
-        mobs.spawn(x + Math.random(), y + Math.random(), 20, radius * (1 + 1.2 * Math.random()), "rgba(0,100,105,0.4)");
+        mobs.spawn(x + Math.random(), y + Math.random(), 20, radius * (1 + 1.2 * Math.random()), "rgba(0,80,125,0.3)");
         let me = mob[mob.length - 1];
         me.stroke = "transparent"
         me.isBoss = true;
@@ -3378,7 +3378,7 @@ const spawn = {
 
         // spawn.shield(me, x, y, 1);
         Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.12 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.isBoss = true;
         me.onDamage = function() {};
         me.onDeath = function() {

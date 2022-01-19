@@ -1,35 +1,40 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new boss: slashBoss - same as slash mob, but it's get invulnerability of course
+exit door has a 1 second delay and animation
 
-if you have upgraded bots then random bot will that type
-being inside slime reduces gravity by 50% through buoyancy
-difficulty increase for mobs harm is 2% lower per level
-boson composite no longer lets you pass through elevators and rotors
+reservoir map now has a flipped horizontal chance
+map ruins renamed -> pavilion
 
-NAND gate damage 50 -> 55.5%
+all the individual !m.isBodiesAsleep are replaced with ones in the main game loop
+  this needs extensive bug testing?
+    should behave similarly to testing mode, which doesn't have issues
+  todo remove the checks from bullets and mobs, do this after update so it can be easy to revert
+
+bug fixes
 
 ******************************************************** TODO ********************************************************
 
-if you have upgraded bots then random bot will that type
-  might have to nerf upgraded bots in the future, but let's try it out
+mobs that are given the players location at the start can get confused if the map is reversed
+  suckers
+
+can mob bullets damage other mob?
+  maybe if they switch collisions and classType === "body" or obj.classType === "bullet"
+
+grenade gun seems weak
+
+path finding system
+
+figure out how to get friction effects on map/body to apply to player
+
+vertical reversed version of reservoir level, start at top and press buttons to lower slime
+
+growBoss and cellBoss are too similar
+
+might have to nerf upgraded bots
 
 variant of Occam's razor - remove 50% of your tech for each removed get:
   2 bots?
   50 energy max
-
-animate going to next level?
-  door fills in with color that climbs up vertically through the door graphic the longer you stand on door
-  hold crouch on door? or automatically
-
-make ship mode more playable and a fun option for people with trackpads
-joystick support?
-
-make a new boss with similar movement to powerUpBossBaby
-  bossBaby power up boss has really smart movement
-  like slasher mob since it's kinda the best mob
-
-reversed version of reservoir level, start at top and press buttons to lower slime
 
 tech immune to harm after mob kill
   require no other mob kill tech?
@@ -40,7 +45,7 @@ final boss invulnerability
   in between phases
   for all of one phase
 
-JUNK tech - do something to the mob display health method
+JUNK tech - do something fun to the mob display health method
 
 new platform element, spring
   toggle to on when player touches platform    
