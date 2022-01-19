@@ -1,16 +1,7 @@
 ******************************************************** NEXT PATCH **************************************************
 
-exit door has a 1 second delay and animation
-
-reservoir map now has a flipped horizontal chance
-map ruins renamed -> pavilion
-
-all the individual !m.isBodiesAsleep are replaced with ones in the main game loop
-  this needs extensive bug testing?
-    should behave similarly to testing mode, which doesn't have issues
-  todo remove the checks from bullets and mobs, do this after update so it can be easy to revert
-
-bug fixes
+removed about 80 !m.isBodiesAsleep
+  this could cause some bugs for bullets or mobs when time is dilated
 
 ******************************************************** TODO ********************************************************
 

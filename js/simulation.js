@@ -14,14 +14,16 @@ const simulation = {
         }
         m.move();
         m.look();
-        simulation.checks();
         simulation.camera();
         level.custom();
         powerUps.do();
         mobs.draw();
         simulation.draw.cons();
         simulation.draw.body();
-        if (!m.isBodiesAsleep) mobs.loop();
+        if (!m.isBodiesAsleep) {
+            simulation.checks();
+            mobs.loop();
+        }
         mobs.healthBar();
         m.draw();
         m.hold();
@@ -873,7 +875,7 @@ const simulation = {
     //   }
     // },
     checks() {
-        if (!(simulation.cycle % 60) && !m.isBodiesAsleep) { //once a second
+        if (!(simulation.cycle % 60)) { //once a second
             //energy overfill 
             if (m.energy > m.maxEnergy) m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
             if (tech.isFlipFlopEnergy && m.immuneCycle < m.cycle) {
