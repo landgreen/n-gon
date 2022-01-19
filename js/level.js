@@ -31,7 +31,7 @@ const level = {
             // tech.tech[297].frequency = 100
 
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.reservoir();
+            // level.vats();
             // level.testing(); //not in rotation, used for testing
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); }
@@ -7506,7 +7506,6 @@ const level = {
 
             ctx.fillStyle = "#d4f4f4"
             ctx.fillRect(3500, 675, 600, 450)
-            level.exit.draw()
             level.enter.draw()
         }
 
