@@ -352,7 +352,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         //update tech text //disable not allowed tech
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             const techID = document.getElementById("tech-" + i)
-            if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
+            if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode || (localSettings.isJunkExperiment && tech.tech[i].isJunk))) {
                 if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
                     // console.log(tech.tech[i].name, isAllowed, tech.tech[i].count, tech.haveGunCheck("nail gun"))
                     const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
@@ -456,10 +456,12 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             text += `<div id = "gun-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div> ${b.guns[i].description}</div>`
         }
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (!tech.tech[i].isExperimentHide) { //&& (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
-                if (tech.tech[i].allowed() && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
+            if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isJunk || localSettings.isJunkExperiment)) { //&& (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
+                if (tech.tech[i].allowed() && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode || localSettings.isJunkExperiment)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
                     if (tech.tech[i].isExperimentalMode) {
                         text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title">${tech.tech[i].name}</div> ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+                    } else if (tech.tech[i].isJunk) {
+                        text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].link}</div> ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
                     } else {
                         text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link}</div> ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
                     }
@@ -633,16 +635,16 @@ function openExperimentMenu() {
 
 //record settings so they can be reproduced in the experimental menu
 document.getElementById("experiment-button").addEventListener("click", () => { //setup build run
-    let field = 0;
-    let inventory = [];
-    let techList = [];
-    if (!simulation.firstRun) {
-        field = m.fieldMode
-        inventory = [...b.inventory]
-        for (let i = 0; i < tech.tech.length; i++) {
-            techList.push(tech.tech[i].count)
-        }
-    }
+    // let field = 0;
+    // let inventory = [];
+    // let techList = [];
+    // if (!simulation.firstRun) {
+    //     field = m.fieldMode
+    //     inventory = [...b.inventory]
+    //     for (let i = 0; i < tech.tech.length; i++) {
+    //         techList.push(tech.tech[i].count)
+    //     }
+    // }
     openExperimentMenu();
 });
 
@@ -1154,6 +1156,7 @@ if (localSettings) {
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
 } else {
     localSettings = {
+        isJunkExperiment: false,
         isCommunityMaps: false,
         difficultyMode: '2',
         fpsCapDefault: 'max',

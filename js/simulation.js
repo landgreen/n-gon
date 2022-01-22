@@ -513,8 +513,10 @@ const simulation = {
                 bodies[i].force.y += bodies[i].mass * magnitude;
             }
         }
-        addGravity(powerUp, simulation.g);
-        addGravity(body, simulation.g);
+        if (!m.isBodiesAsleep) {
+            addGravity(powerUp, simulation.g);
+            addGravity(body, simulation.g);
+        }
         player.force.y += player.mass * simulation.g;
     },
     firstRun: true,

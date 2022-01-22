@@ -1,15 +1,28 @@
 ******************************************************** NEXT PATCH **************************************************
 
+JUNK tech: tinker - unlock JUNK tech in experiment mode
+  this effect is stored for future visits on the same browser
+several JUNK tech text have been cleaned up
+
+your explosions do 8% more damage, but not more harm
+grenade gun fires 5% faster
+ruins/pavilion map is adjusted to be a bit easier to move around
+crouching speeds up exit door animation
+
+removed google analytics
+bug fix with power ups and frozen time
+bug fix with elevators and map collision
 
 ******************************************************** TODO ********************************************************
 
-mobs that are given the players location at the start can get confused if the map is reversed
-  suckers
+add anticipation to more mob attacks
+  stabber
+  striker
+
+boss that fires giant bullets, that bounce around and chases you
 
 can mob bullets damage other mob?
   maybe if they switch collisions and classType === "body" or obj.classType === "bullet"
-
-grenade gun seems weak
 
 path finding system
 
@@ -18,8 +31,6 @@ figure out how to get friction effects on map/body to apply to player
 vertical reversed version of reservoir level, start at top and press buttons to lower slime
 
 growBoss and cellBoss are too similar
-
-might have to nerf upgraded bots
 
 variant of Occam's razor - remove 50% of your tech for each removed get:
   2 bots?

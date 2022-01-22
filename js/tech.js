@@ -605,7 +605,7 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return build.isExperimentSelection
+                return true
             },
             requires: "",
             effect() {
@@ -7323,7 +7323,6 @@ const tech = {
         //     count: 0,
         //     frequency: 0,
         //     isNonRefundable: true,
-        //     isExperimentHide: true,
         //     isJunk: true,
         //     allowed() {
         //         return true
@@ -7335,13 +7334,31 @@ const tech = {
         //     remove() {}
         // },
         {
+            name: "tinker",
+            description: "<strong>permanently</strong> unlock <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> in experiment mode<br><em>this effect is stored for future visits</em>",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            frequencyDefault: 0,
+            isJunk: true,
+            isNonRefundable: true,
+            allowed() {
+                return !localSettings.isJunkExperiment
+            },
+            requires: "",
+            effect() {
+                localSettings.isJunkExperiment = true
+                localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            },
+            remove() {}
+        },
+        {
             name: "brainstorm",
             description: "the <strong class='color-m'>tech</strong> choice menu <strong>randomizes</strong><br>every <strong>0.5</strong> seconds for <strong>10</strong> seconds",
             maxCount: 1,
             count: 0,
             frequency: 0,
             frequencyDefault: 0,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return true
@@ -7364,7 +7381,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return !tech.isFallingDamage && !tech.isOverHeal && !tech.isEnergyHealth },
             requires: "not quenching, tungsten carbide, mass-energy",
@@ -7378,12 +7394,11 @@ const tech = {
         },
         {
             name: "density",
-            description: `<strong class='color-block'>block</strong> are <strong>10</strong> times less <strong>dense</strong>`,
+            description: `<strong class='color-block'>blocks</strong> are <strong>10</strong> times less <strong>dense</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -7419,7 +7434,6 @@ const tech = {
             count: 0,
             frequency: 0,
             // isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -7449,7 +7463,6 @@ const tech = {
             count: 0,
             frequency: 0,
             // isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -7476,12 +7489,11 @@ const tech = {
         },
         {
             name: "planetesimals",
-            description: `play <strong>planetesimals</strong><br><em>(an annoying asteroids game with Newtonian physics)</em><br>clearing a <strong>level</strong> in <strong>planetesimals</strong> spawns a <strong class='color-m'>tech</strong> in <strong>n-gon</strong><br>but, if you <strong style="color:red;">die</strong> in <strong>planetesimals</strong> you <strong style="color:red;">die</strong> in <strong>n-gon</strong>`,
+            description: `play <strong>planetesimals</strong> <em style = 'font-size:80%;'>(an asteroids-like game)</em><br>clear <strong>levels</strong> in <strong>planetesimals</strong> to spawn <strong class='color-m'>tech</strong><br>if you <strong style="color:red;">die</strong> in <strong>planetesimals</strong> you <strong style="color:red;">die</strong> in <strong>n-gon</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -7515,7 +7527,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -7530,7 +7541,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -7547,7 +7557,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -7564,7 +7573,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -7609,7 +7617,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -7669,7 +7676,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -7743,7 +7749,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isJunk: true,
             isNonRefundable: true,
             allowed() { return true },
@@ -7838,7 +7843,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return !tech.isFireMoveLock
@@ -7862,7 +7866,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return !tech.isEnergyHealth
@@ -7877,12 +7880,11 @@ const tech = {
         },
         {
             name: "not a bug",
-            description: "initiate a totally safe game crash for 5 seconds",
+            description: "initiate a totally safe game crash for 10 seconds",
             maxCount: 1,
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -7894,7 +7896,7 @@ const tech = {
                 setTimeout(() => {
                     simulation.drawCircle = savedfunction
                     canvas.width = canvas.width //clears the canvas // works on chrome at least
-                }, 5000);
+                }, 10000);
 
                 // for (;;) {} //freezes the tab
             },
@@ -7906,7 +7908,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return !m.isShipMode
@@ -7925,7 +7926,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isJunk: true,
             isNonRefundable: true,
             allowed() {
@@ -7946,7 +7946,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isNonRefundable: true,
             isJunk: true,
             allowed() {
@@ -7976,7 +7975,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isNonRefundable: true,
             isJunk: true,
             allowed() {
@@ -7996,7 +7994,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isNonRefundable: true,
             isJunk: true,
             allowed() { return true },
@@ -8039,11 +8036,10 @@ const tech = {
         // },
         {
             name: "Fourier analysis",
-            description: "your aiming is now controlled by this equation:<br>2sin(0.0133t) + sin(0.013t) + 0.5sin(0.031t)+ 0.33sin(0.03t)",
+            description: "your aiming is now controlled by this equation:<br><span style = 'font-size:80%;'>2sin(0.0133t) + sin(0.013t) + 0.5sin(0.031t)+ 0.33sin(0.03t)</span>",
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return !m.isShipMode
@@ -8071,7 +8067,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return b.inventory.length > 0
@@ -8091,7 +8086,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8121,7 +8115,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8150,7 +8143,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8166,7 +8158,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8185,7 +8176,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8204,7 +8194,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8222,7 +8211,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8238,7 +8226,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8269,7 +8256,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8292,7 +8278,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8310,7 +8295,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return !m.isShipMode && m.fieldUpgrades[m.fieldMode].name !== "negative mass"
@@ -8350,7 +8334,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8366,7 +8349,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8383,7 +8365,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return m.fieldUpgrades[m.fieldMode].name !== "negative mass"
@@ -8396,19 +8377,34 @@ const tech = {
         },
         {
             name: "rewind",
-            description: "every 5 seconds <strong class='color-rewind'>rewind</strong> <strong>2</strong> seconds<br>lasts 120 seconds",
+            description: "every 10 seconds <strong class='color-rewind'>rewind</strong> <strong>2</strong> seconds",
             maxCount: 9,
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
             effect() {
-                for (let i = 0; i < 24; i++) {
-                    setTimeout(() => { m.rewind(120) }, i * 5000);
-                }
+                setInterval(() => { m.rewind(120) }, 10000);
+                // for (let i = 0; i < 24; i++) {
+                //     setTimeout(() => { m.rewind(120) }, i * 5000);
+                // }
+            },
+            remove() {}
+        },
+        {
+            name: "undo",
+            description: "every 4 seconds <strong class='color-rewind'>rewind</strong> <strong>1/2</strong> a second",
+            maxCount: 9,
+            count: 0,
+            frequency: 0,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                setInterval(() => { m.rewind(30) }, 4000);
             },
             remove() {}
         },
@@ -8419,7 +8415,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8447,7 +8442,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8463,7 +8457,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8480,7 +8473,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8499,17 +8491,16 @@ const tech = {
         },
         {
             name: "missile Launching System",
-            description: "fire missiles for the next 60 seconds",
+            description: "fire missiles for the next 120 seconds",
             maxCount: 9,
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
             effect() {
-                for (let i = 0; i < 60; i++) {
+                for (let i = 0; i < 120; i++) {
                     setTimeout(() => {
                         const where = {
                             x: m.pos.x,
@@ -8523,26 +8514,23 @@ const tech = {
         },
         {
             name: "grenade production",
-            description: "drop grenades for the next 120 seconds",
+            description: "drop a grenade every 2 seconds",
             maxCount: 9,
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
             effect() {
-                for (let i = 0; i < 120; i++) {
-                    setTimeout(() => {
-                        b.grenade(Vector.add(m.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -Math.PI / 2) //fire different angles for each grenade
-                        const who = bullet[bullet.length - 1]
-                        Matter.Body.setVelocity(who, {
-                            x: who.velocity.x * 0.1,
-                            y: who.velocity.y * 0.1
-                        });
-                    }, i * 1000);
-                }
+                setInterval(() => {
+                    b.grenade(Vector.add(m.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -Math.PI / 2) //fire different angles for each grenade
+                    const who = bullet[bullet.length - 1]
+                    Matter.Body.setVelocity(who, {
+                        x: who.velocity.x * 0.1,
+                        y: who.velocity.y * 0.1
+                    });
+                }, 2000);
             },
             remove() {}
         },
@@ -8577,7 +8565,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return !m.isShipMode
@@ -8623,7 +8610,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return !m.isShipMode
@@ -8664,7 +8650,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return !m.isShipMode
@@ -8733,7 +8718,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8758,7 +8742,6 @@ const tech = {
             frequency: 0,
             isBotTech: true,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return b.totalBots() > 2
@@ -8816,7 +8799,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8832,7 +8814,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",
@@ -8848,7 +8829,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return b.inventory.length > 0
@@ -8876,7 +8856,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return powerUps.research.count > 3
@@ -8898,7 +8877,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() {
                 return powerUps.research.count > 3
@@ -8919,7 +8897,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isNonRefundable: true,
-            isExperimentHide: true,
             isJunk: true,
             allowed() { return true },
             requires: "",

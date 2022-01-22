@@ -553,6 +553,7 @@ const m = {
                 }
             }
         }
+
         let history = m.history[(m.cycle - steps) % 600]
         Matter.Body.setPosition(player, history.position);
         Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
@@ -598,6 +599,7 @@ const m = {
                 if (isDrawPlayer) {
                     isDrawPlayer = false
                     ctx.save();
+                    ctx.globalCompositeOperation = "lighter";
                     ctx.translate(canvas.width2, canvas.height2); //center
                     ctx.scale(simulation.zoom / simulation.edgeZoomOutSmooth, simulation.zoom / simulation.edgeZoomOutSmooth); //zoom in once centered
                     ctx.translate(-canvas.width2 + m.transX, -canvas.height2 + m.transY); //translate

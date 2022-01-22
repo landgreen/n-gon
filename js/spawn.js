@@ -1301,7 +1301,48 @@ const spawn = {
             }
             for (let i = 0; i < powerUp.length; i++) powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
         };
+
+        //steal all power ups
+        // for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
+        //     powerUp[i].collisionFilter.mask = 0
+        //     Matter.Body.setPosition(powerUp[i], this.vertices[i])
+        //     Matter.Body.setVelocity(powerUp[i], {
+        //         x: 0,
+        //         y: 0
+        //     })
+        // }
+        // me.powerUpList = []
+        // me.constrainPowerUps = function() {
+        //     for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
+        //         //remove other constraints on power up
+        //         for (let i = 0, len = cons.length; i < len; ++i) {
+        //             if (cons[i].bodyB === powerUp[i] || cons[i].bodyA === powerUp[i]) {
+        //                 Matter.Composite.remove(engine.world, cons[i]);
+        //                 cons.splice(i, 1);
+        //                 break;
+        //             }
+        //         }
+
+        //         //add to list
+        //         this.powerUpList.push(powerUp[i])
+        //         //position and stop
+        //         powerUp[i].collisionFilter.mask = 0
+        //         Matter.Body.setPosition(powerUp[i], this.vertices[i])
+        //         Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 })
+        //         //add constraint
+        //         cons[cons.length] = Constraint.create({
+        //             pointA: this.vertices[i],
+        //             bodyB: powerUp[i],
+        //             stiffness: 1,
+        //             damping: 1
+        //         });
+        //         Composite.add(engine.world, cons[cons.length - 1]);
+        //     }
+        //     for (let i = 0; i < this.powerUpList.length; i++) {}
+        // }
+        // me.constrainPowerUps()
         me.do = function() {
+            this.stroke = `hsl(0,0%,${80 + 25 * Math.sin(simulation.cycle * 0.01)}%)`
             // if (this.isInvulnerable) {
             //     if (this.invulnerabilityCountDown > 0) {
             //         this.invulnerabilityCountDown--
@@ -1318,16 +1359,19 @@ const spawn = {
             //         this.damageReduction = this.startingDamageReduction
             //     }
             // }
-            this.stroke = `hsl(0,0%,${80 + 25 * Math.sin(simulation.cycle * 0.01)}%)`
             //steal all power ups
+            // for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
+            //     powerUp[i].collisionFilter.mask = 0
+            //     Matter.Body.setPosition(powerUp[i], this.vertices[i])
+            //     Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 })
+            // }
+
             for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
                 powerUp[i].collisionFilter.mask = 0
                 Matter.Body.setPosition(powerUp[i], this.vertices[i])
-                Matter.Body.setVelocity(powerUp[i], {
-                    x: 0,
-                    y: 0
-                })
+                Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 })
             }
+
             this.seePlayerCheckByDistance();
             this.attraction();
             this.checkStatus();
@@ -1624,25 +1668,16 @@ const spawn = {
                 });
             }
             this.seePlayerCheckByDistance()
-            // if (!(simulation.cycle % this.seePlayerFreq)) {
-            //     if (this.distanceToPlayer2() < this.seeAtDistance2) { //   ignore cloak for black holes
-            //         this.locatePlayer();
-            //         if (!this.seePlayer.yes) this.seePlayer.yes = true;
-            //     } else if (this.seePlayer.recall) {
-            //         this.lostPlayer();
-            //     }
-            // }
             this.checkStatus();
-            // if (this.seePlayer.recall) {
+            //accelerate towards the player
+            if (this.seePlayer.recall) {
+                const forceMag = this.accelMag * this.mass;
+                const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                this.force.x += forceMag * Math.cos(angle);
+                this.force.y += forceMag * Math.sin(angle);
+            }
             //eventHorizon waves in and out
             const eventHorizon = this.eventHorizon * (0.93 + 0.17 * Math.sin(simulation.cycle * 0.011))
-
-            //accelerate towards the player
-            const forceMag = this.accelMag * this.mass;
-            const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
-            this.force.x += forceMag * Math.cos(angle);
-            this.force.y += forceMag * Math.sin(angle);
-
             //draw darkness
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, eventHorizon * 0.25, 0, 2 * Math.PI);
@@ -1678,7 +1713,6 @@ const spawn = {
                 ctx.fillStyle = "rgba(0,0,0,0.3)";
                 ctx.fill();
             }
-            // }
         }
     },
     suckerBoss(x, y, radius = 25) {

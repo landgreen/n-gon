@@ -20,7 +20,7 @@ const level = {
             // m.setField("time dilation")
             // b.giveGuns("harpoon")
             // for (let i = 0; i < 9; i++) tech.giveTech("slow light")
-            // tech.giveTech("boson composite")
+            // tech.giveTech("grenade production")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // tech.giveTech("charmed baryons")
             // tech.giveTech("tinsellated flagella")
@@ -31,7 +31,7 @@ const level = {
             // tech.tech[297].frequency = 100
 
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.vats();
+            // level.pavilion();
             // level.testing(); //not in rotation, used for testing
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); }
@@ -321,7 +321,7 @@ const level = {
                 player.position.y < level.exit.y - 40 &&
                 player.velocity.y < 0.1
             ) {
-                level.exitCount += 2
+                level.exitCount += input.down ? 8 : 2
             } else if (level.exitCount > 0) {
                 level.exitCount -= 2
             }
@@ -484,7 +484,7 @@ const level = {
         const who = body[body.length] = Bodies.rectangle(x, isAtTop ? maxHeight : y, width, height, {
             collisionFilter: {
                 category: cat.map,
-                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                mask: cat.map | cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
             },
             isNoSetCollision: true,
             inertia: Infinity, //prevents rotation
@@ -2557,7 +2557,7 @@ const level = {
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
-        // spawn.powerUpBoss(3200, -500)
+        spawn.powerUpBoss(1900, -500)
         // spawn.powerUpBossBaby(3200, -500)
         // spawn.snakeBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
@@ -2575,7 +2575,7 @@ const level = {
         // spawn.tetherBoss(1700, -500) //go to actual level?
         // spawn.revolutionBoss(1900, -500)
         // spawn.bomberBoss(1400, -500)
-        spawn.cellBossCulture(1600, -500)
+        // spawn.cellBossCulture(1600, -500)
         // spawn.shieldingBoss(1700, -500)
 
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
@@ -3298,25 +3298,30 @@ const level = {
         //bottom floor
         //entrance
         spawn.mapRect(-200, -750, 1500, 100);
-        spawn.mapRect(-575, 0, 3275, 500);
-        spawn.mapRect(-1275, 275, 875, 225);
+        spawn.mapRect(-575, 0, 2150, 500);
+        // spawn.mapRect(-1275, 275, 875, 225);
+        spawn.mapRect(-1275, 275, 3975, 225);
         spawn.mapRect(-1050, 0, 325, 50);
         spawn.mapRect(-775, 0, 50, 140);
         vanish.push(level.vanish(-725, 13, 150, 25))
-
-        spawn.mapRect(-200, -750, 100, 648);
-        spawn.mapRect(1200, -750, 100, 648);
+        spawn.mapRect(-200, -750, 100, 600);
+        // spawn.mapRect(1200, -750, 100, 600);
         vanish.push(level.vanish(-350, -225, 150, 225))
         vanish.push(level.vanish(-350, -450, 150, 223))
         spawn.mapRect(2475, -1800, 250, 2300);
-        vanish.push(level.vanish(1300, -225, 150, 225))
-        vanish.push(level.vanish(1300, -450, 150, 223))
-        powerUps.spawnStartingPowerUps(550, -100);
+        // vanish.push(level.vanish(1300, -375, 150, 225))
+        // vanish.push(level.vanish(1300, -450, 150, 223))
+        // spawn.mapRect(1200, -375, 250, 50);
 
+        // spawn.mapRect(1200, -375, 250, 225);
+        // spawn.mapRect(1200, -375, 175, 25);
+        spawn.mapRect(1200, -750, 100, 450);
+        spawn.mapRect(1200, -375, 250, 75);
+        powerUps.spawnStartingPowerUps(550, -100);
         spawn.mapRect(125, -12, 850, 50);
         spawn.mapRect(175, -25, 750, 50);
-
-
+        spawn.bodyRect(1350, -175, 150, 175, 0.5);
+        spawn.bodyRect(1350, -600, 125, 225, 0.2);
         //entrance
         // vanish.push(level.vanish(-300, -500, 100, 25))
         // vanish.push(level.vanish(-450, -200, 100, 25))
@@ -3334,14 +3339,20 @@ const level = {
             spawn.mapRect(500, -1350, 525, 497);
             spawn.mapRect(25, -1050, 300, 150);
         }
-        vanish.push(level.vanish(550, -1575, 50, 225))
-        vanish.push(level.vanish(925, -1575, 50, 225))
+        if (Math.random() < 0.5) {
+            vanish.push(level.vanish(400, -1600, 175, 25))
+            vanish.push(level.vanish(950, -1600, 175, 25))
+        } else {
+            vanish.push(level.vanish(550, -1575, 50, 225))
+            vanish.push(level.vanish(925, -1575, 50, 225))
+        }
+
         // vanish.push(level.vanish(575, -1575, 375, 225))
 
         spawn.bodyRect(225, -850, 50, 100, 0.4);
         spawn.mapRect(600, -1800, 325, 225);
         spawn.mapRect(1900, -1500, 325, 25);
-        spawn.bodyRect(1000, -1825, 250, 20, 0.2);
+        spawn.bodyRect(1050, -1825, 250, 20, 0.2);
         if (Math.random() < 0.5) {
             vanish.push(level.vanish(1400, -1000, 200, 25))
             vanish.push(level.vanish(1625, -1250, 200, 25))
@@ -3349,9 +3360,10 @@ const level = {
             vanish.push(level.vanish(1400, -1075, 175, 175))
             vanish.push(level.vanish(1575, -1250, 175, 175))
         }
-        vanish.push(level.vanish(1100, -1800, 225, 25))
-        vanish.push(level.vanish(1500, -1800, 225, 25))
-        vanish.push(level.vanish(-50, -1800, 400, 25))
+        vanish.push(level.vanish(1125, -1800, 625, 25))
+
+        // vanish.push(level.vanish(1500, -1800, 225, 25))
+        vanish.push(level.vanish(-50, -1800, 450, 25))
 
         //exit
         spawn.mapRect(-1050, -1450, 700, 25);
@@ -3384,7 +3396,7 @@ const level = {
                 ctx.fillStyle = "#d0d3d9"
                 ctx.fillRect(-2500, -1800, 3575, 2100);
                 ctx.fillStyle = "#c0c3c9"
-                ctx.fillRect(-2075, -1475, 25, 1500);
+                ctx.fillRect(-2075, -1475, 25, 1800);
                 ctx.fillStyle = "#cff" //exit
                 ctx.fillRect(550, -1800, 525, 350)
 
@@ -3394,6 +3406,7 @@ const level = {
             level.customTopLayer = () => {
                 //shadow
                 ctx.fillStyle = "rgba(0,10,30,0.1)"
+                ctx.fillRect(-1450, -300, 150, 325);
                 ctx.fillRect(-1300, -650, 1500, 650)
                 ctx.fillRect(725, 50, 325, 225)
                 ctx.fillRect(-325, -950, 300, 225)
@@ -3407,7 +3420,7 @@ const level = {
                 ctx.fillStyle = "#d0d3d9"
                 ctx.fillRect(-1075, -1800, 3575, 2100);
                 ctx.fillStyle = "#c0c3c9"
-                ctx.fillRect(2050, -1475, 25, 1500);
+                ctx.fillRect(2050, -1475, 25, 1800);
                 ctx.fillStyle = "#cff" //exit
                 ctx.fillRect(-1050, -1800, 525, 350)
 
@@ -3417,6 +3430,7 @@ const level = {
             level.customTopLayer = () => {
                 //shadow
                 ctx.fillStyle = "rgba(0,10,30,0.1)"
+                ctx.fillRect(1300, -300, 150, 325);
                 ctx.fillRect(-200, -675, 1500, 700)
                 ctx.fillRect(500, -950, 525, 225);
                 ctx.fillRect(600, -1600, 325, 275);
