@@ -1154,7 +1154,17 @@ const mobs = {
                     }
                     if (tech.isBotSpawnerReset) {
                         for (let i = 0, len = bullet.length; i < len; i++) {
-                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 840 //14 seconds
+                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) {
+                                bullet[i].endCycle = simulation.cycle + 840 //14 seconds
+                                // //draw a flash on top of bot
+                                // ctx.beginPath();
+                                // const v = bullet[i].vertices;
+                                // ctx.moveTo(v[0].x, v[0].y);
+                                // for (let i = 1; i < v.length; ++i) ctx.lineTo(v[i].x, v[i].y);
+                                // ctx.lineTo(v[0].x, v[0].y);
+                                // ctx.fillStyle = "#fff"
+                                // ctx.fill();
+                            }
                         }
                     }
                     if (Math.random() < tech.botSpawner) {

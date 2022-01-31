@@ -795,7 +795,7 @@ const tech = {
         },
         {
             name: "heuristics",
-            description: "<strong>30%</strong> decreased <strong><em>delay</em></strong> after firing",
+            description: "<strong>33%</strong> decreased <strong><em>delay</em></strong> after firing",
             maxCount: 9,
             count: 0,
             frequency: 1,
@@ -803,7 +803,7 @@ const tech = {
             allowed() { return true },
             requires: "",
             effect() {
-                tech.fireRate *= 0.7
+                tech.fireRate *= 0.67
                 b.setFireCD();
             },
             remove() {
@@ -4671,7 +4671,7 @@ const tech = {
         },
         {
             name: "ammonium nitrate",
-            description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>30%</strong><br>increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>30%</strong>",
+            description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>27%</strong><br>increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>27%</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -4682,7 +4682,7 @@ const tech = {
             },
             requires: "an explosive damage source, not iridium-192",
             effect: () => {
-                tech.explosiveRadius += 0.3;
+                tech.explosiveRadius += 0.27;
             },
             remove() {
                 tech.explosiveRadius = 1;
@@ -5955,7 +5955,7 @@ const tech = {
         },
         {
             name: "spherical harmonics",
-            description: "<strong>standing wave</strong> oscillates in a 3rd dimension<br>increasing <strong>deflecting</strong> efficiency by <strong>40%</strong>",
+            description: "<strong>standing wave</strong> oscillates in a 3rd dimension<br>increase <strong>deflecting</strong> efficiency by <strong>40%</strong>",
             isFieldTech: true,
             maxCount: 9,
             count: 0,
@@ -5967,18 +5967,18 @@ const tech = {
             requires: "standing wave",
             effect() {
                 tech.harmonics++
-                m.fieldShieldingScale = 1.3 * Math.pow(0.6, (tech.harmonics - 2))
+                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 1.1 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
                 m.harmonicShield = m.harmonicAtomic
             },
             remove() {
                 tech.harmonics = 2
-                m.fieldShieldingScale = 1.3 * Math.pow(0.6, (tech.harmonics - 2))
+                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 1.1 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
                 m.harmonicShield = m.harmonic3Phase
             }
         },
         {
             name: "expansion",
-            description: "using <strong>standing wave</strong> field<br>temporarily <strong>expands</strong> its <strong>radius</strong>",
+            description: "using <strong>standing wave</strong> field <strong>expands</strong> its <strong>radius</strong><br>increase <strong>deflecting</strong> efficiency by <strong>25%</strong>",
             // description: "use <strong class='color-f'>energy</strong> to <strong>expand</strong> <strong>standing wave</strong><br>the field slowly <strong>contracts</strong> when not used",
             isFieldTech: true,
             maxCount: 1,
@@ -5991,9 +5991,11 @@ const tech = {
             requires: "standing wave",
             effect() {
                 tech.isStandingWaveExpand = true
+                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 1.1 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
             },
             remove() {
                 tech.isStandingWaveExpand = false
+                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 1.1 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
                 m.harmonicRadius = 1
             }
         },
@@ -8468,7 +8470,7 @@ const tech = {
         },
         {
             name: "energy investment",
-            description: "every 10 seconds drain your <strong class='color-f'>energy</strong><br>return it doubled 10 seconds later<br>lasts 180 seconds",
+            description: "every 10 seconds drain your <strong class='color-f'>energy</strong><br>return it doubled 5 seconds later",
             maxCount: 9,
             count: 0,
             frequency: 0,
@@ -8477,20 +8479,20 @@ const tech = {
             allowed() { return true },
             requires: "",
             effect() {
-                for (let i = 0; i < 18; i++) {
-                    setTimeout(() => { //drain energy
+                setInterval(() => {
+                    if (!simulation.paused) {
                         const energy = m.energy
                         m.energy = 0
                         setTimeout(() => { //return energy
                             m.energy += 2 * energy
                         }, 5000);
-                    }, i * 10000);
-                }
+                    }
+                }, 10000);
             },
             remove() {}
         },
         {
-            name: "missile Launching System",
+            name: "missile launching system",
             description: "fire missiles for the next 120 seconds",
             maxCount: 9,
             count: 0,
@@ -8524,12 +8526,14 @@ const tech = {
             requires: "",
             effect() {
                 setInterval(() => {
-                    b.grenade(Vector.add(m.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -Math.PI / 2) //fire different angles for each grenade
-                    const who = bullet[bullet.length - 1]
-                    Matter.Body.setVelocity(who, {
-                        x: who.velocity.x * 0.1,
-                        y: who.velocity.y * 0.1
-                    });
+                    if (!simulation.paused && document.visibilityState !== "hidden") {
+                        b.grenade(Vector.add(m.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -Math.PI / 2) //fire different angles for each grenade
+                        const who = bullet[bullet.length - 1]
+                        Matter.Body.setVelocity(who, {
+                            x: who.velocity.x * 0.1,
+                            y: who.velocity.y * 0.1
+                        });
+                    }
                 }, 2000);
             },
             remove() {}

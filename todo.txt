@@ -1,19 +1,45 @@
 ******************************************************** NEXT PATCH **************************************************
 
-JUNK tech: tinker - unlock JUNK tech in experiment mode
-  this effect is stored for future visits on the same browser
-several JUNK tech text have been cleaned up
+new level: reactor - midBoss fight
+  it's not well balanced yet
+  Let me know if there are any impossible gun combinations
 
-your explosions do 8% more damage, but not more harm
-grenade gun fires 5% faster
-ruins/pavilion map is adjusted to be a bit easier to move around
-crouching speeds up exit door animation
+for new players the training button at the start screen now cycles colors
+  effect shows if you haven't cleared the first training level, and you haven't done at least a few normal runs
 
-removed google analytics
-bug fix with power ups and frozen time
-bug fix with elevators and map collision
+standing wave expansion tech is 40% larger and gives 25% deflecting efficiency
+ammonium nitrate gives 30 -> 27% damage and range
+heuristics gives 30 -> 33% fire rate
+wormhole invariant tech drains energy much slower while time is paused
+
+bug fixes
+  null level now longer progresses level.onLevel
 
 ******************************************************** TODO ********************************************************
+
+reactor
+  give map some background graphics
+  it's a little short
+    add alternate boss
+    add a boss that spawns after the first one dies
+  balance
+    boss damage reduction
+    bullet size
+    bullet spawn number
+    bounce speed
+  add horizontal flip mode
+
+bug:  possibly clearing away all bullets causes a problem
+  bullet.js 255  (.do() is missing)
+  I died and quantum immortality triggered (I had needles and ice-IX)
+  game crashed but recovered
+
+go non-collide with mobs when immune to damage?
+
+mobs that are invulnerable from the front
+
+vertical reversed version of reservoir level, start at top and press buttons to lower slime
+  mechanic: push a very large block into slime in order to stand on it and avoid slime
 
 add anticipation to more mob attacks
   stabber
@@ -27,8 +53,6 @@ can mob bullets damage other mob?
 path finding system
 
 figure out how to get friction effects on map/body to apply to player
-
-vertical reversed version of reservoir level, start at top and press buttons to lower slime
 
 growBoss and cellBoss are too similar
 
@@ -540,6 +564,8 @@ possible names for tech
   hall effect thrusters
   spaghettification
   particle accelerator
+  superluminal signalling
+  NP-complete
  
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

@@ -1197,7 +1197,7 @@ const spawn = {
         } else if (!m.isCloak) {
             me.foundPlayer();
         }
-        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.22 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.isInvulnerable = true
         me.startingDamageReduction = me.damageReduction
         me.damageReduction = 0
@@ -1276,7 +1276,7 @@ const spawn = {
             me.foundPlayer();
         }
 
-        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.22 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         // me.isInvulnerable = true
         // me.startingDamageReduction = me.damageReduction
         // me.damageReduction = 0
@@ -2030,7 +2030,7 @@ const spawn = {
                     this.cons2.length = 100 + 1.5 * this.radius;
 
                     this.isInvulnerable = false
-                    this.invulnerabilityCountDown = 60 + Math.max(0, 70 - simulation.difficulty * 0.5)
+                    this.invulnerabilityCountDown = 70 + Math.max(0, 70 - simulation.difficulty * 0.5)
                     this.damageReduction = this.startingDamageReduction
                     for (let i = 0; i < this.babyList.length; i++) {
                         if (this.babyList[i].alive) this.babyList[i].damageReduction = this.startingDamageReduction
@@ -2044,7 +2044,7 @@ const spawn = {
                     this.cons2.length = -200;
 
                     this.isInvulnerable = false
-                    this.invulnerabilityCountDown = 60 + Math.max(0, 70 - simulation.difficulty)
+                    this.invulnerabilityCountDown = 70 + Math.max(0, 70 - simulation.difficulty)
                     this.damageReduction = this.startingDamageReduction
                     for (let i = 0; i < this.babyList.length; i++) {
                         if (this.babyList[i].alive) this.babyList[i].damageReduction = this.startingDamageReduction
@@ -3517,6 +3517,110 @@ const spawn = {
             ctx.stroke(); // Draw it
             ctx.setLineDash([]);
         }
+    },
+    bounceBoss(x, y, radius = 80, isSpawnBossPOwerUp = true) {
+        mobs.spawn(x, y, 0, radius, "rgb(255,255,255)") // "rgb(201,202,225)");
+        let me = mob[mob.length - 1];
+        Matter.Body.rotate(me, 2 * Math.PI * Math.random());
+        me.isBoss = true;
+        Matter.Body.setDensity(me, 0.003); //normal is 0.001
+        me.inertia = Infinity;
+        me.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.startingDamageReduction = me.damageReduction
+        me.isInvulnerable = false
+        me.frictionAir = 0.01
+        me.restitution = 1
+        me.friction = 0
+        me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob
+        Matter.Body.setVelocity(me, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) });
+        me.seePlayer.recall = 1;
+        // spawn.shield(me, x, y, 1);
+        me.onDamage = function() {
+            if (this.health < this.nextHealthThreshold) {
+                this.health = this.nextHealthThreshold - 0.01
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
+                this.fireCount = 60 + simulation.difficulty * 1.5
+                this.isInvulnerable = true
+                this.damageReduction = 0
+            }
+        };
+        if (isSpawnBossPOwerUp) me.onDeath = function() { powerUps.spawnBossPowerUp(this.position.x, this.position.y) };
+        me.cycle = 0
+        me.nextHealthThreshold = 0.75
+        me.fireCount = 0
+        // console.log(me.mass) //100
+        me.do = function() {
+            if (this.isInvulnerable) {
+                this.fireCount--
+                if (this.fireCount < 0) {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                }
+
+                if (this.mass > 10) Matter.Body.scale(this, 0.99, 0.99);
+
+                // for (let i = 0; i < 1; i++) {
+                const velocity = Vector.rotate(Vector.mult(Vector.normalise(this.velocity), -10 - 10 * Math.random()), 1 * (Math.random() - 0.5))
+                spawn.bounceBullet(this.position.x, this.position.y, velocity)
+                // }
+                //draw invulnerable
+                ctx.beginPath();
+                let vertices = this.vertices;
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                ctx.lineTo(vertices[0].x, vertices[0].y);
+                ctx.lineWidth = 20;
+                ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                ctx.stroke();
+            } else if (this.mass < 100) {
+                Matter.Body.scale(this, 1.01, 1.01); //grow back to normal size
+            }
+
+            this.checkStatus();
+            //horizontal attraction
+            // const xMag = 0.0005
+            // if (player.position.x > this.position.x + 200) {
+            //     this.force.x += xMag * this.mass;
+            // } else if (player.position.x < this.position.x - 200) {
+            //     this.force.x -= xMag * this.mass;
+            // }
+
+            //maintain speed //faster in the vertical to help avoid repeating patterns
+            if (Math.abs(this.velocity.y) < 15) {
+                Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.05 });
+            }
+            if (Math.abs(this.velocity.x) < 11) {
+                Matter.Body.setVelocity(this, { x: this.velocity.x * 1.05, y: this.velocity.y });
+            }
+        };
+    },
+    bounceBullet(x, y, velocity = { x: 0, y: 0 }, radius = 10, sides = 6) {
+        //bullets
+        mobs.spawn(x, y, sides, radius, "rgb(255,0,155)");
+        let me = mob[mob.length - 1];
+        me.stroke = "transparent";
+        Matter.Body.setDensity(me, 0.00003); //normal is 0.001
+        me.timeLeft = 360 + Math.floor(180 * Math.random())
+        me.inertia = Infinity;
+        me.damageReduction = 1
+        me.frictionAir = 0
+        me.friction = 0
+        me.restitution = 1
+        me.collisionFilter.category = cat.mobBullet;
+        me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob
+
+        me.leaveBody = false;
+        me.isDropPowerUp = false;
+        me.isBadTarget = true;
+        me.isMobBullet = true;
+        me.showHealthBar = false;
+        me.onHit = function() {
+            this.explode(this.mass * 20);
+        };
+        me.do = function() {
+            this.timeLimit();
+        };
+        Matter.Body.setVelocity(me, velocity);
     },
     slashBoss(x, y, radius = 80) {
         mobs.spawn(x, y, 5, radius, "rgb(201,202,225)");

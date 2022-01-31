@@ -1604,10 +1604,10 @@ const m = {
                         if (tech.isStandingWaveExpand) {
                             if (input.field) {
                                 // const oldHarmonicRadius = m.harmonicRadius
-                                m.harmonicRadius = 0.985 * m.harmonicRadius + 0.015 * 2.5
+                                m.harmonicRadius = 0.99 * m.harmonicRadius + 0.01 * 4
                                 // m.energy -= 0.1 * (m.harmonicRadius - oldHarmonicRadius)
                             } else {
-                                m.harmonicRadius = 0.995 * m.harmonicRadius + 0.005
+                                m.harmonicRadius = 0.994 * m.harmonicRadius + 0.006
                             }
                         }
                         m.harmonicShield()
@@ -3064,7 +3064,7 @@ const m = {
 
                         if (input.field) {
                             if (tech.isWormHolePause) {
-                                const drain = m.fieldRegen + 0.0007
+                                const drain = m.fieldRegen + 0.0004
                                 if (m.energy > drain) {
                                     m.energy -= drain
                                     if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage for 1/4 seconds // and can't regen

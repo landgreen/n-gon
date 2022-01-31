@@ -132,6 +132,25 @@ window.addEventListener('load', () => {
             if (property === "level") document.getElementById("starting-level").value = Math.max(Number(set[property]) - 1, 0)
             if (property === "noPower") document.getElementById("no-power-ups").checked = Number(set[property])
         }
+    } else if (localSettings.isTrainingNotAttempted && localSettings.runCount < 30) { //make training button more obvious for new players
+        // document.getElementById("training-button").style.border = "0px #333 solid";
+        // document.getElementById("training-button").style.fill = "rgb(0, 150, 235)" //"#fff";
+        // document.getElementById("training-button").style.background = "rgb(0, 200, 255)";
+
+        //css classes not working for some reason
+        // document.getElementById("training-button").classList.add('lore-text');
+
+        let myanim = document.createElementNS("http://www.w3.org/2000/svg", 'animate');
+        myanim.setAttribute("id", "myAnimation");
+        myanim.setAttribute("attributeType", "XML");
+        myanim.setAttribute("attributeName", "fill");
+        // myanim.setAttribute("values", "#f55;#cc5;#5c5;#5dd;#66f;#5dd;#5c5;#cc5;#f55"); //rainbow
+        myanim.setAttribute("values", "#5dd;#66f;#5dd");
+        // myanim.setAttribute("values", "#333;rgb(0, 170, 255);#333");
+        myanim.setAttribute("dur", "3s");
+        myanim.setAttribute("repeatCount", "indefinite");
+        document.getElementById("training-button").appendChild(myanim);
+        document.getElementById("myAnimation").beginElement();
     }
 });
 
@@ -252,25 +271,25 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         text += `<div class="pause-grid-module" id ="pause-field"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
-                const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
+                const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                 if (tech.tech[i].isFieldTech) {
                     text += `<div class="pause-grid-module"><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                               <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                             </span>
-                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isGunTech) {
                     text += `<div class="pause-grid-module"><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                                             </span>
-                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isLore) {
-                    text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else {
-                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 }
             } else if (tech.tech[i].isLost) {
                 text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].link}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
@@ -355,7 +374,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode || (localSettings.isJunkExperiment && tech.tech[i].isJunk))) {
                 if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
                     // console.log(tech.tech[i].name, isAllowed, tech.tech[i].count, tech.haveGunCheck("nail gun"))
-                    const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
+                    const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
 
                     // <div class="circle-grid-small research" style="position:absolute; top:13px; left:30px;opacity:0.85;"></div>
                     if (tech.tech[i].isFieldTech) {
@@ -367,7 +386,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                 <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                             </span>
-                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}
+                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}
                         </div>`
                         // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
                         // <div class="circle-grid tech" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
@@ -380,15 +399,15 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                             </span>
-                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}
+                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}
                         </div>`
                     } else
                     if (tech.tech[i].isJunk) {
-                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
                     } else if (tech.tech[i].isExperimentalMode) {
                         techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
                     } else {
-                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
                     }
                     //deselect selected tech options if you don't have the tech any more // for example: when bot techs are converted after a bot upgrade tech is taken
                     if (tech.tech[i].count === 0 && techID.classList.contains("build-tech-selected")) techID.classList.remove("build-tech-selected");
@@ -1161,6 +1180,7 @@ if (localSettings) {
         difficultyMode: '2',
         fpsCapDefault: 'max',
         runCount: 0,
+        isTrainingNotAttempted: true,
         levelsClearedLastGame: 0,
         loreCount: 0,
         isHuman: false,
