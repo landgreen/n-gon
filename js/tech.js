@@ -2449,7 +2449,7 @@ const tech = {
         },
         {
             name: "Zeno's paradox",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>85%</strong>, but every <strong>5</strong> seconds<br>remove <strong>1/10</strong> of your current <strong class='color-h'>health</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>85%</strong>, but every <strong>5</strong> seconds<br>remove <strong>1/12</strong> of your current <strong class='color-h'>health</strong>",
             // description: "every <strong>5</strong> seconds remove <strong>1/10</strong> of your <strong class='color-h'>health</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong>",
             maxCount: 1,
             count: 0,

@@ -1094,7 +1094,7 @@ const b = {
                             if (mob[i].shield) dmg *= 3 //to make up for the /5 that shields normally take
                             mob[i].damage(dmg);
                             mob[i].locatePlayer();
-                            if (tech.isNeutronSlow) {
+                            if (tech.isNeutronSlow && mob[i].speed > 4) {
                                 Matter.Body.setVelocity(mob[i], {
                                     x: mob[i].velocity.x * 0.97,
                                     y: mob[i].velocity.y * 0.97
@@ -1746,8 +1746,14 @@ const b = {
                             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position))
                             const radius = mob[i].radius + tech.extruderRange / 2
                             if (dist < radius * radius) {
-                                Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.25, y: mob[i].velocity.y * 0.25 });
-                                Matter.Body.setPosition(this, Vector.add(this.position, mob[i].velocity)) //move with the medium
+                                if (mob[i].speed > 2) {
+                                    if (mob[i].isBoss || mob[i].isShielded) {
+                                        Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.95, y: mob[i].velocity.y * 0.95 });
+                                    } else {
+                                        Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.25, y: mob[i].velocity.y * 0.25 });
+                                    }
+                                }
+                                // Matter.Body.setPosition(this, Vector.add(this.position, mob[i].velocity)) //move with the medium
                                 let dmg = this.dmg / Math.min(10, mob[i].mass)
                                 mob[i].damage(dmg);
                                 if (mob[i].alive) mob[i].foundPlayer();
@@ -1864,10 +1870,12 @@ const b = {
                     //push mobs away
                     const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
                     Matter.Body.applyForce(best.who, path[1], force)
-                    Matter.Body.setVelocity(best.who, { //friction
-                        x: best.who.velocity.x * 0.7,
-                        y: best.who.velocity.y * 0.7
-                    });
+                    if (best.who.speed > 4) {
+                        Matter.Body.setVelocity(best.who, { //friction
+                            x: best.who.velocity.x * 0.9,
+                            y: best.who.velocity.y * 0.9
+                        });
+                    }
                     //draw mob damage circle
                     simulation.drawList.push({
                         x: path[1].x,
@@ -3097,7 +3105,12 @@ const b = {
                     } else {
                         Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.target.velocity), this.target.position))
                     }
-                    Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.9))
+                    if (this.target.isBoss) {
+                        if (this.target.speed > 8) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.98))
+                    } else {
+                        if (this.target.speed > 4) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.95))
+                    }
+
                     Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9);
                     // Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
                     if (this.target.isShielded) {
@@ -4163,10 +4176,12 @@ const b = {
                                 //push mobs away
                                 const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
                                 Matter.Body.applyForce(best.who, path[1], force)
-                                Matter.Body.setVelocity(best.who, { //friction
-                                    x: best.who.velocity.x * 0.7,
-                                    y: best.who.velocity.y * 0.7
-                                });
+                                if (best.who.speed > 3) {
+                                    Matter.Body.setVelocity(best.who, { //friction
+                                        x: best.who.velocity.x * 0.7,
+                                        y: best.who.velocity.y * 0.7
+                                    });
+                                }
                                 //draw mob damage circle
                                 if (best.who.damageReduction) {
                                     simulation.drawList.push({

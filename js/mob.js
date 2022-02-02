@@ -68,12 +68,13 @@ const mobs = {
                 whom.isSlowed = true;
                 whom.status.push({
                     effect() {
-                        const speedCap = 2
-                        const drag = 0.95
-                        Matter.Body.setVelocity(whom, {
-                            x: Math.min(speedCap, whom.velocity.x) * drag,
-                            y: Math.min(speedCap, whom.velocity.y) * drag
-                        });
+                        if (whom.speed > 2) {
+                            const drag = 0.95
+                            Matter.Body.setVelocity(whom, {
+                                x: whom.velocity.x * drag,
+                                y: whom.velocity.y * drag
+                            });
+                        }
                         Matter.Body.setAngularVelocity(whom, 0);
                         ctx.beginPath();
                         ctx.moveTo(whom.vertices[0].x, whom.vertices[0].y);
@@ -99,10 +100,12 @@ const mobs = {
     },
     statusStun(who, cycles = 180) {
         if (!who.shield && !who.isShielded) {
-            Matter.Body.setVelocity(who, {
-                x: who.velocity.x * 0.8,
-                y: who.velocity.y * 0.8
-            });
+            if (who.speed > 3) {
+                Matter.Body.setVelocity(who, {
+                    x: who.velocity.x * 0.8,
+                    y: who.velocity.y * 0.8
+                });
+            }
             Matter.Body.setAngularVelocity(who, who.angularVelocity * 0.8);
             //remove other "stun" effects on this mob
             let i = who.status.length

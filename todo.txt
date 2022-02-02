@@ -1,23 +1,28 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new level: reactor - midBoss fight
-  it's not well balanced yet
-  Let me know if there are any impossible gun combinations
+difficulty balance per level
+  mob harm done is reduced about 2%
+  player damage is increased about 2%
 
-for new players the training button at the start screen now cycles colors
-  effect shows if you haven't cleared the first training level, and you haven't done at least a few normal runs
+slasher mobs do 20% less damage
+  this is because they killed me on my last run and I'm bitter
+mantisBoss is invincible for a less time
+Zeno's paradox removes 1/10 -> 1/12 health every 5 seconds
 
-standing wave expansion tech is 40% larger and gives 25% deflecting efficiency
-ammonium nitrate gives 30 -> 27% damage and range
-heuristics gives 30 -> 33% fire rate
-wormhole invariant tech drains energy much slower while time is paused
+slow, stun, plasma, foam, neutron bomb effects now only slow mobs down to a minimum speed of about 2-4
 
 bug fixes
-  null level now longer progresses level.onLevel
+  bounceBoss deals with slow effects in a less buggy way
+  final boss didn't kill invincible mobs when it dies
 
 ******************************************************** TODO ********************************************************
 
+tech - field power ups now give 3 field tech instead of 3 field?
+
+run more profiles of n-gon to fix performance issues
+
 reactor
+  foam hits all the bullets and makes this fight easy
   give map some background graphics
   it's a little short
     add alternate boss

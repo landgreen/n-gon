@@ -1316,7 +1316,7 @@ const m = {
             m.energy -= fieldBlockCost
             if (m.energy < 0) m.energy = 0;
             m.fieldCDcycle = m.cycle + m.fieldBlockCD;
-            if (tech.blockingIce) {
+            if (tech.blockingIce && !who.isInvulnerable) {
                 for (let i = 0; i < fieldBlockCost * 60 * tech.blockingIce; i++) b.iceIX(3, 2 * Math.PI * Math.random(), m.pos)
             }
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
@@ -3476,16 +3476,20 @@ const m = {
                 m.angle = player.angle
             }
 
-            level.playerExitCheck = () => {
-                if (
-                    player.position.x > level.exit.x &&
-                    player.position.x < level.exit.x + 100 &&
-                    player.position.y > level.exit.y - 150 &&
-                    player.position.y < level.exit.y + 40
-                ) {
-                    level.nextLevel()
-                }
-            }
+
+
+
+
+            // level.exit.drawAndCheck = () => { //fix this
+            //     if (
+            //         player.position.x > level.exit.x &&
+            //         player.position.x < level.exit.x + 100 &&
+            //         player.position.y > level.exit.y - 150 &&
+            //         player.position.y < level.exit.y + 40
+            //     ) {
+            //         level.nextLevel()
+            //     }
+            // }
             m.move = () => {
                 m.pos.x = player.position.x;
                 m.pos.y = player.position.y;

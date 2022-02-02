@@ -128,29 +128,29 @@ const level = {
         b.dmgScale = 1; //damage done by player decreases each level
         simulation.accelScale = 1 //mob acceleration increases each level
         simulation.CDScale = 1 //mob CD time decreases each level
-        simulation.dmgScale = 0.38 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = 0.375 * simulation.difficulty //damage done by mobs increases each level
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
-            b.dmgScale *= 0.917; //damage done by player decreases each level
+            b.dmgScale *= 0.92; //damage done by player decreases each level
             if (simulation.accelScale < 6) simulation.accelScale *= 1.025 //mob acceleration increases each level
             if (simulation.CDScale > 0.15) simulation.CDScale *= 0.965 //mob CD time decreases each level
         }
-        simulation.dmgScale = 0.38 * simulation.difficulty //damage done by mobs scales with total levels
+        simulation.dmgScale = 0.375 * simulation.difficulty //damage done by mobs scales with total levels
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
         // console.log(`CD = ${simulation.CDScale}`)
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
-            b.dmgScale /= 0.917; //damage done by player decreases each level
+            b.dmgScale /= 0.92; //damage done by player decreases each level
             if (simulation.accelScale > 1) simulation.accelScale /= 1.025 //mob acceleration increases each level
             if (simulation.CDScale < 1) simulation.CDScale /= 0.965 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = 0.38 * simulation.difficulty //damage done by mobs scales with total levels
+        simulation.dmgScale = 0.375 * simulation.difficulty //damage done by mobs scales with total levels
         if (simulation.dmgScale < 0.1) simulation.dmgScale = 0.1;
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055)
     },
@@ -320,8 +320,8 @@ const level = {
                 player.position.x > level.exit.x &&
                 player.position.x < level.exit.x + 100 &&
                 player.position.y > level.exit.y - 150 &&
-                player.position.y < level.exit.y - 40 &&
-                player.velocity.y < 0.1
+                player.position.y < level.exit.y - 0 &&
+                player.velocity.y < 0.15
             ) {
                 level.exitCount += input.down ? 8 : 2
             } else if (level.exitCount > 0) {

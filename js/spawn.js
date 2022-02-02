@@ -397,7 +397,13 @@ const spawn = {
                 //damage all mobs
                 for (let j = 0; j < 8; j++) { //in case some mobs leave things after they die
                     for (let i = 0, len = mob.length; i < len; ++i) {
-                        if (mob[i] !== this) mob[i].damage(Infinity, true);
+                        if (mob[i] !== this) {
+                            if (mob[i].isInvulnerable) { //disable invulnerability
+                                mob[i].isInvulnerable = false
+                                mob[i].damageReduction = 1
+                            }
+                            mob[i].damage(Infinity, true);
+                        }
                     }
                 }
 
@@ -2030,7 +2036,7 @@ const spawn = {
                     this.cons2.length = 100 + 1.5 * this.radius;
 
                     this.isInvulnerable = false
-                    this.invulnerabilityCountDown = 70 + Math.max(0, 70 - simulation.difficulty * 0.5)
+                    this.invulnerabilityCountDown = 80 + Math.max(0, 70 - simulation.difficulty * 0.5)
                     this.damageReduction = this.startingDamageReduction
                     for (let i = 0; i < this.babyList.length; i++) {
                         if (this.babyList[i].alive) this.babyList[i].damageReduction = this.startingDamageReduction
@@ -2044,7 +2050,7 @@ const spawn = {
                     this.cons2.length = -200;
 
                     this.isInvulnerable = false
-                    this.invulnerabilityCountDown = 70 + Math.max(0, 70 - simulation.difficulty)
+                    this.invulnerabilityCountDown = 80 + Math.max(0, 70 - simulation.difficulty)
                     this.damageReduction = this.startingDamageReduction
                     for (let i = 0; i < this.babyList.length; i++) {
                         if (this.babyList[i].alive) this.babyList[i].damageReduction = this.startingDamageReduction
@@ -3550,6 +3556,23 @@ const spawn = {
         me.fireCount = 0
         // console.log(me.mass) //100
         me.do = function() {
+            me.seePlayer.recall = 1
+            //maintain speed //faster in the vertical to help avoid repeating patterns
+            if (this.speed < 0.01) {
+                const unit = Vector.sub(player.position, this.position)
+                Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(unit), 0.1));
+                // this.fireCount = 10 + simulation.difficulty * 0.5
+                // this.isInvulnerable = true
+                // this.damageReduction = 0
+            } else {
+                if (Math.abs(this.velocity.y) < 15) {
+                    Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.07 });
+                }
+                if (Math.abs(this.velocity.x) < 11) {
+                    Matter.Body.setVelocity(this, { x: this.velocity.x * 1.07, y: this.velocity.y });
+                }
+            }
+
             if (this.isInvulnerable) {
                 this.fireCount--
                 if (this.fireCount < 0) {
@@ -3584,14 +3607,6 @@ const spawn = {
             // } else if (player.position.x < this.position.x - 200) {
             //     this.force.x -= xMag * this.mass;
             // }
-
-            //maintain speed //faster in the vertical to help avoid repeating patterns
-            if (Math.abs(this.velocity.y) < 15) {
-                Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.05 });
-            }
-            if (Math.abs(this.velocity.x) < 11) {
-                Matter.Body.setVelocity(this, { x: this.velocity.x * 1.05, y: this.velocity.y });
-            }
         };
     },
     bounceBullet(x, y, velocity = { x: 0, y: 0 }, radius = 10, sides = 6) {
@@ -3802,7 +3817,7 @@ const spawn = {
         me.swordRadiusMax = 350 + 5 * simulation.difficulty;
         me.swordRadiusGrowRate = me.swordRadiusMax * (0.018 + 0.0006 * simulation.difficulty)
         me.isSlashing = false;
-        me.swordDamage = 0.05 * simulation.dmgScale
+        me.swordDamage = 0.04 * simulation.dmgScale
         me.laserAngle = 3 * Math.PI / 5
         const seeDistance2 = 200000
         spawn.shield(me, x, y);
