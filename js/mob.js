@@ -157,7 +157,7 @@ const mobs = {
             who.status.push({
                 effect() {
                     if ((simulation.cycle - this.startCycle) % 30 === 0) {
-                        let dmg = b.dmgScale * this.dmg
+                        let dmg = m.dmgScale * this.dmg
                         who.damage(dmg);
                         if (who.damageReduction) {
                             simulation.drawList.push({ //add dmg to draw queue
@@ -188,7 +188,7 @@ const mobs = {
     //     who.status.push({
     //       effect() {
     //         if ((simulation.cycle - this.startCycle) % 15 === 0) {
-    //           let dmg = b.dmgScale * tickDamage * 0.5 * (1 + Math.random())
+    //           let dmg = m.dmgScale * tickDamage * 0.5 * (1 + Math.random())
     //           who.damage(dmg);
     //           simulation.drawList.push({ //add dmg to draw queue
     //             x: who.position.x,

@@ -231,7 +231,7 @@ const spawn = {
             //aoe damage to mobs
             // for (let i = 0, len = mob.length; i < len; i++) {
             //     if (!mob[i].isShielded && Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radius) {
-            //         let dmg = b.dmgScale * 0.082
+            //         let dmg = m.dmgScale * 0.082
             //         if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
             //         if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
             //         mob[i].damage(dmg);
@@ -1120,10 +1120,10 @@ const spawn = {
             Matter.Body.scale(this, scale, scale);
             this.radius *= scale;
 
-            this.isInvulnerable = true
-            if (this.damageReduction) this.startingDamageReduction = this.damageReduction
-            this.damageReduction = 0
-            this.invulnerabilityCountDown = simulation.difficulty
+            // this.isInvulnerable = true
+            // if (this.damageReduction) this.startingDamageReduction = this.damageReduction
+            // this.damageReduction = 0
+            // this.invulnerabilityCountDown = simulation.difficulty
         }
         me.onDeath = function() {
             this.isBuffBoss = false;
@@ -1142,27 +1142,27 @@ const spawn = {
                 powerUps.spawnRandomPowerUp(this.position.x, this.position.y) // manual power up spawn to avoid spawning too many tech with "symbiosis"
             }
         }
-        me.damageReduction = 0.23 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         //required setup for invulnerable
-        me.isInvulnerable = false
+        // me.isInvulnerable = false
         me.invulnerabilityCountDown = 0
         me.do = function() {
-            if (this.isInvulnerable) {
-                if (this.invulnerabilityCountDown > 0) {
-                    this.invulnerabilityCountDown--
-                    ctx.beginPath();
-                    let vertices = this.vertices;
-                    ctx.moveTo(vertices[0].x, vertices[0].y);
-                    for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
-                    ctx.lineTo(vertices[0].x, vertices[0].y);
-                    ctx.lineWidth = 20;
-                    ctx.strokeStyle = "rgba(255,255,255,0.7)";
-                    ctx.stroke();
-                } else {
-                    this.isInvulnerable = false
-                    this.damageReduction = this.startingDamageReduction
-                }
-            }
+            // if (this.isInvulnerable) {
+            //     if (this.invulnerabilityCountDown > 0) {
+            //         this.invulnerabilityCountDown--
+            //         ctx.beginPath();
+            //         let vertices = this.vertices;
+            //         ctx.moveTo(vertices[0].x, vertices[0].y);
+            //         for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+            //         ctx.lineTo(vertices[0].x, vertices[0].y);
+            //         ctx.lineWidth = 20;
+            //         ctx.strokeStyle = "rgba(255,255,255,0.7)";
+            //         ctx.stroke();
+            //     } else {
+            //         this.isInvulnerable = false
+            //         this.damageReduction = this.startingDamageReduction
+            //     }
+            // }
             this.alwaysSeePlayer();
             this.checkStatus();
             this.attraction();
@@ -3583,7 +3583,7 @@ const spawn = {
                 if (this.mass > 10) Matter.Body.scale(this, 0.99, 0.99);
 
                 // for (let i = 0; i < 1; i++) {
-                const velocity = Vector.rotate(Vector.mult(Vector.normalise(this.velocity), -10 - 10 * Math.random()), 1 * (Math.random() - 0.5))
+                const velocity = Vector.rotate(Vector.mult(Vector.normalise(this.velocity), -5 - 10 * Math.random()), 0.5 * (Math.random() - 0.5))
                 spawn.bounceBullet(this.position.x, this.position.y, velocity)
                 // }
                 //draw invulnerable
@@ -3609,7 +3609,7 @@ const spawn = {
             // }
         };
     },
-    bounceBullet(x, y, velocity = { x: 0, y: 0 }, radius = 10, sides = 6) {
+    bounceBullet(x, y, velocity = { x: 0, y: 0 }, radius = 11, sides = 6) {
         //bullets
         mobs.spawn(x, y, sides, radius, "rgb(255,0,155)");
         let me = mob[mob.length - 1];
@@ -3630,7 +3630,7 @@ const spawn = {
         me.isMobBullet = true;
         me.showHealthBar = false;
         me.onHit = function() {
-            this.explode(this.mass * 20);
+            this.explode(this.mass * 12);
         };
         me.do = function() {
             this.timeLimit();

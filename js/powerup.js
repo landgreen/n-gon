@@ -1037,6 +1037,18 @@ const powerUps = {
             return false
         }
     },
+    pauseEjectTech(index) {
+        if (tech.isPauseEjectTech || simulation.testing) {
+            if (Math.random() < 0.03) {
+                tech.removeTech(index)
+                m.energy += 20.48;
+            } else {
+                powerUps.ejectTech(index)
+            }
+            document.getElementById(`${index}-pause-tech`).style.textDecoration = "line-through"
+            document.getElementById(`${index}-pause-tech`).onclick = null
+        }
+    },
     // removeRandomTech() {
     //     const have = [] //find which tech you have
     //     for (let i = 0; i < tech.tech.length; i++) {

@@ -1,27 +1,40 @@
 ******************************************************** NEXT PATCH **************************************************
 
-difficulty balance per level
-  mob harm done is reduced about 2%
-  player damage is increased about 2%
+tech: particle collider - in pause menu clicking a tech ejects it (5% chance to lose the power up and convert into energy)
+  (also works on testing without the tech)
 
-slasher mobs do 20% less damage
-  this is because they killed me on my last run and I'm bitter
-mantisBoss is invincible for a less time
-Zeno's paradox removes 1/10 -> 1/12 health every 5 seconds
+growBoss no longer goes invulnerable
+bounceBoss bullets (on reactor map)
+  do 33% less damage
+  move 50% slower, so they don't fill the entire map
 
-slow, stun, plasma, foam, neutron bomb effects now only slow mobs down to a minimum speed of about 2-4
-
-bug fixes
-  bounceBoss deals with slow effects in a less buggy way
-  final boss didn't kill invincible mobs when it dies
+ground state reworked: reduce passive energy regen by 66%, increase max energy by 200
+electronegativity: increase damage by 1% for every 9 -> 8 energy
+acetone peroxide does 300 -> 200% more self harm from explosions
+predator renamed parasitism
 
 ******************************************************** TODO ********************************************************
 
-tech - field power ups now give 3 field tech instead of 3 field?
+JUNK tech: https://bindingofisaacrebirth.fandom.com/wiki/Damocles
+
+cloaking field doesn't show energy over max
+
+junk tech or regular tech with this named
+  wiki: List of common misconceptions
 
 run more profiles of n-gon to fix performance issues
 
 reactor
+  hopBoss 
+  swoopBoss: hides in top center
+    take a lap around the map that you have to dodge
+    spawn mobs
+    fire sniper bullets?
+    remove center map element?
+  add some blocks to the reactor level
+  add ammo?
+  boss speeds up as time goes on?
+  slow bullet speed?
   foam hits all the bullets and makes this fight easy
   give map some background graphics
   it's a little short

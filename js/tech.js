@@ -228,7 +228,7 @@ const tech = {
         if (tech.isEnergyLoss) dmg *= 1.55;
         if (tech.isAcidDmg && m.health > 1) dmg *= 1.35;
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
-        if (tech.isEnergyDamage) dmg *= 1 + m.energy * 0.11;
+        if (tech.isEnergyDamage) dmg *= 1 + m.energy * 0.125;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
         if (tech.isRerollDamage) dmg *= 1 + 0.037 * powerUps.research.count
         if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
@@ -2100,26 +2100,6 @@ const tech = {
             }
         },
         {
-            name: "ground state",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return !tech.isCrouchRegen //(tech.iceEnergy || tech.isWormholeEnergy || tech.isPiezo || tech.isRailEnergyGain || tech.energySiphon || tech.isEnergyRecovery || tech.dynamoBotCount || tech.isFlipFlopEnergy || tech.isTokamak) && tech.energyRegen !== 0.004 && !tech.isEnergyHealth && !tech.isCrouchRegen
-            },
-            requires: "not inductive coupling", //"not time crystals",
-            effect: () => {
-                tech.energyRegen = 0;
-                m.fieldRegen = tech.energyRegen;
-            },
-            remove() {
-                tech.energyRegen = 0.001;
-                m.fieldRegen = tech.energyRegen;
-            }
-        },
-        {
             name: "mass-energy equivalence",
             description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong class='color-harm'>harm</strong> <strong>reduction</strong> effects provide <strong>no</strong> benefit",
             maxCount: 1,
@@ -2218,7 +2198,7 @@ const tech = {
         },
         {
             name: "electronegativity",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>9</strong> stored <strong class='color-f'>energy</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>1%</strong><br>for every <strong>8</strong> stored <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2233,19 +2213,26 @@ const tech = {
             }
         },
         {
-            name: "exothermic process",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>if a mob <strong>dies</strong> drain <strong class='color-f'>energy</strong> by <strong>25%</strong>",
+            name: "ground state",
+            description: "increase your <strong>max</strong> <strong class='color-f'>energy</strong> by <strong>200</strong><br>reduce passive <strong class='color-f'>energy</strong> regen by <strong>66%</strong>",
+            // description: "reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() { return true },
-            requires: "",
-            effect() {
-                tech.isEnergyLoss = true;
+            allowed() {
+                return !tech.isTimeCrystals
+            },
+            requires: "not time crystals",
+            effect: () => {
+                m.fieldRegen = 0.00033
+                tech.isGroundState = true
+                m.setMaxEnergy()
             },
             remove() {
-                tech.isEnergyLoss = false;
+                m.fieldRegen = 0.001;
+                tech.isGroundState = false
+                m.setMaxEnergy()
             }
         },
         {
@@ -2266,6 +2253,22 @@ const tech = {
             remove() {
                 tech.isMaxEnergyTech = false;
                 m.setMaxEnergy()
+            }
+        },
+        {
+            name: "exothermic process",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong><br>if a mob <strong>dies</strong> drain <strong class='color-f'>energy</strong> by <strong>25%</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                tech.isEnergyLoss = true;
+            },
+            remove() {
+                tech.isEnergyLoss = false;
             }
         },
         {
@@ -2342,9 +2345,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return tech.energyRegen !== 0 && !tech.isDamageAfterKillNoRegen
+                return !tech.isDamageAfterKillNoRegen
             },
-            requires: "not ground state, predator",
+            requires: "not parasitism",
             effect() {
                 tech.isCrouchRegen = true; //only used to check for requirements
                 m.regenEnergy = function() {
@@ -2409,13 +2412,15 @@ const tech = {
             }
         },
         {
-            name: "predator",
+            name: "parasitism",
             description: "<span style = 'font-size:91%;'>if a mob has <strong>died</strong> in the last <strong>5 seconds</strong> inhibit<br>passive <strong class='color-f'>energy</strong> regen and increase <strong class='color-d'>damage</strong> <strong>50%</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() { return !tech.isCrouchRegen },
+            allowed() {
+                return !tech.isCrouchRegen
+            },
             requires: "not inductive coupling",
             effect() {
                 tech.isDamageAfterKillNoRegen = true;
@@ -3058,6 +3063,24 @@ const tech = {
                     tech.isPauseSwitchField = false;
                     powerUps.research.changeRerolls(-6)
                 }
+            }
+        },
+        {
+            name: "particle collider",
+            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while <strong>paused</strong> <strong>ejects</strong> them<br><em><strong>3%</strong> chance to convert your tech into <strong class='color-f'>energy</strong></em>`,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return tech.isPauseSwitchField
+            },
+            requires: "unified field theory",
+            effect() {
+                tech.isPauseEjectTech = true;
+            },
+            remove() {
+                tech.isPauseEjectTech = false;
             }
         },
         {
@@ -4709,7 +4732,7 @@ const tech = {
         },
         {
             name: "acetone peroxide",
-            description: "increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>80%</strong>, but<br>you take <strong>300%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
+            description: "increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>80%</strong>, but<br>you take <strong>200%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6688,16 +6711,16 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "pilot wave")
+                return !tech.isGroundState && (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "pilot wave")
             },
-            requires: "time dilation or pilot wave",
+            requires: "time dilation or pilot wave, not ground state",
             effect: () => {
-                tech.energyRegen = 0.004;
-                m.fieldRegen = tech.energyRegen;
+                m.fieldRegen = 0.004
+                tech.isTimeCrystals = true
             },
             remove() {
-                tech.energyRegen = 0.001;
-                m.fieldRegen = tech.energyRegen;
+                m.fieldRegen = 0.001
+                tech.isTimeCrystals = false
             }
         },
         {
@@ -9175,6 +9198,7 @@ const tech = {
     isNeedles: null,
     isExplodeRadio: null,
     isPauseSwitchField: null,
+    isPauseEjectTech: null,
     isShieldPierce: null,
     isDuplicateBoss: null,
     is111Duplicate: null,
@@ -9284,5 +9308,7 @@ const tech = {
     isBrainstormActive: null,
     brainStormDelay: null,
     wormSize: null,
-    extraSuperBalls: null
+    extraSuperBalls: null,
+    isTimeCrystals: null,
+    isGroundState: null,
 }

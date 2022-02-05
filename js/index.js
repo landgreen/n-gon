@@ -254,7 +254,7 @@ ${botText}
 <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${m.cycle} cycles
 <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
 
-<br>damage difficulty scale: ${(b.dmgScale*100).toFixed(2) }%
+<br>damage difficulty scale: ${(m.dmgScale*100).toFixed(2) }%
 <br>harm difficulty scale: ${(simulation.dmgScale*100).toFixed(0)}%
 <br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%
 ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
@@ -273,14 +273,14 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
                 const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                 if (tech.tech[i].isFieldTech) {
-                    text += `<div class="pause-grid-module"><div class="grid-title">
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})"><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                               <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                             </span>
                                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isGunTech) {
-                    text += `<div class="pause-grid-module"><div class="grid-title">
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})"><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
@@ -289,7 +289,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                 } else if (tech.tech[i].isLore) {
                     text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else {
-                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 }
             } else if (tech.tech[i].isLost) {
                 text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].link}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`

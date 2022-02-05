@@ -393,6 +393,7 @@ const m = {
         m.drop();
         if (simulation.paused) build.pauseGrid() //update the build when paused
     },
+    dmgScale: null, //scales all damage, but not raw .dmg //set in levels.setDifficulty
     death() {
         if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
             //remove immortality tech
@@ -922,7 +923,7 @@ const m = {
             if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
         }
         if (m.energy < m.maxEnergy) m.energy = m.maxEnergy;
-        m.fieldRegen = tech.energyRegen; //0.001
+        m.fieldRegen = 0.001
         m.fieldMeterColor = "#0cf"
         m.eyeFillColor = m.fieldMeterColor
         m.fieldShieldingScale = 1;
@@ -1321,7 +1322,7 @@ const m = {
             }
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
-                who.damage(tech.blockDmg * b.dmgScale, true)
+                who.damage(tech.blockDmg * m.dmgScale, true)
                 //draw electricity
                 const step = 40
                 ctx.beginPath();
@@ -1646,7 +1647,7 @@ const m = {
                                     }
                                 }
                                 if (tech.blockDmg) { //electricity
-                                    mob[i].damage(tech.blockDmg * b.dmgScale)
+                                    mob[i].damage(tech.blockDmg * m.dmgScale)
                                     const step = 40
                                     ctx.beginPath();
                                     for (let i = 0, len = 1.5 * tech.blockDmg; i < len; i++) {
@@ -2598,7 +2599,7 @@ const m = {
         //                   ctx.fillStyle = `rgba(140,217,255,0.5)`
         //                   ctx.fill()
         //                 } else if (tech.superposition && inPlayer[i].isDropPowerUp) {
-        //                   // inPlayer[i].damage(0.4 * b.dmgScale); //damage mobs inside the player
+        //                   // inPlayer[i].damage(0.4 * m.dmgScale); //damage mobs inside the player
         //                   // m.energy += 0.005;
 
         //                   mobs.statusStun(inPlayer[i], 300)
@@ -3656,7 +3657,7 @@ const m = {
                                 //mob + bullet collisions
                                 if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
                                     obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
-                                    let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
+                                    let dmg = m.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
                                     if (tech.isCrit && mob[k].isStunned) dmg *= 4
                                     mob[k].damage(dmg);
                                     if (mob[k].alive) mob[k].foundPlayer();
@@ -3675,7 +3676,7 @@ const m = {
                                 if (obj.classType === "body" && obj.speed > 6) {
                                     const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
                                     if (v > 9) {
-                                        let dmg = tech.blockDamage * b.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2 : 1);
+                                        let dmg = tech.blockDamage * m.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2 : 1);
                                         if (mob[k].isShielded) dmg *= 0.7
                                         mob[k].damage(dmg, true);
                                         if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && m.throwCycle > m.cycle) {

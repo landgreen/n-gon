@@ -22,7 +22,7 @@ const level = {
             // m.setField("standing wave")
             // b.giveGuns("laser")
             // for (let i = 0; i < 100; i++) tech.giveTech("slow light")
-            // tech.giveTech("expansion")
+            // tech.giveTech("eject")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // tech.giveTech("tinsellated flagella")
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
@@ -125,7 +125,7 @@ const level = {
     customTopLayer() {},
     setDifficulty() {
         simulation.difficulty = 0
-        b.dmgScale = 1; //damage done by player decreases each level
+        m.dmgScale = 1; //damage done by player decreases each level
         simulation.accelScale = 1 //mob acceleration increases each level
         simulation.CDScale = 1 //mob CD time decreases each level
         simulation.dmgScale = 0.375 * simulation.difficulty //damage done by mobs increases each level
@@ -134,7 +134,7 @@ const level = {
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
-            b.dmgScale *= 0.92; //damage done by player decreases each level
+            m.dmgScale *= 0.92; //damage done by player decreases each level
             if (simulation.accelScale < 6) simulation.accelScale *= 1.025 //mob acceleration increases each level
             if (simulation.CDScale > 0.15) simulation.CDScale *= 0.965 //mob CD time decreases each level
         }
@@ -145,7 +145,7 @@ const level = {
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
-            b.dmgScale /= 0.92; //damage done by player decreases each level
+            m.dmgScale /= 0.92; //damage done by player decreases each level
             if (simulation.accelScale > 1) simulation.accelScale /= 1.025 //mob acceleration increases each level
             if (simulation.CDScale < 1) simulation.CDScale /= 0.965 //mob CD time decreases each level
         }
