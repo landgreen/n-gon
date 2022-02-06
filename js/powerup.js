@@ -566,7 +566,8 @@ const powerUps = {
                 }
             }
             if (options.length > 0) {
-                return options[Math.floor(Math.random() * options.length)]
+                // return options[Math.floor(Math.random() * options.length)]
+                return options[Math.floor(Math.seededRandom(0, options.length))]
             }
         },
         choiceLog: [], //records all previous choice options
@@ -650,7 +651,8 @@ const powerUps = {
                     }
 
                     if (options.length > 0) {
-                        const choose = options[Math.floor(Math.random() * options.length)]
+                        // const choose = options[Math.floor(Math.random() * options.length)]
+                        const choose = options[Math.floor(Math.seededRandom(0, options.length))]
                         const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
 
                         if (tech.tech[choose].isFieldTech) {
@@ -813,7 +815,10 @@ const powerUps = {
                 }
             }
             if (options.length > 0) {
-                return options[Math.floor(Math.random() * options.length)]
+                // console.log(`random: ${Math.seededRandom(0, options.length)}`)
+
+                return options[Math.floor(Math.seededRandom(0, options.length))]
+                // return options[Math.floor(Math.random() * options.length)]
             }
         },
         choiceLog: [], //records all previous choice options

@@ -658,7 +658,9 @@ const simulation = {
         b.setFireMethod()
         b.setFireCD();
         // simulation.updateTechHUD();
-        powerUps.tech.choiceLog = []
+        powerUps.tech.choiceLog = [];
+        powerUps.gun.choiceLog = [];
+        powerUps.field.choiceLog = [];
         powerUps.totalPowerUps = 0;
         powerUps.research.count = 0;
         m.setFillColors();

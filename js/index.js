@@ -1,4 +1,39 @@
 "use strict";
+
+//convert text into numbers for seed
+Math.hash = s => { for (var i = 0, h = 9; i < s.length;) h = Math.imul(h ^ s.charCodeAt(i++), 9 ** 9); return h ^ h >>> 9 }
+
+// const date1 = new Date()
+// Math.seed = date1.getUTCDate() * date1.getUTCFullYear(); // daily seed,  day + year
+// Math.seed = Date.now() //random every time:  just the time in seconds UTC
+Math.seed = Math.floor(Date.now() % 100000000) //random every time:  just the time in seconds UTC
+Math.seededRandom = function(min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined
+    Math.seed = (Math.seed * 9301 + 49297) % 233280;
+    return min + Math.seed / 233280 * (max - min);
+}
+document.getElementById("seed").placeholder = Math.seed //display seed in settings
+//Math.seed is set to document.getElementById("seed").value in level.populate level at the start of runs
+// console.log(Math.seed)
+
+
+function shuffle(array) {
+    var currentIndex = array.length,
+        temporaryValue,
+        randomIndex;
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+        // Pick a remaining element...
+        // randomIndex = Math.floor(Math.random() * currentIndex);
+        randomIndex = Math.floor(Math.seededRandom(0, currentIndex)) //Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+    return array;
+}
+
 //collision groups
 //   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield | cat.phased
 const cat = {
@@ -35,23 +70,6 @@ const color = { //light
 //     blockS: "#111",
 //     map: "#444",
 // }
-
-function shuffle(array) {
-    var currentIndex = array.length,
-        temporaryValue,
-        randomIndex;
-    // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-        // Pick a remaining element...
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-        // And swap it with the current element.
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-    }
-    return array;
-}
 
 // shrink power up selection menu
 // if (screen.height < 800) {

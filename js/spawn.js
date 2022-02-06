@@ -2,12 +2,19 @@
 const spawn = {
     nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture", "growBossCulture"],
     // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
-    randomLevelBoss(x, y, options = [
-        "shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
+    randomBossList: ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
         "powerUpBoss", "powerUpBossBaby", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss",
         "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "mantisBoss", "slashBoss"
-    ]) {
-        spawn[options[Math.floor(Math.random() * options.length)]](x, y)
+    ],
+    bossTypeSpawnOrder: [], //preset list of boss names calculated at the start of a run by the randomSeed
+    bossTypeSpawnIndex: 0, //increases as the boss type cycles
+    randomLevelBoss(x, y, options = []) {
+        if (options.length === 0) {
+            const boss = spawn.bossTypeSpawnOrder[spawn.bossTypeSpawnIndex++ % spawn.bossTypeSpawnOrder.length]
+            spawn[boss](x, y)
+        } else {
+            spawn[options[Math.floor(Math.random() * options.length)]](x, y)
+        }
     },
     pickList: ["starter", "starter"],
     fullPickList: [
@@ -33,11 +40,17 @@ const spawn = {
         "spawner",
         "ghoster",
     ],
+    mobTypeSpawnOrder: [], //preset list of mob names calculated at the start of a run by the randomSeed
+    mobTypeSpawnIndex: 0, //increases as the mob type cycles
     allowedGroupList: ["spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "launcherOne", "stabber", "sniper", "pulsar", "grenadier", "slasher"],
     setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
-        //each level has 2 mobs: one new mob and one from the last level
         spawn.pickList.splice(0, 1);
-        spawn.pickList.push(spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]);
+        const push = spawn.mobTypeSpawnOrder[spawn.mobTypeSpawnIndex++ % spawn.mobTypeSpawnOrder.length]
+        spawn.pickList.push(push);
+        // if (spawn.mobTypeSpawnIndex > spawn.mobTypeSpawnOrder.length) spawn.mobTypeSpawnIndex = 0
+        //each level has 2 mobs: one new mob and one from the last level
+        // spawn.pickList.splice(0, 1);
+        // spawn.pickList.push(spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]);
     },
     spawnChance(chance) {
         return Math.random() < chance + 0.07 * simulation.difficulty && mob.length < -1 + 16 * Math.log10(simulation.difficulty + 1)

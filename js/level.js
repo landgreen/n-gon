@@ -16,7 +16,6 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // m.immuneCycle = Infinity //you can't take damage
             // localSettings.levelsClearedLastGame = 10
-            // spawn.setSpawnList();spawn.setSpawnList();
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.setField("standing wave")
@@ -222,10 +221,12 @@ const level = {
         }
     },
     populateLevels() {
+        if (document.getElementById("seed").value) Math.seed = Math.hash(document.getElementById("seed").value) //update randomizer seed in case the player changed it
+
         if (simulation.isTraining) {
             level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
         } else {
-            simulation.isHorizontalFlipped = (Math.random() < 0.5) ? true : false //if true, some maps are flipped horizontally
+            simulation.isHorizontalFlipped = (Math.seededRandom() < 0.5) ? true : false //if true, some maps are flipped horizontally
             level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
             if (simulation.isCommunityMaps) {
                 // level.levels.push(level.communityLevels)
@@ -235,8 +236,9 @@ const level = {
             } else {
                 level.levels = shuffle(level.levels); //shuffles order of maps
             }
-            level.levels.splice(Math.floor(level.levels.length * (0.4 + 0.6 * Math.random())), 0, "reservoir"); //add level to the back half of the randomized levels list
-            level.levels.splice(Math.floor(level.levels.length * (0.4 + 0.6 * Math.random())), 0, "reactor"); //add level to the back half of the randomized levels list
+            // level.levels.splice(Math.floor(level.levels.length * (0.4 + 0.6 * Math.random())), 0, "reservoir"); //add level to the back half of the randomized levels list
+            level.levels.splice(Math.floor(Math.seededRandom((level.levels.length) * 0.4, level.levels.length)), 0, "reservoir"); //add level to the back half of the randomized levels list
+            level.levels.splice(Math.floor(Math.seededRandom((level.levels.length) * 0.4, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
             level.levels.splice(0, 2); //remove 2 levels from the start of the array
             if (!build.isExperimentSelection || (build.hasExperimentalMode && !simulation.isCheating)) { //experimental mode is endless, unless you only have an experiment Tech
                 level.levels.unshift("intro"); //add level to the start of the randomized levels list
@@ -244,6 +246,9 @@ const level = {
                 level.levels.push("final"); //add level to the end of the randomized levels list
             }
         }
+        //set seeded random lists of mobs and bosses
+        for (let i = 0; i < level.levels.length; i++) spawn.mobTypeSpawnOrder.push(spawn.fullPickList[Math.floor(Math.seededRandom(0, spawn.fullPickList.length))])
+        for (let i = 0; i < level.levels.length * 2; i++) spawn.bossTypeSpawnOrder.push(spawn.randomBossList[Math.floor(Math.seededRandom(0, spawn.randomBossList.length))])
     },
     flipHorizontal() {
         const flipX = (who) => {
@@ -2508,8 +2513,6 @@ const level = {
         level.exit.y = -430;
 
         // level.difficultyIncrease(14); //hard mode level 7
-        spawn.setSpawnList();
-        spawn.setSpawnList();
         level.defaultZoom = 1500
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = color.background //"#ddd";
@@ -3232,8 +3235,6 @@ const level = {
 
         // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         // m.immuneCycle = Infinity //you can't take damage
-        // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
-        // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
 
         simulation.isHorizontalFlipped = true
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
