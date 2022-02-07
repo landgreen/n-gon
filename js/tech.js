@@ -3067,15 +3067,13 @@ const tech = {
         },
         {
             name: "particle collider",
-            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while <strong>paused</strong> <strong>ejects</strong> them<br><em><strong>3%</strong> chance to convert that tech into <strong class='color-f'>energy</strong></em>`,
+            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while <strong>paused</strong> <strong>ejects</strong> them<br><em><strong>4%</strong> chance to convert that tech into <strong class='color-f'>energy</strong></em>`,
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() {
-                return tech.isPauseSwitchField
-            },
-            requires: "unified field theory",
+            allowed() { return true },
+            requires: "",
             effect() {
                 tech.isPauseEjectTech = true;
             },

@@ -6,12 +6,17 @@ Math.hash = s => { for (var i = 0, h = 9; i < s.length;) h = Math.imul(h ^ s.cha
 // const date1 = new Date()
 // Math.seed = date1.getUTCDate() * date1.getUTCFullYear(); // daily seed,  day + year
 // Math.seed = Date.now() //random every time:  just the time in seconds UTC
-Math.seed = Math.floor(Date.now() % 100000000) //random every time:  just the time in seconds UTC
+// Math.seed = Math.abs(Math.hash(String(Date.now()))) //update randomizer seed in case the player changed it
+
+// document.getElementById("seed").placeholder = Math.seed = Math.initialSeed = Math.floor(Date.now() % 100000) //random every time:  just the time in milliseconds UTC
+
+
+document.getElementById("seed").placeholder = Math.initialSeed = String(Math.floor(Date.now() % 100000))
+Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
 Math.seededRandom = function(min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined
     Math.seed = (Math.seed * 9301 + 49297) % 233280;
     return min + Math.seed / 233280 * (max - min);
 }
-document.getElementById("seed").placeholder = Math.seed //display seed in settings
 //Math.seed is set to document.getElementById("seed").value in level.populate level at the start of runs
 // console.log(Math.seed)
 
@@ -269,6 +274,7 @@ ${botText}
 <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
 <br>mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
 <br>
+<br>seed: ${Math.initialSeed}
 <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${m.cycle} cycles
 <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
 

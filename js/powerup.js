@@ -1044,7 +1044,7 @@ const powerUps = {
     },
     pauseEjectTech(index) {
         if (tech.isPauseEjectTech || simulation.testing) {
-            if (Math.random() < 0.03) {
+            if (Math.random() < 0.04) {
                 tech.removeTech(index)
                 m.energy += 20.48;
             } else {

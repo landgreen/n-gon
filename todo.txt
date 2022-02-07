@@ -1,32 +1,33 @@
 ******************************************************** NEXT PATCH **************************************************
 
-all runs are now seeded
-seed defaults to the last 8 digits of UTC time in milliseconds
-set a custom randomization seed in settings
-seed controls:
-    at start - boss list, mob type list, level list, horizontal flip
-    during run - tech, gun, field choices, some custom level randomization
-doesn't control: mob spawns, mob size, some minor level differences, specific level boss choices, ammo reward values, specific tech effects
-
-bug fix with ground state
+seeds are displayed in pause menu and intro map
+seeds from your previous run is displayed in settings after you die
+fixed some minor seed inconsistency
 
 ******************************************************** TODO ********************************************************
 
+make railgun default fire mode for crouch harpoon?
+
+buff perfect diamagnetism
+
 make a seed/hash system that controls only the tech/guns/fields shown
+  URL sharing could include a seed
   seed will control:
-    seeded random at start done - random level boss, mob types list, level order, horizontal flip
+    seeded random at start - random level boss, mob types list, level order, horizontal flip
     seeded random during run - tech, gun, field choices
     not seeded random - mob spawns, mob size, minor level differences, custom level boss choices, ammo rewards, tech effect randomness
       better to only seed things at the start of the run so it doesn't mess with power up choices
-  put a seed display in top right corner of splash menu, or settings?
-    normal seed = full UTC time
-    make option for a daily seed: seed = day+year
-      give 1 extra tech for doing the daily seeded run
-      make the option for the daily run, a secret exit in the intro level?
-    figure out how to convert text into seed
-  display seed in pause menu
+  make option for a daily seed: seed = day+year
+    give 1 extra tech for doing the daily seeded run
+    make the option for the daily run, a secret exit in the intro level?
+  when you die
+    randomize seed
+      display new seed
+      show previous run seed
+      edit div in settings
+    
 
-tech upgrade to anthropic to make it trigger at 50% life and 0%
+tech upgrade to anthropic principle to make it trigger at 50% life and 0% once per map
 
 JUNK tech: https://bindingofisaacrebirth.fandom.com/wiki/Damocles
 

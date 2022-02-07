@@ -221,7 +221,10 @@ const level = {
         }
     },
     populateLevels() {
-        if (document.getElementById("seed").value) Math.seed = Math.hash(document.getElementById("seed").value) //update randomizer seed in case the player changed it
+        if (document.getElementById("seed").value) {
+            Math.initialSeed = String(document.getElementById("seed").value)
+            Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
+        }
 
         if (simulation.isTraining) {
             level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
