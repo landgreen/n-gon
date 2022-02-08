@@ -1,14 +1,16 @@
 ******************************************************** NEXT PATCH **************************************************
 
-seeds are displayed in pause menu and intro map
-seeds from your previous run is displayed in settings after you die
-fixed some minor seed inconsistency
+harpoon's crouch is now a harpoon sized railgun
+tech: halfwave rectifier now gives energy on harpoon/railgun charge and also stops harpoon from draining energy when it retracts
+toggling harpoon does 800 -> 600% more damage
+
+perfect diamagnetism default field is a bit larger
+
+bug fix with several periodic checks running off simulation time
+  they now run on player time and will be active during time dilation
+fixed a bug where lore wasn't working
 
 ******************************************************** TODO ********************************************************
-
-make railgun default fire mode for crouch harpoon?
-
-buff perfect diamagnetism
 
 make a seed/hash system that controls only the tech/guns/fields shown
   URL sharing could include a seed

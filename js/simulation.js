@@ -888,7 +888,7 @@ const simulation = {
     //   }
     // },
     checks() {
-        if (!(simulation.cycle % 60)) { //once a second
+        if (!(m.cycle % 60)) { //once a second
             //energy overfill 
             if (m.energy > m.maxEnergy) m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
             if (tech.isFlipFlopEnergy && m.immuneCycle < m.cycle) {
@@ -942,12 +942,13 @@ const simulation = {
             //   }
             // }
 
-            if (m.lastKillCycle + 300 > simulation.cycle) { //effects active for 5 seconds after killing a mob
+            if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
                 if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) m.energy += m.maxEnergy * 0.05
+                console.log(`lastKill = ${m.lastKillCycle}, cycle = ${m.cycle},   health = ${m.health}, maxHealth = ${m.maxHealth}`)
                 if (tech.isHealthRecovery) m.addHealth(0.01 * m.maxHealth)
             }
 
-            if (!(simulation.cycle % 420)) { //once every 7 seconds
+            if (!(m.cycle % 420)) { //once every 7 seconds
                 if (tech.isZeno) {
                     m.health *= 0.9167 //remove 1/12
                     m.displayHealth();

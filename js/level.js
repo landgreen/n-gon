@@ -19,9 +19,9 @@ const level = {
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.setField("standing wave")
-            // b.giveGuns("laser")
+            // b.giveGuns("harpoon")
             // for (let i = 0; i < 100; i++) tech.giveTech("slow light")
-            // tech.giveTech("eject")
+            // tech.giveTech("recycling")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // tech.giveTech("tinsellated flagella")
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
@@ -2374,8 +2374,8 @@ const level = {
     },
     null() {
         level.levels.pop(); //remove lore level from rotation
-        level.onLevel--
-        console.log(level.onLevel, level.levels)
+        // level.onLevel--
+        // console.log(level.onLevel, level.levels)
         //start a conversation based on the number of conversations seen
         if (localSettings.loreCount < lore.conversation.length && !simulation.isCheating) {
             lore.testSpeechAPI() //see if speech is working

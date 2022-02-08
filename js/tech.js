@@ -5330,16 +5330,16 @@ const tech = {
         {
             name: "capacitor bank",
             // description: "<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, foam, railgun, pulse, tokamak</em>",
-            descriptionFunction() { return `<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, ${tech.haveGunCheck("foam", false) ? "<strong>foam</strong>" : "foam"}, ${tech.isRailGun ? "<strong>railgun</strong>" : "railgun"}, ${tech.isPulseLaser ? "<strong>pulse</strong>" : "pulse"}, ${tech.isTokamak ? "<strong>tokamak</strong>" : "tokamak"}</em>` },
+            descriptionFunction() { return `<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, ${tech.haveGunCheck("foam", false) ? "<strong>foam</strong>" : "foam"}, ${tech.haveGunCheck("harpoon", false) ? "<strong>railgun</strong>" : "railgun"}, ${tech.isPulseLaser ? "<strong>pulse</strong>" : "pulse"}, ${tech.isTokamak ? "<strong>tokamak</strong>" : "tokamak"}</em>` },
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.blockDamage > 0.075 || tech.haveGunCheck("foam") || tech.isRailGun || tech.isTokamak || tech.isPulseLaser
+                return tech.blockDamage > 0.075 || tech.haveGunCheck("foam") || tech.isTokamak || tech.isPulseLaser
             },
-            requires: "throwing blocks, foam, railgun, pulse, tokamak",
+            requires: "throwing blocks, foam, pulse, tokamak",
             effect() {
                 tech.isCapacitor = true;
             },
@@ -5537,7 +5537,7 @@ const tech = {
         },
         {
             name: "toggling harpoon",
-            description: "increase the <strong class='color-d'>damage</strong> of your next <strong>harpoon</strong><br>by <strong>800%</strong> after using it to collect a <strong>power up</strong>",
+            description: "increase the <strong class='color-d'>damage</strong> of your next <strong>harpoon</strong><br>by <strong>600%</strong> after using it to collect a <strong>power up</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5574,9 +5574,28 @@ const tech = {
                 tech.extraHarpoons = 0;
             }
         },
+        // {
+        //     name: "railgun",
+        //     description: "firing the <strong>harpoon</strong> while crouched launches<br>a rod that is <strong>faster</strong>, <strong>larger</strong>, and more <strong>dense</strong>",
+        //     isGunTech: true,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return tech.haveGunCheck("harpoon")
+        //     },
+        //     requires: "railgun",
+        //     effect() {
+        //         tech.isRailGun = true;
+        //     },
+        //     remove() {
+        //         tech.isRailGun = false;
+        //     }
+        // },
         {
-            name: "railgun",
-            description: "firing the <strong>harpoon</strong> while crouched launches<br>a rod that is <strong>faster</strong>, <strong>larger</strong>, and more <strong>dense</strong>",
+            name: "half-wave rectifier",
+            description: "<strong>harpoons</strong> drain no <strong class='color-f'>energy</strong> as they <strong>retract</strong><br><strong>crouch</strong> firing <strong>harpoon</strong> generates <strong class='color-f'>energy</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5586,25 +5605,6 @@ const tech = {
                 return tech.haveGunCheck("harpoon")
             },
             requires: "railgun",
-            effect() {
-                tech.isRailGun = true;
-            },
-            remove() {
-                tech.isRailGun = false;
-            }
-        },
-        {
-            name: "half-wave rectifier",
-            description: "charging the <strong>railgun</strong> gives you <strong class='color-f'>energy</strong><br><em>instead of draining it</em>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.isRailGun
-            },
-            requires: "harpoon, railgun",
             effect() {
                 tech.isRailEnergyGain = true;
             },
