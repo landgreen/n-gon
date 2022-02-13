@@ -14,22 +14,23 @@ const level = {
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
-            // m.immuneCycle = Infinity //you can't take damage
-            // localSettings.levelsClearedLastGame = 10
-            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.setField("standing wave")
             // b.giveGuns("harpoon")
             // for (let i = 0; i < 100; i++) tech.giveTech("slow light")
-            // tech.giveTech("recycling")
+            // tech.giveTech("tungsten carbide")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // tech.giveTech("tinsellated flagella")
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
-            // tech.giveTech("nail-bot")
+            // tech.giveTech("decoherence")
+            // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
+            // powerUps.research.changeRerolls(100000)
             // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.tech[297].frequency = 100
 
+            // m.immuneCycle = Infinity //you can't take damage
+            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.reactor();
             // level.testing(); //not in rotation, used for testing
@@ -220,7 +221,7 @@ const level = {
             simulation.clearNow = true; //triggers in simulation.clearMap to remove all physics bodies and setup for new map
         }
     },
-    populateLevels() {
+    populateLevels() { //run a second time if URL is loaded
         if (document.getElementById("seed").value) {
             Math.initialSeed = String(document.getElementById("seed").value)
             Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
@@ -250,7 +251,9 @@ const level = {
             }
         }
         //set seeded random lists of mobs and bosses
+        spawn.mobTypeSpawnOrder = []
         for (let i = 0; i < level.levels.length; i++) spawn.mobTypeSpawnOrder.push(spawn.fullPickList[Math.floor(Math.seededRandom(0, spawn.fullPickList.length))])
+        spawn.bossTypeSpawnOrder = []
         for (let i = 0; i < level.levels.length * 2; i++) spawn.bossTypeSpawnOrder.push(spawn.randomBossList[Math.floor(Math.seededRandom(0, spawn.randomBossList.length))])
     },
     flipHorizontal() {
@@ -2609,24 +2612,32 @@ const level = {
         document.body.style.backgroundColor = "#d0d5df" //"#d8dadf";
         // powerUps.spawnStartingPowerUps(1475, -1175);
         // spawn.debris(750, -2200, 3700, 16); //16 debris per level
-        spawn.mapRect(-1525, -2825, 1250, 3925);
+        spawn.mapRect(-1525, -2825, 1250, 4925);
         spawn.mapRect(-400, -2025, 625, 925);
         spawn.mapRect(-400, -750, 625, 1200);
 
-        spawn.mapRect(-425, 0, 4200, 1100);
+        // spawn.mapVertex(200, 0, "-200 0  -100 -100  100 -100  200 0");
+        spawn.bodyRect(225, -100, 100, 100, 0.5);
+        spawn.bodyRect(225, -200, 75, 100, 0.5);
+        spawn.bodyRect(325, -70, 150, 70, 1);
+        spawn.bodyRect(-275, -850, 75, 100, 0.4);
+        spawn.bodyRect(1525, -100, 100, 100, 0.3);
+        spawn.bodyRect(2325, -50, 125, 50, 0.3);
+        spawn.bodyRect(2375, -100, 50, 50, 0.3);
+        for (let i = 0; i < 3; ++i) powerUps.spawn(400 + 2000 * Math.random(), -25, "ammo");
+
+        spawn.mapRect(-425, 0, 4200, 2100);
         spawn.mapRect(175, -1250, 50, 300);
         spawn.mapRect(-475, -2825, 4250, 1025);
         // spawn.mapRect(1200, -1300, 600, 800);
         const a = 400 //side length
         const c = 100 //corner offset
-        spawn.mapVertex(1487, -900, `${-a} ${-a+c}  ${-a+c} ${-a}     ${a-c} ${-a}  ${a} ${-a+c}    ${a} ${a-c}  ${a-c} ${a}    ${-a+c} ${a}  ${-a} ${a-c}`); //square with edges cut off
+        spawn.mapVertex(1487, -900, `${-a} ${-a+c}  ${-a+c} ${-a}   ${a-c} ${-a}  ${a} ${-a+c}   ${a} ${a-c}  ${a-c} ${a}  ${-a+c} ${a}  ${-a} ${a-c}`); //square with edges cut off
 
         //exit
-        spawn.mapRect(3300, -2825, 1125, 3925);
+        spawn.mapRect(3300, -2825, 1125, 4925);
         spawn.mapRect(2750, -2150, 1025, 1775);
         spawn.mapRect(2750, -475, 50, 300);
-
-
 
         // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
         // spawn.randomSmallMob(1300, -70);
@@ -2651,6 +2662,8 @@ const level = {
         let isSpawnedBoss = false
 
         level.custom = () => {
+            // player.force.y -= player.mass * simulation.g * 0.4; //float player
+
             if (isDoorsLocked) {
                 if (!isFightOver && !(simulation.cycle % 120)) { //once a second
                     let isFoundBoss = false
@@ -2665,7 +2678,6 @@ const level = {
                         doorIn.isClosing = false
                         doorOut.isClosing = false
                         powerUps.spawnBossPowerUp(2900, -100)
-                        for (let i = 0; i < 3; ++i) powerUps.spawn(2900 + 30 * i, -300, "ammo");
                     }
                 }
 
@@ -2688,12 +2700,19 @@ const level = {
                 doorOut.isClosing = true
                 if (!isSpawnedBoss) {
                     isSpawnedBoss = true
-                    for (let i = 0, len = simulation.difficulty / 20; i < len; ++i) spawn.bounceBoss(1487 + 300 * i, -1525, 80, false);
+                    if (Math.random() > 0.5) {
+                        for (let i = 0, len = Math.min(simulation.difficulty / 20, 5); i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
+                    } else {
+                        for (let i = 0, len = Math.min(simulation.difficulty / 10, 10); i < len; ++i) spawn.sprayBoss(2400 - 150 * i, -225, 30, false)
+                    }
+                    // for (let i = 0, len = 3 + simulation.difficulty / 20; i < len; ++i) spawn.mantisBoss(1487 + 300 * i, -1525, 35, false)
                 }
             }
 
             doorIn.openClose();
             doorOut.openClose();
+            ctx.fillStyle = "#d5ebef"
+            ctx.fillRect(2750, -375, 550, 375)
             level.enter.draw();
             level.exit.drawAndCheck();
         };
@@ -2704,6 +2723,10 @@ const level = {
             // }
             doorIn.draw();
             doorOut.draw();
+            ctx.fillStyle = "rgba(0,0,0,0.05)"
+            ctx.fillRect(-275, -1100, 500, 350);
+            // ctx.fillStyle = "rgba(0,255,255,0.1)"
+            // ctx.fillRect(2750, -375, 550, 375)
         };
         // if (simulation.difficulty > 1) spawn.randomLevelBoss(2200, -1300);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned

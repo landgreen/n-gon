@@ -1,20 +1,21 @@
 ******************************************************** NEXT PATCH **************************************************
 
-harpoon's crouch is now a harpoon sized railgun
-tech: halfwave rectifier now gives energy on harpoon/railgun charge and also stops harpoon from draining energy when it retracts
-toggling harpoon does 800 -> 600% more damage
-
-perfect diamagnetism default field is a bit larger
-
-bug fix with several periodic checks running off simulation time
-  they now run on player time and will be active during time dilation
-fixed a bug where lore wasn't working
+new sprayBoss on reactor level
+  shows up 50% of the time
+  unbalanced right now, so give me feedback
 
 ******************************************************** TODO ********************************************************
 
+tech doing damage refunds up to 50% of damage take in last 10 seconds
+  use history to manage this?
+
+tech: frozen mobs dies at 10% life
+
+CPt disables the falling damage tech
+
 make a seed/hash system that controls only the tech/guns/fields shown
   URL sharing could include a seed
-  seed will control:
+  seed controls:
     seeded random at start - random level boss, mob types list, level order, horizontal flip
     seeded random during run - tech, gun, field choices
     not seeded random - mob spawns, mob size, minor level differences, custom level boss choices, ammo rewards, tech effect randomness
@@ -22,11 +23,6 @@ make a seed/hash system that controls only the tech/guns/fields shown
   make option for a daily seed: seed = day+year
     give 1 extra tech for doing the daily seeded run
     make the option for the daily run, a secret exit in the intro level?
-  when you die
-    randomize seed
-      display new seed
-      show previous run seed
-      edit div in settings
     
 
 tech upgrade to anthropic principle to make it trigger at 50% life and 0% once per map
@@ -35,13 +31,20 @@ JUNK tech: https://bindingofisaacrebirth.fandom.com/wiki/Damocles
 
 cloaking field doesn't show energy over max
 
-junk tech or regular tech with this named
-  wiki: List of common misconceptions
-
 run more profiles of n-gon to fix performance issues
 
+sprayBoss
+  reactor or everywhere?
+
 reactor
-  hopBoss 
+  life-like cellular automata boss
+    https://scratch.mit.edu/projects/77724260/
+    night/day?
+      boss on far right produces more "on" cells
+  tailBoss
+    story the last 5 seconds of position, draw damage circles over those positions, like a tail
+  limit mantis boss to only reactor?
+  laserBoss?
   swoopBoss: hides in top center
     take a lap around the map that you have to dodge
     spawn mobs

@@ -944,7 +944,6 @@ const simulation = {
 
             if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
                 if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) m.energy += m.maxEnergy * 0.05
-                console.log(`lastKill = ${m.lastKillCycle}, cycle = ${m.cycle},   health = ${m.health}, maxHealth = ${m.maxHealth}`)
                 if (tech.isHealthRecovery) m.addHealth(0.01 * m.maxHealth)
             }
 

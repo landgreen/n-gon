@@ -304,7 +304,14 @@ const powerUps = {
                 const banishLength = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
                 for (let i = 0; i < banishLength; i++) {
                     const index = powerUps.tech.choiceLog.length - i - 1
-                    if (powerUps.tech.choiceLog[index] !== undefined) tech.tech[powerUps.tech.choiceLog[index]].isBanished = true
+                    if (powerUps.tech.choiceLog[index] && tech.tech[powerUps.tech.choiceLog[index]]) {
+                        tech.tech[powerUps.tech.choiceLog[index]].isBanished = true
+                    } else { //if no tech options available eject banish tech
+                        for (let i = 0, len = tech.tech.length; i < len; i++) {
+                            if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i)
+                        }
+                        powerUps.endDraft("tech");
+                    }
                 }
                 simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - banishLength)}`)
             }
@@ -397,7 +404,18 @@ const powerUps = {
                 const banishLength = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
                 for (let i = 0; i < banishLength; i++) {
                     const index = powerUps.tech.choiceLog.length - i - 1
-                    if (powerUps.tech.choiceLog[index] !== undefined || powerUps.tech.choiceLog[index] !== null) tech.tech[powerUps.tech.choiceLog[index]].isBanished = true
+                    // console.log(index)
+                    // console.log(powerUps.tech.choiceLog.length)
+                    // console.log(powerUps.tech.choiceLog[index])
+                    // console.log(tech.tech[powerUps.tech.choiceLog[index]])
+                    if (powerUps.tech.choiceLog[index] && tech.tech[powerUps.tech.choiceLog[index]]) {
+                        tech.tech[powerUps.tech.choiceLog[index]].isBanished = true
+                    } else { //if no tech options available eject banish tech
+                        for (let i = 0, len = tech.tech.length; i < len; i++) {
+                            if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i)
+                        }
+                        powerUps.endDraft("tech");
+                    }
                 }
                 simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - banishLength)}`)
             }
@@ -686,6 +704,7 @@ const powerUps = {
                 if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("tech",true)'>✕</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>tech</h3>`
                 let choice1 = pick()
+                console.log(choice1)
                 let choice2 = null
                 let choice3 = null
                 if (choice1 !== null) {
@@ -776,12 +795,6 @@ const powerUps = {
                     document.getElementById("choose-grid").innerHTML = text
                     powerUps.showDraft();
 
-                } else if (tech.isBanish) { //if no tech options available eject banish tech
-                    for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i)
-                    }
-                    // simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - powerUps.tech.banishLog.length)}`)
-                    powerUps.endDraft("tech");
                 }
             }
         }

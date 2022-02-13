@@ -1371,7 +1371,7 @@ const b = {
                     requestAnimationFrame(() => { who.isShielded = true });
                 }
                 if (tech.fragments) {
-                    b.targetedNail(this.vertices[2], tech.fragments * 4)
+                    b.targetedNail(this.vertices[2], tech.fragments * 3)
                     if (!isReturn) this.endCycle = 0;
                 }
                 if (!who.isBadTarget) {
@@ -5650,7 +5650,7 @@ const b = {
                                 Matter.Body.setVelocity(this, { x: -0.4 * this.velocity.x, y: -0.4 * this.velocity.y });
                             } else {
                                 if (tech.fragments && this.speed > 10) {
-                                    b.targetedNail(this.position, tech.fragments * 17)
+                                    b.targetedNail(this.position, tech.fragments * 13)
                                     this.endCycle = 0 //triggers despawn
                                 }
                             }

@@ -1,10 +1,10 @@
 //main object for spawning things in a level
 const spawn = {
     nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "orbitalBoss", "spawnerBossCulture", "growBossCulture"],
-    // other bosses: suckerBoss, laserBoss, tetherBoss,    //these need a particular level to work so they are not included in the random pool
+    // other bosses: suckerBoss, laserBoss, tetherBoss, mantisBoss, bounceBoss, sprayBoss    //these need a particular level to work so they are not included in the random pool
     randomBossList: ["shieldingBoss", "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
         "powerUpBoss", "powerUpBossBaby", "snakeBoss", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss",
-        "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "mantisBoss", "slashBoss"
+        "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss"
     ],
     bossTypeSpawnOrder: [], //preset list of boss names calculated at the start of a run by the randomSeed
     bossTypeSpawnIndex: 0, //increases as the boss type cycles
@@ -19,26 +19,15 @@ const spawn = {
     pickList: ["starter", "starter"],
     fullPickList: [
         "hopper", "hopper", "hopper",
-        "slasher", "slasher",
+        "slasher", "slasher", "hopper",
+        "stabber", "stabber", "stabber",
+        "springer", "springer", "springer",
         "shooter", "shooter",
         "grenadier", "grenadier",
         "striker", "striker",
         "laser", "laser",
-        "stabber", "stabber",
-        "springer", "springer",
         "pulsar", "pulsar",
-        "launcher",
-        "launcherOne",
-        "exploder",
-        "sneaker",
-        "sucker",
-        "sniper",
-        "spinner",
-        "grower",
-        "beamer",
-        "focuser",
-        "spawner",
-        "ghoster",
+        "launcher", "launcherOne", "exploder", "sneaker", "sucker", "sniper", "spinner", "grower", "beamer", "focuser", "spawner", "ghoster",
     ],
     mobTypeSpawnOrder: [], //preset list of mob names calculated at the start of a run by the randomSeed
     mobTypeSpawnIndex: 0, //increases as the mob type cycles
@@ -1950,7 +1939,7 @@ const spawn = {
         spawn.groupShield(targets, x, y, sideLength + 1 * radius + nodes * 5 - 25);
         spawn.allowShields = true;
     },
-    mantisBoss(x, y, radius = 35) {
+    mantisBoss(x, y, radius = 35, isSpawnBossPowerUp = true) {
         mobs.spawn(x, y, 5, radius, "#6ba");
         let me = mob[mob.length - 1];
         me.babyList = [] //list of mobs that are apart of this boss
@@ -2140,7 +2129,7 @@ const spawn = {
 
         me.onDeath = function() {
             this.removeCons();
-            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             for (let i = 0; i < this.babyList.length; i++) {
                 if (this.babyList[i].alive) {
                     this.babyList[i].collisionFilter.mask = cat.map | cat.bullet | cat.player
@@ -3537,7 +3526,98 @@ const spawn = {
             ctx.setLineDash([]);
         }
     },
-    bounceBoss(x, y, radius = 80, isSpawnBossPOwerUp = true) {
+    sprayBoss(x, y, radius = 30, isSpawnBossPowerUp = true) {
+        mobs.spawn(x, y, 16, radius, "rgb(255,255,255)");
+        let me = mob[mob.length - 1];
+        me.isBoss = true;
+        me.inertia = Infinity; //no rotation
+        // me.accelMag = 0.00008 + 0.00007 * simulation.accelScale;
+        me.burstFireFreq = 20 + Math.floor(20 * simulation.CDScale)
+        me.burstTotalPhases = 4 + Math.floor(2 / simulation.CDScale)
+        me.noFireTotalCycles = 390
+        me.frictionStatic = 0;
+        me.friction = 0;
+        me.frictionAir = 0;
+        me.restitution = 1
+        spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random(), 1)
+        Matter.Body.setDensity(me, 0.0022 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        me.damageReduction = 0.12 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.onDeath = function() {
+            if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+        };
+        me.onDamage = function() {};
+
+        //draw radial lines from verticies showing future bullet paths?
+        me.radialLines = function() {
+            ctx.beginPath();
+            for (let i = 0, len = this.vertices.length; i < len; i++) {
+                ctx.moveTo(this.vertices[i].x, this.vertices[i].y)
+                const unit = Vector.add(Vector.mult(Vector.normalise(Vector.sub(this.vertices[i], this.position)), 1000), this.vertices[i])
+                ctx.lineTo(unit.x, unit.y)
+                // console.log(unit, this.vertices, this.position)
+            }
+            ctx.lineWidth = 10
+            ctx.strokeStyle = "rgb(200,0,200,0.03)"
+            ctx.stroke();
+        }
+
+        me.phaseCycle = 0
+        me.normalDoStuff = function() {
+            // this.seePlayerByHistory();
+            // this.attraction();
+            this.checkStatus();
+            me.seePlayer.recall = 1
+            //maintain speed //faster in the vertical to help avoid repeating patterns
+            if (this.speed < 0.01) {
+                Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(Vector.sub(player.position, this.position)), 0.1));
+            } else {
+                if (Math.abs(this.velocity.y) < 15) Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.07 });
+                if (Math.abs(this.velocity.x) < 11) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.07, y: this.velocity.y });
+            }
+        }
+        me.noFire = function() {
+            this.normalDoStuff();
+            this.phaseCycle++
+            if (this.phaseCycle > this.noFireTotalCycles) { //start burst fire mode
+                this.phaseCycle = -2
+                this.do = this.burstFire
+                this.frictionAir = 1
+                if (!this.isShielded) spawn.shield(this, this.position.x, this.position.y, 1);
+            }
+        };
+        me.burstFire = function() {
+            this.normalDoStuff();
+            this.radialLines()
+            if (!(simulation.cycle % this.burstFireFreq)) {
+                this.phaseCycle++
+                if (this.phaseCycle > this.burstTotalPhases) { //start spiral fire mode
+                    this.phaseCycle = -7
+                    this.do = this.noFire
+                    this.frictionAir = 0;
+                    Matter.Body.setVelocity(this, Vector.rotate({ x: 20, y: 0 }, 2 * Math.PI * Math.random()));
+                    if (this.isShielded) { //remove shield
+                        for (let i = 0; i < mob.length; i++) {
+                            if (mob[i].shield) mob[i].death()
+                        }
+                    }
+                }
+                if (this.phaseCycle > -1) {
+                    Matter.Body.rotate(this, 0.08)
+                    for (let i = 0, len = this.vertices.length; i < len; i++) { //fire a bullet from each vertex
+                        spawn.sniperBullet(this.vertices[i].x, this.vertices[i].y, 8, 4);
+                        const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[i])), -26)
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: velocity.x,
+                            y: velocity.y
+                        });
+                    }
+                }
+            }
+        };
+        me.do = me.noFire
+        Matter.Body.setVelocity(me, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) });
+    },
+    bounceBoss(x, y, radius = 80, isSpawnBossPowerUp = true) {
         mobs.spawn(x, y, 0, radius, "rgb(255,255,255)") // "rgb(201,202,225)");
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
@@ -3563,7 +3643,7 @@ const spawn = {
                 this.damageReduction = 0
             }
         };
-        if (isSpawnBossPOwerUp) me.onDeath = function() { powerUps.spawnBossPowerUp(this.position.x, this.position.y) };
+        if (isSpawnBossPowerUp) me.onDeath = function() { powerUps.spawnBossPowerUp(this.position.x, this.position.y) };
         me.cycle = 0
         me.nextHealthThreshold = 0.75
         me.fireCount = 0
@@ -4411,8 +4491,7 @@ const spawn = {
             }
         };
     },
-    sniperBullet(x, y, radius = 9, sides = 4) {
-        //bullets
+    sniperBullet(x, y, radius = 9, sides = 4) { //bullets
         mobs.spawn(x, y, sides, radius, "rgb(255,0,155)");
         let me = mob[mob.length - 1];
         me.stroke = "transparent";
@@ -4431,10 +4510,23 @@ const spawn = {
         me.showHealthBar = false;
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
+        me.onDeath = function() {
+            if (simulation.difficulty > 11) { //explode AoE
+                const radius = 100 + simulation.difficulty + 60 * Math.random()
+                if (m.immuneCycle < m.cycle && Vector.magnitude(Vector.sub(this.position, player.position)) < radius) m.damage(0.0004 * radius * simulation.dmgScale);
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: radius,
+                    color: "rgba(255,0,155,0.5)",
+                    time: simulation.drawTime
+                });
+            }
+        };
         me.do = function() {
             // this.gravity();
             this.timeLimit();
-            if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0 && this.speed < 3) {
+            if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0 && this.speed < 10) {
                 this.isDropPowerUp = false;
                 this.death(); //death with no power up
             }

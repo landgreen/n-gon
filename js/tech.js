@@ -221,7 +221,7 @@ const tech = {
         if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
         if (tech.isLowEnergyDamage) dmg *= 1 + 0.7 * Math.max(0, 1 - m.energy)
         if (tech.isMaxEnergyTech) dmg *= 1.5
-        if (tech.isEnergyNoAmmo) dmg *= 1.66
+        if (tech.isEnergyNoAmmo) dmg *= 1.70
         if (tech.isDamageForGuns) dmg *= 1 + 0.12 * b.inventory.length
         if (tech.isLowHealthDmg) dmg *= 1 + Math.max(0, 1 - m.health) * 0.5
         if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
@@ -230,7 +230,7 @@ const tech = {
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
         if (tech.isEnergyDamage) dmg *= 1 + m.energy * 0.125;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
-        if (tech.isRerollDamage) dmg *= 1 + 0.037 * powerUps.research.count
+        if (tech.isRerollDamage) dmg *= 1 + 0.038 * powerUps.research.count
         if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
@@ -580,7 +580,7 @@ const tech = {
         },
         {
             name: "exciton",
-            description: `increase <strong class='color-d'>damage</strong> by <strong>66%</strong>, but<br>${powerUps.orb.ammo()} will no longer <strong>spawn</strong>`,
+            description: `increase <strong class='color-d'>damage</strong> by <strong>70%</strong>, but<br>${powerUps.orb.ammo()} will no longer <strong>spawn</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2879,7 +2879,7 @@ const tech = {
         },
         {
             name: "Bayesian statistics",
-            description: `increase <strong class='color-d'>damage</strong> by <strong>3.7%</strong><br>for each ${powerUps.orb.research(1)} in your inventory`,
+            description: `increase <strong class='color-d'>damage</strong> by <strong>3.8%</strong><br>for each ${powerUps.orb.research(1)} in your inventory`,
             maxCount: 1,
             count: 0,
             frequency: 2,
@@ -3067,7 +3067,7 @@ const tech = {
         },
         {
             name: "particle collider",
-            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while <strong>paused</strong> <strong>ejects</strong> them<br><em><strong>4%</strong> chance to convert that tech into <strong class='color-f'>energy</strong></em>`,
+            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><em><strong>4%</strong> chance to convert that tech into <strong class='color-f'>energy</strong></em>`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3340,9 +3340,9 @@ const tech = {
             frequencyDefault: 10,
             isNonRefundable: true,
             allowed() {
-                return tech.duplicationChance() > 0.99
+                return tech.duplicationChance() > 0.7
             },
-            requires: "duplication chance above 99%",
+            requires: "duplication chance above 70%",
             effect() {
                 tech.is111Duplicate = true;
                 tech.maxDuplicationEvent()
@@ -3522,7 +3522,7 @@ const tech = {
         },
         {
             name: "reinforcement learning",
-            description: "increase the <strong class='flicker'>frequency</strong> of finding copies of<br>recursive <strong class='color-m'>tech</strong> you already have by <strong>1000%</strong>",
+            description: "increase the <strong class='flicker'>frequency</strong> of finding copies of<br>your current recursive <strong class='color-m'>tech</strong> by <strong>1000%</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -6723,7 +6723,7 @@ const tech = {
         },
         {
             name: "no-cloning theorem",
-            description: `<strong>40%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>mob</strong> <strong>dies</strong>, lose <strong>2%</strong> <strong class='color-dup'>duplication</strong> chance`,
+            description: `<strong>45%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a <strong>mob</strong> <strong>dies</strong>, lose <strong>2%</strong> <strong class='color-dup'>duplication</strong> chance`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -6734,7 +6734,7 @@ const tech = {
             },
             requires: "cloaking, time dilation",
             effect() {
-                tech.cloakDuplication = 0.4
+                tech.cloakDuplication = 0.45
                 powerUps.setDupChance(); //needed after adjusting duplication chance
                 if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.4);
             },
@@ -6745,7 +6745,7 @@ const tech = {
         },
         {
             name: "symbiosis",
-            description: "after a <strong>mob</strong> <strong>dies</strong>, lose <strong>0.5</strong> max <strong class='color-h'>health</strong><br><strong>bosses</strong> spawn <strong>1</strong> extra <strong class='color-m'>tech</strong> after they <strong>die</strong>",
+            description: "after a <strong>mob</strong> <strong>dies</strong>, lose <strong>0.45</strong> max <strong class='color-h'>health</strong><br><strong>bosses</strong> spawn <strong>1</strong> extra <strong class='color-m'>tech</strong> after they <strong>die</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,

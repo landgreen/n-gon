@@ -154,6 +154,11 @@ window.addEventListener('load', () => {
             }
             if (property === "level") document.getElementById("starting-level").value = Math.max(Number(set[property]) - 1, 0)
             if (property === "noPower") document.getElementById("no-power-ups").checked = Number(set[property])
+            // if (property === "seed") {
+            //     document.getElementById("seed").placeholder = Math.initialSeed = String(set[property])
+            //     Math.seed = Math.abs(Math.hash(Math.initialSeed))
+            //     level.populateLevels()
+            // }
         }
     } else if (localSettings.isTrainingNotAttempted && localSettings.runCount < 30) { //make training button more obvious for new players
         // document.getElementById("training-button").style.border = "0px #333 solid";
@@ -555,6 +560,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
     },
     shareURL(isCustom = false) {
         let url = "https://landgreen.github.io/sidescroller/index.html?"
+        url += `&seed=${Math.initialSeed}`
         let count = 0;
         for (let i = 0; i < b.inventory.length; i++) {
             if (b.guns[b.inventory[i]].have) {
@@ -585,16 +591,12 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         navigator.clipboard.writeText(url).then(function() {
             /* clipboard successfully set */
             if (isCustom) {
-                setTimeout(function() {
-                    alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
-                }, 300);
+                setTimeout(function() { alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.') }, 300);
             }
         }, function() {
             /* clipboard write failed */
             if (isCustom) {
-                setTimeout(function() {
-                    alert('copy failed')
-                }, 300);
+                setTimeout(function() { alert('copy failed') }, 300);
             }
             console.log('copy failed')
         });
