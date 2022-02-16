@@ -1,17 +1,33 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new sprayBoss on reactor level
-  shows up 50% of the time
-  unbalanced right now, so give me feedback
+new reactor boss - mineBoss
+  1/3 chance for 1 of 3 different bosses to spawn on the reactor level
+
+harpoon starts with 10->3 ammo, and still gets 1 ammo per powerUpx
+network effect damage per bot 7->6%
+perimeter defense harm reduction 8->7%
+
+bug fix decoherence
 
 ******************************************************** TODO ********************************************************
 
++damage for each different bot type you have
+  disables bot upgrades?
+
+improve rail gun / use ammo to crouch fire style for harpoon
+  spend ammo to get some tech
+    ammo cost on reticulum
+    spend ammo to make harpoon radioactive
+    tech disables filament and unaaq?  probably don't need to
+  give rail gun the auto targeting
+    improve auto-target with a tech?
+      you already tried this and target probably can't get better
+  try to get grappling hook working again
+
 tech doing damage refunds up to 50% of damage take in last 10 seconds
-  use history to manage this?
+  use history[] to manage this?
 
-tech: frozen mobs dies at 10% life
-
-CPt disables the falling damage tech
+tech: frozen mobs die at 10% life
 
 make a seed/hash system that controls only the tech/guns/fields shown
   URL sharing could include a seed
@@ -24,7 +40,6 @@ make a seed/hash system that controls only the tech/guns/fields shown
     give 1 extra tech for doing the daily seeded run
     make the option for the daily run, a secret exit in the intro level?
     
-
 tech upgrade to anthropic principle to make it trigger at 50% life and 0% once per map
 
 JUNK tech: https://bindingofisaacrebirth.fandom.com/wiki/Damocles
@@ -33,10 +48,10 @@ cloaking field doesn't show energy over max
 
 run more profiles of n-gon to fix performance issues
 
-sprayBoss
-  reactor or everywhere?
-
 reactor
+  mineBoss - bounces around and drops mines
+    mines explode with a large radius that can trigger other mines
+      mines have a short delay before exploding so they don't all go up in the same cycle
   life-like cellular automata boss
     https://scratch.mit.edu/projects/77724260/
     night/day?

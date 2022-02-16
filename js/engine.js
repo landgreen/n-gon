@@ -135,7 +135,7 @@ function collisionChecks(event) {
                         }
                         if (tech.isPiezo) m.energy += 20.48;
                         if (tech.isStimulatedEmission) powerUps.ejectTech()
-                        if (mob[k].onHit) mob[k].onHit(k);
+                        if (mob[k].onHit) mob[k].onHit();
                         if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                         //extra kick between player and mob              //this section would be better with forces but they don't work...
                         let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);

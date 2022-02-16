@@ -514,7 +514,7 @@ const m = {
         if (tech.isSlowFPS) dmg *= 0.8
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.4
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.1
-        if (tech.isBotArmor) dmg *= 0.92 ** b.totalBots()
+        if (tech.isBotArmor) dmg *= 0.93 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.energyRegen === 0) dmg *= 0.34
@@ -3618,7 +3618,7 @@ const m = {
                                     m.damage(dmg);
                                     if (tech.isPiezo) m.energy += 20.48;
                                     if (tech.isStimulatedEmission) powerUps.ejectTech()
-                                    if (mob[k].onHit) mob[k].onHit(k);
+                                    if (mob[k].onHit) mob[k].onHit();
                                     if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                                     //extra kick between player and mob              //this section would be better with forces but they don't work...
                                     let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);

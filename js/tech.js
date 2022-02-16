@@ -234,7 +234,7 @@ const tech = {
         if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
-        if (tech.isBotDamage) dmg *= 1 + 0.07 * b.totalBots()
+        if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.5
         return dmg * tech.slowFire * tech.aimDamage
     },
@@ -1395,7 +1395,7 @@ const tech = {
         },
         {
             name: "perimeter defense",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>8%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>7%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
             maxCount: 1,
             count: 0,
             frequency: 2,
@@ -1414,7 +1414,7 @@ const tech = {
         },
         {
             name: "network effect",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>7%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>6%</strong><br>for each of your permanent <strong class='color-bot'>bots</strong>",
             maxCount: 1,
             count: 0,
             frequency: 2,
@@ -7768,7 +7768,7 @@ const tech = {
         },
         {
             name: "emergency broadcasting",
-            description: "emit 2 sound sine waveforms at 853 Hz and 960 Hz<br><em>lower your volume</em>",
+            description: "emit 2 sine waveforms at 853 Hz and 960 Hz<br><em>lower your volume</em>",
             maxCount: 1,
             count: 0,
             frequency: 0,

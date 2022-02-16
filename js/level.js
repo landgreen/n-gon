@@ -15,7 +15,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
-            // m.setField("standing wave")
+            // m.setField("time dilation")
             // b.giveGuns("harpoon")
             // for (let i = 0; i < 100; i++) tech.giveTech("slow light")
             // tech.giveTech("tungsten carbide")
@@ -30,7 +30,7 @@ const level = {
             // tech.tech[297].frequency = 100
 
             // m.immuneCycle = Infinity //you can't take damage
-            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.reactor();
             // level.testing(); //not in rotation, used for testing
@@ -2617,13 +2617,13 @@ const level = {
         spawn.mapRect(-400, -750, 625, 1200);
 
         // spawn.mapVertex(200, 0, "-200 0  -100 -100  100 -100  200 0");
-        spawn.bodyRect(225, -100, 100, 100, 0.5);
-        spawn.bodyRect(225, -200, 75, 100, 0.5);
-        spawn.bodyRect(325, -70, 150, 70, 1);
-        spawn.bodyRect(-275, -850, 75, 100, 0.4);
-        spawn.bodyRect(1525, -100, 100, 100, 0.3);
-        spawn.bodyRect(2325, -50, 125, 50, 0.3);
-        spawn.bodyRect(2375, -100, 50, 50, 0.3);
+        // spawn.bodyRect(225, -100, 100, 100, 0.5);
+        // spawn.bodyRect(225, -200, 75, 100, 0.5);
+        spawn.bodyRect(250, -70, 100, 70, 1);
+        // spawn.bodyRect(-275, -850, 75, 100, 0.4);
+        // spawn.bodyRect(1525, -100, 100, 100, 0.3);
+        // spawn.bodyRect(2325, -50, 125, 50, 0.3);
+        // spawn.bodyRect(2375, -100, 50, 50, 0.3);
         for (let i = 0; i < 3; ++i) powerUps.spawn(400 + 2000 * Math.random(), -25, "ammo");
 
         spawn.mapRect(-425, 0, 4200, 2100);
@@ -2700,10 +2700,12 @@ const level = {
                 doorOut.isClosing = true
                 if (!isSpawnedBoss) {
                     isSpawnedBoss = true
-                    if (Math.random() > 0.5) {
+                    if (Math.random() < 0.33) {
                         for (let i = 0, len = Math.min(simulation.difficulty / 20, 5); i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
-                    } else {
+                    } else if (Math.random() < 0.5) {
                         for (let i = 0, len = Math.min(simulation.difficulty / 10, 10); i < len; ++i) spawn.sprayBoss(2400 - 150 * i, -225, 30, false)
+                    } else {
+                        for (let i = 0, len = Math.min(simulation.difficulty / 8, 10); i < len; ++i) spawn.mineBoss(1950, -250, 50, false);
                     }
                     // for (let i = 0, len = 3 + simulation.difficulty / 20; i < len; ++i) spawn.mantisBoss(1487 + 300 * i, -1525, 35, false)
                 }

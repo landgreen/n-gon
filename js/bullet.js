@@ -3122,10 +3122,9 @@ const b = {
                         this.target.damage(m.dmgScale * this.damage);
                     }
                 } else if (this.target !== null) { //look for a new target
-                    this.target = null
                     this.collisionFilter.category = cat.bullet;
                     this.collisionFilter.mask = cat.mob //| cat.mobShield //cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
-                    if (tech.isFoamGrowOnDeath && bullet.length < 180) {
+                    if (tech.isFoamGrowOnDeath && bullet.length < 180 && !this.target.isMobBullet) {
                         let targets = []
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -3147,6 +3146,7 @@ const b = {
                             }
                         }
                     }
+                    this.target = null
                 } else if (Matter.Query.point(map, this.position).length > 0) { //slow when touching map or blocks
                     const slow = 0.85
                     Matter.Body.setVelocity(this, {
@@ -5581,7 +5581,7 @@ const b = {
             name: "harpoon",
             description: "fire a <strong>self-steering</strong> harpoon that uses <strong class='color-f'>energy</strong><br>to <strong>retract</strong> and refund its <strong class='color-ammo'>ammo</strong> cost",
             ammo: 0,
-            ammoPack: 1,
+            ammoPack: 0.3,
             have: false,
             do() {},
             fire() {

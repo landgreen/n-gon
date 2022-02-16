@@ -3617,6 +3617,160 @@ const spawn = {
         me.do = me.noFire
         Matter.Body.setVelocity(me, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) });
     },
+    mineBoss(x, y, radius = 120, isSpawnBossPowerUp = true) {
+        mobs.spawn(x, y, 0, radius, "rgba(255,255,255,0.5)") // "rgb(201,202,225)");
+        let me = mob[mob.length - 1];
+        // Matter.Body.rotate(me, 2 * Math.PI * Math.random());
+        me.isBoss = true;
+        Matter.Body.setDensity(me, 0.001); //normal is 0.001
+        me.inertia = Infinity;
+        me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.startingDamageReduction = me.damageReduction
+        me.isInvulnerable = false
+        me.frictionAir = 0.01
+        me.restitution = 1
+        me.friction = 0
+        me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob
+        me.explodeRange = 400
+        Matter.Body.setVelocity(me, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) });
+        me.seePlayer.recall = 1;
+        // spawn.shield(me, x, y, 1);
+        me.onDamage = function() {
+            if (this.health < this.nextHealthThreshold) {
+                this.health = this.nextHealthThreshold - 0.01
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4
+                this.invulnerableCount = 60 + simulation.difficulty * 1.5
+                this.isInvulnerable = true
+                this.damageReduction = 0
+
+                //slow time to look cool
+                // simulation.fpsCap = 10 //new fps
+                // simulation.fpsInterval = 1000 / simulation.fpsCap;
+                //how long to wait to return to normal fps
+                // m.defaultFPSCycle = m.cycle + 20 + 90
+
+
+                for (let i = 0, len = mob.length; i < len; ++i) { //trigger nearby mines
+                    if (mob[i].isMine && Vector.magnitude(Vector.sub(this.position, mob[i].position)) < this.explodeRange) mob[i].isExploding = true
+                }
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: this.explodeRange,
+                    color: "rgba(255,25,0,0.6)",
+                    time: simulation.drawTime * 2
+                });
+
+            }
+        };
+        me.onDeath = function() {
+            if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            for (let i = 0, len = mob.length; i < len; ++i) { //trigger nearby mines
+                if (mob[i].isMine && Vector.magnitude(Vector.sub(this.position, mob[i].position)) < this.explodeRange) mob[i].isExploding = true
+            }
+        };
+        me.cycle = 0
+        me.nextHealthThreshold = 0.75
+        me.invulnerableCount = 0
+        // console.log(me.mass) //100
+        me.do = function() {
+            me.seePlayer.recall = 1
+            //maintain speed //faster in the vertical to help avoid repeating patterns
+            if (this.speed < 0.01) {
+                const unit = Vector.sub(player.position, this.position)
+                Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(unit), 0.1));
+                // this.invulnerableCount = 10 + simulation.difficulty * 0.5
+                // this.isInvulnerable = true
+                // this.damageReduction = 0
+            } else {
+                if (Math.abs(this.velocity.y) < 10) {
+                    Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.03 });
+                }
+                if (Math.abs(this.velocity.x) < 7) {
+                    Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y });
+                }
+            }
+            if (this.isInvulnerable) {
+                this.invulnerableCount--
+                if (this.invulnerableCount < 0) {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                }
+                //draw invulnerable
+                ctx.beginPath();
+                let vertices = this.vertices;
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                ctx.lineTo(vertices[0].x, vertices[0].y);
+                ctx.lineWidth = 20;
+                ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                ctx.stroke();
+            }
+            this.checkStatus();
+            if (!(simulation.cycle % 15) && mob.length < 360) spawn.mine(this.position.x, this.position.y)
+        };
+    },
+    mine(x, y) {
+        mobs.spawn(x, y, 8, 10, "rgb(100,170,150)");
+        let me = mob[mob.length - 1];
+        me.stroke = "transparent";
+        Matter.Body.setDensity(me, 0.0001); //normal is 0.001
+        // Matter.Body.setStatic(me, true); //make static  (disables taking damage)
+        me.frictionAir = 1
+        me.damageReduction = 2
+        me.collisionFilter.category = cat.mobBullet;
+        me.collisionFilter.mask = cat.bullet | cat.body // | cat.player
+        me.isMine = true
+        me.leaveBody = false;
+        me.isDropPowerUp = false;
+        me.isBadTarget = true;
+        me.isMobBullet = true;
+        me.showHealthBar = false;
+        me.explodeRange = 200 + 150 * Math.random()
+        me.isExploding = false
+        me.countDown = Math.ceil(4 * Math.random())
+
+        // me.onHit = function() {
+        //     this.isExploding = true
+        // };
+        // me.onDamage = function() {
+        //     this.health = 1
+        //     this.isExploding = true
+        // };
+        me.do = function() {
+            this.checkStatus();
+
+            if (Matter.Query.collides(this, [player]).length > 0) {
+                this.isExploding = true
+            }
+
+            if (this.isExploding) {
+                if (this.countDown-- < 0) { //explode
+                    this.death();
+                    //hit player
+                    if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.explodeRange) {
+                        m.damage(0.008 * simulation.dmgScale);
+                        const DRAIN = 0.08 * (tech.isRadioactiveResistance ? 0.25 : 1)
+                        if (m.energy > DRAIN) m.energy -= DRAIN
+                    }
+                    // mob[i].isInvulnerable = false //make mineBoss not invulnerable ?
+                    const range = this.explodeRange + 50 //mines get a slightly larger range to explode
+                    for (let i = 0, len = mob.length; i < len; ++i) {
+                        if (mob[i].alive && Vector.magnitude(Vector.sub(this.position, mob[i].position)) < range) {
+                            if (mob[i].isMine) mob[i].isExploding = true //explode other mines
+                        }
+                    }
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: this.explodeRange,
+                        color: "rgba(80,220,190,0.45)",
+                        time: 16
+                    });
+                }
+            }
+        };
+    },
     bounceBoss(x, y, radius = 80, isSpawnBossPowerUp = true) {
         mobs.spawn(x, y, 0, radius, "rgb(255,255,255)") // "rgb(201,202,225)");
         let me = mob[mob.length - 1];
@@ -3659,10 +3813,10 @@ const spawn = {
                 // this.damageReduction = 0
             } else {
                 if (Math.abs(this.velocity.y) < 15) {
-                    Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.07 });
+                    Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.03 });
                 }
                 if (Math.abs(this.velocity.x) < 11) {
-                    Matter.Body.setVelocity(this, { x: this.velocity.x * 1.07, y: this.velocity.y });
+                    Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y });
                 }
             }
 
