@@ -17,20 +17,20 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // m.setField("time dilation")
             // b.giveGuns("harpoon")
-            // for (let i = 0; i < 100; i++) tech.giveTech("slow light")
-            // tech.giveTech("tungsten carbide")
+            // tech.giveTech("unaaq")
+            // tech.giveTech("railgun")
+            // tech.giveTech("capacitor bank")
+            // tech.giveTech("half-wave rectifier")
+            // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
-            // tech.giveTech("tinsellated flagella")
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
-            // tech.giveTech("decoherence")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
             // powerUps.research.changeRerolls(100000)
-            // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
             // tech.tech[297].frequency = 100
 
             // m.immuneCycle = Infinity //you can't take damage
-            // level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(8) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.reactor();
             // level.testing(); //not in rotation, used for testing
@@ -128,30 +128,29 @@ const level = {
         m.dmgScale = 1; //damage done by player decreases each level
         simulation.accelScale = 1 //mob acceleration increases each level
         simulation.CDScale = 1 //mob CD time decreases each level
-        simulation.dmgScale = 0.375 * simulation.difficulty //damage done by mobs increases each level
+        simulation.dmgScale = Math.max(0.1, 0.35 * simulation.difficulty) //damage done by mobs scales with total levels
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
-            m.dmgScale *= 0.92; //damage done by player decreases each level
+            m.dmgScale *= 0.925; //damage done by player decreases each level
             if (simulation.accelScale < 6) simulation.accelScale *= 1.025 //mob acceleration increases each level
             if (simulation.CDScale > 0.15) simulation.CDScale *= 0.965 //mob CD time decreases each level
         }
-        simulation.dmgScale = 0.375 * simulation.difficulty //damage done by mobs scales with total levels
+        simulation.dmgScale = Math.max(0.1, 0.35 * simulation.difficulty) //damage done by mobs scales with total levels
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
         // console.log(`CD = ${simulation.CDScale}`)
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
-            m.dmgScale /= 0.92; //damage done by player decreases each level
+            m.dmgScale /= 0.925; //damage done by player decreases each level
             if (simulation.accelScale > 1) simulation.accelScale /= 1.025 //mob acceleration increases each level
             if (simulation.CDScale < 1) simulation.CDScale /= 0.965 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = 0.375 * simulation.difficulty //damage done by mobs scales with total levels
-        if (simulation.dmgScale < 0.1) simulation.dmgScale = 0.1;
+        simulation.dmgScale = Math.max(0.1, 0.35 * simulation.difficulty) //damage done by mobs scales with total levels
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055)
     },
     difficultyText() {
@@ -2701,11 +2700,11 @@ const level = {
                 if (!isSpawnedBoss) {
                     isSpawnedBoss = true
                     if (Math.random() < 0.33) {
-                        for (let i = 0, len = Math.min(simulation.difficulty / 20, 5); i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
+                        for (let i = 0, len = Math.min(simulation.difficulty / 20, 6); i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
                     } else if (Math.random() < 0.5) {
-                        for (let i = 0, len = Math.min(simulation.difficulty / 10, 10); i < len; ++i) spawn.sprayBoss(2400 - 150 * i, -225, 30, false)
+                        for (let i = 0, len = Math.min(simulation.difficulty / 9, 8); i < len; ++i) spawn.sprayBoss(2400 - 150 * i, -225, 30, false)
                     } else {
-                        for (let i = 0, len = Math.min(simulation.difficulty / 8, 10); i < len; ++i) spawn.mineBoss(1950, -250, 50, false);
+                        for (let i = 0, len = Math.min(simulation.difficulty / 6, 10); i < len; ++i) spawn.mineBoss(1950, -250, 50, false);
                     }
                     // for (let i = 0, len = 3 + simulation.difficulty / 20; i < len; ++i) spawn.mantisBoss(1487 + 300 * i, -1525, 35, false)
                 }

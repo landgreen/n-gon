@@ -2454,7 +2454,7 @@ const tech = {
         },
         {
             name: "Zeno's paradox",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>85%</strong>, but every <strong>5</strong> seconds<br>remove <strong>1/12</strong> of your current <strong class='color-h'>health</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>85%</strong>, but every <strong>5</strong> seconds<br>remove <strong>7%</strong> of your current <strong class='color-h'>health</strong>",
             // description: "every <strong>5</strong> seconds remove <strong>1/10</strong> of your <strong class='color-h'>health</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong>",
             maxCount: 1,
             count: 0,
@@ -3655,25 +3655,6 @@ const tech = {
             }
         },
         {
-            name: "ceramics",
-            description: `<strong>needles</strong> and <strong>harpoons</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.haveGunCheck("harpoon") || (tech.isNeedles || tech.isNeedleShot)
-            },
-            requires: "nail gun, needle gun, needle-shot, harpoon",
-            effect() {
-                tech.isShieldPierce = true
-            },
-            remove() {
-                tech.isShieldPierce = false
-            }
-        },
-        {
             name: "nanowires",
             description: `<strong>needles</strong> tunnel through <strong class='color-block'>blocks</strong> and <strong>map</strong><br>increase needle <strong class='color-d'>damage</strong> by <strong>20%</strong>`,
             isGunTech: true,
@@ -4219,6 +4200,25 @@ const tech = {
             }
         },
         {
+            name: "incendiary ammunition",
+            description: "<strong>shotgun</strong>, <strong>super balls</strong>, and <strong>drones</strong><br>are loaded with <strong class='color-e'>explosives</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return ((m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isDroneTeleport || tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot && !tech.isNeedleShot
+            },
+            requires: "super balls, basic or slug shotgun, drones, not irradiated drones or burst drones",
+            effect() {
+                tech.isIncendiary = true
+            },
+            remove() {
+                tech.isIncendiary = false;
+            }
+        },
+        {
             name: "supertemporal",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Temporal_paradox' class="link">supertemporal</a>`,
             description: "fire <strong>super ball</strong> from the same point in <strong>space</strong><br> but separated by <strong>0.1</strong> seconds in <strong>time</strong>",
@@ -4409,8 +4409,8 @@ const tech = {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "matter wave") {
                         b.guns[i].chooseFireMethod()
-                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack / 8
-                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 8);
+                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack / 9
+                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 9);
                         simulation.updateGunHUD();
                         break
                     }
@@ -4423,7 +4423,7 @@ const tech = {
                             tech.isLongitudinal = false;
                             b.guns[i].chooseFireMethod()
                             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
-                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 8);
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 9);
                             simulation.updateGunHUD();
                             break
                         }
@@ -4510,6 +4510,164 @@ const tech = {
                     b.respawnBots();
                     if (!tech.haveGunCheck("missiles", false)) b.giveGuns("missiles")
                 }
+            }
+        },
+        {
+            name: "iridium-192",
+            description: "<strong class='color-e'>explosions</strong> release <strong class='color-p'>gamma radiation</strong><br><strong>100%</strong> more <strong class='color-d'>damage</strong>, but over 4 seconds",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isTokamak)
+            },
+            requires: "an explosive damage source, not ammonium nitrate or nitroglycerin",
+            effect: () => {
+                tech.isExplodeRadio = true; //iridium-192
+            },
+            remove() {
+                tech.isExplodeRadio = false;
+            }
+        },
+        {
+            name: "fragmentation",
+            description: "some <strong class='color-e'>detonations</strong> and collisions eject <strong>nails</strong><br><em style = 'font-size: 90%'>blocks, grenades, missiles, slugs, harpoon</em>",
+            isGunTech: true,
+            maxCount: 9,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return tech.haveGunCheck("harpoon") || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.missileBotCount || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.blockDamage > 0.075
+            },
+            requires: "grenades, missiles, shotgun slugs, harpoon, or mass driver",
+            effect() {
+                tech.fragments++
+            },
+            remove() {
+                tech.fragments = 0
+            }
+        },
+        {
+            name: "ammonium nitrate",
+            description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>27%</strong><br>increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>27%</strong>",
+            isGunTech: true,
+            maxCount: 9,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
+            },
+            requires: "an explosive damage source, not iridium-192",
+            effect: () => {
+                tech.explosiveRadius += 0.27;
+            },
+            remove() {
+                tech.explosiveRadius = 1;
+            }
+        },
+        {
+            name: "nitroglycerin",
+            description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>66%</strong><br>decrease <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>33%</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
+            },
+            requires: "an explosive damage source, not iridium-192",
+            effect: () => {
+                tech.isSmallExplosion = true;
+            },
+            remove() {
+                tech.isSmallExplosion = false;
+            }
+        },
+        {
+            name: "acetone peroxide",
+            description: "increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>80%</strong>, but<br>you take <strong>200%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            isBadRandomOption: true,
+            allowed() {
+                return tech.hasExplosiveDamageCheck()
+            },
+            requires: "an explosive damage source",
+            effect: () => {
+                tech.isExplosionHarm = true;
+            },
+            remove() {
+                tech.isExplosionHarm = false;
+            }
+        },
+        {
+            name: "shock wave",
+            description: "<strong class='color-e'>explosions</strong> <strong>stun</strong> mobs for <strong>1-2</strong> seconds<br>decrease <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>30%</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
+            },
+            requires: "an explosive damage source, not iridium-192",
+            effect() {
+                tech.isExplosionStun = true;
+            },
+            remove() {
+                tech.isExplosionStun = false;
+            }
+        },
+        {
+            name: "controlled explosion",
+            description: `use ${powerUps.orb.research(3)} to dynamically <strong>reduce</strong> all<br><strong class='color-e'>explosions</strong> until they do no <strong class='color-harm'>harm</strong>`,
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 2) && (tech.haveGunCheck("missiles") || tech.isMissileField || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
+            },
+            requires: "an explosive damage source, not electric reactive armor",
+            effect: () => {
+                tech.isSmartRadius = true;
+                for (let i = 0; i < 3; i++) {
+                    if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+                }
+            },
+            remove() {
+                tech.isSmartRadius = false;
+                if (this.count > 0) powerUps.research.changeRerolls(3)
+            }
+        },
+        {
+            name: "electric reactive armor",
+            // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
+            description: "<strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong> is passively reduced<br>by <strong>5%</strong> for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return !tech.isSmartRadius && !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
+            },
+            requires: "an explosive damage source, not iridium-192",
+            effect: () => {
+                tech.isImmuneExplosion = true;
+            },
+            remove() {
+                tech.isImmuneExplosion = false;
             }
         },
         {
@@ -4669,183 +4827,6 @@ const tech = {
             },
             remove() {
                 tech.isRadioactiveResistance = false
-            }
-        },
-        {
-            name: "iridium-192",
-            description: "<strong class='color-e'>explosions</strong> release <strong class='color-p'>gamma radiation</strong><br><strong>100%</strong> more <strong class='color-d'>damage</strong>, but over 4 seconds",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isTokamak)
-            },
-            requires: "an explosive damage source, not ammonium nitrate or nitroglycerin",
-            effect: () => {
-                tech.isExplodeRadio = true; //iridium-192
-            },
-            remove() {
-                tech.isExplodeRadio = false;
-            }
-        },
-        {
-            name: "ammonium nitrate",
-            description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>27%</strong><br>increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>27%</strong>",
-            isGunTech: true,
-            maxCount: 9,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
-            },
-            requires: "an explosive damage source, not iridium-192",
-            effect: () => {
-                tech.explosiveRadius += 0.27;
-            },
-            remove() {
-                tech.explosiveRadius = 1;
-            }
-        },
-        {
-            name: "nitroglycerin",
-            description: "increase <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>66%</strong><br>decrease <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>33%</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
-            },
-            requires: "an explosive damage source, not iridium-192",
-            effect: () => {
-                tech.isSmallExplosion = true;
-            },
-            remove() {
-                tech.isSmallExplosion = false;
-            }
-        },
-        {
-            name: "acetone peroxide",
-            description: "increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>80%</strong>, but<br>you take <strong>200%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            isBadRandomOption: true,
-            allowed() {
-                return tech.hasExplosiveDamageCheck()
-            },
-            requires: "an explosive damage source",
-            effect: () => {
-                tech.isExplosionHarm = true;
-            },
-            remove() {
-                tech.isExplosionHarm = false;
-            }
-        },
-        {
-            name: "shock wave",
-            description: "<strong class='color-e'>explosions</strong> <strong>stun</strong> mobs for <strong>1-2</strong> seconds<br>decrease <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong> by <strong>30%</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
-            },
-            requires: "an explosive damage source, not iridium-192",
-            effect() {
-                tech.isExplosionStun = true;
-            },
-            remove() {
-                tech.isExplosionStun = false;
-            }
-        },
-        {
-            name: "controlled explosion",
-            description: `use ${powerUps.orb.research(3)} to dynamically <strong>reduce</strong> all<br><strong class='color-e'>explosions</strong> until they do no <strong class='color-harm'>harm</strong>`,
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 2) && (tech.haveGunCheck("missiles") || tech.isMissileField || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
-            },
-            requires: "an explosive damage source, not electric reactive armor",
-            effect: () => {
-                tech.isSmartRadius = true;
-                for (let i = 0; i < 3; i++) {
-                    if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-                }
-            },
-            remove() {
-                tech.isSmartRadius = false;
-                if (this.count > 0) powerUps.research.changeRerolls(3)
-            }
-        },
-        {
-            name: "electric reactive armor",
-            // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
-            description: "<strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong> is passively reduced<br>by <strong>5%</strong> for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return !tech.isSmartRadius && !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
-            },
-            requires: "an explosive damage source, not iridium-192",
-            effect: () => {
-                tech.isImmuneExplosion = true;
-            },
-            remove() {
-                tech.isImmuneExplosion = false;
-            }
-        },
-        {
-            name: "incendiary ammunition",
-            description: "<strong>shotgun</strong>, <strong>super balls</strong>, and <strong>drones</strong><br>are loaded with <strong class='color-e'>explosives</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return ((m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isDroneTeleport || tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport) || tech.haveGunCheck("super balls") || tech.haveGunCheck("shotgun")) && !tech.isNailShot && !tech.isIceShot && !tech.isFoamShot && !tech.isWormShot && !tech.isNeedleShot
-            },
-            requires: "super balls, basic or slug shotgun, drones, not irradiated drones or burst drones",
-            effect() {
-                tech.isIncendiary = true
-            },
-            remove() {
-                tech.isIncendiary = false;
-            }
-        },
-        {
-            name: "fragmentation",
-            description: "some <strong class='color-e'>detonations</strong> and collisions eject <strong>nails</strong><br><em style = 'font-size: 90%'>blocks, grenades, missiles, slugs, harpoon</em>",
-            isGunTech: true,
-            maxCount: 9,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return tech.haveGunCheck("harpoon") || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.missileBotCount || (tech.haveGunCheck("shotgun") && tech.isSlugShot) || tech.blockDamage > 0.075
-            },
-            requires: "grenades, missiles, shotgun slugs, harpoon, or mass driver",
-            effect() {
-                tech.fragments++
-            },
-            remove() {
-                tech.fragments = 0
             }
         },
         {
@@ -5109,41 +5090,6 @@ const tech = {
             }
         },
         {
-            name: "fault tolerance",
-            description: "spawn <strong>8</strong> <strong>drones</strong> that last <strong>forever</strong><br>remove your <strong>drone gun</strong>",
-            isGunTech: true,
-            isRemoveGun: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return tech.haveGunCheck("drones", false) && !tech.isDroneRespawn && tech.isBulletsLastLonger === 1
-            },
-            requires: "drones, not drone repair, anti-shear topology",
-            effect() {
-                const num = 8
-                tech.isForeverDrones += num
-                if (tech.haveGunCheck("drones", false)) b.removeGun("drones")
-                //spawn drones
-                if (tech.isDroneRadioactive) {
-                    for (let i = 0; i < num * 0.25; i++) {
-                        b.droneRadioactive({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
-                        bullet[bullet.length - 1].endCycle = Infinity
-                    }
-                } else {
-                    for (let i = 0; i < num; i++) {
-                        b.drone({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
-                        bullet[bullet.length - 1].endCycle = Infinity
-                    }
-                }
-            },
-            remove() {
-                tech.isForeverDrones = 0
-                if (this.count && !tech.haveGunCheck("drones", false)) b.giveGuns("drones")
-            }
-        },
-        {
             name: "reduced tolerances",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Engineering_tolerance' class="link">reduced tolerances</a>`,
             description: `increase <strong>drones</strong> per ${powerUps.orb.ammo()} or <strong class='color-f'>energy</strong> by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>`,
@@ -5328,23 +5274,71 @@ const tech = {
             }
         },
         {
-            name: "capacitor bank",
-            // description: "<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, foam, railgun, pulse, tokamak</em>",
-            descriptionFunction() { return `<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, ${tech.haveGunCheck("foam", false) ? "<strong>foam</strong>" : "foam"}, ${tech.haveGunCheck("harpoon", false) ? "<strong>railgun</strong>" : "railgun"}, ${tech.isPulseLaser ? "<strong>pulse</strong>" : "pulse"}, ${tech.isTokamak ? "<strong>tokamak</strong>" : "tokamak"}</em>` },
+            name: "fault tolerance",
+            description: "spawn <strong>8</strong> <strong>drones</strong> that last <strong>forever</strong><br>remove your <strong>drone gun</strong>",
             isGunTech: true,
+            isRemoveGun: true,
             maxCount: 1,
             count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
+            frequency: 1,
+            frequencyDefault: 1,
             allowed() {
-                return tech.blockDamage > 0.075 || tech.haveGunCheck("foam") || tech.isTokamak || tech.isPulseLaser
+                return tech.haveGunCheck("drones", false) && !tech.isDroneRespawn && tech.isBulletsLastLonger === 1
             },
-            requires: "throwing blocks, foam, pulse, tokamak",
+            requires: "drones, not drone repair, anti-shear topology",
             effect() {
-                tech.isCapacitor = true;
+                const num = 8
+                tech.isForeverDrones += num
+                if (tech.haveGunCheck("drones", false)) b.removeGun("drones")
+                //spawn drones
+                if (tech.isDroneRadioactive) {
+                    for (let i = 0; i < num * 0.25; i++) {
+                        b.droneRadioactive({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
+                        bullet[bullet.length - 1].endCycle = Infinity
+                    }
+                } else {
+                    for (let i = 0; i < num; i++) {
+                        b.drone({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
+                        bullet[bullet.length - 1].endCycle = Infinity
+                    }
+                }
             },
             remove() {
-                tech.isCapacitor = false;
+                tech.isForeverDrones = 0
+                if (this.count && !tech.haveGunCheck("drones", false)) b.giveGuns("drones")
+            }
+        },
+        {
+            name: "surfactant",
+            description: "trade your <strong>foam gun</strong> for <strong>2</strong> <strong class='color-bot'>foam-bots</strong><br>and <strong>upgrade</strong> all bots to foam<br>",
+            isGunTech: true,
+            isRemoveGun: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            isBot: true,
+            isBotTech: true,
+            isNonRefundable: true,
+            requires: "foam gun, NOT EXPERIMENT MODE, bot upgrades, fractionation, quantum foam",
+            allowed() {
+                return tech.haveGunCheck("foam", false) && !b.hasBotUpgrade() && !tech.isAmmoFoamSize && !tech.foamFutureFire
+            },
+            effect() {
+                tech.giveTech("foam-bot upgrade")
+                for (let i = 0; i < 2; i++) {
+                    b.foamBot()
+                    tech.foamBotCount++;
+                }
+                simulation.makeTextLog(`tech.isFoamBotUpgrade = true`)
+                if (tech.haveGunCheck("foam", false)) b.removeGun("foam")
+            },
+            remove() {
+                // if (this.count) {
+                //     b.clearPermanentBots();
+                //     b.respawnBots();
+                //     if (!tech.haveGunCheck("foam")) b.giveGuns("foam")
+                // }
             }
         },
         {
@@ -5464,152 +5458,63 @@ const tech = {
             }
         },
         {
-            name: "surfactant",
-            description: "trade your <strong>foam gun</strong> for <strong>2</strong> <strong class='color-bot'>foam-bots</strong><br>and <strong>upgrade</strong> all bots to foam<br>",
+            name: "capacitor bank",
+            // description: "<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, foam, railgun, pulse, tokamak</em>",
+            descriptionFunction() { return `<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, ${tech.haveGunCheck("foam", false) ? "<strong>foam</strong>" : "foam"}, ${tech.isRailGun ? "<strong>railgun</strong>" : "railgun"}, ${tech.isPulseLaser ? "<strong>pulse</strong>" : "pulse"}, ${tech.isTokamak ? "<strong>tokamak</strong>" : "tokamak"}</em>` },
             isGunTech: true,
-            isRemoveGun: true,
             maxCount: 1,
             count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            isBot: true,
-            isBotTech: true,
-            isNonRefundable: true,
-            requires: "foam gun, NOT EXPERIMENT MODE, bot upgrades, fractionation, quantum foam",
+            frequency: 2,
+            frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("foam", false) && !b.hasBotUpgrade() && !tech.isAmmoFoamSize && !tech.foamFutureFire
+                return tech.blockDamage > 0.075 || tech.isRailGun || tech.haveGunCheck("foam") || tech.isTokamak || tech.isPulseLaser
             },
+            requires: "throwing blocks, railgun, foam, pulse, tokamak",
             effect() {
-                tech.giveTech("foam-bot upgrade")
-                for (let i = 0; i < 2; i++) {
-                    b.foamBot()
-                    tech.foamBotCount++;
+                tech.isCapacitor = true;
+            },
+            remove() {
+                tech.isCapacitor = false;
+            }
+        },
+        {
+            name: "railgun",
+            description: `harpoons are <strong>66% denser</strong>, but don't <strong>retract</strong><br>gain <strong>600%</strong> more harpoon <strong>ammo</strong> per ${powerUps.orb.ammo(1)}`,
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.extraHarpoons && !tech.isHarpoonPowerUp
+            },
+            requires: "harpoon, not filament, reticulum, toggling harpoon",
+            ammoBonus: 6,
+            effect() {
+                tech.isRailGun = true;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "harpoon") {
+                        b.guns[i].chooseFireMethod()
+                        b.guns[i].ammoPack = this.ammoBonus;
+                        b.guns[i].ammo = b.guns[i].ammo * this.ammoBonus;
+                        simulation.updateGunHUD();
+                        break
+                    }
                 }
-                simulation.makeTextLog(`tech.isFoamBotUpgrade = true`)
-                if (tech.haveGunCheck("foam", false)) b.removeGun("foam")
             },
             remove() {
-                // if (this.count) {
-                //     b.clearPermanentBots();
-                //     b.respawnBots();
-                //     if (!tech.haveGunCheck("foam")) b.giveGuns("foam")
-                // }
-            }
-        },
-        {
-            name: "filament",
-            description: "increase the <strong>length</strong> of your <strong>harpoon</strong>'s <strong>rope</strong><br>by <strong>1%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.haveGunCheck("harpoon")
-            },
-            requires: "harpoon",
-            effect() {
-                tech.isFilament = true;
-            },
-            remove() {
-                tech.isFilament = false;
-            }
-        },
-        {
-            name: "unaaq",
-            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Harpoon#/media/File:Harpon_Unaaq_MHNT_ETH_AC_198.jpg' class="link">unaaq</a>`, //https://en.wikipedia.org/wiki/Weapon
-            description: "increase the <strong>size</strong> of your <strong>harpoon</strong><br>by <strong>10%</strong> of the square root of harpoon <strong class='color-ammo'>ammo</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.haveGunCheck("harpoon")
-            },
-            requires: "harpoon",
-            effect() {
-                tech.isLargeHarpoon = true;
-            },
-            remove() {
-                tech.isLargeHarpoon = false;
-            }
-        },
-        {
-            name: "toggling harpoon",
-            description: "increase the <strong class='color-d'>damage</strong> of your next <strong>harpoon</strong><br>by <strong>600%</strong> after using it to collect a <strong>power up</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.haveGunCheck("harpoon")
-            },
-            requires: "harpoon",
-            effect() {
-                tech.isHarpoonPowerUp = true
-            },
-            remove() {
-                tech.isHarpoonPowerUp = false
-                tech.harpoonDensity = 0.008
-            }
-        },
-        {
-            name: "reticulum",
-            description: "fire <strong>+1</strong> <strong>harpoon</strong>, but <strong class='color-f'>energy</strong> cost<br>to <strong>retract</strong> also increases",
-            isGunTech: true,
-            maxCount: 9,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.haveGunCheck("harpoon")
-            },
-            requires: "harpoon",
-            effect() {
-                tech.extraHarpoons++;
-            },
-            remove() {
-                tech.extraHarpoons = 0;
-            }
-        },
-        // {
-        //     name: "railgun",
-        //     description: "firing the <strong>harpoon</strong> while crouched launches<br>a rod that is <strong>faster</strong>, <strong>larger</strong>, and more <strong>dense</strong>",
-        //     isGunTech: true,
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 2,
-        //     frequencyDefault: 2,
-        //     allowed() {
-        //         return tech.haveGunCheck("harpoon")
-        //     },
-        //     requires: "railgun",
-        //     effect() {
-        //         tech.isRailGun = true;
-        //     },
-        //     remove() {
-        //         tech.isRailGun = false;
-        //     }
-        // },
-        {
-            name: "half-wave rectifier",
-            description: "<strong>harpoons</strong> drain no <strong class='color-f'>energy</strong> as they <strong>retract</strong><br><strong>crouch</strong> firing <strong>harpoon</strong> generates <strong class='color-f'>energy</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.haveGunCheck("harpoon")
-            },
-            requires: "railgun",
-            effect() {
-                tech.isRailEnergyGain = true;
-            },
-            remove() {
-                tech.isRailEnergyGain = false;
+                if (tech.isRailGun) {
+                    tech.isRailGun = false;
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "harpoon") {
+                            b.guns[i].chooseFireMethod()
+                            b.guns[i].ammoPack = 0.6;
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo / this.ammoBonus);
+                            simulation.updateGunHUD();
+                            break
+                        }
+                    }
+                }
             }
         },
         // {
@@ -5650,6 +5555,122 @@ const tech = {
         //         tech.isRodAreaDamage = false;
         //     }
         // },
+        {
+            name: "half-wave rectifier",
+            description: "<strong>harpoons</strong> drain no <strong class='color-f'>energy</strong> as they <strong>retract</strong><br><strong>crouch</strong> firing <strong>harpoon</strong> generates <strong class='color-f'>energy</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("harpoon")
+            },
+            requires: "railgun",
+            effect() {
+                tech.isRailEnergyGain = true;
+            },
+            remove() {
+                tech.isRailEnergyGain = false;
+            }
+        },
+        {
+            name: "ceramics",
+            description: `<strong>needles</strong> and <strong>harpoons</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("harpoon") || (tech.isNeedles || tech.isNeedleShot)
+            },
+            requires: "nail gun, needle gun, needle-shot, harpoon",
+            effect() {
+                tech.isShieldPierce = true
+            },
+            remove() {
+                tech.isShieldPierce = false
+            }
+        },
+        {
+            name: "unaaq",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Harpoon#/media/File:Harpon_Unaaq_MHNT_ETH_AC_198.jpg' class="link">unaaq</a>`, //https://en.wikipedia.org/wiki/Weapon
+            description: "increase the <strong>size</strong> of your <strong>harpoon</strong><br>by <strong>10%</strong> of the square root of harpoon <strong class='color-ammo'>ammo</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("harpoon")
+            },
+            requires: "harpoon",
+            effect() {
+                tech.isLargeHarpoon = true;
+            },
+            remove() {
+                tech.isLargeHarpoon = false;
+            }
+        },
+        {
+            name: "filament",
+            description: "increase the <strong>length</strong> of your <strong>harpoon</strong>'s <strong>rope</strong><br>by <strong>1%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("harpoon") && !tech.isRailGun
+            },
+            requires: "harpoon",
+            effect() {
+                tech.isFilament = true;
+            },
+            remove() {
+                tech.isFilament = false;
+            }
+        },
+        {
+            name: "toggling harpoon",
+            description: "increase the <strong class='color-d'>damage</strong> of your next <strong>harpoon</strong><br>by <strong>600%</strong> after using it to collect a <strong>power up</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("harpoon") && !tech.isRailGun
+            },
+            requires: "harpoon",
+            effect() {
+                tech.isHarpoonPowerUp = true
+            },
+            remove() {
+                tech.isHarpoonPowerUp = false
+                tech.harpoonDensity = 0.006
+            }
+        },
+        {
+            name: "reticulum",
+            description: "fire <strong>+1</strong> <strong>harpoon</strong>, but <strong class='color-f'>energy</strong> cost<br>to <strong>retract</strong> also increases",
+            isGunTech: true,
+            maxCount: 9,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("harpoon") && !tech.isRailGun
+            },
+            requires: "harpoon",
+            effect() {
+                tech.extraHarpoons++;
+            },
+            remove() {
+                tech.extraHarpoons = 0;
+            }
+        },
         {
             name: "optical amplifier",
             description: "gain <strong>3</strong> random <strong class='color-laser'>laser</strong> <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong><br><strong class='color-laser'>laser</strong> only turns <strong>off</strong> if you have no <strong class='color-f'>energy</strong>",
@@ -6954,7 +6975,7 @@ const tech = {
         },
         {
             name: "virtual particles",
-            description: `use ${powerUps.orb.research(4)}to exploit your <strong class='color-worm'>wormhole</strong> for a<br><strong>13%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
+            description: `use ${powerUps.orb.research(4)}to exploit your <strong class='color-worm'>wormhole</strong> for a<br><strong>12%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -6965,7 +6986,7 @@ const tech = {
             },
             requires: "wormhole",
             effect() {
-                tech.wormDuplicate = 0.13
+                tech.wormDuplicate = 0.12
                 powerUps.setDupChance(); //needed after adjusting duplication chance
                 if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.13);
                 for (let i = 0; i < 4; i++) {
@@ -6980,7 +7001,7 @@ const tech = {
         },
         {
             name: "Penrose process",
-            description: "after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>you gain <strong>63</strong> <strong class='color-f'>energy</strong>",
+            description: "after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>you gain <strong>53</strong> <strong class='color-f'>energy</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -9309,4 +9330,5 @@ const tech = {
     extraSuperBalls: null,
     isTimeCrystals: null,
     isGroundState: null,
+    isRailGun: null
 }

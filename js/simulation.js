@@ -652,6 +652,7 @@ const simulation = {
             if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
+            if (b.guns[i].name === "harpoon") b.guns[i].chooseFireMethod()
         }
         tech.dynamoBotCount = 0;
         tech.nailBotCount = 0;
@@ -949,7 +950,7 @@ const simulation = {
 
             if (!(m.cycle % 420)) { //once every 7 seconds
                 if (tech.isZeno) {
-                    m.health *= 0.9167 //remove 1/12
+                    m.health *= 0.93 //remove 7%
                     m.displayHealth();
                 }
                 if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles

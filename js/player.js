@@ -2970,9 +2970,9 @@ const m = {
                                                 Matter.Composite.remove(engine.world, body[i]);
                                                 body.splice(i, 1);
                                                 m.fieldRange *= 0.8
-                                                if (tech.isWormholeEnergy) m.energy += 0.63
+                                                if (tech.isWormholeEnergy) m.energy += 0.53
                                                 if (tech.isWormholeSpores) { //pandimensional spermia
-                                                    for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
+                                                    for (let i = 0, len = Math.ceil(2.5 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                         if (tech.isSporeWorm) {
                                                             b.worm(Vector.add(m.hole.pos2, Vector.rotate({
                                                                 x: m.fieldRange * 0.4,
@@ -3004,9 +3004,9 @@ const m = {
                                             body.splice(i, 1);
                                             m.fieldRange *= 0.8
                                             // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
-                                            if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.63
+                                            if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.53
                                             if (tech.isWormholeSpores) { //pandimensional spermia
-                                                for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
+                                                for (let i = 0, len = Math.ceil(2.5 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                     if (tech.isSporeWorm) {
                                                         b.worm(Vector.add(m.hole.pos1, Vector.rotate({
                                                             x: m.fieldRange * 0.4,

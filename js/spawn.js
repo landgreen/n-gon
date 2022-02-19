@@ -3532,7 +3532,7 @@ const spawn = {
         me.isBoss = true;
         me.inertia = Infinity; //no rotation
         // me.accelMag = 0.00008 + 0.00007 * simulation.accelScale;
-        me.burstFireFreq = 20 + Math.floor(20 * simulation.CDScale)
+        me.burstFireFreq = 22 + Math.floor(22 * simulation.CDScale)
         me.burstTotalPhases = 4 + Math.floor(2 / simulation.CDScale)
         me.noFireTotalCycles = 390
         me.frictionStatic = 0;
@@ -3602,10 +3602,10 @@ const spawn = {
                     }
                 }
                 if (this.phaseCycle > -1) {
-                    Matter.Body.rotate(this, 0.08)
+                    Matter.Body.rotate(this, 0.02)
                     for (let i = 0, len = this.vertices.length; i < len; i++) { //fire a bullet from each vertex
                         spawn.sniperBullet(this.vertices[i].x, this.vertices[i].y, 8, 4);
-                        const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[i])), -26)
+                        const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[i])), -20)
                         Matter.Body.setVelocity(mob[mob.length - 1], {
                             x: velocity.x,
                             y: velocity.y
@@ -3683,10 +3683,10 @@ const spawn = {
                 // this.isInvulnerable = true
                 // this.damageReduction = 0
             } else {
-                if (Math.abs(this.velocity.y) < 10) {
+                if (Math.abs(this.velocity.y) < 11) {
                     Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.03 });
                 }
-                if (Math.abs(this.velocity.x) < 7) {
+                if (Math.abs(this.velocity.x) < 8) {
                     Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y });
                 }
             }
@@ -3729,6 +3729,7 @@ const spawn = {
         me.explodeRange = 200 + 150 * Math.random()
         me.isExploding = false
         me.countDown = Math.ceil(4 * Math.random())
+        me.isInvulnerable = true //not actually invulnerable, just prevents block + ice-9 interaction
 
         // me.onHit = function() {
         //     this.isExploding = true
@@ -3749,9 +3750,9 @@ const spawn = {
                     this.death();
                     //hit player
                     if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.explodeRange) {
-                        m.damage(0.008 * simulation.dmgScale);
-                        const DRAIN = 0.08 * (tech.isRadioactiveResistance ? 0.25 : 1)
-                        if (m.energy > DRAIN) m.energy -= DRAIN
+                        m.damage(0.01 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.25 : 1));
+                        m.energy -= 0.1 * (tech.isRadioactiveResistance ? 0.25 : 1)
+                        if (m.energy < 0) m.energy = 0
                     }
                     // mob[i].isInvulnerable = false //make mineBoss not invulnerable ?
                     const range = this.explodeRange + 50 //mines get a slightly larger range to explode

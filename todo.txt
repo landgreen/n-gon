@@ -1,28 +1,46 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new reactor boss - mineBoss
-  1/3 chance for 1 of 3 different bosses to spawn on the reactor level
+tech railgun - harpoon charge fires and no longer retracts, get 8x ammo from power ups
+  railgun has auto-targeting, like harpoon
+    the aiming graphic is gone
+  disables filament, reticulum, toggling
+  unlocks capacitor bank
 
-harpoon starts with 10->3 ammo, and still gets 1 ammo per powerUpx
-network effect damage per bot 7->6%
-perimeter defense harm reduction 8->7%
+mobs do 2% less harm to player
+player does 0.5% more damage per level
+Zeno's paradox removes 1/10 -> 1/12 -> 1/14 (7%) health every 5 seconds
+drone gun gets 10% more ammo
 
-bug fix decoherence
+harpoon damage reduced by 15%
+random bots have a 100% -> 66% chance to match your upgraded bot type
+phonon has 1/8 -> 1/9 less ammo than matter wave
+Penrose process gain 63 -> 53 energy when wormhole eats blocks
+transdimensional spores makes 20% fewer spores when wormhole eats blocks
+
+bugfixes
 
 ******************************************************** TODO ********************************************************
 
+tech:   when this tech is ejected spawn one of every power up type
+  JUNK tech?
+
+railgun feels like a downgrade from harpoon
+  buff railgun
+    increase harpoon size
+  nerf harpoon
+    shrink crouch mode harpoon size
+
+
+try to get grappling hook working again
+
+bug - does any url sharing work?
+
+setting to remove UI, except health bar
+  except active gun? to see ammo
+  checkbox in pause and in settings
+
 +damage for each different bot type you have
   disables bot upgrades?
-
-improve rail gun / use ammo to crouch fire style for harpoon
-  spend ammo to get some tech
-    ammo cost on reticulum
-    spend ammo to make harpoon radioactive
-    tech disables filament and unaaq?  probably don't need to
-  give rail gun the auto targeting
-    improve auto-target with a tech?
-      you already tried this and target probably can't get better
-  try to get grappling hook working again
 
 tech doing damage refunds up to 50% of damage take in last 10 seconds
   use history[] to manage this?
@@ -42,7 +60,9 @@ make a seed/hash system that controls only the tech/guns/fields shown
     
 tech upgrade to anthropic principle to make it trigger at 50% life and 0% once per map
 
-JUNK tech: https://bindingofisaacrebirth.fandom.com/wiki/Damocles
+tech: spontaneous collapse - very low chance of something to occur
+  JUNK tech
+  https://bindingofisaacrebirth.fandom.com/wiki/Damocles
 
 cloaking field doesn't show energy over max
 
