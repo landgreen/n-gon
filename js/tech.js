@@ -3276,7 +3276,7 @@ const tech = {
         },
         {
             name: "metastability",
-            description: "<strong>12%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong> ",
+            description: "<strong>12%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -5479,17 +5479,17 @@ const tech = {
         },
         {
             name: "railgun",
-            description: `harpoons are <strong>66% denser</strong>, but don't <strong>retract</strong><br>gain <strong>600%</strong> more harpoon <strong>ammo</strong> per ${powerUps.orb.ammo(1)}`,
+            description: `harpoons are <strong>50% denser</strong>, but don't <strong>retract</strong><br>gain <strong>500%</strong> more harpoon <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.extraHarpoons && !tech.isHarpoonPowerUp
+                return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.isHarpoonPowerUp
             },
-            requires: "harpoon, not filament, reticulum, toggling harpoon",
-            ammoBonus: 6,
+            requires: "harpoon, not filament, toggling harpoon",
+            ammoBonus: 5,
             effect() {
                 tech.isRailGun = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -5556,8 +5556,8 @@ const tech = {
         //     }
         // },
         {
-            name: "half-wave rectifier",
-            description: "<strong>harpoons</strong> drain no <strong class='color-f'>energy</strong> as they <strong>retract</strong><br><strong>crouch</strong> firing <strong>harpoon</strong> generates <strong class='color-f'>energy</strong>",
+            name: "alternator",
+            description: "<strong>harpoon</strong> drains no <strong class='color-f'>energy</strong><br><strong>railgun</strong> generates <strong class='color-f'>energy</strong>", //as they <strong>retract</strong><br><strong>crouch</strong> firing <strong>harpoon</strong> generates <strong class='color-f'>energy</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5583,7 +5583,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("harpoon") || (tech.isNeedles || tech.isNeedleShot)
+                return (!tech.isLargeHarpoon && tech.haveGunCheck("harpoon")) || (tech.isNeedles || tech.isNeedleShot)
             },
             requires: "nail gun, needle gun, needle-shot, harpoon",
             effect() {
@@ -5594,8 +5594,7 @@ const tech = {
             }
         },
         {
-            name: "unaaq",
-            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Harpoon#/media/File:Harpon_Unaaq_MHNT_ETH_AC_198.jpg' class="link">unaaq</a>`, //https://en.wikipedia.org/wiki/Weapon
+            name: "Bessemer process",
             description: "increase the <strong>size</strong> of your <strong>harpoon</strong><br>by <strong>10%</strong> of the square root of harpoon <strong class='color-ammo'>ammo</strong>",
             isGunTech: true,
             maxCount: 1,
@@ -5603,7 +5602,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("harpoon")
+                return tech.haveGunCheck("harpoon") && !tech.isShieldPierce
             },
             requires: "harpoon",
             effect() {
@@ -5614,7 +5613,45 @@ const tech = {
             }
         },
         {
-            name: "filament",
+            name: "smelting",
+            // description: `spend ${powerUps.orb.ammo(2)}to upgrade the <strong>harpoon</strong><br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot`,
+            // description: `forge ${Math.ceil(0.6*(tech.isRailGun? 5: 1))} ammo into a new <strong>harpoon</strong><br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot`,
+            descriptionFunction() { return `forge <strong>${tech.isRailGun? 10: 2}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot` },
+            isGunTech: true,
+            maxCount: 9,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("harpoon") && b.returnGunAmmo('harpoon') > 1
+            },
+            requires: "harpoon",
+            effect() {
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "harpoon") {
+                        b.guns[i].ammo -= tech.isRailGun ? 10 : 2
+                        if (b.guns[i].ammo < 0) b.guns[i].ammo = 0
+                        simulation.updateGunHUD();
+                        tech.extraHarpoons++;
+                        break
+                    }
+                }
+            },
+            remove() {
+                if (tech.extraHarpoons) {
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "harpoon") {
+                            b.guns[i].ammo += Math.ceil(b.guns[i].ammoPack) * 2 * tech.extraHarpoons
+                            simulation.updateGunHUD();
+                            break
+                        }
+                    }
+                }
+                tech.extraHarpoons = 0;
+            }
+        },
+        {
+            name: "UHMWPE",
             description: "increase the <strong>length</strong> of your <strong>harpoon</strong>'s <strong>rope</strong><br>by <strong>1%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
             isGunTech: true,
             maxCount: 1,
@@ -5633,7 +5670,7 @@ const tech = {
             }
         },
         {
-            name: "toggling harpoon",
+            name: "induction furnace",
             description: "increase the <strong class='color-d'>damage</strong> of your next <strong>harpoon</strong><br>by <strong>600%</strong> after using it to collect a <strong>power up</strong>",
             isGunTech: true,
             maxCount: 1,
@@ -5650,25 +5687,6 @@ const tech = {
             remove() {
                 tech.isHarpoonPowerUp = false
                 tech.harpoonDensity = 0.006
-            }
-        },
-        {
-            name: "reticulum",
-            description: "fire <strong>+1</strong> <strong>harpoon</strong>, but <strong class='color-f'>energy</strong> cost<br>to <strong>retract</strong> also increases",
-            isGunTech: true,
-            maxCount: 9,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.haveGunCheck("harpoon") && !tech.isRailGun
-            },
-            requires: "harpoon",
-            effect() {
-                tech.extraHarpoons++;
-            },
-            remove() {
-                tech.extraHarpoons = 0;
             }
         },
         {
@@ -7393,6 +7411,40 @@ const tech = {
             effect() {
                 localSettings.isJunkExperiment = true
                 localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            },
+            remove() {}
+        },
+        {
+            name: "Higgs phase transition",
+            description: "instantly spawn 3 <strong class='color-m'>tech</strong>, but add a chance to<br>remove everything with a 5 minute <strong>half-life</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            frequencyDefault: 0,
+            isJunk: true,
+            isNonRefundable: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                powerUps.spawn(m.pos.x, m.pos.y, "tech");
+                powerUps.spawn(m.pos.x + 20, m.pos.y, "tech");
+                powerUps.spawn(m.pos.x + 40, m.pos.y, "tech");
+
+                function loop() {
+                    // (1-X)^cycles = chance to be removed //Math.random() < 0.000019  10 min
+                    if (!simulation.paused && m.alive) {
+                        if (Math.random() < 0.000038) {
+                            // m.death();
+                            simulation.clearMap();
+                            simulation.draw.setPaths();
+                            return
+                        }
+                    }
+                    requestAnimationFrame(loop);
+                }
+                requestAnimationFrame(loop);
             },
             remove() {}
         },

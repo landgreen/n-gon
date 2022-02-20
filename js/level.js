@@ -21,7 +21,7 @@ const level = {
             // tech.giveTech("railgun")
             // tech.giveTech("capacitor bank")
             // tech.giveTech("half-wave rectifier")
-            // for (let i = 0; i < 1; i++) tech.giveTech("reticulum")
+            // for (let i = 0; i < 3; i++) tech.giveTech("reticulum")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
@@ -30,7 +30,7 @@ const level = {
             // tech.tech[297].frequency = 100
 
             // m.immuneCycle = Infinity //you can't take damage
-            // level.difficultyIncrease(8) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.reactor();
             // level.testing(); //not in rotation, used for testing

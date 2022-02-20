@@ -1,39 +1,34 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech railgun - harpoon charge fires and no longer retracts, get 8x ammo from power ups
-  railgun has auto-targeting, like harpoon
-    the aiming graphic is gone
-  disables filament, reticulum, toggling
-  unlocks capacitor bank
+filament renamed UHMWPE
+unaaq renamed Bessemer process
+toggling harpoon renamed induction furnace
+half-wave rectifier renamed alternator
+reticulum renamed smelting
+  smelting costs 2 ammo packs per upgrade 
+  railgun works with smelting
 
-mobs do 2% less harm to player
-player does 0.5% more damage per level
-Zeno's paradox removes 1/10 -> 1/12 -> 1/14 (7%) health every 5 seconds
-drone gun gets 10% more ammo
-
-harpoon damage reduced by 15%
-random bots have a 100% -> 66% chance to match your upgraded bot type
-phonon has 1/8 -> 1/9 less ammo than matter wave
-Penrose process gain 63 -> 53 energy when wormhole eats blocks
-transdimensional spores makes 20% fewer spores when wormhole eats blocks
-
-bugfixes
+JUNK tech: Higgs phase transition - spawn 3 tech, there is a chance to remove everything with a 5 minute halflife
 
 ******************************************************** TODO ********************************************************
+
+make a variety of harpoon shapes?
+  just a different railgun shape?
+
+tech - Plasma railgun
+  like foam, or phonon?
+
+pause time like invariant for other things...
+  throwing blocks
+  charging railgun
+  charging anything?
 
 tech:   when this tech is ejected spawn one of every power up type
   JUNK tech?
 
-railgun feels like a downgrade from harpoon
-  buff railgun
-    increase harpoon size
-  nerf harpoon
-    shrink crouch mode harpoon size
-
-
 try to get grappling hook working again
 
-bug - does any url sharing work?
+bug - url sharing still broken sometimes
 
 setting to remove UI, except health bar
   except active gun? to see ammo

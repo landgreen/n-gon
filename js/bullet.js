@@ -114,6 +114,11 @@ const b = {
             simulation.updateGunHUD();
         }
     },
+    returnGunAmmo(name) {
+        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            if (b.guns[i].name === name) return b.guns[i].ammo
+        }
+    },
     giveGuns(gun = "random", ammoPacks = 10) {
         if (tech.ammoCap) ammoPacks = 0.45 * tech.ammoCap
         if (tech.isOneGun) b.removeAllGuns();
@@ -1448,9 +1453,7 @@ const b = {
                 // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
                 ctx.stroke();
             },
-            draw() {
-
-            },
+            draw() {},
             returnToPlayer() {
                 if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius) { //near player
                     this.endCycle = 0;
@@ -5631,6 +5634,7 @@ const b = {
                     }
                     //fire
                     if ((!input.fire && this.charge > 0.6)) {
+                        tech.harpoonDensity = 0.009 //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
                         const where = {
                             x: m.pos.x + 30 * Math.cos(m.angle),
                             y: m.pos.y + 30 * Math.sin(m.angle)
@@ -5639,21 +5643,56 @@ const b = {
                             distance: 10000,
                             target: null
                         }
-                        //look for closest mob in player's LoS
-                        const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
                         const harpoonSize = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
-                        for (let i = 0, len = mob.length; i < len; ++i) {
-                            if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
-                                const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
-                                const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
-                                if (dist < closest.distance && dot > 0.88) { //target closest mob that player is looking at and isn't too close to target
-                                    closest.distance = dist
-                                    closest.target = mob[i]
+
+                        if (tech.extraHarpoons) {
+                            let targetCount = 0
+                            const SPREAD = 0.06 + 0.05 * (!input.down)
+                            let angle = m.angle - SPREAD * tech.extraHarpoons / 2;
+                            const dir = { x: Math.cos(angle), y: Math.sin(angle) }; //make a vector for the player's direction of length 1; used in dot product
+
+                            for (let i = 0, len = mob.length; i < len; ++i) {
+                                if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
+                                    const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
+                                    if (dot > 0.7) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
+                                        if (this.ammo > 0) {
+                                            this.ammo--
+                                            b.harpoon(where, mob[i], angle, harpoonSize, false) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
+                                            angle += SPREAD
+                                            targetCount++
+                                            if (targetCount > tech.extraHarpoons) break
+                                        }
+                                    }
                                 }
                             }
+                            //if more harpoons and no targets left
+                            if (targetCount < tech.extraHarpoons + 1) {
+                                const num = tech.extraHarpoons + 1 - targetCount
+                                for (let i = 0; i < num; i++) {
+                                    if (this.ammo > 0) {
+                                        this.ammo--
+                                        b.harpoon(where, null, angle, harpoonSize, false)
+                                        angle += SPREAD
+                                    }
+                                }
+                            }
+                            this.ammo++ //make up for the ammo used up in fire()
+                            simulation.updateGunHUD();
+                        } else {
+                            //look for closest mob in player's LoS
+                            const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
+                            for (let i = 0, len = mob.length; i < len; ++i) {
+                                if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
+                                    const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
+                                    const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
+                                    if (dist < closest.distance && dot > 0.88) { //target closest mob that player is looking at and isn't too close to target
+                                        closest.distance = dist
+                                        closest.target = mob[i]
+                                    }
+                                }
+                            }
+                            b.harpoon(where, closest.target, m.angle, harpoonSize, false)
                         }
-                        tech.harpoonDensity = 0.01 //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
-                        b.harpoon(where, closest.target, m.angle, harpoonSize, false)
 
                         //push away blocks and mobs
                         const range = 1200 * this.charge
@@ -5710,7 +5749,7 @@ const b = {
                         if (input.down) smoothRate *= 0.995
 
                         this.charge = this.charge * smoothRate + 1 - smoothRate
-                        m.energy += (this.charge - previousCharge) * (tech.isRailEnergyGain ? 0.8 : -0.3) //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
+                        m.energy += (this.charge - previousCharge) * ((tech.isRailEnergyGain ? 0.5 : -0.3)) //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
 
                         //draw magnetic field
                         const X = m.pos.x
@@ -5755,9 +5794,11 @@ const b = {
                     target: null
                 }
                 //look for closest mob in player's LoS
-                const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
                 const harpoonSize = (tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1) //* (input.down ? 0.7 : 1)
                 const totalCycles = 7 * (tech.isFilament ? 1 + 0.01 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
+                const SPREAD = 0.1
+                let angle = m.angle - SPREAD * tech.extraHarpoons / 2;
+                const dir = { x: Math.cos(angle), y: Math.sin(angle) }; //make a vector for the player's direction of length 1; used in dot product
 
                 if (tech.extraHarpoons && !input.down) {
                     const range = 450 * (tech.isFilament ? 1 + 0.005 * Math.min(110, this.ammo) : 1)
@@ -5769,7 +5810,8 @@ const b = {
                             if (dist < range && dot > 0.7) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
                                 if (this.ammo > 0) {
                                     this.ammo--
-                                    b.harpoon(where, mob[i], m.angle, harpoonSize, true, totalCycles) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
+                                    b.harpoon(where, mob[i], angle, harpoonSize, true, totalCycles) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
+                                    angle += SPREAD
                                     targetCount++
                                     if (targetCount > tech.extraHarpoons) break
                                 }
@@ -5778,14 +5820,12 @@ const b = {
                     }
                     //if more harpoons and no targets left
                     if (targetCount < tech.extraHarpoons + 1) {
-                        const SPREAD = 0.1
                         const num = tech.extraHarpoons + 1 - targetCount
-                        let dir = m.angle - SPREAD * (num - 1) / 2;
                         for (let i = 0; i < num; i++) {
                             if (this.ammo > 0) {
                                 this.ammo--
-                                b.harpoon(where, null, dir, harpoonSize, true, totalCycles) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
-                                dir += SPREAD
+                                b.harpoon(where, null, angle, harpoonSize, true, totalCycles) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
+                                angle += SPREAD
                             }
                         }
                     }
@@ -5804,7 +5844,7 @@ const b = {
                         }
                     }
                     b.harpoon(where, closest.target, m.angle, harpoonSize, !input.down, totalCycles)
-                    m.fireCDcycle = m.cycle + 90 //Infinity; // cool down
+                    m.fireCDcycle = m.cycle + 45 // cool down
                 }
                 const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), input.down ? 0.015 : 0.035)
                 player.force.x -= recoil.x
