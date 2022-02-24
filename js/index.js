@@ -4,14 +4,10 @@
 Math.hash = s => { for (var i = 0, h = 9; i < s.length;) h = Math.imul(h ^ s.charCodeAt(i++), 9 ** 9); return h ^ h >>> 9 }
 
 // const date1 = new Date()
-// Math.seed = date1.getUTCDate() * date1.getUTCFullYear(); // daily seed,  day + year
-// Math.seed = Date.now() //random every time:  just the time in seconds UTC
-// Math.seed = Math.abs(Math.hash(String(Date.now()))) //update randomizer seed in case the player changed it
+// console.log(date1.getUTCHours())
+// document.getElementById("seed").placeholder = Math.initialSeed = String(date1.getUTCDate() * date1.getUTCFullYear()) // daily seed,  day + year
 
-// document.getElementById("seed").placeholder = Math.seed = Math.initialSeed = Math.floor(Date.now() % 100000) //random every time:  just the time in milliseconds UTC
-
-
-document.getElementById("seed").placeholder = Math.initialSeed = String(Math.floor(Date.now() % 100000))
+document.getElementById("seed").placeholder = Math.initialSeed = Math.floor(Date.now() % 100000) //random every time:  just the time in milliseconds UTC
 Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
 Math.seededRandom = function(min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined
     Math.seed = (Math.seed * 9301 + 49297) % 233280;
@@ -400,15 +396,12 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         //update tech text //disable not allowed tech
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             const techID = document.getElementById("tech-" + i)
-            if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode || (localSettings.isJunkExperiment && tech.tech[i].isJunk))) {
+            if (!tech.tech[i].isExperimentHide && !tech.tech[i].isNonRefundable && (!tech.tech[i].isJunk || tech.tech[i].isExperimentalMode || localSettings.isJunkExperiment)) {
                 if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
-                    // console.log(tech.tech[i].name, isAllowed, tech.tech[i].count, tech.haveGunCheck("nail gun"))
                     const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
-
                     // <div class="circle-grid-small research" style="position:absolute; top:13px; left:30px;opacity:0.85;"></div>
                     if (tech.tech[i].isFieldTech) {
                         techID.classList.remove('experiment-grid-hide');
-
                         techID.innerHTML = `
                         <div class="grid-title">
                             <span style="position:relative;">
@@ -430,8 +423,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                             </span>
                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}
                         </div>`
-                    } else
-                    if (tech.tech[i].isJunk) {
+                    } else if (tech.tech[i].isJunk) {
                         techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
                     } else if (tech.tech[i].isExperimentalMode) {
                         techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
@@ -525,7 +517,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             lore.setTechGoal()
             localSettings.difficultyMode = Number(document.getElementById("difficulty-select-experiment").value)
             document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-experiment").value
-            localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         });
         //add tooltips
         for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -756,7 +748,7 @@ const input = {
         document.getElementById("splash-previous-gun").innerHTML = cleanText(input.key.previousGun)[0]
 
         localSettings.key = input.key
-        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     },
     focus: null,
     setTextFocus() {
@@ -1061,7 +1053,12 @@ window.addEventListener("keydown", function(event) {
                 break
             case "h":
                 // m.health = Infinity
-                m.immuneCycle = Infinity //you can't take damage
+                if (m.immuneCycle === Infinity) {
+                    m.immuneCycle = 0 //you can't take damage
+                } else {
+                    m.immuneCycle = Infinity //you can't take damage
+                }
+
                 // m.energy = Infinity
                 // document.getElementById("health").style.display = "none"
                 // document.getElementById("health-bg").style.display = "none"
@@ -1175,8 +1172,38 @@ document.body.addEventListener("wheel", (e) => {
 //**********************************************************************
 //  local storage
 //**********************************************************************
-let localSettings = JSON.parse(localStorage.getItem("localSettings"));
-if (localSettings) {
+let localSettings
+
+function localstorageCheck() {
+    try {
+        return 'localStorage' in window && window['localStorage'] !== null;
+    } catch (e) {
+        return false;
+    }
+
+}
+if (localstorageCheck()) {
+    localSettings = JSON.parse(localStorage.getItem("localSettings"))
+    if (localSettings) {
+        localSettings.isAllowed = true
+        localSettings.isEmpty = false
+        console.log('localStorage is enabled')
+    } else {
+        console.log('localStorage is enabled, local settings empty')
+        localSettings = {
+            isAllowed: true,
+            isEmpty: true
+        }
+    }
+} else {
+    localSettings = { isAllowed: false }
+    console.log("localStorage is disabled")
+}
+
+
+if (localSettings.isAllowed && !localSettings.isEmpty) {
+    console.log('restoring previous settings')
+
     if (localSettings.key) {
         input.key = localSettings.key
     } else {
@@ -1200,6 +1227,7 @@ if (localSettings) {
     }
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
 } else {
+    console.log('setting default localSettings')
     localSettings = {
         isJunkExperiment: false,
         isCommunityMaps: false,
@@ -1213,7 +1241,7 @@ if (localSettings) {
         key: undefined
     };
     input.setDefault()
-    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     document.getElementById("community-maps").checked = localSettings.isCommunityMaps
     simulation.isCommunityMaps = localSettings.isCommunityMaps
     document.getElementById("difficulty-select").value = localSettings.difficultyMode
@@ -1235,13 +1263,13 @@ document.getElementById("fps-select").addEventListener("input", () => {
         simulation.fpsCapDefault = Number(value)
     }
     localSettings.fpsCapDefault = value
-    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
 document.getElementById("community-maps").addEventListener("input", () => {
     simulation.isCommunityMaps = document.getElementById("community-maps").checked
     localSettings.isCommunityMaps = simulation.isCommunityMaps
-    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
 // difficulty-select-experiment event listener is set in build.makeGrid
@@ -1250,7 +1278,7 @@ document.getElementById("difficulty-select").addEventListener("input", () => {
     lore.setTechGoal()
     localSettings.difficultyMode = simulation.difficultyMode
     localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
-    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
 

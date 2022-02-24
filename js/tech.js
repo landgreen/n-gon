@@ -657,9 +657,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !m.isShipMode && !tech.isAlwaysFire
+                return !m.isShipMode && !tech.isAlwaysFire, !tech.isGrapple
             },
-            requires: "not ship mode, not automatic",
+            requires: "not ship mode, not automatic, grappling hook",
             effect: () => {
                 tech.isFireMoveLock = true;
                 b.setFireCD();
@@ -4831,7 +4831,7 @@ const tech = {
         },
         {
             name: "booby trap",
-            description: "drop a <strong>mine</strong> after picking up a <strong>power up</strong><br><strong>+53%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+            description: "<strong>50%</strong> chance to drop a <strong>mine</strong> from <strong>power ups</strong><br><strong>+50%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -4844,7 +4844,7 @@ const tech = {
             effect() {
                 tech.isMineDrop = true;
                 if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0)
-                this.refundAmount += tech.addJunkTechToPool(0.53)
+                this.refundAmount += tech.addJunkTechToPool(0.5)
             },
             refundAmount: 0,
             remove() {
@@ -5479,16 +5479,16 @@ const tech = {
         },
         {
             name: "railgun",
-            description: `harpoons are <strong>50% denser</strong>, but don't <strong>retract</strong><br>gain <strong>500%</strong> more harpoon <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
+            description: `<strong>harpoons</strong> are <strong>50% denser</strong>, but don't <strong>retract</strong><br>gain <strong>500%</strong> more harpoon <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.isHarpoonPowerUp
+                return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.isHarpoonPowerUp && !tech.isGrapple
             },
-            requires: "harpoon, not filament, toggling harpoon",
+            requires: "harpoon, not filament, toggling harpoon, grappling hook",
             ammoBonus: 5,
             effect() {
                 tech.isRailGun = true;
@@ -5556,8 +5556,35 @@ const tech = {
         //     }
         // },
         {
+            name: "grappling hook",
+            description: `<strong>harpoons</strong> attach to the <strong>map</strong> and pull you in<br><strong>rope</strong> extends much <strong>farther</strong> while you hold fire`,
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.isHarpoonPowerUp && !tech.isRailGun && !tech.isFireMoveLock
+            },
+            requires: "harpoon, not railgun, filament, toggling harpoon, Higgs mechanism",
+            effect() {
+                tech.isGrapple = true;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "harpoon") b.guns[i].chooseFireMethod()
+                }
+            },
+            remove() {
+                if (tech.isGrapple) {
+                    tech.isGrapple = false;
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "harpoon") b.guns[i].chooseFireMethod()
+                    }
+                }
+            }
+        },
+        {
             name: "alternator",
-            description: "<strong>harpoon</strong> drains no <strong class='color-f'>energy</strong><br><strong>railgun</strong> generates <strong class='color-f'>energy</strong>", //as they <strong>retract</strong><br><strong>crouch</strong> firing <strong>harpoon</strong> generates <strong class='color-f'>energy</strong>",
+            description: "<strong>harpoon</strong> and <strong>grappling hook</strong> drain no <strong class='color-f'>energy</strong><br><strong>railgun</strong> generates <strong class='color-f'>energy</strong>", //as they <strong>retract</strong><br><strong>crouch</strong> firing <strong>harpoon</strong> generates <strong class='color-f'>energy</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5615,8 +5642,8 @@ const tech = {
         {
             name: "smelting",
             // description: `spend ${powerUps.orb.ammo(2)}to upgrade the <strong>harpoon</strong><br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot`,
-            // description: `forge ${Math.ceil(0.6*(tech.isRailGun? 5: 1))} ammo into a new <strong>harpoon</strong><br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot`,
-            descriptionFunction() { return `forge <strong>${tech.isRailGun? 10: 2}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot` },
+            description: `forge <strong>2</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot`,
+            // descriptionFunction() { return `forge <strong>${tech.isRailGun? 10: 2}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot` },
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -5629,7 +5656,7 @@ const tech = {
             effect() {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "harpoon") {
-                        b.guns[i].ammo -= tech.isRailGun ? 10 : 2
+                        b.guns[i].ammo -= 2
                         if (b.guns[i].ammo < 0) b.guns[i].ammo = 0
                         simulation.updateGunHUD();
                         tech.extraHarpoons++;
@@ -5641,7 +5668,7 @@ const tech = {
                 if (tech.extraHarpoons) {
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "harpoon") {
-                            b.guns[i].ammo += Math.ceil(b.guns[i].ammoPack) * 2 * tech.extraHarpoons
+                            b.guns[i].ammo += 2
                             simulation.updateGunHUD();
                             break
                         }
@@ -5659,9 +5686,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("harpoon") && !tech.isRailGun
+                return tech.haveGunCheck("harpoon") && !tech.isRailGun && !tech.isGrapple
             },
-            requires: "harpoon",
+            requires: "harpoon, not grappling hook, railgun",
             effect() {
                 tech.isFilament = true;
             },
@@ -5678,9 +5705,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("harpoon") && !tech.isRailGun
+                return tech.haveGunCheck("harpoon") && !tech.isRailGun && !tech.isGrapple
             },
-            requires: "harpoon",
+            requires: "harpoon, not grappling hook, railgun",
             effect() {
                 tech.isHarpoonPowerUp = true
             },
@@ -7409,8 +7436,9 @@ const tech = {
             },
             requires: "",
             effect() {
+                console.log('hi')
                 localSettings.isJunkExperiment = true
-                localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             },
             remove() {}
         },
@@ -9382,5 +9410,6 @@ const tech = {
     extraSuperBalls: null,
     isTimeCrystals: null,
     isGroundState: null,
-    isRailGun: null
+    isRailGun: null,
+    isGrapple: null
 }

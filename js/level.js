@@ -17,11 +17,9 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // m.setField("time dilation")
             // b.giveGuns("harpoon")
-            // tech.giveTech("unaaq")
-            // tech.giveTech("railgun")
-            // tech.giveTech("capacitor bank")
-            // tech.giveTech("half-wave rectifier")
-            // for (let i = 0; i < 3; i++) tech.giveTech("reticulum")
+            // for (let i = 0; i < 9; i++) tech.giveTech("smelting")
+            // tech.giveTech("UHMWPE")
+            // tech.giveTech("grappling hook")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
@@ -34,7 +32,7 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.reactor();
             // level.testing(); //not in rotation, used for testing
-
+            // level.run()
             if (simulation.isTraining) { level.walk(); } else { level.intro(); }
 
             // powerUps.research.changeRerolls(3000)
@@ -43,9 +41,11 @@ const level = {
             // lore.techCount = 3
             // simulation.isCheating = false //true;
             // localSettings.loreCount = 2; //this sets what conversation is heard
-            // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
+            // lore.unlockTesting();
+            // tech.giveTech("tinker"); //show junk tech in experiment mode
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.pickList = ["focuser", "focuser"]
@@ -53,7 +53,7 @@ const level = {
             if (!simulation.isCheating && !build.isExperimentRun && !simulation.isTraining) {
                 localSettings.runCount += level.levelsCleared //track the number of total runs locally
                 localSettings.levelsClearedLastGame = level.levelsCleared
-                localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             }
         }
         if (!simulation.isTraining) level.levelAnnounce();
@@ -128,7 +128,7 @@ const level = {
         m.dmgScale = 1; //damage done by player decreases each level
         simulation.accelScale = 1 //mob acceleration increases each level
         simulation.CDScale = 1 //mob CD time decreases each level
-        simulation.dmgScale = Math.max(0.1, 0.35 * simulation.difficulty) //damage done by mobs scales with total levels
+        simulation.dmgScale = Math.max(0.1, 0.34 * simulation.difficulty) //damage done by mobs scales with total levels
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyIncrease(num = 1) {
@@ -138,7 +138,7 @@ const level = {
             if (simulation.accelScale < 6) simulation.accelScale *= 1.025 //mob acceleration increases each level
             if (simulation.CDScale > 0.15) simulation.CDScale *= 0.965 //mob CD time decreases each level
         }
-        simulation.dmgScale = Math.max(0.1, 0.35 * simulation.difficulty) //damage done by mobs scales with total levels
+        simulation.dmgScale = Math.max(0.1, 0.34 * simulation.difficulty) //damage done by mobs scales with total levels
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
         // console.log(`CD = ${simulation.CDScale}`)
     },
@@ -2385,7 +2385,7 @@ const level = {
             lore.sentence = 0 //what part of the conversation to start on
             lore.conversation[lore.chapter][lore.sentence]()
             localSettings.loreCount++ //hear the next conversation next time you win
-            localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         }
 
         // const hazardSlime = level.hazard(-1800, 150, 3600, 650, 0.004, "hsla(160, 100%, 35%,0.75)")
@@ -2488,63 +2488,39 @@ const level = {
     testing() {
         const button = level.button(1000, 0)
         spawn.bodyRect(1000, -50, 50, 50);
-
-        // const toggle = level.toggle(200, -700)
         level.custom = () => {
-            // button.draw();
             ctx.fillStyle = "rgba(0,255,255,0.1)";
             ctx.fillRect(6400, -550, 300, 350);
             level.exit.drawAndCheck();
-
             level.enter.draw();
         };
         level.customTopLayer = () => {
             button.query();
             button.draw();
-            vanish1.query();
-            // vanish2.query();
-            // vanish3.query();
-            // vanish4.query();
-            // vanish5.query();
         };
-        const vanish1 = level.vanish(1400, -200, 200, 50) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
-        // const vanish2 = level.vanish(1825, -150, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
-        // const vanish3 = level.vanish(1975, -150, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
-        // const vanish4 = level.vanish(1825, -300, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
-        // const vanish5 = level.vanish(1975, -300, 150, 150) //x, y, width, height, hide = { x: 0, y: 0 }  //hide should just be somewhere behind the map so the player can't see it
         level.setPosToSpawn(0, -450); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-        level.exit.x = 200 //6500;
-        level.exit.y = -430;
+        level.exit.x = 6500;
+        level.exit.y = -230;
 
         // level.difficultyIncrease(14); //hard mode level 7
         level.defaultZoom = 1500
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = color.background //"#ddd";
-        // simulation.draw.mapFill = "#444"
-        // simulation.draw.bodyFill = "rgba(140,140,140,0.85)"
-        // simulation.draw.bodyStroke = "#222"
-        // level.addZone(level.exit.x, level.exit.y, 100, 30, "nextLevel");
-
         spawn.mapRect(-950, 0, 8200, 800); //ground
         spawn.mapRect(-950, -1200, 800, 1400); //left wall
         spawn.mapRect(-950, -1800, 8200, 800); //roof
         spawn.mapRect(-250, -400, 1000, 600); // shelf
         spawn.mapRect(-250, -1200, 1000, 550); // shelf roof
-        // powerUps.spawnStartingPowerUps(600, -800);
-        // for (let i = 0; i < 50; ++i) powerUps.spawn(550, -800, "research", false);
-        // powerUps.spawn(350, -800, "gun", false);
+        // for (let i = 0; i < 10; ++i) powerUps.spawn(550, -800, "ammo", false);
 
         function blockDoor(x, y, blockSize = 58) {
             spawn.mapRect(x, y - 290, 40, 60); // door lip
             spawn.mapRect(x, y, 40, 50); // door lip
             for (let i = 0; i < 4; ++i) spawn.bodyRect(x + 5, y - 260 + i * blockSize, 30, blockSize);
         }
-        // blockDoor(710, -710);
-        // for (let i = 0; i < 200; i++) powerUps.directSpawn(710 + 1000 * Math.random(), -710 + 1000 * Math.random(), "tech");
 
         spawn.mapRect(2500, -1200, 200, 750); //right wall
-        // blockDoor(2585, -210)
         spawn.mapRect(2500, -200, 200, 300); //right wall
         spawn.mapRect(4500, -1200, 200, 650); //right wall
         blockDoor(4585, -310)
@@ -2566,10 +2542,11 @@ const level = {
         m.addHealth(Infinity)
 
         // spawn.starter(1900, -500, 200) //big boy
+        // for (let i = 0; i < 10; ++i) spawn.hopper(1900, -500)
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
-        spawn.powerUpBoss(1900, -500)
+        // spawn.powerUpBoss(1900, -500)
         // spawn.powerUpBossBaby(3200, -500)
         // spawn.snakeBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
@@ -2928,7 +2905,7 @@ const level = {
                     simulation.makeTextLog(`for (let i <span class='color-symbol'>=</span> 0; i <span class='color-symbol'><</span> localSettings.levelsClearedLastGame <span class='color-symbol'>/</span> 3; i<span class='color-symbol'>++</span>)`);
                     simulation.makeTextLog(`{ powerUps.spawn(m.pos.x, m.pos.y, "tech") <em>//simulation superposition</em>}`);
                     localSettings.levelsClearedLastGame = 0 //after getting bonus power ups reset run history
-                    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                 }
             }
             spawn.mapRect(2025, 0, 150, 50); //lid to floor hole
@@ -7086,8 +7063,8 @@ const level = {
         //Boss Spawning 
         if (simulation.difficulty > 3) {
             spawn.randomLevelBoss(6000, 700, ["pulsarBoss", "laserTargetingBoss", "powerUpBoss", "bomberBoss", "historyBoss", "orbitalBoss"]);
-            if (simulation.difficulty > 10) spawn.shieldingBoss(7200, 500);
-            if (simulation.difficulty > 20) spawn.randomLevelBoss(2000, 300, ["historyBoss", "shooterBoss"]);
+            // if (simulation.difficulty > 10) spawn.shieldingBoss(7200, 500);
+            // if (simulation.difficulty > 20) spawn.randomLevelBoss(2000, 300, ["historyBoss", "shooterBoss"]);
         }
 
         //Blocks
@@ -7101,15 +7078,15 @@ const level = {
 
         //Powerups
         powerUps.spawnStartingPowerUps(1250, 1500);
-        powerUps.spawnStartingPowerUps(1500, 1500);
+        // powerUps.spawnStartingPowerUps(1500, 1500);
         powerUps.spawn(8650, -200, "ammo");
-        powerUps.spawn(8650, -200, "ammo");
-        powerUps.spawn(8650, -200, "ammo");
-        powerUps.spawn(8650, -200, "ammo");
+        // powerUps.spawn(8650, -200, "ammo");
+        // powerUps.spawn(8650, -200, "ammo");
+        // powerUps.spawn(8650, -200, "ammo");
         powerUps.spawn(200, 50, "heal");
-        powerUps.spawn(200, 50, "ammo");
-        powerUps.spawn(200, 50, "ammo");
-        powerUps.spawn(200, 50, "ammo");
+        // powerUps.spawn(200, 50, "ammo");
+        // powerUps.spawn(200, 50, "ammo");
+        // powerUps.spawn(200, 50, "ammo");
 
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
         spawn.secondaryBossChance(6600, 600)
@@ -8431,7 +8408,7 @@ const level = {
         const hazard = level.hazard(2300, -3090, 1700, 110, 0.005);
         let isButtonTapped = false;
 
-        if (b.inventory.length < 5) powerUps.spawn(3800, -3200, "gun");
+        // if (b.inventory.length < 5) powerUps.spawn(3800, -3200, "gun");
         powerUps.spawn(3900, -3100, "heal", true, null, 30);
         powerUps.spawn(3900, -3100, "heal", true, null, 30);
 
@@ -8519,7 +8496,7 @@ const level = {
         spawn.shieldingBoss(3900, -3200, 70);
 
         let randomBoss = Math.floor(Math.random() * 2);
-        if (simulation.difficulty > 5) spawn[["shooterBoss", "launcherBoss"][randomBoss]](7500, -150);
+        if (simulation.difficulty > 5) spawn[["shooterBoss", "launcherBoss"][randomBoss]](7500, -150, 100, false);
         else spawn[["shooter", "launcher"][randomBoss]](7500, -150, 150);
         spawn[["shooter", "launcher"][randomBoss]](8500, -150, 150);
 
@@ -8913,14 +8890,14 @@ const level = {
             }
             powerUps.spawnRandomPowerUp(1700, -700);
 
-            if (simulation.difficulty > 20) {
-                powerUps.spawn(4600, -700, "tech");
-            }
+            // if (simulation.difficulty > 20) {
+            //     powerUps.spawn(4600, -700, "tech");
+            // }
             powerUps.spawnRandomPowerUp(4700, -700);
 
-            if (simulation.difficulty > 30) {
-                powerUps.spawn(6800, -1000, "tech");
-            }
+            // if (simulation.difficulty > 30) {
+            //     powerUps.spawn(6800, -1000, "tech");
+            // }
             powerUps.spawnRandomPowerUp(6900, -1000);
 
             powerUps.spawn(9200, -5400, "tech");
@@ -8928,12 +8905,12 @@ const level = {
             if (simulation.difficulty > 10) {
                 powerUps.spawn(9200, -5500, "tech");
             }
-            if (simulation.difficulty > 20) {
-                powerUps.spawn(9200, -5600, "tech");
-            }
-            if (simulation.difficulty > 30) {
-                powerUps.spawn(9200, -5700, "tech");
-            }
+            // if (simulation.difficulty > 20) {
+            //     powerUps.spawn(9200, -5600, "tech");
+            // }
+            // if (simulation.difficulty > 30) {
+            //     powerUps.spawn(9200, -5700, "tech");
+            // }
             powerUps.addResearchToLevel() //needs to run after mobs are spawned
             initialSpawn == true;
         }
@@ -8996,7 +8973,7 @@ const level = {
     crouch() { //learn to crouch
         if (localSettings.isTrainingNotAttempted) { //after making it to the second training level 
             localSettings.isTrainingNotAttempted = false // this makes the training button less obvious at the start screen
-            localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         }
 
         m.addHealth(Infinity)

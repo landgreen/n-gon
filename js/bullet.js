@@ -1348,6 +1348,285 @@ const b = {
         Composite.add(engine.world, bullet[me]); //add bullet to world
 
     },
+    grapple(where, angle = m.angle, isReturn = false, harpoonSize = 1) {
+        const me = bullet.length;
+        const returnRadius = 100 * Math.sqrt(harpoonSize)
+        bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -40 * harpoonSize, y: 2 * harpoonSize, index: 0, isInternal: false }, { x: -40 * harpoonSize, y: -2 * harpoonSize, index: 1, isInternal: false }, { x: 50 * harpoonSize, y: -3 * harpoonSize, index: 3, isInternal: false }, { x: 30 * harpoonSize, y: 2 * harpoonSize, index: 4, isInternal: false }], {
+            cycle: 0,
+            angle: angle,
+            friction: 1,
+            frictionAir: 0.4,
+            thrustMag: 0.1,
+            dmg: 6, //damage done in addition to the damage from momentum
+            classType: "bullet",
+            endCycle: simulation.cycle + 45,
+            collisionFilter: {
+                category: cat.bullet,
+                mask: tech.isShieldPierce ? cat.map | cat.body | cat.mob | cat.mobBullet : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield,
+            },
+            minDmgSpeed: 4,
+            ropeExtension: 0,
+            lookFrequency: Math.floor(7 + Math.random() * 3),
+            density: tech.harpoonDensity, //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
+            beforeDmg(who) {
+                if (tech.isShieldPierce && who.isShielded) { //disable shields
+                    who.isShielded = false
+                    requestAnimationFrame(() => { who.isShielded = true });
+                }
+                if (tech.fragments) {
+                    b.targetedNail(this.vertices[2], tech.fragments * 3)
+                    if (!isReturn) this.endCycle = 0;
+                }
+                if (!who.isBadTarget) {
+                    if (isReturn) {
+                        this.do = this.returnToPlayer
+                    } else {
+                        this.frictionAir = 0.01
+                        this.do = () => {
+                            this.force.y += this.mass * 0.003; //gravity
+                            this.draw();
+                        }
+                    }
+                }
+            },
+            caughtPowerUp: null,
+            dropCaughtPowerUp() {
+                if (this.caughtPowerUp) {
+                    this.caughtPowerUp.collisionFilter.category = cat.powerUp
+                    this.caughtPowerUp.collisionFilter.mask = cat.map | cat.powerUp
+                    this.caughtPowerUp = null
+                }
+            },
+            onEnd() {
+                if (this.caughtPowerUp && !simulation.isChoosing && (this.caughtPowerUp.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
+                    let index = null //find index
+                    for (let i = 0, len = powerUp.length; i < len; ++i) {
+                        if (powerUp[i] === this.caughtPowerUp) index = i
+                    }
+                    if (index !== null) {
+                        powerUps.onPickUp(this.caughtPowerUp);
+                        this.caughtPowerUp.effect();
+                        Matter.Composite.remove(engine.world, this.caughtPowerUp);
+                        powerUp.splice(index, 1);
+                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.006 * 6 //0.006 is normal
+                    } else {
+                        this.dropCaughtPowerUp()
+                    }
+                } else {
+                    this.dropCaughtPowerUp()
+                }
+            },
+            drawString() {
+                const where = {
+                    x: m.pos.x + 30 * Math.cos(m.angle),
+                    y: m.pos.y + 30 * Math.sin(m.angle)
+                }
+                const sub = Vector.sub(where, this.vertices[0])
+                const controlPoint = Vector.add(where, Vector.mult(sub, -0.5))
+                ctx.strokeStyle = "#000" // "#0ce"
+                ctx.lineWidth = 0.5
+                ctx.beginPath();
+                ctx.moveTo(where.x, where.y);
+                ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
+                // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+                ctx.stroke();
+            },
+            draw() {},
+            returnToPlayer() {
+                if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius) { //near player
+                    this.endCycle = 0;
+                    if (m.cycle + 25 * b.fireCDscale < m.fireCDcycle) m.fireCDcycle = m.cycle + 35 * b.fireCDscale //lower cd to 25 if it is above 25
+                    //recoil on catching
+                    const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.00015 : 0.0003))
+                    player.force.x += momentum.x
+                    player.force.y += momentum.y
+                    // refund ammo
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "harpoon") {
+                            b.guns[i].ammo++;
+                            simulation.updateGunHUD();
+                            break;
+                        }
+                    }
+                } else {
+                    if (!tech.isRailEnergyGain && m.energy > 0.005) m.energy -= 0.005
+                    const sub = Vector.sub(this.position, m.pos)
+                    const rangeScale = 1 + 0.000001 * Vector.magnitude(sub) * Vector.magnitude(sub) //return faster when far from player
+                    const returnForce = Vector.mult(Vector.normalise(sub), rangeScale * this.thrustMag * this.mass)
+                    this.force.x -= returnForce.x
+                    this.force.y -= returnForce.y
+                    this.grabPowerUp()
+                }
+                this.draw();
+            },
+            grabPowerUp() { //grab power ups near the tip of the harpoon
+                if (this.caughtPowerUp) {
+                    Matter.Body.setPosition(this.caughtPowerUp, Vector.add(this.vertices[2], this.velocity))
+                    Matter.Body.setVelocity(this.caughtPowerUp, { x: 0, y: 0 })
+                } else { //&& simulation.cycle % 2 
+                    for (let i = 0, len = powerUp.length; i < len; ++i) {
+                        const radius = powerUp[i].circleRadius + 50
+                        if (Vector.magnitudeSquared(Vector.sub(this.vertices[2], powerUp[i].position)) < radius * radius) {
+                            if (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) {
+                                this.caughtPowerUp = powerUp[i]
+                                Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 })
+                                Matter.Body.setPosition(powerUp[i], this.vertices[2])
+                                powerUp[i].collisionFilter.category = 0
+                                powerUp[i].collisionFilter.mask = 0
+                                this.thrustMag *= 0.6
+                                this.endCycle += 0.5 //it pulls back slower, so this prevents it from ending early
+                                break //just pull 1 power up if possible
+                            }
+                        }
+                    }
+                }
+            },
+            do() {
+                this.cycle++
+                if (isReturn) {
+                    if (input.fire) {
+                        this.grabPowerUp()
+                        if (this.endCycle < simulation.cycle + 1) { //if at end of lifespan, but player is holding down fire, force retraction
+                            this.endCycle = simulation.cycle + 60
+                            m.fireCDcycle = m.cycle + 20 // cool down
+                            this.do = this.returnToPlayer
+                            Matter.Body.setDensity(this, 0.0005); //reduce density on return
+                            if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
+                            this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
+                        }
+                    } else {
+                        //snap rope if not enough energy
+                        if (m.energy < 0.05) {
+                            const returnForce = Vector.mult(Vector.normalise(Vector.sub(this.position, m.pos)), 3 * this.thrustMag * this.mass)
+                            this.force.x -= returnForce.x
+                            this.force.y -= returnForce.y
+                            this.frictionAir = 0.002
+                            this.do = () => {
+                                if (this.speed < 20) this.force.y += 0.0005 * this.mass;
+                            }
+                            this.dropCaughtPowerUp()
+                        } else {
+                            //return to player
+                            this.do = this.returnToPlayer
+                            this.endCycle = simulation.cycle + 60
+                            Matter.Body.setDensity(this, 0.0005); //reduce density on return
+                            if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
+                            this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
+                        }
+                    }
+
+                    //grappling hook
+                    if (input.fire && Matter.Query.collides(this, map).length) {
+                        const pull = Vector.mult(Vector.normalise(Vector.sub(this.position, m.pos)), 0.1)
+                        player.force.x += pull.x
+                        player.force.y += pull.y - player.mass * 0.02
+                        const move = { x: 50 * Math.cos(this.angle), y: 50 * Math.sin(this.angle), }
+                        Matter.Body.setPosition(this, Vector.add(this.position, move))
+
+                        if (Matter.Query.collides(this, map).length) {
+                            Matter.Body.setStatic(this, true)
+                            this.endCycle = simulation.cycle + 5
+                            this.dropCaughtPowerUp()
+                            this.do = () => {
+                                // const grappleBack = {
+                                //     x: this.position.x - 50 * Math.cos(this.angle),
+                                //     y: this.position.y - 50 * Math.sin(this.angle)
+                                // }
+
+                                //between player nose and the grapple
+                                const sub = Vector.sub(this.vertices[0], {
+                                    x: m.pos.x + 30 * Math.cos(m.angle),
+                                    y: m.pos.y + 30 * Math.sin(m.angle)
+                                })
+                                let dist = Vector.magnitude(sub) - this.ropeExtension
+                                if (input.fire) {
+                                    m.fireCDcycle = m.cycle + 30; // cool down if out of energy
+                                    this.endCycle = simulation.cycle + 10
+
+                                    Matter.Body.setVelocity(player, { x: player.velocity.x * 0.8, y: player.velocity.y * 0.8 });
+                                    if (input.down) { //down
+                                        dist *= 0.25
+                                        player.force.y += 5 * player.mass * simulation.g;
+                                    }
+                                    //control position while hooked
+                                    // if (input.down) { //down
+                                    // player.force.y += 5 * player.mass * simulation.g;
+                                    // dist *= 0.25
+                                    // this.ropeExtension += 10
+                                    // } else if (input.up) { //up
+                                    // this.ropeExtension -= 10
+                                    // if (this.ropeExtension < 0) this.ropeExtension = 0
+                                    // player.force.y -= 5 * player.mass * simulation.g;
+                                    // dist *= 0.4
+                                    // } else {}
+
+                                    // if (input.right) { //down
+                                    //     dist *= 0.4
+                                    //     player.force.x += 5 * player.mass * simulation.g;
+                                    // } else if (input.left) { //up
+                                    //     dist *= 0.4
+                                    //     player.force.x -= 5 * player.mass * simulation.g;
+                                    // }
+                                    if (!tech.isRailEnergyGain && m.energy > 0.004 && dist > 400) m.energy -= 0.004
+                                    const pull = Vector.mult(Vector.normalise(sub), 0.00035 * Math.min(Math.max(30, dist), 500))
+                                    player.force.x += pull.x
+                                    player.force.y += pull.y
+                                } else { //if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius + 200)
+                                    // if (input.up) { //up
+                                    //     player.force.y -= 20 * player.mass * simulation.g;
+                                    // }
+                                    //automatically get ammo back
+                                    this.endCycle = 0;
+                                    if (m.cycle + 15 * b.fireCDscale < m.fireCDcycle) m.fireCDcycle = m.cycle + 15 * b.fireCDscale //lower cd to 15 if it is above 15
+                                    // refund ammo
+                                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                                        if (b.guns[i].name === "harpoon") {
+                                            b.guns[i].ammo++;
+                                            simulation.updateGunHUD();
+                                            break;
+                                        }
+                                    }
+                                }
+                                // if (dist > returnRadius) 
+                                this.draw();
+                            }
+                        }
+                    }
+                    this.force.x += this.thrustMag * this.mass * Math.cos(this.angle);
+                    this.force.y += this.thrustMag * this.mass * Math.sin(this.angle);
+                    this.draw()
+                }
+            },
+        });
+        if (!isReturn) {
+            Matter.Body.setVelocity(bullet[me], {
+                x: m.Vx / 2 + 60 * Math.cos(bullet[me].angle),
+                y: m.Vy / 2 + 60 * Math.sin(bullet[me].angle)
+            });
+            bullet[me].frictionAir = 0.002
+            bullet[me].do = function() {
+                if (this.speed < 20) this.force.y += 0.0005 * this.mass;
+                this.draw();
+            }
+        }
+        if (tech.isHarpoonPowerUp && bullet[me].density > 0.01) {
+            if (isReturn) {
+                bullet[me].draw = function() {
+                    this.drawToggleHarpoon()
+                    this.drawString()
+                }
+            } else {
+                bullet[me].draw = function() {
+                    this.drawToggleHarpoon()
+                }
+            }
+        } else if (isReturn) {
+            bullet[me].draw = function() {
+                this.drawString()
+            }
+        }
+        Composite.add(engine.world, bullet[me]); //add bullet to world
+    },
     harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35) {
         const me = bullet.length;
         const returnRadius = 100 * Math.sqrt(harpoonSize)
@@ -1505,42 +1784,77 @@ const b = {
             },
             do() {
                 this.cycle++
-                if (isReturn) {
-                    if (this.cycle > totalCycles) {
-                        if (m.energy < 0.05) { //snap rope if not enough energy
-                            const returnForce = Vector.mult(Vector.normalise(Vector.sub(this.position, m.pos)), 3 * this.thrustMag * this.mass)
-                            this.force.x -= returnForce.x
-                            this.force.y -= returnForce.y
-                            this.frictionAir = 0.002
-                            this.do = () => { if (this.speed < 20) this.force.y += 0.0005 * this.mass; }
-                            this.dropCaughtPowerUp()
-                        } else { //return to player
-                            this.do = this.returnToPlayer
-                            Matter.Body.setDensity(this, 0.0005); //reduce density on return
-                            if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
-                            this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
-                        }
-                    } else {
-                        this.grabPowerUp()
-                    }
-                } else if (this.cycle > 30) {
-                    this.frictionAir = 0.003
-                    this.do = () => { if (this.speed < 20) this.force.y += 0.0005 * this.mass; }
-                }
-
-                if (target) { //rotate towards the target
-                    const face = {
-                        x: Math.cos(this.angle),
-                        y: Math.sin(this.angle)
-                    };
-                    const vectorGoal = Vector.normalise(Vector.sub(this.position, target.position));
-                    if (Vector.cross(vectorGoal, face) > 0) {
-                        Matter.Body.rotate(this, this.turnRate);
-                    } else {
-                        Matter.Body.rotate(this, -this.turnRate);
-                    }
-                }
                 if (isReturn || target) {
+                    if (isReturn) {
+                        if (this.cycle > totalCycles) {
+                            //snap rope if not enough energy
+                            if (m.energy < 0.05) {
+                                const returnForce = Vector.mult(Vector.normalise(Vector.sub(this.position, m.pos)), 3 * this.thrustMag * this.mass)
+                                this.force.x -= returnForce.x
+                                this.force.y -= returnForce.y
+                                this.frictionAir = 0.002
+                                this.do = () => {
+                                    if (this.speed < 20) this.force.y += 0.0005 * this.mass;
+                                }
+                                this.dropCaughtPowerUp()
+                            } else {
+                                //return to player
+                                this.do = this.returnToPlayer
+                                Matter.Body.setDensity(this, 0.0005); //reduce density on return
+                                if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
+                                this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
+                            }
+                        } else {
+                            this.grabPowerUp()
+                        }
+                    }
+
+                    if (target) { //rotate towards the target
+                        const face = {
+                            x: Math.cos(this.angle),
+                            y: Math.sin(this.angle)
+                        };
+                        const vectorGoal = Vector.normalise(Vector.sub(this.position, target.position));
+                        if (Vector.cross(vectorGoal, face) > 0) {
+                            Matter.Body.rotate(this, this.turnRate);
+                        } else {
+                            Matter.Body.rotate(this, -this.turnRate);
+                        }
+                    }
+                    //grappling hook
+                    // if (input.fire && !input.down && Matter.Query.collides(this, map).length) {
+                    //     const pull = Vector.mult(Vector.normalise(Vector.sub(this.position, m.pos)), 0.1)
+                    //     player.force.x += pull.x
+                    //     player.force.y += pull.y - player.mass * 0.02
+                    //     Matter.Body.setStatic(this, true)
+                    //     this.endCycle = simulation.cycle + 5
+                    //     this.dropCaughtPowerUp()
+                    //     this.do = () => {
+                    //         const sub = Vector.sub(this.position, m.pos)
+                    //         const dist = Vector.magnitude(sub)
+                    //         if (input.fire) {
+                    //             m.fireCDcycle = m.cycle + 30; // cool down if out of energy
+                    //             this.endCycle = simulation.cycle + 10
+                    //             const pull = Vector.mult(Vector.normalise(sub), 0.001 * Math.min(Math.max(1, dist), 100))
+                    //             player.force.x += pull.x
+                    //             player.force.y += pull.y
+                    //             Matter.Body.setVelocity(player, { x: player.velocity.x * 0.8, y: player.velocity.y * 0.8 });
+                    //         } else { //if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius + 200)
+                    //             //automatically get ammo back
+                    //             this.endCycle = 0;
+                    //             if (m.cycle + 15 * b.fireCDscale < m.fireCDcycle) m.fireCDcycle = m.cycle + 15 * b.fireCDscale //lower cd to 15 if it is above 15
+                    //             // refund ammo
+                    //             for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    //                 if (b.guns[i].name === "harpoon") {
+                    //                     b.guns[i].ammo++;
+                    //                     simulation.updateGunHUD();
+                    //                     break;
+                    //                 }
+                    //             }
+                    //         }
+                    //         if (dist > returnRadius) this.draw();
+                    //     }
+                    // }
                     this.force.x += this.thrustMag * this.mass * Math.cos(this.angle);
                     this.force.y += this.thrustMag * this.mass * Math.sin(this.angle);
                 }
@@ -2118,7 +2432,7 @@ const b = {
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
             lookFrequency: 67 + Math.floor(7 * Math.random()),
-            drain: 0.62 * tech.isLaserDiode * tech.laserFieldDrain,
+            drain: 0.7 * tech.isLaserDiode * tech.laserFieldDrain,
             isDetonated: false,
             torqueMagnitude: 0.000003 * (Math.round(Math.random()) ? 1 : -1),
             range: 1500,
@@ -5615,6 +5929,9 @@ const b = {
                 if (tech.isRailGun) {
                     this.do = this.railDo
                     this.fire = this.railFire
+                } else if (tech.isGrapple) {
+                    this.do = () => {}
+                    this.fire = this.grappleFire
                 } else {
                     this.do = () => {}
                     this.fire = this.harpoonFire
@@ -5643,57 +5960,6 @@ const b = {
                             distance: 10000,
                             target: null
                         }
-                        const harpoonSize = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
-
-                        if (tech.extraHarpoons) {
-                            let targetCount = 0
-                            const SPREAD = 0.06 + 0.05 * (!input.down)
-                            let angle = m.angle - SPREAD * tech.extraHarpoons / 2;
-                            const dir = { x: Math.cos(angle), y: Math.sin(angle) }; //make a vector for the player's direction of length 1; used in dot product
-
-                            for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
-                                    const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
-                                    if (dot > 0.7) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
-                                        if (this.ammo > 0) {
-                                            this.ammo--
-                                            b.harpoon(where, mob[i], angle, harpoonSize, false) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
-                                            angle += SPREAD
-                                            targetCount++
-                                            if (targetCount > tech.extraHarpoons) break
-                                        }
-                                    }
-                                }
-                            }
-                            //if more harpoons and no targets left
-                            if (targetCount < tech.extraHarpoons + 1) {
-                                const num = tech.extraHarpoons + 1 - targetCount
-                                for (let i = 0; i < num; i++) {
-                                    if (this.ammo > 0) {
-                                        this.ammo--
-                                        b.harpoon(where, null, angle, harpoonSize, false)
-                                        angle += SPREAD
-                                    }
-                                }
-                            }
-                            this.ammo++ //make up for the ammo used up in fire()
-                            simulation.updateGunHUD();
-                        } else {
-                            //look for closest mob in player's LoS
-                            const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
-                            for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
-                                    const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
-                                    const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
-                                    if (dist < closest.distance && dot > 0.88) { //target closest mob that player is looking at and isn't too close to target
-                                        closest.distance = dist
-                                        closest.target = mob[i]
-                                    }
-                                }
-                            }
-                            b.harpoon(where, closest.target, m.angle, harpoonSize, false)
-                        }
-
                         //push away blocks and mobs
                         const range = 1200 * this.charge
                         for (let i = 0, len = mob.length; i < len; ++i) { //push away mobs when firing
@@ -5731,6 +5997,57 @@ const b = {
                         player.force.x -= recoil.x
                         player.force.y -= recoil.y
                         tech.harpoonDensity = 0.006 //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
+                        const harpoonSize = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
+                        if (tech.extraHarpoons) {
+                            let targetCount = 0
+                            const SPREAD = 0.06 + 0.05 * (!input.down)
+                            let angle = m.angle - SPREAD * tech.extraHarpoons / 2;
+                            const dir = { x: Math.cos(angle), y: Math.sin(angle) }; //make a vector for the player's direction of length 1; used in dot product
+
+                            for (let i = 0, len = mob.length; i < len; ++i) {
+                                if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
+                                    const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
+                                    const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
+                                    // console.log(dot, 0.95 - Math.min(dist * 0.00015, 0.3))
+                                    if (dot > 0.95 - Math.min(dist * 0.00015, 0.3)) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
+                                        if (this.ammo > -1) {
+                                            this.ammo--
+                                            b.harpoon(where, mob[i], angle, harpoonSize, false) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
+                                            angle += SPREAD
+                                            targetCount++
+                                            if (targetCount > tech.extraHarpoons) break
+                                        }
+                                    }
+                                }
+                            }
+                            //if more harpoons and no targets left
+                            if (targetCount < tech.extraHarpoons + 1) {
+                                const num = tech.extraHarpoons + 1 - targetCount
+                                for (let i = 0; i < num; i++) {
+                                    if (this.ammo > -1) {
+                                        this.ammo--
+                                        b.harpoon(where, null, angle, harpoonSize, false)
+                                        angle += SPREAD
+                                    }
+                                }
+                            }
+                            this.ammo++ //make up for the ammo used up in fire()
+                            simulation.updateGunHUD();
+                        } else {
+                            //look for closest mob in player's LoS
+                            const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
+                            for (let i = 0, len = mob.length; i < len; ++i) {
+                                if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
+                                    const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
+                                    const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
+                                    if (dist < closest.distance && dot > 0.98 - Math.min(dist * 0.00014, 0.3)) { //target closest mob that player is looking at and isn't too close to target
+                                        closest.distance = dist
+                                        closest.target = mob[i]
+                                    }
+                                }
+                            }
+                            b.harpoon(where, closest.target, m.angle, harpoonSize, false)
+                        }
 
                         this.charge = 0;
                     } else { //charging
@@ -5784,6 +6101,31 @@ const b = {
                 m.fireCDcycle = m.cycle + 10 //can't fire until mouse is released
                 this.charge += 0.00001
             },
+            grappleFire() {
+                const where = {
+                    x: m.pos.x + 30 * Math.cos(m.angle),
+                    y: m.pos.y + 30 * Math.sin(m.angle)
+                }
+                const harpoonSize = (tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1) //* (input.down ? 0.7 : 1)
+                if (tech.extraHarpoons && !input.down) { //multiple harpoons
+                    const SPREAD = 0.06
+                    const len = tech.extraHarpoons + 1
+                    let angle = m.angle - SPREAD * len / 2;
+                    for (let i = 0; i < len; i++) {
+                        if (this.ammo > 0) {
+                            this.ammo--
+                            b.grapple(where, angle, true, harpoonSize)
+                            angle += SPREAD
+                        }
+                    }
+                    this.ammo++ //make up for the ammo used up in fire()
+                    simulation.updateGunHUD();
+                    m.fireCDcycle = m.cycle + 90 // cool down
+                } else {
+                    b.grapple(where, m.angle, !input.down, harpoonSize)
+                }
+                m.fireCDcycle = m.cycle + 45 // cool down
+            },
             harpoonFire() {
                 const where = {
                     x: m.pos.x + 30 * Math.cos(m.angle),
@@ -5796,18 +6138,18 @@ const b = {
                 //look for closest mob in player's LoS
                 const harpoonSize = (tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1) //* (input.down ? 0.7 : 1)
                 const totalCycles = 7 * (tech.isFilament ? 1 + 0.01 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
-                const SPREAD = 0.1
-                let angle = m.angle - SPREAD * tech.extraHarpoons / 2;
-                const dir = { x: Math.cos(angle), y: Math.sin(angle) }; //make a vector for the player's direction of length 1; used in dot product
 
-                if (tech.extraHarpoons && !input.down) {
+                if (tech.extraHarpoons && !input.down) { //multiple harpoons
+                    const SPREAD = 0.1
+                    let angle = m.angle - SPREAD * tech.extraHarpoons / 2;
+                    const dir = { x: Math.cos(angle), y: Math.sin(angle) }; //make a vector for the player's direction of length 1; used in dot product
                     const range = 450 * (tech.isFilament ? 1 + 0.005 * Math.min(110, this.ammo) : 1)
                     let targetCount = 0
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
                             const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                             const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
-                            if (dist < range && dot > 0.7) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
+                            if (dist < range && dot > 0.9) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
                                 if (this.ammo > 0) {
                                     this.ammo--
                                     b.harpoon(where, mob[i], angle, harpoonSize, true, totalCycles) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
@@ -5833,17 +6175,23 @@ const b = {
                     simulation.updateGunHUD();
                     m.fireCDcycle = m.cycle + 90 // cool down
                 } else {
+                    //single harpoon
+                    const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
                             const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                             const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
-                            if (dist < closest.distance && dot > 0.88) { //target closest mob that player is looking at and isn't too close to target
+                            if (dist < closest.distance && dot > 0.98 - Math.min(dist * 0.00014, 0.3)) { //target closest mob that player is looking at and isn't too close to target
                                 closest.distance = dist
                                 closest.target = mob[i]
                             }
                         }
                     }
-                    b.harpoon(where, closest.target, m.angle, harpoonSize, !input.down, totalCycles)
+                    if (input.down) {
+                        b.harpoon(where, closest.target, m.angle, harpoonSize, false, 70)
+                    } else {
+                        b.harpoon(where, closest.target, m.angle, harpoonSize, true, totalCycles)
+                    }
                     m.fireCDcycle = m.cycle + 45 // cool down
                 }
                 const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), input.down ? 0.015 : 0.035)

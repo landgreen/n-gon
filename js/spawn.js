@@ -4399,7 +4399,7 @@ const spawn = {
             this.fire();
         };
     },
-    shooterBoss(x, y, radius = 110) {
+    shooterBoss(x, y, radius = 110, isSpawnBossPowerUp = true) {
         mobs.spawn(x, y, 3, radius, "rgb(255,70,180)");
         let me = mob[mob.length - 1];
         setTimeout(() => { //fix mob in place, but allow rotation
@@ -4440,7 +4440,7 @@ const spawn = {
         }, 100); //have to wait a sec so the tether constraint doesn't attach to an orbital
         Matter.Body.setDensity(me, 0.008 + 0.0003 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
-            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
         };
 
@@ -4746,7 +4746,7 @@ const spawn = {
             }
         };
     },
-    launcherBoss(x, y, radius = 90) {
+    launcherBoss(x, y, radius = 90, isSpawnBossPowerUp = true) {
         mobs.spawn(x, y, 6, radius, "rgb(150,150,255)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
@@ -4763,7 +4763,7 @@ const spawn = {
 
         Matter.Body.setDensity(me, 0.0022 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
-            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
         };
         me.onDamage = function() {};

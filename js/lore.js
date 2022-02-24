@@ -43,7 +43,7 @@ const lore = {
     },
     unlockTesting() {
         if (localSettings.loreCount < 1) localSettings.loreCount = 1
-        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
         // document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
         simulation.makeTextLog(`<span class='color-var'>lore</span>.unlockTesting()`, Infinity);
@@ -406,13 +406,13 @@ const lore = {
                         lore.sentence--
                         lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => { lore.anand.text("Not a human, maybe it's an artificial intelligence?") })
                         localSettings.isHuman = false
-                        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                     } else if (input.up) {
                         lore.anand.text("It jumped: so YES")
                         lore.sentence--
                         lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => { lore.anand.text("So you're just a regular human playing a video game!") })
                         localSettings.isHuman = true
-                        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                     } else if (m.alive) {
                         requestAnimationFrame(cycle);
                     }

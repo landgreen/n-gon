@@ -1,19 +1,28 @@
 ******************************************************** NEXT PATCH **************************************************
 
-filament renamed UHMWPE
-unaaq renamed Bessemer process
-toggling harpoon renamed induction furnace
-half-wave rectifier renamed alternator
-reticulum renamed smelting
-  smelting costs 2 ammo packs per upgrade 
-  railgun works with smelting
-
-JUNK tech: Higgs phase transition - spawn 3 tech, there is a chance to remove everything with a 5 minute halflife
+tech grappling hook - can attack to walls and pull you towards the walls
+   harpoon extends farther as you hold down fire, but no longer has auto-steering
+  
+mobs do 4% less harm per difficulty level
+railgun/harpoon auto-targeting is smarter at long distances with multiple small targets
+  but it still has trouble with moving targets
+booby trap only has a 100 -> 50% chance to drop a mine when picking up power ups
+added fallback for browsers that don't allow local storage
 
 ******************************************************** TODO ********************************************************
 
-make a variety of harpoon shapes?
-  just a different railgun shape?
+grappling hook
+  new shape, different from harpoon
+    how to draw convex?
+      composite
+      draw the hook part directly
+  give player more control over motion while hanging and retracting
+    reduce friction effects so player swing around?
+    up down left right push player around?
+      lengthen and shrink the rope length?
+    scale velocity dampening with distance to grapple
+  get induction furnace working?
+    I'm not a fan of this tech, I'd be happy if it was basic harpoon only
 
 tech - Plasma railgun
   like foam, or phonon?
@@ -22,11 +31,6 @@ pause time like invariant for other things...
   throwing blocks
   charging railgun
   charging anything?
-
-tech:   when this tech is ejected spawn one of every power up type
-  JUNK tech?
-
-try to get grappling hook working again
 
 bug - url sharing still broken sometimes
 
