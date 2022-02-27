@@ -1,28 +1,44 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech grappling hook - can attack to walls and pull you towards the walls
-   harpoon extends farther as you hold down fire, but no longer has auto-steering
-  
-mobs do 4% less harm per difficulty level
-railgun/harpoon auto-targeting is smarter at long distances with multiple small targets
-  but it still has trouble with moving targets
-booby trap only has a 100 -> 50% chance to drop a mine when picking up power ups
-added fallback for browsers that don't allow local storage
+grappling hook - small quality of life improvements
+  about 30% larger, and a new shape (does more damage as a result)
+  continues past mobs after hitting them instead of retracting
+  pulls faster even at close range
+  sticks into walls more reliably
+  returns to you when you let go of fire, even when stuck
+  loses ammo less often
+  drains energy as it pulls
+
+JUNK tech: Mech v4.48 - open a portal to a primordial version of reality (an old scratch game I wrote)
+JUNK tech: harvest - convert all the mobs on this level into ammo
+pause menu stats are a bit different
 
 ******************************************************** TODO ********************************************************
 
 grappling hook
-  new shape, different from harpoon
-    how to draw convex?
-      composite
-      draw the hook part directly
+  fire delay reduction doesn't have much effect
+  tech:  give harm immunity while being pulled?
+    make not stack with alternator?  so no energy regen
+  tech: give no collisions, like boson composite while attached to harpoon
+    make not stack with alternator?  so no energy regen
+    this was annoying to code, but probably doable
+  draw the hook part directly
+    two backwards angled spikes near the front
   give player more control over motion while hanging and retracting
     reduce friction effects so player swing around?
     up down left right push player around?
-      lengthen and shrink the rope length?
-    scale velocity dampening with distance to grapple
-  get induction furnace working?
-    I'm not a fan of this tech, I'd be happy if it was basic harpoon only
+    scale velocity dampening with distance to grapple?
+
+tech that does less damage the more tech you have?
+  tech.totalCount
+
+add coyote jump
+  log game m.cycle when last on ground
+  for jump check if game cycle is < last on ground cycle -2
+
+setting to remove UI, except health bar
+  except active gun? to see ammo
+  checkbox in pause and in settings
 
 tech - Plasma railgun
   like foam, or phonon?
@@ -33,10 +49,6 @@ pause time like invariant for other things...
   charging anything?
 
 bug - url sharing still broken sometimes
-
-setting to remove UI, except health bar
-  except active gun? to see ammo
-  checkbox in pause and in settings
 
 +damage for each different bot type you have
   disables bot upgrades?

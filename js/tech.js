@@ -4831,7 +4831,7 @@ const tech = {
         },
         {
             name: "booby trap",
-            description: "<strong>50%</strong> chance to drop a <strong>mine</strong> from <strong>power ups</strong><br><strong>+50%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
+            description: "<strong>60%</strong> chance to drop a <strong>mine</strong> from <strong>power ups</strong><br><strong>+46%</strong> <strong class='color-j'>JUNK</strong> to the potential <strong class='color-m'>tech</strong> pool",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -4844,7 +4844,7 @@ const tech = {
             effect() {
                 tech.isMineDrop = true;
                 if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0)
-                this.refundAmount += tech.addJunkTechToPool(0.5)
+                this.refundAmount += tech.addJunkTechToPool(0.46)
             },
             refundAmount: 0,
             remove() {
@@ -5557,7 +5557,7 @@ const tech = {
         // },
         {
             name: "grappling hook",
-            description: `<strong>harpoons</strong> attach to the <strong>map</strong> and pull you in<br><strong>rope</strong> extends much <strong>farther</strong> while you hold fire`,
+            description: `<strong>harpoons</strong> attach to the <strong>map</strong> and pull you in<br>your <strong>rope</strong> extends while holding <strong>fire</strong>`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5582,6 +5582,46 @@ const tech = {
                 }
             }
         },
+        // {
+        //     name: "exchange interaction",
+        //     description: `<strong>immune</strong> to <strong class='color-harm'>harm</strong> while <strong>grappling</strong>`,
+        //     // link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Boson' class="link">boson</a>`,
+        //     isGunTech: true,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return tech.isGrapple && !tech.isRailEnergyGain
+        //     },
+        //     requires: "grappling hook, not alternator",
+        //     effect() {
+        //         tech.isIntangibleGrapple = true;
+        //     },
+        //     remove() {
+        //         tech.isIntangibleGrapple = false
+        //     }
+        // },
+        // {
+        //     name: "boson quasiparticles",
+        //     description: `<strong>intangible</strong> to <strong class='color-block'>blocks</strong> and mobs while <strong>grappling</strong><br>passing through <strong>shields</strong> drains your <strong class='color-f'>energy</strong>`,
+        //     link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Boson' class="link">boson</a>`,
+        //     isGunTech: true,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return tech.isGrapple && !tech.isRailEnergyGain
+        //     },
+        //     requires: "grappling hook, not alternator",
+        //     effect() {
+        //         tech.isIntangibleGrapple = true;
+        //     },
+        //     remove() {
+        //         tech.isIntangibleGrapple = false
+        //     }
+        // },
         {
             name: "alternator",
             description: "<strong>harpoon</strong> and <strong>grappling hook</strong> drain no <strong class='color-f'>energy</strong><br><strong>railgun</strong> generates <strong class='color-f'>energy</strong>", //as they <strong>retract</strong><br><strong>crouch</strong> firing <strong>harpoon</strong> generates <strong class='color-f'>energy</strong>",
@@ -7477,6 +7517,27 @@ const tech = {
             remove() {}
         },
         {
+            name: "harvest",
+            description: "convert all the mobs on this level into <strong class='color-ammo'>ammo</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            frequencyDefault: 0,
+            isJunk: true,
+            isNonRefundable: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0, len = mob.length; i < len; i++) {
+                    powerUps.directSpawn(mob[i].position.x, mob[i].position.y, "ammo");
+                    mob[i].death();
+                }
+            },
+            remove() {}
+        },
+        {
             name: "brainstorm",
             description: "the <strong class='color-m'>tech</strong> choice menu <strong>randomizes</strong><br>every <strong>0.5</strong> seconds for <strong>10</strong> seconds",
             maxCount: 1,
@@ -7610,6 +7671,21 @@ const tech = {
             remove() {
                 if (this.count) m.look = m.lookDefault
             }
+        },
+        {
+            name: "Mech v4.48",
+            description: `open a portal to a primordial version of reality`,
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                window.open('https://scratch.mit.edu/projects/14005697/fullscreen/', '_blank')
+            },
+            remove() {}
         },
         {
             name: "planetesimals",
@@ -9411,5 +9487,6 @@ const tech = {
     isTimeCrystals: null,
     isGroundState: null,
     isRailGun: null,
-    isGrapple: null
+    isGrapple: null,
+    // isIntangibleGrapple: null
 }

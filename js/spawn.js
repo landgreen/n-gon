@@ -1238,8 +1238,8 @@ const spawn = {
                     ctx.moveTo(vertices[0].x, vertices[0].y);
                     for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
                     ctx.lineTo(vertices[0].x, vertices[0].y);
-                    ctx.lineWidth = 20;
-                    ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                    ctx.lineWidth = 13 + 5 * Math.random();
+                    ctx.strokeStyle = `rgba(255,255,255,${0.5+0.2*Math.random()})`;
                     ctx.stroke();
                 } else {
                     this.isInvulnerable = false
@@ -2010,8 +2010,8 @@ const spawn = {
                         ctx.lineTo(vertices[0].x, vertices[0].y);
                     }
                 }
-                ctx.lineWidth = 20;
-                ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                ctx.lineWidth = 13 + 5 * Math.random();
+                ctx.strokeStyle = `rgba(255,255,255,${0.5+0.2*Math.random()})`;
                 ctx.stroke();
             } else if (this.invulnerabilityCountDown > 0) {
                 this.invulnerabilityCountDown--
@@ -3420,10 +3420,8 @@ const spawn = {
                     ctx.moveTo(vertices[0].x, vertices[0].y);
                     for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
                     ctx.lineTo(vertices[0].x, vertices[0].y);
-                    ctx.lineWidth = 20;
-                    // ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
-                    // ctx.fill();
-                    ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                    ctx.lineWidth = 13 + 5 * Math.random();
+                    ctx.strokeStyle = `rgba(255,255,255,${0.5+0.2*Math.random()})`;
                     ctx.stroke();
                 } else {
                     this.isInvulnerable = false
@@ -3702,8 +3700,8 @@ const spawn = {
                 ctx.moveTo(vertices[0].x, vertices[0].y);
                 for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
                 ctx.lineTo(vertices[0].x, vertices[0].y);
-                ctx.lineWidth = 20;
-                ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                ctx.lineWidth = 13 + 5 * Math.random();
+                ctx.strokeStyle = `rgba(255,255,255,${0.5+0.2*Math.random()})`;
                 ctx.stroke();
             }
             this.checkStatus();
@@ -3840,8 +3838,8 @@ const spawn = {
                 ctx.moveTo(vertices[0].x, vertices[0].y);
                 for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
                 ctx.lineTo(vertices[0].x, vertices[0].y);
-                ctx.lineWidth = 20;
-                ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                ctx.lineWidth = 13 + 5 * Math.random();
+                ctx.strokeStyle = `rgba(255,255,255,${0.5+0.2*Math.random()})`;
                 ctx.stroke();
             } else if (this.mass < 100) {
                 Matter.Body.scale(this, 1.01, 1.01); //grow back to normal size
@@ -3970,8 +3968,8 @@ const spawn = {
             ctx.moveTo(vertices[0].x, vertices[0].y);
             for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
             ctx.lineTo(vertices[0].x, vertices[0].y);
-            ctx.lineWidth = 20;
-            ctx.strokeStyle = "rgba(255,255,255,0.7)";
+            ctx.lineWidth = 13 + 5 * Math.random();
+            ctx.strokeStyle = `rgba(255,255,255,${0.5+0.2*Math.random()})`;
             ctx.stroke();
         }
         me.swordSlash = function() {
@@ -3992,8 +3990,8 @@ const spawn = {
             ctx.moveTo(vertices[0].x, vertices[0].y);
             for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
             ctx.lineTo(vertices[0].x, vertices[0].y);
-            ctx.lineWidth = 20;
-            ctx.strokeStyle = "rgba(255,255,255,0.7)";
+            ctx.lineWidth = 13 + 5 * Math.random();
+            ctx.strokeStyle = `rgba(255,255,255,${0.5+0.2*Math.random()})`;
             ctx.stroke();
         }
         me.laserSword = function(where, angle) {

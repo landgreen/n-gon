@@ -803,27 +803,27 @@ const mobs = {
                     }
                 }
             },
-            invulnerability() {
-                if (this.isInvulnerable) {
-                    if (this.invulnerabilityCountDown > 0) {
-                        this.invulnerabilityCountDown--
-                        //graphics //draw a super shield?
-                        ctx.beginPath();
-                        let vertices = this.vertices;
-                        ctx.moveTo(vertices[0].x, vertices[0].y);
-                        for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
-                        ctx.lineTo(vertices[0].x, vertices[0].y);
-                        ctx.lineWidth = 20;
-                        // ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
-                        // ctx.fill();
-                        ctx.strokeStyle = "rgba(255,255,255,0.4)";
-                        ctx.stroke();
-                    } else {
-                        this.isInvulnerable = false
-                        this.damageReduction = this.startingDamageReduction
-                    }
-                }
-            },
+            // invulnerability() {
+            //     if (this.isInvulnerable) {
+            //         if (this.invulnerabilityCountDown > 0) {
+            //             this.invulnerabilityCountDown--
+            //             //graphics //draw a super shield?
+            //             ctx.beginPath();
+            //             let vertices = this.vertices;
+            //             ctx.moveTo(vertices[0].x, vertices[0].y);
+            //             for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+            //             ctx.lineTo(vertices[0].x, vertices[0].y);
+            //             ctx.lineWidth = 20;
+            //             // ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
+            //             // ctx.fill();
+            //             ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            //             ctx.stroke();
+            //         } else {
+            //             this.isInvulnerable = false
+            //             this.damageReduction = this.startingDamageReduction
+            //         }
+            //     }
+            // },
             grow() {
                 if (this.seePlayer.recall) {
                     if (this.radius < 80) {

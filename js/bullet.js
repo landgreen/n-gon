@@ -1348,11 +1348,10 @@ const b = {
         Composite.add(engine.world, bullet[me]); //add bullet to world
 
     },
-    grapple(where, angle = m.angle, isReturn = false, harpoonSize = 1) {
+    grapple(where, angle = m.angle, harpoonSize = 1) {
         const me = bullet.length;
         const returnRadius = 100 * Math.sqrt(harpoonSize)
-        bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -40 * harpoonSize, y: 2 * harpoonSize, index: 0, isInternal: false }, { x: -40 * harpoonSize, y: -2 * harpoonSize, index: 1, isInternal: false }, { x: 50 * harpoonSize, y: -3 * harpoonSize, index: 3, isInternal: false }, { x: 30 * harpoonSize, y: 2 * harpoonSize, index: 4, isInternal: false }], {
-            cycle: 0,
+        bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -70 * harpoonSize, y: 3 * harpoonSize, index: 0, isInternal: false }, { x: -70 * harpoonSize, y: -3 * harpoonSize, index: 1, isInternal: false }, { x: 45 * harpoonSize, y: -2 * harpoonSize, index: 2, isInternal: false }, { x: 50 * harpoonSize, y: 0, index: 3, isInternal: false }, { x: 45 * harpoonSize, y: 2 * harpoonSize, index: 4, isInternal: false }], {
             angle: angle,
             friction: 1,
             frictionAir: 0.4,
@@ -1362,12 +1361,13 @@ const b = {
             endCycle: simulation.cycle + 45,
             collisionFilter: {
                 category: cat.bullet,
-                mask: tech.isShieldPierce ? cat.map | cat.body | cat.mob | cat.mobBullet : cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield,
+                mask: tech.isShieldPierce ? cat.body | cat.mob | cat.mobBullet : cat.body | cat.mob | cat.mobBullet | cat.mobShield,
             },
             minDmgSpeed: 4,
             ropeExtension: 0,
             lookFrequency: Math.floor(7 + Math.random() * 3),
             density: tech.harpoonDensity, //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
+            drain: 0.004,
             beforeDmg(who) {
                 if (tech.isShieldPierce && who.isShielded) { //disable shields
                     who.isShielded = false
@@ -1375,19 +1375,10 @@ const b = {
                 }
                 if (tech.fragments) {
                     b.targetedNail(this.vertices[2], tech.fragments * 3)
-                    if (!isReturn) this.endCycle = 0;
                 }
-                if (!who.isBadTarget) {
-                    if (isReturn) {
-                        this.do = this.returnToPlayer
-                    } else {
-                        this.frictionAir = 0.01
-                        this.do = () => {
-                            this.force.y += this.mass * 0.003; //gravity
-                            this.draw();
-                        }
-                    }
-                }
+                // if (!who.isBadTarget) {
+                //     this.do = this.returnToPlayer
+                // }
             },
             caughtPowerUp: null,
             dropCaughtPowerUp() {
@@ -1416,7 +1407,7 @@ const b = {
                     this.dropCaughtPowerUp()
                 }
             },
-            drawString() {
+            draw() {
                 const where = {
                     x: m.pos.x + 30 * Math.cos(m.angle),
                     y: m.pos.y + 30 * Math.sin(m.angle)
@@ -1430,8 +1421,9 @@ const b = {
                 ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
                 // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
                 ctx.stroke();
+                //draw hook
+                // ctx.beginPath();
             },
-            draw() {},
             returnToPlayer() {
                 if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius) { //near player
                     this.endCycle = 0;
@@ -1482,149 +1474,129 @@ const b = {
                 }
             },
             do() {
-                this.cycle++
-                if (isReturn) {
-                    if (input.fire) {
-                        this.grabPowerUp()
-                        if (this.endCycle < simulation.cycle + 1) { //if at end of lifespan, but player is holding down fire, force retraction
-                            this.endCycle = simulation.cycle + 60
-                            m.fireCDcycle = m.cycle + 20 // cool down
-                            this.do = this.returnToPlayer
-                            Matter.Body.setDensity(this, 0.0005); //reduce density on return
-                            if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
-                            this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
-                        }
-                    } else {
-                        //snap rope if not enough energy
-                        if (m.energy < 0.05) {
-                            const returnForce = Vector.mult(Vector.normalise(Vector.sub(this.position, m.pos)), 3 * this.thrustMag * this.mass)
-                            this.force.x -= returnForce.x
-                            this.force.y -= returnForce.y
-                            this.frictionAir = 0.002
-                            this.do = () => {
-                                if (this.speed < 20) this.force.y += 0.0005 * this.mass;
-                            }
-                            this.dropCaughtPowerUp()
-                        } else {
-                            //return to player
-                            this.do = this.returnToPlayer
-                            this.endCycle = simulation.cycle + 60
-                            Matter.Body.setDensity(this, 0.0005); //reduce density on return
-                            if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
-                            this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
-                        }
+                if (input.fire) { //&& !Matter.Query.collides(this, body).length
+                    this.grabPowerUp()
+                    if (this.endCycle < simulation.cycle + 1) { //if at end of lifespan, but player is holding down fire, force retraction
+                        this.endCycle = simulation.cycle + 60
+                        m.fireCDcycle = m.cycle + 20 // cool down
+                        this.do = this.returnToPlayer
+                        Matter.Body.setDensity(this, 0.0005); //reduce density on return
+                        if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
+                        this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
                     }
+                } else {
+                    //snap rope if not enough energy
+                    if (m.energy < 0.05) {
+                        const returnForce = Vector.mult(Vector.normalise(Vector.sub(this.position, m.pos)), 3 * this.thrustMag * this.mass)
+                        this.force.x -= returnForce.x
+                        this.force.y -= returnForce.y
+                        this.frictionAir = 0.002
+                        this.do = () => {
+                            if (this.speed < 20) this.force.y += 0.0005 * this.mass;
+                        }
+                        this.dropCaughtPowerUp()
+                    } else {
+                        //return to player
+                        this.do = this.returnToPlayer
+                        this.endCycle = simulation.cycle + 60
+                        Matter.Body.setDensity(this, 0.0005); //reduce density on return
+                        if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
+                        this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
+                    }
+                }
+                //grappling hook
+                if (input.fire && Matter.Query.collides(this, map).length) {
+                    Matter.Body.setPosition(this, Vector.add(this.position, { x: 20 * Math.cos(this.angle), y: 20 * Math.sin(this.angle) }))
+                    if (Matter.Query.collides(this, map).length) {
+                        Matter.Sleeping.set(this, true)
+                        this.endCycle = simulation.cycle + 5
+                        this.dropCaughtPowerUp()
+                        this.do = () => {
+                            //between player nose and the grapple
+                            const sub = Vector.sub(this.vertices[0], {
+                                x: m.pos.x + 30 * Math.cos(m.angle),
+                                y: m.pos.y + 30 * Math.sin(m.angle)
+                            })
+                            let dist = Vector.magnitude(sub) - this.ropeExtension
+                            if (input.fire) {
+                                //control position while hooked
+                                // if (input.down) { //down
+                                // player.force.y += 5 * player.mass * simulation.g;
+                                // dist *= 0.25
+                                // this.ropeExtension += 10
+                                // } else if (input.up) { //up
+                                // this.ropeExtension -= 10
+                                // if (this.ropeExtension < 0) this.ropeExtension = 0
+                                // player.force.y -= 5 * player.mass * simulation.g;
+                                // dist *= 0.4
+                                // } else {}
 
-                    //grappling hook
-                    if (input.fire && Matter.Query.collides(this, map).length) {
-                        const pull = Vector.mult(Vector.normalise(Vector.sub(this.position, m.pos)), 0.1)
-                        player.force.x += pull.x
-                        player.force.y += pull.y - player.mass * 0.02
-                        const move = { x: 50 * Math.cos(this.angle), y: 50 * Math.sin(this.angle), }
-                        Matter.Body.setPosition(this, Vector.add(this.position, move))
-
-                        if (Matter.Query.collides(this, map).length) {
-                            Matter.Body.setStatic(this, true)
-                            this.endCycle = simulation.cycle + 5
-                            this.dropCaughtPowerUp()
-                            this.do = () => {
-                                // const grappleBack = {
-                                //     x: this.position.x - 50 * Math.cos(this.angle),
-                                //     y: this.position.y - 50 * Math.sin(this.angle)
+                                // if (input.right) { //down
+                                //     dist *= 0.4
+                                //     player.force.x += 5 * player.mass * simulation.g;
+                                // } else if (input.left) { //up
+                                //     dist *= 0.4
+                                //     player.force.x -= 5 * player.mass * simulation.g;
                                 // }
-
-                                //between player nose and the grapple
-                                const sub = Vector.sub(this.vertices[0], {
-                                    x: m.pos.x + 30 * Math.cos(m.angle),
-                                    y: m.pos.y + 30 * Math.sin(m.angle)
-                                })
-                                let dist = Vector.magnitude(sub) - this.ropeExtension
-                                if (input.fire) {
-                                    m.fireCDcycle = m.cycle + 30; // cool down if out of energy
-                                    this.endCycle = simulation.cycle + 10
-
+                                m.fireCDcycle = m.cycle + 30; // cool down if out of energy
+                                this.endCycle = simulation.cycle + 10
+                                if (input.down) { //down
+                                    dist = 0
+                                    player.force.y += 5 * player.mass * simulation.g;
+                                }
+                                if (m.energy > this.drain || tech.isRailEnergyGain) {
                                     Matter.Body.setVelocity(player, { x: player.velocity.x * 0.8, y: player.velocity.y * 0.8 });
-                                    if (input.down) { //down
-                                        dist *= 0.25
-                                        player.force.y += 5 * player.mass * simulation.g;
-                                    }
-                                    //control position while hooked
-                                    // if (input.down) { //down
-                                    // player.force.y += 5 * player.mass * simulation.g;
-                                    // dist *= 0.25
-                                    // this.ropeExtension += 10
-                                    // } else if (input.up) { //up
-                                    // this.ropeExtension -= 10
-                                    // if (this.ropeExtension < 0) this.ropeExtension = 0
-                                    // player.force.y -= 5 * player.mass * simulation.g;
-                                    // dist *= 0.4
-                                    // } else {}
-
-                                    // if (input.right) { //down
-                                    //     dist *= 0.4
-                                    //     player.force.x += 5 * player.mass * simulation.g;
-                                    // } else if (input.left) { //up
-                                    //     dist *= 0.4
-                                    //     player.force.x -= 5 * player.mass * simulation.g;
-                                    // }
-                                    if (!tech.isRailEnergyGain && m.energy > 0.004 && dist > 400) m.energy -= 0.004
-                                    const pull = Vector.mult(Vector.normalise(sub), 0.00035 * Math.min(Math.max(30, dist), 500))
+                                    const pull = Vector.mult(Vector.normalise(sub), 0.0008 * Math.min(Math.max(15, dist), 200))
                                     player.force.x += pull.x
                                     player.force.y += pull.y
-                                } else { //if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius + 200)
-                                    // if (input.up) { //up
-                                    //     player.force.y -= 20 * player.mass * simulation.g;
-                                    // }
-                                    //automatically get ammo back
-                                    this.endCycle = 0;
-                                    if (m.cycle + 15 * b.fireCDscale < m.fireCDcycle) m.fireCDcycle = m.cycle + 15 * b.fireCDscale //lower cd to 15 if it is above 15
-                                    // refund ammo
-                                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                                        if (b.guns[i].name === "harpoon") {
-                                            b.guns[i].ammo++;
-                                            simulation.updateGunHUD();
-                                            break;
+
+                                    if (!tech.isRailEnergyGain && dist > 500) {
+                                        m.energy -= this.drain
+                                        if (m.energy < 0) {
+                                            this.endCycle = 0;
+                                            if (m.cycle + 50 < m.fireCDcycle) m.fireCDcycle = m.cycle + 50
+                                            // refund ammo
+                                            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                                                if (b.guns[i].name === "harpoon") {
+                                                    b.guns[i].ammo++;
+                                                    simulation.updateGunHUD();
+                                                    break;
+                                                }
+                                            }
                                         }
                                     }
                                 }
-                                // if (dist > returnRadius) 
-                                this.draw();
+                                // if (tech.isIntangibleGrapple) {
+                                //     player.collisionFilter.mask = cat.map
+                                //     let inPlayer = Matter.Query.region(mob, player.bounds)
+                                //     if (inPlayer.length > 0) {
+                                //         for (let i = 0; i < inPlayer.length; i++) {
+                                //             if (m.energy > 0 && inPlayer[i].shield) m.energy -= 0.014;
+                                //         }
+                                //     }
+                                //     //check for disabling intangible in next cycle
+                                //     requestAnimationFrame(() => {
+                                //         if (!tech.isIntangibleGrapple || !input.fire || this.) {
+                                //             player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
+                                //         }
+                                //     });
+                                // }
+                            } else {
+                                Matter.Sleeping.set(this, false)
+                                this.collisionFilter.category = 0
+                                this.collisionFilter.mask = 0
+                                this.do = this.returnToPlayer
+                                this.endCycle = simulation.cycle + 60
                             }
+                            this.draw();
                         }
                     }
-                    this.force.x += this.thrustMag * this.mass * Math.cos(this.angle);
-                    this.force.y += this.thrustMag * this.mass * Math.sin(this.angle);
-                    this.draw()
                 }
+                this.force.x += this.thrustMag * this.mass * Math.cos(this.angle);
+                this.force.y += this.thrustMag * this.mass * Math.sin(this.angle);
+                this.draw()
             },
         });
-        if (!isReturn) {
-            Matter.Body.setVelocity(bullet[me], {
-                x: m.Vx / 2 + 60 * Math.cos(bullet[me].angle),
-                y: m.Vy / 2 + 60 * Math.sin(bullet[me].angle)
-            });
-            bullet[me].frictionAir = 0.002
-            bullet[me].do = function() {
-                if (this.speed < 20) this.force.y += 0.0005 * this.mass;
-                this.draw();
-            }
-        }
-        if (tech.isHarpoonPowerUp && bullet[me].density > 0.01) {
-            if (isReturn) {
-                bullet[me].draw = function() {
-                    this.drawToggleHarpoon()
-                    this.drawString()
-                }
-            } else {
-                bullet[me].draw = function() {
-                    this.drawToggleHarpoon()
-                }
-            }
-        } else if (isReturn) {
-            bullet[me].draw = function() {
-                this.drawString()
-            }
-        }
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
     harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35) {
@@ -6122,7 +6094,7 @@ const b = {
                     simulation.updateGunHUD();
                     m.fireCDcycle = m.cycle + 90 // cool down
                 } else {
-                    b.grapple(where, m.angle, !input.down, harpoonSize)
+                    b.grapple(where, m.angle, harpoonSize)
                 }
                 m.fireCDcycle = m.cycle + 45 // cool down
             },

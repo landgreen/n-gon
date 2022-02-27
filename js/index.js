@@ -257,31 +257,37 @@ const build = {
         if (tech.plasmaBotCount) botText += `<br>plasma-bots: ${tech.plasmaBotCount}`
         if (tech.missileBotCount) botText += `<br>missile-bots: ${tech.missileBotCount}`
 
-        const harm = (1 - m.harmReduction()) * 100
         let text = `<div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">`
         if (!simulation.isChoosing) text += `<br><span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume
 <br><br><svg class="SVG-button" onclick="build.shareURL(false)" width="92" height="20" style="padding:0px; margin: 1px;">
     <g stroke='none' fill='#333' stroke-width="2" font-size="14px" font-family="Ariel, sans-serif"> <text x="5" y="15">copy build url</text></g>
 </svg><br>`
-        text += `<strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}%
-<br><strong class='color-harm'>harm</strong> reduction: ${harm.toFixed(harm > 90 ? 2 : 0)}%
-<br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
-<br><strong class='color-dup'>duplication</strong> chance: ${(tech.duplicationChance()*100).toFixed(0)}%
-${botText}
+        //{ /* <strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}% */ }
+        // <br>damage difficulty reduction: ${((1-m.dmgScale)*100).toFixed(2)}%
+        // <br>effective damage: ${(((tech.damageFromTech()-1)*m.dmgScale)*100).toFixed(0)}%
+        // <br>
+        // <br><strong class='color-d'>damage</strong> =  ${((tech.damageFromTech())*100).toFixed(0)}% × ${((m.dmgScale)*100).toFixed(2)}% = ${(((tech.damageFromTech())*m.dmgScale)*100).toFixed(0)}%
+        /// <br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%
+        text +=
+            `
+<br>effective <strong class='color-d'>damage</strong>: ${(tech.damageFromTech() * m.dmgScale).toPrecision(4)}
+<br>damage: ${((tech.damageFromTech())).toPrecision(4)}, difficulty: ${((m.dmgScale)).toPrecision(4)}
 <br>
-<br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
+<br>effective <strong class='color-harm'>harm</strong>: ${(simulation.dmgScale*m.harmReduction()).toPrecision(4)}
+<br>reduction: ${(m.harmReduction()).toPrecision(4)}, difficulty: ${(simulation.dmgScale).toPrecision(4)}
+<br>
+${botText}
 <br><strong class='color-h'>health</strong>: (${(m.health*100).toFixed(0)} / ${(m.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(m.energy*100).toFixed(0)} / ${(m.maxEnergy*100).toFixed(0)})
 <br><strong class='color-g'>gun</strong>: ${b.activeGun !== null ? b.guns[b.activeGun].name: "null"} &nbsp; <strong class='color-g'>ammo</strong>: ${b.activeGun !== null ? b.guns[b.activeGun].ammo: "0"}
+<br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
+<br><strong class='color-dup'>duplication</strong> chance: ${(tech.duplicationChance()*100).toFixed(0)}%
+<br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
 <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
 <br>mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
 <br>
 <br>seed: ${Math.initialSeed}
 <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${m.cycle} cycles
 <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
-
-<br>damage difficulty scale: ${(m.dmgScale*100).toFixed(2) }%
-<br>harm difficulty scale: ${(simulation.dmgScale*100).toFixed(0)}%
-<br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%
 ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
 </div>`;
         for (let i = 0, len = b.inventory.length; i < len; i++) {

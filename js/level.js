@@ -18,7 +18,7 @@ const level = {
             // m.setField("time dilation")
             // b.giveGuns("harpoon")
             // for (let i = 0; i < 9; i++) tech.giveTech("smelting")
-            // tech.giveTech("UHMWPE")
+            // tech.giveTech("boson quasiparticles")
             // tech.giveTech("grappling hook")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
@@ -32,7 +32,7 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.reactor();
             // level.testing(); //not in rotation, used for testing
-            // level.run()
+            // level.pavilion()
             if (simulation.isTraining) { level.walk(); } else { level.intro(); }
 
             // powerUps.research.changeRerolls(3000)
@@ -2547,7 +2547,7 @@ const level = {
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
         // spawn.powerUpBoss(1900, -500)
-        // spawn.powerUpBossBaby(3200, -500)
+        spawn.powerUpBossBaby(3200, -500)
         // spawn.snakeBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
         // spawn.pulsarBoss(1700, -500)
