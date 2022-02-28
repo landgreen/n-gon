@@ -369,6 +369,7 @@ const tech = {
                     if (gunTechPool.length) {
                         const index = Math.floor(Math.random() * gunTechPool.length)
                         tech.giveTech(gunTechPool[index]) // choose from the gun pool
+                        tech.tech[gunTechPool[index]].isFromAppliedScience = true //makes it not remove properly under pure science
                         simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[gunTechPool[index]].name}</span>")`)
                     }
                 }
@@ -1634,8 +1635,8 @@ const tech = {
             }
         },
         {
-            name: "complex spin-statistics",
-            description: `become <strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1.8</strong> seconds<br>once every <strong>7</strong> seconds`,
+            name: "spin–statistics theorem",
+            description: `become <strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1.9</strong> seconds<br>once every <strong>7</strong> seconds`,
             maxCount: 3,
             count: 0,
             frequency: 1,
@@ -1645,7 +1646,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                tech.cyclicImmunity += 108;
+                tech.cyclicImmunity += 114;
             },
             remove() {
                 tech.cyclicImmunity = 0;
@@ -3066,8 +3067,8 @@ const tech = {
             }
         },
         {
-            name: "particle collider",
-            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><em><strong>4%</strong> chance to convert that tech into <strong class='color-f'>energy</strong></em>`,
+            name: "pure science",
+            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>4%</strong> chance to convert that tech into ${powerUps.orb.research(1)}`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -5582,58 +5583,37 @@ const tech = {
                 }
             }
         },
-        // {
-        //     name: "exchange interaction",
-        //     description: `<strong>immune</strong> to <strong class='color-harm'>harm</strong> while <strong>grappling</strong>`,
-        //     // link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Boson' class="link">boson</a>`,
-        //     isGunTech: true,
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 2,
-        //     frequencyDefault: 2,
-        //     allowed() {
-        //         return tech.isGrapple && !tech.isRailEnergyGain
-        //     },
-        //     requires: "grappling hook, not alternator",
-        //     effect() {
-        //         tech.isIntangibleGrapple = true;
-        //     },
-        //     remove() {
-        //         tech.isIntangibleGrapple = false
-        //     }
-        // },
-        // {
-        //     name: "boson quasiparticles",
-        //     description: `<strong>intangible</strong> to <strong class='color-block'>blocks</strong> and mobs while <strong>grappling</strong><br>passing through <strong>shields</strong> drains your <strong class='color-f'>energy</strong>`,
-        //     link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Boson' class="link">boson</a>`,
-        //     isGunTech: true,
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 2,
-        //     frequencyDefault: 2,
-        //     allowed() {
-        //         return tech.isGrapple && !tech.isRailEnergyGain
-        //     },
-        //     requires: "grappling hook, not alternator",
-        //     effect() {
-        //         tech.isIntangibleGrapple = true;
-        //     },
-        //     remove() {
-        //         tech.isIntangibleGrapple = false
-        //     }
-        // },
         {
-            name: "alternator",
-            description: "<strong>harpoon</strong> and <strong>grappling hook</strong> drain no <strong class='color-f'>energy</strong><br><strong>railgun</strong> generates <strong class='color-f'>energy</strong>", //as they <strong>retract</strong><br><strong>crouch</strong> firing <strong>harpoon</strong> generates <strong class='color-f'>energy</strong>",
+            name: "bulk modulus",
+            description: `become <strong>immune</strong> to <strong class='color-harm'>harm</strong> while <strong>grappling</strong><br>drains <strong class='color-f'>energy</strong> and prevents <strong>regen</strong>`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("harpoon")
+                return tech.isGrapple && !tech.isRailEnergyGain
             },
-            requires: "railgun",
+            requires: "grappling hook, not alternator",
+            effect() {
+                tech.isImmuneGrapple = true;
+            },
+            remove() {
+                tech.isImmuneGrapple = false
+            }
+        },
+        {
+            name: "alternator",
+            description: "<strong>harpoons</strong> drain no <strong class='color-f'>energy</strong><br><strong>railgun</strong> generates <strong class='color-f'>energy</strong>", //as they <strong>retract</strong><br><strong>crouch</strong> firing <strong>harpoon</strong> generates <strong class='color-f'>energy</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("harpoon") && !tech.isImmuneGrapple
+            },
+            requires: "railgun, not Bose–Einstein statistics",
             effect() {
                 tech.isRailEnergyGain = true;
             },
@@ -5652,7 +5632,7 @@ const tech = {
             allowed() {
                 return (!tech.isLargeHarpoon && tech.haveGunCheck("harpoon")) || (tech.isNeedles || tech.isNeedleShot)
             },
-            requires: "nail gun, needle gun, needle-shot, harpoon",
+            requires: "nail gun, needle gun, needle-shot, harpoon, not Bessemer process",
             effect() {
                 tech.isShieldPierce = true
             },
@@ -5671,7 +5651,7 @@ const tech = {
             allowed() {
                 return tech.haveGunCheck("harpoon") && !tech.isShieldPierce
             },
-            requires: "harpoon",
+            requires: "harpoon not ceramics",
             effect() {
                 tech.isLargeHarpoon = true;
             },
@@ -5690,22 +5670,24 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("harpoon") && b.returnGunAmmo('harpoon') > 1
+                return tech.haveGunCheck("harpoon") && b.returnGunAmmo('harpoon') > 1 + this.count * 2
             },
             requires: "harpoon",
             effect() {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "harpoon") {
-                        b.guns[i].ammo -= 2
+                        b.guns[i].ammo -= 2 + this.count
                         if (b.guns[i].ammo < 0) b.guns[i].ammo = 0
                         simulation.updateGunHUD();
                         tech.extraHarpoons++;
                         break
                     }
                 }
+                this.description = `forge <strong>${2+(this.count+1)*2}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot`
             },
             remove() {
                 if (tech.extraHarpoons) {
+                    this.description = `forge <strong>${2}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot`
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "harpoon") {
                             b.guns[i].ammo += 2
@@ -7531,8 +7513,16 @@ const tech = {
             requires: "",
             effect() {
                 for (let i = 0, len = mob.length; i < len; i++) {
-                    powerUps.directSpawn(mob[i].position.x, mob[i].position.y, "ammo");
-                    mob[i].death();
+                    if (mob[i].isDropPowerUp) {
+                        powerUps.directSpawn(mob[i].position.x, mob[i].position.y, "ammo");
+                        mob[i].death();
+                    }
+                }
+                for (let i = powerUp.length - 1; i > -1; i--) {
+                    if (powerUp[i].name !== "ammo") {
+                        Matter.Composite.remove(engine.world, powerUp[i]);
+                        powerUp.splice(i, 1);
+                    }
                 }
             },
             remove() {}
@@ -9488,5 +9478,5 @@ const tech = {
     isGroundState: null,
     isRailGun: null,
     isGrapple: null,
-    // isIntangibleGrapple: null
+    isImmuneGrapple: null,
 }

@@ -1358,13 +1358,12 @@ const b = {
             thrustMag: 0.1,
             dmg: 6, //damage done in addition to the damage from momentum
             classType: "bullet",
-            endCycle: simulation.cycle + 45,
+            endCycle: simulation.cycle + 70,
             collisionFilter: {
                 category: cat.bullet,
                 mask: tech.isShieldPierce ? cat.body | cat.mob | cat.mobBullet : cat.body | cat.mob | cat.mobBullet | cat.mobShield,
             },
             minDmgSpeed: 4,
-            ropeExtension: 0,
             lookFrequency: Math.floor(7 + Math.random() * 3),
             density: tech.harpoonDensity, //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
             drain: 0.004,
@@ -1517,7 +1516,7 @@ const b = {
                                 x: m.pos.x + 30 * Math.cos(m.angle),
                                 y: m.pos.y + 30 * Math.sin(m.angle)
                             })
-                            let dist = Vector.magnitude(sub) - this.ropeExtension
+                            let dist = Vector.magnitude(sub)
                             if (input.fire) {
                                 //control position while hooked
                                 // if (input.down) { //down
@@ -1566,21 +1565,18 @@ const b = {
                                         }
                                     }
                                 }
-                                // if (tech.isIntangibleGrapple) {
-                                //     player.collisionFilter.mask = cat.map
-                                //     let inPlayer = Matter.Query.region(mob, player.bounds)
-                                //     if (inPlayer.length > 0) {
-                                //         for (let i = 0; i < inPlayer.length; i++) {
-                                //             if (m.energy > 0 && inPlayer[i].shield) m.energy -= 0.014;
-                                //         }
-                                //     }
-                                //     //check for disabling intangible in next cycle
-                                //     requestAnimationFrame(() => {
-                                //         if (!tech.isIntangibleGrapple || !input.fire || this.) {
-                                //             player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
-                                //         }
-                                //     });
-                                // }
+                                if (tech.isImmuneGrapple && m.immuneCycle < m.cycle + 10) {
+                                    m.immuneCycle = m.cycle + 10;
+                                    if (m.energy > 0.001) {
+                                        m.energy -= 0.001
+                                    } else {
+                                        Matter.Sleeping.set(this, false)
+                                        this.collisionFilter.category = 0
+                                        this.collisionFilter.mask = 0
+                                        this.do = this.returnToPlayer
+                                        this.endCycle = simulation.cycle + 60
+                                    }
+                                }
                             } else {
                                 Matter.Sleeping.set(this, false)
                                 this.collisionFilter.category = 0
@@ -6092,11 +6088,11 @@ const b = {
                     }
                     this.ammo++ //make up for the ammo used up in fire()
                     simulation.updateGunHUD();
-                    m.fireCDcycle = m.cycle + 90 // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(75 * b.fireCDscale) // cool down
                 } else {
                     b.grapple(where, m.angle, harpoonSize)
                 }
-                m.fireCDcycle = m.cycle + 45 // cool down
+                m.fireCDcycle = m.cycle + Math.floor(75 * b.fireCDscale) // cool down
             },
             harpoonFire() {
                 const where = {

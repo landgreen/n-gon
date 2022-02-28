@@ -18,7 +18,7 @@ const level = {
             // m.setField("time dilation")
             // b.giveGuns("harpoon")
             // for (let i = 0; i < 9; i++) tech.giveTech("smelting")
-            // tech.giveTech("boson quasiparticles")
+            // tech.giveTech("exchange interaction")
             // tech.giveTech("grappling hook")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")

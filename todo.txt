@@ -1,33 +1,24 @@
 ******************************************************** NEXT PATCH **************************************************
 
-grappling hook - small quality of life improvements
-  about 30% larger, and a new shape (does more damage as a result)
-  continues past mobs after hitting them instead of retracting
-  pulls faster even at close range
-  sticks into walls more reliably
-  returns to you when you let go of fire, even when stuck
-  loses ammo less often
-  drains energy as it pulls
+grapple goes 40% farther before it retracts automatically
+grapple now works well with fire delay reduction
+  or it's annoying, you decide!
+smelting cost more ammo as you increase stacks
 
-JUNK tech: Mech v4.48 - open a portal to a primordial version of reality (an old scratch game I wrote)
-JUNK tech: harvest - convert all the mobs on this level into ammo
-pause menu stats are a bit different
+grappling hook tech: bulk modulus - immune to harm while grappling, but drain a bit of energy
 
+particle collider renamed pure science - and it gives 1 research instead of energy when it fails: 4% chance
+  
 ******************************************************** TODO ********************************************************
 
 grappling hook
-  fire delay reduction doesn't have much effect
-  tech:  give harm immunity while being pulled?
-    make not stack with alternator?  so no energy regen
-  tech: give no collisions, like boson composite while attached to harpoon
-    make not stack with alternator?  so no energy regen
-    this was annoying to code, but probably doable
   draw the hook part directly
     two backwards angled spikes near the front
   give player more control over motion while hanging and retracting
     reduce friction effects so player swing around?
     up down left right push player around?
     scale velocity dampening with distance to grapple?
+    make a variable to track rope length?
 
 tech that does less damage the more tech you have?
   tech.totalCount
