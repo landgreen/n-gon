@@ -16,8 +16,8 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
             // m.setField("time dilation")
-            b.giveGuns("harpoon")
-            tech.giveTech("railgun")
+            // b.giveGuns("harpoon")
+            // tech.giveTech("railgun")
             // tech.giveTech("necrophage")
             // tech.giveTech("isotropic radiator")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
