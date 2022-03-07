@@ -323,6 +323,7 @@ const m = {
                 }
                 if (
                     !tech.tech[i].isNonRefundable &&
+                    !tech.tech[i].isFromAppliedScience &&
                     tech.tech[i].name !== "many-worlds" &&
                     tech.tech[i].name !== "Ψ(t) collapse" &&
                     tech.tech[i].name !== "non-unitary operator" &&
@@ -891,7 +892,7 @@ const m = {
     isSneakAttack: false,
     duplicateChance: 0,
     energy: 0,
-    fieldRegen: 0,
+    fieldRegen: 0.001,
     fieldMode: 0,
     fieldFire: false,
     fieldHarmReduction: 1,
@@ -923,7 +924,7 @@ const m = {
             if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
         }
         if (m.energy < m.maxEnergy) m.energy = m.maxEnergy;
-        m.fieldRegen = 0.001
+        // m.fieldRegen = 0.001
         m.fieldMeterColor = "#0cf"
         m.eyeFillColor = m.fieldMeterColor
         m.fieldShieldingScale = 1;

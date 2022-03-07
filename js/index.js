@@ -7,7 +7,9 @@ Math.hash = s => { for (var i = 0, h = 9; i < s.length;) h = Math.imul(h ^ s.cha
 // console.log(date1.getUTCHours())
 // document.getElementById("seed").placeholder = Math.initialSeed = String(date1.getUTCDate() * date1.getUTCFullYear()) // daily seed,  day + year
 
-document.getElementById("seed").placeholder = Math.initialSeed = Math.floor(Date.now() % 100000) //random every time:  just the time in milliseconds UTC
+// document.getElementById("seed").placeholder = Math.initialSeed = Math.floor(Date.now() % 100000) //random every time:  just the time in milliseconds UTC
+
+document.getElementById("seed").placeholder = Math.initialSeed = String(Math.floor(Date.now() % 100000))
 Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
 Math.seededRandom = function(min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined
     Math.seed = (Math.seed * 9301 + 49297) % 233280;
@@ -1108,6 +1110,11 @@ window.addEventListener("keydown", function(event) {
                 for (let i = 0, len = mob.length; i < len; ++i) mob[i].damage(Infinity, true)
                 setTimeout(() => { for (let i = 0, len = mob.length; i < len; ++i) mob[i].damage(Infinity, true) }, 100);
                 setTimeout(() => { for (let i = 0, len = mob.length; i < len; ++i) mob[i].damage(Infinity, true) }, 200);
+                break
+            case "l":
+                document.getElementById("field").style.display = "none"
+                document.getElementById("guns").style.display = "none"
+                document.getElementById("tech").style.display = "none"
                 break
         }
     }

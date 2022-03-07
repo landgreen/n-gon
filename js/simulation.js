@@ -399,7 +399,7 @@ const simulation = {
                 }
             }
         }
-        if (tech.isCrouchAmmo) tech.isCrouchAmmo = 1 //this prevents hacking the tech by switching guns
+        if (tech.crouchAmmoCount) tech.crouchAmmoCount = 1 //this prevents hacking the tech by switching guns
 
         b.activeGun = b.inventory[b.inventoryGun];
         if (b.guns[b.activeGun].charge) b.guns[b.activeGun].charge = 0; //if switching into foam set charge to 0
@@ -653,6 +653,7 @@ const simulation = {
             if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "harpoon") b.guns[i].chooseFireMethod()
+            if (b.guns[i].name === "foam") b.guns[i].chooseFireMethod()
         }
         tech.dynamoBotCount = 0;
         tech.nailBotCount = 0;
@@ -778,7 +779,7 @@ const simulation = {
             }
             for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
                 if (b.guns[i].name === "mine") {
-                    if (tech.isCrouchAmmo) count = Math.ceil(count / 2)
+                    if (tech.crouchAmmoCount) count = Math.ceil(count / 2)
                     b.guns[i].ammo += count
                     if (tech.ammoCap) b.guns[i].ammo = Math.min(tech.ammoCap, b.guns[i].ammo)
                     simulation.updateGunHUD();

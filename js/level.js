@@ -16,10 +16,10 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
             // m.setField("time dilation")
-            // b.giveGuns("harpoon")
-            // for (let i = 0; i < 9; i++) tech.giveTech("smelting")
-            // tech.giveTech("exchange interaction")
-            // tech.giveTech("grappling hook")
+            b.giveGuns("harpoon")
+            tech.giveTech("railgun")
+            // tech.giveTech("necrophage")
+            // tech.giveTech("isotropic radiator")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
@@ -32,7 +32,7 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.reactor();
             // level.testing(); //not in rotation, used for testing
-            // level.pavilion()
+            // level.highrise()
             if (simulation.isTraining) { level.walk(); } else { level.intro(); }
 
             // powerUps.research.changeRerolls(3000)
@@ -103,7 +103,8 @@ const level = {
             for (let j = 0, len = 5; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         }
         for (let i = 0; i < tech.wimpExperiment; i++) spawn.WIMP()
-        if (tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
+        // if (tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
+        if ((tech.isRelay || tech.isFlipFlop) && !tech.isFlipFlopOn) {
             tech.isFlipFlopOn = true
             m.eyeFillColor = m.fieldMeterColor
             simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
@@ -2538,16 +2539,16 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        level.difficultyIncrease(1) //30 is near max on hard  //60 is near max on why
+        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
         // spawn.starter(1900, -500, 200) //big boy
-        // for (let i = 0; i < 10; ++i) spawn.hopper(1900, -500)
+        for (let i = 0; i < 10; ++i) spawn.hopper(1900, -500)
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
         // spawn.powerUpBoss(1900, -500)
-        spawn.powerUpBossBaby(3200, -500)
+        // spawn.powerUpBossBaby(3200, -500)
         // spawn.snakeBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
         // spawn.pulsarBoss(1700, -500)
@@ -4729,7 +4730,7 @@ const level = {
         const elevator1 = level.elevator(-790, -190, 180, 25, -1150, 0.0025, { up: 0.01, down: 0.2 }, true) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
         elevator1.addConstraint();
         // const button1 = level.button(-500, -200)
-        const toggle1 = level.toggle(-500, -200) //(x,y,isOn,isLockOn = true/false)
+        const toggle1 = level.toggle(-300, -200) //(x,y,isOn,isLockOn = true/false)
 
         const elevator2 = level.elevator(-3630, -1000, 180, 25, -1740) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
         elevator2.addConstraint();
@@ -4843,7 +4844,7 @@ const level = {
         spawn.bodyRect(-75, -300, 50, 50);
 
         spawn.mapRect(-600, -200, 500, 250); //ledge for boarding elevator
-        spawn.bodyRect(-250, -300, 100, 100); //a nice block near the elevator
+        spawn.bodyRect(-500, -300, 100, 100, 0.6); //a nice block near the elevator
 
         spawn.bodyRect(-425, -1375, 400, 225);
         spawn.mapRect(-925, -1575, 50, 475);

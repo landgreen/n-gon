@@ -82,12 +82,12 @@ const b = {
     },
     fireWithAmmo() { //triggers after firing when you have ammo
         b.guns[b.activeGun].fire();
-        if (tech.isCrouchAmmo && input.down) {
-            if (tech.isCrouchAmmo % 2) {
+        if (tech.crouchAmmoCount && input.down) {
+            if (tech.crouchAmmoCount % 2) {
                 b.guns[b.activeGun].ammo--;
                 simulation.updateGunHUD();
             }
-            tech.isCrouchAmmo++ //makes the no ammo toggle off and on
+            tech.crouchAmmoCount++ //makes the no ammo toggle off and on
         } else {
             b.guns[b.activeGun].ammo--;
             simulation.updateGunHUD();
@@ -103,9 +103,9 @@ const b = {
         }
     },
     refundAmmo() { //triggers after firing when you removed ammo for a gun, but didn't need to
-        if (tech.isCrouchAmmo && input.down) {
-            tech.isCrouchAmmo--
-            if ((tech.isCrouchAmmo) % 2) {
+        if (tech.crouchAmmoCount && input.down) {
+            tech.crouchAmmoCount--
+            if ((tech.crouchAmmoCount) % 2) {
                 b.guns[b.activeGun].ammo++;
                 simulation.updateGunHUD();
             }
@@ -1351,7 +1351,7 @@ const b = {
     grapple(where, angle = m.angle, harpoonSize = 1) {
         const me = bullet.length;
         const returnRadius = 100 * Math.sqrt(harpoonSize)
-        bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -70 * harpoonSize, y: 3 * harpoonSize, index: 0, isInternal: false }, { x: -70 * harpoonSize, y: -3 * harpoonSize, index: 1, isInternal: false }, { x: 45 * harpoonSize, y: -2 * harpoonSize, index: 2, isInternal: false }, { x: 50 * harpoonSize, y: 0, index: 3, isInternal: false }, { x: 45 * harpoonSize, y: 2 * harpoonSize, index: 4, isInternal: false }], {
+        bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -50 * harpoonSize, y: 2 * harpoonSize, index: 0, isInternal: false }, { x: -50 * harpoonSize, y: -2 * harpoonSize, index: 1, isInternal: false }, { x: 45 * harpoonSize, y: -3 * harpoonSize, index: 2, isInternal: false }, { x: 50 * harpoonSize, y: 0, index: 3, isInternal: false }, { x: 45 * harpoonSize, y: 3 * harpoonSize, index: 4, isInternal: false }], {
             angle: angle,
             friction: 1,
             frictionAir: 0.4,
@@ -1420,8 +1420,20 @@ const b = {
                 ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
                 // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
                 ctx.stroke();
-                //draw hook
-                // ctx.beginPath();
+                //draw harpoon spikes
+                const spikeLength = 2
+                ctx.beginPath();
+                const spike1 = Vector.add(this.vertices[1], Vector.mult(Vector.sub(this.vertices[1], this.vertices[2]), spikeLength))
+                ctx.moveTo(this.vertices[2].x, this.vertices[2].y);
+                ctx.lineTo(spike1.x, spike1.y);
+                ctx.lineTo(this.vertices[3].x, this.vertices[3].y);
+
+                const spike2 = Vector.add(this.vertices[3], Vector.mult(Vector.sub(this.vertices[3], this.vertices[2]), spikeLength))
+                ctx.moveTo(this.vertices[2].x, this.vertices[2].y);
+                ctx.lineTo(spike2.x, spike2.y);
+                ctx.lineTo(this.vertices[1].x, this.vertices[1].y);
+                ctx.fillStyle = '#000'
+                ctx.fill();
             },
             returnToPlayer() {
                 if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius) { //near player
@@ -2375,7 +2387,7 @@ const b = {
             ctx.globalAlpha = 1;
         }
     },
-    AoEStunEffect(where, range, cycles = 150 + 120 * Math.random()) {
+    AoEStunEffect(where, range, cycles = 90 + 60 * Math.random()) {
         for (let i = 0, len = mob.length; i < len; ++i) {
             if (mob[i].alive && !mob[i].isShielded && !mob[i].shield && !mob[i].isBadTarget) {
                 if (Vector.magnitude(Vector.sub(where, mob[i].position)) - mob[i].radius < range) mobs.statusStun(mob[i], cycles)
@@ -2421,7 +2433,7 @@ const b = {
                             Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                             Matter.Query.ray(body, this.position, mob[i].position).length === 0
                         ) {
-                            if (tech.isMineStun) b.AoEStunEffect(this.position, 1300);
+                            if (tech.isExplosionStun) b.AoEStunEffect(this.position, 1300);
                             this.do = this.laserSpin
                             if (this.angularSpeed < 0.5) this.torque += this.inertia * this.torqueMagnitude * 200 //spin
                             this.endCycle = simulation.cycle + 360 + 120
@@ -2555,7 +2567,7 @@ const b = {
                                         Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                         Matter.Query.ray(body, this.position, mob[i].position).length === 0
                                     ) {
-                                        if (tech.isMineStun) b.AoEStunEffect(this.position, 700 + mob[i].radius + random);
+                                        if (tech.isExplosionStun) b.AoEStunEffect(this.position, 700 + mob[i].radius + random);
                                         if (tech.isMineSentry) {
                                             this.lookFrequency = 8 + Math.floor(3 * Math.random())
                                             this.endCycle = simulation.cycle + 1020
@@ -2619,13 +2631,15 @@ const b = {
                     y: 100 * (Math.random() - 0.5)
                 },
                 beforeDmg(who) {
-                    if (tech.wormSurviveDmg && who.alive) {
+                    if (tech.isSpawnBulletsOnDeath && who.alive && who.isDropPowerUp) {
                         setTimeout(() => {
                             if (!who.alive) {
-                                this.endCycle = simulation.cycle + Math.floor((600 + Math.floor(Math.random() * 420)) * tech.isBulletsLastLonger); //bullet ends cycle resets
-                            } else {
-                                this.endCycle = 0; //bullet ends cycle after doing damage 
+                                for (let i = 0; i < 3; i++) { //spawn 3 more
+                                    b.worm(this.position)
+                                    bullet[bullet.length - 1].endCycle = Math.min(simulation.cycle + Math.floor(420 * tech.isBulletsLastLonger), this.endCycle + 180 + Math.floor(60 * Math.random())) //simulation.cycle + Math.floor(420 * tech.isBulletsLastLonger)
+                                }
                             }
+                            this.endCycle = 0; //bullet ends cycle after doing damage 
                         }, 1);
                     } else {
                         this.endCycle = 0; //bullet ends cycle after doing damage 
@@ -2948,7 +2962,7 @@ const b = {
                     const who = b.guns[b.activeGun]
                     if (who.name === "drones" && who.ammo > 0 && mob.length) {
                         b.drone({ x: this.position.x, y: this.position.y }, 0)
-                        if (Math.random() < 0.25) {
+                        if (Math.random() < 0.2) {
                             b.guns[b.activeGun].ammo--;
                             simulation.updateGunHUD();
                         }
@@ -3143,7 +3157,7 @@ const b = {
                     const who = b.guns[b.activeGun]
                     if (who.name === "drones" && who.ammo > 0 && mob.length) {
                         b.droneRadioactive({ x: this.position.x, y: this.position.y }, 0)
-                        if (Math.random() < 0.25) {
+                        if (Math.random() < 0.2) {
                             b.guns[b.activeGun].ammo--;
                             simulation.updateGunHUD();
                         }
@@ -3409,7 +3423,7 @@ const b = {
                 } else if (this.target !== null) { //look for a new target
                     this.collisionFilter.category = cat.bullet;
                     this.collisionFilter.mask = cat.mob //| cat.mobShield //cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
-                    if (tech.isFoamGrowOnDeath && bullet.length < 180 && !this.target.isMobBullet) {
+                    if (tech.isSpawnBulletsOnDeath && bullet.length < 180 && !this.target.isMobBullet) {
                         let targets = []
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
@@ -4765,11 +4779,20 @@ const b = {
                     y: SPEED * Math.sin(m.angle)
                 });
                 bullet[me].endCycle = simulation.cycle + 180
+
                 bullet[me].beforeDmg = function(who) { //beforeDmg is rewritten with ice crystal tech
+                    if (tech.isIncendiary) {
+                        this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                        b.explosion(this.position, 100 + (Math.random() - 0.5) * 20); //makes bullet do explosive damage at end
+                    }
                     if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
                         b.explosion(this.position, 300 + 30 * Math.random()); //makes bullet do explosive damage at end
                     }
                     if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 0.7 : 0.24), tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
+                    if (this.speed > 4 && tech.fragments) {
+                        b.targetedNail(this.position, 1.5 * tech.fragments * tech.nailSize)
+                        this.endCycle = 0 //triggers despawn
+                    }
                 };
 
                 bullet[me].minDmgSpeed = 10
@@ -4829,10 +4852,18 @@ const b = {
                 });
                 bullet[me].endCycle = simulation.cycle + 180
                 bullet[me].beforeDmg = function(who) { //beforeDmg is rewritten with ice crystal tech
+                    if (tech.isIncendiary) {
+                        this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                        b.explosion(this.position, 100 + (Math.random() - 0.5) * 20); //makes bullet do explosive damage at end
+                    }
                     if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
                         b.explosion(this.position, 300 + 30 * Math.random()); //makes bullet do explosive damage at end
                     }
                     if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 0.7 : 0.24), tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
+                    if (this.speed > 4 && tech.fragments) {
+                        b.targetedNail(this.position, 1.5 * tech.fragments * tech.nailSize)
+                        this.endCycle = 0 //triggers despawn
+                    }
                 };
 
                 bullet[me].minDmgSpeed = 10
@@ -4913,8 +4944,8 @@ const b = {
             name: "shotgun",
             description: "fire a wide <strong>burst</strong> of short range <strong> bullets</strong>",
             ammo: 0,
-            ammoPack: 4,
-            defaultAmmoPack: 4,
+            ammoPack: 3.8,
+            defaultAmmoPack: 3.8,
             have: false,
             do() {},
             fire() {
@@ -4945,7 +4976,7 @@ const b = {
 
                 b.muzzleFlash(35);
 
-                if (tech.isSlugShot) {
+                if (tech.isRivets) {
                     const me = bullet.length;
                     // const dir = m.angle + 0.02 * (Math.random() - 0.5)
                     bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 60 * tech.nailSize, 27 * tech.nailSize, b.fireAttributes(m.angle));
@@ -5048,20 +5079,17 @@ const b = {
                             }, dmg)
                         }
                     }
-                } else if (tech.isWormShot) {
-                    const where = {
-                        x: m.pos.x + 35 * Math.cos(m.angle),
-                        y: m.pos.y + 35 * Math.sin(m.angle)
-                    }
-                    const spread = (input.down ? 0.04 : 0.08)
+                } else if (tech.isSporeWorm) {
+                    const where = { x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) }
+                    const spread = (input.down ? 0.02 : 0.07)
                     const number = 3 * (tech.isShotgunReversed ? 1.6 : 1) + Math.random()
                     let angle = m.angle - (number - 1) * spread * 0.5
                     for (let i = 0; i < number; i++) {
                         b.worm(where)
-                        const SPEED = (16 + 20 * input.down) * (1 + 0.15 * Math.random())
+                        const SPEED = (8 + 10 * input.down) * (1 + 0.15 * Math.random())
                         Matter.Body.setVelocity(bullet[bullet.length - 1], {
-                            x: SPEED * Math.cos(angle),
-                            y: SPEED * Math.sin(angle)
+                            x: player.velocity.x * 0.5 + SPEED * Math.cos(angle),
+                            y: player.velocity.y * 0.5 + SPEED * Math.sin(angle)
                         });
                         angle += spread
                     }
@@ -5083,7 +5111,7 @@ const b = {
                         const angle = m.angle + spread * (Math.random() - 0.5)
                         b.foam(where, { x: SPEED * Math.cos(angle), y: SPEED * Math.sin(angle) }, 5 + 8 * Math.random())
                     }
-                } else if (tech.isNeedleShot) {
+                } else if (tech.isNeedles) {
                     const number = 9 * (tech.isShotgunReversed ? 1.6 : 1)
                     const spread = (input.down ? 0.03 : 0.05)
                     let angle = m.angle - (number - 1) * spread * 0.5
@@ -5249,12 +5277,15 @@ const b = {
             propagationRate: 20,
             waves: [], //used in longitudinal mode
             chooseFireMethod() { //set in simulation.startGame
-                if (tech.is360Longitudinal) {
-                    this.fire = this.fire360Longitudinal
-                    this.do = this.do360Longitudinal
-                } else if (tech.isLongitudinal) {
-                    this.fire = this.fireLongitudinal
-                    this.do = this.doLongitudinal
+                this.waves = [];
+                if (tech.isLongitudinal) {
+                    if (tech.is360Longitudinal) {
+                        this.fire = this.fire360Longitudinal
+                        this.do = this.do360Longitudinal
+                    } else {
+                        this.fire = this.fireLongitudinal
+                        this.do = this.doLongitudinal
+                    }
                 } else {
                     this.fire = this.fireTransverse
                     this.do = this.doTransverse
@@ -5567,7 +5598,7 @@ const b = {
                     this.wavePacketCycle = 0;
                 }
             },
-
+            fire() {}
         },
         {
             name: "missiles",
@@ -5817,11 +5848,53 @@ const b = {
             name: "foam",
             description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",
             ammo: 0,
-            ammoPack: 22,
+            ammoPack: 24,
             have: false,
             charge: 0,
             isDischarge: false,
-            do() {
+            chooseFireMethod() {
+                if (tech.isCapacitor) {
+                    this.do = this.doStream
+                    this.fire = this.fireStream
+                } else {
+                    this.do = this.doCharges // () => {}
+                    this.fire = this.fireCharges
+                }
+            },
+            doStream() {},
+            fireStream() {
+                const spread = (input.down ? 0.04 : 0.3) * (Math.random() - 0.5)
+                const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+                const SPEED = Math.max(2, 14 - radius * 0.25)
+                const dir = m.angle + 0.15 * (Math.random() - 0.5)
+                const velocity = {
+                    x: SPEED * Math.cos(dir),
+                    y: SPEED * Math.sin(dir)
+                }
+                const position = {
+                    x: m.pos.x + 30 * Math.cos(m.angle),
+                    y: m.pos.y + 30 * Math.sin(m.angle)
+                }
+                if (tech.foamFutureFire) {
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: position.x,
+                        y: position.y,
+                        radius: 5,
+                        color: "rgba(0,50,50,0.3)",
+                        time: 15 * tech.foamFutureFire
+                    });
+                    setTimeout(() => {
+                        if (!simulation.paused) {
+                            b.foam(position, Vector.rotate(velocity, spread), radius)
+                            bullet[bullet.length - 1].damage *= (1 + 0.7 * tech.foamFutureFire)
+                        }
+                    }, 210 * tech.foamFutureFire);
+                } else {
+                    b.foam(position, Vector.rotate(velocity, spread), radius)
+                }
+                m.fireCDcycle = m.cycle + Math.floor(1.5 * b.fireCDscale);
+            },
+            doCharges() {
                 if (this.charge > 0) {
                     //draw charge level
                     ctx.fillStyle = "rgba(0,50,50,0.3)";
@@ -5833,7 +5906,7 @@ const b = {
 
                     if (this.isDischarge) {
                         this.charge--
-                        const spread = (input.down ? 0.05 : 0.6) * (Math.random() - 0.5)
+                        const spread = (input.down ? 0.04 : 0.5) * (Math.random() - 0.5)
                         const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
                         const SPEED = 18 - radius * 0.4;
                         const dir = m.angle + 0.15 * (Math.random() - 0.5)
@@ -5874,7 +5947,7 @@ const b = {
                     this.isDischarge = false
                 }
             },
-            fire() {
+            fireCharges() {
                 const capacity = 20
                 if (tech.isCapacitor && this.charge === 0 && b.guns[b.activeGun].ammo > capacity) {
                     this.charge = capacity
@@ -5884,6 +5957,8 @@ const b = {
                 this.charge++
                 m.fireCDcycle = m.cycle + Math.floor(1 + 0.3 * this.charge);
             },
+            fire() {},
+            do() {},
         },
         {
             name: "harpoon",
@@ -6089,7 +6164,10 @@ const b = {
                     this.ammo++ //make up for the ammo used up in fire()
                     simulation.updateGunHUD();
                     m.fireCDcycle = m.cycle + Math.floor(75 * b.fireCDscale) // cool down
+                    // } else if (input.down) {
+                    //     b.harpoon(where, null, m.angle, harpoonSize, false, 70)
                 } else {
+                    if (tech.crouchAmmoCount) tech.crouchAmmoCount = 1
                     b.grapple(where, m.angle, harpoonSize)
                 }
                 m.fireCDcycle = m.cycle + Math.floor(75 * b.fireCDscale) // cool down
@@ -6974,7 +7052,7 @@ const b = {
                         x: 7.5 * Math.cos(m.angle - Math.PI / 2),
                         y: 7.5 * Math.sin(m.angle - Math.PI / 2)
                     }
-                    const dmg = 0.7 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
+                    const dmg = 0.66 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
                     const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                     const eye = {
                         x: m.pos.x + 15 * Math.cos(m.angle),

@@ -1,19 +1,55 @@
 ******************************************************** NEXT PATCH **************************************************
 
-grapple goes 40% farther before it retracts automatically
-grapple now works well with fire delay reduction
-  or it's annoying, you decide!
-smelting cost more ammo as you increase stacks
-
-grappling hook tech: bulk modulus - immune to harm while grappling, but drain a bit of energy
-
-particle collider renamed pure science - and it gives 1 research instead of energy when it fails: 4% chance
+railgun and foam have a bit more ammo
+capacitor bank makes foam gun fire a stream of foam
+tech shift registers is now always on
+  (set ON/OFF to ON at the start of a new level)
+tech from applied science doesn't count for various tech that convert tech into other things (pure science, many worlds)
+grappling hook now shows hooks on the grapple
   
+merged similar gun tech
+  needle gun+needle shot
+  rivet gun+shotgun slug
+  shockwave+blast mines
+  nematodes+worm-shot
+  necrophoresis+necrophage
+    the worm aspect now spawns 3 copies instead of just a lifespan reset
+
 ******************************************************** TODO ********************************************************
 
+buff railgun
+  damage? ammo?
+  make railgun push blocks in the same direction railgun moves
+    make block intangible for a sec, like a block throw
+
+buff drone tech, but not drones?
+
+const ctx = canvas.getContext('2d', {‘willReadFrequently': true});
+
+//deal with game crashes?
+canvas.addEventListener("contextlost", onContextLost);
+canvas.addEventListener("contextrestored", redraw);
+ctx.reset();
+
+a mine tech that makes mines you can stand on
+  works similar to the field block throwing system
+    but you don't need to find a block to throw
+  blocks explode after mobs touch them
+    or 3 seconds after you touch them
+  benefits from all block tech
+
+setting to remove UI, except health bar
+  except active gun? to see ammo
+  checkbox in pause and in settings
+
+bug: often game puts player position at NaN
+  clues:
+    after apoximis?
+    vanish level?
+    very high level for tech, duplication
+    maybe not about JUNK though
+
 grappling hook
-  draw the hook part directly
-    two backwards angled spikes near the front
   give player more control over motion while hanging and retracting
     reduce friction effects so player swing around?
     up down left right push player around?
@@ -27,10 +63,6 @@ add coyote jump
   log game m.cycle when last on ground
   for jump check if game cycle is < last on ground cycle -2
 
-setting to remove UI, except health bar
-  except active gun? to see ammo
-  checkbox in pause and in settings
-
 tech - Plasma railgun
   like foam, or phonon?
 
@@ -40,6 +72,8 @@ pause time like invariant for other things...
   charging anything?
 
 bug - url sharing still broken sometimes
+
+maybe?  timing QTE for charging effects,  if you fire right before the charge gets full it's better
 
 +damage for each different bot type you have
   disables bot upgrades?
