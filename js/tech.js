@@ -3797,23 +3797,42 @@ const tech = {
         //         tech.isSlugShot = false;
         //     }
         // },
+        // {
+        //     name: "super sized",
+        //     description: `increase <strong>super ball</strong> radius by <strong>14%</strong><br>increases <strong class='color-d'>damage</strong> by about <strong>27%</strong>`,
+        //     isGunTech: true,
+        //     maxCount: 9,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return tech.haveGunCheck("super balls")
+        //     },
+        //     requires: "super balls",
+        //     effect() {
+        //         tech.bulletSize += 0.14
+        //     },
+        //     remove() {
+        //         tech.bulletSize = 1;
+        //     }
+        // },
         {
-            name: "pneumatic hammer",
-            description: `<span style = 'font-size:95%;'><strong>rivets</strong>, <strong>needles</strong>, and <strong>nails</strong> are <strong>18%</strong> larger</span><br>increases mass and physical <strong class='color-d'>damage</strong>`,
+            name: "caliber",
+            description: `<strong>rivets</strong>, <strong>needles</strong>, <strong>super balls</strong>, and <strong>nails</strong><br>have <strong>16%</strong> increased mass and physical <strong class='color-d'>damage</strong>`,
             isGunTech: true,
             maxCount: 9,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob + ((tech.haveGunCheck("mine") && !tech.isLaserMine) + (tech.haveGunCheck("nail gun")) + tech.isNeedles + tech.isNailShot + tech.isRivets) * 2 > 1
+                return tech.isMineDrop + tech.nailBotCount + tech.fragments + tech.nailsDeathMob + (tech.haveGunCheck("super balls") + (tech.haveGunCheck("mine") && !tech.isLaserMine) + (tech.haveGunCheck("nail gun")) + tech.isNeedles + tech.isNailShot + tech.isRivets) * 2 > 1
             },
             requires: "nails, nail gun, rivets, shotgun",
             effect() {
-                tech.nailSize += 0.18
+                tech.bulletSize += 0.16
             },
             remove() {
-                tech.nailSize = 1;
+                tech.bulletSize = 1;
             }
         },
         {
@@ -4172,25 +4191,6 @@ const tech = {
                         if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
                     }
                 }
-            }
-        },
-        {
-            name: "super sized",
-            description: `increase <strong>super ball</strong> radius by <strong>14%</strong><br>increases <strong class='color-d'>damage</strong> by about <strong>27%</strong>`,
-            isGunTech: true,
-            maxCount: 9,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.haveGunCheck("super balls")
-            },
-            requires: "super balls",
-            effect() {
-                tech.bulletSize += 0.14
-            },
-            remove() {
-                tech.bulletSize = 1;
             }
         },
         {
@@ -5420,7 +5420,7 @@ const tech = {
         },
         {
             name: "railgun",
-            description: `<strong>harpoons</strong> are <strong>50% denser</strong>, but don't <strong>retract</strong><br>gain <strong>600%</strong> more harpoon <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
+            description: `<strong>harpoons</strong> are <strong>50% denser</strong>, but don't <strong>retract</strong><br>gain <strong>800%</strong> more harpoon <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5430,7 +5430,7 @@ const tech = {
                 return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.isHarpoonPowerUp && !tech.isGrapple
             },
             requires: "harpoon, not filament, toggling harpoon, grappling hook",
-            ammoBonus: 6,
+            ammoBonus: 8,
             effect() {
                 tech.isRailGun = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -8777,6 +8777,87 @@ const tech = {
             remove() {}
         },
         {
+            name: "🐱",
+            description: "🐈",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() {
+                return !m.isShipMode
+            },
+            requires: "",
+            effect() {
+                m.draw = function() {
+                    ctx.fillStyle = m.fillColor;
+                    m.walk_cycle += m.flipLegs * m.Vx;
+                    ctx.save();
+                    ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
+                    ctx.translate(m.pos.x, m.pos.y);
+                    m.calcLeg(Math.PI, -3);
+                    m.drawLeg("#4a4a4a");
+
+
+                    if (!(m.angle > -Math.PI / 2 && m.angle < Math.PI / 2)) {
+                        ctx.scale(1, -1);
+                        ctx.rotate(Math.PI);
+                    }
+                    ctx.beginPath();
+                    ctx.moveTo(-30, 0);
+                    ctx.bezierCurveTo(-65, -75,
+                        -5, 150 + (5 * Math.sin(simulation.cycle / 10)),
+                        -70 + (10 * Math.sin(simulation.cycle / 10)), 0 + (10 * Math.sin(simulation.cycle / 10)));
+                    ctx.strokeStyle = "#333";
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+
+                    if (!(m.angle > -Math.PI / 2 && m.angle < Math.PI / 2)) {
+                        ctx.scale(1, -1);
+                        ctx.rotate(0 - Math.PI);
+                    }
+                    m.calcLeg(0, 0);
+                    m.drawLeg("#333");
+
+                    ctx.rotate(m.angle);
+                    if (!(m.angle > -Math.PI / 2 && m.angle < Math.PI / 2)) ctx.scale(1, -1);
+                    ctx.beginPath();
+                    ctx.moveTo(5, -30);
+                    ctx.lineTo(20, -40);
+                    ctx.lineTo(20, -20);
+                    ctx.lineWidth = 2;
+                    ctx.fillStyle = "#f3f";
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                    ctx.fillStyle = this.bodyGradient
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.moveTo(19, 0);
+                    ctx.arc(15, 0, 4, Math.PI, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(24.3, 6, 5, Math.PI * 2, Math.PI);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(30, 6);
+                    ctx.lineTo(32, 0);
+                    ctx.lineTo(26, 0);
+                    ctx.lineTo(30, 6);
+                    ctx.fillStyle = "#f3f";
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.restore();
+                    m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                }
+            },
+            remove() {}
+        },
+        {
             name: "pareidolia",
             description: "don't",
             maxCount: 1,
@@ -9404,7 +9485,7 @@ const tech = {
     isAxion: null,
     isWormholeMapIgnore: null,
     isLessDamageReduction: null,
-    nailSize: null,
+    // bulletSize: null,
     needleTunnel: null,
     isBrainstorm: null,
     isBrainstormActive: null,

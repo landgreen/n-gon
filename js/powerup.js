@@ -1052,6 +1052,7 @@ const powerUps = {
                 powerUps.ejectTech(index)
             }
             document.getElementById(`${index}-pause-tech`).style.textDecoration = "line-through"
+            document.getElementById(`${index}-pause-tech`).style.animation = ""
             document.getElementById(`${index}-pause-tech`).onclick = null
         }
     },

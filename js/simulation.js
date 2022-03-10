@@ -691,7 +691,6 @@ const simulation = {
 
         level.onLevel = 0;
         level.levelsCleared = 0;
-
         //resetting difficulty
         // simulation.difficulty = 0;
         level.setDifficulty()
@@ -713,6 +712,7 @@ const simulation = {
         document.getElementById("health").style.display = "inline"
         document.getElementById("health-bg").style.display = "inline"
         m.alive = true;
+        m.onGround = false
         m.setMaxHealth()
         m.health = 0;
         m.addHealth(0.25)

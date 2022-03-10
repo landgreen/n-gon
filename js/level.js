@@ -16,9 +16,9 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
             // m.setField("time dilation")
-            // b.giveGuns("harpoon")
-            // tech.giveTech("railgun")
-            // tech.giveTech("necrophage")
+            // b.giveGuns("foam")
+            // tech.giveTech("quantum foam")
+            // tech.giveTech("capacitor bank")
             // tech.giveTech("isotropic radiator")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
@@ -32,7 +32,7 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.reactor();
             // level.testing(); //not in rotation, used for testing
-            // level.highrise()
+            // level.perplex()
             if (simulation.isTraining) { level.walk(); } else { level.intro(); }
 
             // powerUps.research.changeRerolls(3000)
@@ -237,6 +237,7 @@ const level = {
                 level.levels = level.levels.concat(level.communityLevels)
                 level.levels = shuffle(level.levels); //shuffles order of maps
                 level.levels.splice(0, 9); //remove some random levels to make up for adding the community levels
+                simulation.isHorizontalFlipped = false;
             } else {
                 level.levels = shuffle(level.levels); //shuffles order of maps
             }
@@ -2539,11 +2540,11 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        level.difficultyIncrease(5) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
         // spawn.starter(1900, -500, 200) //big boy
-        for (let i = 0; i < 10; ++i) spawn.hopper(1900, -500)
+        for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)

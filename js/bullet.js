@@ -3542,9 +3542,9 @@ const b = {
         }
     },
     nail(pos, velocity, dmg = 1) {
-        dmg *= tech.nailSize
+        dmg *= tech.bulletSize
         const me = bullet.length;
-        bullet[me] = Bodies.rectangle(pos.x, pos.y, 25 * tech.nailSize, 2 * tech.nailSize, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
+        bullet[me] = Bodies.rectangle(pos.x, pos.y, 25 * tech.bulletSize, 2 * tech.bulletSize, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
         Matter.Body.setVelocity(bullet[me], velocity);
         Composite.add(engine.world, bullet[me]); //add bullet to world
         bullet[me].endCycle = simulation.cycle + 60 + 18 * Math.random();
@@ -3559,7 +3559,7 @@ const b = {
     },
     needle(angle = m.angle) {
         const me = bullet.length;
-        bullet[me] = Bodies.rectangle(m.pos.x + 40 * Math.cos(m.angle), m.pos.y + 40 * Math.sin(m.angle), 75 * tech.nailSize, 0.75 * tech.nailSize, b.fireAttributes(angle));
+        bullet[me] = Bodies.rectangle(m.pos.x + 40 * Math.cos(m.angle), m.pos.y + 40 * Math.sin(m.angle), 75 * tech.bulletSize, 0.75 * tech.bulletSize, b.fireAttributes(angle));
         Matter.Body.setDensity(bullet[me], 0.00001); //0.001 is normal
         bullet[me].immuneList = []
         bullet[me].dmg = 6
@@ -3584,12 +3584,12 @@ const b = {
                             }
                             if (!immune) {
                                 if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
-                                    b.explosion(this.position, 220 * tech.nailSize + 50 * Math.random()); //makes bullet do explosive damage at end
+                                    b.explosion(this.position, 220 * tech.bulletSize + 50 * Math.random()); //makes bullet do explosive damage at end
                                 }
                                 this.immuneList.push(who.id) //remember that this needle has hit this mob once already
-                                let dmg = this.dmg * tech.nailSize * m.dmgScale
+                                let dmg = this.dmg * tech.bulletSize * m.dmgScale
                                 if (tech.isNailRadiation) {
-                                    mobs.statusDoT(who, (tech.isFastRadiation ? 6 : 2) * tech.nailSize, tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
+                                    mobs.statusDoT(who, (tech.isFastRadiation ? 6 : 2) * tech.bulletSize, tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
                                     dmg *= 0.25
                                 }
                                 if (tech.isCrit && who.isStunned) dmg *= 4
@@ -3639,12 +3639,12 @@ const b = {
                             }
                             if (!immune) {
                                 if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
-                                    b.explosion(this.position, 220 * tech.nailSize + 50 * Math.random()); //makes bullet do explosive damage at end
+                                    b.explosion(this.position, 220 * tech.bulletSize + 50 * Math.random()); //makes bullet do explosive damage at end
                                 }
                                 this.immuneList.push(who.id) //remember that this needle has hit this mob once already
-                                let dmg = this.dmg * tech.nailSize * m.dmgScale
+                                let dmg = this.dmg * tech.bulletSize * m.dmgScale
                                 if (tech.isNailRadiation) {
-                                    mobs.statusDoT(who, (tech.isFastRadiation ? 6 : 2) * tech.nailSize, tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
+                                    mobs.statusDoT(who, (tech.isFastRadiation ? 6 : 2) * tech.bulletSize, tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
                                     dmg *= 0.25
                                 }
                                 if (tech.isCrit && who.isStunned) dmg *= 4
@@ -4768,7 +4768,7 @@ const b = {
                 m.fireCDcycle = m.cycle + Math.floor((input.down ? 25 : 17) * b.fireCDscale); // cool down
 
                 const me = bullet.length;
-                const size = tech.nailSize * 8
+                const size = tech.bulletSize * 8
                 bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 5 * size, size, b.fireAttributes(m.angle));
                 bullet[me].dmg = tech.isNailRadiation ? 0 : 2.75
                 Matter.Body.setDensity(bullet[me], 0.002);
@@ -4790,7 +4790,7 @@ const b = {
                     }
                     if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 0.7 : 0.24), tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
                     if (this.speed > 4 && tech.fragments) {
-                        b.targetedNail(this.position, 1.5 * tech.fragments * tech.nailSize)
+                        b.targetedNail(this.position, 1.5 * tech.fragments * tech.bulletSize)
                         this.endCycle = 0 //triggers despawn
                     }
                 };
@@ -4840,7 +4840,7 @@ const b = {
                 m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
 
                 const me = bullet.length;
-                const size = tech.nailSize * 8
+                const size = tech.bulletSize * 8
                 bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 5 * size, size, b.fireAttributes(m.angle));
                 bullet[me].dmg = tech.isNailRadiation ? 0 : 2.75
                 Matter.Body.setDensity(bullet[me], 0.002);
@@ -4861,7 +4861,7 @@ const b = {
                     }
                     if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 0.7 : 0.24), tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
                     if (this.speed > 4 && tech.fragments) {
-                        b.targetedNail(this.position, 1.5 * tech.fragments * tech.nailSize)
+                        b.targetedNail(this.position, 1.5 * tech.fragments * tech.bulletSize)
                         this.endCycle = 0 //triggers despawn
                     }
                 };
@@ -4979,7 +4979,7 @@ const b = {
                 if (tech.isRivets) {
                     const me = bullet.length;
                     // const dir = m.angle + 0.02 * (Math.random() - 0.5)
-                    bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 60 * tech.nailSize, 27 * tech.nailSize, b.fireAttributes(m.angle));
+                    bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 60 * tech.bulletSize, 27 * tech.bulletSize, b.fireAttributes(m.angle));
 
                     Matter.Body.setDensity(bullet[me], 0.007 * (tech.isShotgunReversed ? 1.6 : 1));
                     Composite.add(engine.world, bullet[me]); //add bullet to world
@@ -5002,7 +5002,7 @@ const b = {
                     bullet[me].minDmgSpeed = 7
                     // bullet[me].restitution = 0.4
                     bullet[me].frictionAir = 0.006;
-                    bullet[me].turnMag = 0.04 * Math.pow(tech.nailSize, 3.75)
+                    bullet[me].turnMag = 0.04 * Math.pow(tech.bulletSize, 3.75)
                     bullet[me].do = function() {
                         this.force.y += this.mass * 0.0022
                         if (this.speed > 6) { //rotates bullet to face current velocity?
@@ -5017,7 +5017,7 @@ const b = {
                     if (tech.fragments) {
                         bullet[me].beforeDmg = function() {
                             if (this.speed > 4) {
-                                b.targetedNail(this.position, 7 * tech.fragments * tech.nailSize)
+                                b.targetedNail(this.position, 7 * tech.fragments * tech.bulletSize)
                                 this.endCycle = 0 //triggers despawn
                             }
                         }
@@ -6008,11 +6008,21 @@ const b = {
                         for (let i = 0, len = mob.length; i < len; ++i) { //push away mobs when firing
                             const SUB = Vector.sub(mob[i].position, m.pos)
                             const DISTANCE = Vector.magnitude(SUB)
-                            if (DISTANCE < range) {
-                                const DEPTH = Math.min(range - DISTANCE, 1500)
+                            if (DISTANCE < range + mob[i].radius) {
+                                const DEPTH = 100 + Math.min(range - DISTANCE + mob[i].radius, 1500)
                                 const FORCE = Vector.mult(Vector.normalise(SUB), 0.0015 * Math.sqrt(DEPTH) * mob[i].mass)
                                 mob[i].force.x += FORCE.x;
                                 mob[i].force.y += FORCE.y;
+
+                                let dmg = m.dmgScale * (mob[i].isDropPowerUp ? 0.1 : 0.4)
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: mob[i].position.x,
+                                    y: mob[i].position.y,
+                                    radius: Math.log(dmg + 1.1) * 40 * mob[i].damageReduction + 3,
+                                    color: 'rgba(100, 0, 200, 0.2)',
+                                    time: 15
+                                });
+                                mob[i].damage(dmg);
                             }
                         }
                         for (let i = 0, len = body.length; i < len; ++i) { //push away blocks when firing
@@ -6039,7 +6049,7 @@ const b = {
                         const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), input.down ? 0.03 : 0.06)
                         player.force.x -= recoil.x
                         player.force.y -= recoil.y
-                        tech.harpoonDensity = 0.006 //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
+                        tech.harpoonDensity = 0.01 //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
                         const harpoonSize = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
                         if (tech.extraHarpoons) {
                             let targetCount = 0
@@ -6055,7 +6065,7 @@ const b = {
                                     if (dot > 0.95 - Math.min(dist * 0.00015, 0.3)) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
                                         if (this.ammo > -1) {
                                             this.ammo--
-                                            b.harpoon(where, mob[i], angle, harpoonSize, false) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
+                                            b.harpoon(where, input.down ? mob[i] : null, angle, harpoonSize, false) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
                                             angle += SPREAD
                                             targetCount++
                                             if (targetCount > tech.extraHarpoons) break
@@ -6089,7 +6099,7 @@ const b = {
                                     }
                                 }
                             }
-                            b.harpoon(where, closest.target, m.angle, harpoonSize, false)
+                            b.harpoon(where, input.down ? closest.target : null, m.angle, harpoonSize, false)
                         }
 
                         this.charge = 0;

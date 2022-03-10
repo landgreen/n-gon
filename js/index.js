@@ -248,7 +248,7 @@ const build = {
     //     }
     // },
     pauseGrid() {
-        //right side
+        //left side
         let botText = ""
         if (tech.nailBotCount) botText += `<br>nail-bots: ${tech.nailBotCount}`
         if (tech.orbitBotCount) botText += `<br>orbital-bots: ${tech.orbitBotCount}`
@@ -299,30 +299,36 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         el.style.display = "grid"
         el.innerHTML = text
 
-        //left side
+        //right side
         text = "";
-        text += `<div class="pause-grid-module" id ="pause-field"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
+        if (tech.isPauseSwitchField) {
+            text += `<div class="pause-grid-module" id ="pause-field" style="animation: fieldColorCycle 1s linear infinite alternate;"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
+        } else {
+            text += `<div class="pause-grid-module" id ="pause-field"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
+        }
+
+        const style = tech.isPauseEjectTech ? 'style="animation: techColorCycle 1s linear infinite alternate;"' : ''
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
                 const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                 if (tech.tech[i].isFieldTech) {
-                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})"><div class="grid-title">
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})" ${style}><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                               <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                             </span>
                                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isGunTech) {
-                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})"><div class="grid-title">
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})" ${style}><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                                             </span>
                                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isLore) {
-                    text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore" ${style}></div> &nbsp; ${tech.tech[i].name} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else {
-                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})" ${style}><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 }
             } else if (tech.tech[i].isLost) {
                 text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].link}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
