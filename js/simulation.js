@@ -821,6 +821,44 @@ const simulation = {
         level.zones = [];
         simulation.drawList = [];
 
+        if (tech.isDronesTravel) {
+            //count drones
+            let count = 0
+            let deliveryCount = 0
+            for (let i = 0; i < bullet.length; ++i) {
+                if (bullet[i].isDrone) {
+                    count++
+                    if (bullet[i].isImproved) deliveryCount++
+                }
+            }
+            // count *= 2
+            //respawn drones in animation frame
+            let respawnDrones = () => {
+                if (count > 0) {
+                    requestAnimationFrame(respawnDrones);
+                    if (!simulation.paused && !simulation.isChoosing) {
+                        count--
+                        const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
+                        if (tech.isDroneRadioactive) {
+                            b.droneRadioactive({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 100 * (Math.random() - 0.5) }, 0)
+                        } else {
+                            b.drone({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 120 * (Math.random() - 0.5) }, 0)
+                            if (tech.isDroneGrab && deliveryCount > 0) {
+                                const who = bullet[bullet.length - 1]
+                                who.isImproved = true;
+                                const SCALE = 2.25
+                                Matter.Body.scale(who, SCALE, SCALE);
+                                who.lookFrequency = 30 + Math.floor(11 * Math.random());
+                                who.endCycle += 3000 * tech.droneCycleReduction * tech.isBulletsLastLonger
+                                deliveryCount--
+                            }
+                        }
+                    }
+                }
+            }
+            requestAnimationFrame(respawnDrones);
+        }
+
         function removeAll(array) {
             // for (let i = 0; i < array.length; ++i) Matter.Composite.remove(engine.world, array[i]);
             for (let i = 0; i < array.length; ++i) Matter.Composite.remove(engine.world, array[i]);

@@ -765,7 +765,7 @@ const b = {
             bullet[me].explodeRad = 300 * size;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 2 * Math.random()))
+                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
             }
             bullet[me].minDmgSpeed = 1;
             bullet[me].beforeDmg = function() {
@@ -790,7 +790,7 @@ const b = {
             bullet[me].explodeRad = 305 * size;
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 2 * Math.random()))
+                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
             }
             bullet[me].minDmgSpeed = 1;
             bullet[me].beforeDmg = function() {
@@ -825,7 +825,7 @@ const b = {
             bullet[me].explodeRad = 350 * size + Math.floor(Math.random() * 50) + tech.isBlockExplode * 110
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 2 * Math.random()))
+                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
             }
             bullet[me].minDmgSpeed = 1;
             bullet[me].beforeDmg = function() {
@@ -902,7 +902,7 @@ const b = {
             bullet[me].explodeRad = 350 * size + Math.floor(Math.random() * 50) + tech.isBlockExplode * 100
             bullet[me].onEnd = function() {
                 b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * 5)
+                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
             }
             bullet[me].beforeDmg = function() {
                 this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
@@ -1253,7 +1253,7 @@ const b = {
                     requestAnimationFrame(() => { who.isShielded = true });
                 }
                 if (tech.fragments) {
-                    b.targetedNail(this.vertices[2], tech.fragments * 4)
+                    b.targetedNail(this.vertices[2], tech.fragments * Math.floor(2 + 1.5 * Math.random()))
                     this.endCycle = 0;
                 }
                 if (!who.isBadTarget) {
@@ -1373,7 +1373,7 @@ const b = {
                     requestAnimationFrame(() => { who.isShielded = true });
                 }
                 if (tech.fragments) {
-                    b.targetedNail(this.vertices[2], tech.fragments * 3)
+                    b.targetedNail(this.vertices[2], tech.fragments * Math.floor(2 + Math.random()))
                 }
                 // if (!who.isBadTarget) {
                 //     this.do = this.returnToPlayer
@@ -1635,7 +1635,7 @@ const b = {
                     requestAnimationFrame(() => { who.isShielded = true });
                 }
                 if (tech.fragments) {
-                    b.targetedNail(this.vertices[2], tech.fragments * 3)
+                    b.targetedNail(this.vertices[2], tech.fragments * Math.floor(2 + Math.random()))
                     if (!isReturn) this.endCycle = 0;
                 }
                 if (!who.isBadTarget) {
@@ -1927,7 +1927,7 @@ const b = {
             },
             onEnd() {
                 b.explosion(this.position, this.explodeRad * size); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 2 * Math.random()))
+                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
             },
             lockedOn: null,
             tryToLockOn() {
@@ -2002,7 +2002,7 @@ const b = {
     didExtruderDrain: false,
     canExtruderFire: true,
     extruder() {
-        const DRAIN = 0.0021
+        const DRAIN = 0.0018
         if (m.energy > DRAIN && b.canExtruderFire) {
             m.energy -= DRAIN
             if (m.energy < 0) {
@@ -2854,7 +2854,6 @@ const b = {
             },
             minDmgSpeed: 0,
             lockedOn: null,
-            isFollowMouse: true,
             beforeDmg(who) {
                 mobs.statusSlow(who, 180)
                 this.endCycle = simulation.cycle
@@ -2923,17 +2922,17 @@ const b = {
             lookFrequency: (tech.isDroneFastLook ? 20 : 70) + Math.floor(17 * Math.random()),
             endCycle: simulation.cycle + Math.floor((950 + 400 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction) + 5 * RADIUS + Math.max(0, 150 - bullet.length),
             classType: "bullet",
+            isDrone: true,
             collisionFilter: {
                 category: cat.bullet,
                 mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield //self collide
             },
             minDmgSpeed: 0,
             lockedOn: null,
-            isFollowMouse: true,
             deathCycles: 110 + RADIUS * 5,
             isImproved: false,
             beforeDmg(who) {
-                if (tech.isIncendiary && simulation.cycle + this.deathCycles < this.endCycle) {
+                if (tech.isIncendiary && simulation.cycle + this.deathCycles < this.endCycle && !tech.isForeverDrones) {
                     const max = Math.max(Math.min(this.endCycle - simulation.cycle - this.deathCycles, 1500), 0)
                     b.explosion(this.position, max * 0.1 + this.isImproved * 110 + 60 * Math.random()); //makes bullet do explosive damage at end
                     if (tech.isForeverDrones) {
@@ -3127,6 +3126,7 @@ const b = {
             lookFrequency: 120 + Math.floor(23 * Math.random()),
             endCycle: simulation.cycle + Math.floor((900 + 110 * Math.random()) * tech.isBulletsLastLonger / tech.droneRadioDamage) + 5 * RADIUS + Math.max(0, 150 - 2 * bullet.length),
             classType: "bullet",
+            isDrone: true,
             collisionFilter: {
                 category: cat.bullet,
                 mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield //self collide
@@ -3134,7 +3134,6 @@ const b = {
             minDmgSpeed: 0,
             speedCap: 5 + 2 * Math.random(), //6 is normal
             lockedOn: null,
-            isFollowMouse: true,
             deathCycles: 110 + RADIUS * 5,
             isImproved: false,
             radioRadius: 0,
@@ -4790,7 +4789,7 @@ const b = {
                     }
                     if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 0.7 : 0.24), tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
                     if (this.speed > 4 && tech.fragments) {
-                        b.targetedNail(this.position, 1.5 * tech.fragments * tech.bulletSize)
+                        b.targetedNail(this.position, 1.25 * tech.fragments * tech.bulletSize)
                         this.endCycle = 0 //triggers despawn
                     }
                 };
@@ -4861,7 +4860,7 @@ const b = {
                     }
                     if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 0.7 : 0.24), tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
                     if (this.speed > 4 && tech.fragments) {
-                        b.targetedNail(this.position, 1.5 * tech.fragments * tech.bulletSize)
+                        b.targetedNail(this.position, 1.25 * tech.fragments * tech.bulletSize)
                         this.endCycle = 0 //triggers despawn
                     }
                 };
@@ -5017,7 +5016,7 @@ const b = {
                     if (tech.fragments) {
                         bullet[me].beforeDmg = function() {
                             if (this.speed > 4) {
-                                b.targetedNail(this.position, 7 * tech.fragments * tech.bulletSize)
+                                b.targetedNail(this.position, 6 * tech.fragments * tech.bulletSize)
                                 this.endCycle = 0 //triggers despawn
                             }
                         }

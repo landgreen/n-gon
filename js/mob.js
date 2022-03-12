@@ -1151,7 +1151,7 @@ const mobs = {
                             for (let i = 0; i < len; i++) b.spore(this.position)
                         }
                     } else if (tech.isExplodeMob) {
-                        b.explosion(this.position, Math.min(600, Math.sqrt(this.mass + 1.5) * (22 + 60 * Math.random())))
+                        b.explosion(this.position, Math.min(700, Math.sqrt(this.mass + 6) * (30 + 60 * Math.random())))
                     } else if (tech.nailsDeathMob) {
                         b.targetedNail(this.position, tech.nailsDeathMob, 39 + 6 * Math.random())
                     }

@@ -211,6 +211,7 @@ const tech = {
     },
     damageFromTech() {
         let dmg = 1 //m.fieldDamage
+        if (tech.isTechDebt) dmg *= 4 - 0.1 * tech.totalCount
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 1 + 0.75 * (1 - m.harmReduction())
         if (tech.OccamDamage) dmg *= tech.OccamDamage
         if (tech.isCloakingDamage) dmg *= 1.35
@@ -3083,6 +3084,26 @@ const tech = {
             }
         },
         {
+            name: "technical debt", // overengineering
+            // description: `increase <strong class='color-d'>damage</strong> by <strong>300%</strong> minus <strong>10%</strong> for <strong class='color-m'>tech</strong> you have learned(${4 - 0.1 * tech.totalCount})`,
+            // description: `increase <strong class='color-d'>damage</strong> by <strong>300%</strong>, but reduce <strong class='color-d'>damage</strong><br>by <strong>10%</strong> for <strong class='color-m'>tech</strong> you have learned`,
+            descriptionFunction() {
+                return `increase <strong class='color-d'>damage</strong> by <strong>300%</strong> minus <strong>10%</strong><br>for <strong class='color-m'>tech</strong> you have learned <em>(${Math.floor(100*(4 - 0.1 * tech.totalCount))-100}%)</em>`
+            },
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                tech.isTechDebt = true;
+            },
+            remove() {
+                tech.isTechDebt = false;
+            }
+        },
+        {
             name: "abiogenesis",
             description: `at the start of a level spawn a 2nd <strong>boss</strong><br>use ${powerUps.orb.research(4)}or add <strong>49%</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool`,
             maxCount: 1,
@@ -5021,7 +5042,7 @@ const tech = {
         {
             name: "reduced tolerances",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Engineering_tolerance' class="link">reduced tolerances</a>`,
-            description: `increase <strong>drones</strong> per ${powerUps.orb.ammo()} or <strong class='color-f'>energy</strong> by <strong>66%</strong><br>reduce the average <strong>drone</strong> lifetime by <strong>40%</strong>`,
+            description: `increase <strong>drones</strong> per ${powerUps.orb.ammo()} or <strong class='color-f'>energy</strong> by <strong>66%</strong><br>reduce average <strong>drone</strong> <strong>durability</strong> by <strong>40%</strong>`,
             isGunTech: true,
             maxCount: 3,
             count: 0,
@@ -5087,6 +5108,25 @@ const tech = {
             },
             remove() {
                 tech.isDroneRespawn = false
+            }
+        },
+        {
+            name: "autonomous navigation",
+            description: "<strong>drones</strong> travel with you through <strong>levels</strong><br>and reset their <strong>durability</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isMissileField || tech.isIceField))
+            },
+            requires: "drones",
+            effect() {
+                tech.isDronesTravel = true
+            },
+            remove() {
+                tech.isDronesTravel = false
             }
         },
         {
@@ -5212,9 +5252,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return tech.haveGunCheck("drones", false) && !tech.isDroneRespawn && tech.isBulletsLastLonger === 1
+                return tech.haveGunCheck("drones", false) && !tech.isDroneRespawn && tech.isBulletsLastLonger === 1 && !tech.isDronesTravel
             },
-            requires: "drones, not drone repair, anti-shear topology",
+            requires: "drones, not drone repair, anti-shear topology, autonomous navigation",
             effect() {
                 const num = 6
                 tech.isForeverDrones += num
@@ -6337,7 +6377,6 @@ const tech = {
                 for (let i = 0; i < 3; i++) {
                     if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                 }
-
                 //fill array of available bots
                 const notUpgradedBots = []
                 const num = 2
@@ -9497,4 +9536,6 @@ const tech = {
     isRailGun: null,
     isGrapple: null,
     isImmuneGrapple: null,
+    isDronesTravel: null,
+    isTechDebt: null
 }

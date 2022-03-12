@@ -1957,11 +1957,12 @@ const m = {
                 // m.fieldMeterColor = "#0c5"
                 // m.eyeFillColor = m.fieldMeterColor
                 m.hold = function() {
-                    if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 200 && (m.cycle % 2)) {
+                    if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 300 && (m.cycle % 2)) {
                         if (tech.isSporeField) {
                             if (tech.isSporeWorm) {
-                                if (m.energy > 0.16) {
-                                    m.energy -= 0.16
+                                const drain = 0.16 + (Math.max(bullet.length, 130) - 130) * 0.02
+                                if (m.energy > drain) {
+                                    m.energy -= drain
                                     b.worm({ x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) })
                                     const SPEED = 2 + 1 * Math.random();
                                     Matter.Body.setVelocity(bullet[bullet.length - 1], {
@@ -1970,13 +1971,13 @@ const m = {
                                     });
                                 }
                             } else {
+                                const drain = 0.08 + (Math.max(bullet.length, 130) - 130) * 0.01
                                 for (let i = 0, len = Math.random() * 20; i < len; i++) {
-                                    m.energy -= 0.08
-                                    if (m.energy > 0) {
+                                    if (m.energy > drain) {
+                                        m.energy -= drain
                                         b.spore(m.pos)
                                     } else {
-                                        m.energy = 0.001
-                                        break;
+                                        break
                                     }
                                 }
                             }
@@ -1987,11 +1988,19 @@ const m = {
                             m.energy -= 0.04;
                             b.iceIX(1)
                         } else if (tech.isDroneRadioactive) {
-                            m.energy -= 0.8;
-                            b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 25)
+                            const drain = 0.8 + (Math.max(bullet.length, 50) - 50) * 0.01
+                            if (m.energy > drain) {
+                                m.energy -= drain
+                                b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 25)
+                            }
                         } else {
-                            m.energy -= 0.45 * tech.droneEnergyReduction;
-                            b.drone()
+                            //every bullet above 100 adds 0.005 to the energy cost per drone
+                            //at 200 bullets the energy cost is 0.45 + 100*0.006 = 1.05
+                            const drain = (0.45 + (Math.max(bullet.length, 100) - 100) * 0.006) * tech.droneEnergyReduction
+                            if (m.energy > drain) {
+                                m.energy -= drain
+                                b.drone()
+                            }
                         }
                     }
 
@@ -2775,7 +2784,7 @@ const m = {
 
                                 for (let i = 0, len = body.length; i < len; ++i) {
                                     if (Vector.magnitude(Vector.sub(body[i].position, m.fieldPosition)) < m.fieldRadius && !body[i].isNotHoldable) {
-                                        const DRAIN = speed * body[i].mass * 0.000006 // * (1 + m.energy * m.energy) //drain more energy when you have more energy
+                                        const DRAIN = speed * body[i].mass * 0.000005 // * (1 + m.energy * m.energy) //drain more energy when you have more energy
                                         if (m.energy > DRAIN) {
                                             m.energy -= DRAIN;
                                             Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity

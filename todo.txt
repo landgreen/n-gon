@@ -1,35 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-JUNK tech - 🐱
+tech: autonomous navigation - drones travel with you through levels and drones reset durability
+tech: technical debt - increase damage by 300%, but reduce damage by 10% for each tech you have
 
-railgun buffs
-  600% -> 800% more ammo
-  more dense (more damage)
-  only targets mobs when pressing down
-  does a bit of damage to nearby mobs after you fire
-    extra damage to mob bullets
+molecular assembler now has a higher bullet spawn cap 200->300
+  but it increases energy cost per spawn above around 150
 
-pneumatic hammer renamed caliber
-  also applies to super balls
-  5% less size increase per stack
-
-pure science and unified field theory have a pause animation to show they are clickable
+fragments are about 15% fewer
+thermal runaway is about 40% bigger and more damage
+plasma torch: extruder uses less energy
+pilot wave uses less energy
 
 bug fixes
 
 ******************************************************** TODO ********************************************************
-
-github bug report - if you reload, the TInker effect is lost, despite it saying it persists through sessions. Please fix.
-
-bug: railgun AoE is randomly killing some mobs when it shouldn't
-
-buff mob death explosions
-
-buff railgun
-  make railgun push blocks in the same direction railgun moves
-    make block intangible for a sec, like a block throw
-
-buff drone gun / gun tech, but not drones?
 
 const ctx = canvas.getContext('2d', {‘willReadFrequently': true});
 
@@ -54,13 +38,6 @@ bug: often game puts player position at NaN
     after apoximis?
     very high level for tech, duplication
     maybe not about JUNK though
-
-grappling hook
-  give player more control over motion while hanging and retracting
-    reduce friction effects so player swing around?
-    up down left right push player around?
-    scale velocity dampening with distance to grapple?
-    make a variable to track rope length?
 
 tech that does less damage the more tech you have?
   tech.totalCount

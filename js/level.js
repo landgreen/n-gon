@@ -15,13 +15,13 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
-            // m.setField("time dilation")
-            // b.giveGuns("foam")
-            // tech.giveTech("quantum foam")
-            // tech.giveTech("capacitor bank")
-            // tech.giveTech("isotropic radiator")
+            // m.setField("molecular assembler")
+            // b.giveGuns("drones")
+            // tech.giveTech("autonomous navigation")
+            // tech.giveTech("delivery drone")
+            // tech.giveTech("dynamo-bot upgrade")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
-            // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
+            // for (let i = 0; i < 9; i++) tech.giveTech("dynamo-bot")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
             // powerUps.research.changeRerolls(100000)
             // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
