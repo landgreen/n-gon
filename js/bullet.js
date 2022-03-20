@@ -1519,6 +1519,7 @@ const b = {
                 if (input.fire && Matter.Query.collides(this, map).length) {
                     Matter.Body.setPosition(this, Vector.add(this.position, { x: 20 * Math.cos(this.angle), y: 20 * Math.sin(this.angle) }))
                     if (Matter.Query.collides(this, map).length) {
+                        Matter.Body.setVelocity(this, { x: 0, y: 0 });
                         Matter.Sleeping.set(this, true)
                         this.endCycle = simulation.cycle + 5
                         this.dropCaughtPowerUp()
@@ -2605,7 +2606,7 @@ const b = {
     },
     worm(where, isFreeze = tech.isSporeFreeze) { //used with the tech upgrade in mob.death()
         const bIndex = bullet.length;
-        const wormSize = 6 + tech.wormSize * 7.2 * Math.random()
+        const wormSize = 6 + tech.wormSize * 7 * Math.random()
         if (bIndex < 500) { //can't make over 500 spores
             bullet[bIndex] = Bodies.polygon(where.x, where.y, 3, 3, {
                 inertia: Infinity,
@@ -2616,7 +2617,7 @@ const b = {
                 frictionAir: 0.025,
                 thrust: (tech.isFastSpores ? 0.001 : 0.0005) * (1 + 0.5 * (Math.random() - 0.5)),
                 wormSize: wormSize,
-                wormTail: 1 + wormSize,
+                wormTail: 1 + Math.max(4, wormSize - 2 * tech.wormSize),
                 dmg: (tech.isMutualism ? 7 : 2.9) * wormSize, //bonus damage from tech.isMutualism //2.5 is extra damage as worm
                 lookFrequency: 100 + Math.floor(37 * Math.random()),
                 classType: "bullet",
@@ -3329,6 +3330,165 @@ const b = {
             y: speed * Math.sin(dir)
         });
     },
+    // plasmaBall(position, velocity, radius) {
+    //     // radius *= Math.sqrt(tech.bulletSize)
+    //     const me = bullet.length;
+    //     bullet[me] = Bodies.polygon(position.x, position.y, 20, radius, {
+    //         density: 0.000001, //  0.001 is normal density
+    //         inertia: Infinity,
+    //         frictionAir: 0.003,
+    //         dmg: 0, //damage on impact
+    //         damage: 0, //damage done over time
+    //         scale: 1 - 0.006 / tech.isBulletsLastLonger,
+    //         classType: "bullet",
+    //         collisionFilter: {
+    //             category: cat.bullet,
+    //             mask: 0 //cat.mob | cat.mobBullet // cat.map | cat.body | cat.mob | cat.mobShield
+    //         },
+    //         minDmgSpeed: 0,
+    //         endCycle: Infinity,
+    //         count: 0,
+    //         radius: radius,
+    //         portFrequency: 5 + Math.floor(5 * Math.random()),
+    //         nextPortCycle: Infinity, //disabled unless you have the teleport tech
+    //         beforeDmg(who) {
+    //             if (!this.target && who.alive) {
+    //                 this.target = who;
+    //                 if (who.radius < 20) {
+    //                     this.targetRelativePosition = {
+    //                         x: 0,
+    //                         y: 0
+    //                     } //find relative position vector for zero mob rotation
+    //                 } else if (Matter.Query.collides(this, [who]).length > 0) {
+    //                     const normal = Matter.Query.collides(this, [who])[0].normal
+    //                     this.targetRelativePosition = Vector.rotate(Vector.sub(Vector.sub(this.position, who.position), Vector.mult(normal, -this.radius)), -who.angle) //find relative position vector for zero mob rotation
+    //                 } else {
+    //                     this.targetRelativePosition = Vector.rotate(Vector.sub(this.position, who.position), -who.angle) //find relative position vector for zero mob rotation
+    //                 }
+    //                 this.collisionFilter.category = cat.body;
+    //                 this.collisionFilter.mask = null;
+
+    //                 let bestVertexDistance = Infinity
+    //                 let bestVertex = null
+    //                 for (let i = 0; i < this.target.vertices.length; i++) {
+    //                     const dist = Vector.magnitude(Vector.sub(this.position, this.target.vertices[i]));
+    //                     if (dist < bestVertexDistance) {
+    //                         bestVertex = i
+    //                         bestVertexDistance = dist
+    //                     }
+    //                 }
+    //                 this.targetVertex = bestVertex
+    //             }
+    //         },
+    //         onEnd() {},
+    //         do() {
+    //             if (this.count < 20) {
+    //                 this.count++
+    //                 //grow
+    //                 const SCALE = 1.06
+    //                 Matter.Body.scale(this, SCALE, SCALE);
+    //                 this.radius *= SCALE;
+    //             } else {
+    //                 //shrink
+    //                 Matter.Body.scale(this, this.scale, this.scale);
+    //                 this.radius *= this.scale;
+    //                 if (this.radius < 8) this.endCycle = 0;
+    //             }
+    //             if (this.target && this.target.alive) { //if stuck to a target
+    //                 const rotate = Vector.rotate(this.targetRelativePosition, this.target.angle) //add in the mob's new angle to the relative position vector
+    //                 if (this.target.isVerticesChange) {
+    //                     Matter.Body.setPosition(this, this.target.vertices[this.targetVertex])
+    //                 } else {
+    //                     Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.target.velocity), this.target.position))
+    //                 }
+    //                 if (this.target.isBoss) {
+    //                     if (this.target.speed > 8) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.98))
+    //                 } else {
+    //                     if (this.target.speed > 4) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.95))
+    //                 }
+
+    //                 Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9);
+    //                 // Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
+    //                 if (this.target.isShielded) {
+    //                     this.target.damage(m.dmgScale * this.damage, true); //shield damage bypass
+    //                     const SCALE = 1 - 0.004 / tech.isBulletsLastLonger //shrink if mob is shielded
+    //                     Matter.Body.scale(this, SCALE, SCALE);
+    //                     this.radius *= SCALE;
+    //                 } else {
+    //                     this.target.damage(m.dmgScale * this.damage);
+    //                 }
+    //             } else if (this.target !== null) { //look for a new target
+    //                 this.collisionFilter.category = cat.bullet;
+    //                 this.collisionFilter.mask = cat.mob //| cat.mobShield //cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
+    //                 if (tech.isSpawnBulletsOnDeath && bullet.length < 180 && !this.target.isMobBullet) {
+    //                     let targets = []
+    //                     for (let i = 0, len = mob.length; i < len; i++) {
+    //                         const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
+    //                         if (dist < 1000000) targets.push(mob[i])
+    //                     }
+    //                     const radius = Math.min(this.radius * 0.5, 9)
+    //                     const len = bullet.length < 80 ? 2 : 1
+    //                     for (let i = 0; i < len; i++) {
+    //                         if (targets.length - i > 0) {
+    //                             const index = Math.floor(Math.random() * targets.length)
+    //                             const speed = 6 + 6 * Math.random()
+    //                             const velocity = Vector.mult(Vector.normalise(Vector.sub(targets[index].position, this.position)), speed)
+    //                             b.foam(this.position, Vector.rotate(velocity, 0.5 * (Math.random() - 0.5)), radius)
+    //                         } else {
+    //                             b.foam(this.position, Vector.rotate({
+    //                                 x: 15 + 10 * Math.random(),
+    //                                 y: 0
+    //                             }, 2 * Math.PI * Math.random()), radius)
+    //                         }
+    //                     }
+    //                 }
+    //                 this.target = null
+    //             } else if (Matter.Query.point(map, this.position).length > 0) { //slow when touching map or blocks
+    //                 const slow = 0.85
+    //                 Matter.Body.setVelocity(this, {
+    //                     x: this.velocity.x * slow,
+    //                     y: this.velocity.y * slow
+    //                 });
+    //                 const SCALE = 0.96
+    //                 Matter.Body.scale(this, SCALE, SCALE);
+    //                 this.radius *= SCALE;
+    //                 // } else if (Matter.Query.collides(this, body).length > 0) {
+    //             } else if (Matter.Query.point(body, this.position).length > 0) {
+    //                 const slow = 0.9
+    //                 Matter.Body.setVelocity(this, {
+    //                     x: this.velocity.x * slow,
+    //                     y: this.velocity.y * slow
+    //                 });
+    //                 const SCALE = 0.96
+    //                 Matter.Body.scale(this, SCALE, SCALE);
+    //                 this.radius *= SCALE;
+    //             } else {
+    //                 this.force.y += this.mass * tech.foamGravity; //gravity
+    //                 if (tech.isFoamAttract) {
+    //                     for (let i = 0, len = mob.length; i < len; i++) {
+    //                         if (!mob[i].isBadTarget && Vector.magnitude(Vector.sub(mob[i].position, this.position)) < 375 && mob[i].alive && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+    //                             this.force = Vector.mult(Vector.normalise(Vector.sub(mob[i].position, this.position)), this.mass * 0.004)
+    //                             const slow = 0.9
+    //                             Matter.Body.setVelocity(this, {
+    //                                 x: this.velocity.x * slow,
+    //                                 y: this.velocity.y * slow
+    //                             });
+    //                             break
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //             if (this.nextPortCycle < simulation.cycle) { //teleport around if you have tech.isBulletTeleport
+    //                 this.nextPortCycle = simulation.cycle + this.portFrequency
+    //                 const range = 15 * Math.sqrt(this.radius) * Math.random()
+    //                 Matter.Body.setPosition(this, Vector.add(this.position, Vector.rotate({ x: range, y: 0 }, 2 * Math.PI * Math.random())))
+    //             }
+    //         }
+    //     });
+    //     if (tech.isBulletTeleport) bullet[me].nextPortCycle = simulation.cycle + bullet[me].portFrequency
+    //     Composite.add(engine.world, bullet[me]); //add bullet to world
+    //     Matter.Body.setVelocity(bullet[me], velocity);
+    // },
     foam(position, velocity, radius) {
         // radius *= Math.sqrt(tech.bulletSize)
         const me = bullet.length;

@@ -1,19 +1,61 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: autonomous navigation - drones travel with you through levels and drones reset durability
-tech: technical debt - increase damage by 300%, but reduce damage by 10% for each tech you have
+plasma ball is now live, but it's still in beta
+  still needs
+    new graphics
+    damage balancing
+    fast decay in mob shields
+    player angle rotation speed while firing adds to fire speed
+    tech upgrade to get electrical arcs that randomly damage nearby mobs
+    current tech synergy
+      capacitor bank,plasma jet(range?)
 
-molecular assembler now has a higher bullet spawn cap 200->300
-  but it increases energy cost per spawn above around 150
+reservoir level is less crowded, so you can dodge mobs easier
+  horizontal flipped version is so reenabled
+pure science renamed paradigm shift
+difficulty scaling for heal and mob damage reduced 2%
 
-fragments are about 15% fewer
-thermal runaway is about 40% bigger and more damage
-plasma torch: extruder uses less energy
-pilot wave uses less energy
+some possible bug fixes, I don't know...
 
-bug fixes
 
 ******************************************************** TODO ********************************************************
+
+bug: harpoon attack gave a mob really high levels of health
+  recent events:
+    had 3 harpoons at a time
+    tech: immune with grappling hook, Bulk modulus
+    cancel true colors with pure science
+    attack with harpoon at slasher mobs
+      they didn't die, but they should in one hit  instead they got a huge health bar,  then I just died for no reason after touching one
+
+bug: maybe I can put in an event listener to reset inputs to false when you tab out to prevent key sticking
+
+
+enemies stuck with foam receive upward force over time
+  only form aerogel tech?
+
+bug: often game puts player position at NaN
+  try:
+    cloaking/harpoon grapple on normal, continue past beating the final boss
+  clues:
+    maybe with vanish or other special blocks and grapple hook
+    very high level for tech, duplication
+    maybe not about JUNK though
+    maybe on tons of bullets
+    maybe grappling hook, Bulk modulus
+  solution: just kill the player if they go NaN
+
+Tech: superglue
+Requires: foam + another gun or plasma torch or molecular assembler
+  Foam bubbles decay 50% slower
+  Enemies stuck with foam cannot move
+  Foam does 0 damage
+  Enemies stuck with foam take 25% more damage
+  should foam bots gets this also or is that too strong
+
+
+buff pilot wave damage or lower energy drain
+lower base harpoon density
 
 const ctx = canvas.getContext('2d', {‘willReadFrequently': true});
 
@@ -33,21 +75,9 @@ setting to remove UI, except health bar
   except active gun? to see ammo
   checkbox in pause and in settings
 
-bug: often game puts player position at NaN
-  clues:
-    after apoximis?
-    very high level for tech, duplication
-    maybe not about JUNK though
-
-tech that does less damage the more tech you have?
-  tech.totalCount
-
 add coyote jump
   log game m.cycle when last on ground
   for jump check if game cycle is < last on ground cycle -2
-
-tech - Plasma railgun
-  like foam, or phonon?
 
 pause time like invariant for other things...
   throwing blocks

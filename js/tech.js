@@ -58,6 +58,7 @@ const tech = {
         simulation.makeTextLog(`<span class='color-var'>tech</span>.removeTech("<span class='color-text'>${tech.tech[index].name}</span>")`)
         tech.tech[index].remove();
         tech.tech[index].count = 0;
+        tech.totalCount -= totalRemoved
         simulation.updateTechHUD();
         tech.tech[index].isLost = true
         simulation.updateTechHUD();
@@ -211,7 +212,7 @@ const tech = {
     },
     damageFromTech() {
         let dmg = 1 //m.fieldDamage
-        if (tech.isTechDebt) dmg *= 4 - 0.1 * tech.totalCount
+        if (tech.isTechDebt) dmg *= 4 - 0.08 * tech.totalCount
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 1 + 0.75 * (1 - m.harmReduction())
         if (tech.OccamDamage) dmg *= tech.OccamDamage
         if (tech.isCloakingDamage) dmg *= 1.35
@@ -370,7 +371,7 @@ const tech = {
                     if (gunTechPool.length) {
                         const index = Math.floor(Math.random() * gunTechPool.length)
                         tech.giveTech(gunTechPool[index]) // choose from the gun pool
-                        tech.tech[gunTechPool[index]].isFromAppliedScience = true //makes it not remove properly under pure science
+                        tech.tech[gunTechPool[index]].isFromAppliedScience = true //makes it not remove properly under paradigm shift
                         simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[gunTechPool[index]].name}</span>")`)
                     }
                 }
@@ -747,7 +748,7 @@ const tech = {
         },
         {
             name: "regression",
-            description: "bullet <strong>collisions</strong> increase <strong>vulnerability</strong> to<br><strong class='color-d'>damage</strong> by <strong>6%</strong> for mobs <em>(1% for bosses)</em>",
+            description: "bullet <strong>collisions</strong> increase <strong>vulnerability</strong> to<br><strong class='color-d'>damage</strong> by <strong>5%</strong> for mobs <em>(0.5% for bosses)</em>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -1620,7 +1621,7 @@ const tech = {
         },
         {
             name: "Pauli exclusion",
-            description: `after receiving <strong class='color-harm'>harm</strong> from a <strong>collision</strong> become<br><strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1.5</strong> extra seconds`,
+            description: `after receiving <strong class='color-harm'>harm</strong> from a <strong>collision</strong> become<br><strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>2.5</strong> extra seconds`,
             maxCount: 9,
             count: 0,
             frequency: 1,
@@ -1628,7 +1629,7 @@ const tech = {
             allowed() { return true },
             requires: "",
             effect() {
-                tech.collisionImmuneCycles += 90;
+                tech.collisionImmuneCycles += 150;
                 if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
             },
             remove() {
@@ -1637,7 +1638,7 @@ const tech = {
         },
         {
             name: "spin–statistics theorem",
-            description: `become <strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1.9</strong> seconds<br>once every <strong>7</strong> seconds`,
+            description: `become <strong>immune</strong> to <strong class='color-harm'>harm</strong> for <strong>1.75</strong> seconds<br>once every <strong>7</strong> seconds`,
             maxCount: 3,
             count: 0,
             frequency: 1,
@@ -1647,7 +1648,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                tech.cyclicImmunity += 114;
+                tech.cyclicImmunity += 105;
             },
             remove() {
                 tech.cyclicImmunity = 0;
@@ -3068,7 +3069,7 @@ const tech = {
             }
         },
         {
-            name: "pure science",
+            name: "paradigm shift",
             description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>4%</strong> chance to convert that tech into ${powerUps.orb.research(1)}`,
             maxCount: 1,
             count: 0,
@@ -3088,7 +3089,7 @@ const tech = {
             // description: `increase <strong class='color-d'>damage</strong> by <strong>300%</strong> minus <strong>10%</strong> for <strong class='color-m'>tech</strong> you have learned(${4 - 0.1 * tech.totalCount})`,
             // description: `increase <strong class='color-d'>damage</strong> by <strong>300%</strong>, but reduce <strong class='color-d'>damage</strong><br>by <strong>10%</strong> for <strong class='color-m'>tech</strong> you have learned`,
             descriptionFunction() {
-                return `increase <strong class='color-d'>damage</strong> by <strong>300%</strong> minus <strong>10%</strong><br>for <strong class='color-m'>tech</strong> you have learned <em>(${Math.floor(100*(4 - 0.1 * tech.totalCount))-100}%)</em>`
+                return `increase <strong class='color-d'>damage</strong> by <strong>300%</strong> minus <strong>8%</strong><br>for <strong class='color-m'>tech</strong> you have learned <em>(${Math.floor(100*(4 - 0.08 * tech.totalCount))-100}%)</em>`
             },
             maxCount: 1,
             count: 0,
@@ -3704,7 +3705,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return ((tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.nailRecoil) || (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isFoamShot && !tech.isSporeWorm)) && !tech.isRivets && !tech.isIncendiary && !tech.isIceCrystals
+                return ((tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.nailRecoil) || (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isFoamShot && !tech.isSporeWorm)) && !tech.isRivets && !tech.isIncendiary && !tech.isIceCrystals && !tech.isIceShot
             },
             requires: "nail gun, shotgun, not ice crystal, rivets, rotary cannon, or pneumatic, incendiary, nail-shot, rivets, foam-shot, worm-shot, ice-shot",
             effect() {
@@ -3743,7 +3744,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return ((tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate) || (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isFoamShot && !tech.isSporeWorm)) && !tech.isNeedles && !tech.isIceCrystals
+                return ((tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate) || (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isFoamShot && !tech.isSporeWorm)) && !tech.isNeedles && !tech.isIceCrystals && !tech.isIceShot
             },
             requires: "nail gun shot gun, not ice crystal, needles, or pneumatic actuator",
             effect() {
@@ -5004,7 +5005,7 @@ const tech = {
             name: "annelids",
             description: "increase <strong class='color-p' style='letter-spacing: -0.8px;'>worm</strong> size and <strong class='color-d'>damage</strong><br>between <strong>10%</strong> and <strong>120%</strong>",
             isGunTech: true,
-            maxCount: 9,
+            maxCount: 3,
             count: 0,
             frequency: 3,
             frequencyDefault: 3,
@@ -6445,7 +6446,7 @@ const tech = {
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return (build.isExperimentSelection || powerUps.research.count > 0) && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
+                return (build.isExperimentSelection || powerUps.research.count > 0) && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport || tech.isDronesTravel)
             },
             requires: "molecular assembler, no other manufacturing, no drone tech",
             effect() {
@@ -6472,7 +6473,7 @@ const tech = {
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return (build.isExperimentSelection || powerUps.research.count > 0) && m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
+                return (build.isExperimentSelection || powerUps.research.count > 0) && m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport || tech.isDronesTravel)
             },
             requires: "molecular assembler, no other manufacturing, no drone tech",
             effect() {
@@ -6499,7 +6500,7 @@ const tech = {
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return (build.isExperimentSelection || powerUps.research.count > 0) && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
+                return (build.isExperimentSelection || powerUps.research.count > 0) && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport || tech.isDronesTravel)
             },
             requires: "molecular assembler, no other manufacturing, no drone tech",
             effect() {
@@ -6636,6 +6637,27 @@ const tech = {
             }
         },
         {
+            name: "plasma ball",
+            description: "charge up a ball of <strong class='color-plasma'>plasma</strong> and fire it",
+            isFieldTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder
+            },
+            requires: "plasma torch, not extruder",
+            effect() {
+                tech.isPlasmaBall = true;
+                m.fieldUpgrades[m.fieldMode].set()
+            },
+            remove() {
+                tech.isPlasmaBall = false;
+                if (this.count) m.fieldUpgrades[m.fieldMode].set()
+            }
+        },
+        {
             name: "extruder",
             description: "<strong class='color-plasma'>plasma</strong> <strong>torch</strong> <strong class='color-plasma'>extrudes</strong> a thin hot wire<br>increases <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
             isFieldTech: true,
@@ -6644,9 +6666,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "plasma torch"
+                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isPlasmaBall
             },
-            requires: "plasma torch",
+            requires: "plasma torch, not plasma ball",
             effect() {
                 tech.isExtruder = true;
                 m.fieldUpgrades[m.fieldMode].set()
@@ -7641,54 +7663,6 @@ const tech = {
             remove() {
                 if (this.count) m.look = m.lookDefault
             }
-        },
-        {
-            name: "Mech v4.48",
-            description: `open a portal to a primordial version of reality`,
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isNonRefundable: true,
-            isJunk: true,
-            allowed() { return true },
-            requires: "",
-            effect() {
-                window.open('https://scratch.mit.edu/projects/14005697/fullscreen/', '_blank')
-            },
-            remove() {}
-        },
-        {
-            name: "planetesimals",
-            description: `play <strong>planetesimals</strong> <em style = 'font-size:80%;'>(an asteroids-like game)</em><br>clear <strong>levels</strong> in <strong>planetesimals</strong> to spawn <strong class='color-m'>tech</strong><br>if you <strong style="color:red;">die</strong> in <strong>planetesimals</strong> you <strong style="color:red;">die</strong> in <strong>n-gon</strong>`,
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isNonRefundable: true,
-            isJunk: true,
-            allowed() { return true },
-            requires: "",
-            effect() {
-                window.open('../../planetesimals/index.html', '_blank')
-                // powerUps.spawn(m.pos.x, m.pos.y, "tech");
-
-                // for communicating to other tabs, like planetesimals
-                // Connection to a broadcast channel
-                const bc = new BroadcastChannel('planetesimals');
-                bc.activated = false
-
-                bc.onmessage = function(ev) {
-                    if (ev.data === 'tech') powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
-                    if (ev.data === 'death') {
-                        m.death()
-                        bc.close(); //end session
-                    }
-                    if (ev.data === 'ready' && !bc.activated) {
-                        bc.activated = true //prevents n-gon from activating multiple copies of planetesimals
-                        bc.postMessage("activate");
-                    }
-                }
-            },
-            remove() {}
         },
         {
             name: "facsimile",
@@ -9165,6 +9139,54 @@ const tech = {
             },
             remove() {}
         },
+        {
+            name: "Mech v4.48",
+            description: `open a portal to a primordial version of reality`,
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                window.open('https://scratch.mit.edu/projects/14005697/fullscreen/', '_blank')
+            },
+            remove() {}
+        },
+        {
+            name: "planetesimals",
+            description: `play <strong>planetesimals</strong> <em style = 'font-size:80%;'>(an asteroids-like game)</em><br>clear <strong>levels</strong> in <strong>planetesimals</strong> to spawn <strong class='color-m'>tech</strong><br>if you <strong style="color:red;">die</strong> in <strong>planetesimals</strong> you <strong style="color:red;">die</strong> in <strong>n-gon</strong>`,
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                window.open('../../planetesimals/index.html', '_blank')
+                // powerUps.spawn(m.pos.x, m.pos.y, "tech");
+
+                // for communicating to other tabs, like planetesimals
+                // Connection to a broadcast channel
+                const bc = new BroadcastChannel('planetesimals');
+                bc.activated = false
+
+                bc.onmessage = function(ev) {
+                    if (ev.data === 'tech') powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
+                    if (ev.data === 'death') {
+                        m.death()
+                        bc.close(); //end session
+                    }
+                    if (ev.data === 'ready' && !bc.activated) {
+                        bc.activated = true //prevents n-gon from activating multiple copies of planetesimals
+                        bc.postMessage("activate");
+                    }
+                }
+            },
+            remove() {}
+        },
         //************************************************** 
         //************************************************** undefined / lore
         //************************************************** tech
@@ -9537,5 +9559,6 @@ const tech = {
     isGrapple: null,
     isImmuneGrapple: null,
     isDronesTravel: null,
-    isTechDebt: null
+    isTechDebt: null,
+    isPlasmaBall: null
 }

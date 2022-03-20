@@ -15,35 +15,35 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
-            // m.setField("molecular assembler")
-            // b.giveGuns("drones")
-            // tech.giveTech("autonomous navigation")
-            // tech.giveTech("delivery drone")
-            // tech.giveTech("dynamo-bot upgrade")
+            // m.setField("metamaterial cloaking")
+            // b.giveGuns("harpoon")
+            // tech.giveTech("grappling hook")
+            // tech.giveTech("bulk modulus")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 9; i++) tech.giveTech("dynamo-bot")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
             // powerUps.research.changeRerolls(100000)
-            // for (let i = 0; i < 2; i++) tech.giveTech("laser-bot")
+            // for (let i = 0; i < 2; i++) tech.giveTech("undefined")
             // tech.tech[297].frequency = 100
+            // m.setField("plasma torch")
+            // tech.giveTech("plasma ball")
 
             // m.immuneCycle = Infinity //you can't take damage
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.reactor();
-            // level.testing(); //not in rotation, used for testing
-            // level.perplex()
-            if (simulation.isTraining) { level.walk(); } else { level.intro(); }
-
+            // level.pavilion(); //not in rotation, used for testing
+            if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
             // lore.techCount = 3
             // simulation.isCheating = false //true;
-            // localSettings.loreCount = 2; //this sets what conversation is heard
+            // localSettings.loreCount = 0; //this sets what conversation is heard
             // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
+
             // lore.unlockTesting();
             // tech.giveTech("tinker"); //show junk tech in experiment mode
         } else {
@@ -113,6 +113,9 @@ const level = {
             for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false) //exit
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false); //start
         }
+        if (m.plasmaBall) {
+            m.plasmaBall.isOn = false
+        }
     },
     trainingText(say) {
         simulation.lastLogTime = 0; //clear previous messages
@@ -130,7 +133,7 @@ const level = {
         simulation.accelScale = 1 //mob acceleration increases each level
         simulation.CDScale = 1 //mob CD time decreases each level
         simulation.dmgScale = Math.max(0.1, 0.34 * simulation.difficulty) //damage done by mobs scales with total levels
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.052) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
@@ -140,7 +143,7 @@ const level = {
             if (simulation.CDScale > 0.15) simulation.CDScale *= 0.965 //mob CD time decreases each level
         }
         simulation.dmgScale = Math.max(0.1, 0.34 * simulation.difficulty) //damage done by mobs scales with total levels
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.055) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.052) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
         // console.log(`CD = ${simulation.CDScale}`)
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
@@ -151,8 +154,8 @@ const level = {
             if (simulation.CDScale < 1) simulation.CDScale /= 0.965 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = Math.max(0.1, 0.35 * simulation.difficulty) //damage done by mobs scales with total levels
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.055)
+        simulation.dmgScale = Math.max(0.1, 0.34 * simulation.difficulty) //damage done by mobs scales with total levels
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.052)
     },
     difficultyText() {
         if (simulation.difficultyMode === 1) {
@@ -836,7 +839,7 @@ const level = {
             // const block = body[body.length] = Bodies.rectangle(x, y, width, height, {
             collisionFilter: {
                 category: cat.map,
-                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                mask: cat.player | cat.body | cat.bullet | cat.powerUp // | cat.mob | cat.mobBullet
             },
             isNoSetCollision: true,
             inertia: Infinity, //prevents rotation
@@ -3173,9 +3176,12 @@ const level = {
         //right
         spawn.mapVertex(425 + 437, -50, "490 0  350 80  -350 80  -490 0  -350 -80  350 -80");
         spawn.mapRect(325, -100, 1070, 100);
-        spawn.mapRect(225, 675, 375, 25);
-        spawn.mapRect(675, 450, 375, 25);
-        spawn.mapRect(1125, 225, 375, 25);
+        // spawn.mapRect(225, 675, 375, 25);
+        // spawn.mapRect(675, 450, 375, 25);
+        // spawn.mapRect(1125, 225, 375, 25);
+        spawn.mapRect(175, 675, 425, 25);
+        spawn.mapRect(1125, 225, 425, 25);
+        spawn.mapRect(650, 450, 425, 25);
 
         if (Math.random() < 0.33) {
             spawn.mapVertex(855, -1000, "-100 -300  0 -350  100 -300  100 300  0 350  -100 300");
@@ -3190,12 +3196,19 @@ const level = {
         spawn.mapVertex(-687, -1936, "-612 50  0 100  612 50  612 -50 -612 -50");
 
         //2nd floor right building
-        spawn.mapRect(550, -3050, 600, 175);
+        // spawn.mapRect(550, -3050, 600, 175);
+        spawn.mapRect(550, -3050, 600, 75);
 
         spawn.bodyRect(-125, -2025, 475, 25);
         //2nd floor left building
-        spawn.mapRect(-925, -2350, 675, 200);
-        spawn.mapRect(-825, -2825, 425, 275);
+        // if (Math.random() > 0.5) {
+        //     spawn.mapRect(-925, -2350, 675, 200);
+        // } else {
+        // }
+
+        spawn.mapRect(-925, -2350, 675, 50);
+        spawn.mapRect(-825, -2825, 425, 50);
+        // spawn.mapRect(-825, -2825, 425, 275);
         spawn.mapRect(-450, -3125, 50, 350);
         spawn.mapRect(-750, -3150, 350, 50);
         spawn.mapRect(-650, -3400, 250, 300);
@@ -3203,8 +3216,11 @@ const level = {
         spawn.bodyRect(-375, -2150, 100, 150, 0.2);
         //2nd floor left pillar
         spawn.mapRect(-1400, -2625, 325, 25);
-        spawn.mapRect(-1400, -3225, 325, 25);
-        spawn.mapRect(-1400, -3825, 325, 25);
+        spawn.mapRect(-1450, -3225, 425, 25);
+        // spawn.mapRect(-1500, -3825, 525, 25);
+        spawn.mapRect(-1512.5, -3825, 550, 25);
+        // spawn.mapRect(-1400, -3225, 325, 25);
+        // spawn.mapRect(-1400, -3825, 325, 25);
 
         spawn.randomMob(1000, -275, 0.2);
         spawn.randomMob(950, -1725, 0.1);
@@ -3231,7 +3247,7 @@ const level = {
         slime.min.y += slime.maxHeight
         slime.max.y = slime.min.y + slime.height
         const elevator1 = level.elevator(-1625, -90, 310, 800, -2000, 0.0025, { up: 0.1, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
-        const elevator2 = level.elevator(1175, -3050, 200, 300, -4475, 0.0025, { up: 0.12, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+        const elevator2 = level.elevator(1175, -3050, 200, 250, -4475, 0.0025, { up: 0.12, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
         let waterFallWidth = 0
         let waterFallX = 0
         let waterFallSmoothX = 0
@@ -3242,10 +3258,10 @@ const level = {
         // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         // m.immuneCycle = Infinity //you can't take damage
 
-        simulation.isHorizontalFlipped = true
+        // simulation.isHorizontalFlipped = true
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
-            spawn.mapVertex(584, -2435, "0 0  300 0  150 600  0 600");
-            spawn.mapVertex(1116, -2435, "0 0  300 0  300 600  150 600");
+            spawn.mapVertex(584, -2500, "0 0  300 0  150 600  0 600");
+            spawn.mapVertex(1116, -2500, "0 0  300 0  300 600  150 600");
             spawn.bodyRect(-200, -125, 625, 25);
 
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -3255,7 +3271,7 @@ const level = {
 
             spinnerArray.push(level.spinner(-110, -3325, 45, 600, 0.003, 0, 0, 0.01)) //    spinner(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0) {
 
-            const boost1 = level.boost(-900, -2000, 700)
+            const boost1 = level.boost(-900, -2000, 790)
             level.setPosToSpawn(500, 850); //normal spawn
             level.custom = () => {
                 ctx.fillStyle = "#c0c3c9" ///!!!!!!!!!!   for flipped x:  newX = -oldX - width
@@ -3287,11 +3303,11 @@ const level = {
                 ctx.fill();
                 //shadow
                 ctx.fillStyle = "rgba(0,10,30,0.1)"
-                ctx.fillRect(-1150, -2900, 600, 925);
+                ctx.fillRect(-1150, -3000, 600, 1025);
                 ctx.fillRect(450, -3100, 300, 275);
                 ctx.fillRect(450, -3625, 200, 225);
-                ctx.fillRect(400, -2575, 425, 325);
-                ctx.fillRect(250, -2150, 675, 150);
+                ctx.fillRect(400, -2775, 425, 450);
+                ctx.fillRect(250, -2300, 675, 300);
 
                 slime.query();
                 if (isWaterfallFilling) {
@@ -3319,6 +3335,8 @@ const level = {
                 }
             };
         } else { //not flipped
+            spawn.mapVertex(1116, -2500, "0 0  300 0  150 600  0 600");
+            spawn.mapVertex(584, -2500, "0 0  300 0  300 600  150 600");
 
             if (Math.random() < 0.33) {
                 spinnerArray.push(level.spinner(65, -300, 40, 450, 0.003, Math.PI / 2))
@@ -3336,7 +3354,7 @@ const level = {
                 Matter.Body.setVertices(spinnerArray[spinnerArray.length - 1].bodyB, Vertices.fromPath(hexagon))
             }
 
-            const boost1 = level.boost(800, -2000, 700)
+            const boost1 = level.boost(800, -2000, 790)
 
             level.custom = () => {
                 ctx.fillStyle = "#c0c3c9"
@@ -3346,7 +3364,6 @@ const level = {
                 ctx.fillStyle = "#d0d4d6"
                 ctx.fillRect(-1100, -1925, 825, 2925) //large pillar background
                 ctx.fillRect(450, -1925, 825, 2925) //large pillar background
-
                 ctx.fillStyle = "#cff" //exit
                 ctx.fillRect(1475, -4900, 525, 425)
                 level.exit.drawAndCheck();
@@ -3369,11 +3386,11 @@ const level = {
                 ctx.fill();
                 //shadow
                 ctx.fillStyle = "rgba(0,10,30,0.1)"
-                ctx.fillRect(550, -2900, 600, 925);
+                ctx.fillRect(550, -3000, 600, 1025);
                 ctx.fillRect(-750, -3100, 300, 275);
                 ctx.fillRect(-650, -3625, 200, 225);
-                ctx.fillRect(-825, -2575, 425, 325);
-                ctx.fillRect(-925, -2150, 675, 150);
+                ctx.fillRect(-825, -2775, 425, 450);
+                ctx.fillRect(-925, -2300, 675, 300);
 
                 slime.query();
                 if (isWaterfallFilling) {
@@ -6019,10 +6036,10 @@ const level = {
         const balance = level.spinner(5500, -412.5, 25, 660) //entrance
         const rotor = level.rotor(7000, 580, -0.001);
         const doorSortieSalle = level.door(8590, -520, 20, 800, 750)
-        let buttonSortieSalle
-        let portalEnBas
+        // let buttonSortieSalle
+        // let portalEnBas
         let portalEnHaut
-        let door3isClosing = false;
+        // let door3isClosing = false;
 
         function drawOnTheMapMapRect(x, y, dx, dy) {
             spawn.mapRect(x, y, dx, dy);

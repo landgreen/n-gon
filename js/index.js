@@ -326,7 +326,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                                             </span>
                                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isLore) {
-                    text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore" ${style}></div> &nbsp; ${tech.tech[i].name} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else {
                     text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})" ${style}><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 }
@@ -379,7 +379,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                 if (!who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
                 tech.giveTech(index)
             } else if (!tech.tech[index].isNonRefundable) {
-                tech.totalCount -= tech.tech[index].count
+                // tech.totalCount -= tech.tech[index].count
                 tech.removeTech(index);
                 who.classList.remove("build-tech-selected");
             } else {

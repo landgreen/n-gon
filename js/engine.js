@@ -188,7 +188,7 @@ function collisionChecks(event) {
                                     time: simulation.drawTime
                                 });
                             }
-                            if (tech.isLessDamageReduction && !mob[k].shield) mob[k].damageReduction *= mob[k].isBoss ? 1.01 : 1.06
+                            if (tech.isLessDamageReduction && !mob[k].shield) mob[k].damageReduction *= mob[k].isBoss ? 1.005 : 1.05
                             return;
                         }
                         //mob + body collisions

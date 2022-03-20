@@ -3747,7 +3747,7 @@ const spawn = {
                 if (this.countDown-- < 0) { //explode
                     this.death();
                     //hit player
-                    if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.explodeRange) {
+                    if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.explodeRange && m.immuneCycle < m.cycle) {
                         m.damage(0.01 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.25 : 1));
                         m.energy -= 0.1 * (tech.isRadioactiveResistance ? 0.25 : 1)
                         if (m.energy < 0) m.energy = 0

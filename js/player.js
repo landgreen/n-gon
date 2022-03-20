@@ -34,9 +34,9 @@ const m = {
                 category: cat.player,
                 mask: cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
             },
-            death() {
-                m.death();
-            }
+            // death() {
+            //     m.death();
+            // }
         });
         Matter.Body.setMass(player, m.mass);
         Composite.add(engine.world, [player]);
@@ -2085,7 +2085,126 @@ const m = {
             description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away",
             set() {
                 b.isExtruderOn = false
-                if (tech.isExtruder) {
+                if (m.plasmaBall) {
+                    m.plasmaBall.isOn = false
+                    Matter.Composite.remove(engine.world, m.plasmaBall);
+                }
+                if (tech.isPlasmaBall) {
+                    // m.plasmaBall = {
+                    //     position: { x: m.pos.x + 10 * Math.cos(m.angle), y: m.pos.y + 10 * Math.sin(m.angle) },
+                    //     velocity: { x: 0, y: 0 },
+                    //     radius: 1,     
+                    // }
+
+                    m.plasmaBall = Bodies.circle(m.pos.x + 10 * Math.cos(m.angle), m.pos.y + 10 * Math.sin(m.angle), 1, {
+                        collisionFilter: {
+                            group: 0,
+                            category: 0,
+                            mask: 0 //cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
+                        },
+                        frictionAir: 0,
+                        // radius: 1,
+                        // friction: 0,
+                        // frictionStatic: 0,
+                        // restitution: 0,
+                        alpha: 0.6,
+                        isAttached: false,
+                        isOn: false,
+                        drain: 0.0012,
+                        radiusLimit: 10,
+                        damage: 0.18,
+                        setPositionToNose() {
+                            const nose = { x: m.pos.x + 10 * Math.cos(m.angle), y: m.pos.y + 10 * Math.sin(m.angle) }
+                            Matter.Body.setPosition(this, Vector.add(nose, Vector.mult(Vector.normalise(Vector.sub(nose, m.pos)), this.circleRadius)));
+                        },
+                        fire() {
+                            this.isAttached = false;
+                            const speed = 4 //scale with mass?
+                            Matter.Body.setVelocity(this, {
+                                x: 0.4 * player.velocity.x + speed * Math.cos(m.angle),
+                                y: 0.2 * player.velocity.y + speed * Math.sin(m.angle)
+                            });
+                        },
+                        do() {
+                            if (this.isOn) {
+                                //collisions with map
+                                if (Matter.Query.collides(this, map).length > 0) {
+                                    const scale = Math.max(0.7, 0.99 - 1 / m.plasmaBall.circleRadius)
+                                    Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
+                                    if (m.plasmaBall.circleRadius < m.plasmaBall.radiusLimit) this.isOn = false
+                                }
+                                //collisions with mobs
+                                const whom = Matter.Query.collides(this, mob)
+                                const dmg = this.damage * m.dmgScale
+                                for (let i = 0, len = whom.length; i < len; i++) {
+                                    if (whom[i].bodyA.alive) whom[i].bodyA.damage(dmg);
+                                    if (whom[i].bodyB.alive) whom[i].bodyB.damage(dmg);
+                                }
+
+
+
+                                //graphics
+                                var gradient = ctx.createRadialGradient(this.position.x, this.position.y, 0, this.position.x, this.position.y, this.circleRadius);
+                                gradient.addColorStop(0, `rgba(255,255,255,${this.alpha})`);
+                                gradient.addColorStop(0.2, `rgba(255,200,255,${this.alpha})`);
+                                gradient.addColorStop(1, `rgba(255,0,255,${this.alpha})`);
+                                ctx.fillStyle = gradient
+                                ctx.beginPath();
+                                ctx.arc(this.position.x, this.position.y, this.circleRadius, 0, 2 * Math.PI);
+                                ctx.fill();
+                            }
+                        },
+                    });
+                    Composite.add(engine.world, m.plasmaBall);
+
+                    m.hold = function() {
+                        if (m.isHolding) {
+                            m.drawHold(m.holdingTarget);
+                            m.holding();
+                            m.throwBlock();
+                        } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+                            m.grabPowerUp();
+                            m.lookForPickUp();
+
+                            //field is active
+                            if (!m.plasmaBall.isAttached) { //return ball to player
+                                const scale = 0.7
+                                Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
+                                if (m.plasmaBall.circleRadius < m.plasmaBall.radiusLimit) {
+                                    m.plasmaBall.isAttached = true
+                                    m.plasmaBall.isOn = true
+                                    m.plasmaBall.setPositionToNose()
+                                }
+                            } else if (m.energy > m.plasmaBall.drain) { //charge up when attached
+                                m.energy -= m.plasmaBall.drain;
+                                const scale = 1 + 5 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.5)
+                                Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+                                m.plasmaBall.setPositionToNose()
+
+                                //add friction for player when holding ball,  maybe more friction in vertical
+
+
+                            } else {
+                                m.fieldCDcycle = m.cycle + 90;
+                                m.plasmaBall.fire()
+                            }
+                        } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+                            m.pickUp();
+                        } else {
+                            m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                            if (m.plasmaBall.isAttached) {
+                                m.fieldCDcycle = m.cycle + 30;
+                                m.plasmaBall.fire()
+                            }
+                        }
+                        m.drawFieldMeter("rgba(0, 0, 0, 0.2)")
+
+                        m.plasmaBall.do()
+                    }
+
+
+
+                } else if (tech.isExtruder) {
                     m.hold = function() {
                         b.isExtruderOn = false
                         if (m.isHolding) {

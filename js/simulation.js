@@ -821,7 +821,7 @@ const simulation = {
         level.zones = [];
         simulation.drawList = [];
 
-        if (tech.isDronesTravel) {
+        if (tech.isDronesTravel && player.alive) {
             //count drones
             let count = 0
             let deliveryCount = 0
@@ -945,7 +945,7 @@ const simulation = {
                 }
             }
 
-            if (m.pos.y > simulation.fallHeight) { // if 4000px deep
+            if (m.pos.y > simulation.fallHeight || isNaN(player.position.x)) { // if 4000px deep
                 Matter.Body.setVelocity(player, {
                     x: 0,
                     y: 0
