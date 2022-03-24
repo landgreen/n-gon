@@ -1,15 +1,7 @@
 ******************************************************** NEXT PATCH **************************************************
-plasma ball
-  much more damage
-  new graphics
-  fast decay in mob shields
-  works with capacitor
-  some bug fixes
 
-paradigm shift: 4->10% chance to give research instead of tech
-harpoon density: 0.006->0.005  (lower damage and knock back to mobs)
-wormhole: 7->5% duplication chance
-pilot wave uses less energy
+enthalpy: 3->2% heal from damage done
+technical debt: 8->15% less damage for each tech
 
 ******************************************************** TODO ********************************************************
 

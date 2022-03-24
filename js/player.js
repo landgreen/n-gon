@@ -2171,7 +2171,7 @@ const m = {
                                 this.alpha = 0.5 + 0.1 * Math.random()
                                 gradient.addColorStop(0, `rgba(255,255,255,${this.alpha})`);
                                 gradient.addColorStop(0.18 + 0.1 * Math.random(), `rgba(255,150,255,${this.alpha})`);
-                                gradient.addColorStop(0.95, `rgba(255,0,255,${this.alpha})`);
+                                gradient.addColorStop(1, `rgba(255,0,255,${this.alpha})`);
                                 // gradient.addColorStop(1, `rgba(255,150,255,${this.alpha})`);
                                 ctx.fillStyle = gradient
                                 ctx.beginPath();
@@ -2228,8 +2228,6 @@ const m = {
                                     m.plasmaBall.setPositionToNose()
                                 }
                             } else if (m.energy > m.plasmaBall.drain) { //charge up when attached
-
-
                                 if (tech.isCapacitor) {
                                     m.energy -= m.plasmaBall.drain * 4;
                                     const scale = 1 + 5 * 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
@@ -2241,7 +2239,6 @@ const m = {
                                     Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
                                 }
                                 m.plasmaBall.setPositionToNose()
-
                                 //add friction for player when holding ball,  maybe more friction in vertical
 
                             } else {
@@ -2264,7 +2261,6 @@ const m = {
                         m.drawFieldMeter("rgba(0, 0, 0, 0.2)")
 
                         m.plasmaBall.do()
-                        console.log(m.plasmaBall.isAttached)
                     }
 
 
