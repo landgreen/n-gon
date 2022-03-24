@@ -18,7 +18,7 @@ const level = {
             // m.setField("metamaterial cloaking")
             // b.giveGuns("harpoon")
             // tech.giveTech("grappling hook")
-            // tech.giveTech("bulk modulus")
+            // tech.giveTech("capacitor bank")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 9; i++) tech.giveTech("dynamo-bot")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
@@ -32,7 +32,7 @@ const level = {
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.reactor();
-            // level.pavilion(); //not in rotation, used for testing
+            // level.testing(); //not in rotation, used for testing
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
@@ -113,9 +113,7 @@ const level = {
             for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false) //exit
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false); //start
         }
-        if (m.plasmaBall) {
-            m.plasmaBall.isOn = false
-        }
+        if (m.plasmaBall) m.plasmaBall.isOn = false
     },
     trainingText(say) {
         simulation.lastLogTime = 0; //clear previous messages
@@ -2543,11 +2541,11 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        level.difficultyIncrease(5) //30 is near max on hard  //60 is near max on why
+        level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
-        // spawn.starter(1900, -500, 200) //big boy
-        for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
+        spawn.starter(1900, -500, 200) //big boy
+        // for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)

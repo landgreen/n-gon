@@ -3070,7 +3070,7 @@ const tech = {
         },
         {
             name: "paradigm shift",
-            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>4%</strong> chance to convert that tech into ${powerUps.orb.research(1)}`,
+            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>10%</strong> chance to convert that tech into ${powerUps.orb.research(1)}`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3859,7 +3859,7 @@ const tech = {
         },
         {
             name: "pneumatic actuator",
-            description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>to it's shortest <strong><em>delay</em></strong> after firing",
+            description: "<strong>nail gun</strong> takes <strong>no</strong> time to ramp up<br>to its shortest <strong><em>delay</em></strong> after firing",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5430,16 +5430,16 @@ const tech = {
         {
             name: "capacitor bank",
             // description: "<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, foam, railgun, pulse, tokamak</em>",
-            descriptionFunction() { return `<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, ${tech.haveGunCheck("foam", false) ? "<strong>foam</strong>" : "foam"}, ${tech.isRailGun ? "<strong>railgun</strong>" : "railgun"}, ${tech.isPulseLaser ? "<strong>pulse</strong>" : "pulse"}, ${tech.isTokamak ? "<strong>tokamak</strong>" : "tokamak"}</em>` },
+            descriptionFunction() { return `<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:93%;'>throwing, ${tech.haveGunCheck("foam", false) ? "<strong>foam</strong>" : "foam"}, ${tech.isPlasmaBall ? "<strong>plasma ball</strong>" : "plasma ball"}, ${tech.isRailGun ? "<strong>railgun</strong>" : "railgun"}, ${tech.isPulseLaser ? "<strong>pulse</strong>" : "pulse"}, ${tech.isTokamak ? "<strong>tokamak</strong>" : "tokamak"}</em>` },
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.blockDamage > 0.075 || tech.isRailGun || tech.haveGunCheck("foam") || tech.isTokamak || tech.isPulseLaser
+                return tech.blockDamage > 0.075 || tech.isRailGun || tech.haveGunCheck("foam") || tech.isTokamak || tech.isPulseLaser || tech.isPlasmaBall
             },
-            requires: "throwing blocks, railgun, foam, pulse, tokamak",
+            requires: "throwing blocks, railgun, foam, pulse, tokamak, plasma ball",
             effect() {
                 tech.isCapacitor = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -5717,7 +5717,7 @@ const tech = {
             },
             remove() {
                 tech.isHarpoonPowerUp = false
-                tech.harpoonDensity = 0.006
+                tech.harpoonDensity = 0.005
             }
         },
         {
@@ -6654,7 +6654,7 @@ const tech = {
             },
             remove() {
                 tech.isPlasmaBall = false;
-                if (this.count) m.fieldUpgrades[m.fieldMode].set()
+                if (this.count && m.fieldUpgrades[m.fieldMode].name === "plasma torch") m.fieldUpgrades[m.fieldMode].set()
             }
         },
         {
@@ -6675,7 +6675,7 @@ const tech = {
             },
             remove() {
                 tech.isExtruder = false;
-                if (this.count) m.fieldUpgrades[m.fieldMode].set()
+                if (this.count && m.fieldUpgrades[m.fieldMode].name === "plasma torch") m.fieldUpgrades[m.fieldMode].set()
             }
         },
         {

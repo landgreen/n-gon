@@ -1,24 +1,45 @@
 ******************************************************** NEXT PATCH **************************************************
+plasma ball
+  much more damage
+  new graphics
+  fast decay in mob shields
+  works with capacitor
+  some bug fixes
 
-plasma ball is now live, but it's still in beta
-  still needs
-    new graphics
-    damage balancing
-    fast decay in mob shields
-    player angle rotation speed while firing adds to fire speed
-    tech upgrade to get electrical arcs that randomly damage nearby mobs
-    current tech synergy
-      capacitor bank,plasma jet(range?)
-
-reservoir level is less crowded, so you can dodge mobs easier
-  horizontal flipped version is so reenabled
-pure science renamed paradigm shift
-difficulty scaling for heal and mob damage reduced 2%
-
-some possible bug fixes, I don't know...
-
+paradigm shift: 4->10% chance to give research instead of tech
+harpoon density: 0.006->0.005  (lower damage and knock back to mobs)
+wormhole: 7->5% duplication chance
+pilot wave uses less energy
 
 ******************************************************** TODO ********************************************************
+
+plasma ball
+  maybe grow faster when you have more energy
+    or excess energy
+  change size/alpha when touching mobs
+    explode when touching mobs like spirit bomb?
+  player angle rotation speed while firing adds to fire speed
+  tech upgrade to get electrical arcs that randomly damage nearby mobs
+    use plasma jet tech?
+  tech: black hole: gives the plasma ball gravity
+    plasma orb increases in size and power as it eats enemies
+    maybe does damage to player to grow faster?
+  tech that makes it explode when it expires
+
+bug: often game puts player position at NaN
+  try:
+    cloaking/harpoon grapple on normal, continue past beating the final boss
+  clues:
+    maybe with vanish or other special blocks and grapple hook
+    very high level for tech, duplication
+    maybe not about JUNK though
+    maybe on tons of bullets
+    maybe grappling hook, Bulk modulus
+  solution: just kill the player if they go NaN
+  vanish elements shouldn't collide with mobs
+    maybe they don't return if mobs are in the way?
+    maybe they kill mobs in the way
+    maybe they should go non-collide with mobs
 
 bug: harpoon attack gave a mob really high levels of health
   recent events:
@@ -34,17 +55,6 @@ bug: maybe I can put in an event listener to reset inputs to false when you tab 
 enemies stuck with foam receive upward force over time
   only form aerogel tech?
 
-bug: often game puts player position at NaN
-  try:
-    cloaking/harpoon grapple on normal, continue past beating the final boss
-  clues:
-    maybe with vanish or other special blocks and grapple hook
-    very high level for tech, duplication
-    maybe not about JUNK though
-    maybe on tons of bullets
-    maybe grappling hook, Bulk modulus
-  solution: just kill the player if they go NaN
-
 Tech: superglue
 Requires: foam + another gun or plasma torch or molecular assembler
   Foam bubbles decay 50% slower
@@ -53,9 +63,10 @@ Requires: foam + another gun or plasma torch or molecular assembler
   Enemies stuck with foam take 25% more damage
   should foam bots gets this also or is that too strong
 
-
-buff pilot wave damage or lower energy drain
-lower base harpoon density
+tech: harpoons stick into enemies
+  detonate after a short delay
+  attaches mob to wall if possible
+  firing while harpoon is stuck into an enemy rips it out of them, inflicting damage and stun and pulling them towards you
 
 const ctx = canvas.getContext('2d', {‘willReadFrequently': true});
 

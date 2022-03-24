@@ -2103,16 +2103,12 @@ const m = {
                             mask: 0 //cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
                         },
                         frictionAir: 0,
-                        // radius: 1,
-                        // friction: 0,
-                        // frictionStatic: 0,
-                        // restitution: 0,
                         alpha: 0.6,
                         isAttached: false,
                         isOn: false,
-                        drain: 0.0012,
+                        drain: 0.0015,
                         radiusLimit: 10,
-                        damage: 0.18,
+                        damage: 0.4,
                         setPositionToNose() {
                             const nose = { x: m.pos.x + 10 * Math.cos(m.angle), y: m.pos.y + 10 * Math.sin(m.angle) }
                             Matter.Body.setPosition(this, Vector.add(nose, Vector.mult(Vector.normalise(Vector.sub(nose, m.pos)), this.circleRadius)));
@@ -2120,38 +2116,94 @@ const m = {
                         fire() {
                             this.isAttached = false;
                             const speed = 4 //scale with mass?
+                            // Matter.Body.setVelocity(this, {
+                            //     x: speed * Math.cos(m.angle),
+                            //     y: speed * Math.sin(m.angle)
+                            // });
                             Matter.Body.setVelocity(this, {
-                                x: 0.4 * player.velocity.x + speed * Math.cos(m.angle),
-                                y: 0.2 * player.velocity.y + speed * Math.sin(m.angle)
+                                x: player.velocity.x * 0.5 + speed * Math.cos(m.angle),
+                                y: player.velocity.y * 0.2 + speed * Math.sin(m.angle)
                             });
+                            m.plasmaBall.setPositionToNose()
+                        },
+                        scale(scale) {
+                            Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
+                            if (this.circleRadius < this.radiusLimit) this.isOn = false
                         },
                         do() {
                             if (this.isOn) {
                                 //collisions with map
                                 if (Matter.Query.collides(this, map).length > 0) {
-                                    const scale = Math.max(0.7, 0.99 - 1 / m.plasmaBall.circleRadius)
-                                    Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
-                                    if (m.plasmaBall.circleRadius < m.plasmaBall.radiusLimit) this.isOn = false
+                                    this.scale(Math.max(0.9, 0.98 - 0.05 / m.plasmaBall.circleRadius))
+                                    if (this.speed > 2.5) {
+                                        const scale = 0.96
+                                        Matter.Body.setVelocity(this, {
+                                            x: scale * this.velocity.x,
+                                            y: scale * this.velocity.y
+                                        });
+                                    }
                                 }
                                 //collisions with mobs
                                 const whom = Matter.Query.collides(this, mob)
                                 const dmg = this.damage * m.dmgScale
                                 for (let i = 0, len = whom.length; i < len; i++) {
-                                    if (whom[i].bodyA.alive) whom[i].bodyA.damage(dmg);
-                                    if (whom[i].bodyB.alive) whom[i].bodyB.damage(dmg);
+                                    if (whom[i].bodyA.alive) {
+                                        whom[i].bodyA.damage(dmg);
+                                        if (whom[i].bodyA.shield) this.scale(Math.max(0.9, 0.99 - 0.5 / m.plasmaBall.circleRadius))
+                                    }
+                                    if (whom[i].bodyB.alive) {
+                                        whom[i].bodyB.damage(dmg);
+                                        if (whom[i].bodyB.shield) this.scale(Math.max(0.9, 0.99 - 0.5 / m.plasmaBall.circleRadius))
+                                    }
+                                }
+                                //slowly slow down if too fast
+                                if (this.speed > 6) {
+                                    const scale = 0.997
+                                    Matter.Body.setVelocity(this, {
+                                        x: scale * this.velocity.x,
+                                        y: scale * this.velocity.y
+                                    });
                                 }
 
-
-
                                 //graphics
-                                var gradient = ctx.createRadialGradient(this.position.x, this.position.y, 0, this.position.x, this.position.y, this.circleRadius);
+                                const radius = this.circleRadius * (0.99 + 0.02 * Math.random()) + 3 * Math.random()
+                                const gradient = ctx.createRadialGradient(this.position.x, this.position.y, 0, this.position.x, this.position.y, radius);
+                                this.alpha = 0.5 + 0.1 * Math.random()
                                 gradient.addColorStop(0, `rgba(255,255,255,${this.alpha})`);
-                                gradient.addColorStop(0.2, `rgba(255,200,255,${this.alpha})`);
-                                gradient.addColorStop(1, `rgba(255,0,255,${this.alpha})`);
+                                gradient.addColorStop(0.18 + 0.1 * Math.random(), `rgba(255,150,255,${this.alpha})`);
+                                gradient.addColorStop(0.95, `rgba(255,0,255,${this.alpha})`);
+                                // gradient.addColorStop(1, `rgba(255,150,255,${this.alpha})`);
                                 ctx.fillStyle = gradient
                                 ctx.beginPath();
-                                ctx.arc(this.position.x, this.position.y, this.circleRadius, 0, 2 * Math.PI);
+                                ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
                                 ctx.fill();
+                                //draw arcs
+                                const unit = Vector.rotate({ x: 1, y: 0 }, Math.random() * 6.28)
+                                let len = 8
+                                const step = this.circleRadius / len
+                                let x = this.position.x
+                                let y = this.position.y
+                                ctx.beginPath();
+                                if (Math.random() < 0.5) {
+                                    x += step * (unit.x + 6 * (Math.random() - 0.5))
+                                    y += step * (unit.y + 6 * (Math.random() - 0.5))
+                                    len -= 2
+                                }
+                                if (Math.random() < 0.5) {
+                                    x += step * (unit.x + 6 * (Math.random() - 0.5))
+                                    y += step * (unit.y + 6 * (Math.random() - 0.5))
+                                    len -= 2
+                                }
+                                ctx.moveTo(x, y);
+
+                                for (let i = 0; i < len; i++) {
+                                    x += step * (unit.x + 1.9 * (Math.random() - 0.5))
+                                    y += step * (unit.y + 1.9 * (Math.random() - 0.5))
+                                    ctx.lineTo(x, y);
+                                }
+                                ctx.strokeStyle = "#88f";
+                                ctx.lineWidth = 2 * Math.random();
+                                ctx.stroke();
                             }
                         },
                     });
@@ -2176,13 +2228,21 @@ const m = {
                                     m.plasmaBall.setPositionToNose()
                                 }
                             } else if (m.energy > m.plasmaBall.drain) { //charge up when attached
-                                m.energy -= m.plasmaBall.drain;
-                                const scale = 1 + 5 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.5)
-                                Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+
+
+                                if (tech.isCapacitor) {
+                                    m.energy -= m.plasmaBall.drain * 4;
+                                    const scale = 1 + 5 * 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+                                    Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+
+                                } else {
+                                    m.energy -= m.plasmaBall.drain;
+                                    const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+                                    Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
+                                }
                                 m.plasmaBall.setPositionToNose()
 
                                 //add friction for player when holding ball,  maybe more friction in vertical
-
 
                             } else {
                                 m.fieldCDcycle = m.cycle + 90;
@@ -2190,6 +2250,10 @@ const m = {
                             }
                         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                             m.pickUp();
+                            if (m.plasmaBall.isAttached) {
+                                m.fieldCDcycle = m.cycle + 30;
+                                m.plasmaBall.fire()
+                            }
                         } else {
                             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                             if (m.plasmaBall.isAttached) {
@@ -2200,6 +2264,7 @@ const m = {
                         m.drawFieldMeter("rgba(0, 0, 0, 0.2)")
 
                         m.plasmaBall.do()
+                        console.log(m.plasmaBall.isAttached)
                     }
 
 
@@ -2903,7 +2968,7 @@ const m = {
 
                                 for (let i = 0, len = body.length; i < len; ++i) {
                                     if (Vector.magnitude(Vector.sub(body[i].position, m.fieldPosition)) < m.fieldRadius && !body[i].isNotHoldable) {
-                                        const DRAIN = speed * body[i].mass * 0.000005 // * (1 + m.energy * m.energy) //drain more energy when you have more energy
+                                        const DRAIN = speed * body[i].mass * 0.0000035 // * (1 + m.energy * m.energy) //drain more energy when you have more energy
                                         if (m.energy > DRAIN) {
                                             m.energy -= DRAIN;
                                             Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity
@@ -2988,10 +3053,10 @@ const m = {
         },
         {
             name: "wormhole",
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>5%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             drain: 0,
             effect: function() {
-                m.duplicateChance = 0.07
+                m.duplicateChance = 0.05
                 m.fieldRange = 0
                 powerUps.setDupChance(); //needed after adjusting duplication chance
 

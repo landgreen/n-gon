@@ -1045,7 +1045,7 @@ const powerUps = {
     },
     pauseEjectTech(index) {
         if (tech.isPauseEjectTech || simulation.testing) {
-            if (Math.random() < 0.04 || tech.tech[index].isFromAppliedScience) {
+            if (Math.random() < 0.1 || tech.tech[index].isFromAppliedScience) {
                 tech.removeTech(index)
                 powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
             } else {

@@ -1365,7 +1365,7 @@ const b = {
             },
             minDmgSpeed: 4,
             lookFrequency: Math.floor(7 + Math.random() * 3),
-            density: tech.harpoonDensity, //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
+            density: tech.harpoonDensity, //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.005*6 when buffed
             drain: 0.004,
             beforeDmg(who) {
                 if (tech.isShieldPierce && who.isShielded) { //disable shields
@@ -1398,7 +1398,7 @@ const b = {
                         this.caughtPowerUp.effect();
                         Matter.Composite.remove(engine.world, this.caughtPowerUp);
                         powerUp.splice(index, 1);
-                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.006 * 6 //0.006 is normal
+                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.005 * 6 //0.005 is normal
                     } else {
                         this.dropCaughtPowerUp()
                     }
@@ -1629,7 +1629,7 @@ const b = {
             },
             minDmgSpeed: 4,
             lookFrequency: Math.floor(7 + Math.random() * 3),
-            density: tech.harpoonDensity, //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
+            density: tech.harpoonDensity, //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.005*6 when buffed
             beforeDmg(who) {
                 if (tech.isShieldPierce && who.isShielded) { //disable shields
                     who.isShielded = false
@@ -1671,7 +1671,7 @@ const b = {
                         this.caughtPowerUp.effect();
                         Matter.Composite.remove(engine.world, this.caughtPowerUp);
                         powerUp.splice(index, 1);
-                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.006 * 6 //0.006 is normal
+                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.005 * 6 //0.006 is normal
                     } else {
                         this.dropCaughtPowerUp()
                     }
@@ -6153,7 +6153,7 @@ const b = {
                     }
                     //fire
                     if ((!input.fire && this.charge > 0.6)) {
-                        tech.harpoonDensity = 0.009 //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
+                        tech.harpoonDensity = 0.008 //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.005*6 when buffed
                         const where = {
                             x: m.pos.x + 30 * Math.cos(m.angle),
                             y: m.pos.y + 30 * Math.sin(m.angle)
@@ -6208,7 +6208,8 @@ const b = {
                         const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), input.down ? 0.03 : 0.06)
                         player.force.x -= recoil.x
                         player.force.y -= recoil.y
-                        tech.harpoonDensity = 0.01 //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
+                        tech.harpoonDensity = 0.008 //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.005*6 when buffed
+
                         const harpoonSize = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
                         if (tech.extraHarpoons) {
                             let targetCount = 0
@@ -6412,7 +6413,7 @@ const b = {
                 const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), input.down ? 0.015 : 0.035)
                 player.force.x -= recoil.x
                 player.force.y -= recoil.y
-                tech.harpoonDensity = 0.006 //0.001 is normal for blocks,  0.006 is normal for harpoon,  0.006*6 when buffed
+                tech.harpoonDensity = 0.005 //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.005*6 when buffed
             },
             // railGun2() {
             //     const where = {
