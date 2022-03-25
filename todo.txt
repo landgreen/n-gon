@@ -1,18 +1,23 @@
 ******************************************************** NEXT PATCH **************************************************
 
-enthalpy: 3->2% heal from damage done
-technical debt: 8->15% less damage for each tech
+plasma ball
+  moves faster
+  grows/drains extra fast when you have excess energy
+
+bug: technical debt no longer produces negative damage at high tech levels
+  maybe this was causing the NaN position bug?
 
 ******************************************************** TODO ********************************************************
 
+
 plasma ball
-  maybe grow faster when you have more energy
-    or excess energy
+  damage is fine
+  disable plasma torch tech with no effect on plasma ball
   change size/alpha when touching mobs
     explode when touching mobs like spirit bomb?
   player angle rotation speed while firing adds to fire speed
   tech upgrade to get electrical arcs that randomly damage nearby mobs
-    use plasma jet tech?
+    could work for all branches of plasma torch
   tech: black hole: gives the plasma ball gravity
     plasma orb increases in size and power as it eats enemies
     maybe does damage to player to grow faster?

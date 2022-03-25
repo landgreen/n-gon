@@ -212,7 +212,7 @@ const tech = {
     },
     damageFromTech() {
         let dmg = 1 //m.fieldDamage
-        if (tech.isTechDebt) dmg *= 4 - 0.15 * tech.totalCount
+        if (tech.isTechDebt) dmg *= Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount)
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 1 + 0.75 * (1 - m.harmReduction())
         if (tech.OccamDamage) dmg *= tech.OccamDamage
         if (tech.isCloakingDamage) dmg *= 1.35
@@ -543,7 +543,7 @@ const tech = {
         {
             name: "cache",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Cache_(computing)' class="link">cache</a>`,
-            description: `${powerUps.orb.ammo()} give <strong>13x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
+            description: `${powerUps.orb.ammo()} give <strong>14x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
             // ammo powerups always max out your gun,
             // but the maximum ammo ti limited
             // description: `${powerUps.orb.ammo()} give <strong>13x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
@@ -556,7 +556,7 @@ const tech = {
             },
             requires: "not exciton",
             effect() {
-                tech.ammoCap = 13;
+                tech.ammoCap = 14;
                 powerUps.ammo.effect()
             },
             remove() {
@@ -3089,7 +3089,8 @@ const tech = {
             // description: `increase <strong class='color-d'>damage</strong> by <strong>300%</strong> minus <strong>10%</strong> for <strong class='color-m'>tech</strong> you have learned(${4 - 0.1 * tech.totalCount})`,
             // description: `increase <strong class='color-d'>damage</strong> by <strong>300%</strong>, but reduce <strong class='color-d'>damage</strong><br>by <strong>10%</strong> for <strong class='color-m'>tech</strong> you have learned`,
             descriptionFunction() {
-                return `increase <strong class='color-d'>damage</strong> by <strong>300%</strong> minus <strong>15%</strong><br>for each <strong class='color-m'>tech</strong> you have learned <em>(${Math.floor(100*(4 - 0.14 * tech.totalCount))-100}%)</em>`
+                // return `increase <strong class='color-d'>damage</strong> by <strong>300%</strong> minus <strong>15%</strong><br>for each <strong class='color-m'>tech</strong> you have learned <em>(${Math.floor(100*(4 - 0.14 * tech.totalCount))-100}%)</em>`
+                return `increase <strong class='color-d'>damage</strong> by <strong>300%</strong> minus <strong>15%</strong><br>for each <strong class='color-m'>tech</strong> you have learned <em>(${Math.floor(100*(Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount) ))-100}%)</em>`
             },
             maxCount: 1,
             count: 0,
@@ -6622,9 +6623,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (tech.plasmaBotCount || m.fieldUpgrades[m.fieldMode].name === "plasma torch") && (build.isExperimentSelection || powerUps.research.count > 1)
+                return (tech.plasmaBotCount || m.fieldUpgrades[m.fieldMode].name === "plasma torch") && (build.isExperimentSelection || powerUps.research.count > 1) && !tech.isPlasmaBall
             },
-            requires: "plasma torch",
+            requires: "plasma torch, not plasma ball",
             effect() {
                 tech.isPlasmaRange += 0.5;
                 for (let i = 0; i < 2; i++) {
@@ -6645,9 +6646,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder
+                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder && tech.isPlasmaRange === 1
             },
-            requires: "plasma torch, not extruder",
+            requires: "plasma torch, not extruder, plasma jet",
             effect() {
                 tech.isPlasmaBall = true;
                 m.fieldUpgrades[m.fieldMode].set()

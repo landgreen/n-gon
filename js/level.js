@@ -25,8 +25,8 @@ const level = {
             // powerUps.research.changeRerolls(100000)
             // for (let i = 0; i < 2; i++) tech.giveTech("undefined")
             // tech.tech[297].frequency = 100
-            m.setField("plasma torch")
-            tech.giveTech("plasma ball")
+            // m.setField("plasma torch")
+            // tech.giveTech("plasma ball")
 
             // m.immuneCycle = Infinity //you can't take damage
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why

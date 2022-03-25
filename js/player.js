@@ -2115,14 +2115,14 @@ const m = {
                         },
                         fire() {
                             this.isAttached = false;
-                            const speed = 4 //scale with mass?
+                            const speed = 6 //scale with mass?
                             // Matter.Body.setVelocity(this, {
                             //     x: speed * Math.cos(m.angle),
                             //     y: speed * Math.sin(m.angle)
                             // });
                             Matter.Body.setVelocity(this, {
                                 x: player.velocity.x * 0.5 + speed * Math.cos(m.angle),
-                                y: player.velocity.y * 0.2 + speed * Math.sin(m.angle)
+                                y: player.velocity.y * 0.1 + speed * Math.sin(m.angle)
                             });
                             m.plasmaBall.setPositionToNose()
                         },
@@ -2134,13 +2134,17 @@ const m = {
                             if (this.isOn) {
                                 //collisions with map
                                 if (Matter.Query.collides(this, map).length > 0) {
-                                    this.scale(Math.max(0.9, 0.98 - 0.05 / m.plasmaBall.circleRadius))
-                                    if (this.speed > 2.5) {
-                                        const scale = 0.96
-                                        Matter.Body.setVelocity(this, {
-                                            x: scale * this.velocity.x,
-                                            y: scale * this.velocity.y
-                                        });
+                                    if (this.isAttached) {
+                                        this.scale(Math.max(0.9, 1 - 0.05 / m.plasmaBall.circleRadius))
+                                    } else {
+                                        this.scale(Math.max(0.9, 0.98 - 0.05 / m.plasmaBall.circleRadius))
+                                        if (this.speed > 2.5) {
+                                            const scale = 0.96
+                                            Matter.Body.setVelocity(this, {
+                                                x: scale * this.velocity.x,
+                                                y: scale * this.velocity.y
+                                            });
+                                        }
                                     }
                                 }
                                 //collisions with mobs
@@ -2157,7 +2161,7 @@ const m = {
                                     }
                                 }
                                 //slowly slow down if too fast
-                                if (this.speed > 6) {
+                                if (this.speed > 8) {
                                     const scale = 0.997
                                     Matter.Body.setVelocity(this, {
                                         x: scale * this.velocity.x,
@@ -2229,11 +2233,15 @@ const m = {
                                 }
                             } else if (m.energy > m.plasmaBall.drain) { //charge up when attached
                                 if (tech.isCapacitor) {
-                                    m.energy -= m.plasmaBall.drain * 4;
-                                    const scale = 1 + 5 * 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+                                    m.energy -= m.plasmaBall.drain * 2;
+                                    const scale = 1 + 3 * 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
                                     Matter.Body.scale(m.plasmaBall, scale, scale); //grow
-
                                 } else {
+                                    m.energy -= m.plasmaBall.drain;
+                                    const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+                                    Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
+                                }
+                                if (m.energy > m.maxEnergy) {
                                     m.energy -= m.plasmaBall.drain;
                                     const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
                                     Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
