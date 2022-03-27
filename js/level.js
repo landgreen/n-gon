@@ -9,7 +9,7 @@ const level = {
     levelsCleared: 0,
     //see level.populateLevels:   (intro, ... , reservoir, reactor, ... , gauntlet, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion"],
-    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel"],
+    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
@@ -20,7 +20,7 @@ const level = {
             // tech.giveTech("grappling hook")
             // tech.giveTech("capacitor bank")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
-            // for (let i = 0; i < 9; i++) tech.giveTech("dynamo-bot")
+            // for (let i = 0; i < 9; i++) tech.giveTech("overcharge")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
             // powerUps.research.changeRerolls(100000)
             // for (let i = 0; i < 2; i++) tech.giveTech("undefined")
@@ -31,7 +31,7 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.reactor();
+            // level.islands();
             // level.testing(); //not in rotation, used for testing
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -113,7 +113,7 @@ const level = {
             for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false) //exit
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false); //start
         }
-        if (m.plasmaBall) m.plasmaBall.isOn = false
+        if (m.plasmaBall) this.reset()
     },
     trainingText(say) {
         simulation.lastLogTime = 0; //clear previous messages
@@ -2544,8 +2544,8 @@ const level = {
         level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
-        spawn.starter(1900, -500, 200) //big boy
-        // for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
+        // spawn.starter(1900, -500, 200) //big boy
+        for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
@@ -8931,6 +8931,350 @@ const level = {
             powerUps.addResearchToLevel() //needs to run after mobs are spawned
             initialSpawn == true;
         }
+    },
+    islands() {
+        const boost1 = level.boost(58500, -18264, 1300);
+        let portal2, portal3;
+        // const removeIndex1 = map.length - 1;
+        const drip1 = level.drip(59300, -18975, -18250, 100); // drip(x, yMin, yMax, period = 100, color = "hsla(160, 100%, 35%, 0.5)") {
+        const drip2 = level.drip(60000, -18953, -18250, 150);
+        const drip3 = level.drip(60905, -18652, -18250, 70);
+        const slimePit1 = level.hazard(58850, -18300, 2275, 100, 0.01); //hazard(x, y, width, height, damage = 0.003) spawn.mapRect(58850, -18300, 2275, 100);
+        const slimePit2 = level.hazard(74400, -18075, 350, 100, 0.01);
+        let isSpawnedBoss = false;
+        level.custom = () => {
+            level.exit.drawAndCheck();
+            boost1.query();
+            level.enter.draw();
+            drip1.draw();
+            drip2.draw();
+            drip3.draw();
+            //      portal[2].query();
+            //      portal[3].query();
+            //      portal[0].draw();
+            //      portal[1].draw();
+            //      portal[2].draw();
+            //      portal[3].draw();
+            portal2[2].query();
+            portal2[3].query();
+            portal2[0].draw();
+            portal2[1].draw();
+            portal2[2].draw();
+            portal2[3].draw();
+            portal3[2].query();
+            portal3[3].query();
+            portal3[0].draw();
+            portal3[1].draw();
+            portal3[2].draw();
+            portal3[3].draw();
+        };
+        level.customTopLayer = () => {
+            slimePit1.query();
+            slimePit2.query();
+            ctx.fillStyle = `rgba(68, 68, 68, ${Math.max(0.3,Math.min((-17650 - m.pos.y) / 100, 0.99))})`;
+            ctx.fillRect(58390, -17655, 1490, 740);
+        };
+        level.setPosToSpawn(57680, -18330);
+        level.exit.x = 76343;
+        level.exit.y = -18020;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 30);
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 30);
+        level.defaultZoom = 2000;
+        simulation.zoomTransition(level.defaultZoom);
+        document.body.style.backgroundColor = "#00000";
+        // spawn.setSpawnList = [
+        //     "hopper",
+        //     "slasher",
+        //     "striker",
+        //     "stabber",
+        //     "springer",
+        //     "pulsar",
+        //     "sneaker",
+        //     "spinner",
+        //     "grower",
+        //     "focuser",
+        //     "spawner",
+        // ];
+        spawn.mapRect(57800, -18550, 50, 100);
+        spawn.mapRect(57500, -18550, 50, 275);
+        spawn.mapRect(66900, -18675, 300, 200);
+        spawn.mapRect(66925, -19050, 125, 225);
+        spawn.mapRect(67825, -16975, 125, 100);
+        spawn.mapRect(74900, -18075, 225, 100);
+        spawn.mapRect(73925, -18225, 150, 275);
+        spawn.mapRect(76200, -18325, 50, 125);
+        spawn.mapRect(76525, -18325, 75, 400);
+        spawn.mapRect(61325, -18350, 50, 25);
+        spawn.mapRect(61450, -18425, 50, 25);
+        spawn.mapRect(61475, -18450, 25, 25);
+        spawn.mapRect(58725, -18350, 125, 50);
+        spawn.mapRect(58675, -18275, 50, 75);
+        spawn.mapRect(58600, -18275, 75, 75);
+        spawn.mapRect(58675, -18325, 50, 50);
+        spawn.mapRect(58250, -16925, 1825, 1050);
+        spawn.mapRect(57500, -18200, 4475, 550);
+        spawn.mapRect(61500, -18475, 475, 275);
+        spawn.mapRect(62175, -18575, 325, 400);
+        spawn.mapRect(62900, -18850, 525, 375);
+        spawn.mapRect(63900, -18925, 450, 400);
+        spawn.mapRect(64725, -19000, 625, 500);
+        spawn.mapRect(65825, -19050, 675, 400);
+        spawn.mapRect(66800, -18950, 400, 400);
+        spawn.mapRect(68775, -18850, 525, 400);
+        spawn.mapRect(67375, -16900, 1800, 1450);
+        spawn.mapRect(67375, -17475, 325, 575);
+        spawn.mapRect(68900, -17500, 250, 500);
+        spawn.mapRect(69425, -17050, 500, 475);
+        spawn.mapRect(70400, -17150, 425, 175);
+        spawn.mapRect(71175, -17325, 450, 325);
+        spawn.mapRect(72000, -17425, 325, 300);
+        spawn.mapRect(72725, -17450, 350, 275);
+        spawn.mapRect(70050, -18800, 550, 350);
+        spawn.mapRect(67750, -19400, 375, 1200);
+        spawn.mapRect(67750, -18200, 1425, 700);
+        spawn.mapRect(66800, -18550, 575, 1650);
+        spawn.mapRect(66800, -16900, 575, 1450);
+        spawn.mapRect(67350, -18175, 250, 750);
+        spawn.mapRect(71050, -18450, 725, 275);
+        spawn.mapRect(72100, -18150, 475, 200);
+        spawn.mapRect(73325, -17975, 3275, 475);
+        spawn.mapRect(73175, -17775, 150, 300);
+        spawn.mapRect(72975, -17675, 225, 250);
+        spawn.mapRect(76200, -18325, 400, 75);
+        spawn.mapRect(76525, -18250, 75, 275);
+        spawn.mapRect(76200, -18250, 50, 50);
+        spawn.mapRect(57500, -17675, 900, 1800);
+        spawn.mapRect(59875, -17675, 1975, 1800);
+        spawn.mapRect(57550, -18275, 225, 75);
+        spawn.mapRect(61375, -18375, 50, 50);
+        spawn.mapRect(61100, -18350, 75, 50);
+        spawn.mapRect(61175, -18325, 50, 25);
+        spawn.mapRect(61850, -16525, 250, 175);
+        spawn.mapRect(57500, -18500, 50, 325);
+        spawn.mapRect(57500, -18550, 350, 50);
+        spawn.mapRect(57800, -18500, 50, 50);
+        spawn.mapRect(61275, -18325, 375, 125);
+        spawn.mapRect(61425, -18400, 200, 75);
+        spawn.mapRect(62125, -18575, 125, 75);
+        spawn.mapRect(62250, -18200, 175, 125);
+        spawn.mapRect(62850, -18725, 100, 75);
+        spawn.mapRect(63075, -18550, 225, 225);
+        spawn.mapRect(62800, -18275, 75, 75);
+        spawn.mapRect(62500, -18475, 75, 50);
+        spawn.mapRect(63825, -18900, 150, 50);
+        spawn.mapRect(63950, -18575, 150, 125);
+        spawn.mapRect(64200, -18550, 100, 250);
+        spawn.mapRect(64925, -18525, 200, 275);
+        spawn.mapRect(64625, -18425, 75, 125);
+        spawn.mapRect(65225, -18675, 150, 175);
+        spawn.mapRect(65350, -18950, 75, 100);
+        spawn.mapRect(65950, -18575, 75, 150);
+        spawn.mapRect(66000, -18725, 225, 175);
+        spawn.mapRect(66275, -18675, 75, 125);
+        spawn.mapRect(66275, -18550, 75, 75);
+        spawn.mapRect(66150, -18550, 100, 50);
+        spawn.mapRect(66225, -18875, 25, 150);
+        spawn.mapRect(66200, -18750, 75, 25);
+        spawn.mapRect(66925, -19100, 125, 150);
+        spawn.mapRect(66000, -19100, 75, 50);
+        spawn.mapRect(65000, -19075, 100, 75);
+        spawn.mapRect(66750, -18625, 100, 100);
+        spawn.mapRect(68050, -18500, 350, 350);
+        spawn.mapRect(68125, -18975, 150, 475);
+        spawn.mapRect(69850, -18675, 150, 200);
+        spawn.mapRect(70000, -18625, 150, 50);
+        spawn.mapRect(68850, -18575, 325, 225);
+        spawn.mapRect(69100, -18400, 75, 100);
+        spawn.mapRect(70150, -18525, 125, 200);
+        spawn.mapRect(70425, -18525, 125, 200);
+        spawn.mapRect(70250, -18350, 175, 225);
+        spawn.mapRect(70325, -18475, 50, 150);
+        spawn.mapRect(70275, -18450, 150, 150);
+        spawn.mapRect(71175, -18250, 525, 250);
+        spawn.mapRect(71050, -18200, 150, 375);
+        spawn.mapRect(70925, -18300, 200, 250);
+        spawn.mapRect(71425, -18525, 175, 150);
+        spawn.mapRect(70225, -18950, 275, 250);
+        spawn.mapRect(70475, -17050, 225, 175);
+        spawn.mapRect(70625, -17250, 100, 150);
+        spawn.mapRect(71300, -17150, 200, 350);
+        spawn.mapRect(71100, -17250, 125, 100);
+        spawn.mapRect(71550, -17400, 150, 150);
+        spawn.mapRect(67675, -17150, 225, 300);
+        spawn.mapRect(68225, -17000, 100, 125);
+        spawn.mapRect(67900, -16975, 375, 100);
+        spawn.mapRect(68275, -16950, 150, 50);
+        spawn.bodyRect(76200, -18200, 50, 200);
+        spawn.mapRect(76200, -18000, 50, 25);
+        spawn.bodyRect(57800, -18450, 50, 175);
+        spawn.mapRect(68725, -17600, 300, 250);
+        spawn.mapRect(68625, -17550, 175, 100);
+        spawn.mapRect(68850, -17400, 150, 125);
+        spawn.mapRect(69325, -16900, 200, 225);
+        spawn.mapRect(69575, -16625, 175, 275);
+        spawn.mapRect(69850, -16875, 250, 200);
+        spawn.mapRect(69875, -16650, 150, 300);
+        spawn.mapRect(69825, -16800, 375, 325);
+        spawn.mapRect(69650, -16775, 325, 475);
+        spawn.mapRect(71975, -17325, 100, 125);
+        spawn.mapRect(72075, -17200, 150, 150);
+        spawn.mapRect(72275, -17350, 150, 150);
+        spawn.mapRect(72325, -17275, 150, 225);
+        spawn.mapRect(72225, -18050, 200, 225);
+        spawn.mapRect(71925, -18150, 250, 175);
+        spawn.mapRect(72075, -18275, 125, 175);
+        spawn.mapRect(72500, -18025, 125, 175);
+        spawn.mapRect(72400, -17975, 150, 175);
+        spawn.mapRect(73925, -18225, 350, 275);
+        spawn.mapRect(74750, -18125, 275, 175);
+        spawn.mapRect(74250, -18100, 150, 75);
+        spawn.mapRect(74275, -18050, 200, 75);
+        spawn.mapRect(73750, -18100, 275, 125);
+        spawn.mapRect(73075, -17475, 3525, 300);
+        spawn.mapRect(73275, -17600, 3325, 225);
+        spawn.mapRect(57775, -18250, 150, 50);
+        spawn.mapRect(57775, -18275, 75, 25);
+        spawn.mapRect(57925, -18225, 50, 25);
+        spawn.debris(68300, -17000, 3700, 16);
+        spawn.mapRect(62000, -16525, 100, 200);
+        spawn.mapRect(59125, -19125, 325, 200);
+        spawn.mapRect(59925, -19175, 350, 225);
+        spawn.mapRect(60800, -18850, 275, 200);
+        spawn.mapRect(75025, -18075, 200, 100);
+        spawn.mapRect(75225, -18025, 100, 50);
+        spawn.bodyRect(74300, -18150, 50, 25);
+        spawn.bodyRect(73850, -18150, 75, 75);
+        spawn.bodyRect(74700, -18000, 75, 50);
+        spawn.bodyRect(74250, -18325, 25, 25);
+        spawn.bodyRect(74275, -18325, 25, 25);
+        spawn.bodyRect(74275, -18325, 25, 25);
+        spawn.bodyRect(74300, -18325, 100, 25);
+        //    portal = level.portal(
+        //      {
+        //        x: 58625,
+        //        y: -16925,
+        //      },
+        //      1.5 * Math.PI,
+        //      {
+        //        //right
+        //        x: 58625,
+        //        y: -17650,
+        //      },
+        //      2.5 * Math.PI
+        //    ); //right
+        portal2 = level.portal({
+                x: 61920,
+                y: -16525,
+            },
+            1.5 * Math.PI, {
+                //right
+                x: 58400,
+                y: -17325,
+            },
+            2 * Math.PI
+        );
+        portal3 = level.portal({
+                x: 59865,
+                y: -17300,
+            },
+            3 * Math.PI, {
+                //right
+                x: 60820,
+                y: -31130,
+            },
+            2.5 * Math.PI
+        );
+
+        spawn.mapRect(60275, -32250, 975, 400);
+        spawn.mapRect(60375, -31925, 275, 225);
+        spawn.mapRect(61025, -31950, 175, 300);
+        spawn.mapRect(60825, -31725, 100, 350);
+        spawn.mapRect(60675, -31875, 200, 225);
+        spawn.mapRect(60225, -31950, 100, 725);
+        spawn.mapRect(60250, -31525, 250, 375);
+        spawn.mapRect(60675, -31475, 425, 350);
+        spawn.mapRect(60625, -32500, 225, 300);
+        spawn.mapRect(61025, -32325, 125, 175);
+        spawn.mapRect(60375, -32325, 175, 150);
+        spawn.mapRect(60250, -19075, 100, 100);
+        spawn.randomMob(59850, -18825, Infinity);
+        spawn.randomMob(62325, -18800, Infinity);
+        spawn.randomMob(61725, -18800, Infinity);
+        spawn.randomMob(63050, -19025, Infinity);
+        spawn.randomMob(64100, -19200, Infinity);
+        spawn.randomMob(64225, -19100, Infinity);
+        spawn.randomMob(64875, -19300, Infinity);
+        spawn.randomMob(65125, -19325, Infinity);
+        spawn.randomMob(65850, -19275, Infinity);
+        spawn.randomMob(66200, -19300, Infinity);
+        spawn.randomMob(65975, -19425, Infinity);
+        spawn.randomMob(67925, -19600, Infinity);
+        spawn.randomMob(66975, -19275, Infinity);
+        spawn.randomMob(67550, -18750, Infinity);
+        spawn.randomMob(69625, -17275, Infinity);
+        spawn.randomMob(70550, -17350, Infinity);
+        spawn.randomMob(71375, -17475, Infinity);
+        spawn.randomMob(72200, -17600, Infinity);
+        spawn.randomMob(73000, -18025, Infinity);
+        spawn.randomMob(73850, -18350, Infinity);
+        spawn.randomMob(75725, -18300, Infinity);
+        spawn.randomMob(75875, -18275, Infinity);
+        spawn.randomMob(75700, -18200, Infinity);
+        spawn.randomMob(75550, -18275, Infinity);
+        spawn.randomMob(75825, -18150, Infinity);
+        spawn.randomMob(75575, -18150, Infinity);
+        spawn.randomGroup(75575, -18150, 0);
+        // powerUps.spawn(59352, -17115, "tech");
+        level.chain(67250, -19325, 0, true, 14, 20);
+        spawn.mapRect(58725, -18300, 125, 100);
+        spawn.mapRect(61100, -18300, 175, 100);
+        spawn.mapRect(67175, -19375, 100, 100);
+        spawn.mapRect(59125, -19125, 325, 200);
+        spawn.mapRect(59925, -19175, 350, 225);
+        spawn.mapRect(60800, -18850, 275, 200);
+        spawn.mapRect(60850, -18725, 50, 200);
+        spawn.mapRect(60950, -18675, 50, 200);
+        spawn.mapRect(59975, -19025, 50, 250);
+        spawn.mapRect(60125, -19025, 50, 400);
+        spawn.mapRect(60075, -19025, 50, 450);
+        spawn.mapRect(59425, -19075, 100, 100);
+        spawn.mapRect(59175, -19000, 100, 225);
+        spawn.mapRect(59325, -19000, 75, 450);
+        spawn.mapRect(59050, -19000, 100, 100);
+        spawn.mapRect(61050, -18775, 100, 75);
+        spawn.mapRect(60725, -18850, 125, 125);
+        spawn.bodyRect(61850, -16525, 250, 175);
+        if (simulation.difficulty > 1) {
+            spawn.randomGroup(75575, -18150, 0);
+            spawn.randomLevelBoss(68450, -17300);
+        }
+        if (!isSpawnedBoss) {
+            isSpawnedBoss = true;
+            if (Math.random() < 0.33) {
+                for (
+                    let i = 0, len = Math.min(simulation.difficulty / 20, 6); i < len;
+                    ++i
+                )
+                    spawn.bounceBoss(59025, -17325, 50, true);
+            } else if (Math.random() < 0.5) {
+                for (
+                    let i = 0, len = Math.min(simulation.difficulty / 9, 8); i < len;
+                    ++i
+                )
+                    spawn.sprayBoss(59025, -17325, 50, true);
+            } else {
+                for (
+                    let i = 0, len = Math.min(simulation.difficulty / 6, 10); i < len;
+                    ++i
+                )
+                    spawn.mineBoss(59025, -17325, 50, true);
+            }
+            // for (let i = 0, len = 3 + simulation.difficulty / 20; i < len; ++i) spawn.mantisBoss(1487 + 300 * i, -1525, 35, false)
+        }
+        simulation.fallHeight = -15000;
+        powerUps.addResearchToLevel();
+        powerUps.spawn(3000, -230, "heal");
+        // level.difficultyIncrease(60)
     },
     // ********************************************************************************************************
     // ********************************************************************************************************

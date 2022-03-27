@@ -1,27 +1,25 @@
 ******************************************************** NEXT PATCH **************************************************
 
 plasma ball
-  moves faster
-  grows/drains extra fast when you have excess energy
-
-bug: technical debt no longer produces negative damage at high tech levels
-  maybe this was causing the NaN position bug?
+  once released explodes on mobs or map
+  slows mobs
+  grows at 2x rate if you have energy above max
+  player is slowed when holding plasma ball
+  every 20 cycles damage a nearby mob
+  next patch plasma ball tech
 
 ******************************************************** TODO ********************************************************
 
-
 plasma ball
-  damage is fine
-  disable plasma torch tech with no effect on plasma ball
-  change size/alpha when touching mobs
-    explode when touching mobs like spirit bomb?
-  player angle rotation speed while firing adds to fire speed
-  tech upgrade to get electrical arcs that randomly damage nearby mobs
-    could work for all branches of plasma torch
-  tech: black hole: gives the plasma ball gravity
+  delay on returning to player is annoying
+  scale float effect with ball size
+  tech upgrades
+    more electric arcs
+    greatly improve floating effects while holding
+    black hole: gives the plasma ball gravity
+    suck or stun on explosion?  
     plasma orb increases in size and power as it eats enemies
-    maybe does damage to player to grow faster?
-  tech that makes it explode when it expires
+      while attached?
 
 bug: often game puts player position at NaN
   try:

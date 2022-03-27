@@ -2090,25 +2090,21 @@ const m = {
                     Matter.Composite.remove(engine.world, m.plasmaBall);
                 }
                 if (tech.isPlasmaBall) {
-                    // m.plasmaBall = {
-                    //     position: { x: m.pos.x + 10 * Math.cos(m.angle), y: m.pos.y + 10 * Math.sin(m.angle) },
-                    //     velocity: { x: 0, y: 0 },
-                    //     radius: 1,     
-                    // }
-
                     m.plasmaBall = Bodies.circle(m.pos.x + 10 * Math.cos(m.angle), m.pos.y + 10 * Math.sin(m.angle), 1, {
-                        collisionFilter: {
-                            group: 0,
-                            category: 0,
-                            mask: 0 //cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
-                        },
+                        // collisionFilter: {
+                        //     group: 0,
+                        //     category: 0,
+                        //     mask: 0 //cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
+                        // },
+                        isSensor: true,
                         frictionAir: 0,
-                        alpha: 0.6,
+                        alpha: 0.7,
+                        isPopping: false,
                         isAttached: false,
                         isOn: false,
                         drain: 0.0015,
                         radiusLimit: 10,
-                        damage: 0.4,
+                        damage: 0.6,
                         setPositionToNose() {
                             const nose = { x: m.pos.x + 10 * Math.cos(m.angle), y: m.pos.y + 10 * Math.sin(m.angle) }
                             Matter.Body.setPosition(this, Vector.add(nose, Vector.mult(Vector.normalise(Vector.sub(nose, m.pos)), this.circleRadius)));
@@ -2128,38 +2124,124 @@ const m = {
                         },
                         scale(scale) {
                             Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
-                            if (this.circleRadius < this.radiusLimit) this.isOn = false
+                            if (this.circleRadius < this.radiusLimit) this.reset()
+                        },
+                        reset() {
+                            const scale = 1 / m.plasmaBall.circleRadius
+                            Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+                            this.alpha = 0.7
+                            this.isOn = false
+                            this.isPopping = false
                         },
                         do() {
                             if (this.isOn) {
                                 //collisions with map
                                 if (Matter.Query.collides(this, map).length > 0) {
                                     if (this.isAttached) {
-                                        this.scale(Math.max(0.9, 1 - 0.05 / m.plasmaBall.circleRadius))
+                                        this.scale(Math.max(0.9, 0.998 - 0.1 / m.plasmaBall.circleRadius))
                                     } else {
-                                        this.scale(Math.max(0.9, 0.98 - 0.05 / m.plasmaBall.circleRadius))
-                                        if (this.speed > 2.5) {
-                                            const scale = 0.96
-                                            Matter.Body.setVelocity(this, {
-                                                x: scale * this.velocity.x,
-                                                y: scale * this.velocity.y
-                                            });
-                                        }
+                                        this.isPopping = true
                                     }
+                                }
+                                if (this.isPopping) {
+                                    this.alpha -= 0.03
+                                    if (this.alpha < 0.1) {
+                                        this.reset()
+                                    } else {
+                                        const scale = 1.04 + 4 / Math.max(1, m.plasmaBall.circleRadius)
+                                        Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+                                    }
+                                    // if (this.speed > 2.5) {
+                                    //     const slow = 0.9
+                                    //     Matter.Body.setVelocity(this, {
+                                    //         x: slow * this.velocity.x,
+                                    //         y: slow * this.velocity.y
+                                    //     });
+                                    // }
                                 }
                                 //collisions with mobs
-                                const whom = Matter.Query.collides(this, mob)
+                                // const whom = Matter.Query.collides(this, mob)
+                                // const dmg = this.damage * m.dmgScale
+                                // for (let i = 0, len = whom.length; i < len; i++) {
+                                //     const mobHit = (who) => {
+                                //         if (who.alive) {
+                                //             if (!this.isAttached && !who.isMobBullet) this.isPopping = true
+                                //             who.damage(dmg);
+                                //             // if (who.shield) this.scale(Math.max(0.9, 0.99 - 0.5 / m.plasmaBall.circleRadius))
+                                //             if (who.speed > 5) {
+                                //                 Matter.Body.setVelocity(who, { //friction
+                                //                     x: who.velocity.x * 0.6,
+                                //                     y: who.velocity.y * 0.6
+                                //                 });
+                                //             } else {
+                                //                 Matter.Body.setVelocity(who, { //friction
+                                //                     x: who.velocity.x * 0.93,
+                                //                     y: who.velocity.y * 0.93
+                                //                 });
+                                //             }
+                                //         }
+                                //     }
+                                //     mobHit(whom[i].bodyA)
+                                //     mobHit(whom[i].bodyB)
+                                // }
+
+                                //damage nearby mobs
                                 const dmg = this.damage * m.dmgScale
-                                for (let i = 0, len = whom.length; i < len; i++) {
-                                    if (whom[i].bodyA.alive) {
-                                        whom[i].bodyA.damage(dmg);
-                                        if (whom[i].bodyA.shield) this.scale(Math.max(0.9, 0.99 - 0.5 / m.plasmaBall.circleRadius))
+                                const arcList = []
+                                for (let i = 0, len = mob.length; i < len; i++) {
+                                    const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
+                                    if (sub < this.circleRadius + mob[i].radius) {
+
+                                        if (mob[i].alive) {
+                                            if (!this.isAttached && !mob[i].isMobBullet) this.isPopping = true
+                                            mob[i].damage(dmg);
+                                            if (mob[i].speed > 5) {
+                                                Matter.Body.setVelocity(mob[i], { //friction
+                                                    x: mob[i].velocity.x * 0.6,
+                                                    y: mob[i].velocity.y * 0.6
+                                                });
+                                            } else {
+                                                Matter.Body.setVelocity(mob[i], { //friction
+                                                    x: mob[i].velocity.x * 0.93,
+                                                    y: mob[i].velocity.y * 0.93
+                                                });
+                                            }
+                                        }
+                                    } else if (sub < 150 + 1.3 * this.circleRadius + mob[i].radius && !(m.cycle % 20)) { //populate electrical arc list
+                                        arcList.push(mob[i])
+                                        // mob[i].damage(dmg * 0.1);
                                     }
-                                    if (whom[i].bodyB.alive) {
-                                        whom[i].bodyB.damage(dmg);
-                                        if (whom[i].bodyB.shield) this.scale(Math.max(0.9, 0.99 - 0.5 / m.plasmaBall.circleRadius))
-                                    }
+
                                 }
+                                //
+                                if (arcList.length) {
+                                    const who = arcList[Math.floor(Math.random() * arcList.length)]
+                                    who.damage(dmg * 5);
+
+                                    //draw arcs
+                                    // const unit = Vector.rotate({ x: 1, y: 0 }, Math.random() * 6.28)
+                                    const sub = Vector.sub(who.position, this.position)
+                                    const unit = Vector.normalise(sub)
+                                    let len = 12
+                                    const step = Vector.magnitude(sub) / (len + 2)
+                                    let x = this.position.x
+                                    let y = this.position.y
+                                    ctx.beginPath();
+                                    ctx.moveTo(x, y);
+                                    for (let i = 0; i < len; i++) {
+                                        x += step * (unit.x + 1 * (Math.random() - 0.5))
+                                        y += step * (unit.y + 1 * (Math.random() - 0.5))
+                                        ctx.lineTo(x, y);
+                                    }
+                                    ctx.lineTo(who.position.x, who.position.y);
+                                    ctx.strokeStyle = "#88f";
+                                    ctx.lineWidth = 4 + Math.random();
+                                    ctx.stroke();
+                                }
+
+
+
+
                                 //slowly slow down if too fast
                                 if (this.speed > 8) {
                                     const scale = 0.997
@@ -2172,11 +2254,11 @@ const m = {
                                 //graphics
                                 const radius = this.circleRadius * (0.99 + 0.02 * Math.random()) + 3 * Math.random()
                                 const gradient = ctx.createRadialGradient(this.position.x, this.position.y, 0, this.position.x, this.position.y, radius);
-                                this.alpha = 0.5 + 0.1 * Math.random()
-                                gradient.addColorStop(0, `rgba(255,255,255,${this.alpha})`);
-                                gradient.addColorStop(0.18 + 0.1 * Math.random(), `rgba(255,150,255,${this.alpha})`);
-                                gradient.addColorStop(1, `rgba(255,0,255,${this.alpha})`);
-                                // gradient.addColorStop(1, `rgba(255,150,255,${this.alpha})`);
+                                const alpha = this.alpha + 0.15 * Math.random()
+                                gradient.addColorStop(0, `rgba(255,255,255,${alpha})`);
+                                gradient.addColorStop(0.35 + 0.1 * Math.random(), `rgba(255,150,255,${alpha})`);
+                                gradient.addColorStop(1, `rgba(255,0,255,${alpha})`);
+                                // gradient.addColorStop(1, `rgba(255,150,255,${alpha})`);
                                 ctx.fillStyle = gradient
                                 ctx.beginPath();
                                 ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
@@ -2211,7 +2293,11 @@ const m = {
                             }
                         },
                     });
+
                     Composite.add(engine.world, m.plasmaBall);
+
+                    // m.plasmaBall.startingVertices = m.plasmaBall.vertices.slice();
+                    // console.log(m.plasmaBall.startingVertices, m.plasmaBall.vertices)
 
                     m.hold = function() {
                         if (m.isHolding) {
@@ -2224,17 +2310,24 @@ const m = {
 
                             //field is active
                             if (!m.plasmaBall.isAttached) { //return ball to player
-                                const scale = 0.7
-                                Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
-                                if (m.plasmaBall.circleRadius < m.plasmaBall.radiusLimit) {
+                                if (m.plasmaBall.isOn) {
+                                    m.plasmaBall.isPopping = true
+                                } else {
                                     m.plasmaBall.isAttached = true
                                     m.plasmaBall.isOn = true
                                     m.plasmaBall.setPositionToNose()
                                 }
+                                // const scale = 0.7
+                                // Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
+                                // if (m.plasmaBall.circleRadius < m.plasmaBall.radiusLimit) {
+                                // m.plasmaBall.isAttached = true
+                                // m.plasmaBall.isOn = true
+                                // m.plasmaBall.setPositionToNose()
+                                // }
                             } else if (m.energy > m.plasmaBall.drain) { //charge up when attached
                                 if (tech.isCapacitor) {
                                     m.energy -= m.plasmaBall.drain * 2;
-                                    const scale = 1 + 3 * 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+                                    const scale = 1 + 48 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
                                     Matter.Body.scale(m.plasmaBall, scale, scale); //grow
                                 } else {
                                     m.energy -= m.plasmaBall.drain;
@@ -2242,12 +2335,40 @@ const m = {
                                     Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
                                 }
                                 if (m.energy > m.maxEnergy) {
-                                    m.energy -= m.plasmaBall.drain;
+                                    m.energy -= m.plasmaBall.drain * 2;
                                     const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
                                     Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
                                 }
                                 m.plasmaBall.setPositionToNose()
-                                //add friction for player when holding ball,  maybe more friction in vertical
+
+
+                                //add friction for player when holding ball, more friction in vertical
+                                // const floatScale = Math.sqrt(m.plasmaBall.circleRadius)
+                                // const friction = 0.0002 * floatScale
+                                // const slowY = (player.velocity.y > 0) ? Math.max(0.8, 1 - friction * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - friction * Math.abs(player.velocity.y)) //down : up
+                                // Matter.Body.setVelocity(player, {
+                                //     x: Math.max(0.95, 1 - friction * Math.abs(player.velocity.x)) * player.velocity.x,
+                                //     y: slowY * player.velocity.y
+                                // });
+
+                                // if (player.velocity.y > 7) player.force.y -= 0.95 * player.mass * simulation.g //less gravity when falling fast
+                                // player.force.y -= Math.min(0.95, 0.05 * floatScale) * player.mass * simulation.g; //undo some gravity on up or down
+                                // console.log(friction)
+
+                                //float
+                                const slowY = (player.velocity.y > 0) ? Math.max(0.8, 1 - 0.002 * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - 0.001 * Math.abs(player.velocity.y)) //down : up
+                                Matter.Body.setVelocity(player, {
+                                    x: Math.max(0.95, 1 - 0.003 * Math.abs(player.velocity.x)) * player.velocity.x,
+                                    y: slowY * player.velocity.y
+                                });
+                                if (player.velocity.y > 5) {
+                                    player.force.y -= 0.9 * player.mass * simulation.g //less gravity when falling fast
+                                } else {
+                                    player.force.y -= 0.5 * player.mass * simulation.g;
+                                }
+
+
+
 
                             } else {
                                 m.fieldCDcycle = m.cycle + 90;

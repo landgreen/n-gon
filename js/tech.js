@@ -6585,7 +6585,7 @@ const tech = {
             isBot: true,
             isBotTech: true,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && (build.isExperimentSelection || powerUps.research.count > 0)
+                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && (build.isExperimentSelection || powerUps.research.count > 0) && !tech.isPlasmaBall && !tech.isExtruder
             },
             requires: "plasma torch",
             effect() {
@@ -6639,7 +6639,7 @@ const tech = {
         },
         {
             name: "plasma ball",
-            description: "charge up a ball of <strong class='color-plasma'>plasma</strong> and fire it",
+            description: "<strong>grow</strong> an expanding <strong>ball</strong> of <strong class='color-plasma'>plasma</strong><br>increases <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -6660,7 +6660,7 @@ const tech = {
         },
         {
             name: "extruder",
-            description: "<strong class='color-plasma'>plasma</strong> <strong>torch</strong> <strong class='color-plasma'>extrudes</strong> a thin hot wire<br>increases <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+            description: "<strong>extrude</strong> a thin hot wire of <strong class='color-plasma'>plasma</strong><br>increases <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7923,7 +7923,7 @@ const tech = {
                     oscillator1.connect(gainNode1);
                     gainNode1.connect(audioCtx.destination);
                     oscillator1.type = "sine"; // 'sine' 'square', 'sawtooth', 'triangle' and 'custom'
-                    oscillator1.frequency.value = 853; // value in hertz
+                    oscillator1.frequency.value = 850; // value in hertz
                     oscillator1.start();
 
                     const oscillator2 = audioCtx.createOscillator();
@@ -7932,7 +7932,7 @@ const tech = {
                     oscillator2.connect(gainNode2);
                     gainNode2.connect(audioCtx.destination);
                     oscillator2.type = "sine"; // 'sine' 'square', 'sawtooth', 'triangle' and 'custom'
-                    oscillator2.frequency.value = 960; // value in hertz
+                    oscillator2.frequency.value = 957; // value in hertz
                     oscillator2.start();
                     return audioCtx
                 }
