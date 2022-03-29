@@ -2086,7 +2086,7 @@ const m = {
             set() {
                 b.isExtruderOn = false
                 if (m.plasmaBall) {
-                    m.plasmaBall.isOn = false
+                    m.plasmaBall.reset()
                     Matter.Composite.remove(engine.world, m.plasmaBall);
                 }
                 if (tech.isPlasmaBall) {
@@ -2112,15 +2112,12 @@ const m = {
                         fire() {
                             this.isAttached = false;
                             const speed = 6 //scale with mass?
-                            // Matter.Body.setVelocity(this, {
-                            //     x: speed * Math.cos(m.angle),
-                            //     y: speed * Math.sin(m.angle)
-                            // });
                             Matter.Body.setVelocity(this, {
-                                x: player.velocity.x * 0.5 + speed * Math.cos(m.angle),
-                                y: player.velocity.y * 0.1 + speed * Math.sin(m.angle)
+                                x: player.velocity.x * 0.4 + speed * Math.cos(m.angle),
+                                y: speed * Math.sin(m.angle)
                             });
                             m.plasmaBall.setPositionToNose()
+                            if (this.circleRadius < 10) this.isPopping = true
                         },
                         scale(scale) {
                             Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
@@ -2188,11 +2185,11 @@ const m = {
                                 //damage nearby mobs
                                 const dmg = this.damage * m.dmgScale
                                 const arcList = []
+                                const dischargeRange = 150 + 1600 * tech.plasmaDischarge + 1.3 * this.circleRadius
                                 for (let i = 0, len = mob.length; i < len; i++) {
-                                    const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
-                                    if (sub < this.circleRadius + mob[i].radius) {
-
-                                        if (mob[i].alive) {
+                                    if (!mob[i].isBadTarget && mob[i].alive) {
+                                        const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
+                                        if (sub < this.circleRadius + mob[i].radius) {
                                             if (!this.isAttached && !mob[i].isMobBullet) this.isPopping = true
                                             mob[i].damage(dmg);
                                             if (mob[i].speed > 5) {
@@ -2206,40 +2203,44 @@ const m = {
                                                     y: mob[i].velocity.y * 0.93
                                                 });
                                             }
+                                        } else if (sub < dischargeRange + mob[i].radius && Matter.Query.ray(map, mob[i].position, this.position).length === 0) {
+                                            arcList.push(mob[i]) //populate electrical arc list
                                         }
-                                    } else if (sub < 150 + 1.3 * this.circleRadius + mob[i].radius && !(m.cycle % 20)) { //populate electrical arc list
-                                        arcList.push(mob[i])
-                                        // mob[i].damage(dmg * 0.1);
                                     }
-
                                 }
-                                //
-                                if (arcList.length) {
-                                    const who = arcList[Math.floor(Math.random() * arcList.length)]
-                                    who.damage(dmg * 5);
-
-                                    //draw arcs
-                                    // const unit = Vector.rotate({ x: 1, y: 0 }, Math.random() * 6.28)
-                                    const sub = Vector.sub(who.position, this.position)
-                                    const unit = Vector.normalise(sub)
-                                    let len = 12
-                                    const step = Vector.magnitude(sub) / (len + 2)
-                                    let x = this.position.x
-                                    let y = this.position.y
-                                    ctx.beginPath();
-                                    ctx.moveTo(x, y);
-                                    for (let i = 0; i < len; i++) {
-                                        x += step * (unit.x + 1 * (Math.random() - 0.5))
-                                        y += step * (unit.y + 1 * (Math.random() - 0.5))
-                                        ctx.lineTo(x, y);
+                                for (let i = 0; i < arcList.length; i++) {
+                                    if (tech.plasmaDischarge > Math.random()) {
+                                        const who = arcList[Math.floor(Math.random() * arcList.length)]
+                                        who.damage(dmg * 4);
+                                        //draw arcs
+                                        const sub = Vector.sub(who.position, this.position)
+                                        const unit = Vector.normalise(sub)
+                                        let len = 12
+                                        const step = Vector.magnitude(sub) / (len + 2)
+                                        let x = this.position.x
+                                        let y = this.position.y
+                                        ctx.beginPath();
+                                        ctx.moveTo(x, y);
+                                        for (let i = 0; i < len; i++) {
+                                            x += step * (unit.x + (Math.random() - 0.5))
+                                            y += step * (unit.y + (Math.random() - 0.5))
+                                            ctx.lineTo(x, y);
+                                        }
+                                        ctx.lineTo(who.position.x, who.position.y);
+                                        ctx.strokeStyle = "#88f";
+                                        ctx.lineWidth = 4 + 3 * Math.random();
+                                        ctx.stroke();
+                                        if (who.damageReduction) {
+                                            simulation.drawList.push({
+                                                x: who.position.x,
+                                                y: who.position.y,
+                                                radius: 15,
+                                                color: "rgba(150,150,255,0.4)",
+                                                time: 15
+                                            });
+                                        }
                                     }
-                                    ctx.lineTo(who.position.x, who.position.y);
-                                    ctx.strokeStyle = "#88f";
-                                    ctx.lineWidth = 4 + Math.random();
-                                    ctx.stroke();
                                 }
-
-
 
 
                                 //slowly slow down if too fast
@@ -2254,7 +2255,7 @@ const m = {
                                 //graphics
                                 const radius = this.circleRadius * (0.99 + 0.02 * Math.random()) + 3 * Math.random()
                                 const gradient = ctx.createRadialGradient(this.position.x, this.position.y, 0, this.position.x, this.position.y, radius);
-                                const alpha = this.alpha + 0.15 * Math.random()
+                                const alpha = this.alpha + 0.1 * Math.random()
                                 gradient.addColorStop(0, `rgba(255,255,255,${alpha})`);
                                 gradient.addColorStop(0.35 + 0.1 * Math.random(), `rgba(255,150,255,${alpha})`);
                                 gradient.addColorStop(1, `rgba(255,0,255,${alpha})`);
@@ -2315,7 +2316,11 @@ const m = {
                                 } else {
                                     m.plasmaBall.isAttached = true
                                     m.plasmaBall.isOn = true
+                                    m.plasmaBall.isPopping = false
+                                    m.plasmaBall.alpha = 0.7
                                     m.plasmaBall.setPositionToNose()
+                                    // m.plasmaBall.reset()
+
                                 }
                                 // const scale = 0.7
                                 // Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast

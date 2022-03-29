@@ -6638,27 +6638,6 @@ const tech = {
             }
         },
         {
-            name: "plasma ball",
-            description: "<strong>grow</strong> an expanding <strong>ball</strong> of <strong class='color-plasma'>plasma</strong><br>increases <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
-            isFieldTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder && tech.isPlasmaRange === 1
-            },
-            requires: "plasma torch, not extruder, plasma jet",
-            effect() {
-                tech.isPlasmaBall = true;
-                m.fieldUpgrades[m.fieldMode].set()
-            },
-            remove() {
-                tech.isPlasmaBall = false;
-                if (this.count && m.fieldUpgrades[m.fieldMode].name === "plasma torch") m.fieldUpgrades[m.fieldMode].set()
-            }
-        },
-        {
             name: "extruder",
             description: "<strong>extrude</strong> a thin hot wire of <strong class='color-plasma'>plasma</strong><br>increases <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
             isFieldTech: true,
@@ -6692,37 +6671,52 @@ const tech = {
             },
             requires: "extruder",
             effect() {
-                tech.extruderRange += 50
+                tech.extruderRange += 60
             },
             remove() {
                 tech.extruderRange = 15
             }
         },
-        // {
-        //     name: "CPT gun",
-        //     link: `<a target="_blank" href='https://en.wikipedia.org/wiki/CPT_symmetry' class="link">CPT gun</a>`,
-        //     description: `adds the <strong>CPT</strong> <strong class='color-g'>gun</strong> to your inventory<br>it <strong>rewinds</strong> your <strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong>`,
-        //     isGunTech: true,
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 2,
-        //     frequencyDefault: 2,
-        //     allowed() {
-        //         return (b.totalBots() > 3 || m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isEnergyHealth && !tech.isRewindAvoidDeath //build.isExperimentSelection ||
-        //     },
-        //     requires: "bots > 3, plasma torch, assembler, pilot wave, not mass-energy equivalence, CPT",
-        //     effect() {
-        //         tech.isRewindGun = true
-        //         b.guns.push(b.gunRewind)
-        //         b.giveGuns("CPT gun");
-        //     },
-        //     remove() {
-        //         if (tech.isRewindGun) {
-        //             b.removeGun("CPT gun", true)
-        //             tech.isRewindGun = false
-        //         }
-        //     }
-        // },
+        {
+            name: "plasma ball",
+            description: "<strong>grow</strong> an expanding <strong>ball</strong> of <strong class='color-plasma'>plasma</strong><br>increases <strong class='color-d'>damage</strong> and <strong class='color-f'>energy</strong> drain",
+            isFieldTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder && tech.isPlasmaRange === 1
+            },
+            requires: "plasma torch, not extruder, plasma jet",
+            effect() {
+                tech.isPlasmaBall = true;
+                m.fieldUpgrades[m.fieldMode].set()
+            },
+            remove() {
+                tech.isPlasmaBall = false;
+                if (this.count && m.fieldUpgrades[m.fieldMode].name === "plasma torch") m.fieldUpgrades[m.fieldMode].set()
+            }
+        },
+        {
+            name: "corona discharge",
+            description: "increase the <strong>range</strong> and <strong>frequency</strong><br>of <strong class='color-plasma'>plasma</strong> ball's <strong>electric arc</strong> ",
+            isFieldTech: true,
+            maxCount: 9,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder && tech.isPlasmaRange === 1
+            },
+            requires: "plasma torch, not extruder, plasma jet",
+            effect() {
+                tech.plasmaDischarge += 0.03
+            },
+            remove() {
+                tech.plasmaDischarge = 0.01 //default chance per cycle of a discharge
+            }
+        },
         {
             name: "retrocausality",
             description: "<strong>time dilation</strong> uses <strong class='color-f'>energy</strong> to <strong>rewind</strong> your<br><strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong> up to <strong>10 s</strong>",
@@ -9561,5 +9555,6 @@ const tech = {
     isImmuneGrapple: null,
     isDronesTravel: null,
     isTechDebt: null,
-    isPlasmaBall: null
+    isPlasmaBall: null,
+    plasmaDischarge: null
 }

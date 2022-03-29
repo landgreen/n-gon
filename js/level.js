@@ -20,16 +20,17 @@ const level = {
             // tech.giveTech("grappling hook")
             // tech.giveTech("capacitor bank")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
-            // for (let i = 0; i < 9; i++) tech.giveTech("overcharge")
+            // for (let i = 0; i < 2; i++) tech.giveTech("corona discharge")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
             // powerUps.research.changeRerolls(100000)
-            // for (let i = 0; i < 2; i++) tech.giveTech("undefined")
+            // for (let i = 0; i < 5; i++) tech.giveTech("corona discharge")
             // tech.tech[297].frequency = 100
             // m.setField("plasma torch")
             // tech.giveTech("plasma ball")
+            // tech.giveTech("extruder")
 
             // m.immuneCycle = Infinity //you can't take damage
-            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(10) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.islands();
             // level.testing(); //not in rotation, used for testing
@@ -113,7 +114,7 @@ const level = {
             for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false) //exit
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false); //start
         }
-        if (m.plasmaBall) this.reset()
+        if (m.plasmaBall) m.plasmaBall.reset()
     },
     trainingText(say) {
         simulation.lastLogTime = 0; //clear previous messages
@@ -2544,8 +2545,8 @@ const level = {
         level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
-        // spawn.starter(1900, -500, 200) //big boy
-        for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
+        spawn.starter(1900, -500, 200) //big boy
+        // for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
@@ -8974,6 +8975,7 @@ const level = {
             ctx.fillStyle = `rgba(68, 68, 68, ${Math.max(0.3,Math.min((-17650 - m.pos.y) / 100, 0.99))})`;
             ctx.fillRect(58390, -17655, 1490, 740);
         };
+        document.body.style.backgroundColor = "hsl(138, 3%, 74%)";
         level.setPosToSpawn(57680, -18330);
         level.exit.x = 76343;
         level.exit.y = -18020;
@@ -8981,7 +8983,6 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 30);
         level.defaultZoom = 2000;
         simulation.zoomTransition(level.defaultZoom);
-        document.body.style.backgroundColor = "#00000";
         // spawn.setSpawnList = [
         //     "hopper",
         //     "slasher",
@@ -9224,7 +9225,6 @@ const level = {
         spawn.randomMob(75825, -18150, Infinity);
         spawn.randomMob(75575, -18150, Infinity);
         spawn.randomGroup(75575, -18150, 0);
-        // powerUps.spawn(59352, -17115, "tech");
         level.chain(67250, -19325, 0, true, 14, 20);
         spawn.mapRect(58725, -18300, 125, 100);
         spawn.mapRect(61100, -18300, 175, 100);
@@ -9255,20 +9255,21 @@ const level = {
                     let i = 0, len = Math.min(simulation.difficulty / 20, 6); i < len;
                     ++i
                 )
-                    spawn.bounceBoss(59025, -17325, 50, true);
+                    spawn.bounceBoss(59025, -17325, 50, false);
             } else if (Math.random() < 0.5) {
                 for (
                     let i = 0, len = Math.min(simulation.difficulty / 9, 8); i < len;
                     ++i
                 )
-                    spawn.sprayBoss(59025, -17325, 50, true);
+                    spawn.sprayBoss(59025, -17325, 50, false);
             } else {
                 for (
                     let i = 0, len = Math.min(simulation.difficulty / 6, 10); i < len;
                     ++i
                 )
-                    spawn.mineBoss(59025, -17325, 50, true);
+                    spawn.mineBoss(59025, -17325, 50, false);
             }
+            powerUps.spawn(59352, -17115, "tech");
             // for (let i = 0, len = 3 + simulation.difficulty / 20; i < len; ++i) spawn.mantisBoss(1487 + 300 * i, -1525, 35, false)
         }
         simulation.fallHeight = -15000;

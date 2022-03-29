@@ -1,16 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
+new community map! - islands by Richard0820
+  enable community maps in settings
+
 plasma ball
-  once released explodes on mobs or map
-  slows mobs
-  grows at 2x rate if you have energy above max
-  player is slowed when holding plasma ball
-  every 20 cycles damage a nearby mob
-  next patch plasma ball tech
+  tech: corona discharge - increase frequency and range of electric discharges
+  several bug fixes
+
+bug fix for some people that can't store settings between reloads
 
 ******************************************************** TODO ********************************************************
 
 plasma ball
+  gently scale damage with circleRadius
+  balance corona discharge
   delay on returning to player is annoying
   scale float effect with ball size
   tech upgrades

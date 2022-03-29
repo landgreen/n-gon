@@ -1236,9 +1236,13 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
 
     simulation.isCommunityMaps = localSettings.isCommunityMaps
     document.getElementById("community-maps").checked = localSettings.isCommunityMaps
+
+    if (localSettings.difficultyMode === undefined) localSettings.difficultyMode = "2"
     simulation.difficultyMode = localSettings.difficultyMode
     lore.setTechGoal()
     document.getElementById("difficulty-select").value = localSettings.difficultyMode
+
+    if (localSettings.fpsCapDefault === undefined) localSettings.fpsCapDefault = 'max'
     if (localSettings.fpsCapDefault === 'max') {
         simulation.fpsCapDefault = 999999999;
     } else {
