@@ -6315,11 +6315,11 @@ const b = {
                 this.charge += 0.00001
             },
             grappleFire() {
-                const where = {
-                    x: m.pos.x + 30 * Math.cos(m.angle),
-                    y: m.pos.y + 30 * Math.sin(m.angle)
-                }
                 const harpoonSize = (tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1) //* (input.down ? 0.7 : 1)
+                const where = {
+                    x: m.pos.x + harpoonSize * 40 * Math.cos(m.angle),
+                    y: m.pos.y + harpoonSize * 40 * Math.sin(m.angle)
+                }
                 if (tech.extraHarpoons && !input.down) { //multiple harpoons
                     const SPREAD = 0.06
                     const len = tech.extraHarpoons + 1
@@ -6353,7 +6353,7 @@ const b = {
                 }
                 //look for closest mob in player's LoS
                 const harpoonSize = (tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1) //* (input.down ? 0.7 : 1)
-                const totalCycles = 7 * (tech.isFilament ? 1 + 0.01 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
+                const totalCycles = 6 * (tech.isFilament ? 1 + 0.01 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
 
                 if (tech.extraHarpoons && !input.down) { //multiple harpoons
                     const SPREAD = 0.1
@@ -6404,7 +6404,7 @@ const b = {
                         }
                     }
                     if (input.down) {
-                        b.harpoon(where, closest.target, m.angle, harpoonSize, false, 70)
+                        b.harpoon(where, null, m.angle, harpoonSize, true, 1.5 * totalCycles)
                     } else {
                         b.harpoon(where, closest.target, m.angle, harpoonSize, true, totalCycles)
                     }

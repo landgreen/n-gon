@@ -18,7 +18,8 @@ const level = {
             // m.setField("metamaterial cloaking")
             // b.giveGuns("harpoon")
             // tech.giveTech("grappling hook")
-            // tech.giveTech("capacitor bank")
+            // tech.giveTech("railgun")
+            // tech.giveTech("shape-memory alloy")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 2; i++) tech.giveTech("corona discharge")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
@@ -107,6 +108,8 @@ const level = {
         // if (tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
         if ((tech.isRelay || tech.isFlipFlop) && !tech.isFlipFlopOn) {
             tech.isFlipFlopOn = true
+            m.setMaxHealth()
+            m.setMaxEnergy()
             m.eyeFillColor = m.fieldMeterColor
             simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
         }

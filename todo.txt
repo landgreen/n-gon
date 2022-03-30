@@ -1,13 +1,12 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community map! - islands by Richard0820
-  enable community maps in settings
+tech lithium-ion - give 200 max energy when relay is ON
+tech shape-memory alloy - give 200 max health when flip-flop is ON
+  NOR gate now prevents damage when in the OFF state (previously ON) to work well with shape-memory alloy
 
-plasma ball
-  tech: corona discharge - increase frequency and range of electric discharges
-  several bug fixes
+harpoon crouch mode now retracts at 30% greater distance than normal with no targeting
 
-bug fix for some people that can't store settings between reloads
+more bug fixes of course
 
 ******************************************************** TODO ********************************************************
 
@@ -17,12 +16,18 @@ plasma ball
   delay on returning to player is annoying
   scale float effect with ball size
   tech upgrades
-    more electric arcs
     greatly improve floating effects while holding
     black hole: gives the plasma ball gravity
-    suck or stun on explosion?  
+    stun on expansion
     plasma orb increases in size and power as it eats enemies
       while attached?
+
+tech: frozen mobs die at 10% life
+
+tech: harpoons stick into enemies
+  detonate after a short delay
+  attaches mob to wall if possible
+  firing while harpoon is stuck into an enemy rips it out of them, inflicting damage and stun and pulling them towards you
 
 bug: often game puts player position at NaN
   try:
@@ -49,7 +54,6 @@ bug: harpoon attack gave a mob really high levels of health
 
 bug: maybe I can put in an event listener to reset inputs to false when you tab out to prevent key sticking
 
-
 enemies stuck with foam receive upward force over time
   only form aerogel tech?
 
@@ -60,11 +64,6 @@ Requires: foam + another gun or plasma torch or molecular assembler
   Foam does 0 damage
   Enemies stuck with foam take 25% more damage
   should foam bots gets this also or is that too strong
-
-tech: harpoons stick into enemies
-  detonate after a short delay
-  attaches mob to wall if possible
-  firing while harpoon is stuck into an enemy rips it out of them, inflicting damage and stun and pulling them towards you
 
 const ctx = canvas.getContext('2d', {‘willReadFrequently': true});
 
@@ -100,10 +99,8 @@ maybe?  timing QTE for charging effects,  if you fire right before the charge ge
 +damage for each different bot type you have
   disables bot upgrades?
 
-tech doing damage refunds up to 50% of damage take in last 10 seconds
+tech: doing damage to mobs refunds up to 50% of damage taken in last 10 seconds
   use history[] to manage this?
-
-tech: frozen mobs die at 10% life
 
 make a seed/hash system that controls only the tech/guns/fields shown
   URL sharing could include a seed
@@ -122,14 +119,11 @@ tech: spontaneous collapse - very low chance of something to occur
   JUNK tech
   https://bindingofisaacrebirth.fandom.com/wiki/Damocles
 
-cloaking field doesn't show energy over max
+bug? cloaking field doesn't show energy over max
 
 run more profiles of n-gon to fix performance issues
 
 reactor
-  mineBoss - bounces around and drops mines
-    mines explode with a large radius that can trigger other mines
-      mines have a short delay before exploding so they don't all go up in the same cycle
   life-like cellular automata boss
     https://scratch.mit.edu/projects/77724260/
     night/day?
@@ -175,14 +169,13 @@ add anticipation to more mob attacks
   stabber
   striker
 
-boss that fires giant bullets, that bounce around and chases you
-
 can mob bullets damage other mob?
   maybe if they switch collisions and classType === "body" or obj.classType === "bullet"
 
 path finding system
 
 figure out how to get friction effects on map/body to apply to player
+also horizontal moving platform?
 
 growBoss and cellBoss are too similar
 

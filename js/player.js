@@ -491,7 +491,7 @@ const m = {
     },
     baseHealth: 1,
     setMaxHealth() {
-        m.maxHealth = m.baseHealth + tech.extraMaxHealth + tech.isFallingDamage //+ tech.bonusHealth
+        m.maxHealth = m.baseHealth + tech.extraMaxHealth + tech.isFallingDamage + 2 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
@@ -962,7 +962,7 @@ const m = {
         }
     },
     setMaxEnergy() {
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 2 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",

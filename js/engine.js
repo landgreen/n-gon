@@ -117,13 +117,14 @@ function collisionChecks(event) {
                                 tech.isFlipFlopOn = false
                                 if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>OFF</strong>`
                                 m.eyeFillColor = 'transparent'
-                                if (!tech.isFlipFlopHarm) m.damage(dmg);
+                                m.damage(dmg);
                             } else {
                                 tech.isFlipFlopOn = true //immune to damage this hit, lose immunity for next hit
                                 if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>ON</strong>`
                                 m.eyeFillColor = m.fieldMeterColor //'#0cf'
-                                m.damage(dmg);
+                                if (!tech.isFlipFlopHarm) m.damage(dmg);
                             }
+                            m.setMaxHealth();
                         } else {
                             m.damage(dmg); //normal damage
                         }

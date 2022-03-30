@@ -1656,11 +1656,11 @@ const tech = {
         },
         {
             name: "NOR gate",
-            description: "if <strong>flip-flop</strong> is in the <strong class='color-flop'>ON</strong> state<br>take <strong>0</strong> <strong class='color-harm'>harm</strong> from collisions with mobs",
+            description: "if <strong>flip-flop</strong> is in the <strong class='color-flop'>OFF</strong> state<br>take <strong>0</strong> <strong class='color-harm'>harm</strong> from collisions with mobs",
             maxCount: 1,
             count: 0,
-            frequency: 4,
-            frequencyDefault: 4,
+            frequency: 3,
+            frequencyDefault: 3,
             allowed() {
                 return tech.isFlipFlop
             },
@@ -1670,6 +1670,26 @@ const tech = {
             },
             remove() {
                 tech.isFlipFlopHarm = false
+            }
+        },
+        {
+            name: "shape-memory alloy",
+            description: "if <strong>flip-flop</strong> is in the <strong class='color-flop'>ON</strong> state<br>increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>200</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 3,
+            frequencyDefault: 3,
+            allowed() {
+                return tech.isFlipFlop && !tech.isEnergyHealth
+            },
+            requires: "flip-flop, not mass-energy equivalence",
+            effect() {
+                tech.isFlipFlopHealth = true;
+                m.setMaxHealth();
+            },
+            remove() {
+                tech.isFlipFlopHealth = false;
+                m.setMaxHealth();
             }
         },
         {
@@ -1712,6 +1732,42 @@ const tech = {
             }
         },
         {
+            name: "NAND gate",
+            description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>55.5%</strong> more <strong class='color-d'>damage</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 3,
+            frequencyDefault: 3,
+            allowed() {
+                return tech.isFlipFlop || tech.isRelay
+            },
+            requires: "ON/OFF tech",
+            effect() {
+                tech.isFlipFlopDamage = true;
+            },
+            remove() {
+                tech.isFlipFlopDamage = false;
+            }
+        },
+        {
+            name: "transistor",
+            description: "if <strong class='color-flop'>ON</strong> regen <strong>20</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>1</strong> <strong class='color-f'>energy</strong> per second",
+            maxCount: 1,
+            count: 0,
+            frequency: 3,
+            frequencyDefault: 3,
+            allowed() {
+                return tech.isFlipFlop || tech.isRelay
+            },
+            requires: "ON/OFF tech",
+            effect() {
+                tech.isFlipFlopEnergy = true;
+            },
+            remove() {
+                tech.isFlipFlopEnergy = false;
+            }
+        },
+        {
             name: "relay switch",
             description: `toggle <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after picking up a <strong>power up</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
             nameInfo: "<span id = 'tech-switch'></span>",
@@ -1750,39 +1806,23 @@ const tech = {
             }
         },
         {
-            name: "NAND gate",
-            description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>55.5%</strong> more <strong class='color-d'>damage</strong>",
+            name: "lithium-ion",
+            description: "if <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>200</strong>",
             maxCount: 1,
             count: 0,
-            frequency: 4,
-            frequencyDefault: 4,
+            frequency: 3,
+            frequencyDefault: 3,
             allowed() {
-                return tech.isFlipFlop || tech.isRelay
+                return tech.isRelay
             },
-            requires: "ON/OFF tech",
-            effect() {
-                tech.isFlipFlopDamage = true;
+            requires: "relay switch",
+            effect: () => {
+                tech.isRelayEnergy = true
+                m.setMaxEnergy()
             },
             remove() {
-                tech.isFlipFlopDamage = false;
-            }
-        },
-        {
-            name: "transistor",
-            description: "if <strong class='color-flop'>ON</strong> regen <strong>20</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>1</strong> <strong class='color-f'>energy</strong> per second",
-            maxCount: 1,
-            count: 0,
-            frequency: 4,
-            frequencyDefault: 4,
-            allowed() {
-                return tech.isFlipFlop || tech.isRelay
-            },
-            requires: "ON/OFF tech",
-            effect() {
-                tech.isFlipFlopEnergy = true;
-            },
-            remove() {
-                tech.isFlipFlopEnergy = false;
+                tech.isRelayEnergy = false
+                m.setMaxEnergy()
             }
         },
         // {
@@ -1803,13 +1843,14 @@ const tech = {
         //         tech.isFlipFlopLevelReset = false;
         //     }
         // },
+
         {
             name: "thermocouple",
             description: "if  <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>condense <strong>4-13</strong> <strong class='color-s'>ice IX</strong> crystals every second",
             maxCount: 9,
             count: 0,
-            frequency: 4,
-            frequencyDefault: 4,
+            frequency: 3,
+            frequencyDefault: 3,
             allowed() {
                 return tech.isRelay
             },
@@ -6707,9 +6748,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder && tech.isPlasmaRange === 1
+                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && tech.isPlasmaBall
             },
-            requires: "plasma torch, not extruder, plasma jet",
+            requires: "plasma ball",
             effect() {
                 tech.plasmaDischarge += 0.03
             },
@@ -9556,5 +9597,7 @@ const tech = {
     isDronesTravel: null,
     isTechDebt: null,
     isPlasmaBall: null,
-    plasmaDischarge: null
+    plasmaDischarge: null,
+    isFlipFlopHealth: null,
+    isRelayEnergy: null,
 }
