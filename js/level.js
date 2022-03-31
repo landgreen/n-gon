@@ -18,7 +18,7 @@ const level = {
             // m.setField("metamaterial cloaking")
             // b.giveGuns("harpoon")
             // tech.giveTech("grappling hook")
-            // tech.giveTech("railgun")
+            tech.giveTech("discount")
             // tech.giveTech("shape-memory alloy")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 2; i++) tech.giveTech("corona discharge")
@@ -48,6 +48,8 @@ const level = {
 
             // lore.unlockTesting();
             // tech.giveTech("tinker"); //show junk tech in experiment mode
+            // tech.giveRandomJUNK()
+            // tech.giveRandomJUNK()
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.pickList = ["focuser", "focuser"]
@@ -108,8 +110,11 @@ const level = {
         // if (tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
         if ((tech.isRelay || tech.isFlipFlop) && !tech.isFlipFlopOn) {
             tech.isFlipFlopOn = true
-            m.setMaxHealth()
-            m.setMaxEnergy()
+            if (tech.isFlipFlopHealth) m.setMaxHealth()
+            if (tech.isRelayEnergy) {
+                m.setMaxEnergy()
+                m.energy += 2
+            }
             m.eyeFillColor = m.fieldMeterColor
             simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
         }

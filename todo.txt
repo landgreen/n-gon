@@ -1,14 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech lithium-ion - give 200 max energy when relay is ON
-tech shape-memory alloy - give 200 max health when flip-flop is ON
-  NOR gate now prevents damage when in the OFF state (previously ON) to work well with shape-memory alloy
+JUNK tech: meteor shower - take a shower, but meteors instead of water
+JUNK tech: discount - get 3 random JUNK tech for the price of 1!
 
-harpoon crouch mode now retracts at 30% greater distance than normal with no targeting
+bug fixes
 
-more bug fixes of course
+I'll be off line until Saturday, so please don't submit any bug reports until I return
 
 ******************************************************** TODO ********************************************************
+
+
+tech mines:  mines fire _____ instead of nails
+  needles
+  super balls?
+  foam?
 
 plasma ball
   gently scale damage with circleRadius

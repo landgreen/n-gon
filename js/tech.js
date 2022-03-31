@@ -122,6 +122,15 @@ const tech = {
             }
         }
     },
+    giveRandomJUNK() {
+        const list = []
+        for (let i = 0; i < tech.tech.length; i++) {
+            if (tech.tech[i].isJunk) list.push(tech.tech[i].name)
+        }
+        let name = list[Math.floor(Math.random() * list.length)]
+        tech.giveTech(name)
+        simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${name}</span>")<em>`);
+    },
     giveTech(index = 'random') {
         if (index === 'random') {
             let options = [];
@@ -1659,8 +1668,8 @@ const tech = {
             description: "if <strong>flip-flop</strong> is in the <strong class='color-flop'>OFF</strong> state<br>take <strong>0</strong> <strong class='color-harm'>harm</strong> from collisions with mobs",
             maxCount: 1,
             count: 0,
-            frequency: 3,
-            frequencyDefault: 3,
+            frequency: 4,
+            frequencyDefault: 4,
             allowed() {
                 return tech.isFlipFlop
             },
@@ -1677,8 +1686,8 @@ const tech = {
             description: "if <strong>flip-flop</strong> is in the <strong class='color-flop'>ON</strong> state<br>increase your <strong>maximum</strong> <strong class='color-h'>health</strong> by <strong>200</strong>",
             maxCount: 1,
             count: 0,
-            frequency: 3,
-            frequencyDefault: 3,
+            frequency: 4,
+            frequencyDefault: 4,
             allowed() {
                 return tech.isFlipFlop && !tech.isEnergyHealth
             },
@@ -1736,8 +1745,8 @@ const tech = {
             description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>55.5%</strong> more <strong class='color-d'>damage</strong>",
             maxCount: 1,
             count: 0,
-            frequency: 3,
-            frequencyDefault: 3,
+            frequency: 4,
+            frequencyDefault: 4,
             allowed() {
                 return tech.isFlipFlop || tech.isRelay
             },
@@ -1754,8 +1763,8 @@ const tech = {
             description: "if <strong class='color-flop'>ON</strong> regen <strong>20</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>1</strong> <strong class='color-f'>energy</strong> per second",
             maxCount: 1,
             count: 0,
-            frequency: 3,
-            frequencyDefault: 3,
+            frequency: 4,
+            frequencyDefault: 4,
             allowed() {
                 return tech.isFlipFlop || tech.isRelay
             },
@@ -1810,8 +1819,8 @@ const tech = {
             description: "if <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>200</strong>",
             maxCount: 1,
             count: 0,
-            frequency: 3,
-            frequencyDefault: 3,
+            frequency: 4,
+            frequencyDefault: 4,
             allowed() {
                 return tech.isRelay
             },
@@ -1849,8 +1858,8 @@ const tech = {
             description: "if  <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>condense <strong>4-13</strong> <strong class='color-s'>ice IX</strong> crystals every second",
             maxCount: 9,
             count: 0,
-            frequency: 3,
-            frequencyDefault: 3,
+            frequency: 4,
+            frequencyDefault: 4,
             allowed() {
                 return tech.isRelay
             },
@@ -7503,6 +7512,66 @@ const tech = {
             remove() {}
         },
         {
+            name: "discount",
+            description: "get 3 random <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> for the price of 1!",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            isNonRefundable: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                tech.giveRandomJUNK()
+                tech.giveRandomJUNK()
+                tech.giveRandomJUNK()
+            },
+            remove() {}
+        },
+        {
+            name: "meteor shower",
+            description: "take a shower, but meteors instead of water",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            isNonRefundable: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                setInterval(() => {
+
+                    fireBlock = function(xPos, yPos) {
+                        const index = body.length
+                        spawn.bodyRect(xPos, yPos, 20 + 50 * Math.random(), 20 + 50 * Math.random());
+                        const bodyBullet = body[body.length - 1]
+                        Matter.Body.setVelocity(body[index], { x: 5 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) });
+                        body[index].collisionFilter.category = cat.body;
+                        body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+                        body[index].classType = "body";
+                        Composite.add(engine.world, body[index]); //add to world
+                        setTimeout(() => { //remove block
+                            for (let i = 0; i < body.length; i++) {
+                                if (body[i] === bodyBullet) {
+                                    Matter.Composite.remove(engine.world, body[i]);
+                                    body.splice(i, 1);
+                                }
+                            }
+                        }, 3000 + Math.floor(6000 * Math.random()));
+                    }
+                    fireBlock(player.position.x + 600 * (Math.random() - 0.5), player.position.y - 500 - 500 * Math.random());
+                    // for (let i = 0, len =  Math.random(); i < len; i++) {
+                    // }
+
+                }, 1000);
+            },
+            remove() {}
+        },
+        {
             name: "Higgs phase transition",
             description: "instantly spawn 3 <strong class='color-m'>tech</strong>, but add a chance to<br>remove everything with a 5 minute <strong>half-life</strong>",
             maxCount: 1,
@@ -8041,7 +8110,7 @@ const tech = {
         },
         {
             name: "hidden variable",
-            description: `spawn ${powerUps.orb.heal(15)}<br>but hide your <strong class='color-h'>health</strong> bar`,
+            description: `spawn ${powerUps.orb.heal(20)}<br>but hide your <strong class='color-h'>health</strong> bar`,
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -8054,7 +8123,7 @@ const tech = {
             effect() {
                 document.getElementById("health").style.display = "none"
                 document.getElementById("health-bg").style.display = "none"
-                for (let i = 0; i < 15; i++) powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
+                for (let i = 0; i < 20; i++) powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
             },
             remove() {}
         },
@@ -8076,6 +8145,7 @@ const tech = {
                 setTimeout(() => {
                     simulation.drawCircle = savedfunction
                     canvas.width = canvas.width //clears the canvas // works on chrome at least
+                    powerUps.spawn(m.pos.x, m.pos.y, "tech");
                 }, 10000);
 
                 // for (;;) {} //freezes the tab

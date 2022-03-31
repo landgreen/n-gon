@@ -124,7 +124,7 @@ function collisionChecks(event) {
                                 m.eyeFillColor = m.fieldMeterColor //'#0cf'
                                 if (!tech.isFlipFlopHarm) m.damage(dmg);
                             }
-                            m.setMaxHealth();
+                            if (tech.isFlipFlopHealth) m.setMaxHealth();
                         } else {
                             m.damage(dmg); //normal damage
                         }
