@@ -18,7 +18,7 @@ const level = {
             // m.setField("metamaterial cloaking")
             // b.giveGuns("harpoon")
             // tech.giveTech("grappling hook")
-            tech.giveTech("discount")
+            //tech.giveTech("discount")
             // tech.giveTech("shape-memory alloy")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 2; i++) tech.giveTech("corona discharge")
