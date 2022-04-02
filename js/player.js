@@ -84,6 +84,7 @@ const m = {
     yOff: 70,
     yOffGoal: 70,
     onGround: false, //checks if on ground or in air
+    lastOnGroundCycle: 0, //use to calculate coyote time
     standingOn: undefined,
     numTouching: 0,
     crouch: false,
@@ -231,25 +232,28 @@ const m = {
         }
     },
     buttonCD_jump: 0, //cool down for player buttons
+    jump() {
+        m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
+        //apply a fraction of the jump force to the body the player is jumping off of
+        Matter.Body.applyForce(m.standingOn, m.pos, {
+            x: 0,
+            y: m.jumpForce * 0.12 * Math.min(m.standingOn.mass, 5)
+        });
+
+        player.force.y = -m.jumpForce; //player jump force
+        Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
+            x: player.velocity.x,
+            y: Math.max(-10, Math.min(m.standingOn.velocity.y, 10)) //cap velocity contribution from blocks you are standing on to 10 in the vertical
+        });
+    },
     groundControl() {
         //check for crouch or jump
         if (m.crouch) {
             if (!(input.down) && m.checkHeadClear() && m.hardLandCD < m.cycle) m.undoCrouch();
         } else if (input.down || m.hardLandCD > m.cycle) {
             m.doCrouch(); //on ground && not crouched and pressing s or down
-        } else if ((input.up) && m.buttonCD_jump + 20 < m.cycle && m.yOffWhen.stand > 23) {
-            m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
-            //apply a fraction of the jump force to the body the player is jumping off of
-            Matter.Body.applyForce(m.standingOn, m.pos, {
-                x: 0,
-                y: m.jumpForce * 0.12 * Math.min(m.standingOn.mass, 5)
-            });
-
-            player.force.y = -m.jumpForce; //player jump force
-            Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
-                x: player.velocity.x,
-                y: Math.max(-10, Math.min(m.standingOn.velocity.y, 10)) //cap velocity contribution from blocks you are standing on to 10 in the vertical
-            });
+        } else if (input.up && m.buttonCD_jump + 20 < m.cycle && m.yOffWhen.stand > 23) {
+            m.jump()
         }
 
         if (input.left) {
@@ -282,6 +286,9 @@ const m = {
         }
     },
     airControl() {
+        //check for coyote time jump
+        if (input.up && m.buttonCD_jump + 20 < m.cycle && m.yOffWhen.stand > 23 && m.lastOnGroundCycle + 5 > m.cycle) m.jump()
+
         //check for short jumps   //moving up   //recently pressed jump  //but not pressing jump key now
         if (m.buttonCD_jump + 60 > m.cycle && !(input.up) && m.Vy < 0) {
             Matter.Body.setVelocity(player, {
@@ -3776,6 +3783,7 @@ const m = {
             m.spin = 0
             // m.groundControl = () => {}         //disable entering ground
             m.onGround = false
+            m.lastOnGroundCycle = 0
             // playerOnGroundCheck = () => {}
             m.airControl = () => { //tank controls
                 player.force.y -= player.mass * simulation.g; //undo gravity

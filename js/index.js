@@ -1204,9 +1204,9 @@ function localstorageCheck() {
 if (localstorageCheck()) {
     localSettings = JSON.parse(localStorage.getItem("localSettings"))
     if (localSettings) {
+        console.log('localStorage is enabled')
         localSettings.isAllowed = true
         localSettings.isEmpty = false
-        console.log('localStorage is enabled')
     } else {
         console.log('localStorage is enabled, local settings empty')
         localSettings = {
@@ -1215,8 +1215,8 @@ if (localstorageCheck()) {
         }
     }
 } else {
-    localSettings = { isAllowed: false }
     console.log("localStorage is disabled")
+    localSettings = { isAllowed: false }
 }
 
 
@@ -1243,6 +1243,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     document.getElementById("difficulty-select").value = localSettings.difficultyMode
 
     if (localSettings.fpsCapDefault === undefined) localSettings.fpsCapDefault = 'max'
+    if (localSettings.personalSeeds === undefined) localSettings.personalSeeds = [];
     if (localSettings.fpsCapDefault === 'max') {
         simulation.fpsCapDefault = 999999999;
     } else {
@@ -1252,6 +1253,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
 } else {
     console.log('setting default localSettings')
     localSettings = {
+        personalSeeds: [],
         isJunkExperiment: false,
         isCommunityMaps: false,
         difficultyMode: '2',

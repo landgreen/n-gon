@@ -1,14 +1,25 @@
 ******************************************************** NEXT PATCH **************************************************
 
-JUNK tech: meteor shower - take a shower, but meteors instead of water
-JUNK tech: discount - get 3 random JUNK tech for the price of 1!
+added 5 cycles of "coyote time"
+  this means you can still jump for 5/60 = 0.1 seconds after leaving the ground
+  let me know if you like the feel
+  this might cause some unexpected bugs, or reduce the difficulty of some platforming levels
 
-bug fixes
+JUNK tech: NFT - buy your current game seed
+  no one is allow to use your seeds
+  if they use them they are gonna get in trouble
 
-I'll be off line until Saturday, so please don't submit any bug reports until I return
+removed the pavilion/ruins map to see if it's causing bugs
 
 ******************************************************** TODO ********************************************************
 
+tech smoke grenades - mobs inside a cloud can't see player
+  draw on the region so it's hard for player to see as well
+  you'd have to make something similar to MACHO that exists after an explosion goes off
+  maybe just keep it simple:
+    stun mobs for a long time, and draw a 99& alpha grey circle for the same time
+      don't worry about mobs seeing you inside the circle, the circle is kinda small so it doesn't matter
+  
 
 tech mines:  mines fire _____ instead of nails
   needles
@@ -40,6 +51,8 @@ bug: often game puts player position at NaN
   clues:
     maybe with vanish or other special blocks and grapple hook
     very high level for tech, duplication
+      happened once with only 13 tech
+        ?&seed=7269&gun0=drones&gun1=matter%20wave&gun2=shotgun&tech0=arsenal&tech1=dead%20reckoning&tech2=regression&tech3=unified%20field%20theory&tech4=rivet%20gun&tech5=phonon&tech6=affine%20connection&field=wormhole&difficulty=2
     maybe not about JUNK though
     maybe on tons of bullets
     maybe grappling hook, Bulk modulus
@@ -87,10 +100,6 @@ a mine tech that makes mines you can stand on
 setting to remove UI, except health bar
   except active gun? to see ammo
   checkbox in pause and in settings
-
-add coyote jump
-  log game m.cycle when last on ground
-  for jump check if game cycle is < last on ground cycle -2
 
 pause time like invariant for other things...
   throwing blocks

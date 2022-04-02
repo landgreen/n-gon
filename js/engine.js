@@ -72,6 +72,7 @@ function playerOffGroundCheck(event) {
         if (pairs[i].bodyA === jumpSensor || pairs[i].bodyB === jumpSensor) {
             if (m.onGround && m.numTouching === 0) {
                 m.onGround = false;
+                m.lastOnGroundCycle = m.cycle;
                 m.hardLandCD = 0 // disable hard landing
                 if (m.checkHeadClear()) {
                     if (m.crouch) {
@@ -189,7 +190,7 @@ function collisionChecks(event) {
                                     time: simulation.drawTime
                                 });
                             }
-                            if (tech.isLessDamageReduction && !mob[k].shield) mob[k].damageReduction *= mob[k].isBoss ? 1.005 : 1.05
+                            if (tech.isLessDamageReduction && !mob[k].shield) mob[k].damageReduction *= mob[k].isBoss ? 1.0025 : 1.05
                             return;
                         }
                         //mob + body collisions

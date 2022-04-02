@@ -8,7 +8,8 @@ const level = {
     onLevel: -1,
     levelsCleared: 0,
     //see level.populateLevels:   (intro, ... , reservoir, reactor, ... , gauntlet, final)    added later
-    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion"],
+    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"], //"pavilion"
+    // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
@@ -18,7 +19,7 @@ const level = {
             // m.setField("metamaterial cloaking")
             // b.giveGuns("harpoon")
             // tech.giveTech("grappling hook")
-            tech.giveTech("discount")
+            // tech.giveTech("discount")
             // tech.giveTech("shape-memory alloy")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 2; i++) tech.giveTech("corona discharge")
@@ -870,7 +871,7 @@ const level = {
                     if (this.isTouched) {
                         if (!m.isBodiesAsleep) {
                             this.fadeCount--
-                            Matter.Body.setVertices(this, this.shrinkVertices(Math.max(this.fadeCount / this.fadeTime, 0.03))) //take on harpoon shape
+                            Matter.Body.setVertices(this, this.shrinkVertices(Math.max(this.fadeCount / this.fadeTime, 0.03)))
                         }
                         if (this.fadeCount < 1) {
                             Matter.Body.setPosition(this, hide)
@@ -878,8 +879,8 @@ const level = {
                             this.isTouched = false
                             this.collisionFilter.mask = 0 //cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
                             this.returnCount = this.returnTime
-                            Matter.Body.setVertices(this, this.shrinkVertices(1)) //take on harpoon shape
-                            Matter.Body.setVertices(this, vertices) //take on harpoon shape
+                            Matter.Body.setVertices(this, this.shrinkVertices(1))
+                            Matter.Body.setVertices(this, vertices)
                         }
                     } else if (Matter.Query.collides(this, [player]).length) { // || (Matter.Query.collides(this, body).length)) {
                         this.isTouched = true

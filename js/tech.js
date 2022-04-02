@@ -757,7 +757,7 @@ const tech = {
         },
         {
             name: "regression",
-            description: "bullet <strong>collisions</strong> increase <strong>vulnerability</strong> to<br><strong class='color-d'>damage</strong> by <strong>5%</strong> for mobs <em>(0.5% for bosses)</em>",
+            description: "bullet <strong>collisions</strong> increase <strong>vulnerability</strong> to<br><strong class='color-d'>damage</strong> by <strong>5%</strong> for mobs <em>(0.25% for bosses)</em>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -7492,26 +7492,6 @@ const tech = {
         //     remove() {}
         // },
         {
-            name: "tinker",
-            description: "<strong>permanently</strong> unlock <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> in experiment mode<br><em>this effect is stored for future visits</em>",
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            frequencyDefault: 0,
-            isJunk: true,
-            isNonRefundable: true,
-            allowed() {
-                return !localSettings.isJunkExperiment
-            },
-            requires: "",
-            effect() {
-                console.log('hi')
-                localSettings.isJunkExperiment = true
-                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-            },
-            remove() {}
-        },
-        {
             name: "discount",
             description: "get 3 random <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> for the price of 1!",
             maxCount: 1,
@@ -9290,6 +9270,43 @@ const tech = {
                         bc.postMessage("activate");
                     }
                 }
+            },
+            remove() {}
+        },
+        {
+            name: "tinker",
+            description: "<strong>permanently</strong> unlock <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> in experiment mode<br><em>this effect is stored for future visits</em>",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            frequencyDefault: 0,
+            isJunk: true,
+            isNonRefundable: true,
+            allowed() {
+                return !localSettings.isJunkExperiment
+            },
+            requires: "",
+            effect() {
+                localSettings.isJunkExperiment = true
+                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            },
+            remove() {}
+        },
+        {
+            name: "NFT",
+            descriptionFunction() { return `buy your current game seed: <strong style = 'font-size:130%;'>${Math.initialSeed}</strong><br><em>no one is allow to use your seeds<br>if they use them they are gonna get in trouble</em><br>your seeds: <span style = 'font-size:70%;'>${localSettings.personalSeeds.join()}</span>` },
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            isNonRefundable: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                localSettings.personalSeeds.push(Math.initialSeed)
+                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             },
             remove() {}
         },

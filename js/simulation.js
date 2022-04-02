@@ -713,6 +713,7 @@ const simulation = {
         document.getElementById("health-bg").style.display = "inline"
         m.alive = true;
         m.onGround = false
+        m.lastOnGroundCycle = 0
         m.setMaxHealth()
         m.health = 0;
         m.addHealth(0.25)
