@@ -335,7 +335,7 @@ const spawn = {
                     let count = 0
 
                     function loop() {
-                        if (!simulation.paused) {
+                        if (!simulation.paused && !simulation.onTitlePage) {
                             count++
                             if (count < 660) {
                                 if (count === 1) simulation.makeTextLog(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
@@ -359,13 +359,15 @@ const spawn = {
                                 document.getElementById("fade-out").style.opacity = 1; //slowly fades out
                                 // build.shareURL(false)
                                 setTimeout(function() {
-                                    simulation.paused = true;
-                                    // simulation.clearMap();
-                                    // Matter.Composite.clear(composite, keepStatic, [deep = false])
-                                    // Composite.clear(engine.composite);
-                                    engine.world.bodies.forEach((body) => { Matter.Composite.remove(engine.world, body) })
-                                    Engine.clear(engine);
-                                    simulation.splashReturn();
+                                    if (!simulation.onTitlePage) {
+                                        simulation.paused = true;
+                                        // simulation.clearMap();
+                                        // Matter.Composite.clear(composite, keepStatic, [deep = false])
+                                        // Composite.clear(engine.composite);
+                                        engine.world.bodies.forEach((body) => { Matter.Composite.remove(engine.world, body) })
+                                        Engine.clear(engine);
+                                        simulation.splashReturn();
+                                    }
                                 }, 6000);
                                 return
                             }
@@ -376,7 +378,7 @@ const spawn = {
                                 simulation.makeTextLog(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
                             }, 1500);
                         } else {
-                            requestAnimationFrame(loop);
+                            if (!simulation.onTitlePage) requestAnimationFrame(loop);
                         }
                     }
                     requestAnimationFrame(loop);

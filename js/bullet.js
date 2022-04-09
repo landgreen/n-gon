@@ -1531,25 +1531,6 @@ const b = {
                             })
                             let dist = Vector.magnitude(sub)
                             if (input.fire) {
-                                //control position while hooked
-                                // if (input.down) { //down
-                                // player.force.y += 5 * player.mass * simulation.g;
-                                // dist *= 0.25
-                                // this.ropeExtension += 10
-                                // } else if (input.up) { //up
-                                // this.ropeExtension -= 10
-                                // if (this.ropeExtension < 0) this.ropeExtension = 0
-                                // player.force.y -= 5 * player.mass * simulation.g;
-                                // dist *= 0.4
-                                // } else {}
-
-                                // if (input.right) { //down
-                                //     dist *= 0.4
-                                //     player.force.x += 5 * player.mass * simulation.g;
-                                // } else if (input.left) { //up
-                                //     dist *= 0.4
-                                //     player.force.x -= 5 * player.mass * simulation.g;
-                                // }
                                 m.fireCDcycle = m.cycle + 30; // cool down if out of energy
                                 this.endCycle = simulation.cycle + 10
                                 if (input.down) { //down
@@ -1608,7 +1589,7 @@ const b = {
         });
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
-    harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35) {
+    harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true) {
         const me = bullet.length;
         const returnRadius = 100 * Math.sqrt(harpoonSize)
         bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -40 * harpoonSize, y: 2 * harpoonSize, index: 0, isInternal: false }, { x: -40 * harpoonSize, y: -2 * harpoonSize, index: 1, isInternal: false }, { x: 50 * harpoonSize, y: -3 * harpoonSize, index: 3, isInternal: false }, { x: 30 * harpoonSize, y: 2 * harpoonSize, index: 4, isInternal: false }], {
@@ -1723,11 +1704,13 @@ const b = {
                     player.force.x += momentum.x
                     player.force.y += momentum.y
                     // refund ammo
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "harpoon") {
-                            b.guns[i].ammo++;
-                            simulation.updateGunHUD();
-                            break;
+                    if (isReturnAmmo) {
+                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                            if (b.guns[i].name === "harpoon") {
+                                b.guns[i].ammo++;
+                                simulation.updateGunHUD();
+                                break;
+                            }
                         }
                     }
                 } else {
@@ -6404,7 +6387,7 @@ const b = {
                         }
                     }
                     if (input.down) {
-                        b.harpoon(where, null, m.angle, harpoonSize, true, 1.5 * totalCycles)
+                        b.harpoon(where, null, m.angle, harpoonSize, true, 1.5 * totalCycles, (input.down && tech.crouchAmmoCount && (tech.crouchAmmoCount - 1) % 2) ? false : true)
                     } else {
                         b.harpoon(where, closest.target, m.angle, harpoonSize, true, totalCycles)
                     }

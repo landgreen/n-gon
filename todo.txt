@@ -1,17 +1,63 @@
 ******************************************************** NEXT PATCH **************************************************
 
-added 5 cycles of "coyote time"
-  this means you can still jump for 5/60 = 0.1 seconds after leaving the ground
-  let me know if you like the feel
-  this might cause some unexpected bugs, or reduce the difficulty of some platforming levels
+added 2 more classic n-gon dates
 
-JUNK tech: NFT - buy your current game seed
-  no one is allow to use your seeds
-  if they use them they are gonna get in trouble
+plasma ball
+  does 10% more damage
+  moves 20% faster
+  targets mob bullets better
 
-removed the pavilion/ruins map to see if it's causing bugs
+standing wave has a 45/60->30/60 second cooldown after blocking a shielded mob
+  but, standing wave now also triggers it's CD on shields that protect groups of mobs
+
+JUNK tech: Mech v4.48 removed
+JUNK tech: cosmogonic myth - opens a random classic version of n-gon in a new tab, after 5 minutes close the tab and spawn 1 of every tech
+
+bug fixes
+
 
 ******************************************************** TODO ********************************************************
+
+bugs: requirement text man discord messages
+
+bring back:
+  missiles that fall back and down for a sec after they fire
+  the old phase decoherence field
+    make cloak only active on input.field down
+      could be a tech
+        would need some other buff
+    how to make it good enough
+      combine with not killing tech?
+      stun mobs that touch you while phased
+      firing doesn't exit you from cloak
+        but it does drain some energy
+    tech pilot wave: Bose Einstein condensate - freeze mobs in superposition with pilot wave
+
+plasma ball
+  graphics should look more like a real plasma ball
+  gently scale damage with circleRadius
+  balance corona discharge
+  delay on returning to player is annoying
+  scale float effect with ball size
+  tech upgrades
+    greatly improve floating effects while holding
+    black hole: gives the plasma ball gravity
+    stun on expansion
+    plasma orb increases in size and power as it eats enemies
+      while attached?
+
+make level.do() graphic that only shows direction player is facing
+  pattern it after cloaking field
+    will it work with cloaking field at the same time
+
+double jump?
+
+tech coyote time
+  you can still jump for 2 seconds after falling off a ledge
+  make it a JUNK tech? so you can keep the name
+  some other benefit
+    reduce your gravity also?
+    increase jump?
 
 tech smoke grenades - mobs inside a cloud can't see player
   draw on the region so it's hard for player to see as well
@@ -25,18 +71,6 @@ tech mines:  mines fire _____ instead of nails
   needles
   super balls?
   foam?
-
-plasma ball
-  gently scale damage with circleRadius
-  balance corona discharge
-  delay on returning to player is annoying
-  scale float effect with ball size
-  tech upgrades
-    greatly improve floating effects while holding
-    black hole: gives the plasma ball gravity
-    stun on expansion
-    plasma orb increases in size and power as it eats enemies
-      while attached?
 
 tech: frozen mobs die at 10% life
 
@@ -703,6 +737,7 @@ possible names for tech
   particle accelerator
   superluminal signalling
   NP-complete
+  lenticular lens:  is an array of lenses, designed so that when viewed from slightly different angles, different parts of the image underneath are shown.
  
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players

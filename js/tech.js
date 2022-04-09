@@ -705,6 +705,34 @@ const tech = {
                 m.setMovement()
             }
         },
+        // {
+        //     name: "coyote",
+        //     description: "",
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 1,
+        //     frequencyDefault: 1,
+        //     allowed() { return true },
+        //     requires: "",
+        //     effect() { // good with melee builds, content skipping builds
+        //         tech.coyoteTime = 120
+        //         // simulation.gravity = function() {
+        //         //     function addGravity(bodies, magnitude) {
+        //         //         for (var i = 0; i < bodies.length; i++) {
+        //         //             bodies[i].force.y += bodies[i].mass * magnitude;
+        //         //         }
+        //         //     }
+        //         //     if (!m.isBodiesAsleep) {
+        //         //         addGravity(powerUp, simulation.g);
+        //         //         addGravity(body, simulation.g);
+        //         //     }
+        //         //     player.force.y += player.mass * simulation.g
+        //         // }
+        //     },
+        //     remove() {
+        //         tech.coyoteTime = 5
+        //     }
+        // },
         {
             name: "Newton's 1st law",
             description: "moving at high <strong>speeds</strong><br>reduces <strong class='color-harm'>harm</strong> by up to <strong>66%</strong>",
@@ -1816,7 +1844,7 @@ const tech = {
         },
         {
             name: "lithium-ion",
-            description: "if <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>200</strong>",
+            description: "if <strong>relay switch</strong> is in the <strong class='color-flop'>ON</strong> state<br>increase your <strong>maximum</strong> <strong class='color-f'>energy</strong> by <strong>300</strong>",
             maxCount: 1,
             count: 0,
             frequency: 4,
@@ -7511,6 +7539,25 @@ const tech = {
             remove() {}
         },
         {
+            name: "hi",
+            description: `spawn to seed`,
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                document.getElementById("seed").placeholder = Math.initialSeed = String(616)
+                Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
+
+            },
+            remove() {}
+        },
+        {
             name: "meteor shower",
             description: "take a shower, but meteors instead of water",
             maxCount: 1,
@@ -7553,7 +7600,7 @@ const tech = {
         },
         {
             name: "Higgs phase transition",
-            description: "instantly spawn 3 <strong class='color-m'>tech</strong>, but add a chance to<br>remove everything with a 5 minute <strong>half-life</strong>",
+            description: "instantly spawn 5 <strong class='color-m'>tech</strong>, but add a chance to<br>remove everything with a 5 minute <strong>half-life</strong>",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -7566,8 +7613,10 @@ const tech = {
             requires: "",
             effect() {
                 powerUps.spawn(m.pos.x, m.pos.y, "tech");
-                powerUps.spawn(m.pos.x + 20, m.pos.y, "tech");
-                powerUps.spawn(m.pos.x + 40, m.pos.y, "tech");
+                powerUps.spawn(m.pos.x + 30, m.pos.y, "tech");
+                powerUps.spawn(m.pos.x + 60, m.pos.y, "tech");
+                powerUps.spawn(m.pos.x, m.pos.y - 30, "tech");
+                powerUps.spawn(m.pos.x + 30, m.pos.y - 60, "tech");
 
                 function loop() {
                     // (1-X)^cycles = chance to be removed //Math.random() < 0.000019  10 min
@@ -9226,8 +9275,8 @@ const tech = {
             remove() {}
         },
         {
-            name: "Mech v4.48",
-            description: `open a portal to a primordial version of reality`,
+            name: "cosmogonic myth",
+            description: `open a portal to a primordial version of reality<br>after 5 minutes <strong>close</strong> the portal, and spawn 1 of every power up`,
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9236,7 +9285,19 @@ const tech = {
             allowed() { return true },
             requires: "",
             effect() {
-                window.open('https://scratch.mit.edu/projects/14005697/fullscreen/', '_blank')
+                const urls = ["https://scratch.mit.edu/projects/14005697/fullscreen/", "https://scratch.mit.edu/projects/22573757/fullscreen/", "https://codepen.io/lilgreenland/full/ozXNWZ", "https://codepen.io/lilgreenland/full/wzARJY", "classic/7-1-2017/", "classic/4-15-2018/", "classic/7-11-2019/", "classic/9-8-2019/", "classic/7-15-2020/", "classic/6-1-2021/"]
+                const choose = urls[Math.floor(Math.random() * urls.length)]
+                console.log(`opening new tab" ${choose}`)
+                let tab = window.open(choose, "_blank");
+                setTimeout(() => {
+                    tab.close();
+                    powerUps.spawn(m.pos.x, m.pos.y, "gun");
+                    setTimeout(() => { powerUps.spawn(m.pos.x, m.pos.y - 50, "ammo") }, 250);
+                    setTimeout(() => { powerUps.spawn(m.pos.x + 50, m.pos.y, "field"); }, 500);
+                    setTimeout(() => { powerUps.spawn(m.pos.x + 50, m.pos.y - 50, "heal"); }, 750);
+                    setTimeout(() => { powerUps.spawn(m.pos.x - 50, m.pos.y, "tech"); }, 1000);
+                    setTimeout(() => { powerUps.spawn(m.pos.x - 50, m.pos.y - 50, "research"); }, 1250);
+                }, 1000 * 5);
             },
             remove() {}
         },
@@ -9687,4 +9748,5 @@ const tech = {
     plasmaDischarge: null,
     isFlipFlopHealth: null,
     isRelayEnergy: null,
+    coyoteTime: null
 }

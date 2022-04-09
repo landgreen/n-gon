@@ -889,10 +889,7 @@ const powerUps = {
                 if (document.getElementById("tech-switch")) document.getElementById("tech-switch").innerHTML = ` = <strong>ON</strong>`
                 m.eyeFillColor = m.fieldMeterColor //'#0cf'
             }
-            if (tech.isRelayEnergy) {
-                m.setMaxEnergy();
-                m.energy += 2
-            }
+            if (tech.isRelayEnergy) m.setMaxEnergy();
         }
     },
     // giveRandomAmmo() {

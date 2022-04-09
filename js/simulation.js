@@ -822,7 +822,8 @@ const simulation = {
         level.zones = [];
         simulation.drawList = [];
 
-        if (tech.isDronesTravel && player.alive) {
+        if (tech.isDronesTravel && m.alive) {
+            console.log('hi')
             //count drones
             let count = 0
             let deliveryCount = 0
@@ -946,7 +947,7 @@ const simulation = {
                 }
             }
 
-            if (m.pos.y > simulation.fallHeight || isNaN(player.position.x)) { // if 4000px deep
+            if (m.pos.y > simulation.fallHeight) { // if 4000px deep
                 Matter.Body.setVelocity(player, {
                     x: 0,
                     y: 0
@@ -971,6 +972,7 @@ const simulation = {
                 m.damage(0.1 * simulation.difficultyMode);
                 m.energy -= 0.1 * simulation.difficultyMode
             }
+            if (isNaN(player.position.x)) m.death();
 
             // if (tech.isEnergyDamage) {
             //   document.getElementById("tech-capacitor").innerHTML = `(+${(m.energy/0.05).toFixed(0)}%)`

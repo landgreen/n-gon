@@ -233,6 +233,7 @@ const m = {
     },
     buttonCD_jump: 0, //cool down for player buttons
     jump() {
+        // if (!m.onGround) m.lastOnGroundCycle = 0 //m.cycle - tech.coyoteTime
         m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
         //apply a fraction of the jump force to the body the player is jumping off of
         Matter.Body.applyForce(m.standingOn, m.pos, {
@@ -287,6 +288,7 @@ const m = {
     },
     airControl() {
         //check for coyote time jump
+        // if (input.up && m.buttonCD_jump + 20 + tech.coyoteTime < m.cycle && m.yOffWhen.stand > 23 && m.lastOnGroundCycle + tech.coyoteTime > m.cycle) m.jump()
         if (input.up && m.buttonCD_jump + 20 < m.cycle && m.yOffWhen.stand > 23 && m.lastOnGroundCycle + 5 > m.cycle) m.jump()
 
         //check for short jumps   //moving up   //recently pressed jump  //but not pressing jump key now
@@ -969,7 +971,7 @@ const m = {
         }
     },
     setMaxEnergy() {
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 2 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
@@ -1558,7 +1560,7 @@ const m = {
                                 m.pushMass(mob[i]);
                                 this.drainCD = m.cycle + 10
                             }
-                            if (mob[i].isShielded) m.fieldCDcycle = m.cycle + 45
+                            if (mob[i].isShielded || mob[i].shield) m.fieldCDcycle = m.cycle + 30
                         }
                     }
                 }
@@ -1587,7 +1589,7 @@ const m = {
                                 m.pushMass(mob[i]);
                                 this.drainCD = m.cycle + 10
                             }
-                            if (mob[i].isShielded) m.fieldCDcycle = m.cycle + 45
+                            if (mob[i].isShielded || mob[i].shield) m.fieldCDcycle = m.cycle + 30
                         }
                     }
                 }
@@ -2111,14 +2113,14 @@ const m = {
                         isOn: false,
                         drain: 0.0015,
                         radiusLimit: 10,
-                        damage: 0.6,
+                        damage: 0.7,
                         setPositionToNose() {
                             const nose = { x: m.pos.x + 10 * Math.cos(m.angle), y: m.pos.y + 10 * Math.sin(m.angle) }
                             Matter.Body.setPosition(this, Vector.add(nose, Vector.mult(Vector.normalise(Vector.sub(nose, m.pos)), this.circleRadius)));
                         },
                         fire() {
                             this.isAttached = false;
-                            const speed = 6 //scale with mass?
+                            const speed = 7 //scale with mass?
                             Matter.Body.setVelocity(this, {
                                 x: player.velocity.x * 0.4 + speed * Math.cos(m.angle),
                                 y: speed * Math.sin(m.angle)
@@ -2194,7 +2196,7 @@ const m = {
                                 const arcList = []
                                 const dischargeRange = 150 + 1600 * tech.plasmaDischarge + 1.3 * this.circleRadius
                                 for (let i = 0, len = mob.length; i < len; i++) {
-                                    if (!mob[i].isBadTarget && mob[i].alive) {
+                                    if (mob[i].alive && (!mob[i].isBadTarget || mob[i].isMobBullet)) {
                                         const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
                                         if (sub < this.circleRadius + mob[i].radius) {
                                             if (!this.isAttached && !mob[i].isMobBullet) this.isPopping = true
@@ -2251,8 +2253,8 @@ const m = {
 
 
                                 //slowly slow down if too fast
-                                if (this.speed > 8) {
-                                    const scale = 0.997
+                                if (this.speed > 10) {
+                                    const scale = 0.998
                                     Matter.Body.setVelocity(this, {
                                         x: scale * this.velocity.x,
                                         y: scale * this.velocity.y
@@ -2744,8 +2746,44 @@ const m = {
                 // m.fieldDamage = 2.46 // 1 + 146/100
                 m.fieldDrawRadius = 0
                 m.isSneakAttack = true;
-                const drawRadius = 900
-
+                const drawRadius = 800
+                m.drawCloak = function() {
+                    m.fieldPhase += 0.007
+                    const wiggle = 0.15 * Math.sin(m.fieldPhase * 0.5)
+                    ctx.beginPath();
+                    ctx.ellipse(m.pos.x, m.pos.y, m.fieldDrawRadius * (1 - wiggle), m.fieldDrawRadius * (1 + wiggle), m.fieldPhase, 0, 2 * Math.PI);
+                    // if (m.fireCDcycle > m.cycle && (input.field)) {}
+                    ctx.fillStyle = "#fff"
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = "#000"
+                    ctx.stroke()
+                    // ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*m.energy})`;
+                    ctx.globalCompositeOperation = "destination-in";
+                    ctx.fill();
+                    ctx.globalCompositeOperation = "source-over";
+                    ctx.clip();
+                }
+                // m.drawCloak = function() { //controlled by player look direction
+                //     m.fieldPhase = m.angle
+                //     const wiggle = 0.15 * Math.sin(m.angle)
+                //     const off = {
+                //         x: Math.cos(m.angle),
+                //         y: Math.sin(m.angle)
+                //     }
+                //     const look = Vector.add(m.pos, Vector.mult(off, 500))
+                //     ctx.beginPath();
+                //     ctx.ellipse(look.x, look.y, m.fieldDrawRadius * (1 - wiggle), m.fieldDrawRadius * (1 + wiggle), m.fieldPhase, 0, 2 * Math.PI);
+                //     // if (m.fireCDcycle > m.cycle && (input.field)) {}
+                //     ctx.fillStyle = "#fff"
+                //     ctx.lineWidth = 2;
+                //     ctx.strokeStyle = "#000"
+                //     ctx.stroke()
+                //     // ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*m.energy})`;
+                //     ctx.globalCompositeOperation = "destination-in";
+                //     ctx.fill();
+                //     ctx.globalCompositeOperation = "source-over";
+                //     ctx.clip();
+                // }
                 m.hold = function() {
                     // console.log(m.holdingTarget)
                     if (m.isHolding) {
@@ -2805,32 +2843,32 @@ const m = {
                         }
                     }
 
-                    function drawField() {
-                        m.fieldPhase += 0.007
-                        const wiggle = 0.15 * Math.sin(m.fieldPhase * 0.5)
-                        ctx.beginPath();
-                        ctx.ellipse(m.pos.x, m.pos.y, m.fieldDrawRadius * (1 - wiggle), m.fieldDrawRadius * (1 + wiggle), m.fieldPhase, 0, 2 * Math.PI);
-                        // if (m.fireCDcycle > m.cycle && (input.field)) {}
-                        ctx.fillStyle = "#fff"
-                        ctx.lineWidth = 2;
-                        ctx.strokeStyle = "#000"
-                        ctx.stroke()
-                        // ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*m.energy})`;
-                        ctx.globalCompositeOperation = "destination-in";
-                        ctx.fill();
-                        ctx.globalCompositeOperation = "source-over";
-                        ctx.clip();
-                    }
+                    // function drawField() {
+                    //     m.fieldPhase += 0.007
+                    //     const wiggle = 0.15 * Math.sin(m.fieldPhase * 0.5)
+                    //     ctx.beginPath();
+                    //     ctx.ellipse(m.pos.x, m.pos.y, m.fieldDrawRadius * (1 - wiggle), m.fieldDrawRadius * (1 + wiggle), m.fieldPhase, 0, 2 * Math.PI);
+                    //     // if (m.fireCDcycle > m.cycle && (input.field)) {}
+                    //     ctx.fillStyle = "#fff"
+                    //     ctx.lineWidth = 2;
+                    //     ctx.strokeStyle = "#000"
+                    //     ctx.stroke()
+                    //     // ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*m.energy})`;
+                    //     ctx.globalCompositeOperation = "destination-in";
+                    //     ctx.fill();
+                    //     ctx.globalCompositeOperation = "source-over";
+                    //     ctx.clip();
+                    // }
 
                     // const energy = Math.max(0.01, Math.min(m.energy, 1))
                     if (m.isCloak) {
                         this.fieldRange = this.fieldRange * 0.9 + 0.1 * drawRadius
                         m.fieldDrawRadius = this.fieldRange * 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
-                        drawField()
-                    } else if (this.fieldRange < 3000) {
+                        m.drawCloak()
+                    } else if (this.fieldRange < 4000) {
                         this.fieldRange += 50
                         m.fieldDrawRadius = this.fieldRange //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
-                        drawField()
+                        m.drawCloak()
                     }
                     if (tech.isIntangible) {
                         if (m.isCloak) {

@@ -1252,7 +1252,9 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
 } else {
     console.log('setting default localSettings')
+    const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
     localSettings = {
+        isAllowed: isAllowed,
         personalSeeds: [],
         isJunkExperiment: false,
         isCommunityMaps: false,

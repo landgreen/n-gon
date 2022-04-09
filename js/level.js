@@ -17,10 +17,13 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
             // m.setField("metamaterial cloaking")
-            // b.giveGuns("harpoon")
+            // b.giveGuns("drones")
+            // tech.giveTech("desublimated ammunition")
+            // tech.giveTech("smelting")
+            // tech.giveTech("smelting")
+            // tech.giveTech("616")
             // tech.giveTech("grappling hook")
-            // tech.giveTech("discount")
-            // tech.giveTech("shape-memory alloy")
+            // tech.giveTech("coyote")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 2; i++) tech.giveTech("corona discharge")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
@@ -112,10 +115,7 @@ const level = {
         if ((tech.isRelay || tech.isFlipFlop) && !tech.isFlipFlopOn) {
             tech.isFlipFlopOn = true
             if (tech.isFlipFlopHealth) m.setMaxHealth()
-            if (tech.isRelayEnergy) {
-                m.setMaxEnergy()
-                m.energy += 2
-            }
+            if (tech.isRelayEnergy) m.setMaxEnergy()
             m.eyeFillColor = m.fieldMeterColor
             simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
         }
