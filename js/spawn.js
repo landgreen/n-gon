@@ -3532,16 +3532,16 @@ const spawn = {
         me.isBoss = true;
         me.inertia = Infinity; //no rotation
         // me.accelMag = 0.00008 + 0.00007 * simulation.accelScale;
-        me.burstFireFreq = 22 + Math.floor(22 * simulation.CDScale)
+        me.burstFireFreq = 18 + Math.floor(18 * simulation.CDScale)
         me.burstTotalPhases = 4 + Math.floor(2 / simulation.CDScale)
-        me.noFireTotalCycles = 390
+        me.noFireTotalCycles = 360
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0;
         me.restitution = 1
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random(), 1)
         Matter.Body.setDensity(me, 0.0022 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.12 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.09 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.onDeath = function() {
             if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
@@ -4104,7 +4104,7 @@ const spawn = {
         me.swordGrow = function() {
             this.laserSword(this.vertices[this.swordVertex], this.angle + this.laserAngle);
             this.swordRadius += this.swordRadiusGrowRate
-            if (this.swordRadius > this.swordRadiusMax) {
+            if (this.swordRadius > this.swordRadiusMax || this.isStunned) {
                 this.sword = this.swordSlash
                 this.spinCount = 0
             }
@@ -4113,7 +4113,7 @@ const spawn = {
             this.laserSword(this.vertices[this.swordVertex], this.angle + this.laserAngle);
             this.torque += this.torqueMagnitude;
             this.spinCount++
-            if (this.spinCount > 60) {
+            if (this.spinCount > 60 || this.isStunned) {
                 this.sword = this.swordWaiting
                 this.swordRadius = 0
                 this.accelMag = 0.001 * simulation.accelScale;

@@ -3340,22 +3340,11 @@ const m = {
                                                 body.splice(i, 1);
                                                 m.fieldRange *= 0.8
                                                 if (tech.isWormholeEnergy) m.energy += 0.53
-                                                if (tech.isWormholeSpores) { //pandimensional spermia
-                                                    for (let i = 0, len = Math.ceil(2.5 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
-                                                        if (tech.isSporeWorm) {
-                                                            b.worm(Vector.add(m.hole.pos2, Vector.rotate({
-                                                                x: m.fieldRange * 0.4,
-                                                                y: 0
-                                                            }, 2 * Math.PI * Math.random())))
-                                                            Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -5));
-                                                        } else {
-                                                            b.spore(Vector.add(m.hole.pos2, Vector.rotate({
-                                                                x: m.fieldRange * 0.4,
-                                                                y: 0
-                                                            }, 2 * Math.PI * Math.random())))
-                                                            Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -15));
-                                                        }
-                                                    }
+                                                if (tech.isWormholeWorms) { //pandimensional spermia
+                                                    b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
+                                                    Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
+                                                    // for (let i = 0, len = Math.ceil(1.25 * Math.random()); i < len; i++) {
+                                                    // }
                                                 }
                                                 break
                                             }
@@ -3374,22 +3363,11 @@ const m = {
                                             m.fieldRange *= 0.8
                                             // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
                                             if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.53
-                                            if (tech.isWormholeSpores) { //pandimensional spermia
-                                                for (let i = 0, len = Math.ceil(2.5 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
-                                                    if (tech.isSporeWorm) {
-                                                        b.worm(Vector.add(m.hole.pos1, Vector.rotate({
-                                                            x: m.fieldRange * 0.4,
-                                                            y: 0
-                                                        }, 2 * Math.PI * Math.random())))
-                                                        Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), 5));
-                                                    } else {
-                                                        b.spore(Vector.add(m.hole.pos1, Vector.rotate({
-                                                            x: m.fieldRange * 0.4,
-                                                            y: 0
-                                                        }, 2 * Math.PI * Math.random())))
-                                                        Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), 15));
-                                                    }
-                                                }
+                                            if (tech.isWormholeWorms) { //pandimensional spermia
+                                                b.worm(Vector.add(m.hole.pos1, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
+                                                Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), 5));
+                                                // for (let i = 0, len = Math.ceil(1.25 * Math.random()); i < len; i++) {
+                                                // }
                                             }
                                             break
                                         }

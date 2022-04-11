@@ -1887,7 +1887,13 @@ const b = {
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
     missile(where, angle, speed, size = 1) {
-        if (tech.missileSize) size *= 1.5
+        if (tech.isMissileBig) {
+            size *= 1.55
+            if (tech.isMissileBiggest) {
+                size *= 2
+
+            }
+        }
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(where.x, where.y, 30 * size, 4 * size, {
             angle: angle,
@@ -1902,7 +1908,7 @@ const b = {
             },
             minDmgSpeed: 10,
             lookFrequency: Math.floor(10 + Math.random() * 3),
-            explodeRad: 180 * (tech.missileSize ? 1.5 : 1) + 60 * Math.random(),
+            explodeRad: (tech.isMissileBig ? 230 : 180) + 60 * Math.random(),
             density: 0.02, //0.001 is normal
             beforeDmg() {
                 Matter.Body.setDensity(this, 0.0001); //reduce density to normal
@@ -1973,7 +1979,7 @@ const b = {
                 ctx.fill();
             },
         });
-        const thrust = 0.0066 * bullet[me].mass * (tech.missileSize ? 0.6 : 1);
+        const thrust = 0.0066 * bullet[me].mass * (tech.isMissileBig ? (tech.isMissileBiggest ? 0.15 : 0.7) : 1);
         Matter.Body.setVelocity(bullet[me], {
             x: m.Vx / 2 + speed * Math.cos(angle),
             y: m.Vy / 2 + speed * Math.sin(angle)
@@ -2589,7 +2595,7 @@ const b = {
     },
     worm(where, isFreeze = tech.isSporeFreeze) { //used with the tech upgrade in mob.death()
         const bIndex = bullet.length;
-        const wormSize = 6 + tech.wormSize * 7 * Math.random()
+        const wormSize = 6 + tech.wormSize * 6 * Math.random()
         if (bIndex < 500) { //can't make over 500 spores
             bullet[bIndex] = Bodies.polygon(where.x, where.y, 3, 3, {
                 inertia: Infinity,
@@ -2600,7 +2606,7 @@ const b = {
                 frictionAir: 0.025,
                 thrust: (tech.isFastSpores ? 0.001 : 0.0005) * (1 + 0.5 * (Math.random() - 0.5)),
                 wormSize: wormSize,
-                wormTail: 1 + Math.max(4, wormSize - 2 * tech.wormSize),
+                wormTail: 1 + Math.max(4, Math.min(wormSize - 2 * tech.wormSize, 30)),
                 dmg: (tech.isMutualism ? 7 : 2.9) * wormSize, //bonus damage from tech.isMutualism //2.5 is extra damage as worm
                 lookFrequency: 100 + Math.floor(37 * Math.random()),
                 classType: "bullet",
@@ -2637,15 +2643,23 @@ const b = {
                         m.displayHealth();
                     }
                 },
+                tailCycle: 6.28 * Math.random(),
                 do() {
+                    this.tailCycle += this.speed * 0.025
                     ctx.beginPath(); //draw nematode
                     ctx.moveTo(this.position.x, this.position.y);
-                    const dir = Vector.mult(Vector.normalise(this.velocity), -Math.min(100, this.wormTail * this.speed))
+                    // const dir = Vector.mult(Vector.normalise(this.velocity), -Math.min(100, this.wormTail * this.speed))
+                    const speed = Math.min(7, this.speed)
+                    const dir = Vector.mult(Vector.normalise(this.velocity), -0.6 * this.wormTail * speed)
                     const tail = Vector.add(this.position, dir)
-                    ctx.lineTo(tail.x, tail.y);
+                    const wiggle = Vector.add(Vector.add(tail, dir), Vector.rotate(dir, Math.sin(this.tailCycle)))
+                    // const wiggle = Vector.add(tail, Vector.rotate(dir, Math.sin((m.cycle - this.endCycle) * 0.03 * this.speed)))
+                    ctx.quadraticCurveTo(tail.x, tail.y, wiggle.x, wiggle.y) // ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
+                    // ctx.lineTo(tail.x, tail.y);
                     ctx.lineWidth = this.wormSize;
                     ctx.strokeStyle = "#000";
                     ctx.stroke();
+
 
                     if (this.lockedOn && this.lockedOn.alive) {
                         this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
@@ -5744,69 +5758,95 @@ const b = {
         },
         {
             name: "missiles",
-            description: "launch <strong>homing</strong> missiles that <strong class='color-e'>explode</strong><br>crouch to <strong>rapidly</strong> launch smaller missiles",
+            description: "launch <strong>homing</strong> missiles that <strong class='color-e'>explode</strong>",
             ammo: 0,
-            ammoPack: 4,
+            ammoPack: 5,
             have: false,
             fireCycle: 0,
             do() {},
             fire() {
                 const countReduction = Math.pow(0.9, tech.missileCount)
-                if (input.down) {
-                    m.fireCDcycle = m.cycle + 10 * b.fireCDscale / countReduction; // cool down
-                    // for (let i = 0; i < tech.missileCount; i++) {
-                    //     b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction))
-                    //     bullet[bullet.length - 1].force.x += 0.004 * countReduction * (i - (tech.missileCount - 1) / 2);
-                    // }
+                // if (input.down) {
+                //     m.fireCDcycle = m.cycle + tech.missileFireCD * b.fireCDscale / countReduction; // cool down
+                //     // for (let i = 0; i < tech.missileCount; i++) {
+                //     //     b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction))
+                //     //     bullet[bullet.length - 1].force.x += 0.004 * countReduction * (i - (tech.missileCount - 1) / 2);
+                //     // }
 
-                    if (tech.missileCount > 1) {
-                        for (let i = 0; i < tech.missileCount; i++) {
-                            setTimeout(() => {
-                                const where = { x: m.pos.x, y: m.pos.y - 40 }
-                                b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction))
-                                bullet[bullet.length - 1].force.x += 0.025 * countReduction * (i - (tech.missileCount - 1) / 2);
-                            }, 20 * tech.missileCount * Math.random());
-                        }
-                    } else {
-                        const where = {
-                            x: m.pos.x,
-                            y: m.pos.y - 40
-                        }
-                        b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5), -2)
-                    }
-                } else {
-                    m.fireCDcycle = m.cycle + 50 * b.fireCDscale / countReduction; // cool down
-                    const direction = {
-                        x: Math.cos(m.angle),
-                        y: Math.sin(m.angle)
-                    }
-                    const push = Vector.mult(Vector.perp(direction), 0.08 * countReduction / Math.sqrt(tech.missileCount))
-                    if (tech.missileCount > 1) {
-                        for (let i = 0; i < tech.missileCount; i++) {
-                            setTimeout(() => {
-                                const where = {
-                                    x: m.pos.x + 40 * direction.x,
-                                    y: m.pos.y + 40 * direction.y
-                                }
-                                b.missile(where, m.angle, 0, Math.sqrt(countReduction))
-                                bullet[bullet.length - 1].force.x += push.x * (i - (tech.missileCount - 1) / 2);
-                                bullet[bullet.length - 1].force.y += push.y * (i - (tech.missileCount - 1) / 2);
-                            }, 40 * tech.missileCount * Math.random());
-                        }
-                    } else {
-                        const where = {
-                            x: m.pos.x + 40 * direction.x,
-                            y: m.pos.y + 40 * direction.y
-                        }
-                        b.missile(where, m.angle, 0)
-                    }
+                //     if (tech.missileCount > 1) {
+                //         for (let i = 0; i < tech.missileCount; i++) {
+                //             setTimeout(() => {
+                //                 const where = { x: m.pos.x, y: m.pos.y - 40 }
+                //                 b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction))
+                //                 bullet[bullet.length - 1].force.x += 0.025 * countReduction * (i - (tech.missileCount - 1) / 2);
+                //             }, 20 * tech.missileCount * Math.random());
+                //         }
+                //     } else {
+                //         const where = {
+                //             x: m.pos.x,
+                //             y: m.pos.y - 40
+                //         }
+                //         b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5), -2)
+                //     }
+                // } else {
+                m.fireCDcycle = m.cycle + tech.missileFireCD * b.fireCDscale / countReduction; // cool down
+                const direction = {
+                    x: Math.cos(m.angle),
+                    y: Math.sin(m.angle)
+                }
+                // const where = {
+                //     x: m.pos.x + 30 * direction.x,
+                //     y: m.pos.y + 30 * direction.y
+                // }
+                if (tech.missileCount > 1) {
+                    const push = Vector.mult(Vector.perp(direction), 0.2 * countReduction / Math.sqrt(tech.missileCount))
+                    const sqrtCountReduction = Math.sqrt(countReduction)
                     // for (let i = 0; i < tech.missileCount; i++) {
                     //     setTimeout(() => {
-                    //         b.missile(where, m.angle, 0, size)
-                    //         bullet[bullet.length - 1].force.x += push.x * (i - (tech.missileCount - 1) / 2);
-                    //         bullet[bullet.length - 1].force.y += push.y * (i - (tech.missileCount - 1) / 2);
-                    //     }, i * 50);
+                    //         if (input.down) {
+                    //             b.missile(where, m.angle, 20, sqrtCountReduction)
+                    //             // bullet[bullet.length - 1].force.x += 0.7 * push.x * (i - (tech.missileCount - 1) / 2);
+                    //             // bullet[bullet.length - 1].force.y += 0.7 * push.y * (i - (tech.missileCount - 1) / 2);
+                    //         } else {
+                    //             b.missile(where, m.angle, -10, sqrtCountReduction)
+                    //             bullet[bullet.length - 1].force.x += push.x * (i - (tech.missileCount - 1) / 2);
+                    //             bullet[bullet.length - 1].force.y += 0.005 + push.y * (i - (tech.missileCount - 1) / 2);
+                    //         }
+
+                    //     }, 1 + i * 10 * tech.missileCount);
                     // }
+                    const launchDelay = 4
+                    let count = 0
+                    const fireMissile = () => {
+                        if (input.down) {
+                            b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, 20, sqrtCountReduction)
+                            bullet[bullet.length - 1].force.x += 0.5 * push.x * (Math.random() - 0.5)
+                            bullet[bullet.length - 1].force.y += 0.004 + 0.5 * push.y * (Math.random() - 0.5)
+                        } else {
+                            b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, -15, sqrtCountReduction)
+                            bullet[bullet.length - 1].force.x += push.x * (Math.random() - 0.5)
+                            bullet[bullet.length - 1].force.y += 0.005 + push.y * (Math.random() - 0.5)
+                        }
+                    }
+                    const cycle = () => {
+                        if ((simulation.paused || m.isBodiesAsleep) && m.alive) {
+                            requestAnimationFrame(cycle)
+                        } else {
+                            count++
+                            if (!(count % launchDelay)) {
+                                fireMissile()
+                            }
+                            if (count < tech.missileCount * launchDelay && m.alive) requestAnimationFrame(cycle);
+                        }
+                    }
+                    requestAnimationFrame(cycle);
+                } else {
+                    if (input.down) {
+                        b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle, 25)
+                    } else {
+                        b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle, -12)
+                        bullet[bullet.length - 1].force.y += 0.04 * (Math.random() - 0.2)
+                    }
                 }
             }
         }, {

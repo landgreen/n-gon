@@ -8,7 +8,7 @@ const level = {
     onLevel: -1,
     levelsCleared: 0,
     //see level.populateLevels:   (intro, ... , reservoir, reactor, ... , gauntlet, final)    added later
-    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber"], //"pavilion"
+    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion"],
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
@@ -17,15 +17,15 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
             // m.setField("metamaterial cloaking")
-            // b.giveGuns("drones")
-            // tech.giveTech("desublimated ammunition")
-            // tech.giveTech("smelting")
-            // tech.giveTech("smelting")
-            // tech.giveTech("616")
+            // b.giveGuns("missiles")
+            // tech.giveTech("nematodes")
+            // tech.giveTech("launch system")
+            // tech.giveTech("cruise missile")
+            // tech.giveTech("ICBM")
             // tech.giveTech("grappling hook")
-            // tech.giveTech("coyote")
+            // tech.giveTech("annelids")
             // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
-            // for (let i = 0; i < 2; i++) tech.giveTech("corona discharge")
+            // for (let i = 0; i < 9; i++) tech.giveTech("annelids")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
             // powerUps.research.changeRerolls(100000)
             // for (let i = 0; i < 5; i++) tech.giveTech("corona discharge")
@@ -2551,7 +2551,7 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
+        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
         spawn.starter(1900, -500, 200) //big boy
@@ -2690,11 +2690,11 @@ const level = {
                 if (!isSpawnedBoss) {
                     isSpawnedBoss = true
                     if (Math.random() < 0.33) {
-                        for (let i = 0, len = Math.min(simulation.difficulty / 20, 6); i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
+                        for (let i = 0, len = Math.min(simulation.difficulty / 15, 7); i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
                     } else if (Math.random() < 0.5) {
-                        for (let i = 0, len = Math.min(simulation.difficulty / 9, 8); i < len; ++i) spawn.sprayBoss(2400 - 150 * i, -225, 30, false)
+                        for (let i = 0, len = Math.min(simulation.difficulty / 8, 8); i < len; ++i) spawn.sprayBoss(2400 - 150 * i, -225, 30, false)
                     } else {
-                        for (let i = 0, len = Math.min(simulation.difficulty / 6, 10); i < len; ++i) spawn.mineBoss(1950, -250, 50, false);
+                        for (let i = 0, len = Math.min(simulation.difficulty / 5, 11); i < len; ++i) spawn.mineBoss(1950, -250, 50, false);
                     }
                     // for (let i = 0, len = 3 + simulation.difficulty / 20; i < len; ++i) spawn.mantisBoss(1487 + 300 * i, -1525, 35, false)
                 }

@@ -4494,21 +4494,78 @@ const tech = {
         },
         {
             name: "cruise missile",
-            description: "<strong>missiles</strong> travel <strong>63%</strong> slower,<br>but have a <strong>50%</strong> larger <strong class='color-e'>explosive</strong> payload",
+            description: "<strong>missiles</strong> travel <strong>50%</strong> slower,<br>but have a <strong>100%</strong> larger <strong class='color-e'>explosive</strong> payload",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("missiles") || tech.isMissileField || tech.missileBotCount
+                return (tech.haveGunCheck("missiles") && tech.missileFireCD === 45) || tech.isMissileField || tech.missileBotCount
             },
             requires: "missiles",
             effect() {
-                tech.missileSize = true
+                tech.isMissileBig = true
             },
             remove() {
-                tech.missileSize = false
+                tech.isMissileBig = false
+            }
+        },
+        {
+            name: "ICBM",
+            description: "cruise <strong>missiles</strong> travel <strong>66%</strong> slower,<br>but have a <strong>100%</strong> larger <strong class='color-e'>explosive</strong> payload",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("missiles") && tech.isMissileBig //&& !tech.isSmartRadius && !tech.isImmuneExplosion
+            },
+            requires: "missiles, cruse missile", //, not electric reactive armor, controlled explosions",
+            effect() {
+                tech.isMissileBiggest = true
+            },
+            remove() {
+                tech.isMissileBiggest = false
+            }
+        },
+        {
+            name: "launch system",
+            description: `reduce <strong>missile</strong> launch cooldown <strong>500%</strong><br>gain <strong>20%</strong> more missile <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("missiles") && !tech.isMissileBig
+            },
+            requires: "missiles",
+            ammoBonus: 1.2,
+            effect() {
+                tech.missileFireCD = 10
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "missiles") {
+                        b.guns[i].ammoPack = this.ammoBonus;
+                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo * this.ammoBonus);
+                        simulation.updateGunHUD();
+                        break
+                    }
+                }
+            },
+            remove() {
+                if (tech.missileFireCD !== 45) {
+                    tech.missileFireCD = 45;
+                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        if (b.guns[i].name === "missiles") {
+                            b.guns[i].ammoPack = 5;
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo / this.ammoBonus);
+                            simulation.updateGunHUD();
+                            break
+                        }
+                    }
+                }
             }
         },
         {
@@ -4550,7 +4607,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isTokamak)
+                return tech.explosiveRadius === 1 && !tech.isSmallExplosion && (tech.haveGunCheck("missiles") || tech.missileBotCount || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.boomBotCount > 1 || tech.isTokamak)
             },
             requires: "an explosive damage source, not ammonium nitrate or nitroglycerin",
             effect: () => {
@@ -4721,7 +4778,7 @@ const tech = {
         },
         {
             name: "MIRV",
-            description: "fire <strong>+1</strong> <strong>missile</strong> and <strong>grenade</strong><br>decrease <strong class='color-e'>explosion</strong> <strong>radius</strong> up to <strong>10%</strong>",
+            description: "fire <strong>+1</strong> <strong>missile</strong> and <strong>grenade</strong> per shot<br>decrease <strong class='color-e'>explosion</strong> <strong>radius</strong> up to <strong>10%</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -5070,7 +5127,7 @@ const tech = {
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isWormholeSpores || (tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isFoamShot && !tech.isNeedles && !tech.isNailShot)
+                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || (tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isFoamShot && !tech.isNeedles && !tech.isNailShot)
             },
             requires: "spore gun, spores",
             effect() {
@@ -7161,9 +7218,9 @@ const tech = {
             }
         },
         {
-            name: "transdimensional spores",
-            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Dimension' class="link">transdimensional spores</a>`,
-            description: "when <strong class='color-block'>blocks</strong> fall into a <strong class='color-worm'>wormhole</strong><br>higher dimension <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> are summoned",
+            name: "transdimensional worms",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Dimension' class="link">transdimensional worms</a>`,
+            description: "when <strong class='color-block'>blocks</strong> fall into a <strong class='color-worm'>wormhole</strong><br>higher dimension <strong class='color-p' style='letter-spacing: 2px;'>worms</strong> are summoned",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7174,10 +7231,10 @@ const tech = {
             },
             requires: "wormhole",
             effect() {
-                tech.isWormholeSpores = true
+                tech.isWormholeWorms = true
             },
             remove() {
-                tech.isWormholeSpores = false
+                tech.isWormholeWorms = false
             }
         },
         {
@@ -9233,7 +9290,7 @@ const tech = {
             remove() {}
         },
         {
-            name: "quantum black hole",
+            name: "black hole",
             description: `use your <strong class='color-f'>energy</strong> and ${powerUps.orb.research(4)} to <strong>spawn</strong><br>inside the event horizon of a huge <strong>black hole</strong>`,
             maxCount: 1,
             count: 0,
@@ -9297,7 +9354,7 @@ const tech = {
                     setTimeout(() => { powerUps.spawn(m.pos.x + 50, m.pos.y - 50, "heal"); }, 750);
                     setTimeout(() => { powerUps.spawn(m.pos.x - 50, m.pos.y, "tech"); }, 1000);
                     setTimeout(() => { powerUps.spawn(m.pos.x - 50, m.pos.y - 50, "research"); }, 1250);
-                }, 1000 * 5);
+                }, 1000 * 5 * 60);
             },
             remove() {}
         },
@@ -9589,7 +9646,7 @@ const tech = {
     isWormholeDamage: null,
     isNailCrit: null,
     isFlechetteExplode: null,
-    isWormholeSpores: null,
+    isWormholeWorms: null,
     isWormBullets: null,
     isWideLaser: null,
     wideLaser: null,
@@ -9616,7 +9673,8 @@ const tech = {
     isRewindGrenade: null,
     isExtruder: null,
     isEndLevelPowerUp: null,
-    missileSize: null,
+    isMissileBig: null,
+    isMissileBiggest: null,
     isLaserMine: null,
     isAmmoFoamSize: null,
     isIceIX: null,
@@ -9748,5 +9806,6 @@ const tech = {
     plasmaDischarge: null,
     isFlipFlopHealth: null,
     isRelayEnergy: null,
-    coyoteTime: null
+    coyoteTime: null,
+    missileFireCD: null
 }

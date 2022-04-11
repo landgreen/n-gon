@@ -1,27 +1,32 @@
 ******************************************************** NEXT PATCH **************************************************
 
-added 2 more classic n-gon dates
+nematodes now wiggle their tail.  it's horrible
+tech: transdimensional spores renamed transdimensional worms
+  spawns spores -> worms
 
-plasma ball
-  does 10% more damage
-  moves 20% faster
-  targets mob bullets better
+missiles:
+  20% more ammo
+  no longer fire rapidly on crouch
+    instead crouch gives missile initial forward velocity
+    no crouch makes the missiles recoil back before they accelerate forward
+  tech: launch system - fire missiles 500% more rapidly, gives 25% ammo
+    doesn't work with cruse missile
+  tech: ICBM - cruse missile is even bigger and slower
 
-standing wave has a 45/60->30/60 second cooldown after blocking a shielded mob
-  but, standing wave now also triggers it's CD on shields that protect groups of mobs
+pavilion has been added back to the map rotation
+  this will make the game end at 13 again, and feel harder
+  let me know if it's absence resulted in less NaN game crashes
 
-JUNK tech: Mech v4.48 removed
-JUNK tech: cosmogonic myth - opens a random classic version of n-gon in a new tab, after 5 minutes close the tab and spawn 1 of every tech
+reactor sprayBoss is now harder to kill
 
 bug fixes
-
 
 ******************************************************** TODO ********************************************************
 
 bugs: requirement text man discord messages
+  make sure guns are listed to work with gun tech randomization
 
 bring back:
-  missiles that fall back and down for a sec after they fire
   the old phase decoherence field
     make cloak only active on input.field down
       could be a tech
@@ -32,6 +37,8 @@ bring back:
       firing doesn't exit you from cloak
         but it does drain some energy
     tech pilot wave: Bose Einstein condensate - freeze mobs in superposition with pilot wave
+
+tech: plasma drip
 
 plasma ball
   graphics should look more like a real plasma ball
