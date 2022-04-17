@@ -18,13 +18,13 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // m.setField("metamaterial cloaking")
             // b.giveGuns("missiles")
-            // tech.giveTech("nematodes")
-            // tech.giveTech("launch system")
-            // tech.giveTech("cruise missile")
+            // tech.giveTech("scrap-bot manufacturing")
+            // tech.giveTech("dynamo-bot upgrade")
+            // tech.giveTech("time crystals")
             // tech.giveTech("ICBM")
             // tech.giveTech("grappling hook")
             // tech.giveTech("annelids")
-            // for (let i = 0; i < 2; i++) powerUps.directSpawn(0, 0, "tech");
+            // for (let i = 0; i < 10; i++) powerUps.directSpawn(0, 0, "tech");
             // for (let i = 0; i < 9; i++) tech.giveTech("annelids")
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
             // powerUps.research.changeRerolls(100000)
@@ -35,9 +35,9 @@ const level = {
             // tech.giveTech("extruder")
 
             // m.immuneCycle = Infinity //you can't take damage
-            // level.difficultyIncrease(10) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.islands();
+            // level.reactor();
             // level.testing(); //not in rotation, used for testing
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -253,8 +253,8 @@ const level = {
                 level.levels = shuffle(level.levels); //shuffles order of maps
             }
             // level.levels.splice(Math.floor(level.levels.length * (0.4 + 0.6 * Math.random())), 0, "reservoir"); //add level to the back half of the randomized levels list
-            level.levels.splice(Math.floor(Math.seededRandom((level.levels.length) * 0.4, level.levels.length)), 0, "reservoir"); //add level to the back half of the randomized levels list
-            level.levels.splice(Math.floor(Math.seededRandom((level.levels.length) * 0.4, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
+            level.levels.splice(Math.floor(Math.seededRandom((level.levels.length) * 0.6, level.levels.length)), 0, "reservoir"); //add level to the back half of the randomized levels list
+            level.levels.splice(Math.floor(Math.seededRandom((level.levels.length) * 0.6, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
             level.levels.splice(0, 2); //remove 2 levels from the start of the array
             if (!build.isExperimentSelection || (build.hasExperimentalMode && !simulation.isCheating)) { //experimental mode is endless, unless you only have an experiment Tech
                 level.levels.unshift("intro"); //add level to the start of the randomized levels list
@@ -440,6 +440,69 @@ const level = {
         Composite.add(engine.world, constraint);
         return constraint
     },
+    rotor(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
+        x += width / 2
+        y += height / 2
+        const who = body[body.length] = Bodies.rectangle(x, y, width, height, {
+            collisionFilter: {
+                category: cat.map,
+                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+            },
+            isNoSetCollision: true,
+            isNotHoldable: true,
+            frictionAir: frictionAir,
+            friction: 1,
+            frictionStatic: 1,
+            restitution: 0,
+            rotationForce: rotationForce
+        });
+        Matter.Body.setAngle(who, angle)
+        Matter.Body.setAngularVelocity(who, angularVelocity);
+
+        Matter.Body.setDensity(who, density)
+        const constraint = Constraint.create({ //fix rotor in place, but allow rotation
+            pointA: {
+                x: who.position.x,
+                y: who.position.y
+            },
+            bodyB: who,
+            stiffness: 1,
+            damping: 1
+        });
+        Composite.add(engine.world, constraint);
+        who.center = { x: who.position.x, y: who.position.y }
+        who.rotate = function() {
+            if (!m.isBodiesAsleep) {
+                Matter.Body.applyForce(this, {
+                    x: this.position.x + 100,
+                    y: this.position.y + 100
+                }, {
+                    x: this.rotationForce * this.mass,
+                    y: 0
+                })
+            } else {
+                Matter.Body.setAngularVelocity(this, 0);
+            }
+        }
+        // if (rotate) {
+        //     rotor.rotate = function() {
+        //         if (!m.isBodiesAsleep) {
+        //             Matter.Body.applyForce(rotor, {
+        //                 x: rotor.position.x + 100,
+        //                 y: rotor.position.y + 100
+        //             }, {
+        //                 x: rotate * rotor.mass,
+        //                 y: 0
+        //             })
+        //         } else {
+        //             Matter.Body.setAngularVelocity(rotor, 0);
+        //         }
+        //     }
+        // }
+
+
+        return who
+    },
     boost(x, y, height = 1000) { //height is how high the player will be flung above y
         who = map[map.length] = Matter.Bodies.fromVertices(x + 50, y + 35, Vertices.fromPath("120 40 -120 40 -50 -40 50 -40"), {
             collisionFilter: {
@@ -473,7 +536,7 @@ const level = {
                 query(bullet)
                 query(powerUp)
                 //player collision
-                if (Matter.Query.region([player], this.boostBounds).length > 0) {
+                if (Matter.Query.region([player], this.boostBounds).length > 0 && !input.down) {
                     m.buttonCD_jump = 0; // reset short jump counter to prevent short jumps on boosts
                     m.hardLandCD = 0 // disable hard landing
                     if (player.velocity.y > 26) {
@@ -651,77 +714,77 @@ const level = {
         Composite.add(engine.world, who.constraint);
         return who
     },
-    rotor(x, y, rotate = 0, radius = 800, width = 40, density = 0.0005) {
-        const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
-            density: density,
-            isNotHoldable: true,
-            isNonStick: true,
-            collisionFilter: {
-                category: cat.map,
-                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
-            },
-            isNoSetCollision: true,
-        });
-        const rotor2 = Matter.Bodies.rectangle(x, y, width, radius, {
-            angle: Math.PI / 2,
-            density: density,
-            isNotHoldable: true,
-            isNonStick: true,
-            collisionFilter: {
-                category: cat.map,
-                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
-            },
-            isNoSetCollision: true,
-        });
-        rotor = Body.create({ //combine rotor1 and rotor2
-            parts: [rotor1, rotor2],
-            restitution: 0,
-            collisionFilter: {
-                category: cat.map,
-                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
-            },
-            isNoSetCollision: true,
-        });
-        Matter.Body.setPosition(rotor, {
-            x: x,
-            y: y
-        });
-        Composite.add(engine.world, [rotor]);
-        body[body.length] = rotor1
-        body[body.length] = rotor2
+    // rotor(x, y, rotate = 0, radius = 800, width = 40, density = 0.0005) {
+    //     const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
+    //         density: density,
+    //         isNotHoldable: true,
+    //         isNonStick: true,
+    //         collisionFilter: {
+    //             category: cat.map,
+    //             mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+    //         },
+    //         isNoSetCollision: true,
+    //     });
+    //     const rotor2 = Matter.Bodies.rectangle(x, y, width, radius, {
+    //         angle: Math.PI / 2,
+    //         density: density,
+    //         isNotHoldable: true,
+    //         isNonStick: true,
+    //         collisionFilter: {
+    //             category: cat.map,
+    //             mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+    //         },
+    //         isNoSetCollision: true,
+    //     });
+    //     rotor = Body.create({ //combine rotor1 and rotor2
+    //         parts: [rotor1, rotor2],
+    //         restitution: 0,
+    //         collisionFilter: {
+    //             category: cat.map,
+    //             mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+    //         },
+    //         isNoSetCollision: true,
+    //     });
+    //     Matter.Body.setPosition(rotor, {
+    //         x: x,
+    //         y: y
+    //     });
+    //     Composite.add(engine.world, [rotor]);
+    //     body[body.length] = rotor1
+    //     body[body.length] = rotor2
 
-        // setTimeout(function() {
-        //     rotor.collisionFilter.category = cat.body;
-        //     rotor.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet //| cat.map
-        // }, 1000);
+    //     // setTimeout(function() {
+    //     //     rotor.collisionFilter.category = cat.body;
+    //     //     rotor.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet //| cat.map
+    //     // }, 1000);
 
-        const constraint = Constraint.create({ //fix rotor in place, but allow rotation
-            pointA: {
-                x: x,
-                y: y
-            },
-            bodyB: rotor
-        });
-        Composite.add(engine.world, constraint);
+    //     const constraint = Constraint.create({ //fix rotor in place, but allow rotation
+    //         pointA: {
+    //             x: x,
+    //             y: y
+    //         },
+    //         bodyB: rotor
+    //     });
+    //     Composite.add(engine.world, constraint);
 
-        if (rotate) {
-            rotor.rotate = function() {
-                if (!m.isBodiesAsleep) {
-                    Matter.Body.applyForce(rotor, {
-                        x: rotor.position.x + 100,
-                        y: rotor.position.y + 100
-                    }, {
-                        x: rotate * rotor.mass,
-                        y: 0
-                    })
-                } else {
-                    Matter.Body.setAngularVelocity(rotor, 0);
-                }
-            }
-        }
-        composite[composite.length] = rotor
-        return rotor
-    },
+    //     if (rotate) {
+    //         rotor.rotate = function() {
+    //             if (!m.isBodiesAsleep) {
+    //                 Matter.Body.applyForce(rotor, {
+    //                     x: rotor.position.x + 100,
+    //                     y: rotor.position.y + 100
+    //                 }, {
+    //                     x: rotate * rotor.mass,
+    //                     y: 0
+    //                 })
+    //             } else {
+    //                 Matter.Body.setAngularVelocity(rotor, 0);
+    //             }
+    //         }
+    //     }
+    //     composite[composite.length] = rotor
+    //     return rotor
+    // },
     toggle(x, y, isOn = false, isLockOn = false) {
         spawn.mapVertex(x + 65, y + 2, "70 10 -70 10 -40 -10 40 -10"); //toggle platform
         map[map.length - 1].restitution = 0;
@@ -847,7 +910,7 @@ const level = {
             // const block = body[body.length] = Bodies.rectangle(x, y, width, height, {
             collisionFilter: {
                 category: cat.map,
-                mask: cat.player | cat.body | cat.bullet | cat.powerUp // | cat.mob | cat.mobBullet
+                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
             },
             isNoSetCollision: true,
             inertia: Infinity, //prevents rotation
@@ -896,7 +959,7 @@ const level = {
                                 this.returnCount = 15
                             } else {
                                 this.isThere = true
-                                this.collisionFilter.mask = cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                                this.collisionFilter.mask = cat.player | cat.mob | cat.body | cat.bullet | cat.powerUp | cat.mobBullet
                                 this.fadeCount = this.fadeTime
                                 //delete any overlapping blocks
                                 const blocks = Matter.Query.collides(this, body)
@@ -907,6 +970,20 @@ const level = {
                                         for (let i = 1; i < body.length; i++) { //find which index in body array it is and remove from array
                                             if (body[i].isRemoveMeNow) {
                                                 body.splice(i, 1);
+                                                break
+                                            }
+                                        }
+                                    }
+                                }
+                                //delete any overlapping mobs
+                                const mobsHits = Matter.Query.collides(this, mob)
+                                for (let i = 0; i < mobsHits.length; i++) {
+                                    if (mobsHits[i].bodyB !== this && mobsHits[i].bodyB !== m.holdingTarget) { //dont' delete yourself   <----- bug here maybe...
+                                        Matter.Composite.remove(engine.world, mobsHits[i].bodyB);
+                                        mobsHits[i].bodyB.isRemoveMeNow = true
+                                        for (let i = 1; i < mob.length; i++) { //find which index in body array it is and remove from array
+                                            if (mob[i].isRemoveMeNow) {
+                                                mob.splice(i, 1);
                                                 break
                                             }
                                         }
@@ -2554,7 +2631,7 @@ const level = {
         level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
-        spawn.starter(1900, -500, 200) //big boy
+        // spawn.starter(1900, -500, 200) //big boy
         // for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
@@ -2563,7 +2640,7 @@ const level = {
         // spawn.powerUpBossBaby(3200, -500)
         // spawn.snakeBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
-        // spawn.pulsarBoss(1700, -500)
+        spawn.pulsarBoss(1700, -500)
         // spawn.spawnerBossCulture(3200, -500)
         // spawn.grenadierBoss(1700, -500)
         // spawn.growBossCulture(3200, -500)
@@ -2582,7 +2659,7 @@ const level = {
 
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
         // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
-        // spawn.pulsar(1900, -500)
+        spawn.pulsar(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.nodeGroup(1200, 0, "grenadier")
@@ -2601,6 +2678,8 @@ const level = {
         document.body.style.backgroundColor = "#d0d5df" //"#d8dadf";
         // powerUps.spawnStartingPowerUps(1475, -1175);
         // spawn.debris(750, -2200, 3700, 16); //16 debris per level
+        const button = level.button(1400, 0)
+        button.isUp = true
         spawn.mapRect(-1525, -2825, 1250, 4925);
         spawn.mapRect(-400, -2025, 625, 925);
         spawn.mapRect(-400, -750, 625, 1200);
@@ -2613,7 +2692,6 @@ const level = {
         // spawn.bodyRect(1525, -100, 100, 100, 0.3);
         // spawn.bodyRect(2325, -50, 125, 50, 0.3);
         // spawn.bodyRect(2375, -100, 50, 50, 0.3);
-        for (let i = 0; i < 3; ++i) powerUps.spawn(400 + 2000 * Math.random(), -25, "ammo");
 
         spawn.mapRect(-425, 0, 4200, 2100);
         spawn.mapRect(175, -1250, 50, 300);
@@ -2654,22 +2732,6 @@ const level = {
             // player.force.y -= player.mass * simulation.g * 0.4; //float player
 
             if (isDoorsLocked) {
-                if (!isFightOver && !(simulation.cycle % 120)) { //once a second
-                    let isFoundBoss = false
-                    for (let i = 0; i < mob.length; i++) {
-                        if (mob[i].isBoss) {
-                            isFoundBoss = true
-                            break
-                        }
-                    }
-                    if (!isFoundBoss) {
-                        isFightOver = true
-                        doorIn.isClosing = false
-                        doorOut.isClosing = false
-                        powerUps.spawnBossPowerUp(2900, -100)
-                    }
-                }
-
                 // if (mob.length > 0) {
                 //     doorIn.isClosing = true
                 //     doorOut.isClosing = true
@@ -2687,25 +2749,55 @@ const level = {
                 isDoorsLocked = true
                 doorIn.isClosing = true
                 doorOut.isClosing = true
-                if (!isSpawnedBoss) {
-                    isSpawnedBoss = true
-                    if (Math.random() < 0.33) {
-                        for (let i = 0, len = Math.min(simulation.difficulty / 15, 7); i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
-                    } else if (Math.random() < 0.5) {
-                        for (let i = 0, len = Math.min(simulation.difficulty / 8, 8); i < len; ++i) spawn.sprayBoss(2400 - 150 * i, -225, 30, false)
-                    } else {
-                        for (let i = 0, len = Math.min(simulation.difficulty / 5, 11); i < len; ++i) spawn.mineBoss(1950, -250, 50, false);
-                    }
-                    // for (let i = 0, len = 3 + simulation.difficulty / 20; i < len; ++i) spawn.mantisBoss(1487 + 300 * i, -1525, 35, false)
-                }
             }
-
             doorIn.openClose();
             doorOut.openClose();
             ctx.fillStyle = "#d5ebef"
             ctx.fillRect(2750, -375, 550, 375)
             level.enter.draw();
             level.exit.drawAndCheck();
+
+            button.draw();
+            if (button.isUp) {
+                button.query();
+            } else if (!isSpawnedBoss) {
+                for (let i = 0; i < 4; ++i) {
+                    setTimeout(() => { powerUps.spawn(300 + 800 * Math.random(), -1700, "ammo") }, 10000 * Math.random());
+                }
+                for (let i = 0; i < 3; ++i) {
+                    setTimeout(() => { powerUps.spawn(1800 + 800 * Math.random(), -1700, "ammo") }, 10000 * Math.random());
+                }
+                powerUps.spawn(300 + 800 * Math.random(), -1700, "heal");
+                powerUps.spawn(1800 + 800 * Math.random(), -1700, "heal");
+                isSpawnedBoss = true
+                const scale = Math.pow(simulation.difficulty, 0.73) //hard around 30, why around 54
+                if (Math.random() < 0.3) {
+                    for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                } else if (Math.random() < 0.45) {
+                    for (let i = 0, len = scale * 0.17; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+                } else if (Math.random() < 0.9) {
+                    for (let i = 0, len = scale * 0.23; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+                } else {
+                    for (let i = 0, len = scale * 0.1 / 3; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
+                    for (let i = 0, len = scale * 0.17 / 3; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false)
+                    for (let i = 0, len = scale * 0.23 / 3; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false);
+                }
+            } else if (!isFightOver && !(simulation.cycle % 120)) { //once a second look for any bosses
+                let isFoundBoss = false
+                for (let i = 0; i < mob.length; i++) {
+                    if (mob[i].isBoss) {
+                        isFoundBoss = true
+                        break
+                    }
+                }
+                if (!isFoundBoss) {
+                    isFightOver = true
+                    doorIn.isClosing = false
+                    doorOut.isClosing = false
+                    powerUps.spawnBossPowerUp(2900, -100)
+                    powerUps.spawn(2900, -200, "tech")
+                }
+            }
         };
         level.customTopLayer = () => {
             // if (isDoorsLocked) {
@@ -3180,7 +3272,6 @@ const level = {
         } else {
             spawn.mapVertex(-687, -700, "-150 0  150 0  150 450  0 525  -150 450");
         }
-
         //right
         spawn.mapVertex(425 + 437, -50, "490 0  350 80  -350 80  -490 0  -350 -80  350 -80");
         spawn.mapRect(325, -100, 1070, 100);
@@ -3346,13 +3437,47 @@ const level = {
             spawn.mapVertex(1116, -2500, "0 0  300 0  150 600  0 600");
             spawn.mapVertex(584, -2500, "0 0  300 0  300 600  150 600");
 
-            if (Math.random() < 0.33) {
+            if (Math.random() < 0.1) {
                 spinnerArray.push(level.spinner(65, -300, 40, 450, 0.003, Math.PI / 2))
-            } else {
+            } else if (Math.random() < 0.25) {
                 spinnerArray.push(level.spinner(65, -500, 40, 500, 0.003, 0, 0, -0.015)) //    spinner(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0) {
                 const r = 250
                 const hexagon = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
                 Matter.Body.setVertices(spinnerArray[spinnerArray.length - 1].bodyB, Vertices.fromPath(hexagon))
+            } else {
+                const W = 410;
+                const H = 30;
+                spawn.bodyRect(-120, -75, W, H, 1, spawn.propsIsNotHoldable)
+                let b = body[body.length - 1];
+                cons[cons.length] = Constraint.create({
+                    pointA: {
+                        x: b.position.x - (W / 2) + 50 - 211,
+                        y: b.position.y - 1825
+                    },
+                    bodyB: b,
+                    pointB: {
+                        x: -(W / 2) + 50,
+                        y: 0
+                    },
+                    damping: 0.01,
+                    stiffness: 0.002,
+                    length: 1800
+                });
+                cons[cons.length] = Constraint.create({
+                    pointA: {
+                        x: b.position.x + (W / 2) - 50 + 211,
+                        y: b.position.y - 1825
+                    },
+                    bodyB: b,
+                    pointB: {
+                        x: (W / 2) - 50,
+                        y: 0
+                    },
+                    damping: 0.01,
+                    stiffness: 0.002,
+                    length: 1800
+                });
+                Composite.add(engine.world, [cons[cons.length - 1], cons[cons.length - 2]])
             }
 
             spinnerArray.push(level.spinner(50, -3325, 45, 600, 0.003, 0, 0, 0.01)) //    spinner(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0) {
@@ -3846,30 +3971,29 @@ const level = {
             drip1.draw();
             drip2.draw();
             drip3.draw();
-
             button1.query();
             button1.draw();
-
-            rotor.rotate();
-
             ctx.fillStyle = "hsl(175, 15%, 76%)"
             ctx.fillRect(9300, 2200, 600, 400)
             level.exit.drawAndCheck();
-
             level.enter.draw();
         };
         level.customTopLayer = () => {
+            rotor.rotate();
+
             ctx.fillStyle = "#233"
             ctx.beginPath();
-            ctx.arc(balance1.pointA.x, balance1.pointA.y, 9, 0, 2 * Math.PI);
-            ctx.moveTo(balance2.pointA.x, balance2.pointA.y)
-            ctx.arc(balance2.pointA.x, balance2.pointA.y, 9, 0, 2 * Math.PI);
-            ctx.moveTo(balance3.pointA.x, balance3.pointA.y)
-            ctx.arc(balance3.pointA.x, balance3.pointA.y, 9, 0, 2 * Math.PI);
-            ctx.moveTo(balance4.pointA.x, balance4.pointA.y)
-            ctx.arc(balance4.pointA.x, balance4.pointA.y, 9, 0, 2 * Math.PI);
-            ctx.moveTo(balance5.pointA.x, balance5.pointA.y)
-            ctx.arc(balance5.pointA.x, balance5.pointA.y, 9, 0, 2 * Math.PI);
+            ctx.arc(balance1.center.x, balance1.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance2.center.x, balance2.center.y)
+            ctx.arc(balance2.center.x, balance2.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance3.center.x, balance3.center.y)
+            ctx.arc(balance3.center.x, balance3.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance4.center.x, balance4.center.y)
+            ctx.arc(balance4.center.x, balance4.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance5.center.x, balance5.center.y)
+            ctx.arc(balance5.center.x, balance5.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(rotor.center.x, rotor.center.y)
+            ctx.arc(rotor.center.x, rotor.center.y, 9, 0, 2 * Math.PI);
             ctx.fill();
             hazard.query();
             hazard.level(button1.isUp)
@@ -3976,13 +4100,14 @@ const level = {
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
-            rotor = level.rotor(-5100, 2475, 0.001) //rotates other direction because flipped
-            balance1 = level.spinner(-300 - 25, -395, 25, 390, 0.001) //entrance
-            balance2 = level.spinner(-2605 - 390, 500, 390, 25, 0.001) //falling
-            balance3 = level.spinner(-2608 - 584, 1900, 584, 25, 0.001) //falling
-            balance4 = level.spinner(-9300 - 25, 2205, 25, 380, 0.001) //exit
-            balance5 = level.spinner(-2605 - 390, 1100, 390, 25, 0.001) //falling
-
+            // rotor(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
+            // rotor = level.rotor(-5100, 2475, 0.001) //rotates other direction because flipped
+            rotor = level.rotor(-5600, 2390, 850, 50, 0.001, 0, 0.01, 0, 0.001) //balance(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
+            balance1 = level.rotor(-300 - 25, -395, 25, 390, 0.001) //entrance
+            balance2 = level.rotor(-2605 - 390, 500, 390, 25, 0.001) //falling
+            balance3 = level.rotor(-2608 - 584, 1900, 584, 25, 0.001) //falling
+            balance4 = level.rotor(-9300 - 25, 2205, 25, 380, 0.001) //exit
+            balance5 = level.rotor(-2605 - 390, 1100, 390, 25, 0.001) //falling
             // boost1.boostBounds.min.x = -boost1.boostBounds.min.x - 100
             // boost1.boostBounds.max.x = -boost1.boostBounds.max.x + 100
             // level.setPosToSpawn(300, -700); //-x  // no need since 0
@@ -4008,12 +4133,13 @@ const level = {
             };
             // level.customTopLayer = () => {};
         } else {
-            rotor = level.rotor(5100, 2475, -0.001)
-            balance1 = level.spinner(300, -395, 25, 390, 0.001) //entrance
-            balance2 = level.spinner(2605, 500, 390, 25, 0.001) //falling
-            balance3 = level.spinner(2608, 1900, 584, 25, 0.001) //falling
-            balance4 = level.spinner(9300, 2205, 25, 380, 0.001) //exit
-            balance5 = level.spinner(2605, 1100, 390, 25, 0.001) //falling
+            // rotor = level.rotor(5100, 2475, -0.001)
+            rotor = level.rotor(4700, 2390, 850, 50, 0.001, 0, 0.01, 0, -0.001) //balance(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
+            balance1 = level.rotor(300, -395, 25, 390, 0.001) //entrance
+            balance2 = level.rotor(2605, 500, 390, 25, 0.001) //falling
+            balance3 = level.rotor(2608, 1900, 584, 25, 0.001) //falling
+            balance4 = level.rotor(9300, 2205, 25, 380, 0.001) //exit
+            balance5 = level.rotor(2605, 1100, 390, 25, 0.001) //falling
         }
 
     },
@@ -5540,6 +5666,8 @@ const level = {
 
     },
     stronghold() { // player made level  by    Francois 👑 from discord
+        simulation.makeTextLog(`<strong>stronghold</strong> by <span class='color-var'>Francois</span>`);
+
         const boost1 = level.boost(1470, -250, 1080)
         const boost2 = level.boost(-370, 0, 800)
         const boost3 = level.boost(4865, 0, 1800)
@@ -5708,6 +5836,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     basement() { // player made level  by    Francois 👑 from discord
+        simulation.makeTextLog(`<strong>basement</strong> by <span class='color-var'>Francois</span>`);
         let button, door, buttonDoor, buttonPlateformEnd, doorPlateform
         let isLevelReversed = Math.random();
         if (isLevelReversed < 0.7) {
@@ -5996,320 +6125,322 @@ const level = {
         if (simulation.difficulty > 1) spawn.nodeGroup(2330, 1850, "spawns", 8, 20, 105);
         powerUps.chooseRandomPowerUp(3100, 1630);
     },
-    detours() { //by Francois from discord
-        level.setPosToSpawn(0, 0); //lower start
-        level.exit.y = 150;
-        spawn.mapRect(level.enter.x, 45, 100, 20);
-        level.exit.x = 10625;
-        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
-        level.defaultZoom = 1400;
-        simulation.zoomTransition(level.defaultZoom)
-        document.body.style.backgroundColor = "#d5d5d5";
-        const BGColor = "rgba(0,0,0,0.1)";
-        // level.fill.push({
-        //     x: -150,
-        //     y: -250,
-        //     width: 625,
-        //     height: 325,
-        //     color: BGColor
-        // });
-        // level.fill.push({
-        //     x: 475,
-        //     y: -520,
-        //     width: 5375,
-        //     height: 875,
-        //     color: BGColor
-        // });
-        // level.fill.push({
-        //     x: 5850,
-        //     y: -1275,
-        //     width: 2800,
-        //     height: 2475,
-        //     color: BGColor
-        // });
-        // level.fill.push({
-        //     x: 8650,
-        //     y: -500,
-        //     width: 1600,
-        //     height: 750,
-        //     color: BGColor
-        // });
-        // level.fill.push({
-        //     x: 10250,
-        //     y: -700,
-        //     width: 900,
-        //     height: 950,
-        //     color: BGColor
-        // });
-        const balance = level.spinner(5500, -412.5, 25, 660) //entrance
-        const rotor = level.rotor(7000, 580, -0.001);
-        const doorSortieSalle = level.door(8590, -520, 20, 800, 750)
-        // let buttonSortieSalle
-        // let portalEnBas
-        let portalEnHaut
-        // let door3isClosing = false;
+    // detours() { //by Francois from discord
+    //     simulation.makeTextLog(`<strong>detours</strong> by <span class='color-var'>Francois</span>`);
+    //     level.setPosToSpawn(0, 0); //lower start
+    //     level.exit.y = 150;
+    //     spawn.mapRect(level.enter.x, 45, 100, 20);
+    //     level.exit.x = 10625;
+    //     spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+    //     level.defaultZoom = 1400;
+    //     simulation.zoomTransition(level.defaultZoom)
+    //     document.body.style.backgroundColor = "#d5d5d5";
+    //     const BGColor = "rgba(0,0,0,0.1)";
+    //     // level.fill.push({
+    //     //     x: -150,
+    //     //     y: -250,
+    //     //     width: 625,
+    //     //     height: 325,
+    //     //     color: BGColor
+    //     // });
+    //     // level.fill.push({
+    //     //     x: 475,
+    //     //     y: -520,
+    //     //     width: 5375,
+    //     //     height: 875,
+    //     //     color: BGColor
+    //     // });
+    //     // level.fill.push({
+    //     //     x: 5850,
+    //     //     y: -1275,
+    //     //     width: 2800,
+    //     //     height: 2475,
+    //     //     color: BGColor
+    //     // });
+    //     // level.fill.push({
+    //     //     x: 8650,
+    //     //     y: -500,
+    //     //     width: 1600,
+    //     //     height: 750,
+    //     //     color: BGColor
+    //     // });
+    //     // level.fill.push({
+    //     //     x: 10250,
+    //     //     y: -700,
+    //     //     width: 900,
+    //     //     height: 950,
+    //     //     color: BGColor
+    //     // });
+    //     const balance = level.spinner(5500, -412.5, 25, 660) //entrance
+    //     const rotor = level.rotor(7000, 580, -0.001);
+    //     const doorSortieSalle = level.door(8590, -520, 20, 800, 750)
+    //     // let buttonSortieSalle
+    //     // let portalEnBas
+    //     let portalEnHaut
+    //     // let door3isClosing = false;
 
-        function drawOnTheMapMapRect(x, y, dx, dy) {
-            spawn.mapRect(x, y, dx, dy);
-            len = map.length - 1
-            map[len].collisionFilter.category = cat.map;
-            map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
-            Matter.Body.setStatic(map[len], true); //make static
-            Composite.add(engine.world, map[len]); //add to world
-            simulation.draw.setPaths() //update map graphics
-        }
+    //     function drawOnTheMapMapRect(x, y, dx, dy) {
+    //         spawn.mapRect(x, y, dx, dy);
+    //         len = map.length - 1
+    //         map[len].collisionFilter.category = cat.map;
+    //         map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+    //         Matter.Body.setStatic(map[len], true); //make static
+    //         Composite.add(engine.world, map[len]); //add to world
+    //         simulation.draw.setPaths() //update map graphics
+    //     }
 
-        function drawOnTheMapBodyRect(x, y, dx, dy) {
-            spawn.bodyRect(x, y, dx, dy);
-            len = body.length - 1
-            body[len].collisionFilter.category = cat.body;
-            body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-            Composite.add(engine.world, body[len]); //add to world
-            body[len].classType = "body"
-        }
+    //     function drawOnTheMapBodyRect(x, y, dx, dy) {
+    //         spawn.bodyRect(x, y, dx, dy);
+    //         len = body.length - 1
+    //         body[len].collisionFilter.category = cat.body;
+    //         body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+    //         Composite.add(engine.world, body[len]); //add to world
+    //         body[len].classType = "body"
+    //     }
 
-        function spawnCouloirEnHaut() {
-            // level.fill.push({
-            //     x: 2575,
-            //     y: -1150,
-            //     width: 2550,
-            //     height: 630,
-            //     color: BGColor
-            // });
-            // level.fill.push({
-            //     x: 1900,
-            //     y: -2300,
-            //     width: 1650,
-            //     height: 1150,
-            //     color: BGColor
-            // });
-            // level.fill.push({
-            //     x: 3550,
-            //     y: -1625,
-            //     width: 1650,
-            //     height: 475,
-            //     color: BGColor
-            // });
-            // level.fill.push({
-            //     x: 1800,
-            //     y: -1120,
-            //     width: 775,
-            //     height: 600,
-            //     color: BGColor
-            // });
-            drawOnTheMapMapRect(3800, -270, 75, 75);
-            drawOnTheMapMapRect(3900, -895, 500, 75);
-            drawOnTheMapMapRect(3900, -1195, 75, 375);
-            drawOnTheMapMapRect(3525, -1195, 450, 75);
-            drawOnTheMapMapRect(3525, -1995, 50, 1575);
-            drawOnTheMapMapRect(3325, -1995, 50, 1575);
-            drawOnTheMapMapRect(3525, -1670, 1675, 75);
-            drawOnTheMapMapRect(5100, -1670, 100, 1250);
-            drawOnTheMapMapRect(1800, -1195, 1575, 75);
-            drawOnTheMapMapRect(1800, -1520, 375, 400);
-            drawOnTheMapMapRect(1800, -2370, 100, 1250);
-            drawOnTheMapMapRect(2375, -1845, 375, 250);
-            drawOnTheMapMapRect(2700, -1745, 650, 75);
-            drawOnTheMapMapRect(1800, -2370, 1775, 100);
-            drawOnTheMapMapRect(3525, -2370, 50, 775);
-            drawOnTheMapMapRect(4650, -1220, 550, 75);
-            drawOnTheMapBodyRect(3225, -1845, 100, 100);
-            drawOnTheMapBodyRect(3575, 1255, 125, 25);
-            drawOnTheMapBodyRect(2450, 2255, 25, 25);
-            drawOnTheMapBodyRect(3975, -945, 175, 50);
-            drawOnTheMapBodyRect(4825, -1295, 50, 75);
-            drawOnTheMapBodyRect(4850, -720, 250, 200);
-            drawOnTheMapBodyRect(4050, -970, 25, 25);
-            drawOnTheMapBodyRect(3075, -1245, 50, 50);
-            portalEnHaut = level.portal({
-                x: 3650,
-                y: -1470
-            }, Math.PI / 2, {
-                x: 3250,
-                y: -1473
-            }, Math.PI / 2)
+    //     function spawnCouloirEnHaut() {
+    //         // level.fill.push({
+    //         //     x: 2575,
+    //         //     y: -1150,
+    //         //     width: 2550,
+    //         //     height: 630,
+    //         //     color: BGColor
+    //         // });
+    //         // level.fill.push({
+    //         //     x: 1900,
+    //         //     y: -2300,
+    //         //     width: 1650,
+    //         //     height: 1150,
+    //         //     color: BGColor
+    //         // });
+    //         // level.fill.push({
+    //         //     x: 3550,
+    //         //     y: -1625,
+    //         //     width: 1650,
+    //         //     height: 475,
+    //         //     color: BGColor
+    //         // });
+    //         // level.fill.push({
+    //         //     x: 1800,
+    //         //     y: -1120,
+    //         //     width: 775,
+    //         //     height: 600,
+    //         //     color: BGColor
+    //         // });
+    //         drawOnTheMapMapRect(3800, -270, 75, 75);
+    //         drawOnTheMapMapRect(3900, -895, 500, 75);
+    //         drawOnTheMapMapRect(3900, -1195, 75, 375);
+    //         drawOnTheMapMapRect(3525, -1195, 450, 75);
+    //         drawOnTheMapMapRect(3525, -1995, 50, 1575);
+    //         drawOnTheMapMapRect(3325, -1995, 50, 1575);
+    //         drawOnTheMapMapRect(3525, -1670, 1675, 75);
+    //         drawOnTheMapMapRect(5100, -1670, 100, 1250);
+    //         drawOnTheMapMapRect(1800, -1195, 1575, 75);
+    //         drawOnTheMapMapRect(1800, -1520, 375, 400);
+    //         drawOnTheMapMapRect(1800, -2370, 100, 1250);
+    //         drawOnTheMapMapRect(2375, -1845, 375, 250);
+    //         drawOnTheMapMapRect(2700, -1745, 650, 75);
+    //         drawOnTheMapMapRect(1800, -2370, 1775, 100);
+    //         drawOnTheMapMapRect(3525, -2370, 50, 775);
+    //         drawOnTheMapMapRect(4650, -1220, 550, 75);
+    //         drawOnTheMapBodyRect(3225, -1845, 100, 100);
+    //         drawOnTheMapBodyRect(3575, 1255, 125, 25);
+    //         drawOnTheMapBodyRect(2450, 2255, 25, 25);
+    //         drawOnTheMapBodyRect(3975, -945, 175, 50);
+    //         drawOnTheMapBodyRect(4825, -1295, 50, 75);
+    //         drawOnTheMapBodyRect(4850, -720, 250, 200);
+    //         drawOnTheMapBodyRect(4050, -970, 25, 25);
+    //         drawOnTheMapBodyRect(3075, -1245, 50, 50);
+    //         portalEnHaut = level.portal({
+    //             x: 3650,
+    //             y: -1470
+    //         }, Math.PI / 2, {
+    //             x: 3250,
+    //             y: -1473
+    //         }, Math.PI / 2)
 
-            spawn.randomSmallMob(2500, -2070 + Math.random(), 1);
-            spawn.randomSmallMob(5000, -1370, 1);
-            spawn.randomMob(5000, -645, 0.9);
-            spawn.randomMob(4050, -970, 0.9);
-            spawn.randomSmallMob(2800, -1620, 0.7);
-            spawn.randomMob(2400, -1370, 0.5);
-            spawn.randomMob(3725, -1320, 0.3);
-            spawn.randomGroup(2115, -2020, 0.1)
+    //         spawn.randomSmallMob(2500, -2070 + Math.random(), 1);
+    //         spawn.randomSmallMob(5000, -1370, 1);
+    //         spawn.randomMob(5000, -645, 0.9);
+    //         spawn.randomMob(4050, -970, 0.9);
+    //         spawn.randomSmallMob(2800, -1620, 0.7);
+    //         spawn.randomMob(2400, -1370, 0.5);
+    //         spawn.randomMob(3725, -1320, 0.3);
+    //         spawn.randomGroup(2115, -2020, 0.1)
 
-            powerUps.spawn(5000, -1275, "heal");
+    //         powerUps.spawn(5000, -1275, "heal");
 
-            levelCustom2();
-        }
-        //////////////////////////////////////////
-        level.custom = () => {
-            level.exit.drawAndCheck();
-            rotor.rotate();
-            // rotor2.rotate()
+    //         levelCustom2();
+    //     }
+    //     //////////////////////////////////////////
+    //     level.custom = () => {
+    //         level.exit.drawAndCheck();
+    //         rotor.rotate();
+    //         // rotor2.rotate()
 
-            level.enter.draw();
-        };
-        level.customTopLayer = () => {
-            doorSortieSalle.draw();
-            ctx.fillStyle = "#233"
-            ctx.beginPath();
-            ctx.arc(balance.pointA.x, balance.pointA.y, 9, 0, 2 * Math.PI);
-            ctx.fill();
-        };
-        ////////////////////////////////////////
-        function levelCustom2() {
-            level.custom = () => {
-                portalEnHaut[2].query();
-                portalEnHaut[3].query();
-                rotor.rotate();
-                doorSortieSalle.openClose();
-                level.exit.drawAndCheck();
+    //         level.enter.draw();
+    //     };
+    //     level.customTopLayer = () => {
+    //         doorSortieSalle.draw();
+    //         ctx.fillStyle = "#233"
+    //         ctx.beginPath();
+    //         ctx.arc(balance.pointA.x, balance.pointA.y, 9, 0, 2 * Math.PI);
+    //         ctx.fill();
+    //     };
+    //     ////////////////////////////////////////
+    //     function levelCustom2() {
+    //         level.custom = () => {
+    //             portalEnHaut[2].query();
+    //             portalEnHaut[3].query();
+    //             rotor.rotate();
+    //             doorSortieSalle.openClose();
+    //             level.exit.drawAndCheck();
 
-                level.enter.draw();
-            };
-            // //////////////////////////////////////
-            level.customTopLayer = () => {
-                doorSortieSalle.draw();
-                portalEnHaut[0].draw();
-                portalEnHaut[1].draw();
-                portalEnHaut[2].draw();
-                portalEnHaut[3].draw();
-                ctx.fillStyle = "#233"
-                ctx.beginPath();
-                ctx.arc(balance.pointA.x, balance.pointA.y, 9, 0, 2 * Math.PI);
-                ctx.fill();
+    //             level.enter.draw();
+    //         };
+    //         // //////////////////////////////////////
+    //         level.customTopLayer = () => {
+    //             doorSortieSalle.draw();
+    //             portalEnHaut[0].draw();
+    //             portalEnHaut[1].draw();
+    //             portalEnHaut[2].draw();
+    //             portalEnHaut[3].draw();
+    //             ctx.fillStyle = "#233"
+    //             ctx.beginPath();
+    //             ctx.arc(balance.pointA.x, balance.pointA.y, 9, 0, 2 * Math.PI);
+    //             ctx.fill();
 
-            };
-        }
-        //spawn box
-        spawn.mapRect(-200, -295, 75, 425);
-        spawn.mapRect(-200, 55, 700, 75);
-        spawn.mapRect(-200, -295, 700, 75);
-        spawn.bodyRect(470, -220, 25, 275); //porte spawn box
-        //couloir
-        spawn.mapRect(450, -520, 50, 300); //muret gauche haut
-        spawn.mapRect(450, 55, 50, 300); //muret gauche bas
-        spawn.mapRect(1700, -520, 50, 325); //muret 2 haut
-        spawn.mapRect(1700, 55, 50, 300); //muret 2 bas
-        spawn.mapRect(4375, 55, 50, 300);
-        spawn.mapRect(4575, 55, 50, 300);
-        spawn.bodyRect(4625, 155, 75, 100);
-        spawn.bodyRect(4725, 230, 50, 25);
-        if (Math.random() > 0.5) {
-            powerUps.chooseRandomPowerUp(4500, 200);
-        } else {
-            powerUps.chooseRandomPowerUp(8350, -630);
-        }
-        //blocs
-        spawn.bodyRect(7475, 1055, 50, 75);
-        spawn.bodyRect(7775, 1105, 25, 25);
-        spawn.bodyRect(6925, 1105, 125, 25);
-        spawn.bodyRect(6375, 380, 50, 50);
-        spawn.bodyRect(6425, -220, 125, 150);
-        spawn.bodyRect(6475, -245, 125, 25);
-        spawn.bodyRect(7675, -245, 100, 50);
-        spawn.bodyRect(7075, -520, 50, 100);
-        spawn.bodyRect(8400, -595, 100, 75);
-        spawn.bodyRect(1700, 5, 50, 50);
-        spawn.bodyRect(1700, -45, 50, 50);
-        spawn.bodyRect(1700, -95, 50, 50);
-        spawn.bodyRect(1700, -145, 50, 50);
-        spawn.bodyRect(1700, -195, 50, 50);
-        spawn.mapRect(450, -520, 1600, 100); //plafond 1
-        spawn.mapRect(450, 255, 1600, 100); //sol 1
-        spawn.mapRect(2250, -45, 1450, 75); //entresol
-        spawn.mapRect(3900, -520, 2000, 100); //plafond 2
-        spawn.mapRect(3900, 255, 2000, 100); //sol 2
-        //grande salle
-        spawn.bodyRect(5900, 830, 325, 300); //bloc en bas à gauche
-        spawn.mapRect(5775, -1295, 2900, 100);
-        spawn.mapRect(5775, 1130, 2900, 100); //plancher + sol grande salle
-        spawn.mapRect(5925, -70, 650, 50); //plateforme middle entrée
-        spawn.mapRect(7575, -520, 1100, 100); //sol salle en haut à droite
-        spawn.mapRect(6800, -420, 450, 50); //petite plateforme transition vers salle en haut
-        spawn.mapRect(7750, -1295, 75, 575); //mur gauche salle en haut à droite
-        spawn.mapRect(6100, 430, 375, 50); //plateforme en bas, gauche rotor
-        spawn.mapRect(7450, -195, 1225, 75); //longue plateforme
-        //murs grande salle
-        spawn.mapRect(5775, -1295, 125, 875);
-        spawn.mapRect(5775, 255, 125, 975);
-        spawn.mapRect(8550, -1295, 125, 875);
-        spawn.mapRect(8550, 180, 125, 1050);
-        //couloir 2
-        spawn.mapRect(8875, -520, 1425, 325);
-        spawn.mapRect(8550, -520, 1750, 100);
-        spawn.mapRect(8550, 180, 2625, 100);
-        spawn.mapRect(10175, -745, 125, 325);
-        spawn.mapRect(10175, -745, 1000, 125);
-        spawn.mapRect(11050, -745, 125, 1025);
-        spawn.mapRect(8875, 80, 1425, 200);
-        //MOBS
-        spawn.randomSmallMob(900, -70, 1);
-        spawn.randomMob(4300, 95, 1);
-        spawn.randomSmallMob(6250, 630, 1);
-        spawn.randomMob(6255, -835, 0.9);
-        spawn.randomMob(8200, -900, 0.7);
-        spawn.randomMob(5700, -270, 0.7);
-        spawn.randomMob(8275, -320, 0.7);
-        spawn.randomMob(2700, -270, 0.7);
-        spawn.randomMob(7575, 950, 0.5);
-        spawn.randomMob(7000, -695, 0.4);
-        spawn.randomMob(1850, -345, 0.3);
-        spawn.randomMob(3600, -270, 0.3);
-        spawn.randomMob(1500, -270, 0.2);
-        spawn.randomMob(1250, 55, 0.2);
-        spawn.randomMob(8800, -45, 0.2);
-        spawn.randomGroup(8025, -845, 0.2);
+    //         };
+    //     }
+    //     //spawn box
+    //     spawn.mapRect(-200, -295, 75, 425);
+    //     spawn.mapRect(-200, 55, 700, 75);
+    //     spawn.mapRect(-200, -295, 700, 75);
+    //     spawn.bodyRect(470, -220, 25, 275); //porte spawn box
+    //     //couloir
+    //     spawn.mapRect(450, -520, 50, 300); //muret gauche haut
+    //     spawn.mapRect(450, 55, 50, 300); //muret gauche bas
+    //     spawn.mapRect(1700, -520, 50, 325); //muret 2 haut
+    //     spawn.mapRect(1700, 55, 50, 300); //muret 2 bas
+    //     spawn.mapRect(4375, 55, 50, 300);
+    //     spawn.mapRect(4575, 55, 50, 300);
+    //     spawn.bodyRect(4625, 155, 75, 100);
+    //     spawn.bodyRect(4725, 230, 50, 25);
+    //     if (Math.random() > 0.5) {
+    //         powerUps.chooseRandomPowerUp(4500, 200);
+    //     } else {
+    //         powerUps.chooseRandomPowerUp(8350, -630);
+    //     }
+    //     //blocs
+    //     spawn.bodyRect(7475, 1055, 50, 75);
+    //     spawn.bodyRect(7775, 1105, 25, 25);
+    //     spawn.bodyRect(6925, 1105, 125, 25);
+    //     spawn.bodyRect(6375, 380, 50, 50);
+    //     spawn.bodyRect(6425, -220, 125, 150);
+    //     spawn.bodyRect(6475, -245, 125, 25);
+    //     spawn.bodyRect(7675, -245, 100, 50);
+    //     spawn.bodyRect(7075, -520, 50, 100);
+    //     spawn.bodyRect(8400, -595, 100, 75);
+    //     spawn.bodyRect(1700, 5, 50, 50);
+    //     spawn.bodyRect(1700, -45, 50, 50);
+    //     spawn.bodyRect(1700, -95, 50, 50);
+    //     spawn.bodyRect(1700, -145, 50, 50);
+    //     spawn.bodyRect(1700, -195, 50, 50);
+    //     spawn.mapRect(450, -520, 1600, 100); //plafond 1
+    //     spawn.mapRect(450, 255, 1600, 100); //sol 1
+    //     spawn.mapRect(2250, -45, 1450, 75); //entresol
+    //     spawn.mapRect(3900, -520, 2000, 100); //plafond 2
+    //     spawn.mapRect(3900, 255, 2000, 100); //sol 2
+    //     //grande salle
+    //     spawn.bodyRect(5900, 830, 325, 300); //bloc en bas à gauche
+    //     spawn.mapRect(5775, -1295, 2900, 100);
+    //     spawn.mapRect(5775, 1130, 2900, 100); //plancher + sol grande salle
+    //     spawn.mapRect(5925, -70, 650, 50); //plateforme middle entrée
+    //     spawn.mapRect(7575, -520, 1100, 100); //sol salle en haut à droite
+    //     spawn.mapRect(6800, -420, 450, 50); //petite plateforme transition vers salle en haut
+    //     spawn.mapRect(7750, -1295, 75, 575); //mur gauche salle en haut à droite
+    //     spawn.mapRect(6100, 430, 375, 50); //plateforme en bas, gauche rotor
+    //     spawn.mapRect(7450, -195, 1225, 75); //longue plateforme
+    //     //murs grande salle
+    //     spawn.mapRect(5775, -1295, 125, 875);
+    //     spawn.mapRect(5775, 255, 125, 975);
+    //     spawn.mapRect(8550, -1295, 125, 875);
+    //     spawn.mapRect(8550, 180, 125, 1050);
+    //     //couloir 2
+    //     spawn.mapRect(8875, -520, 1425, 325);
+    //     spawn.mapRect(8550, -520, 1750, 100);
+    //     spawn.mapRect(8550, 180, 2625, 100);
+    //     spawn.mapRect(10175, -745, 125, 325);
+    //     spawn.mapRect(10175, -745, 1000, 125);
+    //     spawn.mapRect(11050, -745, 125, 1025);
+    //     spawn.mapRect(8875, 80, 1425, 200);
+    //     //MOBS
+    //     spawn.randomSmallMob(900, -70, 1);
+    //     spawn.randomMob(4300, 95, 1);
+    //     spawn.randomSmallMob(6250, 630, 1);
+    //     spawn.randomMob(6255, -835, 0.9);
+    //     spawn.randomMob(8200, -900, 0.7);
+    //     spawn.randomMob(5700, -270, 0.7);
+    //     spawn.randomMob(8275, -320, 0.7);
+    //     spawn.randomMob(2700, -270, 0.7);
+    //     spawn.randomMob(7575, 950, 0.5);
+    //     spawn.randomMob(7000, -695, 0.4);
+    //     spawn.randomMob(1850, -345, 0.3);
+    //     spawn.randomMob(3600, -270, 0.3);
+    //     spawn.randomMob(1500, -270, 0.2);
+    //     spawn.randomMob(1250, 55, 0.2);
+    //     spawn.randomMob(8800, -45, 0.2);
+    //     spawn.randomGroup(8025, -845, 0.2);
 
-        if (simulation.difficulty > 2) {
-            // if (Math.random() < 0.2) {
-            //     // tether ball
-            //     spawn.tetherBoss(8000, 630, { x: 8550, y: 680 })
-            //     let me = mob[mob.length - 1];
-            //     me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
-            //         this.removeCons(); //remove constraint
-            //         spawnCouloirEnHaut()
-            //         doorSortieSalle.isClosing = false;
-            //     };
-            //     if (simulation.difficulty > 4) spawn.nodeGroup(8000, 630, "spawns", 8, 20, 105);
-            // } else {
-            spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss", "orbitalBoss", "pulsarBoss"]);
-            spawn.secondaryBossChance(8000, 630)
-            //find level boss index
-            let me
-            for (let i = 0, len = mob.length; i < len; i++) {
-                if (mob[i].isBoss) me = mob[i]
-            }
-            if (me) {
-                me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
-                    spawnCouloirEnHaut()
-                    doorSortieSalle.isClosing = false;
-                };
-            } else {
-                spawnCouloirEnHaut()
-                doorSortieSalle.isClosing = false;
-            }
-            // }
-        } else {
-            spawn.randomLevelBoss(8000, 630, ["shooterBoss"]);
-            let me
-            for (let i = 0, len = mob.length; i < len; i++) {
-                if (mob[i].isBoss) me = mob[i]
-            }
-            if (me) {
-                me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
-                    spawnCouloirEnHaut()
-                    doorSortieSalle.isClosing = false;
-                };
-            } else {
-                spawnCouloirEnHaut()
-                doorSortieSalle.isClosing = false;
-            }
-        }
-    },
+    //     if (simulation.difficulty > 2) {
+    //         // if (Math.random() < 0.2) {
+    //         //     // tether ball
+    //         //     spawn.tetherBoss(8000, 630, { x: 8550, y: 680 })
+    //         //     let me = mob[mob.length - 1];
+    //         //     me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
+    //         //         this.removeCons(); //remove constraint
+    //         //         spawnCouloirEnHaut()
+    //         //         doorSortieSalle.isClosing = false;
+    //         //     };
+    //         //     if (simulation.difficulty > 4) spawn.nodeGroup(8000, 630, "spawns", 8, 20, 105);
+    //         // } else {
+    //         spawn.randomLevelBoss(8000, 630, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "bomberBoss", "orbitalBoss", "pulsarBoss"]);
+    //         spawn.secondaryBossChance(8000, 630)
+    //         //find level boss index
+    //         let me
+    //         for (let i = 0, len = mob.length; i < len; i++) {
+    //             if (mob[i].isBoss) me = mob[i]
+    //         }
+    //         if (me) {
+    //             me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
+    //                 spawnCouloirEnHaut()
+    //                 doorSortieSalle.isClosing = false;
+    //             };
+    //         } else {
+    //             spawnCouloirEnHaut()
+    //             doorSortieSalle.isClosing = false;
+    //         }
+    //         // }
+    //     } else {
+    //         spawn.randomLevelBoss(8000, 630, ["shooterBoss"]);
+    //         let me
+    //         for (let i = 0, len = mob.length; i < len; i++) {
+    //             if (mob[i].isBoss) me = mob[i]
+    //         }
+    //         if (me) {
+    //             me.onDeath = function() { //please don't edit the onDeath function this causes serious bugs
+    //                 spawnCouloirEnHaut()
+    //                 doorSortieSalle.isClosing = false;
+    //             };
+    //         } else {
+    //             spawnCouloirEnHaut()
+    //             doorSortieSalle.isClosing = false;
+    //         }
+    //     }
+    // },
     house() { //by Francois from discord
-        const rotor = level.rotor(4315, -315, -0.0002, 120, 20, 200);
+        simulation.makeTextLog(`<strong>house</strong> by <span class='color-var'>Francois</span>`);
+        const rotor = level.rotor(4251, -325, 120, 20, 200, 0, 0.01, 0, -0.0001);
         const hazard = level.hazard(4350, -1000, 300, 110);
         const doorBedroom = level.door(1152, -1150, 25, 250, 250);
         const doorGrenier = level.door(1152, -1625, 25, 150, 160);
@@ -6785,6 +6916,7 @@ const level = {
         }
     },
     perplex() { //by Oranger from discord
+        simulation.makeTextLog(`<strong>perplex</strong> by <span class='color-var'>Oranger</span>`);
         document.body.style.backgroundColor = "#dcdcde";
         level.setPosToSpawn(-600, 400);
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -6806,7 +6938,8 @@ const level = {
             x: 1700,
             y: -1700
         }, -Math.PI / 2) //up
-        const rotor = level.rotor(-200, -1950, -0.001)
+        //    rotor(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
+        const rotor = level.rotor(-600, -1950, 800, 50, 0.001, 0, 0.01, 0, -0.001)
 
         level.custom = () => {
             portal[2].query(true)
@@ -6969,6 +7102,7 @@ const level = {
         spawn.secondaryBossChance(7725, 2275)
     },
     coliseum() {
+        simulation.makeTextLog(`<strong>coliseum</strong> by <span class='color-var'>iNoobBoi</span>`);
         level.custom = () => {
             level.exit.drawAndCheck();
 
@@ -7119,6 +7253,8 @@ const level = {
         spawn.secondaryBossChance(6600, 600)
     },
     crossfire() {
+        simulation.makeTextLog(`<strong>crossfire</strong> by <span class='color-var'>iNoobBoi</span>`);
+
         //*1.5
         //Level Setup
         const slimePitOne = level.hazard(0, 850, 3800, 120);
@@ -7282,6 +7418,8 @@ const level = {
         spawn.debris(9300, -900, 400, debrisCount);
     },
     vats() { // Made by Dablux#6610 on Discord
+        simulation.makeTextLog(`<strong>vats</strong> by <span class='color-var'>Dablux</span>`);
+
         simulation.zoomScale = 1500;
         level.setPosToSpawn(4400, -1060)
         spawn.mapRect(level.enter.x, level.enter.y + 30, 100, 20)
@@ -7304,7 +7442,10 @@ const level = {
         const deliverySlime2 = level.hazard(3700, -461, 100, 1141)
         const slimePit = level.hazard(700, 1200, 2500, 1300, 0.004, "hsla(160, 100%, 35%,0.75)")
         const topSlime = level.hazard(800, -460, 2900, 90, 0.004, "hsla(160, 100%, 35%,0.75)")
-        const rotor = level.rotor(0, -725, 0.001)
+        // const rotor = level.rotor(0, -725, 0.001)
+        const rotor = level.rotor(-400, -725, 800, 50, 0.001, 0, 0.01, 0, 0.001)
+
+
         const portal = level.portal({
             x: -135,
             y: 800
@@ -7718,6 +7859,8 @@ const level = {
         }
     },
     "n-gon"() { //make by Oranger
+        simulation.makeTextLog(`<strong>"n-gon"</strong> by <span class='color-var'>Oranger</span>`);
+
         document.body.style.backgroundColor = "#dcdcde";
         let needGravity = [];
         let s = { //mech statue
@@ -8121,6 +8264,8 @@ const level = {
         }
     },
     tunnel() { // by Scarlettt
+        simulation.makeTextLog(`<strong>tunnel</strong> by <span class='color-var'>Scarlettt</span>`);
+
         level.custom = () => {
             level.exit.drawAndCheck();
 
@@ -8593,6 +8738,8 @@ const level = {
         }
     },
     run() {
+        simulation.makeTextLog(`<strong>run</strong> by <span class='color-var'>iNoobBoi</span>`);
+
         addPartToMap = (len) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
             map[len].collisionFilter.category = cat.map;
             map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
@@ -8943,6 +9090,8 @@ const level = {
         }
     },
     islands() {
+        simulation.makeTextLog(`<strong>islands</strong> by <span class='color-var'>Richard0820</span>`);
+
         const boost1 = level.boost(58500, -18264, 1300);
         let portal2, portal3;
         // const removeIndex1 = map.length - 1;

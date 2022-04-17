@@ -1,30 +1,58 @@
 ******************************************************** NEXT PATCH **************************************************
 
-nematodes now wiggle their tail.  it's horrible
-tech: transdimensional spores renamed transdimensional worms
-  spawns spores -> worms
+automonous navigation -> path integration
+  sends spores and worms and drones to the next level with you
+MIRV gives 10->12% smaller radius and damage
+laser tech slow light has 33% less spacing
+tech exciton gives 70%->88% damage
+discrete optimization: 40%->35% damage and fire delay
+degenerate matter 60->66% harm reduction while field is active
+virtual particles 15% duplication is now allowed for time dilation
+railgun no longer uses extra ammo when firing multiple bullets with smelting
+  smelting now costs more ammo with railgun
+plasma torch, ball, extruder all use 33% less energy, do 15% more damage
+bremsstrahlung does 15% more damage
+standing wave field gives 50 energy
+  it's cooldown for blocking shields in now 0.5->0.33 s
 
-missiles:
-  20% more ammo
-  no longer fire rapidly on crouch
-    instead crouch gives missile initial forward velocity
-    no crouch makes the missiles recoil back before they accelerate forward
-  tech: launch system - fire missiles 500% more rapidly, gives 25% ammo
-    doesn't work with cruse missile
-  tech: ICBM - cruse missile is even bigger and slower
+reactor
+  fight now starts when you press a button, so you can prep
+  spawns more ammo 4->7, heals 0->2
+  will no longer show up on levels 2,3,4
+  fewer bosses spawn at high difficulty levels
+  has a small chance to spawn all 3 boss types
+  sprayBoss is 25% slower, but it goes immune while spraying instead of shielding
 
-pavilion has been added back to the map rotation
-  this will make the game end at 13 again, and feel harder
-  let me know if it's absence resulted in less NaN game crashes
+community maps have a short message onload giving credit to the author
+new level element balance - it's basically spinners and rotors combined
+  I'm replacing all rotors to fix potential BUGS
+    sewers, house, perplex, vats
 
-reactor sprayBoss is now harder to kill
-
-bug fixes
+requirement text bug fixes
 
 ******************************************************** TODO ********************************************************
 
-bugs: requirement text man discord messages
-  make sure guns are listed to work with gun tech randomization
+make player collisions with mobs do no harm while standing wave is active
+
+Mobs bypass the [shrinking thing] on pavilion
+ either make this for all mobs or remove it
+  mobs only ignore it before it has been touched and returned
+
+fix issues with rotor
+  maybe fixes NaN
+  vats, sewers
+  replace with code powered spinner
+
+portal:
+  convert graphics to bitmaps
+    this seems to clip the edges
+      issues with
+        the end 
+        platformer
+  player doesn't fling fast enough, unless arrows are held
+  player can't stand on blocks
+    but they can jump on blocks
+
 
 bring back:
   the old phase decoherence field

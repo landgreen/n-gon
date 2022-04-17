@@ -196,9 +196,9 @@ const b = {
 
         }
     },
-    removeGun(gun, isRemoveSelection = false) {
+    removeGun(gunName) {
         for (let i = 0; i < b.guns.length; i++) {
-            if (b.guns[i].name === gun) {
+            if (b.guns[i].name === gunName && b.guns[i].have) {
                 b.guns[i].have = false
                 for (let j = 0; j < b.inventory.length; j++) {
                     if (b.inventory[j] === i) {
@@ -206,13 +206,12 @@ const b = {
                         break
                     }
                 }
-                if (b.inventory.length) {
+                if (b.inventory.length > 0) {
                     b.activeGun = b.inventory[0];
                 } else {
                     b.activeGun = null;
                 }
                 simulation.makeGunHUD();
-                if (isRemoveSelection) b.guns.splice(i, 1) //also remove gun from gun pool array
                 break
             }
         }
@@ -973,7 +972,7 @@ const b = {
         grenadeNeutron = function(where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }, angle = m.angle, size = 1) {
             const me = bullet.length;
             bullet[me] = Bodies.polygon(where.x, where.y, 10, 4, b.fireAttributes(angle, false));
-            b.fireProps((input.down ? 45 : 25) / Math.pow(0.93, tech.missileCount), input.down ? 35 : 20, angle, me); //cd , speed
+            b.fireProps((input.down ? 45 : 25) / Math.pow(0.92, tech.missileCount), input.down ? 35 : 20, angle, me); //cd , speed
             Matter.Body.setDensity(bullet[me], 0.000001);
             bullet[me].endCycle = Infinity;
             bullet[me].frictionAir = 0;
@@ -1901,7 +1900,7 @@ const b = {
             frictionAir: 0.045,
             dmg: 0, //damage done in addition to the damage from momentum
             classType: "bullet",
-            endCycle: simulation.cycle + Math.floor((230 + 40 * Math.random()) * tech.isBulletsLastLonger),
+            endCycle: simulation.cycle + Math.floor((230 + 40 * Math.random()) * tech.isBulletsLastLonger + 120 * tech.isMissileBiggest + 60 * tech.isMissileBig),
             collisionFilter: {
                 category: cat.bullet,
                 mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
@@ -1992,7 +1991,7 @@ const b = {
     didExtruderDrain: false,
     canExtruderFire: true,
     extruder() {
-        const DRAIN = 0.0018
+        const DRAIN = 0.0012
         if (m.energy > DRAIN && b.canExtruderFire) {
             m.energy -= DRAIN
             if (m.energy < 0) {
@@ -2011,7 +2010,7 @@ const b = {
                 frictionAir: 0,
                 isInHole: true, //this keeps the bullet from entering wormholes
                 minDmgSpeed: 0,
-                dmg: m.dmgScale * 2.5, //damage also changes when you divide by mob.mass on in .do()
+                dmg: m.dmgScale * 2.7, //damage also changes when you divide by mob.mass on in .do()
                 classType: "bullet",
                 isBranch: false,
                 restitution: 0,
@@ -2070,7 +2069,7 @@ const b = {
         }
     },
     plasma() {
-        const DRAIN = 0.0011
+        const DRAIN = 0.00075
         if (m.energy > DRAIN) {
             m.energy -= DRAIN;
             if (m.energy < 0) {
@@ -2150,7 +2149,7 @@ const b = {
                     y: best.y
                 };
                 if (best.who.alive) {
-                    const dmg = 0.8 * m.dmgScale; //********** SCALE DAMAGE HERE *********************
+                    const dmg = 0.9 * m.dmgScale; //********** SCALE DAMAGE HERE *********************
                     best.who.damage(dmg);
                     best.who.locatePlayer();
 
@@ -2726,6 +2725,7 @@ const b = {
                 dmg: tech.isMutualism ? 16.8 : 7, //bonus damage from tech.isMutualism
                 lookFrequency: 100 + Math.floor(117 * Math.random()),
                 classType: "bullet",
+                isSpore: true,
                 collisionFilter: {
                     category: cat.bullet,
                     mask: cat.map | cat.mob | cat.mobBullet | cat.mobShield //no collide with body
@@ -4235,7 +4235,7 @@ const b = {
                                 this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, mob[i].position)), this.mass * 0.02)
 
                                 if (tech.missileCount > 1) {
-                                    const countReduction = Math.pow(0.93, tech.missileCount)
+                                    const countReduction = Math.pow(0.85, tech.missileCount)
                                     const size = 0.9 * Math.sqrt(countReduction)
                                     const direction = {
                                         x: Math.cos(angle),
@@ -5765,7 +5765,7 @@ const b = {
             fireCycle: 0,
             do() {},
             fire() {
-                const countReduction = Math.pow(0.9, tech.missileCount)
+                const countReduction = Math.pow(0.86, tech.missileCount)
                 // if (input.down) {
                 //     m.fireCDcycle = m.cycle + tech.missileFireCD * b.fireCDscale / countReduction; // cool down
                 //     // for (let i = 0; i < tech.missileCount; i++) {
@@ -6246,13 +6246,13 @@ const b = {
                                     const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
                                     // console.log(dot, 0.95 - Math.min(dist * 0.00015, 0.3))
                                     if (dot > 0.95 - Math.min(dist * 0.00015, 0.3)) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
-                                        if (this.ammo > -1) {
-                                            this.ammo--
-                                            b.harpoon(where, input.down ? mob[i] : null, angle, harpoonSize, false) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
-                                            angle += SPREAD
-                                            targetCount++
-                                            if (targetCount > tech.extraHarpoons) break
-                                        }
+                                        // if (this.ammo > -1) {
+                                        //     this.ammo--
+                                        b.harpoon(where, input.down ? mob[i] : null, angle, harpoonSize, false) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
+                                        angle += SPREAD
+                                        targetCount++
+                                        if (targetCount > tech.extraHarpoons) break
+                                        // }
                                     }
                                 }
                             }
@@ -6260,14 +6260,14 @@ const b = {
                             if (targetCount < tech.extraHarpoons + 1) {
                                 const num = tech.extraHarpoons + 1 - targetCount
                                 for (let i = 0; i < num; i++) {
-                                    if (this.ammo > -1) {
-                                        this.ammo--
-                                        b.harpoon(where, null, angle, harpoonSize, false)
-                                        angle += SPREAD
-                                    }
+                                    // if (this.ammo > -1) {
+                                    //     this.ammo--
+                                    b.harpoon(where, null, angle, harpoonSize, false)
+                                    angle += SPREAD
+                                    // }
                                 }
                             }
-                            this.ammo++ //make up for the ammo used up in fire()
+                            // this.ammo++ //make up for the ammo used up in fire()
                             simulation.updateGunHUD();
                         } else {
                             //look for closest mob in player's LoS
@@ -7298,7 +7298,7 @@ const b = {
                     m.fireCDcycle = m.cycle
                     m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode
                     const dmg = 0.4 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
-                    const spacing = Math.ceil(5.2 - 0.4 * tech.historyLaser)
+                    const spacing = Math.ceil(4 - 0.3 * tech.historyLaser)
                     ctx.beginPath();
                     b.laser({
                         x: m.pos.x + 20 * Math.cos(m.angle),

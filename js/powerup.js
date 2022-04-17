@@ -736,7 +736,7 @@ const powerUps = {
 
                         function cycle() {
                             count++
-                            if (count < 600 && simulation.isChoosing) {
+                            if (count < tech.brainStormDelay * 5 && simulation.isChoosing) {
                                 if (!(count % tech.brainStormDelay)) {
                                     powerUps.tech.effect();
                                     document.getElementById("choose-grid").style.pointerEvents = "auto"; //turn off the normal 500ms delay

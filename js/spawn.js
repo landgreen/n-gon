@@ -2988,6 +2988,7 @@ const spawn = {
             }, Vector.normalise(Vector.sub(this.fireTarget, this.position)));
             //distance between the target and the player's location
             if (
+                m.isCloak ||
                 dot > 0.03 || // not looking at target
                 Matter.Query.ray(map, this.fireTarget, this.position).length || Matter.Query.ray(body, this.fireTarget, this.position).length || //something blocking line of sight
                 Vector.magnitude(Vector.sub(m.pos, this.fireTarget)) > 1000 // distance from player to target is very far,  (this is because dot product can't tell if facing 180 degrees away)
@@ -3542,6 +3543,10 @@ const spawn = {
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random(), 1)
         Matter.Body.setDensity(me, 0.0022 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.damageReduction = 0.09 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+
+        me.startingDamageReduction = me.damageReduction
+        me.isInvulnerable = false
+
         me.onDeath = function() {
             if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
@@ -3571,8 +3576,8 @@ const spawn = {
             if (this.speed < 0.01) {
                 Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(Vector.sub(player.position, this.position)), 0.1));
             } else {
-                if (Math.abs(this.velocity.y) < 15) Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.07 });
-                if (Math.abs(this.velocity.x) < 11) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.07, y: this.velocity.y });
+                if (Math.abs(this.velocity.y) < 13) Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.07 });
+                if (Math.abs(this.velocity.x) < 10) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.07, y: this.velocity.y });
             }
         }
         me.noFire = function() {
@@ -3582,18 +3587,32 @@ const spawn = {
                 this.phaseCycle = -2
                 this.do = this.burstFire
                 this.frictionAir = 1
-                if (!this.isShielded) spawn.shield(this, this.position.x, this.position.y, 1);
+                this.isInvulnerable = true
+                this.damageReduction = 0
+                // if (!this.isShielded) spawn.shield(this, this.position.x, this.position.y, 1);
             }
         };
         me.burstFire = function() {
             this.normalDoStuff();
             this.radialLines()
+            //draw invulnerable
+            ctx.beginPath();
+            let vertices = this.vertices;
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+            ctx.lineTo(vertices[0].x, vertices[0].y);
+            ctx.lineWidth = 13 + 5 * Math.random();
+            ctx.strokeStyle = `rgba(255,255,255,${0.5+0.2*Math.random()})`;
+            ctx.stroke();
+
             if (!(simulation.cycle % this.burstFireFreq)) {
                 this.phaseCycle++
                 if (this.phaseCycle > this.burstTotalPhases) { //start spiral fire mode
                     this.phaseCycle = -7
                     this.do = this.noFire
                     this.frictionAir = 0;
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
                     Matter.Body.setVelocity(this, Vector.rotate({ x: 20, y: 0 }, 2 * Math.PI * Math.random()));
                     if (this.isShielded) { //remove shield
                         for (let i = 0; i < mob.length; i++) {

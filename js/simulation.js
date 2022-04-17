@@ -823,24 +823,29 @@ const simulation = {
         simulation.drawList = [];
 
         if (tech.isDronesTravel && m.alive) {
-            console.log('hi')
             //count drones
             let count = 0
+            let sporeCount = 0
+            let wormCount = 0
             let deliveryCount = 0
             for (let i = 0; i < bullet.length; ++i) {
                 if (bullet[i].isDrone) {
                     count++
                     if (bullet[i].isImproved) deliveryCount++
+                } else if (bullet[i].isSpore) {
+                    sporeCount++
+                } else if (bullet[i].wormSize) {
+                    wormCount++
                 }
             }
-            // count *= 2
+
             //respawn drones in animation frame
             let respawnDrones = () => {
                 if (count > 0) {
                     requestAnimationFrame(respawnDrones);
                     if (!simulation.paused && !simulation.isChoosing) {
-                        count--
                         const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
+                        count--
                         if (tech.isDroneRadioactive) {
                             b.droneRadioactive({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 100 * (Math.random() - 0.5) }, 0)
                         } else {
@@ -859,6 +864,32 @@ const simulation = {
                 }
             }
             requestAnimationFrame(respawnDrones);
+
+            //respawn spores in animation frame
+            let respawnSpores = () => {
+                if (sporeCount > 0) {
+                    requestAnimationFrame(respawnSpores);
+                    if (!simulation.paused && !simulation.isChoosing) {
+                        sporeCount--
+                        const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
+                        b.spore({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 120 * (Math.random() - 0.5) })
+                    }
+                }
+            }
+            requestAnimationFrame(respawnSpores);
+
+            //respawn worms in animation frame
+            let respawnWorms = () => {
+                if (wormCount > 0) {
+                    requestAnimationFrame(respawnWorms);
+                    if (!simulation.paused && !simulation.isChoosing) {
+                        wormCount--
+                        const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
+                        b.worm({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 120 * (Math.random() - 0.5) })
+                    }
+                }
+            }
+            requestAnimationFrame(respawnWorms);
         }
 
         function removeAll(array) {

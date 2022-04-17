@@ -522,7 +522,7 @@ const m = {
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.15
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
         if (tech.isSlowFPS) dmg *= 0.8
-        if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.4
+        if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.34
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.1
         if (tech.isBotArmor) dmg *= 0.93 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
@@ -956,7 +956,7 @@ const m = {
         m.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         m.isBodiesAsleep = true;
         m.wakeCheck();
-        // m.setMaxEnergy();
+        m.setMaxEnergy();
         m.hole = {
             isOn: false,
             isReady: false,
@@ -971,7 +971,7 @@ const m = {
         }
     },
     setMaxEnergy() {
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 0.5 * (m.fieldUpgrades[m.fieldMode].name === "standing wave")
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
@@ -1336,7 +1336,7 @@ const m = {
                 //draw electricity
                 const step = 40
                 ctx.beginPath();
-                for (let i = 0, len = 1.5 * tech.blockDmg; i < len; i++) {
+                for (let i = 0, len = 1.3 * tech.blockDmg; i < len; i++) {
                     let x = m.pos.x - 20 * unit.x;
                     let y = m.pos.y - 20 * unit.y;
                     ctx.moveTo(x, y);
@@ -1527,7 +1527,7 @@ const m = {
         },
         {
             name: "standing wave",
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> protects you in every <strong>direction</strong><br><strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>", //drains <strong class='color-f'>energy</strong>
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> protects you in every <strong>direction</strong><br>increase your <strong>max</strong> <strong class='color-f'>energy</strong> by <strong>50</strong>", //drains <strong class='color-f'>energy</strong>  //<strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>
             drainCD: 0,
             effect: () => {
                 m.fieldBlockCD = 0;
@@ -1560,7 +1560,7 @@ const m = {
                                 m.pushMass(mob[i]);
                                 this.drainCD = m.cycle + 10
                             }
-                            if (mob[i].isShielded || mob[i].shield) m.fieldCDcycle = m.cycle + 30
+                            if (mob[i].isShielded || mob[i].shield) m.fieldCDcycle = m.cycle + 20
                         }
                     }
                 }
@@ -1589,7 +1589,7 @@ const m = {
                                 m.pushMass(mob[i]);
                                 this.drainCD = m.cycle + 10
                             }
-                            if (mob[i].isShielded || mob[i].shield) m.fieldCDcycle = m.cycle + 30
+                            if (mob[i].isShielded || mob[i].shield) m.fieldCDcycle = m.cycle + 20
                         }
                     }
                 }
@@ -1660,7 +1660,7 @@ const m = {
                                     mob[i].damage(tech.blockDmg * m.dmgScale)
                                     const step = 40
                                     ctx.beginPath();
-                                    for (let i = 0, len = 1.5 * tech.blockDmg; i < len; i++) {
+                                    for (let i = 0, len = 1.3 * tech.blockDmg; i < len; i++) {
                                         let x = m.fieldPosition.x - 20 * unit.x;
                                         let y = m.fieldPosition.y - 20 * unit.y;
                                         ctx.moveTo(x, y);
@@ -1967,6 +1967,11 @@ const m = {
                 // m.eyeFillColor = m.fieldMeterColor
                 m.hold = function() {
                     if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 300 && (m.cycle % 2)) {
+                        // if (tech.isBotField) {
+                        //     b.randomBot(this.position, false)
+                        //     bullet[bullet.length - 1].endCycle = simulation.cycle + 840 //14 seconds
+                        //     m.energy -= 0.35
+                        // } else 
                         if (tech.isSporeField) {
                             if (tech.isSporeWorm) {
                                 const drain = 0.16 + (Math.max(bullet.length, 130) - 130) * 0.02
@@ -2111,9 +2116,9 @@ const m = {
                         isPopping: false,
                         isAttached: false,
                         isOn: false,
-                        drain: 0.0015,
+                        drain: 0.0011,
                         radiusLimit: 10,
-                        damage: 0.7,
+                        damage: 0.8,
                         setPositionToNose() {
                             const nose = { x: m.pos.x + 10 * Math.cos(m.angle), y: m.pos.y + 10 * Math.sin(m.angle) }
                             Matter.Body.setPosition(this, Vector.add(nose, Vector.mult(Vector.normalise(Vector.sub(nose, m.pos)), this.circleRadius)));
@@ -2355,7 +2360,6 @@ const m = {
                                 }
                                 m.plasmaBall.setPositionToNose()
 
-
                                 //add friction for player when holding ball, more friction in vertical
                                 // const floatScale = Math.sqrt(m.plasmaBall.circleRadius)
                                 // const friction = 0.0002 * floatScale
@@ -2380,10 +2384,6 @@ const m = {
                                 } else {
                                     player.force.y -= 0.5 * player.mass * simulation.g;
                                 }
-
-
-
-
                             } else {
                                 m.fieldCDcycle = m.cycle + 90;
                                 m.plasmaBall.fire()
@@ -2402,12 +2402,8 @@ const m = {
                             }
                         }
                         m.drawFieldMeter("rgba(0, 0, 0, 0.2)")
-
                         m.plasmaBall.do()
                     }
-
-
-
                 } else if (tech.isExtruder) {
                     m.hold = function() {
                         b.isExtruderOn = false
@@ -2651,7 +2647,7 @@ const m = {
                 } else {
                     m.fieldFire = true;
                     m.isBodiesAsleep = false;
-                    m.drain = 0.0005
+                    m.drain = 0.0003
                     m.hold = function() {
                         if (m.isHolding) {
                             m.wakeCheck();
@@ -2662,7 +2658,7 @@ const m = {
                             m.grabPowerUp();
                             m.lookForPickUp();
 
-                            m.drain += 0.0000025 //also increases inside tech.isTimeSkip
+                            m.drain += 0.000002 //also increases inside tech.isTimeSkip
                             if (m.energy > m.drain) {
                                 m.energy -= m.drain;
                                 if (m.energy < m.drain) {
