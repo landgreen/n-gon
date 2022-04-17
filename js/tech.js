@@ -442,6 +442,8 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
+            isNonRefundable: true,
+            isBadRandomOption: true,
             allowed() {
                 return b.inventory.length < b.guns.length - 5 //(tech.isDamageForGuns || tech.isFireRateForGuns) &&
             },
@@ -451,12 +453,12 @@ const tech = {
                 for (let i = 0; i < 8; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "gun");
             },
             remove() {
-                if (tech.isGunCycle) {
-                    for (let i = 0; i < 8; i++) {
-                        if (b.inventory.length) b.removeGun(b.guns[b.inventory[b.inventory.length - 1]].name) //remove your last gun
-                    }
-                    tech.isGunCycle = false;
-                }
+                // if (tech.isGunCycle) {
+                //     for (let i = 0; i < 8; i++) {
+                //         if (b.inventory.length) b.removeGun(b.guns[b.inventory[b.inventory.length - 1]].name) //remove your last gun
+                //     }
+                //     tech.isGunCycle = false;
+                // }
             }
         },
         {
@@ -2857,7 +2859,7 @@ const tech = {
         {
             name: "Ψ(t) collapse",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Wave_function_collapse' class="link">Ψ(t) collapse</a>`,
-            description: `enter an <strong class='alt'>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn ${powerUps.orb.research(21)}`,
+            description: `enter an <strong class='alt'>alternate reality</strong> after you <strong class='color-r'>research</strong><br>spawn ${powerUps.orb.research(14)}`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2866,12 +2868,14 @@ const tech = {
                 return !tech.isSwitchReality && !tech.isCollisionRealitySwitch && !tech.isJunkResearch
             },
             requires: "not many-worlds, non-unitary, pseudoscience",
+            bonusResearch: 14,
             effect() {
                 tech.isResearchReality = true;
-                for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + Math.random() * 60, m.pos.y + Math.random() * 60, "research", false);
+                for (let i = 0; i < this.bonusResearch; i++) powerUps.spawn(m.pos.x + Math.random() * 60, m.pos.y + Math.random() * 60, "research", false);
             },
             remove() {
                 tech.isResearchReality = false;
+                if (this.count > 0) powerUps.research.changeRerolls(-this.bonusResearch)
             }
         },
         {
@@ -2885,9 +2889,10 @@ const tech = {
                 return !tech.isSuperDeterminism
             },
             requires: "not superdeterminism",
+            bonusResearch: 9,
             effect() {
                 tech.isBanish = true
-                for (let i = 0; i < 9; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
+                for (let i = 0; i < this.bonusResearch; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
             },
             remove() {
                 if (tech.isBanish) {
@@ -2896,8 +2901,9 @@ const tech = {
                     for (let i = 0; i < tech.tech.length; i++) {
                         if (tech.tech[i].isBanished) tech.tech[i].isBanished = false
                     }
-                    // powerUps.research.changeRerolls(-10)
+                    powerUps.research.changeRerolls(-this.bonusResearch)
                 }
+                tech.isBanish = false
             }
         },
         {
@@ -3028,12 +3034,9 @@ const tech = {
             requires: "not determinism",
             effect: () => {
                 tech.isExtraGunField = true;
-                // for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
-
             },
             remove() {
                 tech.isExtraGunField = false;
-                // if (this.count > 0) powerUps.research.changeRerolls(-2)
             }
         },
         {
@@ -3135,14 +3138,15 @@ const tech = {
                 return true
             },
             requires: "",
+            bonusResearch: 6,
             effect() {
                 tech.isPauseSwitchField = true;
-                for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
+                for (let i = 0; i < this.bonusResearch; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
             },
             remove() {
                 if (tech.isPauseSwitchField) {
                     tech.isPauseSwitchField = false;
-                    powerUps.research.changeRerolls(-6)
+                    powerUps.research.changeRerolls(-this.bonusResearch)
                 }
             }
         },
@@ -3587,7 +3591,7 @@ const tech = {
             requires: "NOT EXPERIMENT MODE, some duplication, not super determinism",
             effect: () => {
                 powerUps.research.changeRerolls(-2)
-                simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2<br>${powerUps.research.count}`)
+                simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2`)
                 powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
                 if (Math.random() < tech.duplicationChance() * 2) powerUps.directSpawn(m.pos.x + 10, m.pos.y + 5, "tech");
             },

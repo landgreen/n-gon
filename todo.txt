@@ -1,34 +1,12 @@
 ******************************************************** NEXT PATCH **************************************************
 
-automonous navigation -> path integration
-  sends spores and worms and drones to the next level with you
-MIRV gives 10->12% smaller radius and damage
-laser tech slow light has 33% less spacing
-tech exciton gives 70%->88% damage
-discrete optimization: 40%->35% damage and fire delay
-degenerate matter 60->66% harm reduction while field is active
-virtual particles 15% duplication is now allowed for time dilation
-railgun no longer uses extra ammo when firing multiple bullets with smelting
-  smelting now costs more ammo with railgun
-plasma torch, ball, extruder all use 33% less energy, do 15% more damage
-bremsstrahlung does 15% more damage
-standing wave field gives 50 energy
-  it's cooldown for blocking shields in now 0.5->0.33 s
-
 reactor
-  fight now starts when you press a button, so you can prep
-  spawns more ammo 4->7, heals 0->2
-  will no longer show up on levels 2,3,4
-  fewer bosses spawn at high difficulty levels
-  has a small chance to spawn all 3 boss types
-  sprayBoss is 25% slower, but it goes immune while spraying instead of shielding
+  you can skip the fight, by not pressing the button and exiting
+  sprayBoss spray mode is now triggered by health loss, it fires a bit slower
+  power ups now spawn high up, but some fall off the edges
+  bonus Bosses can now spawn on reactor
 
-community maps have a short message onload giving credit to the author
-new level element balance - it's basically spinners and rotors combined
-  I'm replacing all rotors to fix potential BUGS
-    sewers, house, perplex, vats
-
-requirement text bug fixes
+bug fixes
 
 ******************************************************** TODO ********************************************************
 

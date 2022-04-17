@@ -3532,25 +3532,33 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.isBoss = true;
         me.inertia = Infinity; //no rotation
-        // me.accelMag = 0.00008 + 0.00007 * simulation.accelScale;
-        me.burstFireFreq = 18 + Math.floor(18 * simulation.CDScale)
-        me.burstTotalPhases = 4 + Math.floor(2 / simulation.CDScale)
-        me.noFireTotalCycles = 360
+        me.burstFireFreq = 18 + Math.floor(14 * simulation.CDScale)
+        me.burstTotalPhases = 3 + Math.floor(2 / simulation.CDScale)
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0;
         me.restitution = 1
-        spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random(), 1)
-        Matter.Body.setDensity(me, 0.0022 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        spawn.spawnOrbitals(me, radius + 50 + 150 * Math.random(), 1)
+        Matter.Body.setDensity(me, 0.0022 + 0.0001 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.damageReduction = 0.09 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
-
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
-
+        me.nextHealthThreshold = 0.75
         me.onDeath = function() {
             if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.onDamage = function() {};
+        me.onDamage = function() {
+            if (this.health < this.nextHealthThreshold) {
+                this.health = this.nextHealthThreshold - 0.01
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
+
+                this.phaseCycle = -2
+                this.do = this.burstFire
+                this.frictionAir = 1
+                this.isInvulnerable = true
+                this.damageReduction = 0
+            }
+        };
 
         //draw radial lines from verticies showing future bullet paths?
         me.radialLines = function() {
@@ -3559,7 +3567,6 @@ const spawn = {
                 ctx.moveTo(this.vertices[i].x, this.vertices[i].y)
                 const unit = Vector.add(Vector.mult(Vector.normalise(Vector.sub(this.vertices[i], this.position)), 1000), this.vertices[i])
                 ctx.lineTo(unit.x, unit.y)
-                // console.log(unit, this.vertices, this.position)
             }
             ctx.lineWidth = 10
             ctx.strokeStyle = "rgb(200,0,200,0.03)"
@@ -3568,8 +3575,6 @@ const spawn = {
 
         me.phaseCycle = 0
         me.normalDoStuff = function() {
-            // this.seePlayerByHistory();
-            // this.attraction();
             this.checkStatus();
             me.seePlayer.recall = 1
             //maintain speed //faster in the vertical to help avoid repeating patterns
@@ -3580,18 +3585,6 @@ const spawn = {
                 if (Math.abs(this.velocity.x) < 10) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.07, y: this.velocity.y });
             }
         }
-        me.noFire = function() {
-            this.normalDoStuff();
-            this.phaseCycle++
-            if (this.phaseCycle > this.noFireTotalCycles) { //start burst fire mode
-                this.phaseCycle = -2
-                this.do = this.burstFire
-                this.frictionAir = 1
-                this.isInvulnerable = true
-                this.damageReduction = 0
-                // if (!this.isShielded) spawn.shield(this, this.position.x, this.position.y, 1);
-            }
-        };
         me.burstFire = function() {
             this.normalDoStuff();
             this.radialLines()
@@ -3608,8 +3601,8 @@ const spawn = {
             if (!(simulation.cycle % this.burstFireFreq)) {
                 this.phaseCycle++
                 if (this.phaseCycle > this.burstTotalPhases) { //start spiral fire mode
-                    this.phaseCycle = -7
-                    this.do = this.noFire
+                    // this.phaseCycle = -7
+                    this.do = this.normalDoStuff
                     this.frictionAir = 0;
                     this.isInvulnerable = false
                     this.damageReduction = this.startingDamageReduction
@@ -3633,7 +3626,7 @@ const spawn = {
                 }
             }
         };
-        me.do = me.noFire
+        me.do = me.normalDoStuff
         Matter.Body.setVelocity(me, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) });
     },
     mineBoss(x, y, radius = 120, isSpawnBossPowerUp = true) {
