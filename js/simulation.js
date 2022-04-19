@@ -722,7 +722,7 @@ const simulation = {
 
         //set to default field
         tech.healMaxEnergyBonus = 0
-        m.setMaxEnergy();
+        // m.setMaxEnergy();
         m.energy = 0
         m.immuneCycle = 0;
         // simulation.makeTextLog(`${simulation.SVGrightMouse}<strong style='font-size:30px;'> ${m.fieldUpgrades[m.fieldMode].name}</strong><br><span class='faded'></span><br>${m.fieldUpgrades[m.fieldMode].description}`, 600);

@@ -1,36 +1,27 @@
 ******************************************************** NEXT PATCH **************************************************
 
-reactor
-  you can skip the fight, by not pressing the button and exiting
-  sprayBoss spray mode is now triggered by health loss, it fires a bit slower
-  power ups now spawn high up, but some fall off the edges
-  bonus Bosses can now spawn on reactor
+generalist now requires 2 guns to unlock
+  active cooling 18->20% fire speed increase per gun
+  arsenal 12->13% damage increase per gun
+futures exchange 4.3->4.5% duplication on cancel
+perimeter defense 7->6% harm reduction per bot
+unified field theory no longer gets bonus rerolls, instead it triples the frequency of field tech
+  removed tensor field
+meta-analysis gives 3->1 research after choosing JUNK
+
+plasma ball moves faster 7->10
 
 bug fixes
+JUNK tech density removed
+  it was causing the NaN bug
 
 ******************************************************** TODO ********************************************************
 
+
+nonrefundable tech don't display, this is confusing
+    maybe they can show up but greyed out or something
+
 make player collisions with mobs do no harm while standing wave is active
-
-Mobs bypass the [shrinking thing] on pavilion
- either make this for all mobs or remove it
-  mobs only ignore it before it has been touched and returned
-
-fix issues with rotor
-  maybe fixes NaN
-  vats, sewers
-  replace with code powered spinner
-
-portal:
-  convert graphics to bitmaps
-    this seems to clip the edges
-      issues with
-        the end 
-        platformer
-  player doesn't fling fast enough, unless arrows are held
-  player can't stand on blocks
-    but they can jump on blocks
-
 
 bring back:
   the old phase decoherence field

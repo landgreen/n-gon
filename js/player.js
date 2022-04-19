@@ -524,7 +524,7 @@ const m = {
         if (tech.isSlowFPS) dmg *= 0.8
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.34
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.1
-        if (tech.isBotArmor) dmg *= 0.93 ** b.totalBots()
+        if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.energyRegen === 0) dmg *= 0.34
@@ -971,7 +971,7 @@ const m = {
         }
     },
     setMaxEnergy() {
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 0.5 * (m.fieldUpgrades[m.fieldMode].name === "standing wave")
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 0.6 * (m.fieldUpgrades[m.fieldMode].name === "standing wave")
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
@@ -1527,7 +1527,7 @@ const m = {
         },
         {
             name: "standing wave",
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> protects you in every <strong>direction</strong><br>increase your <strong>max</strong> <strong class='color-f'>energy</strong> by <strong>50</strong>", //drains <strong class='color-f'>energy</strong>  //<strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> protects you in every <strong>direction</strong><br>increase your <strong>max</strong> <strong class='color-f'>energy</strong> by <strong>60</strong>", //drains <strong class='color-f'>energy</strong>  //<strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>
             drainCD: 0,
             effect: () => {
                 m.fieldBlockCD = 0;
@@ -1536,9 +1536,9 @@ const m = {
                 m.fieldShieldingScale = 1.3 * Math.pow(0.6, (tech.harmonics - 2))
 
                 m.harmonic3Phase = () => { //normal standard 3 different 2-d circles
-                    const fieldRange1 = (0.7 + 0.3 * Math.sin(m.cycle / 23)) * m.fieldRange * m.harmonicRadius
-                    const fieldRange2 = (0.63 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange * m.harmonicRadius
-                    const fieldRange3 = (0.65 + 0.35 * Math.sin(m.cycle / 47)) * m.fieldRange * m.harmonicRadius
+                    const fieldRange1 = (0.75 + 0.3 * Math.sin(m.cycle / 23)) * m.fieldRange * m.harmonicRadius
+                    const fieldRange2 = (0.68 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange * m.harmonicRadius
+                    const fieldRange3 = (0.7 + 0.35 * Math.sin(m.cycle / 47)) * m.fieldRange * m.harmonicRadius
                     const netfieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
                     ctx.fillStyle = "rgba(110,170,200," + Math.min(0.73, (0.04 + m.energy * (0.11 + 0.13 * Math.random()))) + ")";
                     ctx.beginPath();
@@ -2125,7 +2125,7 @@ const m = {
                         },
                         fire() {
                             this.isAttached = false;
-                            const speed = 7 //scale with mass?
+                            const speed = 10 //scale with mass?
                             Matter.Body.setVelocity(this, {
                                 x: player.velocity.x * 0.4 + speed * Math.cos(m.angle),
                                 y: speed * Math.sin(m.angle)

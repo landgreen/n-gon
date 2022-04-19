@@ -17,7 +17,7 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
             // m.setField("metamaterial cloaking")
-            // b.giveGuns("missiles")
+            // b.giveGuns("laser")
             // tech.giveTech("scrap-bot manufacturing")
             // tech.giveTech("dynamo-bot upgrade")
             // tech.giveTech("time crystals")
@@ -35,9 +35,9 @@ const level = {
             // tech.giveTech("extruder")
 
             // m.immuneCycle = Infinity //you can't take damage
-            // level.difficultyIncrease(1) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.reactor();
+            // level.pavilion();
             // level.testing(); //not in rotation, used for testing
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -49,11 +49,8 @@ const level = {
             // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
-
             // lore.unlockTesting();
             // tech.giveTech("tinker"); //show junk tech in experiment mode
-            // tech.giveRandomJUNK()
-            // tech.giveRandomJUNK()
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.pickList = ["focuser", "focuser"]
@@ -237,7 +234,6 @@ const level = {
             Math.initialSeed = String(document.getElementById("seed").value)
             Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
         }
-
         if (simulation.isTraining) {
             level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
         } else {
@@ -2760,7 +2756,7 @@ const level = {
                     doorIn.isClosing = false
                     doorOut.isClosing = false
                     powerUps.spawnBossPowerUp(2900, -100)
-                    powerUps.spawn(2900, -200, "tech")
+                    powerUps.spawn(3050, -200, "tech")
                 }
             }
         };
