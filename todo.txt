@@ -1,27 +1,20 @@
 ******************************************************** NEXT PATCH **************************************************
 
-generalist now requires 2 guns to unlock
-  active cooling 18->20% fire speed increase per gun
-  arsenal 12->13% damage increase per gun
-futures exchange 4.3->4.5% duplication on cancel
-perimeter defense 7->6% harm reduction per bot
-unified field theory no longer gets bonus rerolls, instead it triples the frequency of field tech
-  removed tensor field
-meta-analysis gives 3->1 research after choosing JUNK
+new fan level temple by Scar1337 is now add to community maps!
+  you have to try it out!
 
-plasma ball moves faster 7->10
+standing wave buffs
+  standing wave deflecting, is more efficient for multiple blocks in a very short time (< 1s)
+  spherical harmonics no longer deactivates on contact with shielded mobs
+  expansion increases block efficiency by 25->40%
 
-bug fixes
-JUNK tech density removed
-  it was causing the NaN bug
+negative mass field
+  neutronium: move 33->25% slower
 
 ******************************************************** TODO ********************************************************
 
-
 nonrefundable tech don't display, this is confusing
     maybe they can show up but greyed out or something
-
-make player collisions with mobs do no harm while standing wave is active
 
 bring back:
   the old phase decoherence field

@@ -187,7 +187,7 @@ const spawn = {
             ctx.stroke();
         }
     },
-    WIMP(x = level.exit.x + 300 * (Math.random() - 0.5), y = level.exit.y + 300 * (Math.random() - 0.5)) { //immortal mob that follows player //if you have the tech it spawns at start of every level at the exit
+    WIMP(x = level.exit.x + tech.wimpCount * 200 * (Math.random() - 0.5), y = level.exit.y + tech.wimpCount * 200 * (Math.random() - 0.5)) { //immortal mob that follows player //if you have the tech it spawns at start of every level at the exit
         mobs.spawn(x, y, 3, 0.1, "transparent");
         let me = mob[mob.length - 1];
         me.stroke = "transparent"
@@ -259,9 +259,15 @@ const spawn = {
             // ctx.fill();
             // ctx.globalCompositeOperation = "source-over"
         }
-        me.do = function() { //wake up 2 seconds after the player moves
+        me.do = function() { //wake up after the player moves
             if (player.speed > 1 && !m.isCloak) {
-                setTimeout(() => { this.do = this.awake; }, 2000);
+                if (this.distanceToPlayer() < 500) {
+                    const unit = Vector.rotate({ x: 1, y: 0 }, Math.random() * 6.28)
+                    Matter.Body.setPosition(this, Vector.add(player.position, Vector.mult(unit, 2000)))
+                }
+                setTimeout(() => {
+                    this.do = this.awake;
+                }, 500 + 2000 * Math.random());
             }
             this.checkStatus();
         };

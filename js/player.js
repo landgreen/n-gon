@@ -1533,7 +1533,7 @@ const m = {
                 m.fieldBlockCD = 0;
                 m.blockingRecoil = 2 //4 is normal
                 m.fieldRange = 175
-                m.fieldShieldingScale = 1.3 * Math.pow(0.6, (tech.harmonics - 2))
+                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
 
                 m.harmonic3Phase = () => { //normal standard 3 different 2-d circles
                     const fieldRange1 = (0.75 + 0.3 * Math.sin(m.cycle / 23)) * m.fieldRange * m.harmonicRadius
@@ -1557,8 +1557,9 @@ const m = {
                             if (this.drainCD > m.cycle) {
                                 m.pushMass(mob[i], 0);
                             } else {
+                                console.log(this.drainCD)
                                 m.pushMass(mob[i]);
-                                this.drainCD = m.cycle + 10
+                                this.drainCD = m.cycle + 15
                             }
                             if (mob[i].isShielded || mob[i].shield) m.fieldCDcycle = m.cycle + 20
                         }
@@ -1587,9 +1588,8 @@ const m = {
                                 m.pushMass(mob[i], 0);
                             } else {
                                 m.pushMass(mob[i]);
-                                this.drainCD = m.cycle + 10
+                                this.drainCD = m.cycle + 15
                             }
-                            if (mob[i].isShielded || mob[i].shield) m.fieldCDcycle = m.cycle + 20
                         }
                     }
                 }

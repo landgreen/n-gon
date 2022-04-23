@@ -3129,7 +3129,7 @@ const tech = {
         },
         {
             name: "unified field theory",
-            description: `<span style = 'font-size:90%;'><strong>clicking</strong> the <strong class='color-f'>field</strong> box when <strong>paused</strong> cycles your <strong class='color-f'>field</strong><br><strong>triple</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong> <strong class='color-m'>tech</strong></span>`,
+            description: `<span style = 'font-size:90%;'><strong>clicking</strong> the <strong class='color-f'>field</strong> box when <strong>paused</strong> cycles your <strong class='color-f'>field</strong><br><strong>triple</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong><strong class='color-m'>tech</strong></span>`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3771,7 +3771,7 @@ const tech = {
         },
         {
             name: "needle gun",
-            description: "<strong>nail gun</strong> and <strong>shot gun</strong> fire mob piercing <strong>needles</strong>",
+            description: "<strong>nail gun</strong> and <strong>shotgun</strong> fire mob piercing <strong>needles</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -3810,7 +3810,7 @@ const tech = {
         },
         {
             name: "rivet gun",
-            description: "<strong>nail gun</strong> and <strong>shot gun</strong> slowly lob a heavy <strong>rivet</strong>",
+            description: "<strong>nail gun</strong> and <strong>shotgun</strong> slowly lob a heavy <strong>rivet</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -3819,7 +3819,7 @@ const tech = {
             allowed() {
                 return ((tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate) || (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isFoamShot && !tech.isSporeWorm)) && !tech.isNeedles && !tech.isIceCrystals && !tech.isIceShot
             },
-            requires: "nail gun, shot gun, not ice crystal, needles, or pneumatic actuator",
+            requires: "nail gun, shotgun, not ice crystal, needles, or pneumatic actuator",
             effect() {
                 tech.isRivets = true
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -4250,7 +4250,7 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return tech.haveGunCheck("shotgun") || tech.haveGunCheck("super balls") || (tech.isRivets && !tech.isNailCrit) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isDroneTeleport || tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
+                return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isNeedles) || tech.haveGunCheck("super balls") || (tech.isRivets && !tech.isNailCrit) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isDroneTeleport || tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
             },
             requires: "shotgun, super balls, rivets, drones, not irradiated drones or burst drones",
             effect() {
@@ -6192,7 +6192,7 @@ const tech = {
         },
         {
             name: "spherical harmonics",
-            description: "<strong>standing wave</strong> oscillates in a 3rd dimension<br>increase <strong>deflecting</strong> efficiency by <strong>40%</strong>",
+            description: "<strong>standing wave</strong> deflects <strong>40%</strong> more efficiently<br>no longer deactivates with mob <strong>shields</strong>", //<strong>standing wave</strong> oscillates in a 3rd dimension<br>
             isFieldTech: true,
             maxCount: 9,
             count: 0,
@@ -6204,18 +6204,18 @@ const tech = {
             requires: "standing wave",
             effect() {
                 tech.harmonics++
-                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 1.1 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
+                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
                 m.harmonicShield = m.harmonicAtomic
             },
             remove() {
                 tech.harmonics = 2
-                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 1.1 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
+                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
                 m.harmonicShield = m.harmonic3Phase
             }
         },
         {
             name: "expansion",
-            description: "using <strong>standing wave</strong> field <strong>expands</strong> its <strong>radius</strong><br>increase <strong>deflecting</strong> efficiency by <strong>25%</strong>",
+            description: "<strong>standing wave</strong> deflects <strong>40%</strong> more efficiently<br>using <strong>standing wave</strong> field <strong>expands</strong> its <strong>radius</strong>",
             // description: "use <strong class='color-f'>energy</strong> to <strong>expand</strong> <strong>standing wave</strong><br>the field slowly <strong>contracts</strong> when not used",
             isFieldTech: true,
             maxCount: 1,
@@ -6223,16 +6223,16 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "standing wave"
+                return m.fieldUpgrades[m.fieldMode].name === "standing wave" && (tech.blockDmg || tech.blockingIce)
             },
-            requires: "standing wave",
+            requires: "standing wave, bremsstrahlung, triple point",
             effect() {
                 tech.isStandingWaveExpand = true
-                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 1.1 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
+                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
             },
             remove() {
                 tech.isStandingWaveExpand = false
-                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 1.1 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
+                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
                 m.harmonicRadius = 1
             }
         },
@@ -6376,7 +6376,7 @@ const tech = {
         },
         {
             name: "neutronium",
-            description: `reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong> when your <strong class='color-f'>field</strong> is active<br><strong>move</strong> and <strong>jump</strong> <strong>33%</strong> <strong>slower</strong>`,
+            description: `reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong> when your <strong class='color-f'>field</strong> is active<br><strong>move</strong> and <strong>jump</strong> <strong>25%</strong> <strong>slower</strong>`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -6388,8 +6388,8 @@ const tech = {
             requires: "negative mass, not mass-energy",
             effect() {
                 tech.isNeutronium = true
-                tech.baseFx *= 0.66
-                tech.baseJumpForce *= 0.66
+                tech.baseFx *= 0.75
+                tech.baseJumpForce *= 0.75
                 m.setMovement()
             },
             //also removed in m.setHoldDefaults() if player switches into a bad field
@@ -7631,25 +7631,24 @@ const tech = {
             },
             remove() {}
         },
-        {
-            name: "hi",
-            description: `spawn to seed`,
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isNonRefundable: true,
-            isJunk: true,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                document.getElementById("seed").placeholder = Math.initialSeed = String(616)
-                Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
-
-            },
-            remove() {}
-        },
+        // {
+        //     name: "hi",
+        //     description: `spawn to seed <strong>616</strong> `,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 0,
+        //     isNonRefundable: true,
+        //     isJunk: true,
+        //     allowed() {
+        //         return true
+        //     },
+        //     requires: "",
+        //     effect() {
+        //         document.getElementById("seed").placeholder = Math.initialSeed = String(616)
+        //         Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
+        //     },
+        //     remove() {}
+        // },
         {
             name: "meteor shower",
             description: "take a shower, but meteors instead of water",
