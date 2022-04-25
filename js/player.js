@@ -1557,7 +1557,6 @@ const m = {
                             if (this.drainCD > m.cycle) {
                                 m.pushMass(mob[i], 0);
                             } else {
-                                console.log(this.drainCD)
                                 m.pushMass(mob[i]);
                                 this.drainCD = m.cycle + 15
                             }

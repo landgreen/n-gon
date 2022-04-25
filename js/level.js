@@ -16,16 +16,16 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
-            // m.setField("metamaterial cloaking")
+            // m.setField("standing wave")
             // b.giveGuns("laser")
             // tech.giveTech("scrap-bot manufacturing")
             // tech.giveTech("dynamo-bot upgrade")
-            // tech.giveTech("time crystals")
+            // tech.giveTech("options exchange")
             // tech.giveTech("ICBM")
             // tech.giveTech("grappling hook")
-            // tech.giveTech("annelids")
-            // for (let i = 0; i < 10; i++) powerUps.directSpawn(0, 0, "tech");
-            // for (let i = 0; i < 9; i++) tech.giveTech("WIMPs")
+            // tech.giveTech("paradigm shift")
+            // for (let i = 0; i < 1; i++) powerUps.directSpawn(450, -50, "tech");
+            // for (let i = 0; i < 15; i++) tech.giveTech()
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
             // powerUps.research.changeRerolls(100000)
             // for (let i = 0; i < 5; i++) tech.giveTech("corona discharge")
@@ -83,7 +83,7 @@ const level = {
             }
         }
         if (tech.isExtraMaxEnergy) {
-            tech.healMaxEnergyBonus += 0.05 * powerUps.totalPowerUps //Math.min(0.02 * powerUps.totalPowerUps, 0.51)
+            tech.healMaxEnergyBonus += 0.1 * powerUps.totalPowerUps //Math.min(0.02 * powerUps.totalPowerUps, 0.51)
             m.setMaxEnergy();
         }
         if (tech.isGunCycle) {
@@ -243,7 +243,7 @@ const level = {
                 // level.levels.push(level.communityLevels)
                 level.levels = level.levels.concat(level.communityLevels)
                 level.levels = shuffle(level.levels); //shuffles order of maps
-                level.levels.splice(0, 9); //remove some random levels to make up for adding the community levels
+                level.levels.splice(0, level.communityLevels.length); //remove some random levels to make up for adding the community levels
                 simulation.isHorizontalFlipped = false;
             } else {
                 level.levels = shuffle(level.levels); //shuffles order of maps
@@ -2473,7 +2473,6 @@ const level = {
             localSettings.loreCount++ //hear the next conversation next time you win
             if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         }
-
         // const hazardSlime = level.hazard(-1800, 150, 3600, 650, 0.004, "hsla(160, 100%, 35%,0.75)")
         level.isHazardRise = false //this is set to true to make the slime rise up
         const hazardSlime = level.hazard(-1800, -800, 3600, 1600, 0.004, "hsla(160, 100%, 35%,0.75)")
@@ -2561,6 +2560,7 @@ const level = {
         simulation.zoomTransition(level.defaultZoom)
         // document.body.style.backgroundColor = "#aaa";
         document.body.style.backgroundColor = "#ddd";
+        color.map = "#808f8f"
 
         spawn.mapRect(-3000, 800, 5000, 1200); //bottom
         spawn.mapRect(-2000, -2000, 5000, 1200); //ceiling
@@ -2624,7 +2624,7 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
         // spawn.starter(1900, -500, 200) //big boy
@@ -2636,7 +2636,7 @@ const level = {
         // spawn.powerUpBossBaby(3200, -500)
         // spawn.snakeBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
-        spawn.pulsarBoss(1700, -500)
+        // spawn.pulsarBoss(1700, -500)
         // spawn.spawnerBossCulture(3200, -500)
         // spawn.grenadierBoss(1700, -500)
         // spawn.growBossCulture(3200, -500)
@@ -2646,7 +2646,7 @@ const level = {
         // spawn.launcherBoss(3200, -500)
         // spawn.blockBoss(1700, -500)
         // spawn.blinkBoss(3200, -500)
-        // spawn.mantisBoss(1700, -500)
+        // spawn.spiderBoss(1700, -500)
         // spawn.tetherBoss(1700, -500) //go to actual level?
         // spawn.revolutionBoss(1900, -500)
         // spawn.bomberBoss(1400, -500)
@@ -2654,8 +2654,8 @@ const level = {
         // spawn.shieldingBoss(1700, -500)
 
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
-        // for (let i = 0; i < 5; i++) spawn.focuser(1900, -500)
-        spawn.pulsar(1900, -500)
+        for (let i = 0; i < 1; i++) spawn.stabber(1900, -500)
+        // spawn.pulsar(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
         // spawn.nodeGroup(1200, 0, "grenadier")
@@ -2672,6 +2672,7 @@ const level = {
         level.defaultZoom = 2000
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#d0d5df" //"#d8dadf";
+        color.map = "#334046";
         // powerUps.spawnStartingPowerUps(1475, -1175);
         // spawn.debris(750, -2200, 3700, 16); //16 debris per level
         const button = level.button(1400, 0)
@@ -3198,6 +3199,8 @@ const level = {
         level.defaultZoom = 2300
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#d8dadf";
+        color.map = "#3d4240"
+
         powerUps.spawnStartingPowerUps(-575, -2925)
         // spawn.debris(750, -2200, 3700, 16); //16 debris per level            //no debris?
 
@@ -3671,6 +3674,7 @@ const level = {
         level.defaultZoom = 2200
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#d5d5d5";
+        color.map = "#555"
         spawn.mapRect(0, -1955, 175, 30);
         const removeIndex1 = map.length - 1 //so much work to catch blocks caught at the bottom of the vertical portals
         spawn.mapRect(1225, -1955, 175, 30);
@@ -3968,6 +3972,7 @@ const level = {
         level.defaultZoom = 1800
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "hsl(138, 3%, 74%)";
+        color.map = "#3d4240"
         powerUps.spawnStartingPowerUps(3475, 1775);
         spawn.debris(4575, 2550, 1600, 9); //16 debris per level
         spawn.debris(7000, 2550, 2000, 7); //16 debris per level
@@ -9489,10 +9494,9 @@ const level = {
             Matter.Body.setDensity(me, 0.014); // extra dense, normal is 0.001 // makes effective life much larger
             me.onDeath = function() {
                 // applying forces to player doesn't seem to work inside this method, not sure why
-                powerUps.spawn(this.position.x, this.position.y, "ammo");
-                powerUps.spawn(this.position.x, this.position.y, "ammo");
-                if (Math.random() > 0.2) powerUps.spawn(this.position.x, this.position.y, "heal", true, null,
-                    30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
+                powerUps.spawn(this.position.x + 20, this.position.y, "ammo");
+                if (Math.random() > 0.5) powerUps.spawn(this.position.x, this.position.y, "ammo");
+                if (Math.random() > 0.3) powerUps.spawn(this.position.x, this.position.y, "heal", true, null, 30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
                 if (simulation.difficulty > 5) {
                     // fling player to center
                     const SUB = V.sub(this.position, player.position)
@@ -9808,11 +9812,13 @@ const level = {
             }
         };
         let oldNextLevel = level.nextLevel;
+        const oldFallHeight = simulation.fallHeight;
         level.nextLevel = () => {
             color.map = "#444";
             m.death = m.oldDeath;
             canvas.style.filter = "";
             level.nextLevel = oldNextLevel;
+            simulation.fallHeight = oldFallHeight;
             oldNextLevel();
         }
         let bounds = [];
@@ -9824,6 +9830,7 @@ const level = {
                 m.death = m.oldDeath;
                 canvas.style.filter = "";
                 level.nextLevel = oldNextLevel;
+                simulation.fallHeight = oldFallHeight;
             }
             m.oldDeath();
         }
@@ -10233,6 +10240,7 @@ const level = {
                     level.exit.x = 4500;
                     level.exit.y = -2030;
                     relocateTo(50, -2050);
+                    simulation.fallHeight = -1000;
                     simulation.setZoom(1800);
                     templePlayer.startAnim = -1;
                     for (let i = 0; i < tech.wimpCount + tech.wimpExperiment; i++) {
@@ -10266,6 +10274,7 @@ const level = {
                 if (templePlayer.room1ToRoom2Anim === 960) {
                     makeLore("You are trying too hard.");
                     relocateTo(0, -7050);
+                    simulation.fallHeight = -6000;
                     templePlayer.stage = 2;
                 }
                 if (templePlayer.room1ToRoom2Anim === 1200) {
@@ -10313,6 +10322,7 @@ const level = {
                     makeLore("Do not interfere with me.");
                     templePlayer.stage = 3;
                     relocateTo(50, -13150);
+                    simulation.fallHeight = -10000;
                     simulation.zoomTransition(1800);
                     templePlayer.startAnim = -1;
                     // Might be a bit harsh to the player if the WIMPs are involved in the third level

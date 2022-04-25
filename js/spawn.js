@@ -91,11 +91,11 @@ const spawn = {
                     spawn.lineGroup(x, y, pick);
                 }
             } else {
-                if (Math.random() < 0.07) {
+                if (Math.random() < 0.1) {
                     spawn[pick](x, y, 90 + Math.random() * 40); //one extra large mob
                     spawn.spawnOrbitals(mob[mob.length - 1], mob[mob.length - 1].radius + 50 + 200 * Math.random(), 1)
-                } else if (Math.random() < 0.35) {
-                    spawn.blockGroup(x, y) //hidden grouping blocks
+                    // } else if (Math.random() < 0.35) {
+                    // spawn.blockGroup(x, y) //hidden grouping blocks
                 } else {
                     pick = (Math.random() < 0.5) ? "randomList" : "random";
                     if (Math.random() < 0.55) {
@@ -3254,7 +3254,7 @@ const spawn = {
             ctx.lineTo(best.x, best.y);
         }
     },
-    stabber(x, y, radius = 25 + Math.ceil(Math.random() * 12), spikeMax = 9) {
+    stabber(x, y, radius = 25 + Math.ceil(Math.random() * 12), spikeMax = 7) {
         if (radius > 80) radius = 65;
         mobs.spawn(x, y, 6, radius, "rgb(220,50,205)"); //can't have sides above 6 or collision events don't work (probably because of a convex problem)
         let me = mob[mob.length - 1];
@@ -3265,11 +3265,14 @@ const spawn = {
         me.spikeVertex = 0;
         me.spikeLength = 0;
         me.isSpikeGrowing = false;
+        me.spikeGrowth = 0;
         me.isSpikeReset = true;
         me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.player //can't touch other mobs
         Matter.Body.rotate(me, Math.PI * 0.1);
         spawn.shield(me, x, y);
         // me.onDamage = function () {};
+        // me.onHit = function() { //run this function on hitting player
+        // };
         me.onDeath = function() {
             if (this.spikeLength > 4) {
                 this.spikeLength = 4
@@ -3287,7 +3290,7 @@ const spawn = {
                 if (this.seePlayer.recall) {
                     const dist = Vector.sub(this.seePlayer.position, this.position);
                     const distMag = Vector.magnitude(dist);
-                    if (distMag < this.radius * 7) {
+                    if (distMag < radius * spikeMax) {
                         //find nearest vertex
                         let nearestDistance = Infinity
                         for (let i = 0, len = this.vertices.length; i < len; i++) {
@@ -3308,24 +3311,29 @@ const spawn = {
                 }
             } else {
                 if (this.isSpikeGrowing) {
-                    this.spikeLength += 1
+                    this.spikeLength += Math.pow(this.spikeGrowth += 0.02, 8)
+                    // if (this.spikeLength < 2) {
+                    //     this.spikeLength += 0.035
+                    // } else {
+                    //     this.spikeLength += 1
+                    // }
                     if (this.spikeLength > spikeMax) {
                         this.isSpikeGrowing = false;
+                        this.spikeGrowth = 0
                     }
                 } else {
-
-                    //reduce rotation
-                    Matter.Body.setAngularVelocity(this, this.angularVelocity * 0.8)
-
-                    this.spikeLength -= 0.2
+                    Matter.Body.setAngularVelocity(this, this.angularVelocity * 0.8) //reduce rotation
+                    this.spikeLength -= 0.3
                     if (this.spikeLength < 1) {
                         this.spikeLength = 1
                         this.isSpikeReset = true
+                        this.radius = radius
                     }
                 }
-                const spike = Vector.mult(Vector.normalise(Vector.sub(this.vertices[this.spikeVertex], this.position)), this.radius * this.spikeLength)
+                const spike = Vector.mult(Vector.normalise(Vector.sub(this.vertices[this.spikeVertex], this.position)), radius * this.spikeLength)
                 this.vertices[this.spikeVertex].x = this.position.x + spike.x
                 this.vertices[this.spikeVertex].y = this.position.y + spike.y
+                // this.radius = radius * this.spikeLength;
             }
         };
     },

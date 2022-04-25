@@ -631,6 +631,17 @@ const simulation = {
         document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
         document.getElementById("dmg").style.display = "inline";
         document.getElementById("health-bg").style.display = "inline";
+
+        document.getElementById("tech").style.display = "inline"
+        document.getElementById("guns").style.display = "inline"
+        document.getElementById("field").style.display = "inline"
+        document.getElementById("health").style.display = "inline"
+        document.getElementById("health-bg").style.display = "inline"
+        // document.body.style.overflow = "hidden"
+        document.getElementById("pause-grid-left").style.display = "none"
+        document.getElementById("pause-grid-right").style.display = "none"
+        document.getElementById("pause-grid-right").style.opacity = "1"
+        document.getElementById("pause-grid-left").style.opacity = "1"
         ctx.globalCompositeOperation = "source-over"
         ctx.shadowBlur = 0;
         // ctx.shadowColor = '#000';
@@ -816,6 +827,9 @@ const simulation = {
         let holdTarget = (m.holdingTarget) ? m.holdingTarget : undefined //if player is holding something this remembers it before it gets deleted
         tech.deathSpawnsFromBoss = 0;
         simulation.fallHeight = 3000;
+        document.body.style.backgroundColor = "#eee" //"#d8dadf";
+        color.map = "#444";
+
         m.fireCDcycle = 0
         m.drop();
         m.hole.isOn = false;

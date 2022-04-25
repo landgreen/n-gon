@@ -1,20 +1,41 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new fan level temple by Scar1337 is now add to community maps!
-  you have to try it out!
+you can scroll through the tech and gun menus while selecting power ups
+added another classic n-gon option in settings
 
-standing wave buffs
-  standing wave deflecting, is more efficient for multiple blocks in a very short time (< 1s)
-  spherical harmonics no longer deactivates on contact with shielded mobs
-  expansion increases block efficiency by 25->40%
+tech: options exchange - canceling tech,gun,field has a 90% chance for a reroll
 
-negative mass field
-  neutronium: move 33->25% slower
+stabber mobs now stab 15% shorter distance, but they can stab more often
+weak interaction gives 5->10 max energy per unused power up
+
+bug fixes
 
 ******************************************************** TODO ********************************************************
 
 nonrefundable tech don't display, this is confusing
     maybe they can show up but greyed out or something
+
+make your power up list scrollable while in power up selection pause menu
+
+Tech could probably be indexed, something like running
+tech.index = new Map();
+for (let i = 0; i < tech.tech.length; i++) {
+    tech.index.set(tech.tech.name, tech.tech);
+}
+
+So when you do something like tech.giveTech("nematodes") it can just do
+const queriedTech = tech.index.get("nematodes");
+if (queriedTech) {
+    queriedTech.count++;
+    queriedTech.effect();
+}
+
+guntech fire a bullet that fires nail fragments after 1s in the same direction as the original bullet
+  like overwatch roadhog
+
+make mol fab field do something cool when it blocks
+  generate energy?
+  reset lifespan of: drone,spore,worm, iceIX
 
 bring back:
   the old phase decoherence field

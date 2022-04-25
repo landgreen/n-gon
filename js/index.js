@@ -220,33 +220,6 @@ for (let i = 0, len = tech.tech.length; i < len; i++) {
 }
 
 const build = {
-    // onLoadPowerUps() {
-    //     const set = getUrlVars()
-    //     if (Object.keys(set).length !== 0) {
-    //         for (const property in set) {
-    //             set[property] = set[property].replace(/%20/g, " ")
-    //             if (property.substring(0, 3) === "gun") b.giveGuns(set[property])
-    //             if (property.substring(0, 3) === "tech") tech.giveTech(set[property])
-    //             if (property === "field") m.setField(set[property])
-    //             if (property === "difficulty") {
-    //                 simulation.difficultyMode = Number(set[property])
-    //                 document.getElementById("difficulty-select").value = Number(set[property])
-    //             }
-    //             if (property === "level") {
-    //                 level.levelsCleared += Number(set[property]);
-    //                 level.difficultyIncrease(Number(set[property]) * simulation.difficultyMode) //increase difficulty based on modes
-    //                 spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
-    //                 level.onLevel++
-    //             }
-    //         }
-    //         for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
-    //         bullet = []; //remove any bullets that might have spawned from tech
-    //         if (b.inventory.length > 0) {
-    //             b.activeGun = b.inventory[0] //set first gun to active gun
-    //             simulation.makeGunHUD();
-    //         }
-    //     }
-    // },
     pauseGrid() {
         //left side
         let botText = ""
@@ -264,14 +237,7 @@ const build = {
 <br><br><svg class="SVG-button" onclick="build.shareURL(false)" width="92" height="20" style="padding:0px; margin: 1px;">
     <g stroke='none' fill='#333' stroke-width="2" font-size="14px" font-family="Ariel, sans-serif"> <text x="5" y="15">copy build url</text></g>
 </svg><br>`
-        //{ /* <strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}% */ }
-        // <br>damage difficulty reduction: ${((1-m.dmgScale)*100).toFixed(2)}%
-        // <br>effective damage: ${(((tech.damageFromTech()-1)*m.dmgScale)*100).toFixed(0)}%
-        // <br>
-        // <br><strong class='color-d'>damage</strong> =  ${((tech.damageFromTech())*100).toFixed(0)}% × ${((m.dmgScale)*100).toFixed(2)}% = ${(((tech.damageFromTech())*m.dmgScale)*100).toFixed(0)}%
-        /// <br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%
-        text +=
-            `
+        text += `
 <br>effective <strong class='color-d'>damage</strong>: ${(tech.damageFromTech() * m.dmgScale).toPrecision(4)}
 <br>damage: ${((tech.damageFromTech())).toPrecision(4)}, difficulty: ${((m.dmgScale)).toPrecision(4)}
 <br>
@@ -301,13 +267,13 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
 
         //right side
         text = "";
-        if (tech.isPauseSwitchField) {
+        if (tech.isPauseSwitchField && !simulation.isChoosing) {
             text += `<div class="pause-grid-module" id ="pause-field" style="animation: fieldColorCycle 1s linear infinite alternate;"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
         } else {
             text += `<div class="pause-grid-module" id ="pause-field"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
         }
 
-        const style = tech.isPauseEjectTech ? 'style="animation: techColorCycle 1s linear infinite alternate;"' : ''
+        const style = (tech.isPauseEjectTech && !simulation.isChoosing) ? 'style="animation: techColorCycle 1s linear infinite alternate;"' : ''
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
                 const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
@@ -337,11 +303,24 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         el = document.getElementById("pause-grid-right")
         el.style.display = "grid"
         el.innerHTML = text
+
+        document.getElementById("tech").style.display = "none"
+        document.getElementById("guns").style.display = "none"
+        document.getElementById("field").style.display = "none"
+        document.getElementById("health").style.display = "none"
+        document.getElementById("health-bg").style.display = "none"
     },
     unPauseGrid() {
+        document.getElementById("tech").style.display = "inline"
+        document.getElementById("guns").style.display = "inline"
+        document.getElementById("field").style.display = "inline"
+        document.getElementById("health").style.display = "inline"
+        document.getElementById("health-bg").style.display = "inline"
         // document.body.style.overflow = "hidden"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"
+        document.getElementById("pause-grid-right").style.opacity = "1"
+        document.getElementById("pause-grid-left").style.opacity = "1"
         window.scrollTo(0, 0);
     },
     isExperimentSelection: false,

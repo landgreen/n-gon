@@ -259,14 +259,15 @@ const powerUps = {
     showDraft() {
         // document.getElementById("choose-grid").style.gridTemplateColumns = "repeat(2, minmax(370px, 1fr))"
         // document.getElementById("choose-background").style.display = "inline"
-        document.getElementById("choose-background").style.visibility = "visible"
-        document.getElementById("choose-background").style.opacity = "0.6"
+        // document.getElementById("choose-background").style.visibility = "visible"
+        // document.getElementById("choose-background").style.opacity = "0.8"
         // document.getElementById("choose-grid").style.display = "grid"
         document.getElementById("choose-grid").style.transitionDuration = "0.25s";
         document.getElementById("choose-grid").style.visibility = "visible"
         document.getElementById("choose-grid").style.opacity = "1"
         //disable clicking for 1/2 a second to prevent mistake clicks
         document.getElementById("choose-grid").style.pointerEvents = "none";
+        document.body.style.cursor = "none";
         setTimeout(() => {
             document.getElementById("choose-grid").style.pointerEvents = "auto";
             document.body.style.cursor = "auto";
@@ -279,10 +280,23 @@ const powerUps = {
         // }
         simulation.paused = true;
         simulation.isChoosing = true; //stops p from un pausing on key down
-        build.pauseGrid(true)
+        build.pauseGrid()
+        document.getElementById("pause-grid-right").style.opacity = "0.3"
+        document.getElementById("pause-grid-left").style.opacity = "0.3"
+        //hide health bar, guns, power ups list
+
+        requestAnimationFrame(() => {
+            ctx.fillStyle = `rgba(221,221,221,0.6)`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
     },
-    endDraft(type, isCanceled = false) {
+    endDraft(type, isCanceled = false) { //type should be a gun, tech, or field
         if (isCanceled) {
+            if (tech.isCancelTech && Math.random() < 0.9) {
+                // powerUps.research.use('tech')
+                powerUps[type].effect();
+                return
+            }
             if (tech.isCancelDuplication) {
                 tech.cancelCount++
                 tech.maxDuplicationEvent()
@@ -300,6 +314,10 @@ const powerUps = {
                     powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), spawnType, false);
                 }
             }
+            // if (tech.isCancelTech && Math.random() < 0.3) {
+            //     powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "tech", false);
+            //     simulation.makeTextLog(`<strong>options exchange</strong>: returns 1 <strong class='color-m'>tech</strong>`)
+            // }
             if (tech.isBanish && type === 'tech') { // banish researched tech by adding them to the list of banished tech
                 const banishLength = tech.isDeterminism ? 1 : 3 + tech.isExtraChoice * 2
                 for (let i = 0; i < banishLength; i++) {
@@ -579,7 +597,7 @@ const powerUps = {
             let choice3 = -1
             if (choice1 > -1) {
                 let text = ""
-                if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("field",true)'>✕</div>`
+                if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("field",true)'>${tech.isCancelTech ? "?":"✕"}</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>field</h3>`
                 text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choice1})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choice1].name}</div> ${m.fieldUpgrades[choice1].description}</div>`
                 powerUps.field.choiceLog.push(choice1)
@@ -689,7 +707,7 @@ const powerUps = {
                 }
 
                 let text = ""
-                if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("tech",true)'>✕</div>`
+                if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("tech",true)'>${tech.isCancelTech ? "?":"✕"}</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>tech</h3>`
                 let choice1 = pick()
                 // console.log(choice1)
@@ -829,7 +847,7 @@ const powerUps = {
             let choice3 = -1
             if (choice1 > -1) {
                 let text = ""
-                if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("gun",true)'>✕</div>`
+                if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("gun",true)'>${tech.isCancelTech ? "?":"✕"}</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>gun</h3>`
                 text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choice1})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choice1].name}</div> ${b.guns[choice1].description}</div>`
                 if (!tech.isDeterminism) {
@@ -1013,7 +1031,7 @@ const powerUps = {
 
                 for (let i = 0; i < tech.tech[choose].count; i++) {
                     powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
-                    powerUp[powerUp.length - 1].isDuplicated = true
+                    // powerUp[powerUp.length - 1].isDuplicated = true
                 }
                 // remove a random tech from the list of tech you have
                 tech.tech[choose].remove();
@@ -1045,7 +1063,7 @@ const powerUps = {
         }
     },
     pauseEjectTech(index) {
-        if (tech.isPauseEjectTech || simulation.testing) {
+        if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing) {
             if (Math.random() < 0.1 || tech.tech[index].isFromAppliedScience || (tech.tech[index].bonusResearch !== undefined && tech.tech[index].bonusResearch > powerUps.research.count)) {
                 tech.removeTech(index)
                 powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
