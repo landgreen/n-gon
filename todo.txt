@@ -1,16 +1,28 @@
 ******************************************************** NEXT PATCH **************************************************
 
-you can scroll through the tech and gun menus while selecting power ups
-added another classic n-gon option in settings
+tech: eternalism - tech,gun,field gives an ammo but, time doesn't pause while choosing
+  I might change the ammo to something else, not sure, maybe just damage
+JUNK tech: panpsychism - awaken blocks, blocks can drop power ups
 
-tech: options exchange - canceling tech,gun,field has a 90% chance for a reroll
+cache gives 14->16x ammo
+1st ionization energy gives 8->10% max energy on heal
 
-stabber mobs now stab 15% shorter distance, but they can stab more often
-weak interaction gives 5->10 max energy per unused power up
+powerUpBossBaby immunity phase is a bit shorter
 
 bug fixes
 
 ******************************************************** TODO ********************************************************
+
+tech:  - don't pause time during draft
+  bugs
+    requirements change after draft is generated
+      disable effects that change requirements
+        when simulation.isChoosing you can't:  eject tech, 
+      check for requirements onclick and give random tech if not met?
+
+make lasers on labs flash on and off
+  make switch a button that stays down
+
 
 nonrefundable tech don't display, this is confusing
     maybe they can show up but greyed out or something

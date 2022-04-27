@@ -1540,7 +1540,7 @@ const m = {
                     const fieldRange2 = (0.68 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange * m.harmonicRadius
                     const fieldRange3 = (0.7 + 0.35 * Math.sin(m.cycle / 47)) * m.fieldRange * m.harmonicRadius
                     const netfieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
-                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.73, (0.04 + m.energy * (0.11 + 0.13 * Math.random()))) + ")";
+                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.65, (0.04 + m.energy * (0.11 + 0.13 * Math.random()))) + ")";
                     ctx.beginPath();
                     ctx.arc(m.pos.x, m.pos.y, fieldRange1, 0, 2 * Math.PI);
                     ctx.fill();
@@ -1571,7 +1571,7 @@ const m = {
                     const radius = m.fieldRange * m.harmonicRadius
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "rgba(110,170,200,0.8)"
-                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.7, m.energy * (0.13 + 0.1 * Math.random()) * (3 / tech.harmonics)) + ")";
+                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.65, m.energy * (0.13 + 0.1 * Math.random()) * (3 / tech.harmonics)) + ")";
                     // ctx.fillStyle = "rgba(110,170,200," + Math.min(0.7, m.energy * (0.22 - 0.01 * tech.harmonics) * (0.5 + 0.5 * Math.random())) + ")";
                     for (let i = 0; i < tech.harmonics; i++) {
                         ctx.beginPath();

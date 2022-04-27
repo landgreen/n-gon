@@ -262,15 +262,13 @@ const powerUps = {
         // document.getElementById("choose-background").style.visibility = "visible"
         // document.getElementById("choose-background").style.opacity = "0.8"
         // document.getElementById("choose-grid").style.display = "grid"
-        document.getElementById("choose-grid").style.transitionDuration = "0.25s";
-        document.getElementById("choose-grid").style.visibility = "visible"
-        document.getElementById("choose-grid").style.opacity = "1"
+
         //disable clicking for 1/2 a second to prevent mistake clicks
         document.getElementById("choose-grid").style.pointerEvents = "none";
         document.body.style.cursor = "none";
         setTimeout(() => {
+            if (!tech.isNoDraftPause) document.body.style.cursor = "auto";
             document.getElementById("choose-grid").style.pointerEvents = "auto";
-            document.body.style.cursor = "auto";
             document.getElementById("choose-grid").style.transitionDuration = "0s";
         }, 500);
 
@@ -278,17 +276,27 @@ const powerUps = {
         //     document.body.style.overflowY = "scroll";
         //     document.body.style.overflowX = "hidden";
         // }
-        simulation.paused = true;
         simulation.isChoosing = true; //stops p from un pausing on key down
-        build.pauseGrid()
-        document.getElementById("pause-grid-right").style.opacity = "0.3"
-        document.getElementById("pause-grid-left").style.opacity = "0.3"
-        //hide health bar, guns, power ups list
 
-        requestAnimationFrame(() => {
-            ctx.fillStyle = `rgba(221,221,221,0.6)`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        });
+        if (!simulation.paused) {
+            if (tech.isNoDraftPause) {
+                powerUps.spawn(m.pos.x, m.pos.y, "ammo");
+                document.getElementById("choose-grid").style.opacity = "0.7"
+            } else {
+                simulation.paused = true;
+                document.getElementById("choose-grid").style.opacity = "1"
+            }
+            document.getElementById("choose-grid").style.transitionDuration = "0.25s";
+            document.getElementById("choose-grid").style.visibility = "visible"
+
+            requestAnimationFrame(() => {
+                ctx.fillStyle = `rgba(221,221,221,0.6)`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            });
+            document.getElementById("pause-grid-right").style.opacity = "0.3"
+            document.getElementById("pause-grid-left").style.opacity = "0.3"
+        }
+        build.pauseGrid()
     },
     endDraft(type, isCanceled = false) { //type should be a gun, tech, or field
         if (isCanceled) {
@@ -342,11 +350,11 @@ const powerUps = {
         document.body.style.cursor = "none";
         // document.body.style.overflow = "hidden"
         // if (m.alive){}
+        if (simulation.paused) requestAnimationFrame(cycle);
         simulation.paused = false;
         simulation.isChoosing = false; //stops p from un pausing on key down
-        if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 30 cycles
         build.unPauseGrid()
-        requestAnimationFrame(cycle);
+        if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 30 cycles
         if (m.holdingTarget) m.drop();
     },
     research: {
@@ -489,7 +497,7 @@ const powerUps = {
             }
 
             if (tech.healGiveMaxEnergy) {
-                tech.healMaxEnergyBonus += 0.08
+                tech.healMaxEnergyBonus += 0.1
                 m.setMaxEnergy();
             }
         },
@@ -890,7 +898,7 @@ const powerUps = {
         powerUps.research.currentRerollCount = 0
         if (tech.isTechDamage && who.name === "tech") m.damage(0.11)
         if (tech.isMassEnergy) m.energy += 2;
-        if (tech.isMineDrop && bullet.length < 150 && Math.random() < 0.60) {
+        if (tech.isMineDrop && bullet.length < 150 && Math.random() < 0.6) {
             if (tech.isLaserMine && input.down) {
                 b.laserMine(who.position)
             } else {
@@ -1012,38 +1020,41 @@ const powerUps = {
         }
     },
     ejectTech(choose = 'random') {
-        //find which tech you have
-        if (choose === 'random') {
-            const have = []
-            for (let i = 0; i < tech.tech.length; i++) {
-                if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) have.push(i)
-            }
-            if (have.length === 0) {
+        if (!simulation.isChoosing)
+
+
+            //find which tech you have
+            if (choose === 'random') {
+                const have = []
                 for (let i = 0; i < tech.tech.length; i++) {
-                    if (tech.tech[i].count > 0) have.push(i)
+                    if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) have.push(i)
                 }
-            }
-
-            if (have.length) {
-                choose = have[Math.floor(Math.random() * have.length)]
-                // simulation.makeTextLog(`<div class='circle tech'></div> &nbsp; <strong>${tech.tech[choose].name}</strong> was ejected`, 600) //message about what tech was lost
-                simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
-
-                for (let i = 0; i < tech.tech[choose].count; i++) {
-                    powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
-                    // powerUp[powerUp.length - 1].isDuplicated = true
+                if (have.length === 0) {
+                    for (let i = 0; i < tech.tech.length; i++) {
+                        if (tech.tech[i].count > 0) have.push(i)
+                    }
                 }
-                // remove a random tech from the list of tech you have
-                tech.tech[choose].remove();
-                tech.tech[choose].count = 0;
-                tech.tech[choose].isLost = true;
-                simulation.updateTechHUD();
-                m.fieldCDcycle = m.cycle + 30; //disable field so you can't pick up the ejected tech
-                return true
-            } else {
-                return false
-            }
-        } else if (tech.tech[choose].count) {
+
+                if (have.length) {
+                    choose = have[Math.floor(Math.random() * have.length)]
+                    // simulation.makeTextLog(`<div class='circle tech'></div> &nbsp; <strong>${tech.tech[choose].name}</strong> was ejected`, 600) //message about what tech was lost
+                    simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
+
+                    for (let i = 0; i < tech.tech[choose].count; i++) {
+                        powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
+                        // powerUp[powerUp.length - 1].isDuplicated = true
+                    }
+                    // remove a random tech from the list of tech you have
+                    tech.tech[choose].remove();
+                    tech.tech[choose].count = 0;
+                    tech.tech[choose].isLost = true;
+                    simulation.updateTechHUD();
+                    m.fieldCDcycle = m.cycle + 30; //disable field so you can't pick up the ejected tech
+                    return true
+                } else {
+                    return false
+                }
+            } else if (tech.tech[choose].count) {
             // simulation.makeTextLog(`<div class='circle tech'></div> &nbsp; <strong>${tech.tech[choose].name}</strong> was ejected`, 600) //message about what tech was lost
             simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
 

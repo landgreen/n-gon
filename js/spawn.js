@@ -1213,11 +1213,11 @@ const spawn = {
         } else if (!m.isCloak) {
             me.foundPlayer();
         }
-        me.damageReduction = 0.22 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.isInvulnerable = true
         me.startingDamageReduction = me.damageReduction
         me.damageReduction = 0
-        me.invulnerabilityCountDown = 60 + simulation.difficulty * 2
+        me.invulnerabilityCountDown = 40 + simulation.difficulty
         me.onHit = function() { //run this function on hitting player
             if (powerUps.ejectTech()) {
                 powerUps.ejectGraphic("150, 138, 255");

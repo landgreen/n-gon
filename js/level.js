@@ -19,7 +19,7 @@ const level = {
             // m.setField("standing wave")
             // b.giveGuns("laser")
             // tech.giveTech("scrap-bot manufacturing")
-            // tech.giveTech("dynamo-bot upgrade")
+            // tech.giveTech("eternalism")
             // tech.giveTech("options exchange")
             // tech.giveTech("ICBM")
             // tech.giveTech("grappling hook")
@@ -37,7 +37,7 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.temple();
+            // level.testChamber();
             // level.testing(); //not in rotation, used for testing
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -2671,8 +2671,8 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 25);
         level.defaultZoom = 2000
         simulation.zoomTransition(level.defaultZoom)
-        document.body.style.backgroundColor = "#d0d5df" //"#d8dadf";
-        color.map = "#334046";
+        document.body.style.backgroundColor = "#c3d6df" //"#d8dadf";
+        color.map = "#303639";
         // powerUps.spawnStartingPowerUps(1475, -1175);
         // spawn.debris(750, -2200, 3700, 16); //16 debris per level
         const button = level.button(1400, 0)
@@ -3673,8 +3673,8 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
         level.defaultZoom = 2200
         simulation.zoomTransition(level.defaultZoom)
-        document.body.style.backgroundColor = "#d5d5d5";
-        color.map = "#555"
+        document.body.style.backgroundColor = "#d0d5d5";
+        color.map = "#444"
         spawn.mapRect(0, -1955, 175, 30);
         const removeIndex1 = map.length - 1 //so much work to catch blocks caught at the bottom of the vertical portals
         spawn.mapRect(1225, -1955, 175, 30);
