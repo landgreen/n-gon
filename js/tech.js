@@ -221,6 +221,7 @@ const tech = {
     },
     damageFromTech() {
         let dmg = 1 //m.fieldDamage
+        if (tech.isNoDraftPause) dmg *= 1.5
         if (tech.isTechDebt) dmg *= Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount)
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 1 + 0.75 * (1 - m.harmReduction())
         if (tech.OccamDamage) dmg *= tech.OccamDamage
@@ -591,25 +592,6 @@ const tech = {
             },
             remove() {
                 tech.isAmmoFromHealth = false;
-            }
-        },
-        {
-            name: "eternalism",
-            description: `choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong> spawns ${powerUps.orb.ammo()}<br><strong>time</strong> doesn't <strong>pause</strong> while choosing`, //${powerUps.orb.heal()} or
-            // description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong>, but <strong>time</strong> continues<br>while choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong>",
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                tech.isNoDraftPause = true
-            },
-            remove() {
-                tech.isNoDraftPause = false
             }
         },
         {
@@ -3154,9 +3136,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !tech.isSuperDeterminism
+                return !tech.isSuperDeterminism && !tech.isNoDraftPause
             },
-            requires: "not superdeterminism",
+            requires: "not superdeterminism, eternalism",
             effect() {
                 tech.isPauseSwitchField = true;
                 for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -3195,13 +3177,34 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() { return true },
-            requires: "",
+            allowed() {
+                return !tech.isSuperDeterminism && !tech.isNoDraftPause
+            },
+            requires: "not superdeterminism, eternalism",
             effect() {
                 tech.isPauseEjectTech = true;
             },
             remove() {
                 tech.isPauseEjectTech = false;
+            }
+        },
+        {
+            name: "eternalism",
+            // description: `increase <strong class='color-d'>damage</strong> by <strong>60%</strong>, but <strong>time</strong> doesn't <strong>pause</strong><br>while choosing a choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong>`, //${powerUps.orb.heal()} or
+            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong>, but<br><strong>time</strong> can't be <strong>paused</strong> <em>(time dilation still works)</em>",
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return !tech.isPauseSwitchField && !tech.isPauseEjectTech && !tech.isWormHolePause
+            },
+            requires: "not unified field theory, paradigm shift, invariant",
+            effect() {
+                tech.isNoDraftPause = true
+            },
+            remove() {
+                tech.isNoDraftPause = false
             }
         },
         {
@@ -3505,7 +3508,7 @@ const tech = {
             allowed() {
                 return tech.duplicationChance() > 0.6
             },
-            requires: "duplication chance above 70%",
+            requires: "NOT EXPERIMENT MODE, duplication chance above 60%",
             effect() {
                 tech.is111Duplicate = true;
                 tech.maxDuplicationEvent()
@@ -4289,9 +4292,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isNeedles) || tech.haveGunCheck("super balls") || (tech.isRivets && !tech.isNailCrit) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isDroneTeleport || tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
+                return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isNeedles) || (tech.haveGunCheck("super balls") && !tech.isFoamBall) || (tech.isRivets && !tech.isNailCrit) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isDroneTeleport || tech.isDroneRadioactive || tech.isSporeField || tech.isMissileField || tech.isIceField)) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
             },
-            requires: "shotgun, super balls, rivets, drones, not irradiated drones or burst drones",
+            requires: "shotgun, super balls, rivets, drones, not irradiated drones, burst drones, polyurethane",
             effect() {
                 tech.isIncendiary = true
             },
@@ -4300,9 +4303,8 @@ const tech = {
             }
         },
         {
-            name: "supertemporal",
-            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Temporal_paradox' class="link">supertemporal</a>`,
-            description: "fire <strong>super ball</strong> from the same point in <strong>space</strong><br> but separated by <strong>0.1</strong> seconds in <strong>time</strong>",
+            name: "autocannon",
+            description: "fire <strong>+1</strong> extra <strong>super ball</strong><br><strong>balls</strong> are quickly released in same direction",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -4373,6 +4375,26 @@ const tech = {
                 }
             }
         },
+        {
+            name: "polyurethane foam",
+            description: "<strong>super balls</strong> colliding with <strong>mobs</strong> catalyzes<br>a reaction that yields <strong>foam</strong> bubbles",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("super balls")
+            },
+            requires: "super balls",
+            effect() {
+                tech.isFoamBall = true;
+            },
+            remove() {
+                tech.isFoamBall = false;
+            }
+        },
+        // 
         {
             name: "phase velocity",
             description: "matter wave <strong>propagates</strong> faster through <strong>solids</strong><br>increase matter wave <strong class='color-d'>damage</strong> by <strong>15%</strong>",
@@ -5218,7 +5240,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("matter wave") || tech.isNeutronBomb || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1 || tech.isSporeWorm || tech.foamBotCount > 1
+                return m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("matter wave") || tech.isNeutronBomb || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1 || tech.isSporeWorm || tech.foamBotCount > 1 || tech.isFoamBall
             },
             requires: "drones, spores, missiles, foam, matter wave, neutron bomb, ice IX",
             effect() {
@@ -5489,7 +5511,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return !tech.isBulletTeleport && (tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot)
+                return !tech.isBulletTeleport && (tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot || tech.isFoamBall)
             },
             requires: "foam, not uncertainty",
             effect() {
@@ -5508,7 +5530,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (!tech.isFoamAttract && (tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot)) || (tech.haveGunCheck("matter wave") && !tech.isLongitudinal)
+                return (!tech.isFoamAttract && (tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot || tech.isFoamBall)) || (tech.haveGunCheck("matter wave") && !tech.isLongitudinal)
             },
             requires: "foam, not electrostatic induction, matter wave, not phonon",
             effect() {
@@ -5527,7 +5549,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot || tech.isSporeWorm
+                return tech.haveGunCheck("foam") || tech.isFoamBall || tech.foamBotCount > 1 || tech.isFoamShot || tech.isSporeWorm
             },
             requires: "foam, worms",
             effect() {
@@ -5546,7 +5568,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot
+                return tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot || tech.isFoamBall
             },
             requires: "foam",
             effect() {
@@ -6213,9 +6235,9 @@ const tech = {
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return (m.fieldUpgrades[m.fieldMode].name === "standing wave" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && (build.isExperimentSelection || powerUps.research.count > 1)
+                return (m.fieldUpgrades[m.fieldMode].name === "standing wave" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "time dilation") && (build.isExperimentSelection || powerUps.research.count > 1)
             },
-            requires: "standing wave or pilot wave",
+            requires: "standing wave, pilot wave, time dilation",
             effect() {
                 tech.harmonicEnergy = 1
                 m.setMaxEnergy()
@@ -6747,7 +6769,7 @@ const tech = {
         // },
         {
             name: "degenerate matter",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>66%</strong> while your <strong class='color-f'>field</strong> is active",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>75%</strong> while your <strong class='color-f'>field</strong> is active",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -6949,25 +6971,25 @@ const tech = {
                 if (this.count) m.fieldUpgrades[m.fieldMode].set()
             }
         },
-        {
-            name: "timelike",
-            description: "<strong>time dilation</strong> doubles your relative time <strong>rate</strong><br>and makes you immune to <strong class='color-harm'>harm</strong>",
-            isFieldTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "time dilation" && !m.isShipMode && !tech.isRewindField
-            },
-            requires: "time dilation, not retrocausality",
-            effect() {
-                tech.isTimeSkip = true;
-            },
-            remove() {
-                tech.isTimeSkip = false;
-            }
-        },
+        // {
+        //     name: "timelike",
+        //     description: "<strong>time dilation</strong> doubles your relative time <strong>rate</strong><br>and makes you immune to <strong class='color-harm'>harm</strong>",
+        //     isFieldTech: true,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return m.fieldUpgrades[m.fieldMode].name === "time dilation" && !m.isShipMode && !tech.isRewindField
+        //     },
+        //     requires: "time dilation, not retrocausality",
+        //     effect() {
+        //         tech.isTimeSkip = true;
+        //     },
+        //     remove() {
+        //         tech.isTimeSkip = false;
+        //     }
+        // },
         {
             name: "Lorentz transformation",
             description: `use ${powerUps.orb.research(3)}to increase your time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>50%</strong> faster`,
@@ -6997,7 +7019,7 @@ const tech = {
         },
         {
             name: "time crystals",
-            description: "<strong>quadruple</strong> your default <strong class='color-f'>energy</strong> regeneration",
+            description: "<strong>quadruple</strong> your base <strong class='color-f'>energy</strong> regeneration",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7241,7 +7263,7 @@ const tech = {
             effect: () => {
                 tech.wimpCount++
                 spawn.WIMP()
-                for (let j = 0, len = 1 + 5 * Math.random(); j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
+                for (let j = 0, len = 5; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
             },
             remove() {
                 tech.wimpCount = 0
@@ -7368,9 +7390,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "wormhole"
+                return m.fieldUpgrades[m.fieldMode].name === "wormhole" && !tech.isNoDraftPause
             },
-            requires: "wormhole",
+            requires: "wormhole, not eternalism",
             effect() {
                 tech.isWormHolePause = true
             },
@@ -7822,7 +7844,7 @@ const tech = {
             remove() {}
         },
         {
-            name: "opacity",
+            name: "&nbsp;",
             description: "",
             maxCount: 1,
             count: 0,
@@ -9895,4 +9917,6 @@ const tech = {
     coyoteTime: null,
     missileFireCD: null,
     isBotField: null,
+    isFoamBall: null,
+    isNoDraftPause: null
 }

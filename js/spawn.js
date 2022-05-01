@@ -3929,7 +3929,7 @@ const spawn = {
         me.lockedOn = null;
 
         me.torqueMagnitude = 0.00024 * me.inertia * (Math.random() > 0.5 ? -1 : 1);
-        me.delay = 120 * simulation.CDScale;
+        me.delay = 60 + 60 * simulation.CDScale;
         me.cd = 0;
         me.swordRadius = 0;
         me.swordVertex = 1

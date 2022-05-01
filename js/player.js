@@ -522,7 +522,7 @@ const m = {
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.15
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
         if (tech.isSlowFPS) dmg *= 0.8
-        if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.34
+        if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.25
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.1
         if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
@@ -1501,8 +1501,9 @@ const m = {
     },
     fieldUpgrades: [{
             name: "field emitter",
-            description: "regen <strong>6</strong> <strong class='color-f'>energy</strong> per second<br>use it to <strong>deflect</strong> mobs and <strong>throw</strong> <strong class='color-block'>blocks</strong><br><strong class='color-f'>energy</strong> regen disabled if immune to <strong class='color-harm'>harm</strong>",
-            // description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs,<br><strong>grab</strong> power ups, and <strong>throw</strong> <strong class='color-block'>blocks</strong><br>regen <strong>6</strong> <strong class='color-f'>energy</strong>/s, when not immune to <strong class='color-harm'>harm</strong>",
+            //<br><strong class='color-f'>energy</strong> regen disabled if immune to <strong class='color-harm'>harm</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>store up to <strong>100</strong> <strong class='color-f'>energy</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
+            // description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs,<br><strong>grab</strong> power ups, and <strong>throw</strong> <strong class='color-block'>blocks</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/s, when not immune to <strong class='color-harm'>harm</strong>",
             effect: () => {
                 m.hold = function() {
                     if (m.isHolding) {
@@ -1527,7 +1528,8 @@ const m = {
         },
         {
             name: "standing wave",
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>deflecting</strong> protects you in every <strong>direction</strong><br>increase your <strong>max</strong> <strong class='color-f'>energy</strong> by <strong>60</strong>", //drains <strong class='color-f'>energy</strong>  //<strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>
+            //<strong>deflecting</strong> protects you in every <strong>direction</strong>
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br>increase your <strong>max</strong> <strong class='color-f'>energy</strong> by <strong>60</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second", //drains <strong class='color-f'>energy</strong>  //<strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>
             drainCD: 0,
             effect: () => {
                 m.fieldBlockCD = 0;
@@ -1540,7 +1542,7 @@ const m = {
                     const fieldRange2 = (0.68 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange * m.harmonicRadius
                     const fieldRange3 = (0.7 + 0.35 * Math.sin(m.cycle / 47)) * m.fieldRange * m.harmonicRadius
                     const netfieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
-                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.65, (0.04 + m.energy * (0.11 + 0.13 * Math.random()))) + ")";
+                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.6, (0.04 + m.energy * (0.1 + 0.11 * Math.random()))) + ")";
                     ctx.beginPath();
                     ctx.arc(m.pos.x, m.pos.y, fieldRange1, 0, 2 * Math.PI);
                     ctx.fill();
@@ -1571,7 +1573,7 @@ const m = {
                     const radius = m.fieldRange * m.harmonicRadius
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "rgba(110,170,200,0.8)"
-                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.65, m.energy * (0.13 + 0.1 * Math.random()) * (3 / tech.harmonics)) + ")";
+                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.6, m.energy * (0.11 + 0.1 * Math.random()) * (3 / tech.harmonics)) + ")";
                     // ctx.fillStyle = "rgba(110,170,200," + Math.min(0.7, m.energy * (0.22 - 0.01 * tech.harmonics) * (0.5 + 0.5 * Math.random())) + ")";
                     for (let i = 0; i < tech.harmonics; i++) {
                         ctx.beginPath();
@@ -1628,7 +1630,8 @@ const m = {
         },
         {
             name: "perfect diamagnetism",
-            description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>deflecting</strong> does not drain <strong class='color-f'>energy</strong><br>maintains <strong>functionality</strong> while <strong>inactive</strong>",
+            description: "<strong>deflecting</strong> does not drain <strong class='color-f'>energy</strong><br>maintains <strong>functionality</strong> while <strong>inactive</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
+            // <br><strong>attract</strong> power ups from <strong>far away</strong>
             // description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>deflecting</strong> doesn't drain <strong class='color-f'>energy</strong><br>thrown <strong class='color-block'>blocks</strong> have",
             // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
             effect: () => {
@@ -1810,7 +1813,8 @@ const m = {
         },
         {
             name: "negative mass",
-            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong><br>hold <strong class='color-block'>blocks</strong> as if they have a lower <strong>mass</strong>",
+            //<br>hold <strong class='color-block'>blocks</strong> as if they have a lower <strong>mass</strong>
+            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
             fieldDrawRadius: 0,
             effect: () => {
                 m.fieldFire = true;
@@ -1960,7 +1964,8 @@ const m = {
         },
         {
             name: "molecular assembler",
-            description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration",
+            description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong>/second",
+            //<strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration
             effect: () => {
                 // m.fieldMeterColor = "#0c5"
                 // m.eyeFillColor = m.fieldMeterColor
@@ -2095,7 +2100,7 @@ const m = {
         // },
         {
             name: "plasma torch",
-            description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away",
+            description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away<br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
             set() {
                 b.isExtruderOn = false
                 if (m.plasmaBall) {
@@ -2472,7 +2477,7 @@ const m = {
         {
             name: "time dilation",
             // description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong>",
-            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br><strong>move</strong> and <strong>fire</strong> while time is stopped<br>but, <strong>collisions</strong> still do <strong class='color-harm'>harm</strong>",
+            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br>for everything except you<br>generate <strong>12</strong> <strong class='color-f'>energy</strong>/second",
             set() {
                 if (tech.isRewindField) {
                     this.rewindCount = 0
@@ -2488,7 +2493,7 @@ const m = {
 
                             if (!m.holdingTarget) {
                                 this.rewindCount += 6;
-                                const DRAIN = 0.001
+                                const DRAIN = 0.003
                                 let history = m.history[(m.cycle - this.rewindCount) % 600]
                                 if (this.rewindCount > 599 || m.energy < DRAIN) {
                                     this.rewindCount = 0;
@@ -2538,34 +2543,10 @@ const m = {
                                                 bullet[bullet.length - 1].endCycle = simulation.cycle + 480 + Math.floor(120 * Math.random()) //8-9 seconds
                                             }
                                         }
-
                                         if (tech.isRewindGrenade) {
                                             b.grenade(m.pos, this.rewindCount) //Math.PI / 2
                                             const who = bullet[bullet.length - 1]
-                                            // Matter.Body.setVelocity(who, {
-                                            //     x: 0,
-                                            //     y: 0
-                                            // });
                                             who.endCycle = simulation.cycle + 60
-                                            // if (tech.isVacuumBomb) {
-                                            //     Matter.Body.setVelocity(who, {
-                                            //         x: who.velocity.x * 0.5,
-                                            //         y: who.velocity.y * 0.5
-                                            //     });
-                                            // } else if (tech.isRPG) {
-                                            //     who.endCycle = simulation.cycle + 10
-                                            // } else if (tech.isNeutronBomb) {
-                                            //     Matter.Body.setVelocity(who, {
-                                            //         x: who.velocity.x * 0.3,
-                                            //         y: who.velocity.y * 0.3
-                                            //     });
-                                            // } else {
-                                            //     Matter.Body.setVelocity(who, {
-                                            //         x: who.velocity.x * 0.5,
-                                            //         y: who.velocity.y * 0.5
-                                            //     });
-                                            //     who.endCycle = simulation.cycle + 30
-                                            // }
                                         }
 
 
@@ -2579,74 +2560,13 @@ const m = {
                             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                             this.rewindCount = 0;
                         }
-                        m.drawFieldMeter()
-
-
-
-
-                        // // console.log(this.rewindCount)
-                        // if (input.field && m.fieldCDcycle < m.cycle) { //button has been held down
-                        //     if (m.isHolding) {
-                        //         m.drawHold(m.holdingTarget);
-                        //         m.holding();
-                        //         m.throwBlock();
-                        //     } else {
-                        //         m.grabPowerUp();
-                        //         m.lookForPickUp();
-                        //         if (!m.holdingTarget) {
-                        //             this.rewindCount += 8;
-                        //             const DRAIN = 0.001
-                        //             let history = m.history[(m.cycle - this.rewindCount) % 600]
-                        //             if (this.rewindCount > 599 || m.energy < DRAIN) {
-                        //                 this.rewindCount = 0;
-                        //                 m.resetHistory();
-                        //             } else {
-                        //                 // m.grabPowerUp(); //a second grab power up to make the power ups easier to grab, and they more fast which matches the time theme
-                        //                 m.energy -= DRAIN
-                        //                 if (m.immuneCycle < m.cycle + 30) m.immuneCycle = m.cycle + 30; //player is immune to damage for 30 cycles
-                        //                 Matter.Body.setPosition(player, history.position);
-                        //                 Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
-                        //                 if (m.health < history.health) {
-                        //                     m.health = history.health
-                        //                     m.displayHealth();
-                        //                 }
-                        //                 m.yOff = history.yOff
-                        //                 if (m.yOff < 48) {
-                        //                     m.doCrouch()
-                        //                 } else {
-                        //                     m.undoCrouch()
-                        //                 }
-                        //                 //grab power ups
-                        //                 for (let i = 0, len = powerUp.length; i < len; ++i) {
-                        //                     if (
-                        //                         Vector.magnitudeSquared(Vector.sub(m.pos, powerUp[i].position)) < 100000 &&
-                        //                         !simulation.isChoosing &&
-                        //                         (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)
-                        //                     ) {
-                        //                         powerUps.onPickUp(powerUp[i]);
-                        //                         powerUp[i].effect();
-                        //                         Matter.Composite.remove(engine.world, powerUp[i]);
-                        //                         powerUp.splice(i, 1);
-                        //                         break; //because the array order is messed up after splice
-                        //                     }
-                        //                 }
-                        //             }
-                        //         }
-                        //     }
-                        // } else { //button is held the first time
-                        //     this.rewindCount = 0;
-                        //     if (m.holdingTarget && m.fieldCDcycle < m.cycle) {
-                        //         m.pickUp();
-                        //     } else {
-                        //         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-                        //     }
-                        // }
-
+                        if (m.energy < m.maxEnergy) m.regenEnergy(); //extra energy regen
+                        m.drawFieldMeter() // this calls  m.regenEnergy(); also
                     }
                 } else {
                     m.fieldFire = true;
                     m.isBodiesAsleep = false;
-                    m.drain = 0.0003
+                    m.drain = 0.003
                     m.hold = function() {
                         if (m.isHolding) {
                             m.wakeCheck();
@@ -2656,8 +2576,6 @@ const m = {
                         } else if (input.field && m.fieldCDcycle < m.cycle) {
                             m.grabPowerUp();
                             m.lookForPickUp();
-
-                            m.drain += 0.000002 //also increases inside tech.isTimeSkip
                             if (m.energy > m.drain) {
                                 m.energy -= m.drain;
                                 if (m.energy < m.drain) {
@@ -2665,6 +2583,7 @@ const m = {
                                     m.energy = 0;
                                     m.wakeCheck();
                                 }
+                                m.immuneCycle = m.cycle + 10; //immune to harm while time is stopped,  this also disables regen
                                 //draw field everywhere
                                 ctx.globalCompositeOperation = "saturation"
                                 ctx.fillStyle = "#ccc";
@@ -2687,26 +2606,26 @@ const m = {
                                 sleep(bullet);
 
                                 simulation.cycle--; //pause all functions that depend on game cycle increasing
-                                if (tech.isTimeSkip) {
-                                    m.immuneCycle = 0;
-                                    m.drain += 0.0000025
-                                    m.regenEnergy(); //immunity disables normal regen, so turn off immunity for just this function
-                                    m.immuneCycle = m.cycle + 10;
-                                    simulation.isTimeSkipping = true;
-                                    m.cycle++;
-                                    simulation.gravity();
-                                    if (tech.isFireMoveLock && input.fire) {
-                                        player.force.x = 0
-                                        player.force.y = 0
-                                    }
-                                    Engine.update(engine, simulation.delta);
-                                    m.move();
-                                    simulation.checks();
-                                    m.walk_cycle += m.flipLegs * m.Vx;
-                                    b.fire();
-                                    b.bulletDo();
-                                    simulation.isTimeSkipping = false;
-                                }
+                                // if (tech.isTimeSkip) {
+                                //     m.immuneCycle = 0;
+                                //     m.drain += 0.0000025
+                                //     m.regenEnergy(); //immunity disables normal regen, so turn off immunity for just this function
+                                //     m.immuneCycle = m.cycle + 10;
+                                //     simulation.isTimeSkipping = true;
+                                //     m.cycle++;
+                                //     simulation.gravity();
+                                //     if (tech.isFireMoveLock && input.fire) {
+                                //         player.force.x = 0
+                                //         player.force.y = 0
+                                //     }
+                                //     Engine.update(engine, simulation.delta);
+                                //     m.move();
+                                //     simulation.checks();
+                                //     m.walk_cycle += m.flipLegs * m.Vx;
+                                //     b.fire();
+                                //     b.bulletDo();
+                                //     simulation.isTimeSkipping = false;
+                                // }
                             } else { //holding, but field button is released
                                 m.wakeCheck();
                             }
@@ -2714,23 +2633,96 @@ const m = {
                             m.wakeCheck();
                             m.pickUp();
                         } else {
-                            if (m.drain > 0.0005) m.drain -= 0.000005 //return drain to base level
                             m.wakeCheck();
                             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                         }
-                        // console.log(m.drain.toFixed(6))
+                        if (m.energy < m.maxEnergy) m.regenEnergy(); //extra energy regen
                         m.drawFieldMeter()
                     }
                 }
+                // } else {
+                //     m.fieldFire = true;
+                //     m.isBodiesAsleep = false;
+                //     m.isTimeStopped = false;
+                //     m.drain = 0.005
+                //     let isFieldInputDown = false;
+                //     m.hold = function() {
+                //         if (m.isHolding) {
+                //             m.drawHold(m.holdingTarget);
+                //             m.holding();
+                //             m.throwBlock();
+                //             isFieldInputDown = false
+                //         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+                //             if (!m.holdingTarget) isFieldInputDown = true;
+                //             m.grabPowerUp();
+                //             m.lookForPickUp();
+                //             // if (m.energy > 0.05) { //deflecting
+                //             //     m.drawField();
+                //             //     m.pushMobsFacing();
+                //             // }
+                //         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+                //             m.pickUp();
+                //         } else {
+                //             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                //         }
+
+                //         if (isFieldInputDown && !input.field && !m.holdingTarget && !m.isHolding) {
+                //             isFieldInputDown = false;
+                //             m.isTimeStopped = true;
+                //         }
+                //         m.drawFieldMeter()
+                //         if (m.energy < m.maxEnergy) { //extra energy regen
+                //             m.regenEnergy();
+                //             m.regenEnergy();
+                //         }
+                //         if (m.isTimeStopped) {
+                //             if (m.energy > m.drain) {
+                //                 // if (player.speed > 0.01 || input.fire) 
+                //                 m.energy -= m.drain;
+                //                 m.immuneCycle = m.cycle + 10; //immune to harm while time is stopped,  this also disables regen
+                //                 simulation.cycle--; //pause all functions that depend on game cycle increasing
+                //                 m.isBodiesAsleep = true;
+                //                 ctx.globalCompositeOperation = "saturation" //draw field everywhere
+                //                 ctx.fillStyle = "#ccc";
+                //                 ctx.fillRect(-100000, -100000, 200000, 200000)
+                //                 ctx.globalCompositeOperation = "source-over"
+
+                //                 function sleep(who) {
+                //                     for (let i = 0, len = who.length; i < len; ++i) {
+                //                         if (!who[i].isSleeping) {
+                //                             who[i].storeVelocity = who[i].velocity
+                //                             who[i].storeAngularVelocity = who[i].angularVelocity
+                //                         }
+                //                         Matter.Sleeping.set(who[i], true)
+                //                     }
+                //                 }
+                //                 sleep(mob);
+                //                 sleep(body);
+                //                 sleep(bullet);
+                //             } else { //restart time
+                //                 m.fieldCDcycle = m.cycle + 60;
+                //                 m.energy = 0;
+                //                 m.isTimeStopped = false
+                //                 m.wakeCheck();
+                //             }
+                //             if (simulation.isChoosing) {
+                //                 // m.fieldCDcycle = m.cycle + 60;
+                //                 m.isTimeStopped = false
+                //                 m.wakeCheck();
+                //             }
+                //         }
+
+                //     }
+                // }
             },
             effect() {
-                // m.fieldMeterColor = "#000"
                 this.set();
             }
         },
         {
             name: "metamaterial cloaking", //"weak photonic coupling" "electromagnetically induced transparency" "optical non-coupling" "slow light field" "electro-optic transparency"
-            description: "when not firing activate a <strong class='color-cloaked'>cloaking</strong> effect<br><strong>+333%</strong> <strong class='color-d'>damage</strong> if a mob hasn't recently <strong>died</strong><br><strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong> when <strong class='color-cloaked'>cloaked</strong>",
+            //<br><strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong> when <strong class='color-cloaked'>cloaked</strong>
+            description: "when not firing activate <strong class='color-cloaked'>cloaking</strong><br><span style = 'font-size:95%;'><strong>+333%</strong> <strong class='color-d'>damage</strong> if no mob has <strong>died</strong> in <strong>4</strong> seconds</span><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
             effect: () => {
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
@@ -3028,7 +3020,9 @@ const m = {
         // },
         {
             name: "pilot wave",
-            description: "use <strong class='color-f'>energy</strong> to push <strong class='color-block'>blocks</strong> with your mouse<br><strong class='color-block'>blocks</strong> can't <strong>collide</strong> with <strong>intangible</strong> mobs<br>field <strong>radius</strong> decreases out of <strong>line of sight</strong>",
+            //<br><strong class='color-block'>blocks</strong> can't <strong>collide</strong> with <strong>intangible</strong> mobs
+            //field <strong>radius</strong> decreases out of <strong>line of sight</strong>
+            description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong>unlock</strong> <strong class='color-m'>tech</strong> from other <strong class='color-f'>fields</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
             effect: () => {
                 m.fieldPhase = 0;
                 m.fieldPosition = {
@@ -3223,7 +3217,8 @@ const m = {
         },
         {
             name: "wormhole",
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br><strong>5%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            //<strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>5%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             drain: 0,
             effect: function() {
                 m.duplicateChance = 0.05
@@ -3641,10 +3636,6 @@ const m = {
                     // } else {
                     //     m.hole.isReady = true;
                     // }
-
-
-
-
                     m.drawFieldMeter()
                 }
             },

@@ -16,12 +16,12 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
-            // m.setField("standing wave")
-            // b.giveGuns("laser")
-            // tech.giveTech("scrap-bot manufacturing")
+            // m.setField("time dilation")
+            // b.giveGuns("matter wave")
+            // tech.giveTech("phonon")
             // tech.giveTech("eternalism")
-            // tech.giveTech("options exchange")
-            // tech.giveTech("ICBM")
+            // tech.giveTech("isotropic radiator")
+            // tech.giveTech("polyurethane balls")
             // tech.giveTech("grappling hook")
             // tech.giveTech("paradigm shift")
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(450, -50, "tech");
@@ -37,7 +37,7 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.testChamber();
+            // level.labs();
             // level.testing(); //not in rotation, used for testing
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -972,19 +972,19 @@ const level = {
                                     }
                                 }
                                 //delete any overlapping mobs
-                                const mobsHits = Matter.Query.collides(this, mob)
-                                for (let i = 0; i < mobsHits.length; i++) {
-                                    if (mobsHits[i].bodyB !== this && mobsHits[i].bodyB !== m.holdingTarget) { //dont' delete yourself   <----- bug here maybe...
-                                        Matter.Composite.remove(engine.world, mobsHits[i].bodyB);
-                                        mobsHits[i].bodyB.isRemoveMeNow = true
-                                        for (let i = 1; i < mob.length; i++) { //find which index in body array it is and remove from array
-                                            if (mob[i].isRemoveMeNow) {
-                                                mob.splice(i, 1);
-                                                break
-                                            }
-                                        }
-                                    }
-                                }
+                                // const mobsHits = Matter.Query.collides(this, mob)
+                                // for (let i = 0; i < mobsHits.length; i++) {
+                                //     if (mobsHits[i].bodyB !== this && mobsHits[i].bodyB !== m.holdingTarget) { //dont' delete yourself   <----- bug here maybe...
+                                //         Matter.Composite.remove(engine.world, mobsHits[i].bodyB);
+                                //         mobsHits[i].bodyB.isRemoveMeNow = true
+                                //         for (let i = 1; i < mob.length; i++) { //find which index in body array it is and remove from array
+                                //             if (mob[i].isRemoveMeNow) {
+                                //                 mob.splice(i, 1);
+                                //                 break
+                                //             }
+                                //         }
+                                //     }
+                                // }
                             }
                         }
                     }
@@ -1444,15 +1444,15 @@ const level = {
                 spawn.bodyRect(x + 1460, y - 900, 30, 150); //entrance door
                 spawn.mapRect(x + 1600, y - 350, 500, 100); //toggle shelf
                 const toggle = level.toggle(x + 1650, y - 350, true) //(x,y,isOn,isLockOn = true/false)
-                let hazard
+                let hazard1
                 if (Math.random() > 0.5) {
                     spawn.mapRect(x + 550, y - 750, 1500, 50); //entrance shelf
-                    hazard = level.hazard(x + 850, y - 920, 600, 10, 0.4) //laser
+                    hazard1 = level.hazard(x + 850, y - 920, 600, 10, 0.4) //laser
                     spawn.mapRect(x + 860, y - 925, 10, 20); //laser nose
                     spawn.mapRect(x + 660, y - 975, 200, 120); //laser body
                 } else {
                     spawn.mapRect(x + 1350, y - 750, 700, 50); //entrance shelf
-                    hazard = level.hazard(x + 1040, y - 660, 1000, 10, 0.4) //laser
+                    hazard1 = level.hazard(x + 1040, y - 660, 1000, 10, 0.4) //laser
                     spawn.mapRect(x + 1050, y - 665, 10, 20); //laser nose
                     spawn.mapRect(x + 650, y - 705, 400, 100); //laser body
                 }
@@ -1476,14 +1476,17 @@ const level = {
                 doCustomTopLayer.push(
                     () => {
                         toggle.query();
-                        hazard.isOn = toggle.isOn
+                        hazard1.isOn = toggle.isOn
                         hazard2.isOn = toggle.isOn
                         hazard3.isOn = toggle.isOn
                         hazard4.isOn = toggle.isOn
-                        hazard.opticalQuery();
-                        hazard2.opticalQuery();
-                        hazard3.opticalQuery();
-                        hazard4.opticalQuery();
+                        if ((simulation.cycle % 120) > 60) {
+                            hazard1.opticalQuery();
+                            hazard2.opticalQuery();
+                        } else {
+                            hazard3.opticalQuery();
+                            hazard4.opticalQuery();
+                        }
                         // if (!isSpawnedMobs && !toggle.isOn) {
                         //     isSpawnedMobs = true
                         //     spawn.randomMob(x + 150, y + -1100, mobSpawnChance);
@@ -2173,89 +2176,102 @@ const level = {
 
             // },
             (x = offset.x, y = offset.y) => {
-                const toggle = level.toggle(x + 950, y + 0, false, true) //    toggle(x, y, isOn = false, isLockOn = false) {
-                toggle.isAddedElements = false
+                // const toggle = level.toggle(x + 950, y + 0, false, true) //    toggle(x, y, isOn = false, isLockOn = false) {
+                // toggle.isAddedElements = false
+
+                const button = level.button(x + 950, y + 0)
+                button.isUp = true
+
+
                 spawn.mapVertex(x + 5, y + -1318, "0 0  0 -250  125 -250"); //left ledges
                 spawn.mapVertex(x + 1995, y + -1318, "0 0  0 -250  -125 -250"); // right ledges
                 doCustomTopLayer.push(
                     () => {
-                        toggle.query();
-                        if (toggle.isOn && !toggle.isAddedElements) { //this code runs once after the toggle is triggered
-                            toggle.isAddedElements = true //only do this once
-                            addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
-                                who.collisionFilter.category = cat.map;
-                                who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
-                                Matter.Body.setStatic(who, true); //make static
-                                Composite.add(engine.world, who); //add to world
+                        button.draw();
+                        if (button.isUp) {
+                            button.query();
+                            if (!button.isUp) {
+                                // toggle.isAddedElements = true //only do this once
+                                addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+                                    who.collisionFilter.category = cat.map;
+                                    who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+                                    Matter.Body.setStatic(who, true); //make static
+                                    Composite.add(engine.world, who); //add to world
+                                }
+                                let r = 150
+                                let hexagon = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
+                                //450 horizontal spread //  -130-130-130 = 390 vertical
+                                if (Math.random() < 0.5) {
+                                    spawn.mapVertex(x + 775, y + -260, hexagon);
+                                    spawn.mapVertex(x + 1225, y + -260, hexagon);
+
+                                    spawn.mapVertex(x + 550, y + -650, hexagon);
+                                    spawn.mapVertex(x + 1000, y + -650, hexagon);
+                                    spawn.mapVertex(x + 1450, y + -650, hexagon);
+
+                                    spawn.mapVertex(x + 325, y + -1040, hexagon);
+                                    spawn.mapVertex(x + 775, y + -1040, hexagon);
+                                    spawn.mapVertex(x + 1225, y + -1040, hexagon);
+                                    spawn.mapVertex(x + 1675, y + -1040, hexagon);
+
+                                    spawn.mapVertex(x + 550, y + -1430, hexagon);
+                                    spawn.mapVertex(x + 1000, y + -1430, hexagon);
+                                    spawn.mapVertex(x + 1450, y + -1430, hexagon);
+
+                                    const numberOfMapElementsAdded = 12
+                                    for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
+                                    spawn.randomMob(x + 225, y + -1775, mobSpawnChance);
+                                    spawn.randomMob(x + 700, y + -1750, mobSpawnChance);
+                                    spawn.randomMob(x + 1175, y + -1725, mobSpawnChance);
+                                    spawn.randomMob(x + 1700, y + -1700, mobSpawnChance);
+                                    spawn.randomMob(x + 1750, y + -250, mobSpawnChance);
+                                    spawn.randomMob(x + 125, y + -250, mobSpawnChance);
+                                } else {
+                                    spawn.mapVertex(x + 775, y + -260, hexagon);
+                                    spawn.mapVertex(x + 1225, y + -260, hexagon);
+
+                                    spawn.mapVertex(x + 550, y + -650, hexagon);
+                                    spawn.mapVertex(x + 1000, y + -650, hexagon);
+                                    spawn.mapVertex(x + 1450, y + -650, hexagon);
+
+                                    spawn.mapVertex(x + 775, y + -1040, hexagon);
+                                    spawn.mapVertex(x + 1225, y + -1040, hexagon);
+
+                                    spawn.mapVertex(x + 550, y + -1430, hexagon);
+                                    spawn.mapVertex(x + 1000, y + -1430, hexagon);
+                                    spawn.mapVertex(x + 1450, y + -1430, hexagon);
+
+                                    spawn.mapVertex(x + 775, y + -1820, hexagon);
+                                    spawn.mapVertex(x + 1225, y + -1820, hexagon);
+                                    const numberOfMapElementsAdded = 12
+                                    for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
+
+                                    spawn.randomMob(x + 225, y + -1025, mobSpawnChance);
+                                    spawn.randomMob(x + 200, y + -675, mobSpawnChance);
+                                    spawn.randomMob(x + 225, y + -200, mobSpawnChance);
+                                    spawn.randomMob(x + 1750, y + -1075, mobSpawnChance);
+                                    spawn.randomMob(x + 1700, y + -650, mobSpawnChance);
+                                    spawn.randomMob(x + 1675, y + -175, mobSpawnChance);
+                                }
+                                simulation.draw.setPaths() //update map graphics
+                                spawn.randomGroup(x + 300, y + -2200);
+                                spawn.randomGroup(x + 1625, y + -2200);
+                                spawn.randomLevelBoss(x + 700, y + -2300);
+                                spawn.secondaryBossChance(x + 1250, y + -2300)
                             }
-                            let r = 150
-                            let hexagon = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
-                            //450 horizontal spread //  -130-130-130 = 390 vertical
-                            if (Math.random() < 0.5) {
-                                spawn.mapVertex(x + 775, y + -260, hexagon);
-                                spawn.mapVertex(x + 1225, y + -260, hexagon);
-
-                                spawn.mapVertex(x + 550, y + -650, hexagon);
-                                spawn.mapVertex(x + 1000, y + -650, hexagon);
-                                spawn.mapVertex(x + 1450, y + -650, hexagon);
-
-                                spawn.mapVertex(x + 325, y + -1040, hexagon);
-                                spawn.mapVertex(x + 775, y + -1040, hexagon);
-                                spawn.mapVertex(x + 1225, y + -1040, hexagon);
-                                spawn.mapVertex(x + 1675, y + -1040, hexagon);
-
-                                spawn.mapVertex(x + 550, y + -1430, hexagon);
-                                spawn.mapVertex(x + 1000, y + -1430, hexagon);
-                                spawn.mapVertex(x + 1450, y + -1430, hexagon);
-
-                                const numberOfMapElementsAdded = 12
-                                for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
-                                spawn.randomMob(x + 225, y + -1775, mobSpawnChance);
-                                spawn.randomMob(x + 700, y + -1750, mobSpawnChance);
-                                spawn.randomMob(x + 1175, y + -1725, mobSpawnChance);
-                                spawn.randomMob(x + 1700, y + -1700, mobSpawnChance);
-                                spawn.randomMob(x + 1750, y + -250, mobSpawnChance);
-                                spawn.randomMob(x + 125, y + -250, mobSpawnChance);
-                            } else {
-                                spawn.mapVertex(x + 775, y + -260, hexagon);
-                                spawn.mapVertex(x + 1225, y + -260, hexagon);
-
-                                spawn.mapVertex(x + 550, y + -650, hexagon);
-                                spawn.mapVertex(x + 1000, y + -650, hexagon);
-                                spawn.mapVertex(x + 1450, y + -650, hexagon);
-
-                                spawn.mapVertex(x + 775, y + -1040, hexagon);
-                                spawn.mapVertex(x + 1225, y + -1040, hexagon);
-
-                                spawn.mapVertex(x + 550, y + -1430, hexagon);
-                                spawn.mapVertex(x + 1000, y + -1430, hexagon);
-                                spawn.mapVertex(x + 1450, y + -1430, hexagon);
-
-                                spawn.mapVertex(x + 775, y + -1820, hexagon);
-                                spawn.mapVertex(x + 1225, y + -1820, hexagon);
-                                const numberOfMapElementsAdded = 12
-                                for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
-
-                                spawn.randomMob(x + 225, y + -1025, mobSpawnChance);
-                                spawn.randomMob(x + 200, y + -675, mobSpawnChance);
-                                spawn.randomMob(x + 225, y + -200, mobSpawnChance);
-                                spawn.randomMob(x + 1750, y + -1075, mobSpawnChance);
-                                spawn.randomMob(x + 1700, y + -650, mobSpawnChance);
-                                spawn.randomMob(x + 1675, y + -175, mobSpawnChance);
-                            }
-                            simulation.draw.setPaths() //update map graphics
-                            spawn.randomGroup(x + 300, y + -2200);
-                            spawn.randomGroup(x + 1625, y + -2200);
-                            spawn.randomLevelBoss(x + 700, y + -2300);
-                            spawn.secondaryBossChance(x + 1250, y + -2300)
                         }
+                        // toggle.query();
+                        // if (toggle.isOn && !toggle.isAddedElements) { //this code runs once after the toggle is triggered
+
+                        // }
                     }
                 )
             },
             (x = offset.x, y = offset.y) => {
-                const toggle = level.toggle(x + 950, y + 0, false, true) //    toggle(x, y, isOn = false, isLockOn = false) {
-                toggle.isAddedElements = false
-
+                // const toggle = level.toggle(x + 950, y + 0, false, true) //    toggle(x, y, isOn = false, isLockOn = false) {
+                // toggle.isAddedElements = false
+                const button = level.button(x + 950, y + 0)
+                button.isUp = true
                 //left ledges
                 spawn.mapVertex(x + 5, y + -1868, "0 0  0 -250  125 -250");
                 spawn.mapVertex(x + 5, y + -1318, "0 0  0 -250  125 -250"); //door
@@ -2267,55 +2283,57 @@ const level = {
 
                 doCustomTopLayer.push(
                     () => {
-                        toggle.query();
-                        if (toggle.isOn && !toggle.isAddedElements) { //this code runs once after the toggle is triggered
-                            toggle.isAddedElements = true //only do this once
-                            addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
-                                who.collisionFilter.category = cat.map;
-                                who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
-                                Matter.Body.setStatic(who, true); //make static
-                                Composite.add(engine.world, who); //add to world
+                        button.draw();
+                        if (button.isUp) {
+                            button.query();
+                            if (!button.isUp) {
+                                addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+                                    who.collisionFilter.category = cat.map;
+                                    who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+                                    Matter.Body.setStatic(who, true); //make static
+                                    Composite.add(engine.world, who); //add to world
+                                }
+                                //right side hexagons
+                                let r = 300
+                                let hexagon = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
+                                spawn.mapVertex(x + 1640, y + -365, hexagon);
+                                // r = 275
+                                // let hexagonHalf = `${r} 0   ${r*Math.cos(5.236)} ${r*Math.sin(5.236)}    ${r*Math.cos(4.189)} ${r*Math.sin(4.189)}     ${-r} 0 `
+                                // spawn.mapVertex(x + 2300, y + -75, hexagonHalf);
+                                r = 150
+                                const hexagon150 = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
+                                // spawn.mapVertex(x + 1750, y + -550, hexagon150);
+                                spawn.mapVertex(x + 1750, y + -1100, hexagon150);
+                                spawn.mapVertex(x + 1750, y + -1650, hexagon150);
+                                spawn.mapVertex(x + 1750, y + -2200, hexagon150);
+
+                                //left side
+                                r = 350
+                                let hexagonHalf = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0 `
+                                spawn.mapVertex(x + 425, y + -90, hexagonHalf);
+
+                                spawn.mapVertex(x + 850, y + -500, hexagon150);
+                                spawn.mapVertex(x + 550, y + -850, hexagon150);
+                                spawn.mapVertex(x + 250, y + -1200, hexagon150);
+                                spawn.mapVertex(x + 250, y + -1700, hexagon150);
+                                spawn.mapVertex(x + 725, y + -1950, hexagon150);
+                                spawn.mapVertex(x + 1200, y + -2200, hexagon150);
+                                const numberOfMapElementsAdded = 11
+                                for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
+
+                                spawn.randomMob(x + 1075, y + -1500, mobSpawnChance);
+                                spawn.randomMob(x + 325, y + -550, mobSpawnChance);
+                                spawn.randomMob(x + 800, y + -925, mobSpawnChance);
+                                spawn.randomMob(x + 1400, y + -1250, mobSpawnChance);
+                                spawn.randomMob(x + 1350, y + -1725, mobSpawnChance);
+                                spawn.randomMob(x + 575, y + -1375, mobSpawnChance);
+                                spawn.randomMob(x + 225, y + -2275, mobSpawnChance);
+                                spawn.randomMob(x + 875, y + -2450, mobSpawnChance);
+                                spawn.randomMob(x + 1550, y + -2525, mobSpawnChance);
+                                spawn.randomLevelBoss(x + 1075, y + -1500);
+                                spawn.secondaryBossChance(x + 1200, y + -1000)
+                                simulation.draw.setPaths() //update map graphics
                             }
-                            //right side hexagons
-                            let r = 300
-                            let hexagon = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
-                            spawn.mapVertex(x + 1640, y + -365, hexagon);
-                            // r = 275
-                            // let hexagonHalf = `${r} 0   ${r*Math.cos(5.236)} ${r*Math.sin(5.236)}    ${r*Math.cos(4.189)} ${r*Math.sin(4.189)}     ${-r} 0 `
-                            // spawn.mapVertex(x + 2300, y + -75, hexagonHalf);
-                            r = 150
-                            const hexagon150 = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0     ${r * Math.cos(2.0944)} ${r * Math.sin(2.0944)}      ${r * Math.cos(1.0472)} ${r * Math.sin(1.0472)}  `
-                            // spawn.mapVertex(x + 1750, y + -550, hexagon150);
-                            spawn.mapVertex(x + 1750, y + -1100, hexagon150);
-                            spawn.mapVertex(x + 1750, y + -1650, hexagon150);
-                            spawn.mapVertex(x + 1750, y + -2200, hexagon150);
-
-                            //left side
-                            r = 350
-                            let hexagonHalf = `${r} 0   ${r * Math.cos(5.236)} ${r * Math.sin(5.236)}    ${r * Math.cos(4.189)} ${r * Math.sin(4.189)}     ${-r} 0 `
-                            spawn.mapVertex(x + 425, y + -90, hexagonHalf);
-
-                            spawn.mapVertex(x + 850, y + -500, hexagon150);
-                            spawn.mapVertex(x + 550, y + -850, hexagon150);
-                            spawn.mapVertex(x + 250, y + -1200, hexagon150);
-                            spawn.mapVertex(x + 250, y + -1700, hexagon150);
-                            spawn.mapVertex(x + 725, y + -1950, hexagon150);
-                            spawn.mapVertex(x + 1200, y + -2200, hexagon150);
-                            const numberOfMapElementsAdded = 11
-                            for (let i = 0; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
-
-                            spawn.randomMob(x + 1075, y + -1500, mobSpawnChance);
-                            spawn.randomMob(x + 325, y + -550, mobSpawnChance);
-                            spawn.randomMob(x + 800, y + -925, mobSpawnChance);
-                            spawn.randomMob(x + 1400, y + -1250, mobSpawnChance);
-                            spawn.randomMob(x + 1350, y + -1725, mobSpawnChance);
-                            spawn.randomMob(x + 575, y + -1375, mobSpawnChance);
-                            spawn.randomMob(x + 225, y + -2275, mobSpawnChance);
-                            spawn.randomMob(x + 875, y + -2450, mobSpawnChance);
-                            spawn.randomMob(x + 1550, y + -2525, mobSpawnChance);
-                            spawn.randomLevelBoss(x + 1075, y + -1500);
-                            spawn.secondaryBossChance(x + 1200, y + -1000)
-                            simulation.draw.setPaths() //update map graphics
                         }
                     }
                 )
@@ -2654,7 +2672,7 @@ const level = {
         // spawn.shieldingBoss(1700, -500)
 
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
-        for (let i = 0; i < 1; i++) spawn.stabber(1900, -500)
+        for (let i = 0; i < 4; i++) spawn.starter(1900, -500)
         // spawn.pulsar(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true

@@ -904,7 +904,7 @@ window.addEventListener("keydown", function(event) {
                     // level.levelAnnounce();
                     document.body.style.cursor = "none";
                     requestAnimationFrame(cycle);
-                } else {
+                } else if (!tech.isNoDraftPause) {
                     simulation.paused = true;
                     build.pauseGrid()
                     document.body.style.cursor = "auto";

@@ -280,7 +280,7 @@ const powerUps = {
 
         if (!simulation.paused) {
             if (tech.isNoDraftPause) {
-                powerUps.spawn(m.pos.x, m.pos.y, "ammo");
+                // powerUps.spawn(m.pos.x, m.pos.y, "ammo");
                 document.getElementById("choose-grid").style.opacity = "0.7"
             } else {
                 simulation.paused = true;

@@ -1,33 +1,44 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: eternalism - tech,gun,field gives an ammo but, time doesn't pause while choosing
-  I might change the ammo to something else, not sure, maybe just damage
-JUNK tech: panpsychism - awaken blocks, blocks can drop power ups
+time dilation field rework
+  2x energy regen, but pausing time now uses much more energy
+  you are immune to harm while time is paused
+    but this stops energy regen
+    tech timelike is removed
 
-cache gives 14->16x ammo
-1st ionization energy gives 8->10% max energy on heal
+eternalism gives 50% damage instead of ammo
+  also disables the pause button, and other pause effects
 
-powerUpBossBaby immunity phase is a bit shorter
+tech: polyurethane foam - super balls turn into foam after hitting a mob
+supertemporal renamed autocannon
+  now gives +1 ball, and has a shorter delay between balls
+
+harpoon and grapple no longer lose ammo when you run out of energy
+  they just trigger a 2 second fire CD
+slashBoss doesn't slash as often at higher difficulty levels
+field descriptions rewritten
 
 bug fixes
 
 ******************************************************** TODO ********************************************************
 
-tech:  - don't pause time during draft
+tech: eternalism - don't pause time during draft
   bugs
     requirements change after draft is generated
-      disable effects that change requirements
-        when simulation.isChoosing you can't:  eject tech, 
-      check for requirements onclick and give random tech if not met?
+    check for requirements onclick and give random tech if not met?
 
-make lasers on labs flash on and off
-  make switch a button that stays down
-
+tech expansion:  should also make other fields do things
+  perfect diamagnetism moves forward when you hold down the shield
+    maybe only with crouch?
+  time dilation drains 1/2 as much energy when paused
+  grow plasma torch as you hold it down
+  negative mass effects much more space
+    needs more benefit
+  reduces the cloaking vision effect?
+    needs more benefit
 
 nonrefundable tech don't display, this is confusing
     maybe they can show up but greyed out or something
-
-make your power up list scrollable while in power up selection pause menu
 
 Tech could probably be indexed, something like running
 tech.index = new Map();
@@ -44,10 +55,6 @@ if (queriedTech) {
 
 guntech fire a bullet that fires nail fragments after 1s in the same direction as the original bullet
   like overwatch roadhog
-
-make mol fab field do something cool when it blocks
-  generate energy?
-  reset lifespan of: drone,spore,worm, iceIX
 
 bring back:
   the old phase decoherence field
