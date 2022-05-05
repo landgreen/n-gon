@@ -1365,7 +1365,7 @@ const mobs = {
                     mob.splice(i, 1);
                     if (tech.isMobBlockFling) {
                         const who = body[body.length - 1]
-                        b.targetedBlock(who, true)
+                        b.targetedBlock(who)
                         Matter.Body.setAngularVelocity(who, (0.5 + 0.2 * Math.random()) * (Math.random() < 0.5 ? -1 : 1));
                     }
                 } else {

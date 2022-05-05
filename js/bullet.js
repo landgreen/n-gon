@@ -208,8 +208,10 @@ const b = {
                 }
                 if (b.inventory.length > 0) {
                     b.activeGun = b.inventory[0];
+                    b.inventoryGun = 0;
                 } else {
                     b.activeGun = null;
+                    b.inventoryGun = 0;
                 }
                 simulation.makeGunHUD();
                 break
@@ -974,7 +976,7 @@ const b = {
             bullet[me] = Bodies.polygon(where.x, where.y, 10, 4, b.fireAttributes(angle, false));
             b.fireProps((input.down ? 45 : 25) / Math.pow(0.92, tech.missileCount), input.down ? 35 : 20, angle, me); //cd , speed
             Matter.Body.setDensity(bullet[me], 0.000001);
-            bullet[me].endCycle = Infinity;
+            bullet[me].endCycle = 500 + simulation.cycle;
             bullet[me].frictionAir = 0;
             bullet[me].friction = 1;
             bullet[me].frictionStatic = 1;
@@ -1132,6 +1134,8 @@ const b = {
                 }
             }
         }
+
+
         let gunIndex = null
         for (let i = 0, len = b.guns.length; i < len; i++) {
             if (b.guns[i].name === "grenades") {
@@ -1364,7 +1368,7 @@ const b = {
             },
             minDmgSpeed: 4,
             lookFrequency: Math.floor(7 + Math.random() * 3),
-            density: tech.harpoonDensity, //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.005*6 when buffed
+            density: tech.harpoonDensity, //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
             drain: 0.004,
             beforeDmg(who) {
                 if (tech.isShieldPierce && who.isShielded) { //disable shields
@@ -1397,7 +1401,7 @@ const b = {
                         this.caughtPowerUp.effect();
                         Matter.Composite.remove(engine.world, this.caughtPowerUp);
                         powerUp.splice(index, 1);
-                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.005 * 6 //0.005 is normal
+                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.004 * 6 //0.005 is normal
                     } else {
                         this.dropCaughtPowerUp()
                     }
@@ -1446,7 +1450,7 @@ const b = {
                     if (m.energy < 0.05) this.dropCaughtPowerUp()
 
                     //recoil on catching
-                    const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.00015 : 0.0003))
+                    const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.0001 : 0.0002))
                     player.force.x += momentum.x
                     player.force.y += momentum.y
                     // refund ammo
@@ -1519,6 +1523,10 @@ const b = {
                     Matter.Body.setDensity(this, 0.0005); //reduce density on return
                     if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
                     this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
+                    //recoil on catching
+                    const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.0001 : 0.0002))
+                    player.force.x += momentum.x
+                    player.force.y += momentum.y
                     // }
                 }
                 //grappling hook
@@ -1576,6 +1584,10 @@ const b = {
                                         this.do = this.returnToPlayer
                                         this.endCycle = simulation.cycle + 60
                                         m.fireCDcycle = m.cycle + 120; //fire cooldown
+                                        //recoil on catching
+                                        const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.0001 : 0.0002))
+                                        player.force.x += momentum.x
+                                        player.force.y += momentum.y
                                     }
                                 }
                             } else {
@@ -1584,6 +1596,10 @@ const b = {
                                 this.collisionFilter.mask = 0
                                 this.do = this.returnToPlayer
                                 this.endCycle = simulation.cycle + 60
+                                //recoil on catching
+                                const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.0001 : 0.0002))
+                                player.force.x += momentum.x
+                                player.force.y += momentum.y
                             }
                             this.draw();
                         }
@@ -1617,7 +1633,7 @@ const b = {
             },
             minDmgSpeed: 4,
             lookFrequency: Math.floor(7 + Math.random() * 3),
-            density: tech.harpoonDensity, //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.005*6 when buffed
+            density: tech.harpoonDensity, //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
             beforeDmg(who) {
                 if (tech.isShieldPierce && who.isShielded) { //disable shields
                     who.isShielded = false
@@ -1659,7 +1675,7 @@ const b = {
                         this.caughtPowerUp.effect();
                         Matter.Composite.remove(engine.world, this.caughtPowerUp);
                         powerUp.splice(index, 1);
-                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.005 * 6 //0.006 is normal
+                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.004 * 6 //0.006 is normal
                     } else {
                         this.dropCaughtPowerUp()
                     }
@@ -1712,7 +1728,7 @@ const b = {
                         m.fireCDcycle = m.cycle + 35 * b.fireCDscale //lower cd to 25 if it is above 25
                     }
                     //recoil on catching
-                    const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.00015 : 0.0003))
+                    const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.0001 : 0.0002))
                     player.force.x += momentum.x
                     player.force.y += momentum.y
                     // refund ammo
@@ -1769,6 +1785,10 @@ const b = {
                             this.collisionFilter.category = 0
                             this.collisionFilter.mask = 0
                             this.endCycle = simulation.cycle + 60
+                            //recoil on jerking line
+                            const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.00015 : 0.0003))
+                            player.force.x += momentum.x
+                            player.force.y += momentum.y
                         } else {
                             this.grabPowerUp()
                         }
@@ -2605,7 +2625,7 @@ const b = {
                 // angle: Math.random() * 2 * Math.PI,
                 friction: 0,
                 frictionAir: 0.025,
-                thrust: (tech.isFastSpores ? 0.001 : 0.0005) * (1 + 0.5 * (Math.random() - 0.5)),
+                thrust: (tech.isFastSpores ? 0.0012 : 0.00055) * (1 + 0.5 * (Math.random() - 0.5)),
                 wormSize: wormSize,
                 wormTail: 1 + Math.max(4, Math.min(wormSize - 2 * tech.wormSize, 30)),
                 dmg: (tech.isMutualism ? 7 : 2.9) * wormSize, //bonus damage from tech.isMutualism //2.5 is extra damage as worm
@@ -2723,7 +2743,7 @@ const b = {
                 angle: Math.random() * 2 * Math.PI,
                 friction: 0,
                 frictionAir: 0.025,
-                thrust: (tech.isFastSpores ? 0.0009 : 0.00045) * (1 + 0.3 * (Math.random() - 0.5)),
+                thrust: (tech.isFastSpores ? 0.0011 : 0.0005) * (1 + 0.3 * (Math.random() - 0.5)),
                 dmg: tech.isMutualism ? 16.8 : 7, //bonus damage from tech.isMutualism
                 lookFrequency: 100 + Math.floor(117 * Math.random()),
                 classType: "bullet",
@@ -3496,7 +3516,7 @@ const b = {
             inertia: Infinity,
             frictionAir: 0.003,
             dmg: 0, //damage on impact
-            damage: (tech.isFastFoam ? 0.0275 : 0.011) * (tech.isBulletTeleport ? 1.43 : 1), //damage done over time
+            damage: tech.foamDamage * (tech.isFastFoam ? 2.5 : 1) * (tech.isBulletTeleport ? 1.43 : 1), //damage done over time
             scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.65 : 1),
             classType: "bullet",
             collisionFilter: {
@@ -3575,6 +3595,35 @@ const b = {
                         const SCALE = 1 - 0.004 / tech.isBulletsLastLonger //shrink if mob is shielded
                         Matter.Body.scale(this, SCALE, SCALE);
                         this.radius *= SCALE;
+
+                        // if (true && !(simulation.cycle % 20)) {
+                        //     let electricity = (who) => {
+                        //         who.damage(2 * m.dmgScale, true)
+                        //         const unit = Vector.normalise(Vector.sub(this.position, who.position))
+                        //         //draw electricity
+                        //         const step = 80
+                        //         ctx.beginPath();
+                        //         let x = this.position.x - 20 * unit.x;
+                        //         let y = this.position.y - 20 * unit.y;
+                        //         ctx.moveTo(x, y);
+                        //         for (let i = 0; i < 3; i++) {
+                        //             x += step * (-unit.x + 1.5 * (Math.random() - 0.5))
+                        //             y += step * (-unit.y + 1.5 * (Math.random() - 0.5))
+                        //             ctx.lineTo(x, y);
+                        //         }
+                        //         ctx.lineWidth = 3;
+                        //         ctx.strokeStyle = "#f0f";
+                        //         ctx.stroke();
+                        //     }
+
+                        //     //find mobs that are close
+                        //     for (let i = 0, len = mob.length; i < len; ++i) {
+                        //         if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) - mob[i].radius < 5000 && !mob[i].isBadTarget) {
+                        //             electricity(mob[0])
+                        //         }
+                        //     }
+                        // }
+
                     } else {
                         this.target.damage(m.dmgScale * this.damage);
                     }
@@ -3650,7 +3699,7 @@ const b = {
         Composite.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
     },
-    targetedBlock(who, isSpin = false, speed = 50 - Math.min(20, who.mass * 2), range = 1600) {
+    targetedBlock(who, speed = 50 - Math.min(20, who.mass * 2), range = 1600) {
         let closestMob, dist
         for (let i = 0, len = mob.length; i < len; i++) {
             if (who !== mob[i]) {
@@ -4809,8 +4858,8 @@ const b = {
             name: "nail gun",
             description: "use compressed air to fire a stream of <strong>nails</strong><br><strong><em>delay</em></strong> after firing <strong>decreases</strong> as you shoot",
             ammo: 0,
-            ammoPack: 45,
-            defaultAmmoPack: 45,
+            ammoPack: 50,
+            defaultAmmoPack: 50,
             recordedAmmo: 0,
             have: false,
             nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -4824,8 +4873,6 @@ const b = {
                     }
                 } else if (tech.isRivets) {
                     this.fire = this.fireRivets
-                } else if (tech.isDarts) {
-                    this.fire = this.fireDarts
                 } else if (tech.isNeedles) {
                     this.fire = this.fireNeedles
                 } else if (tech.nailInstantFireRate) {
@@ -4838,29 +4885,13 @@ const b = {
             },
             do() {},
             fire() {},
-            // for (let i = 0; i < 5; i++) {
-            //     b.dart(where, m.angle + 0.1 * i)
-            //     b.dart(where, m.angle - 0.1 * i)
-            // }
-            fireDarts() {
-                const where = {
-                    x: m.pos.x + 30 * Math.cos(m.angle),
-                    y: m.pos.y + 30 * Math.sin(m.angle)
-                }
-                m.fireCDcycle = m.cycle + 10 * b.fireCDscale; // cool down
-                b.dart(where, m.angle) //+ 0.6 * (Math.random() - 0.5)
-                // const spread = 0.5
-                // b.dart(where, m.angle + spread)
-                // b.dart(where, m.angle)
-                // b.dart(where, m.angle - spread)
-            },
             fireRecoilNails() {
                 if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
-                const CD = Math.max(11 - 0.08 * (m.cycle - this.startingHoldCycle), 1) //CD scales with cycles fire is held down
+                const CD = Math.max(11 - 0.06 * (m.cycle - this.startingHoldCycle), 0.99) //CD scales with cycles fire is held down
                 this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
 
                 m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
-                this.baseFire(m.angle + (Math.random() - 0.5) * (input.down ? 0.1 : 0.13) / CD, 45 + 6 * Math.random())
+                this.baseFire(m.angle + (Math.random() - 0.5) * (input.down ? 0.04 : 0.13) / CD, 45 + 6 * Math.random())
                 //very complex recoil system
                 if (m.onGround) {
                     if (input.down) {
@@ -4887,28 +4918,28 @@ const b = {
             },
             fireNormal() {
                 if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
-                const CD = Math.max(11 - 0.06 * (m.cycle - this.startingHoldCycle), 2) //CD scales with cycles fire is held down
+                const CD = Math.max(11 - 0.06 * (m.cycle - this.startingHoldCycle), 1) //CD scales with cycles fire is held down
                 this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
 
                 m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
-                this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (input.down ? 1.35 : 3.2) / CD)
+                this.baseFire(m.angle + (Math.random() - 0.5) * (input.down ? 0.05 : 0.3) / CD)
             },
             fireNeedles() {
                 if (input.down) {
-                    m.fireCDcycle = m.cycle + 38 * b.fireCDscale; // cool down
+                    m.fireCDcycle = m.cycle + 30 * b.fireCDscale; // cool down
                     b.needle()
 
                     function cycle() {
                         if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
                             count++
                             if (count % 2) b.needle()
-                            if (count < 5 && m.alive) requestAnimationFrame(cycle);
+                            if (count < 7 && m.alive) requestAnimationFrame(cycle);
                         }
                     }
                     let count = -1
                     requestAnimationFrame(cycle);
                 } else {
-                    m.fireCDcycle = m.cycle + 28 * b.fireCDscale; // cool down
+                    m.fireCDcycle = m.cycle + 22 * b.fireCDscale; // cool down
                     b.needle()
 
                     function cycle() {
@@ -4923,15 +4954,14 @@ const b = {
                 }
             },
             fireRivets() {
-                m.fireCDcycle = m.cycle + Math.floor((input.down ? 25 : 17) * b.fireCDscale); // cool down
-
+                m.fireCDcycle = m.cycle + Math.floor((input.down ? 22 : 14) * b.fireCDscale); // cool down
                 const me = bullet.length;
                 const size = tech.bulletSize * 8
                 bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 5 * size, size, b.fireAttributes(m.angle));
                 bullet[me].dmg = tech.isNailRadiation ? 0 : 2.75
                 Matter.Body.setDensity(bullet[me], 0.002);
                 Composite.add(engine.world, bullet[me]); //add bullet to world
-                const SPEED = input.down ? 55 : 44
+                const SPEED = input.down ? 60 : 44
                 Matter.Body.setVelocity(bullet[me], {
                     x: SPEED * Math.cos(m.angle),
                     y: SPEED * Math.sin(m.angle)
@@ -4993,7 +5023,7 @@ const b = {
             fireRecoilRivets() {
                 // m.fireCDcycle = m.cycle + Math.floor((input.down ? 25 : 17) * b.fireCDscale); // cool down
                 if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
-                const CD = Math.max(25 - 0.14 * (m.cycle - this.startingHoldCycle), 6) //CD scales with cycles fire is held down
+                const CD = Math.max(25 - 0.14 * (m.cycle - this.startingHoldCycle), 5) //CD scales with cycles fire is held down
                 this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
                 m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
 
@@ -5003,7 +5033,7 @@ const b = {
                 bullet[me].dmg = tech.isNailRadiation ? 0 : 2.75
                 Matter.Body.setDensity(bullet[me], 0.002);
                 Composite.add(engine.world, bullet[me]); //add bullet to world
-                const SPEED = input.down ? 60 : 50
+                const SPEED = input.down ? 62 : 52
                 Matter.Body.setVelocity(bullet[me], {
                     x: SPEED * Math.cos(m.angle),
                     y: SPEED * Math.sin(m.angle)
@@ -5071,8 +5101,8 @@ const b = {
                 }
             },
             fireInstantFireRate() {
-                m.fireCDcycle = m.cycle + Math.floor(2 * b.fireCDscale); // cool down
-                this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (input.down ? 1.35 : 3.2) / 2)
+                m.fireCDcycle = m.cycle + Math.floor(1 * b.fireCDscale); // cool down
+                this.baseFire(m.angle + (Math.random() - 0.5) * (Math.random() - 0.5) * (input.down ? 1.15 : 2) / 2)
             },
             baseFire(angle, speed = 30 + 6 * Math.random()) {
                 b.nail({
@@ -5102,8 +5132,8 @@ const b = {
             name: "shotgun",
             description: "fire a wide <strong>burst</strong> of short range <strong> bullets</strong>",
             ammo: 0,
-            ammoPack: 3.8,
-            defaultAmmoPack: 3.8,
+            ammoPack: 3.5,
+            defaultAmmoPack: 3.5,
             have: false,
             do() {},
             fire() {
@@ -5910,14 +5940,14 @@ const b = {
             name: "spores",
             description: "fire a <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> that discharges <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> seek out nearby mobs",
             ammo: 0,
-            ammoPack: 2.3,
+            ammoPack: 2.6,
             have: false,
             do() {},
             fire() {
                 const me = bullet.length;
                 const dir = m.angle;
                 bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 20, 4.5, b.fireAttributes(dir, false));
-                b.fireProps(input.down ? 45 : 25, input.down ? 30 : 16, dir, me); //cd , speed
+                b.fireProps(input.down ? 40 : 20, input.down ? 30 : 16, dir, me); //cd , speed
                 Matter.Body.setDensity(bullet[me], 0.000001);
                 bullet[me].endCycle = simulation.cycle + 480 + Math.max(0, 120 - 2 * bullet.length);
                 bullet[me].frictionAir = 0;
@@ -6074,19 +6104,19 @@ const b = {
             charge: 0,
             isDischarge: false,
             chooseFireMethod() {
-                if (tech.isCapacitor) {
+                if (tech.isFoamPressure) {
+                    this.do = this.doCharges
+                    this.fire = this.fireCharges
+                } else {
                     this.do = this.doStream
                     this.fire = this.fireStream
-                } else {
-                    this.do = this.doCharges // () => {}
-                    this.fire = this.fireCharges
                 }
             },
             doStream() {},
             fireStream() {
                 const spread = (input.down ? 0.04 : 0.3) * (Math.random() - 0.5)
                 const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
-                const SPEED = Math.max(2, 14 - radius * 0.25)
+                const SPEED = (input.down ? 1.2 : 1) * Math.max(2, 14 - radius * 0.25)
                 const dir = m.angle + 0.15 * (Math.random() - 0.5)
                 const velocity = {
                     x: SPEED * Math.cos(dir),
@@ -6096,23 +6126,7 @@ const b = {
                     x: m.pos.x + 30 * Math.cos(m.angle),
                     y: m.pos.y + 30 * Math.sin(m.angle)
                 }
-                if (tech.foamFutureFire) {
-                    simulation.drawList.push({ //add dmg to draw queue
-                        x: position.x,
-                        y: position.y,
-                        radius: 5,
-                        color: "rgba(0,50,50,0.3)",
-                        time: 15 * tech.foamFutureFire
-                    });
-                    setTimeout(() => {
-                        if (!simulation.paused) {
-                            b.foam(position, Vector.rotate(velocity, spread), radius)
-                            bullet[bullet.length - 1].damage *= (1 + 0.7 * tech.foamFutureFire)
-                        }
-                    }, 210 * tech.foamFutureFire);
-                } else {
-                    b.foam(position, Vector.rotate(velocity, spread), radius)
-                }
+                b.foam(position, Vector.rotate(velocity, spread), radius)
                 m.fireCDcycle = m.cycle + Math.floor(1.5 * b.fireCDscale);
             },
             doCharges() {
@@ -6120,16 +6134,16 @@ const b = {
                     //draw charge level
                     ctx.fillStyle = "rgba(0,50,50,0.3)";
                     ctx.beginPath();
-                    const radius = 10 * Math.sqrt(this.charge)
+                    const radius = 5 * Math.sqrt(this.charge)
                     const mag = 11 + radius
                     ctx.arc(m.pos.x + mag * Math.cos(m.angle), m.pos.y + mag * Math.sin(m.angle), radius, 0, 2 * Math.PI);
                     ctx.fill();
 
-                    if (this.isDischarge) {
+                    if (this.isDischarge && m.cycle % 2) {
                         this.charge--
                         const spread = (input.down ? 0.04 : 0.5) * (Math.random() - 0.5)
                         const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
-                        const SPEED = 18 - radius * 0.4;
+                        const SPEED = (input.down ? 1.2 : 1) * 10 - radius * 0.4 + Math.min(5, Math.sqrt(this.charge));
                         const dir = m.angle + 0.15 * (Math.random() - 0.5)
                         const velocity = {
                             x: SPEED * Math.cos(dir),
@@ -6139,25 +6153,8 @@ const b = {
                             x: m.pos.x + 30 * Math.cos(m.angle),
                             y: m.pos.y + 30 * Math.sin(m.angle)
                         }
-                        if (tech.foamFutureFire) {
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: position.x,
-                                y: position.y,
-                                radius: 5,
-                                color: "rgba(0,50,50,0.3)",
-                                time: 15 * tech.foamFutureFire
-                            });
-                            setTimeout(() => {
-                                if (!simulation.paused) {
-                                    b.foam(position, Vector.rotate(velocity, spread), radius)
-                                    // (tech.isFastFoam ? 0.044 : 0.011) * (tech.isBulletTeleport ? 1.60 : 1)
-                                    bullet[bullet.length - 1].damage *= (1 + 0.7 * tech.foamFutureFire)
-                                }
-                            }, 250 * tech.foamFutureFire);
-                        } else {
-                            b.foam(position, Vector.rotate(velocity, spread), radius)
-                        }
-                        m.fireCDcycle = m.cycle + 1; //disable firing and adding more charge
+                        b.foam(position, Vector.rotate(velocity, spread), radius)
+                        m.fireCDcycle = m.cycle + 2; //disable firing and adding more charge until empty
                     } else if (!input.fire) {
                         this.isDischarge = true;
                     }
@@ -6169,14 +6166,37 @@ const b = {
                 }
             },
             fireCharges() {
-                const capacity = 20
-                if (tech.isCapacitor && this.charge === 0 && b.guns[b.activeGun].ammo > capacity) {
-                    this.charge = capacity
-                    b.guns[b.activeGun].ammo -= capacity
-                    simulation.updateGunHUD();
+                const spread = (input.down ? 0.04 : 0.3) * (Math.random() - 0.5)
+                const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+                const SPEED = (input.down ? 1.2 : 1) * Math.max(2, 14 - radius * 0.25)
+                const dir = m.angle + 0.15 * (Math.random() - 0.5)
+                const velocity = {
+                    x: SPEED * Math.cos(dir),
+                    y: SPEED * Math.sin(dir)
                 }
-                this.charge++
-                m.fireCDcycle = m.cycle + Math.floor(1 + 0.3 * this.charge);
+                const position = {
+                    x: m.pos.x + 30 * Math.cos(m.angle),
+                    y: m.pos.y + 30 * Math.sin(m.angle)
+                }
+                // if (tech.foamFutureFire) {
+                //     simulation.drawList.push({ //add dmg to draw queue
+                //         x: position.x,
+                //         y: position.y,
+                //         radius: 5,
+                //         color: "rgba(0,50,50,0.3)",
+                //         time: 15 * tech.foamFutureFire
+                //     });
+                //     setTimeout(() => {
+                //         if (!simulation.paused) {
+                //             b.foam(position, Vector.rotate(velocity, spread), radius)
+                //             bullet[bullet.length - 1].damage *= (1 + 0.7 * tech.foamFutureFire)
+                //         }
+                //     }, 210 * tech.foamFutureFire);
+                // } else {
+                // }
+                b.foam(position, Vector.rotate(velocity, spread), radius)
+                m.fireCDcycle = m.cycle + Math.floor(1.5 * b.fireCDscale);
+                this.charge += 1 + tech.isCapacitor
             },
             fire() {},
             do() {},
@@ -6215,7 +6235,7 @@ const b = {
                     }
                     //fire
                     if ((!input.fire && this.charge > 0.6)) {
-                        tech.harpoonDensity = 0.008 //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.005*6 when buffed
+                        tech.harpoonDensity = 0.0065 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
                         const where = {
                             x: m.pos.x + 30 * Math.cos(m.angle),
                             y: m.pos.y + 30 * Math.sin(m.angle)
@@ -6270,7 +6290,7 @@ const b = {
                         const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), input.down ? 0.03 : 0.06)
                         player.force.x -= recoil.x
                         player.force.y -= recoil.y
-                        tech.harpoonDensity = 0.008 //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.005*6 when buffed
+                        tech.harpoonDensity = 0.0065 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
 
                         const harpoonSize = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
                         if (tech.extraHarpoons) {
@@ -6475,7 +6495,7 @@ const b = {
                 const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), input.down ? 0.015 : 0.035)
                 player.force.x -= recoil.x
                 player.force.y -= recoil.y
-                tech.harpoonDensity = 0.005 //0.001 is normal for blocks,  0.005 is normal for harpoon,  0.005*6 when buffed
+                tech.harpoonDensity = 0.004 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
             },
             // railGun2() {
             //     const where = {

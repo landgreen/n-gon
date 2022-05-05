@@ -17,13 +17,13 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
             // m.setField("time dilation")
-            // b.giveGuns("matter wave")
-            // tech.giveTech("phonon")
-            // tech.giveTech("eternalism")
-            // tech.giveTech("isotropic radiator")
-            // tech.giveTech("polyurethane balls")
-            // tech.giveTech("grappling hook")
-            // tech.giveTech("paradigm shift")
+            // b.giveGuns("foam")
+            // tech.giveTech("rocket-propelled grenade")
+            // tech.giveTech("needle gun")
+            // tech.giveTech("rivet gun")
+            // tech.giveTech("capacitor bank")
+            // tech.giveTech("rotary cannon")
+            // tech.giveTech("pneumatic actuator")
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 15; i++) tech.giveTech()
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
@@ -2642,11 +2642,11 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
         // spawn.starter(1900, -500, 200) //big boy
-        // for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
+        for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
@@ -2672,7 +2672,7 @@ const level = {
         // spawn.shieldingBoss(1700, -500)
 
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
-        for (let i = 0; i < 4; i++) spawn.starter(1900, -500)
+        // for (let i = 0; i < 4; i++) spawn.starter(1900, -500)
         // spawn.pulsar(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true

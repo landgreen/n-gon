@@ -5078,7 +5078,7 @@ const tech = {
         {
             name: "tinsellated flagella",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Zoospore#Flagella_types' class="link">tinsellated flagella</a>`,
-            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>40% faster</strong>",
+            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>50% faster</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5481,9 +5481,9 @@ const tech = {
             isBot: true,
             isBotTech: true,
             isNonRefundable: true,
-            requires: "at least 3 guns, foam gun, NOT EXPERIMENT MODE, bot upgrades, fractionation, quantum foam, capacitor",
+            requires: "at least 2 guns, foam gun, NOT EXPERIMENT MODE, bot upgrades, fractionation, pressure vessel",
             allowed() {
-                return b.inventory.length > 2 && tech.haveGunCheck("foam", false) && !b.hasBotUpgrade() && !tech.isAmmoFoamSize && !tech.foamFutureFire && !tech.isCapacitor
+                return b.inventory.length > 1 && tech.haveGunCheck("foam", false) && !b.hasBotUpgrade() && !tech.isAmmoFoamSize && !tech.isFoamPressure
             },
             effect() {
                 tech.giveTech("foam-bot upgrade")
@@ -5532,7 +5532,7 @@ const tech = {
             allowed() {
                 return (!tech.isFoamAttract && (tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot || tech.isFoamBall)) || (tech.haveGunCheck("matter wave") && !tech.isLongitudinal)
             },
-            requires: "foam, not electrostatic induction, matter wave, not phonon",
+            requires: "foam, matter wave, not electrostatic induction, not phonon",
             effect() {
                 tech.isBulletTeleport = true
             },
@@ -5581,22 +5581,22 @@ const tech = {
             }
         },
         {
-            name: "quantum foam",
-            description: "<strong>foam</strong> gun fires <strong>0.25</strong> seconds into the <strong>future</strong><br>increase <strong>foam</strong> gun <strong class='color-d'>damage</strong> by <strong>66%</strong>",
+            name: "surface tension",
+            description: "<strong>foam</strong> bubbles have improved adhesion which<br>does <strong>41%</strong> more <strong class='color-d'>damage</strong> per second",
             isGunTech: true,
             maxCount: 9,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("foam")
+                return tech.haveGunCheck("foam") || tech.foamBotCount > 1 || tech.isFoamShot || tech.isFoamBall
             },
             requires: "foam",
             effect() {
-                tech.foamFutureFire++
+                tech.foamDamage += 0.011 * 0.41
             },
             remove() {
-                tech.foamFutureFire = 0;
+                tech.foamDamage = 0.011;
             }
         },
         {
@@ -5619,6 +5619,37 @@ const tech = {
             }
         },
         {
+            name: "pressure vessel",
+            description: "the <strong>foam</strong> gun builds up pressure as you fire<br>that discharges <strong>foam</strong> after firing",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("foam")
+            },
+            requires: "foam",
+            effect() {
+                tech.isFoamPressure = true;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "foam") {
+                        b.guns[i].chooseFireMethod()
+                        break
+                    }
+                }
+            },
+            remove() {
+                tech.isFoamPressure = false;
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "foam") {
+                        b.guns[i].chooseFireMethod()
+                        break
+                    }
+                }
+            }
+        },
+        {
             name: "capacitor bank",
             // description: "<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, foam, railgun, pulse, tokamak</em>",
             descriptionFunction() { return `<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:93%;'>throwing, ${tech.haveGunCheck("foam", false) ? "<strong>foam</strong>" : "foam"}, ${tech.isPlasmaBall ? "<strong>plasma ball</strong>" : "plasma ball"}, ${tech.isRailGun ? "<strong>railgun</strong>" : "railgun"}, ${tech.isPulseLaser ? "<strong>pulse</strong>" : "pulse"}, ${tech.isTokamak ? "<strong>tokamak</strong>" : "tokamak"}</em>` },
@@ -5628,26 +5659,14 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.blockDamage > 0.075 || tech.isRailGun || tech.haveGunCheck("foam") || tech.isTokamak || tech.isPulseLaser || tech.isPlasmaBall
+                return tech.blockDamage > 0.075 || tech.isRailGun || (tech.haveGunCheck("foam") && tech.isFoamPressure) || tech.isTokamak || tech.isPulseLaser || tech.isPlasmaBall
             },
             requires: "throwing blocks, railgun, foam, pulse, tokamak, plasma ball",
             effect() {
                 tech.isCapacitor = true;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "foam") {
-                        b.guns[i].chooseFireMethod()
-                        break
-                    }
-                }
             },
             remove() {
                 tech.isCapacitor = false;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "foam") {
-                        b.guns[i].chooseFireMethod()
-                        break
-                    }
-                }
             }
         },
         {
@@ -5909,7 +5928,7 @@ const tech = {
             },
             remove() {
                 tech.isHarpoonPowerUp = false
-                tech.harpoonDensity = 0.005
+                tech.harpoonDensity = 0.004
             }
         },
         {
@@ -9802,7 +9821,6 @@ const tech = {
     is111Duplicate: null,
     isDynamoBotUpgrade: null,
     isBlockPowerUps: null,
-    foamFutureFire: null,
     isDamageAfterKillNoRegen: null,
     isHarmReduceNoKill: null,
     isSwitchReality: null,
@@ -9891,7 +9909,6 @@ const tech = {
     isFreeWormHole: null,
     isRewindField: null,
     isCrouchRegen: null,
-    isDarts: null,
     OccamDamage: null,
     isAxion: null,
     isWormholeMapIgnore: null,
@@ -9918,5 +9935,7 @@ const tech = {
     missileFireCD: null,
     isBotField: null,
     isFoamBall: null,
-    isNoDraftPause: null
+    isNoDraftPause: null,
+    isFoamPressure: null,
+    foamDamage: null
 }

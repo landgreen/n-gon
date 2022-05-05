@@ -1,41 +1,48 @@
 ******************************************************** NEXT PATCH **************************************************
 
-time dilation field rework
-  2x energy regen, but pausing time now uses much more energy
-  you are immune to harm while time is paused
-    but this stops energy regen
-    tech timelike is removed
+default foam gun fires a stream
+tech: pressure vessel - in addition to the stream, foam gun builds up charges.
+  charges release after you stop firing
+  capacitor tech doubles pressure vessel effect
+tech: syntactic foam - foam does 41% more damage per second
+  quantum foam removed
 
-eternalism gives 50% damage instead of ammo
-  also disables the pause button, and other pause effects
+spore gun has 25% more ammo and fires 25% more often
+spores and worms move 25% faster
 
-tech: polyurethane foam - super balls turn into foam after hitting a mob
-supertemporal renamed autocannon
-  now gives +1 ball, and has a shorter delay between balls
+nail gun has 5% more ammo
+all versions of nail gun have a much higher fire rate
 
-harpoon and grapple no longer lose ammo when you run out of energy
-  they just trigger a 2 second fire CD
-slashBoss doesn't slash as often at higher difficulty levels
-field descriptions rewritten
+harpoon/grapple density reduced by 20%
+  this also lowers damage about 10%
+harpoon/grapple properly follow conservation of momentum
+  (a small jerk when it retracts)
 
 bug fixes
 
 ******************************************************** TODO ********************************************************
 
+gunIndex section at the end seems pointless
+  merge with the choosing functions?
+
+add foam tech that makes foam stronger vs. shields
+
 tech: eternalism - don't pause time during draft
-  bugs
+  bugs?
     requirements change after draft is generated
     check for requirements onclick and give random tech if not met?
 
 tech expansion:  should also make other fields do things
+  how to make the description work
+    change description based on your current field?
   perfect diamagnetism moves forward when you hold down the shield
     maybe only with crouch?
   time dilation drains 1/2 as much energy when paused
   grow plasma torch as you hold it down
   negative mass effects much more space
-    needs more benefit
+    needs more benefit?
   reduces the cloaking vision effect?
-    needs more benefit
+    needs more benefit?
 
 nonrefundable tech don't display, this is confusing
     maybe they can show up but greyed out or something
