@@ -17,10 +17,10 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
             // m.setField("time dilation")
-            // b.giveGuns("foam")
+            // b.giveGuns("grenades")
             // tech.giveTech("rocket-propelled grenade")
-            // tech.giveTech("needle gun")
-            // tech.giveTech("rivet gun")
+            // tech.giveTech("electric armor")
+            // tech.giveTech("MIRV")
             // tech.giveTech("capacitor bank")
             // tech.giveTech("rotary cannon")
             // tech.giveTech("pneumatic actuator")
@@ -37,7 +37,7 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.labs();
+            // level.warehouse();
             // level.testing(); //not in rotation, used for testing
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -5217,13 +5217,13 @@ const level = {
         spawn.mapRect(-1900, -600, 1775, 100);
         spawn.mapRect(-1900, -550, 100, 1250);
         //house
-        spawn.mapRect(-175, -550, 50, 400);
-        spawn.mapRect(-175, -10, 350, 50);
+        spawn.mapRect(-225, -550, 100, 400);
+        spawn.mapRect(-225, -10, 400, 50);
         spawn.mapRect(-25, -20, 100, 50);
 
         //exit house
         spawn.mapRect(300, -10, 350, 50);
-        spawn.mapRect(-150, -300, 800, 50);
+        spawn.mapRect(-150, -350, 800, 100);
         spawn.mapRect(600, -275, 50, 75);
         spawn.mapRect(425, -20, 100, 25);
         // spawn.mapRect(-1900, 600, 2700, 100);
@@ -5324,10 +5324,10 @@ const level = {
             Composite.add(engine.world, cons[cons.length - 1]);
         }
         //blocks
-        spawn.bodyRect(-165, -150, 30, 35, 1);
-        spawn.bodyRect(-165, -115, 30, 35, 1);
-        spawn.bodyRect(-165, -80, 30, 35, 1);
-        spawn.bodyRect(-165, -45, 30, 35, 1);
+        spawn.bodyRect(-212, -150, 30, 35, 1);
+        spawn.bodyRect(-212, -115, 30, 35, 1);
+        spawn.bodyRect(-212, -80, 30, 35, 1);
+        spawn.bodyRect(-212, -45, 30, 35, 1);
 
         spawn.bodyRect(-750, 400, 150, 150, 0.5);
         spawn.bodyRect(-400, 1175, 100, 250, 1); //block to get to top path on bottom level

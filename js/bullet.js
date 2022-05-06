@@ -378,7 +378,6 @@ const b = {
             //player damage
             if (Vector.magnitude(Vector.sub(where, player.position)) < radius) {
                 const DRAIN = (tech.isExplosionHarm ? 0.9 : 0.45) * (tech.isRadioactiveResistance ? 0.25 : 1)
-                // * (tech.isImmuneExplosion ? Math.min(1, Math.max(1 - m.energy * 0.7, 0)) : 1) 
                 if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 if (m.energy < 0) {
                     m.energy = 0
@@ -426,16 +425,23 @@ const b = {
                 dist = Vector.magnitude(sub);
 
                 if (dist < radius) {
-                    const harm = radius * (tech.isExplosionHarm ? 0.00036 : 0.00018)
-                    if (tech.isImmuneExplosion) {
-                        const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
-                        if (simulation.dmgScale) m.damage(mitigate * harm);
-                    } else {
-                        if (simulation.dmgScale) m.damage(harm);
+                    if (simulation.dmgScale) {
+                        const harm = radius * (tech.isExplosionHarm ? 0.00036 : 0.00018)
+                        if (tech.isImmuneExplosion && m.energy > 0.15) {
+                            // const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
+                            m.energy -= 0.15
+                            m.damage(0.01 * harm); //remove 99% of the damage  1-0.99
+                            console.log(Math.max(0, Math.min(0.15 - 0.01 * player.speed, 0.15)))
+                            knock = Vector.mult(Vector.normalise(sub), -player.mass * Math.max(0, Math.min(0.15 - 0.002 * player.speed, 0.15)));
+                            player.force.x = knock.x; // not +=  so crazy forces can't build up with MIRV
+                            player.force.y = knock.y;
+                        } else {
+                            if (simulation.dmgScale) m.damage(harm);
+                            knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
+                            player.force.x += knock.x;
+                            player.force.y += knock.y;
+                        }
                     }
-                    knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
-                    player.force.x += knock.x;
-                    player.force.y += knock.y;
                 } else if (dist < alertRange) {
                     knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.005);
                     player.force.x += knock.x;
@@ -4529,11 +4535,11 @@ const b = {
                 const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, player.position))
                 if (distanceToPlayer > 100) { //if far away move towards player
                     if (this.explode) {
-                        if (tech.isImmuneExplosion && m.energy > 1.43) {
-                            b.explosion(this.position, this.explode);
-                        } else {
-                            b.explosion(this.position, Math.max(0, Math.min(this.explode, (distanceToPlayer - 70) / b.explosionRange())));
-                        }
+                        // if (tech.isImmuneExplosion && m.energy > 1.43) {
+                        //     b.explosion(this.position, this.explode);
+                        // } else {
+                        // }
+                        b.explosion(this.position, Math.max(0, Math.min(this.explode, (distanceToPlayer - 70) / b.explosionRange())));
                         this.explode = 0;
                     }
                     this.force = Vector.mult(Vector.normalise(Vector.sub(player.position, this.position)), this.mass * this.acceleration)
@@ -5922,7 +5928,7 @@ const b = {
             name: "grenades",
             description: "lob a single <strong>bouncy</strong> projectile<br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after one second",
             ammo: 0,
-            ammoPack: 5,
+            ammoPack: 7,
             have: false,
             do() {}, //do is set in b.setGrenadeMode()
             fire() {

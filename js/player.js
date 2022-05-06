@@ -2477,7 +2477,7 @@ const m = {
         {
             name: "time dilation",
             // description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong>",
-            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br>for everything except you<br>generate <strong>12</strong> <strong class='color-f'>energy</strong>/second",
+            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br>for everything except you<br>generate <strong>18</strong> <strong class='color-f'>energy</strong>/second",
             set() {
                 if (tech.isRewindField) {
                     this.rewindCount = 0
@@ -2636,6 +2636,7 @@ const m = {
                             m.wakeCheck();
                             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                         }
+                        if (m.energy < m.maxEnergy) m.regenEnergy(); //extra energy regen
                         if (m.energy < m.maxEnergy) m.regenEnergy(); //extra energy regen
                         m.drawFieldMeter()
                     }

@@ -4812,9 +4812,9 @@ const tech = {
             }
         },
         {
-            name: "electric reactive armor",
+            name: "electric armor",
             // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
-            description: "<strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong> is passively reduced<br>by <strong>5%</strong> for every <strong>10</strong> stored <strong class='color-f'>energy</strong>",
+            description: "<strong class='color-e'>explosion</strong> <strong class='color-harm'>harm</strong> is reduce by <strong>99%</strong>, but<br>they drain <strong>15</strong> <strong class='color-f'>energy</strong> and have more force",
             isGunTech: true,
             maxCount: 1,
             count: 0,

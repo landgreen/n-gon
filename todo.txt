@@ -1,26 +1,21 @@
 ******************************************************** NEXT PATCH **************************************************
 
-default foam gun fires a stream
-tech: pressure vessel - in addition to the stream, foam gun builds up charges.
-  charges release after you stop firing
-  capacitor tech doubles pressure vessel effect
-tech: syntactic foam - foam does 41% more damage per second
-  quantum foam removed
+electric reactive armor renamed electric armor
+  reduce harm from explosions by 99%, drain 15 energy,
+  and greatly increase knock back
+  it does look like you can go through some thin walls,
+    but that's how it is in the real world, so not a bug
 
-spore gun has 25% more ammo and fires 25% more often
-spores and worms move 25% faster
+grenades have 40% more ammo
 
-nail gun has 5% more ammo
-all versions of nail gun have a much higher fire rate
-
-harpoon/grapple density reduced by 20%
-  this also lowers damage about 10%
-harpoon/grapple properly follow conservation of momentum
-  (a small jerk when it retracts)
-
-bug fixes
+time dilation generates 12->18 energy/s
 
 ******************************************************** TODO ********************************************************
+
+a self referencing tech that switches states every time you access the text of it
+  switches state with it runs the description function
+  could be ON/OFF tech
+  could be JUNK
 
 gunIndex section at the end seems pointless
   merge with the choosing functions?
