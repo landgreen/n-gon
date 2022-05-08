@@ -4814,7 +4814,7 @@ const tech = {
         {
             name: "electric armor",
             // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-harm'>harm</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
-            description: "<strong class='color-e'>explosion</strong> <strong class='color-harm'>harm</strong> is reduce by <strong>99%</strong>, but<br>they drain <strong>15</strong> <strong class='color-f'>energy</strong> and have more force",
+            description: "<strong class='color-e'>explosion</strong> <strong class='color-harm'>harm</strong> is reduced by <strong>99%</strong>, but<br>they drain <strong>15</strong> <strong class='color-f'>energy</strong> and have more force",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -7761,6 +7761,68 @@ const tech = {
             remove() {}
         },
         {
+            name: "rule 30",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                powerUps.spawn(m.pos.x - 50 + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
+            },
+            remove() {},
+            state: [
+                [false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+            ],
+            rule30(state, a, b, c) {
+                if (state[a] && state[b] && state[c]) return false; // TTT => F
+                if (state[a] && state[b] && !state[c]) return false; // TTF => F
+                if (state[a] && !state[b] && state[c]) return false; //TFT => F 
+                if (state[a] && !state[b] && !state[c]) return true; //TFF => T
+                if (!state[a] && state[b] && state[c]) return true; //FTT => T
+                if (!state[a] && state[b] && !state[c]) return true; //FTF => T
+                if (!state[a] && !state[b] && state[c]) return true; //FFT => T
+                if (!state[a] && !state[b] && !state[c]) return false; //FFF => F
+            },
+            id: 0,
+            descriptionFunction() {
+                const loop = () => {
+                    if ((simulation.paused || simulation.isChoosing) && m.alive && !build.isExperimentSelection) { //&& (!simulation.isChoosing || this.count === 0)
+                        let b = []; //produce next row
+                        b.push(this.rule30(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 1, 0, 1)); //left edge wrap around
+                        for (let i = 1; i < this.state[this.state.length - 1].length - 1; i++) { //apply rule to the rest of the array
+                            b.push(this.rule30(this.state[this.state.length - 1], i - 1, i, i + 1));
+                        }
+                        b.push(this.rule30(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 2, this.state[this.state.length - 1].length - 1, 0)); //right edge wrap around
+                        this.state.push(b)
+                        if (document.getElementById(`cellular-rule-id${this.id}`)) document.getElementById(`cellular-rule-id${this.id}`).innerHTML = this.outputText() //convert to squares and send HTML
+                        setTimeout(() => { loop() }, 500);
+                    }
+                }
+                setTimeout(() => { loop() }, 500);
+                this.id++
+                return `<span id = "cellular-rule-id${this.id}" style = "letter-spacing: 0px;font-size: 50%;line-height: normal;">${this.outputText()}</span>`
+            },
+            outputText() {
+                let text = ""
+                for (let j = 0; j < this.state.length; j++) {
+                    text += "<p style = 'margin-bottom: -11px;'>"
+                    for (let i = 0; i < this.state[j].length; i++) {
+                        if (this.state[j][i]) {
+                            text += "⬛" //"█" //"■"
+                        } else {
+                            text += "⬜" //"&nbsp;&nbsp;&nbsp;&nbsp;" //"□"
+                        }
+                    }
+                    text += "</p>"
+                }
+                return text
+            },
+        },
+        {
             name: "discount",
             description: "get 3 random <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> for the price of 1!",
             maxCount: 1,
@@ -7853,12 +7915,12 @@ const tech = {
                         mob[i].death();
                     }
                 }
-                for (let i = powerUp.length - 1; i > -1; i--) {
-                    if (powerUp[i].name !== "ammo") {
-                        Matter.Composite.remove(engine.world, powerUp[i]);
-                        powerUp.splice(i, 1);
-                    }
-                }
+                // for (let i = powerUp.length - 1; i > -1; i--) {
+                //     if (powerUp[i].name !== "ammo") {
+                //         Matter.Composite.remove(engine.world, powerUp[i]);
+                //         powerUp.splice(i, 1);
+                //     }
+                // }
             },
             remove() {}
         },
@@ -9538,7 +9600,7 @@ const tech = {
         },
         {
             name: "NFT",
-            descriptionFunction() { return `buy your current game seed: <strong style = 'font-size:130%;'>${Math.initialSeed}</strong><br><em>no one is allow to use your seeds<br>if they use them they are gonna get in trouble</em><br>your seeds: <span style = 'font-size:70%;'>${localSettings.personalSeeds.join()}</span>` },
+            descriptionFunction() { return `buy your current game seed: <strong style = 'font-size:130%;'>${Math.initialSeed}</strong><br><em>no one is allowed to use your seeds<br>if they use them they are gonna get in trouble</em><br>your seeds: <span style = 'font-size:70%;'>${localSettings.personalSeeds.join()}</span>` },
             maxCount: 1,
             count: 0,
             frequency: 0,

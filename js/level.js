@@ -16,15 +16,17 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
-            // m.setField("time dilation")
+            // m.setField("plasma torch")
             // b.giveGuns("grenades")
             // tech.giveTech("rocket-propelled grenade")
             // tech.giveTech("electric armor")
-            // tech.giveTech("MIRV")
-            // tech.giveTech("capacitor bank")
-            // tech.giveTech("rotary cannon")
+            // tech.giveTech("plasma ball")
+            // tech.giveTech("rule 30")
+            // for (let i = 0; i < 10; i++) tech.giveTech("replication")
+            // tech.giveTech("decoherence")
             // tech.giveTech("pneumatic actuator")
-            // for (let i = 0; i < 1; i++) powerUps.directSpawn(450, -50, "tech");
+            // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
+            // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
             // for (let i = 0; i < 15; i++) tech.giveTech()
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
             // powerUps.research.changeRerolls(100000)
@@ -2646,8 +2648,8 @@ const level = {
         m.addHealth(Infinity)
 
         // spawn.starter(1900, -500, 200) //big boy
-        for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
-        // spawn.slashBoss(1900, -500)
+        // for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
+        spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
         // spawn.powerUpBoss(1900, -500)

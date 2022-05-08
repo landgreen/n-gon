@@ -5146,11 +5146,11 @@ const b = {
                 let knock, spread
                 if (input.down) {
                     spread = 0.65
-                    m.fireCDcycle = m.cycle + Math.floor(60 * b.fireCDscale) // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(69 * b.fireCDscale) // cool down
                     if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(60 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(60 * b.fireCDscale); //player is immune to damage for 30 cycles
                     knock = 0.01
                 } else {
-                    m.fireCDcycle = m.cycle + Math.floor(47 * b.fireCDscale) // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(53 * b.fireCDscale) // cool down
                     if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCDscale); //player is immune to damage for 30 cycles
                     spread = 1.3
                     knock = 0.1
@@ -5496,8 +5496,8 @@ const b = {
             name: "matter wave",
             description: "emit a <strong>wave packet</strong> of oscillating particles<br>that propagates through <strong>solids</strong>",
             ammo: 0,
-            ammoPack: 120,
-            defaultAmmoPack: 120,
+            ammoPack: 115,
+            defaultAmmoPack: 115,
             have: false,
             wavePacketCycle: 0,
             delay: 40,

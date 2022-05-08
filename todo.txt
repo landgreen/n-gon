@@ -1,24 +1,15 @@
 ******************************************************** NEXT PATCH **************************************************
 
-electric reactive armor renamed electric armor
-  reduce harm from explosions by 99%, drain 15 energy,
-  and greatly increase knock back
-  it does look like you can go through some thin walls,
-    but that's how it is in the real world, so not a bug
+plasma ball damage radius is 2x bigger
+  map collisions radius is unchanged
+  it no longer pops after hitting mobs
+  energy drain is 50% higher
 
-grenades have 40% more ammo
+JUNK tech: rule 30
 
-time dilation generates 12->18 energy/s
+generalist cycles guns with final boss phases
 
 ******************************************************** TODO ********************************************************
-
-a self referencing tech that switches states every time you access the text of it
-  switches state with it runs the description function
-  could be ON/OFF tech
-  could be JUNK
-
-gunIndex section at the end seems pointless
-  merge with the choosing functions?
 
 add foam tech that makes foam stronger vs. shields
 
@@ -41,19 +32,6 @@ tech expansion:  should also make other fields do things
 
 nonrefundable tech don't display, this is confusing
     maybe they can show up but greyed out or something
-
-Tech could probably be indexed, something like running
-tech.index = new Map();
-for (let i = 0; i < tech.tech.length; i++) {
-    tech.index.set(tech.tech.name, tech.tech);
-}
-
-So when you do something like tech.giveTech("nematodes") it can just do
-const queriedTech = tech.index.get("nematodes");
-if (queriedTech) {
-    queriedTech.count++;
-    queriedTech.effect();
-}
 
 guntech fire a bullet that fires nail fragments after 1s in the same direction as the original bullet
   like overwatch roadhog

@@ -479,6 +479,11 @@ const spawn = {
                         Matter.Body.scale(this, 0.1, 0.1);
                         Matter.Body.setDensity(me, 100 * density); //extra dense //normal is 0.001 //makes effective life much larger
                     }
+                    if (tech.isGunCycle) {
+                        b.inventoryGun++;
+                        if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
+                        simulation.switchGun();
+                    }
                 }
             } else if (this.mode !== 3) { //all three modes at once
                 this.cycle = 0;
@@ -495,6 +500,11 @@ const spawn = {
                 this.rotateVelocity = 0.001 * (player.position.x > this.position.x ? 1 : -1) //rotate so that the player can get away                    
                 // if (!this.isShielded) spawn.shield(this, x, y, 1); //regen shield here ?
                 this.modeDo = this.modeAll
+                if (tech.isGunCycle) {
+                    b.inventoryGun++;
+                    if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
+                    simulation.switchGun();
+                }
             }
             // }
         };
