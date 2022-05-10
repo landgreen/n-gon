@@ -1,13 +1,7 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: cherenkov radiation - bremsstrahlung damage is increased by 300% over 6 seconds
-  bremsstrahlung does 2->3 damage, and also applies to block collisions
+bremsstrahlung does extra damage to shields
 
-tech: nuclear transmutation - radiation sources do 70% more damage and harm
-
-enthalpy now drops heal power ups instead of directly healing you
-foam-shot has 13->15 particles, is slower, and less spread
-  
 bug fixes
 
 ******************************************************** TODO ********************************************************

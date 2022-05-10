@@ -5572,6 +5572,7 @@ const spawn = {
 
             me.shieldTargetID = target.id
             target.isShielded = true;
+            target.shieldID = me.id
             me.onDeath = function() {
                 //clear isShielded status from target
                 for (let i = 0, len = mob.length; i < len; i++) {

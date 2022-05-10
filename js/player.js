@@ -1026,7 +1026,6 @@ const m = {
             y: Math.sin(m.angle)
         };
         //the dot product of diff and dir will return how much over lap between the vectors
-        // console.log(Vector.dot(dir, diff))
         if (Vector.dot(dir, diff) > m.fieldThreshold) {
             return true;
         }
@@ -1046,7 +1045,6 @@ const m = {
         }
     },
     // setMovement() {
-    //     console.log('hi')
     //     m.Fx = tech.baseFx * tech.squirrelFx * (tech.isFastTime ? 1.5 : 1);
     //     m.jumpForce = tech.baseJumpForce * tech.squirrelJump * (tech.isFastTime ? 1.13 : 1)
     // },
@@ -1333,11 +1331,21 @@ const m = {
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
                 Matter.Body.setVelocity(who, { x: 0.5 * who.velocity.x, y: 0.5 * who.velocity.y });
-                if (tech.isBlockRadiation && !who.isShielded && !who.isMobBullet) {
-                    mobs.statusDoT(who, tech.blockDmg * m.dmgScale * 4 / 12, 360) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
+
+                if (who.isShielded) {
+                    for (let i = 0, len = mob.length; i < len; i++) {
+                        if (mob[i].id === who.shieldID) mob[i].damage(tech.blockDmg * m.dmgScale * (tech.isBlockRadiation ? 6 : 2), true)
+                    }
+                } else if (tech.isBlockRadiation) {
+                    if (who.isMobBullet) {
+                        who.damage(tech.blockDmg * m.dmgScale * 3, true)
+                    } else {
+                        mobs.statusDoT(who, tech.blockDmg * m.dmgScale * 4 / 12, 360) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
+                    }
                 } else {
                     who.damage(tech.blockDmg * m.dmgScale, true)
                 }
+
                 //draw electricity
                 const step = 40
                 ctx.beginPath();
@@ -1665,11 +1673,31 @@ const m = {
                                 }
                                 if (tech.blockDmg) { //electricity
                                     Matter.Body.setVelocity(mob[i], { x: 0.5 * mob[i].velocity.x, y: 0.5 * mob[i].velocity.y });
-                                    if (tech.isBlockRadiation && !mob[i].isShielded && !mob[i].isMobBullet) {
-                                        mobs.statusDoT(mob[i], tech.blockDmg * m.dmgScale * 4 / 12, 360) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
+
+                                    if (mob[i].isShielded) {
+                                        for (let j = 0, len = mob.length; j < len; j++) {
+                                            if (mob[j].id === mob[i].shieldID) mob[j].damage(tech.blockDmg * m.dmgScale * (tech.isBlockRadiation ? 6 : 2), true)
+                                        }
+                                    } else if (tech.isBlockRadiation) {
+                                        if (mob[i].isMobBullet) {
+                                            mob[i].damage(tech.blockDmg * m.dmgScale * 3, true)
+                                        } else {
+                                            mobs.statusDoT(mob[i], tech.blockDmg * m.dmgScale * 4 / 12, 360) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
+                                        }
                                     } else {
-                                        mob[i].damage(tech.blockDmg * m.dmgScale)
+                                        mob[i].damage(tech.blockDmg * m.dmgScale, true)
                                     }
+                                    // if (mob[i].isShielded) {
+                                    //     for (let j = 0, len = mob.length; j < len; j++) {
+                                    //         if (mob[j].id === mob[i].shieldID) mob[j].damage(tech.blockDmg * m.dmgScale * (tech.isBlockRadiation ? 3 : 1), true)
+                                    //     }
+                                    // } else {
+                                    //     if (tech.isBlockRadiation && !mob[i].isMobBullet) {
+                                    //         mobs.statusDoT(mob[i], tech.blockDmg * m.dmgScale * 4 / 12, 360) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
+                                    //     } else {
+                                    //         mob[i].damage(tech.blockDmg * m.dmgScale)
+                                    //     }
+                                    // }
                                     const step = 40
                                     ctx.beginPath();
                                     for (let i = 0, len = 0.8 * tech.blockDmg; i < len; i++) {
@@ -2160,7 +2188,6 @@ const m = {
                             this.isPopping = false
                         },
                         do() {
-                            // console.log(this.circleRadius)
                             if (this.isOn) {
                                 //collisions with map
                                 if (Matter.Query.collides(this, map).length > 0) {
@@ -2327,10 +2354,7 @@ const m = {
                     });
 
                     Composite.add(engine.world, m.plasmaBall);
-
                     // m.plasmaBall.startingVertices = m.plasmaBall.vertices.slice();
-                    // console.log(m.plasmaBall.startingVertices, m.plasmaBall.vertices)
-
                     m.hold = function() {
                         if (m.isHolding) {
                             m.drawHold(m.holdingTarget);
@@ -2388,7 +2412,6 @@ const m = {
 
                                 // if (player.velocity.y > 7) player.force.y -= 0.95 * player.mass * simulation.g //less gravity when falling fast
                                 // player.force.y -= Math.min(0.95, 0.05 * floatScale) * player.mass * simulation.g; //undo some gravity on up or down
-                                // console.log(friction)
 
                                 //float
                                 const slowY = (player.velocity.y > 0) ? Math.max(0.8, 1 - 0.002 * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - 0.001 * Math.abs(player.velocity.y)) //down : up
@@ -2786,7 +2809,6 @@ const m = {
                 //     ctx.clip();
                 // }
                 m.hold = function() {
-                    // console.log(m.holdingTarget)
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
                         m.holding();
@@ -3560,7 +3582,6 @@ const m = {
                     // if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
                     //     const justPastMouse = Vector.add(Vector.mult(Vector.normalise(Vector.sub(simulation.mouseInGame, m.pos)), 50), simulation.mouseInGame)
                     //     const scale = 60
-                    //     // console.log(Matter.Query.region(map, bounds))
                     //     const sub = Vector.sub(simulation.mouseInGame, m.pos)
                     //     const mag = Vector.magnitude(sub)
                     //     const drain = tech.isFreeWormHole ? 0 : 0.06 + 0.006 * Math.sqrt(mag)
@@ -3778,7 +3799,6 @@ const m = {
             ]
             // 
             Matter.Body.setVertices(player, Matter.Vertices.create(points, player))
-            // console.log(circle)        
             player.parts.pop()
             player.parts.pop()
             player.parts.pop()
@@ -3793,9 +3813,7 @@ const m = {
 
             // const circle = Bodies.polygon(player.position.x, player.position.x, 30, 30)
             // player.parts[0] = circle
-            // console.log(player.parts[0])
             // Matter.Body.setVertices(player.parts[0], Matter.Vertices.create(points, player.parts[0]))
-            // console.log(player.parts[0].vertices)
             m.spin = 0
             // m.groundControl = () => {}         //disable entering ground
             m.onGround = false
@@ -3846,7 +3864,6 @@ const m = {
                 m.Vy = player.velocity.y;
 
                 //tracks the last 10s of player information
-                // console.log(m.history)
                 m.history.splice(m.cycle % 600, 1, {
                     position: {
                         x: player.position.x,

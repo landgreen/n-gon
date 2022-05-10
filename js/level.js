@@ -2648,8 +2648,8 @@ const level = {
         m.addHealth(Infinity)
 
         // spawn.starter(1900, -500, 200) //big boy
-        // for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
-        spawn.slashBoss(1900, -500)
+        for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
+        // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
         // spawn.powerUpBoss(1900, -500)
