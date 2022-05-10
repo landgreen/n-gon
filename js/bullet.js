@@ -381,7 +381,7 @@ const b = {
                 if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 if (m.energy < 0) {
                     m.energy = 0
-                    if (simulation.dmgScale) m.damage(0.03 * (tech.isRadioactiveResistance ? 0.25 : 1));
+                    if (simulation.dmgScale) m.damage(tech.radioactiveDamage * 0.03 * (tech.isRadioactiveResistance ? 0.25 : 1));
                 }
             }
 
@@ -431,10 +431,10 @@ const b = {
                             // const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
                             m.energy -= 0.15
                             m.damage(0.01 * harm); //remove 99% of the damage  1-0.99
-                            console.log(Math.max(0, Math.min(0.15 - 0.01 * player.speed, 0.15)))
-                            knock = Vector.mult(Vector.normalise(sub), -player.mass * Math.max(0, Math.min(0.15 - 0.002 * player.speed, 0.15)));
+                            // console.log(Math.max(0, Math.min(0.15 - 0.01 * player.speed, 0.15)))
+                            knock = Vector.mult(Vector.normalise(sub), -0.6 * player.mass * Math.max(0, Math.min(0.15 - 0.002 * player.speed, 0.15)));
                             player.force.x = knock.x; // not +=  so crazy forces can't build up with MIRV
-                            player.force.y = knock.y;
+                            player.force.y = knock.y - 0.3; //some extra vertical kick 
                         } else {
                             if (simulation.dmgScale) m.damage(harm);
                             knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
@@ -1090,21 +1090,20 @@ const b = {
                 } else {
                     //aoe damage to player
                     if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
-                        const DRAIN = tech.isRadioactiveResistance ? 0.0025 * 0.25 : 0.0025
+                        const DRAIN = (tech.isRadioactiveResistance ? 0.0025 * 0.25 : 0.0025)
                         if (m.energy > DRAIN) {
                             if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                         } else {
                             m.energy = 0;
-                            if (simulation.dmgScale) m.damage(tech.isRadioactiveResistance ? 0.00016 * 0.25 : 0.00016) //0.00015
+                            if (simulation.dmgScale) m.damage((tech.isRadioactiveResistance ? 0.00016 * 0.25 : 0.00016) * tech.radioactiveDamage) //0.00015
                         }
                     }
                     //aoe damage to mobs
+                    const dmg = m.dmgScale * 0.11 * tech.radioactiveDamage
                     for (let i = 0, len = mob.length; i < len; i++) {
                         if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius + mob[i].radius) {
-                            let dmg = m.dmgScale * 0.11
                             if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
-                            if (mob[i].shield) dmg *= 3 //to make up for the /5 that shields normally take
-                            mob[i].damage(dmg);
+                            mob[i].damage(mob[i].shield ? dmg * 3 : dmg);
                             mob[i].locatePlayer();
                             if (tech.isNeutronSlow && mob[i].speed > 4) {
                                 Matter.Body.setVelocity(mob[i], {
@@ -3199,16 +3198,15 @@ const b = {
                         if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                     } else {
                         m.energy = 0;
-                        if (simulation.dmgScale) m.damage(tech.isRadioactiveResistance ? 0.00015 * 0.25 : 0.00015) //0.00015
+                        if (simulation.dmgScale) m.damage((tech.isRadioactiveResistance ? 0.00015 * 0.25 : 0.00015) * tech.radioactiveDamage) //0.00015
                     }
                 }
                 //aoe damage to mobs
+                const dmg = (0.12 + 0.04 * tech.isFastDrones) * m.dmgScale * tech.droneRadioDamage * tech.radioactiveDamage
                 for (let i = 0, len = mob.length; i < len; i++) {
                     if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radioRadius + mob[i].radius) {
-                        let dmg = (0.12 + 0.04 * tech.isFastDrones) * m.dmgScale * tech.droneRadioDamage //neutron bombs  dmg = 0.09
                         if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
-                        if (mob[i].shield) dmg *= 3 // to make up for the /5 that shields normally take
-                        mob[i].damage(dmg);
+                        mob[i].damage(mob[i].shield ? dmg * 3 : dmg);
                         mob[i].locatePlayer();
                     }
                 }
@@ -3522,7 +3520,7 @@ const b = {
             inertia: Infinity,
             frictionAir: 0.003,
             dmg: 0, //damage on impact
-            damage: tech.foamDamage * (tech.isFastFoam ? 2.5 : 1) * (tech.isBulletTeleport ? 1.43 : 1), //damage done over time
+            damage: tech.foamDamage * (tech.isFastFoam ? 2.5 : 1) * (tech.isBulletTeleport ? 1.47 : 1), //damage done over time
             scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.65 : 1),
             classType: "bullet",
             collisionFilter: {
@@ -3536,7 +3534,7 @@ const b = {
             target: null,
             targetVertex: null,
             targetRelativePosition: null,
-            portFrequency: 5 + Math.floor(5 * Math.random()),
+            portFrequency: 7 + Math.floor(5 * Math.random()),
             nextPortCycle: Infinity, //disabled unless you have the teleport tech
             beforeDmg(who) {
                 if (!this.target && who.alive) {
@@ -3696,7 +3694,7 @@ const b = {
                 }
                 if (this.nextPortCycle < simulation.cycle) { //teleport around if you have tech.isBulletTeleport
                     this.nextPortCycle = simulation.cycle + this.portFrequency
-                    const range = 15 * Math.sqrt(this.radius) * Math.random()
+                    const range = 13 * Math.sqrt(this.radius) * Math.random()
                     Matter.Body.setPosition(this, Vector.add(this.position, Vector.rotate({ x: range, y: 0 }, 2 * Math.PI * Math.random())))
                 }
             }
@@ -5146,11 +5144,11 @@ const b = {
                 let knock, spread
                 if (input.down) {
                     spread = 0.65
-                    m.fireCDcycle = m.cycle + Math.floor(69 * b.fireCDscale) // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(73 * b.fireCDscale) // cool down
                     if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(60 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(60 * b.fireCDscale); //player is immune to damage for 30 cycles
                     knock = 0.01
                 } else {
-                    m.fireCDcycle = m.cycle + Math.floor(53 * b.fireCDscale) // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(56 * b.fireCDscale) // cool down
                     if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCDscale); //player is immune to damage for 30 cycles
                     spread = 1.3
                     knock = 0.1
@@ -5160,7 +5158,7 @@ const b = {
                     player.force.x += 4 * knock * Math.cos(m.angle)
                     player.force.y += 4 * knock * Math.sin(m.angle) - 6 * player.mass * simulation.g
                 } else if (tech.isShotgunRecoil) {
-                    m.fireCDcycle -= 0.66 * (45 * b.fireCDscale)
+                    m.fireCDcycle -= 0.66 * (56 * b.fireCDscale)
                     player.force.x -= 2 * knock * Math.cos(m.angle)
                     player.force.y -= 2 * knock * Math.sin(m.angle)
                 } else {
@@ -5294,16 +5292,16 @@ const b = {
                         b.iceIX(25 + 20 * Math.random(), m.angle + spread * (Math.random() - 0.5))
                     }
                 } else if (tech.isFoamShot) {
-                    const spread = (input.down ? 0.35 : 0.7)
+                    const spread = (input.down ? 0.2 : 0.6)
                     const where = {
                         x: m.pos.x + 25 * Math.cos(m.angle),
                         y: m.pos.y + 25 * Math.sin(m.angle)
                     }
-                    const number = 13 * (tech.isShotgunReversed ? 1.6 : 1)
+                    const number = 15 * (tech.isShotgunReversed ? 1.6 : 1)
                     for (let i = 0; i < number; i++) {
-                        const SPEED = 25 + 12 * Math.random();
+                        const SPEED = 13 + 4 * Math.random();
                         const angle = m.angle + spread * (Math.random() - 0.5)
-                        b.foam(where, { x: SPEED * Math.cos(angle), y: SPEED * Math.sin(angle) }, 5 + 8 * Math.random())
+                        b.foam(where, { x: SPEED * Math.cos(angle), y: SPEED * Math.sin(angle) }, 6 + 8 * Math.random())
                     }
                 } else if (tech.isNeedles) {
                     const number = 9 * (tech.isShotgunReversed ? 1.6 : 1)

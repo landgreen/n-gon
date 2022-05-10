@@ -1384,7 +1384,7 @@ const tech = {
             name: "bot fabrication",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">bot fabrication</a>`,
             descriptionFunction() {
-                return `after you collect ${powerUps.orb.research(2 + Math.floor(0.1666 * b.totalBots()))}use them to build a<br>random <strong class='color-bot'>bot</strong> <em>(+1 cost every 6 bots)</em>`
+                return `after you collect ${powerUps.orb.research(2 + Math.floor(0.1666 * b.totalBots()))}use them to build a<br>random <strong class='color-bot'>bot</strong> <em>(+1 cost every 5 bots)</em>`
             },
             // description: `if you collect ${powerUps.orb.research(2)}use them to build a<br>random <strong class='color-bot'>bot</strong> <em>(+1 cost every 5 bots)</em>`,
             maxCount: 1,
@@ -2591,25 +2591,6 @@ const tech = {
             }
         },
         {
-            name: "enthalpy",
-            description: "<strong class='color-h'>heal</strong> for <strong>2%</strong> of <strong class='color-d'>damage</strong> done<br>take <strong>10%</strong> more <strong class='color-harm'>harm</strong>",
-            maxCount: 9,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            isHealTech: true,
-            allowed() {
-                return !tech.isEnergyHealth
-            },
-            requires: "not mass-energy equivalence",
-            effect() {
-                tech.healthDrain += 0.02;
-            },
-            remove() {
-                tech.healthDrain = 0;
-            }
-        },
-        {
             name: "fluoroantimonic acid",
             description: "increase <strong class='color-d'>damage</strong> by <strong>35%</strong><br>when your <strong class='color-h'>health</strong> is above <strong>100</strong>",
             maxCount: 1,
@@ -2712,6 +2693,25 @@ const tech = {
                     tech.removeJunkTechFromPool(this.refundAmount)
                     this.refundAmount = 0
                 }
+            }
+        },
+        {
+            name: "enthalpy",
+            description: `doing <strong class='color-d'>damage</strong> can spawn ${powerUps.orb.heal(1)}<br>take <strong>10%</strong> more <strong class='color-harm'>harm</strong>`,
+            maxCount: 9,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            isHealTech: true,
+            allowed() {
+                return !tech.isEnergyHealth
+            },
+            requires: "not mass-energy equivalence",
+            effect() {
+                tech.healthDrain += 0.02;
+            },
+            remove() {
+                tech.healthDrain = 0;
             }
         },
         {
@@ -4246,7 +4246,7 @@ const tech = {
         {
             name: "foam-shot",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Foam' class="link">foam-shot</a>`,
-            description: "<strong>shotgun</strong> sprays <strong>13</strong> sticky <strong>foam</strong> bubbles",
+            description: "<strong>shotgun</strong> sprays <strong>15</strong> sticky <strong>foam</strong> bubbles",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -4602,7 +4602,7 @@ const tech = {
                 tech.missileFireCD = 10
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "missiles") {
-                        b.guns[i].ammoPack = this.ammoBonus;
+                        b.guns[i].ammoPack *= this.ammoBonus;
                         b.guns[i].ammo = Math.ceil(b.guns[i].ammo * this.ammoBonus);
                         simulation.updateGunHUD();
                         break
@@ -4920,9 +4920,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("grenades") && !tech.fragments && !tech.isVacuumBomb
+                return tech.haveGunCheck("grenades") && !tech.fragments && !tech.isVacuumBomb && !tech.isExplodeRadio
             },
-            requires: "grenades, not fragmentation, vacuum bomb",
+            requires: "grenades, not fragmentation, vacuum bomb, iridium-192",
             effect() {
                 tech.isNeutronBomb = true;
                 b.setGrenadeMode()
@@ -4953,14 +4953,14 @@ const tech = {
         },
         {
             name: "radioactive contamination",
-            description: "after a mob or shield <strong>dies</strong>,<br> leftover <strong class='color-p'>radiation</strong> <strong>spreads</strong> to a nearby mob",
+            description: "after a mob or shield <strong>dies</strong>,<br>leftover <strong class='color-p'>radiation</strong> <strong>spreads</strong> to a nearby mob",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isNailRadiation || tech.isWormholeDamage || tech.isNeutronBomb || tech.isExplodeRadio
+                return tech.isNailRadiation || tech.isWormholeDamage || tech.isNeutronBomb || tech.isExplodeRadio || tech.isBlockRadiation
             },
             requires: "radiation damage source",
             effect() {
@@ -4968,6 +4968,25 @@ const tech = {
             },
             remove() {
                 tech.isRadioactive = false
+            }
+        },
+        {
+            name: "nuclear transmutation",
+            description: "<strong class='color-p'>radiation</strong> does <strong>70%</strong> more <strong class='color-d'>damage</strong> and <strong class='color-harm'>harm</strong><br><em>nail, drone, neutron bomb, iridium, string, deflect</em>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.isNailRadiation || tech.isWormholeDamage || tech.isNeutronBomb || tech.isExplodeRadio || tech.isBlockRadiation || tech.isDroneRadioactive
+            },
+            requires: "radiation damage source",
+            effect() {
+                tech.radioactiveDamage = 1.7
+            },
+            remove() {
+                tech.radioactiveDamage = 1
             }
         },
         {
@@ -5523,7 +5542,7 @@ const tech = {
         },
         {
             name: "uncertainty principle",
-            description: "<strong>foam</strong> and <strong>wave</strong> particle <strong>positions</strong> are random<br>increase their <strong class='color-d'>damage</strong> by <strong>43%</strong>",
+            description: "<strong>foam</strong> and <strong>wave</strong> particle <strong>positions</strong> are random<br>increase their <strong class='color-d'>damage</strong> by <strong>47%</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6318,7 +6337,7 @@ const tech = {
         },
         {
             name: "bremsstrahlung",
-            description: "<strong>deflecting</strong> does <strong class='color-d'>damage</strong> to mobs",
+            description: "<strong>deflecting</strong> and thrown <strong class='color-block'>blocks</strong><br>do braking <strong class='color-d'>damage</strong> to mobs",
             isFieldTech: true,
             maxCount: 9,
             count: 0,
@@ -6329,10 +6348,29 @@ const tech = {
             },
             requires: "standing wave, perfect diamagnetism",
             effect() {
-                tech.blockDmg += 2 //if you change this value also update the for loop in the electricity graphics in m.pushMass
+                tech.blockDmg += 3 //if you change this value also update the for loop in the electricity graphics in m.pushMass
             },
             remove() {
                 tech.blockDmg = 0;
+            }
+        },
+        {
+            name: "cherenkov radiation", //<strong>deflecting</strong> and <strong class='color-block'>blocks</strong>
+            description: "bremsstrahlung's effects are <strong class='color-p'>radioactive</strong><br>increase <strong class='color-d'>damage</strong> <strong>300%</strong> over <strong>6</strong> seconds",
+            isFieldTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return (m.fieldUpgrades[m.fieldMode].name === "standing wave" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism") && tech.blockDmg
+            },
+            requires: "bremsstrahlung",
+            effect() {
+                tech.isBlockRadiation = true
+            },
+            remove() {
+                tech.isBlockRadiation = false;
             }
         },
         {
@@ -7759,68 +7797,6 @@ const tech = {
                 }, 1000);
             },
             remove() {}
-        },
-        {
-            name: "rule 30",
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isJunk: true,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                powerUps.spawn(m.pos.x - 50 + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
-            },
-            remove() {},
-            state: [
-                [false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
-            ],
-            rule30(state, a, b, c) {
-                if (state[a] && state[b] && state[c]) return false; // TTT => F
-                if (state[a] && state[b] && !state[c]) return false; // TTF => F
-                if (state[a] && !state[b] && state[c]) return false; //TFT => F 
-                if (state[a] && !state[b] && !state[c]) return true; //TFF => T
-                if (!state[a] && state[b] && state[c]) return true; //FTT => T
-                if (!state[a] && state[b] && !state[c]) return true; //FTF => T
-                if (!state[a] && !state[b] && state[c]) return true; //FFT => T
-                if (!state[a] && !state[b] && !state[c]) return false; //FFF => F
-            },
-            id: 0,
-            descriptionFunction() {
-                const loop = () => {
-                    if ((simulation.paused || simulation.isChoosing) && m.alive && !build.isExperimentSelection) { //&& (!simulation.isChoosing || this.count === 0)
-                        let b = []; //produce next row
-                        b.push(this.rule30(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 1, 0, 1)); //left edge wrap around
-                        for (let i = 1; i < this.state[this.state.length - 1].length - 1; i++) { //apply rule to the rest of the array
-                            b.push(this.rule30(this.state[this.state.length - 1], i - 1, i, i + 1));
-                        }
-                        b.push(this.rule30(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 2, this.state[this.state.length - 1].length - 1, 0)); //right edge wrap around
-                        this.state.push(b)
-                        if (document.getElementById(`cellular-rule-id${this.id}`)) document.getElementById(`cellular-rule-id${this.id}`).innerHTML = this.outputText() //convert to squares and send HTML
-                        setTimeout(() => { loop() }, 500);
-                    }
-                }
-                setTimeout(() => { loop() }, 500);
-                this.id++
-                return `<span id = "cellular-rule-id${this.id}" style = "letter-spacing: 0px;font-size: 50%;line-height: normal;">${this.outputText()}</span>`
-            },
-            outputText() {
-                let text = ""
-                for (let j = 0; j < this.state.length; j++) {
-                    text += "<p style = 'margin-bottom: -11px;'>"
-                    for (let i = 0; i < this.state[j].length; i++) {
-                        if (this.state[j][i]) {
-                            text += "⬛" //"█" //"■"
-                        } else {
-                            text += "⬜" //"&nbsp;&nbsp;&nbsp;&nbsp;" //"□"
-                        }
-                    }
-                    text += "</p>"
-                }
-                return text
-            },
         },
         {
             name: "discount",
@@ -9600,7 +9576,7 @@ const tech = {
         },
         {
             name: "NFT",
-            descriptionFunction() { return `buy your current game seed: <strong style = 'font-size:130%;'>${Math.initialSeed}</strong><br><em>no one is allowed to use your seeds<br>if they use them they are gonna get in trouble</em><br>your seeds: <span style = 'font-size:70%;'>${localSettings.personalSeeds.join()}</span>` },
+            descriptionFunction() { return `buy your current game seed: <strong style = 'font-size:120%;'>${Math.initialSeed}</strong><br><em>no one is allowed to use your seeds<br>if they use them they are gonna get in trouble</em><br>your seeds: <span style = 'font-size:80%;'>${localSettings.personalSeeds.join(", ")}</span>` },
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9615,6 +9591,67 @@ const tech = {
                 if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             },
             remove() {}
+        },
+        {
+            name: "rule 30",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {},
+            remove() {},
+            state: [
+                [false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+            ],
+            rule30(state, a, b, c) {
+                if (state[a] && state[b] && state[c]) return false; // TTT => F
+                if (state[a] && state[b] && !state[c]) return false; // TTF => F
+                if (state[a] && !state[b] && state[c]) return false; //TFT => F 
+                if (state[a] && !state[b] && !state[c]) return true; //TFF => T
+                if (!state[a] && state[b] && state[c]) return true; //FTT => T
+                if (!state[a] && state[b] && !state[c]) return true; //FTF => T
+                if (!state[a] && !state[b] && state[c]) return true; //FFT => T
+                if (!state[a] && !state[b] && !state[c]) return false; //FFF => F
+            },
+            id: 0,
+            descriptionFunction() {
+                const loop = () => {
+                    if ((simulation.paused || simulation.isChoosing) && m.alive && !build.isExperimentSelection) { //&& (!simulation.isChoosing || this.count === 0)
+                        let b = []; //produce next row
+                        b.push(this.rule30(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 1, 0, 1)); //left edge wrap around
+                        for (let i = 1; i < this.state[this.state.length - 1].length - 1; i++) { //apply rule to the rest of the array
+                            b.push(this.rule30(this.state[this.state.length - 1], i - 1, i, i + 1));
+                        }
+                        b.push(this.rule30(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 2, this.state[this.state.length - 1].length - 1, 0)); //right edge wrap around
+                        this.state.push(b)
+                        if (document.getElementById(`cellular-rule-id${this.id}`)) document.getElementById(`cellular-rule-id${this.id}`).innerHTML = this.outputText() //convert to squares and send HTML
+                        if (this.count && this.state.length < 120 && !(this.state.length % 10)) powerUps.spawn(m.pos.x - 50 + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
+                        setTimeout(() => { loop() }, 500);
+                    }
+                }
+                setTimeout(() => { loop() }, 500);
+                this.id++
+                return `<span id = "cellular-rule-id${this.id}" style = "letter-spacing: 0px;font-size: 50%;line-height: normal;">${this.outputText()}</span>`
+            },
+            outputText() {
+                let text = ""
+                for (let j = 0; j < this.state.length; j++) {
+                    text += "<p style = 'margin-bottom: -11px;'>"
+                    for (let i = 0; i < this.state[j].length; i++) {
+                        if (this.state[j][i]) {
+                            text += "⬛" //"█" //"■"
+                        } else {
+                            text += "⬜" //"&nbsp;&nbsp;&nbsp;&nbsp;" //"□"
+                        }
+                    }
+                    text += "</p>"
+                }
+                return text
+            },
         },
         //************************************************** 
         //************************************************** undefined / lore
@@ -9727,6 +9764,7 @@ const tech = {
     orbitBotCount: null,
     collisionImmuneCycles: null,
     blockDmg: null,
+    isBlockRadiation: null,
     isPiezo: null,
     isFastDrones: null,
     isFastSpores: null,
@@ -9840,6 +9878,7 @@ const tech = {
     wideLaser: null,
     isPulseLaser: null,
     isRadioactive: null,
+    radioactiveDamage: null,
     isRailEnergyGain: null,
     isMineSentry: null,
     isIncendiary: null,

@@ -379,7 +379,7 @@ const powerUps = {
             }
             if (tech.isRerollBots) {
                 let delay = 0
-                for (const cost = 2 + Math.floor(0.1666 * b.totalBots()); powerUps.research.count > cost - 1; powerUps.research.count -= cost) {
+                for (const cost = 2 + Math.floor(0.2 * b.totalBots()); powerUps.research.count > cost - 1; powerUps.research.count -= cost) { // 1/5 = 0.2
                     delay += 500
                     setTimeout(() => {
                         b.randomBot()

@@ -16,11 +16,11 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
-            // m.setField("plasma torch")
-            // b.giveGuns("grenades")
-            // tech.giveTech("rocket-propelled grenade")
-            // tech.giveTech("electric armor")
-            // tech.giveTech("plasma ball")
+            // m.setField("perfect diamagnetism")
+            // b.giveGuns("shotgun")
+            // tech.giveTech("bremsstrahlung")
+            // tech.giveTech("cherenkov radiation")
+            // tech.giveTech("enthalpy")
             // tech.giveTech("rule 30")
             // for (let i = 0; i < 10; i++) tech.giveTech("replication")
             // tech.giveTech("decoherence")

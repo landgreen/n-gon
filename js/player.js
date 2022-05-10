@@ -1332,11 +1332,16 @@ const m = {
             }
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
-                who.damage(tech.blockDmg * m.dmgScale, true)
+                Matter.Body.setVelocity(who, { x: 0.5 * who.velocity.x, y: 0.5 * who.velocity.y });
+                if (tech.isBlockRadiation && !who.isShielded && !who.isMobBullet) {
+                    mobs.statusDoT(who, tech.blockDmg * m.dmgScale * 4 / 12, 360) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
+                } else {
+                    who.damage(tech.blockDmg * m.dmgScale, true)
+                }
                 //draw electricity
                 const step = 40
                 ctx.beginPath();
-                for (let i = 0, len = 1.3 * tech.blockDmg; i < len; i++) {
+                for (let i = 0, len = 0.8 * tech.blockDmg; i < len; i++) {
                     let x = m.pos.x - 20 * unit.x;
                     let y = m.pos.y - 20 * unit.y;
                     ctx.moveTo(x, y);
@@ -1659,10 +1664,15 @@ const m = {
                                     }
                                 }
                                 if (tech.blockDmg) { //electricity
-                                    mob[i].damage(tech.blockDmg * m.dmgScale)
+                                    Matter.Body.setVelocity(mob[i], { x: 0.5 * mob[i].velocity.x, y: 0.5 * mob[i].velocity.y });
+                                    if (tech.isBlockRadiation && !mob[i].isShielded && !mob[i].isMobBullet) {
+                                        mobs.statusDoT(mob[i], tech.blockDmg * m.dmgScale * 4 / 12, 360) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
+                                    } else {
+                                        mob[i].damage(tech.blockDmg * m.dmgScale)
+                                    }
                                     const step = 40
                                     ctx.beginPath();
-                                    for (let i = 0, len = 1.3 * tech.blockDmg; i < len; i++) {
+                                    for (let i = 0, len = 0.8 * tech.blockDmg; i < len; i++) {
                                         let x = m.fieldPosition.x - 20 * unit.x;
                                         let y = m.fieldPosition.y - 20 * unit.y;
                                         ctx.moveTo(x, y);

@@ -1,15 +1,25 @@
 ******************************************************** NEXT PATCH **************************************************
 
-plasma ball damage radius is 2x bigger
-  map collisions radius is unchanged
-  it no longer pops after hitting mobs
-  energy drain is 50% higher
+tech: cherenkov radiation - bremsstrahlung damage is increased by 300% over 6 seconds
+  bremsstrahlung does 2->3 damage, and also applies to block collisions
 
-JUNK tech: rule 30
+tech: nuclear transmutation - radiation sources do 70% more damage and harm
 
-generalist cycles guns with final boss phases
+enthalpy now drops heal power ups instead of directly healing you
+foam-shot has 13->15 particles, is slower, and less spread
+  
+bug fixes
 
 ******************************************************** TODO ********************************************************
+
+tech: increase damage from all radioactive sources by 66%
+  apply to dots and to drones, neutron bomb, and radioactive explosions
+
+tech: damage mobs in your last 10 seconds of history
+  field tech?
+    time dilation?
+
+standing wave is weak vs. exploding bullets
 
 add foam tech that makes foam stronger vs. shields
 

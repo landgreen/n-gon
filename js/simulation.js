@@ -720,8 +720,8 @@ const simulation = {
         simulation.makeTextLog(`engine.timing.timeScale <span class='color-symbol'>=</span> 1`);
         // simulation.makeTextLog(`input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
 
-        document.getElementById("health").style.display = "inline"
-        document.getElementById("health-bg").style.display = "inline"
+        // document.getElementById("health").style.display = "inline"
+        // document.getElementById("health-bg").style.display = "inline"
         m.alive = true;
         m.onGround = false
         m.lastOnGroundCycle = 0

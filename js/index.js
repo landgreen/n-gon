@@ -314,8 +314,13 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         document.getElementById("tech").style.display = "inline"
         document.getElementById("guns").style.display = "inline"
         document.getElementById("field").style.display = "inline"
-        document.getElementById("health").style.display = "inline"
-        document.getElementById("health-bg").style.display = "inline"
+        if (tech.isEnergyHealth) {
+            document.getElementById("health").style.display = "none"
+            document.getElementById("health-bg").style.display = "none"
+        } else {
+            document.getElementById("health").style.display = "inline"
+            document.getElementById("health-bg").style.display = "inline"
+        }
         // document.body.style.overflow = "hidden"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"

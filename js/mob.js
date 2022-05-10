@@ -157,7 +157,7 @@ const mobs = {
             who.status.push({
                 effect() {
                     if ((simulation.cycle - this.startCycle) % 30 === 0) {
-                        let dmg = m.dmgScale * this.dmg
+                        let dmg = m.dmgScale * this.dmg * tech.radioactiveDamage
                         who.damage(dmg);
                         if (who.damageReduction) {
                             simulation.drawList.push({ //add dmg to draw queue
@@ -1069,9 +1069,11 @@ const mobs = {
                     dmg *= this.damageReduction
                     //energy and heal drain should be calculated after damage boosts
                     if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon
-                    if (tech.healthDrain && dmg !== Infinity && this.isDropPowerUp) {
-                        m.addHealth(Math.min(this.health, dmg) * tech.healthDrain)
-                        if (m.health > m.maxHealth) m.health = m.maxHealth
+                    if (tech.healthDrain && dmg !== Infinity && this.isDropPowerUp && Math.random() < tech.healthDrain * Math.min(this.health, dmg)) {
+                        powerUps.spawn(m.pos.x + 20 * (Math.random() - 0.5), m.pos.y + 20 * (Math.random() - 0.5), "heal");
+                        // powerUps.spawn(this.position.x + 20 * (Math.random() - 0.5), this.position.y + 20 * (Math.random() - 0.5), "heal");
+                        // m.addHealth(Math.min(this.health, dmg) * tech.healthDrain)
+                        // if (m.health > m.maxHealth) m.health = m.maxHealth
                     }
                     dmg /= Math.sqrt(this.mass)
                     this.health -= dmg
