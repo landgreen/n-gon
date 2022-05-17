@@ -1060,28 +1060,17 @@ const mobs = {
                     dmg *= tech.damageFromTech()
                     //mobs specific damage changes
                     if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
-                    // if (this.shield) dmg *= 0.075
-                    // if (this.isBoss) dmg *= 0.25
-                    // if (this.damageReduction < 1) { //only used for bosses with this.armor()  or shields
-                    //     this.damageReductionGoal += dmg * this.damageReductionScale //reduce damageReductionGoal
-                    //     dmg *= this.damageReduction
-                    // }
                     dmg *= this.damageReduction
                     //energy and heal drain should be calculated after damage boosts
                     if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon
                     if (tech.healthDrain && dmg !== Infinity && this.isDropPowerUp && Math.random() < tech.healthDrain * Math.min(this.health, dmg)) {
                         powerUps.spawn(m.pos.x + 20 * (Math.random() - 0.5), m.pos.y + 20 * (Math.random() - 0.5), "heal");
-                        // powerUps.spawn(this.position.x + 20 * (Math.random() - 0.5), this.position.y + 20 * (Math.random() - 0.5), "heal");
-                        // m.addHealth(Math.min(this.health, dmg) * tech.healthDrain)
-                        // if (m.health > m.maxHealth) m.health = m.maxHealth
                     }
                     dmg /= Math.sqrt(this.mass)
                     this.health -= dmg
                     //this.fill = this.color + this.health + ')';
                     this.onDamage(dmg); //custom damage effects
-                    if ((this.health < 0.05 || isNaN(this.health)) && this.alive) {
-                        this.death();
-                    }
+                    if ((this.health < 0.05 || isNaN(this.health)) && this.alive) this.death();
                 }
             },
             onDamage() {

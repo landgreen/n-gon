@@ -838,13 +838,13 @@ const simulation = {
 
         if (tech.isDronesTravel && m.alive) {
             //count drones
-            let count = 0
+            let droneCount = 0
             let sporeCount = 0
             let wormCount = 0
             let deliveryCount = 0
             for (let i = 0; i < bullet.length; ++i) {
                 if (bullet[i].isDrone) {
-                    count++
+                    droneCount++
                     if (bullet[i].isImproved) deliveryCount++
                 } else if (bullet[i].isSpore) {
                     sporeCount++
@@ -855,11 +855,11 @@ const simulation = {
 
             //respawn drones in animation frame
             let respawnDrones = () => {
-                if (count > 0) {
+                if (droneCount > 0) {
                     requestAnimationFrame(respawnDrones);
                     if (!simulation.paused && !simulation.isChoosing) {
                         const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
-                        count--
+                        droneCount--
                         if (tech.isDroneRadioactive) {
                             b.droneRadioactive({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 100 * (Math.random() - 0.5) }, 0)
                         } else {
@@ -1037,7 +1037,7 @@ const simulation = {
 
             if (!(m.cycle % 420)) { //once every 7 seconds
                 if (tech.isZeno) {
-                    m.health *= 0.93 //remove 7%
+                    m.health *= 0.94 //remove 7%
                     m.displayHealth();
                 }
                 if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
