@@ -543,18 +543,19 @@ const m = {
             for (let i = 1, len = Math.floor(4 + steps / 40); i < len; i++) {
                 b.grenade(Vector.add(m.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -i * Math.PI / len) //fire different angles for each grenade
                 const who = bullet[bullet.length - 1]
-                if (tech.isVacuumBomb) {
+
+                if (tech.isNeutronBomb) {
+                    Matter.Body.setVelocity(who, {
+                        x: who.velocity.x * 0.3,
+                        y: who.velocity.y * 0.3
+                    });
+                } else if (tech.isVacuumBomb) {
                     Matter.Body.setVelocity(who, {
                         x: who.velocity.x * 0.5,
                         y: who.velocity.y * 0.5
                     });
                 } else if (tech.isRPG) {
                     who.endCycle = simulation.cycle + 10
-                } else if (tech.isNeutronBomb) {
-                    Matter.Body.setVelocity(who, {
-                        x: who.velocity.x * 0.3,
-                        y: who.velocity.y * 0.3
-                    });
                 } else {
                     Matter.Body.setVelocity(who, {
                         x: who.velocity.x * 0.5,

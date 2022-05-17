@@ -17,11 +17,11 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
             // m.setField("perfect diamagnetism")
-            // b.giveGuns("shotgun")
-            // tech.giveTech("bremsstrahlung")
-            // tech.giveTech("cherenkov radiation")
-            // tech.giveTech("enthalpy")
+            // b.giveGuns("grenades")
             // tech.giveTech("rule 30")
+            // tech.giveTech("cherenkov radiation")
+            // tech.giveTech("flame test")
+            // tech.giveTech("pyrotechnics")
             // for (let i = 0; i < 10; i++) tech.giveTech("replication")
             // tech.giveTech("decoherence")
             // tech.giveTech("pneumatic actuator")
@@ -39,7 +39,7 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.warehouse();
+            // level.temple();
             // level.testing(); //not in rotation, used for testing
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -2644,11 +2644,11 @@ const level = {
         spawn.mapRect(4850, -275, 50, 175);
 
         //???
-        level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
         m.addHealth(Infinity)
 
         // spawn.starter(1900, -500, 200) //big boy
-        for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
+        // for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
@@ -2663,7 +2663,7 @@ const level = {
         // spawn.blinkBoss(1700, -500)
         // spawn.snakeSpitBoss(3200, -500)
         // spawn.laserBombingBoss(1700, -500)
-        // spawn.launcherBoss(3200, -500)
+        spawn.launcherBoss(3200, -500)
         // spawn.blockBoss(1700, -500)
         // spawn.blinkBoss(3200, -500)
         // spawn.spiderBoss(1700, -500)
@@ -9511,22 +9511,14 @@ const level = {
 
             me.attackCycle = 0;
             me.lastAttackCycle = 0;
-            Matter.Body.setDensity(me, 0.014); // extra dense, normal is 0.001 // makes effective life much larger
+            Matter.Body.setDensity(me, 0.012); // extra dense, normal is 0.001 // makes effective life much larger
             me.onDeath = function() {
                 // applying forces to player doesn't seem to work inside this method, not sure why
                 powerUps.spawn(this.position.x + 20, this.position.y, "ammo");
                 if (Math.random() > 0.5) powerUps.spawn(this.position.x, this.position.y, "ammo");
                 if (Math.random() > 0.3) powerUps.spawn(this.position.x, this.position.y, "heal", true, null, 30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
-                if (simulation.difficulty > 5) {
-                    // fling player to center
-                    const SUB = V.sub(this.position, player.position)
-                    const DISTANCE = V.magnitude(SUB)
-                    if (DISTANCE < this.eventHorizon) {
-                        Matter.Body.setVelocity(player, V.mult(SUB, 5e4 / (100 + DISTANCE) / (100 + DISTANCE)))
-                    }
-                }
             };
-            me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+            me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
             me.do = function() {
                 // keep it slow, to stop issues from explosion knock backs
                 if (this.speed > 1) {
@@ -9650,12 +9642,13 @@ const level = {
             me.isBoss = true;
 
             me.stroke = "transparent";
-            me.eventHorizon = 1000;
+            me.eventHorizon = 950;
             me.collisionFilter.mask = cat.player | cat.bullet | cat.body;
 
             me.memory = Infinity;
             me.attackCycle = 0;
             me.lastAttackCycle = 0;
+            me.spawnCycle = 0;
             Matter.Body.setDensity(me, 0.08); //extra dense //normal is 0.001 //makes effective life much larger
             me.onDeath = function() {
                 for (let j = 0; j < 8; j++) { //in case some mobs leave things after they die
@@ -9763,14 +9756,16 @@ const level = {
                 }
             }
             me.periodicSpawns = function() {
+                if (this.isInvulnerable) return;
+                this.spawnCycle++;
                 // Spawn annoying purple thing(s) that chases the player
-                if (!(simulation.cycle % 180)) {
+                if (!(this.spawnCycle % 180)) {
                     spawn.seeker(this.position.x, this.position.y, 15 * (0.7 + 0.5 * Math.random()), 7);
                     spawn.seeker(this.position.x, this.position.y, 4 * (0.7 + 0.5 * Math.random()), 7);
                     spawn.seeker(this.position.x, this.position.y, 4 * (0.7 + 0.5 * Math.random()), 7);
                 }
                 // Spawn the annoying pink (now blue) exploder that doesn't chase the player
-                if (!(simulation.cycle % 300)) {
+                if (!(this.spawnCycle % 300)) {
                     for (let i = 0; i < 3; i++) {
                         mobGrenade(1100 + 700 * i, -13030, undefined, Math.min(700, 300 + simulation.difficulty * 4), 10);
                         setVel(mob[mob.length - 1], { x: 0, y: -10 });
@@ -9779,19 +9774,30 @@ const level = {
                     }
                 }
                 // Spawn a bunch of mobs
-                if (!(simulation.cycle % 600)) {
-                    spawn.nodeGroup(this.position.x, this.position.y, "focuser", 3);
+                if (!(this.spawnCycle % 600)) {
+                    // This is just ripped off of spawn.nodeGroup because I don't want the shield
+                    const nodes = 3;
+                    const radius = Math.ceil(Math.random() * 10) + 18;
+                    const sideLength = Math.ceil(Math.random() * 100) + 70;
+                    const stiffness = Math.random() * 0.03 + 0.005;
+                    spawn.allowShields = false; //don't want shields on individual group mobs
+                    const angle = 2 * Math.PI / nodes
+                    for (let i = 0; i < nodes; ++i) {
+                        spawn.focuser(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius);
+                    }
+                    spawn.constrainAllMobCombos(nodes, stiffness);
+                    spawn.allowShields = true;
                 }
             }
             me.invulnerableTrap = function() {
                 if (this.trapCycle < 1) return;
                 this.trapCycle++;
-                // 32 is just an arbitrarily large number
-                const spawnCycles = Math.min(32, Math.max(8, 6 + Math.floor(simulation.difficulty / 3)));
+                // 24 is just an arbitrarily large number
+                const spawnCycles = Math.min(24, Math.max(6, 4 + Math.floor(simulation.difficulty / 3)));
                 // I have no idea how to balance at all, please help me
                 const spawnDelay = Math.floor(5 + 10 / (1 + Math.sqrt(simulation.difficulty) / 5));
-                if (this.trapCycle >= 120) {
-                    const cycle = this.trapCycle - 120;
+                if (this.trapCycle >= 90) {
+                    const cycle = this.trapCycle - 90;
                     if (!(cycle % spawnDelay)) {
                         const radius = Math.min(500, 200 + simulation.difficulty * 3);
                         mobGrenade(600, -13050, 30, radius);
@@ -10220,7 +10226,6 @@ const level = {
                         this.pit1.height = this.pit1.width = 0;
                         this.pit2.height = this.pit2.width = 0;
                     }
-
                 },
                 draw() {
                     this.pit1.query();
@@ -10412,8 +10417,6 @@ const level = {
                         break;
                     }
                 }
-                // UwU
-                // Will I get timed out for this
                 if (!isInBounds) {
                     m.damage(0.1 * simulation.difficultyMode);
                     trapPlayer(level.enter.x, level.enter.y);
@@ -10601,7 +10604,8 @@ const level = {
                     powerUps.addResearchToLevel();
                 }
                 if (templePlayer.room1.cycles % 600 === 0 && templePlayer.room1.cycles <= 2400) {
-                    for (let i = 0; i < 3 + Math.pow(simulation.difficulty / 2, 0.7) + Math.floor(templePlayer.room1.cycles / 720); i++) {
+                    const spawnAmt = Math.min(3 + Math.pow(simulation.difficulty / 1.7, 0.6), 10) + Math.floor(templePlayer.room1.cycles / 720);
+                    for (let i = 0; i < spawnAmt; i++) {
                         if (Math.random() < 0.5 + 0.07 * simulation.difficulty) {
                             spawn.randomMob(800 + Math.random() * 3e3, -2400 - Math.random() * 600, Infinity);
                         }

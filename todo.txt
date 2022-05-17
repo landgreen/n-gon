@@ -1,21 +1,50 @@
 ******************************************************** NEXT PATCH **************************************************
 
-bremsstrahlung does extra damage to shields
+grenade tech: flame test - grenades release a cluster of smaller explosions
+grenade tech: pyrotechnics - grenades release a circle of smaller explosions
+grenade tech: implosion - explosions pull things in, not out,  +25% to grenade explosion damage and radius
+chain reaction no longer requires vacuum bomb
+bosses and mobs have much less knock back from explosions
+  invulnerable mobs have no knock back
 
-bug fixes
+alternator harpoon/grapple/railgun energy drain reduced by 100->60%
+bots no longer unlock tech until you upgrade to a bot type
+JUNK tech rule 30 is now sometimes rule 90 instead
+disabled testing for why? mode
+
+wave beam
+  amplitude 50->37% damage
+  propagation 50->37% damage
+worms
+  annelids 10-120% -> about 37% damage
+radiation
+  nuclear transmutation stacks 9x
+    gives 70->47% damage per stack
+explosions
+  ammonium nitrate 27->24% damage and radius
+
 
 ******************************************************** TODO ********************************************************
 
-tech: increase damage from all radioactive sources by 66%
-  apply to dots and to drones, neutron bomb, and radioactive explosions
+buff early matter wave without phonon
+
+some grenade tech made all the bosses go away and not drop anything
+  check: fireworks, vacuum, stun, chain reaction, implosion
+
+more fireworks themed grenade tech
+  shotting star - fire a series of explosions higher and higher up, also increase radius with height
+  star burst - 5 explosions in star shape
+  delay - explosion in same place
+  pulse
+  30s of lasers
+
+merge mines and grenades?
+tech - neutron bombs deal 100% more damage, but finishes detonating much faster
+tech - neutron bombs will explode into a small iridum explosion after it expires
 
 tech: damage mobs in your last 10 seconds of history
   field tech?
     time dilation?
-
-standing wave is weak vs. exploding bullets
-
-add foam tech that makes foam stronger vs. shields
 
 tech: eternalism - don't pause time during draft
   bugs?
@@ -26,6 +55,7 @@ tech expansion:  should also make other fields do things
   how to make the description work
     change description based on your current field?
   perfect diamagnetism moves forward when you hold down the shield
+    it's great, but maybe annoying?
     maybe only with crouch?
   time dilation drains 1/2 as much energy when paused
   grow plasma torch as you hold it down

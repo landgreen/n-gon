@@ -927,6 +927,10 @@ window.addEventListener("keydown", function(event) {
             break
         case input.key.testing:
             if (m.alive && localSettings.loreCount > 0) {
+                if (simulation.difficultyMode > 4) {
+                    simulation.makeTextLog("<em>testing mode disabled for this difficulty</em>");
+                    break
+                }
                 if (simulation.testing) {
                     simulation.testing = false;
                     simulation.loop = simulation.normalLoop

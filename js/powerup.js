@@ -300,7 +300,7 @@ const powerUps = {
     },
     endDraft(type, isCanceled = false) { //type should be a gun, tech, or field
         if (isCanceled) {
-            if (tech.isCancelTech && Math.random() < 0.9) {
+            if (tech.isCancelTech && Math.random() < 0.94) {
                 // powerUps.research.use('tech')
                 powerUps[type].effect();
                 return
