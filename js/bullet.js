@@ -430,18 +430,18 @@ const b = {
                             m.energy -= 0.15
                             m.damage(0.01 * harm); //remove 99% of the damage  1-0.99
                             // console.log(Math.max(0, Math.min(0.15 - 0.01 * player.speed, 0.15)))
-                            knock = Vector.mult(Vector.normalise(sub), 0.6 * player.mass * Math.max(0, Math.min(0.15 - 0.002 * player.speed, 0.15)) * tech.implosion);
+                            knock = Vector.mult(Vector.normalise(sub), -0.6 * player.mass * Math.max(0, Math.min(0.15 - 0.002 * player.speed, 0.15)));
                             player.force.x = knock.x; // not +=  so crazy forces can't build up with MIRV
                             player.force.y = knock.y - 0.3; //some extra vertical kick 
                         } else {
                             if (simulation.dmgScale) m.damage(harm);
-                            knock = Vector.mult(Vector.normalise(sub), Math.sqrt(dmg) * player.mass * 0.013 * tech.implosion);
+                            knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
                             player.force.x += knock.x;
                             player.force.y += knock.y;
                         }
                     }
                 } else if (dist < alertRange) {
-                    knock = Vector.mult(Vector.normalise(sub), Math.sqrt(dmg) * player.mass * 0.005 * tech.implosion);
+                    knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.005);
                     player.force.x += knock.x;
                     player.force.y += knock.y;
                 }
@@ -453,7 +453,7 @@ const b = {
                     sub = Vector.sub(where, body[i].position);
                     dist = Vector.magnitude(sub);
                     if (dist < radius) {
-                        knock = Vector.mult(Vector.normalise(sub), Math.sqrt(dmg) * body[i].mass * 0.022 * tech.implosion);
+                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * body[i].mass * 0.022);
                         body[i].force.x += knock.x;
                         body[i].force.y += knock.y;
                         if (tech.isBlockExplode) {
@@ -468,7 +468,7 @@ const b = {
                             }, 150 + 300 * Math.random());
                         }
                     } else if (dist < alertRange) {
-                        knock = Vector.mult(Vector.normalise(sub), Math.sqrt(dmg) * body[i].mass * 0.011 * tech.implosion);
+                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * body[i].mass * 0.011);
                         body[i].force.x += knock.x;
                         body[i].force.y += knock.y;
                     }
@@ -480,11 +480,11 @@ const b = {
                 sub = Vector.sub(where, powerUp[i].position);
                 dist = Vector.magnitude(sub);
                 if (dist < radius) {
-                    knock = Vector.mult(Vector.normalise(sub), Math.sqrt(dmg) * powerUp[i].mass * 0.013 * tech.implosion);
+                    knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * powerUp[i].mass * 0.013);
                     powerUp[i].force.x += knock.x;
                     powerUp[i].force.y += knock.y;
                 } else if (dist < alertRange) {
-                    knock = Vector.mult(Vector.normalise(sub), Math.sqrt(dmg) * powerUp[i].mass * 0.007 * tech.implosion);
+                    knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * powerUp[i].mass * 0.007);
                     powerUp[i].force.x += knock.x;
                     powerUp[i].force.y += knock.y;
                 }
@@ -501,12 +501,10 @@ const b = {
                         if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
                         mob[i].damage(dmg * damageScale * m.dmgScale);
                         mob[i].locatePlayer();
+                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg * damageScale) * mob[i].mass * (mob[i].isBoss ? 0.003 : 0.01));
                         if (tech.isExplosionStun) {
                             mobs.statusStun(mob[i], 120)
-                            knock *= 0.1
-                        }
-                        knock = Vector.mult(Vector.normalise(sub), Math.sqrt(dmg * damageScale) * mob[i].mass * (mob[i].isBoss ? 0.005 : 0.01) * tech.implosion);
-                        if (!mob[i].isInvulnerable) {
+                        } else if (!mob[i].isInvulnerable) {
                             mob[i].force.x += knock.x;
                             mob[i].force.y += knock.y;
                         }
@@ -514,12 +512,10 @@ const b = {
                         damageScale *= 0.87 //reduced damage for each additional explosion target
                     } else if (!mob[i].seePlayer.recall && dist < alertRange) {
                         mob[i].locatePlayer();
-                        knock = Vector.mult(Vector.normalise(sub), Math.sqrt(dmg * damageScale) * mob[i].mass * (mob[i].isBoss ? 0.002 : 0.006) * tech.implosion);
+                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg * damageScale) * mob[i].mass * (mob[i].isBoss ? 0 : 0.006));
                         if (tech.isExplosionStun) {
                             mobs.statusStun(mob[i], 60)
-                            knock *= 0.1
-                        }
-                        if (!mob[i].isInvulnerable) {
+                        } else if (!mob[i].isInvulnerable) {
                             mob[i].force.x += knock.x;
                             mob[i].force.y += knock.y;
                         }
@@ -773,10 +769,10 @@ const b = {
         const cycle = () => {
             if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
                 count++
-                if (count < 60 && m.alive) requestAnimationFrame(cycle);
-                if (!(count % 8)) {
+                if (count < 110 && m.alive) requestAnimationFrame(cycle);
+                if (!(count % 10)) {
                     const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
-                    b.explosion(Vector.add(where, Vector.mult(unit, size * (count * 0.011 + 0.03 * Math.random()))), size * (0.5 + Math.random() * 0.35), `hsla(${360*Math.random()},100%,66%,0.6)`); //makes bullet do explosive damage at end
+                    b.explosion(Vector.add(where, Vector.mult(unit, size * (count * 0.01 + 0.02 * Math.random()))), size * (0.4 + Math.random() * 0.35), `hsla(${360*Math.random()},100%,66%,0.6)`); //makes bullet do explosive damage at end
                 }
             }
         }
@@ -791,7 +787,7 @@ const b = {
                 if (count < 21 && m.alive) requestAnimationFrame(cycle);
                 if (count % 2) {
                     const unit = Vector.rotate({ x: 1, y: 0 }, curl * 6.28 * count / 18 + off)
-                    b.explosion(Vector.add(where, Vector.mult(unit, size * 0.8)), size * 0.75, color); //makes bullet do explosive damage at end
+                    b.explosion(Vector.add(where, Vector.mult(unit, size * 0.75)), size * 0.7, color); //makes bullet do explosive damage at end
                 }
             }
         }
@@ -799,6 +795,48 @@ const b = {
         const curl = Math.random() < 0.5 ? -1 : 1;
         let count = 0
         requestAnimationFrame(cycle);
+    },
+    fireFlower(where, size) { //can occur after grenades detonate
+        // size *= b.explosionRange()
+        const range = size * Math.sqrt(b.explosionRange())
+        const cycle = () => {
+            if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
+                if (count < 30 && m.alive) requestAnimationFrame(cycle);
+                if (count === 0) {
+                    const color = `hsla(${360*Math.random()},100%,66%,0.6)`
+                    b.explosion(where, size * 0.8, color);
+                }
+                if (count === 8) {
+                    const color = `hsla(${360*Math.random()},100%,66%,0.6)`
+                    for (let i = 0, len = 6; i < len; i++) {
+                        const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * i / len)
+                        b.explosion(Vector.add(where, Vector.mult(unit, 1.2 * range)), size * 0.6, color); //makes bullet do explosive damage at end
+                    }
+                }
+                if (count === 16) {
+                    const color = `hsla(${360*Math.random()},100%,66%,0.6)`
+                    for (let i = 0, len = 10; i < len; i++) {
+                        const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * i / len)
+                        b.explosion(Vector.add(where, Vector.mult(unit, 1.75 * range)), size * 0.45, color); //makes bullet do explosive damage at end
+                    }
+                }
+                count++
+            }
+        }
+        let count = 0
+        requestAnimationFrame(cycle);
+    },
+    grenadeEnd() {
+        if (tech.isCircleExplode) {
+            b.starburst(this.position, this.explodeRad)
+        } else if (tech.isPetalsExplode) {
+            b.fireFlower(this.position, this.explodeRad)
+        } else if (tech.isClusterExplode) {
+            b.fireworks(this.position, this.explodeRad)
+        } else {
+            b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
+        }
+        if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
     },
     grenade() {
 
@@ -808,17 +846,8 @@ const b = {
             const me = bullet.length;
             bullet[me] = Bodies.circle(where.x, where.y, 15, b.fireAttributes(angle, false));
             Matter.Body.setDensity(bullet[me], 0.0003);
-            bullet[me].explodeRad = (tech.implosion ? 375 : 300) * size + 100 * tech.isBlockExplode;
-            bullet[me].onEnd = function() {
-                if (tech.isCircleExplode) {
-                    b.starburst(this.position, this.explodeRad)
-                } else if (tech.isClusterExplode) {
-                    b.fireworks(this.position, this.explodeRad)
-                } else {
-                    b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                }
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
-            }
+            bullet[me].explodeRad = 300 * size + 100 * tech.isBlockExplode;
+            bullet[me].onEnd = b.grenadeEnd
             bullet[me].minDmgSpeed = 1;
             bullet[me].beforeDmg = function() {
                 this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
@@ -839,16 +868,8 @@ const b = {
             const me = bullet.length;
             bullet[me] = Bodies.circle(where.x, where.y, 15, b.fireAttributes(angle, false));
             Matter.Body.setDensity(bullet[me], 0.0003);
-            bullet[me].explodeRad = (tech.implosion ? 375 : 300) * size + 100 * tech.isBlockExplode;
-            bullet[me].onEnd = function() {
-                if (tech.isCircleExplode) {
-                    b.starburst(this.position, this.explodeRad)
-                } else if (tech.isClusterExplode) {
-                    b.fireworks(this.position, this.explodeRad)
-                }
-                b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
-            }
+            bullet[me].explodeRad = 300 * size + 100 * tech.isBlockExplode;
+            bullet[me].onEnd = b.grenadeEnd
             bullet[me].minDmgSpeed = 1;
             bullet[me].beforeDmg = function() {
                 this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
@@ -879,28 +900,18 @@ const b = {
             const me = bullet.length;
             bullet[me] = Bodies.circle(where.x, where.y, 15, b.fireAttributes(angle, false));
             Matter.Body.setDensity(bullet[me], 0.0003);
-            bullet[me].explodeRad = (tech.implosion ? 425 : 350) * size + Math.floor(Math.random() * 50) + tech.isBlockExplode * 100
-            bullet[me].onEnd = function() {
-                if (tech.isCircleExplode) {
-                    b.starburst(this.position, this.explodeRad)
-                } else if (tech.isClusterExplode) {
-                    b.fireworks(this.position, this.explodeRad)
-                }
-                b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
-            }
+            bullet[me].explodeRad = 350 * size + Math.floor(Math.random() * 50) + tech.isBlockExplode * 100
+            bullet[me].onEnd = b.grenadeEnd
             bullet[me].minDmgSpeed = 1;
             bullet[me].beforeDmg = function() {
                 this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
             };
             speed = input.down ? 46 : 32
-
             Matter.Body.setVelocity(bullet[me], {
                 x: m.Vx / 2 + speed * Math.cos(angle),
                 y: m.Vy / 2 + speed * Math.sin(angle)
             });
             Composite.add(engine.world, bullet[me]); //add bullet to world
-
             bullet[me].endCycle = simulation.cycle + 70;
             bullet[me].frictionAir = 0.07;
             const MAG = 0.015
@@ -961,16 +972,8 @@ const b = {
             const me = bullet.length;
             bullet[me] = Bodies.circle(where.x, where.y, 20, b.fireAttributes(angle, false));
             Matter.Body.setDensity(bullet[me], 0.0002);
-            bullet[me].explodeRad = (tech.implosion ? 425 : 350) * size + Math.floor(Math.random() * 50) + tech.isBlockExplode * 100
-            bullet[me].onEnd = function() {
-                if (tech.isCircleExplode) {
-                    b.starburst(this.position, this.explodeRad)
-                } else if (tech.isClusterExplode) {
-                    b.fireworks(this.position, this.explodeRad)
-                }
-                b.explosion(this.position, this.explodeRad); //makes bullet do explosive damage at end
-                if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
-            }
+            bullet[me].explodeRad = 350 * size + Math.floor(Math.random() * 50) + tech.isBlockExplode * 100
+            bullet[me].onEnd = b.grenadeEnd
             bullet[me].beforeDmg = function() {
                 this.endCycle = 0; //bullet ends cycle after doing damage  //this also triggers explosion
             };
@@ -1056,15 +1059,12 @@ const b = {
             if (tech.isRPG) {
                 const SCALE = 2
                 Matter.Body.scale(bullet[me], SCALE, SCALE);
-
                 speed = input.down ? 25 : 15
                 // speed = input.down ? 43 : 32
-
                 Matter.Body.setVelocity(bullet[me], {
                     x: m.Vx / 2 + speed * Math.cos(angle),
                     y: m.Vy / 2 + speed * Math.sin(angle)
                 });
-
                 const MAG = 0.005
                 bullet[me].thrust = {
                     x: bullet[me].mass * MAG * Math.cos(angle),
@@ -5643,7 +5643,7 @@ const b = {
                                 ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
                             }
                         }
-                        this.waves[i].radius += tech.waveBeamSpeed * this.waves[i].expanding //expand / move
+                        this.waves[i].radius += 0.9 * tech.waveBeamSpeed * this.waves[i].expanding //expand / move
                         // if (this.waves[i].radius > end) this.waves.splice(i, 1) //end
                         if (this.waves[i].radius > end) {
                             this.waves[i].expanding = -1
@@ -5738,7 +5738,7 @@ const b = {
                         }
                         // ctx.stroke(); //draw vibes
 
-                        this.waves[i].radius += tech.waveBeamSpeed * 2 * this.waves[i].expanding //expand / move
+                        this.waves[i].radius += tech.waveBeamSpeed * 1.8 * this.waves[i].expanding //expand / move
                         if (this.waves[i].radius > end) {
                             this.waves[i].expanding = -1
                             this.waves[i].reflection--
@@ -5857,9 +5857,9 @@ const b = {
                 let waveSpeedMap = 0.1
                 let waveSpeedBody = 0.25
                 if (tech.isPhaseVelocity) {
-                    waveSpeedMap = 3
-                    waveSpeedBody = 1.9
-                    bullet[me].dmg *= 1.15
+                    waveSpeedMap = 3.5
+                    waveSpeedBody = 2
+                    bullet[me].dmg *= 1.2
                 }
                 if (tech.waveReflections) {
                     bullet[me].reflectCycle = totalCycles / tech.waveReflections //tech.waveLengthRange

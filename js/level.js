@@ -15,16 +15,16 @@ const level = {
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
-            // simulation.isHorizontalFlipped = true
-            // m.setField("perfect diamagnetism")
-            // b.giveGuns("grenades")
-            // tech.giveTech("rule 30")
-            // tech.giveTech("cherenkov radiation")
+            // // simulation.isHorizontalFlipped = true
+            // m.setField("wormhole")
+            // b.giveGuns("matter wave")
+            // tech.giveTech("chain reaction")
+            // tech.giveTech("fireworks")
             // tech.giveTech("flame test")
             // tech.giveTech("pyrotechnics")
             // for (let i = 0; i < 10; i++) tech.giveTech("replication")
-            // tech.giveTech("decoherence")
-            // tech.giveTech("pneumatic actuator")
+            // tech.giveTech("acetone peroxide")
+            // for (let i = 0; i < 10; i++) tech.giveTech("ammonium nitrate")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
             // for (let i = 0; i < 15; i++) tech.giveTech()
@@ -2652,7 +2652,7 @@ const level = {
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
-        // spawn.powerUpBoss(1900, -500)
+        spawn.powerUpBoss(1900, -500)
         // spawn.powerUpBossBaby(3200, -500)
         // spawn.snakeBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
@@ -2663,7 +2663,7 @@ const level = {
         // spawn.blinkBoss(1700, -500)
         // spawn.snakeSpitBoss(3200, -500)
         // spawn.laserBombingBoss(1700, -500)
-        spawn.launcherBoss(3200, -500)
+        // spawn.launcherBoss(3200, -500)
         // spawn.blockBoss(1700, -500)
         // spawn.blinkBoss(3200, -500)
         // spawn.spiderBoss(1700, -500)

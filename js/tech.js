@@ -301,7 +301,7 @@ const tech = {
         }
     },
     tech: [{
-            name: "gun sciences",
+            name: "ordnance",
             description: "</strong>triple</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong><br>spawn a <strong class='color-g'>gun</strong>",
             maxCount: 1,
             count: 0,
@@ -4396,7 +4396,7 @@ const tech = {
         // 
         {
             name: "phase velocity",
-            description: "matter wave <strong>propagates</strong> faster through <strong>solids</strong><br>increase matter wave <strong class='color-d'>damage</strong> by <strong>15%</strong>",
+            description: "matter wave <strong>propagates</strong> faster through <strong>solids</strong><br>increase matter wave <strong class='color-d'>damage</strong> by <strong>20%</strong>",
             // description: "matter wave <strong>propagates</strong> faster through <strong>solids</strong><br>up by <strong>3000%</strong> in the map and <strong>760%</strong> in <strong class='color-block'>blocks</strong>",
             isGunTech: true,
             maxCount: 1,
@@ -4471,7 +4471,7 @@ const tech = {
                 tech.waveBeamDamage += 1.5 * 0.37 //this sets base matter wave damage
             },
             remove() {
-                tech.waveBeamSpeed = 10;
+                tech.waveBeamSpeed = 12;
                 tech.waveBeamDamage = 1.5 //this sets base matter wave damage
             }
         },
@@ -4789,25 +4789,25 @@ const tech = {
         // },
         {
             name: "controlled explosion",
-            description: `use ${powerUps.orb.research(3)} to dynamically <strong>reduce</strong> all<br><strong class='color-e'>explosions</strong> until they do no <strong class='color-harm'>harm</strong>`,
+            description: `use ${powerUps.orb.research(4)} to dynamically <strong>reduce</strong> all<br><strong class='color-e'>explosions</strong> until they do no <strong class='color-harm'>harm</strong>`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 2) && (tech.haveGunCheck("missiles") || tech.isMissileField || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
+                return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 3) && (tech.haveGunCheck("missiles") || tech.isMissileField || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
             },
             requires: "an explosive damage source, not electric reactive armor",
             effect: () => {
                 tech.isSmartRadius = true;
-                for (let i = 0; i < 3; i++) {
+                for (let i = 0; i < 4; i++) {
                     if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                 }
             },
             remove() {
                 tech.isSmartRadius = false;
-                if (this.count > 0) powerUps.research.changeRerolls(3)
+                if (this.count > 0) powerUps.research.changeRerolls(4)
             }
         },
         {
@@ -4892,25 +4892,6 @@ const tech = {
             }
         },
         {
-            name: "implosion",
-            description: "<strong class='color-e'>explosions</strong> pull objects towards them<br>increase <strong>grenade</strong> radius and <strong class='color-d'>damage</strong> <strong>25%</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.haveGunCheck("grenades") && !tech.isExplodeRadio && !tech.isNeutronBomb
-            },
-            requires: "grenades, not iridium-192, neutron bomb",
-            effect: () => {
-                tech.implosion = 1;
-            },
-            remove() {
-                tech.implosion = -1;
-            }
-        },
-        {
             name: "chain reaction",
             description: "increase <strong>grenade</strong> radius and <strong class='color-d'>damage</strong> <strong>33%</strong><br><strong class='color-block'>blocks</strong> caught in <strong class='color-e'>explosions</strong> also <strong class='color-e'>explode</strong>",
             isGunTech: true,
@@ -4938,9 +4919,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("grenades") && !tech.isNeutronBomb
+                return tech.haveGunCheck("grenades") && !tech.isNeutronBomb && !tech.isCircleExplode && !tech.isPetalsExplode
             },
-            requires: "grenades, not neutron bomb",
+            requires: "grenades, not neutron bomb, pyrotechnics, fireworks",
             effect() {
                 tech.isClusterExplode = true;
             },
@@ -4957,14 +4938,33 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("grenades") && !tech.isNeutronBomb && tech.isClusterExplode
+                return tech.haveGunCheck("grenades") && !tech.isNeutronBomb && !tech.isClusterExplode && !tech.isPetalsExplode
             },
-            requires: "grenades, flame test, not neutron bomb",
+            requires: "grenades, not neutron bomb, flame test, fireworks",
             effect() {
                 tech.isCircleExplode = true;
             },
             remove() {
                 tech.isCircleExplode = false;
+            }
+        },
+        {
+            name: "fireworks",
+            description: "when <strong>grenades</strong> detonate they release<br>colorful rings <strong>petals</strong> of <strong class='color-e'>explosions</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("grenades") && !tech.isNeutronBomb && !tech.isClusterExplode && !tech.isCircleExplode
+            },
+            requires: "grenades, not neutron bomb, pyrotechnics, flame test",
+            effect() {
+                tech.isPetalsExplode = true;
+            },
+            remove() {
+                tech.isPetalsExplode = false;
             }
         },
         {
@@ -10185,7 +10185,7 @@ const tech = {
     isNoDraftPause: null,
     isFoamPressure: null,
     foamDamage: null,
-    implosion: null,
     isClusterExplode: null,
-    isCircleExplode: null
+    isCircleExplode: null,
+    isPetalsExplode: null
 }
