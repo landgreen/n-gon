@@ -23,7 +23,7 @@ const level = {
             // tech.giveTech("flame test")
             // tech.giveTech("pyrotechnics")
             // for (let i = 0; i < 10; i++) tech.giveTech("replication")
-            // tech.giveTech("acetone peroxide")
+            // tech.giveTech("eternalism")
             // for (let i = 0; i < 10; i++) tech.giveTech("ammonium nitrate")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
@@ -41,6 +41,8 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.temple();
             // level.testing(); //not in rotation, used for testing
+            // spawn.slashBoss(1900, -500)
+
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
@@ -2652,7 +2654,7 @@ const level = {
         // spawn.slashBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
-        spawn.powerUpBoss(1900, -500)
+        // spawn.powerUpBoss(1900, -500)
         // spawn.powerUpBossBaby(3200, -500)
         // spawn.snakeBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
@@ -2758,7 +2760,7 @@ const level = {
                     if (Math.random() < 0.33) {
                         for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
                     } else if (Math.random() < 0.5) {
-                        for (let i = 0, len = scale * 0.17; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+                        for (let i = 0, len = scale * 0.16; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
                     } else {
                         for (let i = 0, len = scale * 0.23; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
                     }

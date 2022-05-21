@@ -3556,8 +3556,8 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.isBoss = true;
         me.inertia = Infinity; //no rotation
-        me.burstFireFreq = 18 + Math.floor(14 * simulation.CDScale)
-        me.burstTotalPhases = 3 + Math.floor(2 / simulation.CDScale)
+        me.burstFireFreq = 22 + Math.floor(15 * simulation.CDScale)
+        me.burstTotalPhases = 3.5 + Math.floor(1.5 / simulation.CDScale)
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0;
@@ -3605,8 +3605,8 @@ const spawn = {
             if (this.speed < 0.01) {
                 Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(Vector.sub(player.position, this.position)), 0.1));
             } else {
-                if (Math.abs(this.velocity.y) < 13) Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.07 });
-                if (Math.abs(this.velocity.x) < 10) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.07, y: this.velocity.y });
+                if (Math.abs(this.velocity.y) < 12) Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.07 });
+                if (Math.abs(this.velocity.x) < 9) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.07, y: this.velocity.y });
             }
         }
         me.burstFire = function() {
@@ -3640,8 +3640,8 @@ const spawn = {
                 if (this.phaseCycle > -1) {
                     Matter.Body.rotate(this, 0.02)
                     for (let i = 0, len = this.vertices.length; i < len; i++) { //fire a bullet from each vertex
-                        spawn.sniperBullet(this.vertices[i].x, this.vertices[i].y, 8, 4);
-                        const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[i])), -20)
+                        spawn.sniperBullet(this.vertices[i].x, this.vertices[i].y, 6, 4);
+                        const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[i])), -17)
                         Matter.Body.setVelocity(mob[mob.length - 1], {
                             x: velocity.x,
                             y: velocity.y
@@ -3929,9 +3929,9 @@ const spawn = {
         me.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
-        me.frictionAir = 0.01
+        me.frictionAir = 0.02
         me.seeAtDistance2 = 1000000;
-        me.accelMag = 0.001 + 0.0003 * simulation.accelScale;
+        me.accelMag = 0.0004 + 0.00015 * simulation.accelScale;
         Matter.Body.setDensity(me, 0.0005); //normal is 0.001
         me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map
         me.memory = Infinity;
@@ -3939,7 +3939,7 @@ const spawn = {
         me.lockedOn = null;
 
         me.torqueMagnitude = 0.00024 * me.inertia * (Math.random() > 0.5 ? -1 : 1);
-        me.delay = 60 + 60 * simulation.CDScale;
+        me.delay = 70 + 70 * simulation.CDScale;
         me.cd = 0;
         me.swordRadius = 0;
         me.swordVertex = 1

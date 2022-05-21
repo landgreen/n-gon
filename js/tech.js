@@ -602,9 +602,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !tech.isAmmoFromHealth
+                return !tech.isAmmoFromHealth && !tech.isEnergyNoAmmo
             },
-            requires: "not catabolism",
+            requires: "not catabolism, ideal gas law",
             effect() {
                 tech.isEnergyNoAmmo = true;
             },
@@ -913,7 +913,7 @@ const tech = {
         {
             name: "zoospore vector",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Disease_vector' class="link">zoospore vector</a>`,
-            description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>11%</strong> chance",
+            description: "mobs produce <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> when they <strong>die</strong><br><strong>10%</strong> chance",
             maxCount: 9,
             count: 0,
             frequency: 1,
@@ -923,7 +923,7 @@ const tech = {
             },
             requires: "no other mob death tech",
             effect() {
-                tech.sporesOnDeath += 0.11;
+                tech.sporesOnDeath += 0.1;
                 // if (tech.isSporeWorm) {
                 //     for (let i = 0; i < 4; i++) b.worm(m.pos)
                 // } else {
@@ -5657,7 +5657,7 @@ const tech = {
         },
         {
             name: "surface tension",
-            description: "<strong>foam</strong> bubbles have improved adhesion which<br>does <strong>41%</strong> more <strong class='color-d'>damage</strong> per second",
+            description: "<strong>foam</strong> bubbles have improved adhesion which<br>does <strong>41%</strong> more <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -5676,7 +5676,7 @@ const tech = {
         },
         {
             name: "foam fractionation",
-            description: "<strong>foam</strong> gun bubbles are <strong>100%</strong> larger<br>when you have below <strong>300</strong> <strong>foam</strong>",
+            description: "<strong>foam</strong> gun bubbles are <strong>100%</strong> larger<br>when you have below <strong>300</strong> <strong class='color-ammo'>ammo</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5691,6 +5691,33 @@ const tech = {
             },
             remove() {
                 tech.isAmmoFoamSize = false;
+            }
+        },
+        {
+            name: "ideal gas law",
+            description: `flush away <strong>all</strong> of your current <strong>foam</strong> <strong class='color-ammo'>ammo</strong><br>gain <strong>1200%</strong> more <strong>foam</strong> <strong class='color-ammo'>ammo</strong> from ${powerUps.orb.ammo(1)}`,
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("foam") && !tech.isEnergyNoAmmo
+            },
+            requires: "foam, not exciton",
+            ammoLost: 0,
+            effect() {
+                b.guns[8].ammoPack = b.guns[8].ammoPack * 12;
+                this.ammoLost = b.guns[8].ammo
+                b.guns[8].ammo = 0
+                simulation.updateGunHUD()
+            },
+            remove() {
+                if (this.count) {
+                    b.guns[8].ammoPack = 24
+                    b.guns[8].ammo += this.ammoLost
+                    simulation.updateGunHUD()
+                }
             }
         },
         {
@@ -10187,5 +10214,5 @@ const tech = {
     foamDamage: null,
     isClusterExplode: null,
     isCircleExplode: null,
-    isPetalsExplode: null
+    isPetalsExplode: null,
 }

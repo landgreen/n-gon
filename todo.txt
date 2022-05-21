@@ -1,33 +1,15 @@
 ******************************************************** NEXT PATCH **************************************************
 
-grenade now has 3 fireworks options, you can only have 1 at a time
-  flame test, fireworks, pyrotechnics
-implosion has been removed
-controlled explosion 3->4 research
+ideal gas law - lose all your current foam ammo;  foam gun gets 1200% more ammo from ammo power ups
+pressure vessel - has 25% more charges produced as you hold
 
-base matter wave moves 20% faster
-gun science renamed ordnance
+slashBoss is a bit slower and has a bit longer between slashes
+reactor SprayBoss: slower to fire, slower to move, smaller bullets, fewer in number
+  just a tiny nerf though
 
 bug fixes
 
 ******************************************************** TODO ********************************************************
-
-buff early matter wave without phonon
-
-more fireworks themed grenade tech
-  shooting star - fire a series of explosions higher and higher up, also increase radius with height
-
-tech - neutron bombs deal 100% more damage, but finishes detonating much faster
-tech - neutron bombs will explode into a small iridum explosion after it expires
-
-tech: damage mobs in your last 10 seconds of history
-  field tech?
-    time dilation?
-
-tech: eternalism - don't pause time during draft
-  bugs?
-    requirements change after draft is generated
-    check for requirements onclick and give random tech if not met?
 
 tech expansion:  should also make other fields do things
   how to make the description work

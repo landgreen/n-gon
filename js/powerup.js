@@ -237,6 +237,7 @@ const powerUps = {
         }
     },
     choose(type, index) {
+        console.log('choose')
         if (type === "gun") {
             b.giveGuns(index)
             let text = `b.giveGuns("<span class='color-text'>${b.guns[index].name}</span>")`
@@ -248,9 +249,7 @@ const powerUps = {
         } else if (type === "field") {
             m.setField(index)
         } else if (type === "tech") {
-            setTimeout(() => {
-                powerUps.lastTechIndex = index
-            }, 10);
+            setTimeout(() => { powerUps.lastTechIndex = index }, 10);
             simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>")`);
             tech.giveTech(index)
         }
@@ -280,8 +279,16 @@ const powerUps = {
 
         if (!simulation.paused) {
             if (tech.isNoDraftPause) {
-                // powerUps.spawn(m.pos.x, m.pos.y, "ammo");
-                document.getElementById("choose-grid").style.opacity = "0.7"
+
+                const cycle = () => {
+                    m.fireCDcycle = m.cycle + 5; //fire cooldown
+                    if (simulation.isChoosing && m.alive) requestAnimationFrame(cycle)
+                }
+
+                requestAnimationFrame(cycle);
+
+
+                document.getElementById("choose-grid").style.opacity = "0.8"
             } else {
                 simulation.paused = true;
                 document.getElementById("choose-grid").style.opacity = "1"

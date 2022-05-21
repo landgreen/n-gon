@@ -767,12 +767,14 @@ const b = {
     // },
     fireworks(where, size) { //can occur after grenades detonate
         const cycle = () => {
-            if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
-                count++
-                if (count < 110 && m.alive) requestAnimationFrame(cycle);
-                if (!(count % 10)) {
-                    const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
-                    b.explosion(Vector.add(where, Vector.mult(unit, size * (count * 0.01 + 0.02 * Math.random()))), size * (0.4 + Math.random() * 0.35), `hsla(${360*Math.random()},100%,66%,0.6)`); //makes bullet do explosive damage at end
+            if (m.alive) {
+                if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
+                    count++
+                    if (count < 110) requestAnimationFrame(cycle);
+                    if (!(count % 10)) {
+                        const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
+                        b.explosion(Vector.add(where, Vector.mult(unit, size * (count * 0.01 + 0.02 * Math.random()))), size * (0.4 + Math.random() * 0.35), `hsla(${360*Math.random()},100%,66%,0.6)`); //makes bullet do explosive damage at end
+                    }
                 }
             }
         }
@@ -782,12 +784,14 @@ const b = {
     starburst(where, size) { //can occur after grenades detonate
         const color = `hsla(${360*Math.random()},100%,66%,0.6)`
         const cycle = () => {
-            if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
-                count++
-                if (count < 21 && m.alive) requestAnimationFrame(cycle);
-                if (count % 2) {
-                    const unit = Vector.rotate({ x: 1, y: 0 }, curl * 6.28 * count / 18 + off)
-                    b.explosion(Vector.add(where, Vector.mult(unit, size * 0.75)), size * 0.7, color); //makes bullet do explosive damage at end
+            if (m.alive) {
+                if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
+                    count++
+                    if (count < 21) requestAnimationFrame(cycle);
+                    if (count % 2) {
+                        const unit = Vector.rotate({ x: 1, y: 0 }, curl * 6.28 * count / 18 + off)
+                        b.explosion(Vector.add(where, Vector.mult(unit, size * 0.75)), size * 0.7, color); //makes bullet do explosive damage at end
+                    }
                 }
             }
         }
@@ -800,27 +804,29 @@ const b = {
         // size *= b.explosionRange()
         const range = size * Math.sqrt(b.explosionRange())
         const cycle = () => {
-            if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
-                if (count < 30 && m.alive) requestAnimationFrame(cycle);
-                if (count === 0) {
-                    const color = `hsla(${360*Math.random()},100%,66%,0.6)`
-                    b.explosion(where, size * 0.8, color);
-                }
-                if (count === 8) {
-                    const color = `hsla(${360*Math.random()},100%,66%,0.6)`
-                    for (let i = 0, len = 6; i < len; i++) {
-                        const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * i / len)
-                        b.explosion(Vector.add(where, Vector.mult(unit, 1.2 * range)), size * 0.6, color); //makes bullet do explosive damage at end
+            if (m.alive) {
+                if (simulation.paused || m.isBodiesAsleep) { requestAnimationFrame(cycle) } else {
+                    if (count < 30 && m.alive) requestAnimationFrame(cycle);
+                    if (count === 0) {
+                        const color = `hsla(${360*Math.random()},100%,66%,0.6)`
+                        b.explosion(where, size * 0.8, color);
                     }
-                }
-                if (count === 16) {
-                    const color = `hsla(${360*Math.random()},100%,66%,0.6)`
-                    for (let i = 0, len = 10; i < len; i++) {
-                        const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * i / len)
-                        b.explosion(Vector.add(where, Vector.mult(unit, 1.75 * range)), size * 0.45, color); //makes bullet do explosive damage at end
+                    if (count === 8) {
+                        const color = `hsla(${360*Math.random()},100%,66%,0.6)`
+                        for (let i = 0, len = 6; i < len; i++) {
+                            const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * i / len)
+                            b.explosion(Vector.add(where, Vector.mult(unit, 1.2 * range)), size * 0.6, color); //makes bullet do explosive damage at end
+                        }
                     }
+                    if (count === 16) {
+                        const color = `hsla(${360*Math.random()},100%,66%,0.6)`
+                        for (let i = 0, len = 10; i < len; i++) {
+                            const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * i / len)
+                            b.explosion(Vector.add(where, Vector.mult(unit, 1.75 * range)), size * 0.45, color); //makes bullet do explosive damage at end
+                        }
+                    }
+                    count++
                 }
-                count++
             }
         }
         let count = 0
@@ -6167,7 +6173,7 @@ const b = {
             name: "foam", //8
             description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",
             ammo: 0,
-            ammoPack: 24,
+            ammoPack: 24, //set in froth flotation
             have: false,
             charge: 0,
             isDischarge: false,
@@ -6208,7 +6214,7 @@ const b = {
                     ctx.fill();
 
                     if (this.isDischarge && m.cycle % 2) {
-                        this.charge--
+                        this.charge -= 0.75
                         const spread = (input.down ? 0.04 : 0.5) * (Math.random() - 0.5)
                         const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
                         const SPEED = (input.down ? 1.2 : 1) * 10 - radius * 0.4 + Math.min(5, Math.sqrt(this.charge));
