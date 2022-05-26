@@ -77,8 +77,8 @@ const m = {
     setMovement() {
         // m.Fx = 0.08 / mass * tech.squirrelFx 
         // m.FxAir = 0.4 / mass / mass 
-        m.Fx = tech.baseFx * tech.squirrelFx * (tech.isFastTime ? 1.5 : 1) / player.mass //base player mass is 5
-        m.jumpForce = tech.baseJumpForce * tech.squirrelJump * (tech.isFastTime ? 1.13 : 1) / player.mass / player.mass //base player mass is 5
+        m.Fx = tech.baseFx * m.fieldFx * tech.squirrelFx * (tech.isFastTime ? 1.5 : 1) / player.mass //base player mass is 5
+        m.jumpForce = tech.baseJumpForce * m.fieldJump * tech.squirrelJump * (tech.isFastTime ? 1.13 : 1) / player.mass / player.mass //base player mass is 5
     },
     FxAir: 0.016, // 0.4/5/5  run Force in Air
     yOff: 70,
@@ -893,6 +893,9 @@ const m = {
     holdingTarget: null,
     timeSkipLastCycle: 0,
     // these values are set on reset by setHoldDefaults()
+    fieldFx: 1,
+    fieldJump: 1,
+    fieldFireRate: 1,
     blockingRecoil: 4,
     grabPowerUpRange2: 0,
     isFieldActive: false,
@@ -951,6 +954,11 @@ const m = {
         m.isCloak = false;
         player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
         m.airSpeedLimit = 125
+        m.fieldFireRate = 1
+        b.setFireCD();
+        m.fieldFx = 1
+        m.fieldJump = 1
+        m.setMovement();
         m.drop();
         m.holdingMassScale = 0.5;
         m.fieldArc = 0.2; //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
@@ -1045,10 +1053,6 @@ const m = {
             m.holdingTarget = null;
         }
     },
-    // setMovement() {
-    //     m.Fx = tech.baseFx * tech.squirrelFx * (tech.isFastTime ? 1.5 : 1);
-    //     m.jumpForce = tech.baseJumpForce * tech.squirrelJump * (tech.isFastTime ? 1.13 : 1)
-    // },
     definePlayerMass(mass = m.defaultMass) {
         Matter.Body.setMass(player, mass);
         //reduce air and ground move forces
@@ -2514,8 +2518,13 @@ const m = {
         {
             name: "time dilation",
             // description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong>",
-            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br>for everything except you<br>generate <strong>18</strong> <strong class='color-f'>energy</strong>/second",
+            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br>move, jump, and fire <strong>25%</strong> faster<br>generate <strong>18</strong> <strong class='color-f'>energy</strong>/second",
             set() {
+                m.fieldFireRate = 0.75
+                b.setFireCD();
+                m.fieldFx = 1.2
+                m.fieldJump = 1.09
+                m.setMovement();
                 if (tech.isRewindField) {
                     this.rewindCount = 0
                     m.grabPowerUpRange2 = 300000
@@ -2643,26 +2652,6 @@ const m = {
                                 sleep(bullet);
 
                                 simulation.cycle--; //pause all functions that depend on game cycle increasing
-                                // if (tech.isTimeSkip) {
-                                //     m.immuneCycle = 0;
-                                //     m.drain += 0.0000025
-                                //     m.regenEnergy(); //immunity disables normal regen, so turn off immunity for just this function
-                                //     m.immuneCycle = m.cycle + 10;
-                                //     simulation.isTimeSkipping = true;
-                                //     m.cycle++;
-                                //     simulation.gravity();
-                                //     if (tech.isFireMoveLock && input.fire) {
-                                //         player.force.x = 0
-                                //         player.force.y = 0
-                                //     }
-                                //     Engine.update(engine, simulation.delta);
-                                //     m.move();
-                                //     simulation.checks();
-                                //     m.walk_cycle += m.flipLegs * m.Vx;
-                                //     b.fire();
-                                //     b.bulletDo();
-                                //     simulation.isTimeSkipping = false;
-                                // }
                             } else { //holding, but field button is released
                                 m.wakeCheck();
                             }
@@ -2678,80 +2667,6 @@ const m = {
                         m.drawFieldMeter()
                     }
                 }
-                // } else {
-                //     m.fieldFire = true;
-                //     m.isBodiesAsleep = false;
-                //     m.isTimeStopped = false;
-                //     m.drain = 0.005
-                //     let isFieldInputDown = false;
-                //     m.hold = function() {
-                //         if (m.isHolding) {
-                //             m.drawHold(m.holdingTarget);
-                //             m.holding();
-                //             m.throwBlock();
-                //             isFieldInputDown = false
-                //         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
-                //             if (!m.holdingTarget) isFieldInputDown = true;
-                //             m.grabPowerUp();
-                //             m.lookForPickUp();
-                //             // if (m.energy > 0.05) { //deflecting
-                //             //     m.drawField();
-                //             //     m.pushMobsFacing();
-                //             // }
-                //         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
-                //             m.pickUp();
-                //         } else {
-                //             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-                //         }
-
-                //         if (isFieldInputDown && !input.field && !m.holdingTarget && !m.isHolding) {
-                //             isFieldInputDown = false;
-                //             m.isTimeStopped = true;
-                //         }
-                //         m.drawFieldMeter()
-                //         if (m.energy < m.maxEnergy) { //extra energy regen
-                //             m.regenEnergy();
-                //             m.regenEnergy();
-                //         }
-                //         if (m.isTimeStopped) {
-                //             if (m.energy > m.drain) {
-                //                 // if (player.speed > 0.01 || input.fire) 
-                //                 m.energy -= m.drain;
-                //                 m.immuneCycle = m.cycle + 10; //immune to harm while time is stopped,  this also disables regen
-                //                 simulation.cycle--; //pause all functions that depend on game cycle increasing
-                //                 m.isBodiesAsleep = true;
-                //                 ctx.globalCompositeOperation = "saturation" //draw field everywhere
-                //                 ctx.fillStyle = "#ccc";
-                //                 ctx.fillRect(-100000, -100000, 200000, 200000)
-                //                 ctx.globalCompositeOperation = "source-over"
-
-                //                 function sleep(who) {
-                //                     for (let i = 0, len = who.length; i < len; ++i) {
-                //                         if (!who[i].isSleeping) {
-                //                             who[i].storeVelocity = who[i].velocity
-                //                             who[i].storeAngularVelocity = who[i].angularVelocity
-                //                         }
-                //                         Matter.Sleeping.set(who[i], true)
-                //                     }
-                //                 }
-                //                 sleep(mob);
-                //                 sleep(body);
-                //                 sleep(bullet);
-                //             } else { //restart time
-                //                 m.fieldCDcycle = m.cycle + 60;
-                //                 m.energy = 0;
-                //                 m.isTimeStopped = false
-                //                 m.wakeCheck();
-                //             }
-                //             if (simulation.isChoosing) {
-                //                 // m.fieldCDcycle = m.cycle + 60;
-                //                 m.isTimeStopped = false
-                //                 m.wakeCheck();
-                //             }
-                //         }
-
-                //     }
-                // }
             },
             effect() {
                 this.set();

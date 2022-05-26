@@ -271,7 +271,7 @@ const b = {
     },
     fireCDscale: 1,
     setFireCD() {
-        b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage
+        b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage * m.fieldFireRate
         if (tech.isFastTime) b.fireCDscale *= 0.5
         if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.8, b.inventory.length)
         if (tech.isFireMoveLock) b.fireCDscale *= 0.5

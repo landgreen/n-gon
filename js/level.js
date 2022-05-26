@@ -16,12 +16,13 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // // simulation.isHorizontalFlipped = true
-            // m.setField("wormhole")
-            // b.giveGuns("matter wave")
-            // tech.giveTech("chain reaction")
-            // tech.giveTech("fireworks")
-            // tech.giveTech("flame test")
-            // tech.giveTech("pyrotechnics")
+            // m.addHealth(Infinity)
+            // m.setField("standing wave")
+            // b.giveGuns("nail gun")
+            // tech.giveTech("closed timelike curve")
+            // tech.giveTech("irradiated nails")
+            // tech.giveTech("pneumatic actuator")
+            // tech.giveTech("6s half-life")
             // for (let i = 0; i < 10; i++) tech.giveTech("replication")
             // tech.giveTech("eternalism")
             // for (let i = 0; i < 10; i++) tech.giveTech("ammonium nitrate")
@@ -30,18 +31,13 @@ const level = {
             // for (let i = 0; i < 15; i++) tech.giveTech()
             // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
             // powerUps.research.changeRerolls(100000)
-            // for (let i = 0; i < 5; i++) tech.giveTech("corona discharge")
             // tech.tech[297].frequency = 100
-            // m.setField("plasma torch")
-            // tech.giveTech("plasma ball")
-            // tech.giveTech("extruder")
-
             // m.immuneCycle = Infinity //you can't take damage
-            // level.difficultyIncrease(15) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.temple();
-            // level.testing(); //not in rotation, used for testing
-            // spawn.slashBoss(1900, -500)
+            // level.testing();
+            // level.reactor(); //not in rotation, used for testing
+            // spawn.timeBoss(1900, -500)
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -1053,6 +1049,9 @@ const level = {
                         }
                     }
                 }
+            },
+            isClosed() {
+                return this.position.y > y - 1
             },
             draw() {
                 ctx.fillStyle = "#555"
@@ -2596,7 +2595,11 @@ const level = {
     testing() {
         const button = level.button(1000, 0)
         spawn.bodyRect(1000, -50, 50, 50);
+
         level.custom = () => {
+            ctx.fillStyle = "#d4d4d4"
+            ctx.fillRect(2500, -475, 200, 300)
+
             ctx.fillStyle = "rgba(0,255,255,0.1)";
             ctx.fillRect(6400, -550, 300, 350);
             level.exit.drawAndCheck();
@@ -2605,6 +2608,8 @@ const level = {
         level.customTopLayer = () => {
             button.query();
             button.draw();
+            ctx.fillStyle = "rgba(0,0,0,0.1)"
+            ctx.fillRect(-150, -650, 900, 250)
         };
         level.setPosToSpawn(0, -450); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -2686,10 +2691,10 @@ const level = {
         // spawn.randomMob(1600, -500)
     },
     reactor() {
-        level.setPosToSpawn(-50, -800); //normal spawn
+        level.setPosToSpawn(-550, -800); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-        level.exit.x = 3000;
-        level.exit.y = -35;
+        level.exit.x = 3500;
+        level.exit.y = -42;
         spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 25);
         level.defaultZoom = 2000
         simulation.zoomTransition(level.defaultZoom)
@@ -2699,25 +2704,26 @@ const level = {
         // spawn.debris(750, -2200, 3700, 16); //16 debris per level
         const button = level.button(1400, 0)
         button.isUp = true
-        spawn.mapRect(-1525, -2825, 1250, 4925);
-        spawn.mapRect(-400, -2025, 625, 925);
-        spawn.mapRect(-400, -750, 625, 1200);
         spawn.bodyRect(250, -70, 100, 70, 1);
-        spawn.mapRect(-425, 0, 4200, 2100);
-        spawn.mapRect(175, -1250, 50, 300);
-        spawn.mapRect(-475, -2825, 4250, 1025);
+        spawn.mapRect(-425, 0, 4500, 2100);
+        spawn.mapRect(-475, -2825, 4500, 1025);
         // spawn.mapRect(1200, -1300, 600, 800);
         const a = 400 //side length
         const c = 100 //corner offset
         spawn.mapVertex(1487, -900, `${-a} ${-a+c}  ${-a+c} ${-a}   ${a-c} ${-a}  ${a} ${-a+c}   ${a} ${a-c}  ${a-c} ${a}  ${-a+c} ${a}  ${-a} ${a-c}`); //square with edges cut off
-
+        //entrance
+        spawn.mapRect(-2025, -2825, 1250, 4925);
+        spawn.mapRect(-900, -2825, 1125, 1725);
+        spawn.mapRect(-900, -750, 1125, 2850);
+        spawn.mapRect(-325, -1250, 550, 300);
         //exit
-        spawn.mapRect(3300, -2825, 1125, 4925);
-        spawn.mapRect(2750, -2150, 1025, 1775);
-        spawn.mapRect(2750, -475, 50, 300);
+        spawn.mapRect(3800, -2825, 1225, 4925);
+        spawn.mapRect(2750, -2150, 1325, 1775);
+        spawn.mapRect(2750, -475, 550, 300);
+        spawn.mapRect(2750, -7, 1050, 150); //exit room floor
 
-        const doorIn = level.door(187, -950, 25, 200, 190, 2) //x, y, width, height, distance, speed = 1
-        const doorOut = level.door(2762, -175, 25, 200, 190, 2) //x, y, width, height, distance, speed = 1
+        const doorIn = level.door(-313, -950, 525, 200, 190, 2) //x, y, width, height, distance, speed = 1
+        const doorOut = level.door(2762, -175, 525, 200, 190, 2) //x, y, width, height, distance, speed = 1
         // doorOut.isClosing = true
         let isDoorsLocked = false
         let isFightOver = false
@@ -2725,7 +2731,7 @@ const level = {
 
         level.custom = () => {
             if (isDoorsLocked) {
-                if (player.position.x < 0) { //if player gets trapped inside starting room open up again
+                if (player.position.x < -300) { //if player gets trapped inside starting room open up again
                     isDoorsLocked = false
                     doorIn.isClosing = false
                 }
@@ -2738,35 +2744,45 @@ const level = {
             doorIn.openClose();
             doorOut.openClose();
             ctx.fillStyle = "#d5ebef"
-            ctx.fillRect(2750, -375, 550, 375)
+            ctx.fillRect(2750, -375, 1050, 375)
             level.enter.draw();
             level.exit.drawAndCheck();
             button.draw();
             if (button.isUp) {
                 button.query();
             } else if (!isSpawnedBoss) {
-                isSpawnedBoss = true
-                isDoorsLocked = true
-                doorIn.isClosing = true
-                doorOut.isClosing = true
-                for (let i = 0; i < 9; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo")
-                for (let i = 0; i < 3; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "heal");
-                const scale = Math.pow(simulation.difficulty, 0.73) //hard around 30, why around 54
-                if (Math.random() < 0.07 && simulation.difficulty > 22) {
-                    for (let i = 0, len = scale * 0.1 / 3; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
-                    for (let i = 0, len = scale * 0.17 / 3; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false)
-                    for (let i = 0, len = scale * 0.23 / 3; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false);
-                } else {
-                    if (Math.random() < 0.33) {
-                        for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
-                    } else if (Math.random() < 0.5) {
-                        for (let i = 0, len = scale * 0.16; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+                if (player.position.x > 0) {
+                    if (!doorOut.isClosed() || !doorIn.isClosed()) {
+                        doorIn.isClosing = true
+                        doorOut.isClosing = true
                     } else {
-                        for (let i = 0, len = scale * 0.23; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+                        isSpawnedBoss = true
+                        isDoorsLocked = true
+                        for (let i = 0; i < 9; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo")
+                        for (let i = 0; i < 3; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "heal");
+                        const scale = Math.pow(simulation.difficulty, 0.73) //hard around 30, why around 54
+                        if (Math.random() < 0.07 && simulation.difficulty > 24) {
+                            for (let i = 0, len = scale * 0.25 / 4; i < len; ++i) spawn.timeBoss(1487 + 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
+                            for (let i = 0, len = scale * 0.1 / 4; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
+                            for (let i = 0, len = scale * 0.16 / 4; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false)
+                            for (let i = 0, len = scale * 0.23 / 4; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false);
+                        } else {
+                            if (Math.random() < 0.25) {
+                                for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.timeBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                            } else if (Math.random() < 0.33) {
+                                for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                            } else if (Math.random() < 0.5) {
+                                for (let i = 0, len = scale * 0.16; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+                            } else {
+                                for (let i = 0, len = scale * 0.23; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+                            }
+                        }
+                        spawn.secondaryBossChance(2200, -800)
                     }
+                } else {
+                    doorIn.isClosing = false
                 }
-                spawn.secondaryBossChance(2200, -800)
-            } else if (!isFightOver && !(simulation.cycle % 120)) { //once a second look for any bosses
+            } else if (!isFightOver && !(simulation.cycle % 180)) {
                 let isFoundBoss = false
                 for (let i = 0; i < mob.length; i++) {
                     if (mob[i].isBoss) {
@@ -2778,8 +2794,9 @@ const level = {
                     isFightOver = true
                     doorIn.isClosing = false
                     doorOut.isClosing = false
-                    powerUps.spawnBossPowerUp(2900, -100)
-                    powerUps.spawn(3050, -200, "tech")
+                    powerUps.spawnBossPowerUp(3600, -100)
+                    powerUps.spawn(3650, -200, "tech")
+                    // if (player.position.x < 2760 && player.position.x > 210) {}
                 }
             }
         };
@@ -2790,8 +2807,8 @@ const level = {
             // }
             doorIn.draw();
             doorOut.draw();
-            ctx.fillStyle = "rgba(0,0,0,0.05)"
-            ctx.fillRect(-275, -1100, 500, 350);
+            ctx.fillStyle = "rgba(0,0,0,0.1)"
+            ctx.fillRect(-775, -1100, 1000, 350);
             // ctx.fillStyle = "rgba(0,255,255,0.1)"
             // ctx.fillRect(2750, -375, 550, 375)
         };
@@ -4082,7 +4099,7 @@ const level = {
         spawn.randomMob(3600, 1725, 0.9);
         spawn.randomMob(4100, 1225, 0.9);
         spawn.randomMob(2825, 400, 0.9);
-        if (simulation.difficulty > 1) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "historyBoss", "orbitalBoss", "grenadierBoss"]);
+        if (simulation.difficulty > 1) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "blinkBoss", "streamBoss", "historyBoss", "orbitalBoss", "grenadierBoss", "blockBoss", "revolutionBoss", "slashBoss"]);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
         spawn.secondaryBossChance(7725, 2275)
 

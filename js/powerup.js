@@ -280,13 +280,11 @@ const powerUps = {
         if (!simulation.paused) {
             if (tech.isNoDraftPause) {
 
-                const cycle = () => {
-                    m.fireCDcycle = m.cycle + 5; //fire cooldown
-                    if (simulation.isChoosing && m.alive) requestAnimationFrame(cycle)
-                }
-
-                requestAnimationFrame(cycle);
-
+                // const cycle = () => {
+                //     m.fireCDcycle = m.cycle + 1; //fire cooldown
+                //     if (simulation.isChoosing && m.alive) requestAnimationFrame(cycle)
+                // }
+                // requestAnimationFrame(cycle);
 
                 document.getElementById("choose-grid").style.opacity = "0.8"
             } else {
@@ -1081,7 +1079,7 @@ const powerUps = {
         }
     },
     pauseEjectTech(index) {
-        if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing) {
+        if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isNonRefundable) {
             if (Math.random() < 0.1 || tech.tech[index].isFromAppliedScience || (tech.tech[index].bonusResearch !== undefined && tech.tech[index].bonusResearch > powerUps.research.count)) {
                 tech.removeTech(index)
                 powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);

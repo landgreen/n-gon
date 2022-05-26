@@ -602,9 +602,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !tech.isAmmoFromHealth && !tech.isEnergyNoAmmo
+                return !tech.isAmmoFromHealth
             },
-            requires: "not catabolism, ideal gas law",
+            requires: "not catabolism",
             effect() {
                 tech.isEnergyNoAmmo = true;
             },
@@ -4661,9 +4661,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.implosion === -1 && tech.explosiveRadius === 1 && !tech.isSmallExplosion && !tech.isBlockExplode && !tech.fragments && (tech.haveGunCheck("missiles") || tech.missileBotCount || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.isBoomBotUpgrade || tech.isTokamak)
+                return tech.explosiveRadius === 1 && !tech.isSmallExplosion && !tech.isBlockExplode && !tech.fragments && (tech.haveGunCheck("missiles") || tech.missileBotCount || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || tech.isMissileField || tech.isBoomBotUpgrade || tech.isTokamak)
             },
-            requires: "an explosive damage source, not ammonium nitrate, nitroglycerin, chain reaction, fragmentation, implosion",
+            requires: "an explosive damage source, not ammonium nitrate, nitroglycerin, chain reaction, fragmentation",
             effect: () => {
                 tech.isExplodeRadio = true; //iridium-192
             },
@@ -4976,9 +4976,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("grenades") && !tech.fragments && !tech.isVacuumBomb && !tech.isExplodeRadio && !tech.isBlockExplode && !tech.isClusterExplode && tech.implosion === -1
+                return tech.haveGunCheck("grenades") && !tech.fragments && !tech.isVacuumBomb && !tech.isExplodeRadio && !tech.isBlockExplode && !tech.isClusterExplode
             },
-            requires: "grenades, not fragmentation, vacuum bomb, iridium-192, pyrotechnics, implosion",
+            requires: "grenades, not fragmentation, vacuum bomb, iridium-192, pyrotechnics",
             effect() {
                 tech.isNeutronBomb = true;
                 b.setGrenadeMode()
@@ -7106,7 +7106,7 @@ const tech = {
             allowed() {
                 return m.fieldUpgrades[m.fieldMode].name === "time dilation" && !m.isShipMode && !tech.isRewindAvoidDeath && !tech.isEnergyHealth && !tech.isTimeSkip
             },
-            requires: "time dilation, not CPT symmetry, mass-energy, timelike",
+            requires: "time dilation, not CPT symmetry, mass-energy",
             effect() {
                 tech.isRewindField = true;
                 m.fieldUpgrades[m.fieldMode].set()
@@ -7117,25 +7117,6 @@ const tech = {
                 if (this.count) m.fieldUpgrades[m.fieldMode].set()
             }
         },
-        // {
-        //     name: "timelike",
-        //     description: "<strong>time dilation</strong> doubles your relative time <strong>rate</strong><br>and makes you immune to <strong class='color-harm'>harm</strong>",
-        //     isFieldTech: true,
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 2,
-        //     frequencyDefault: 2,
-        //     allowed() {
-        //         return m.fieldUpgrades[m.fieldMode].name === "time dilation" && !m.isShipMode && !tech.isRewindField
-        //     },
-        //     requires: "time dilation, not retrocausality",
-        //     effect() {
-        //         tech.isTimeSkip = true;
-        //     },
-        //     remove() {
-        //         tech.isTimeSkip = false;
-        //     }
-        // },
         {
             name: "Lorentz transformation",
             description: `use ${powerUps.orb.research(3)}to increase your time rate<br><strong>move</strong>, <strong>jump</strong>, and <strong>shoot</strong> <strong>50%</strong> faster`,
@@ -7884,6 +7865,33 @@ const tech = {
                     // }
 
                 }, 1000);
+            },
+            remove() {}
+        },
+        {
+            name: "closed timelike curve",
+            description: "spawn 5 <strong class='color-f'>field</strong> power ups, but every 12 seconds<br>teleport a second into your future<br>",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            isNonRefundable: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "field");
+
+                function loop() {
+                    if (!simulation.paused && m.alive) {
+                        if (!(simulation.cycle % 720)) {
+                            requestAnimationFrame(() => { simulation.timePlayerSkip(60) }); //wrapping in animation frame prevents errors, probably
+                        }
+                    }
+                    requestAnimationFrame(loop);
+                }
+                requestAnimationFrame(loop);
             },
             remove() {}
         },

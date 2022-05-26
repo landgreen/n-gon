@@ -275,9 +275,11 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
 
         const style = (tech.isPauseEjectTech && !simulation.isChoosing) ? 'style="animation: techColorCycle 1s linear infinite alternate;"' : ''
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
+            if (tech.tech[i].count > 0) {
                 const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
-                if (tech.tech[i].isFieldTech) {
+                if (tech.tech[i].isNonRefundable) {
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})" style = "border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; padding-top: 6px; padding-bottom: 6px;"><div class="grid-title">${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                } else if (tech.tech[i].isFieldTech) {
                     text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})" ${style}><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>

@@ -89,15 +89,32 @@ const simulation = {
                 m.airControl()
             }
             m.move();
+            level.custom();
             simulation.checks();
             mobs.loop();
-            // m.draw();
             m.walk_cycle += m.flipLegs * m.Vx;
-
             m.hold();
+            level.customTopLayer();
             b.fire();
             b.bulletRemove();
             b.bulletDo();
+        }
+        simulation.isTimeSkipping = false;
+    },
+    timePlayerSkip(cycles = 60) {
+        simulation.isTimeSkipping = true;
+        for (let i = 0; i < cycles; i++) {
+            simulation.cycle++;
+            simulation.gravity();
+            Engine.update(engine, simulation.delta);
+            // level.custom();
+            // level.customTopLayer();
+            if (!m.isBodiesAsleep) {
+                simulation.checks();
+                mobs.loop();
+            }
+            b.bulletRemove();
+            if (!m.isBodiesAsleep) b.bulletDo();
         }
         simulation.isTimeSkipping = false;
     },

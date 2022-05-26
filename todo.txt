@@ -1,15 +1,68 @@
 ******************************************************** NEXT PATCH **************************************************
 
-ideal gas law - lose all your current foam ammo;  foam gun gets 1200% more ammo from ammo power ups
-pressure vessel - has 25% more charges produced as you hold
+new reactor boss: timeBoss - after taking some damage it speeds up the passage of time
+reactor level has big doors
 
-slashBoss is a bit slower and has a bit longer between slashes
-reactor SprayBoss: slower to fire, slower to move, smaller bullets, fewer in number
-  just a tiny nerf though
-
-bug fixes
+nonrefundable tech show up in the pause menu
+time dilation field - move, jump, and fire 25% faster
+JUNK tech: closed timelike curve - spawn 5 field power ups, but every 12 seconds teleport a second into your future
 
 ******************************************************** TODO ********************************************************
+
+if a mob dies in skiptime it doesn't register?
+  is this only for the ondeath event?
+    so far, but needs more tests
+  is this only for timeskip > 1
+    yes I think
+
+make MEE work with harm reduction
+  how to nerf MEE
+    maybe harm reduction could also reduce energy regen
+
+timeSkipBoss
+  sends out waves of 60s time skip every 5 seconds?
+    or 1 cycle skip every other cycle
+  only active when player is inside range
+    immune to harm outside range?
+    
+simulation.timeSkip(60)
+  skip every other cycle inside black holes?
+  maybe run simulation.timeSkip(60) in a map
+    in labs?
+    reactor boss
+  mob fires laser/bullets that timeSkip player
+  maybe an effect when in range of the historyBoss
+  JUNK tech simulation.timeSkip(60) 
+  add CPT graphics to simulation.timeSkip(60)
+    for player
+  tech requires eternalism - 2x time while choosing, gain more damage
+
+Currently, the mob just deals higher damage on impact, which is annoying although not hard to compete with nor unique
+By "redesign" I mean replacing instances of the regular mob, since the same code is used for the tiny red projectiles (I think) just add a new mob and remove the old one from the rotation
+The new mob should be as such, a "real" exploding mob: 
+Deals regular damage on impact, but breaks apart on touch into several red dots (like the ones thrown out by the going through walls boss) and a chance for also throwing a bomb or two (increases with difficulty)
+If the mob is close to the player or heading into the player fast it will shatter as well (and the projectiles will inherit its speed)
+By a formula such as
+ShouldShatter(distToPlayer, speed) = distToPlayer * speed > threshold
+Optionally (and a part I can do as I'm good at it and it doesn't revolve around a lot of functional code which you don't like other people doing):
+Color changing based on the mob explosion status
+Regular state: red
+About to explode: animation to dark red
+Exploding: several shockwaves from the explosion points and tiny trails given to the shrapnel for a second or two until they deaccelerate
+
+
+
+make laser gain damage and energy drain from fire delay tech
+  wording?  put it in the gun description
+
+reactor:  add horizontal flip mode
+
+pause time like invariant for other things...
+  throwing blocks
+  charging railgun
+  charging anything?
+
+give retrocausality a short delay before it rewinds,  so you can pick up powerups without going back
 
 tech expansion:  should also make other fields do things
   how to make the description work
@@ -23,9 +76,6 @@ tech expansion:  should also make other fields do things
     needs more benefit?
   reduces the cloaking vision effect?
     needs more benefit?
-
-nonrefundable tech don't display, this is confusing
-    maybe they can show up but greyed out or something
 
 guntech fire a bullet that fires nail fragments after 1s in the same direction as the original bullet
   like overwatch roadhog
@@ -146,71 +196,13 @@ setting to remove UI, except health bar
   except active gun? to see ammo
   checkbox in pause and in settings
 
-pause time like invariant for other things...
-  throwing blocks
-  charging railgun
-  charging anything?
-
 bug - url sharing still broken sometimes
-
-maybe?  timing QTE for charging effects,  if you fire right before the charge gets full it's better
-
-+damage for each different bot type you have
-  disables bot upgrades?
-
-tech: doing damage to mobs refunds up to 50% of damage taken in last 10 seconds
-  use history[] to manage this?
-
-make a seed/hash system that controls only the tech/guns/fields shown
-  URL sharing could include a seed
-  seed controls:
-    seeded random at start - random level boss, mob types list, level order, horizontal flip
-    seeded random during run - tech, gun, field choices
-    not seeded random - mob spawns, mob size, minor level differences, custom level boss choices, ammo rewards, tech effect randomness
-      better to only seed things at the start of the run so it doesn't mess with power up choices
-  make option for a daily seed: seed = day+year
-    give 1 extra tech for doing the daily seeded run
-    make the option for the daily run, a secret exit in the intro level?
     
 tech upgrade to anthropic principle to make it trigger at 50% life and 0% once per map
-
-tech: spontaneous collapse - very low chance of something to occur
-  JUNK tech
-  https://bindingofisaacrebirth.fandom.com/wiki/Damocles
 
 bug? cloaking field doesn't show energy over max
 
 run more profiles of n-gon to fix performance issues
-
-reactor
-  life-like cellular automata boss
-    https://scratch.mit.edu/projects/77724260/
-    night/day?
-      boss on far right produces more "on" cells
-  tailBoss
-    story the last 5 seconds of position, draw damage circles over those positions, like a tail
-  limit mantis boss to only reactor?
-  laserBoss?
-  swoopBoss: hides in top center
-    take a lap around the map that you have to dodge
-    spawn mobs
-    fire sniper bullets?
-    remove center map element?
-  add some blocks to the reactor level
-  add ammo?
-  boss speeds up as time goes on?
-  slow bullet speed?
-  foam hits all the bullets and makes this fight easy
-  give map some background graphics
-  it's a little short
-    add alternate boss
-    add a boss that spawns after the first one dies
-  balance
-    boss damage reduction
-    bullet size
-    bullet spawn number
-    bounce speed
-  add horizontal flip mode
 
 bug:  possibly clearing away all bullets causes a problem
   bullet.js 255  (.do() is missing)
