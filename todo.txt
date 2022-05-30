@@ -1,13 +1,42 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new reactor boss: timeBoss - after taking some damage it speeds up the passage of time
-reactor level has big doors
+tech: propagator - 67% damage, lose 1/2 second of time when a mob dies
 
-nonrefundable tech show up in the pause menu
-time dilation field - move, jump, and fire 25% faster
-JUNK tech: closed timelike curve - spawn 5 field power ups, but every 12 seconds teleport a second into your future
+timeSkipBoss is back, maybe it will not cause bugs this time
+  immune to harm unless player is inside horizon
+  player loses time when inside horizon
+
+snake bosses are immune to harm until your remove their tail
+
+mob shields are 30% stronger
+time dilation: retrocausality automatically grabs power ups
+eternalism 50->40% damage
+paradigm shift 10->16% chance to get a research when ejecting tech
+reaction inhibitor 11->13% mob health reduction
+recycling 1->0.5% health for 5 seconds  
+  up to 2.5% per mob kill at normal max health
+
+bug fixes
 
 ******************************************************** TODO ********************************************************
+
+make targeting skip invulnerable mobs
+  drones, spores, harpoon, missiles?, mines, nail on death
+  this helps beat snake boss
+    spores are biggest issue
+
+let blocking instantly destroy the red orbitals?  since they can't be deflected
+  also mines on reactor level?
+  also any bullet?
+
+BUG time skip probably led to player being able to move, and game not being paused for a few seconds while the death screen faded in
+  also small chance it happened with rewind instead, but unlikely
+
+make one value to track all the +dmg effects that don't need dynamic calculations
+  update it with a set damage function
+
+block manufacturing - molecular assembler tech
+Holding r-click will create a slowly increasing in size block, which will be thrown on release
 
 if a mob dies in skiptime it doesn't register?
   is this only for the ondeath event?
@@ -19,23 +48,9 @@ make MEE work with harm reduction
   how to nerf MEE
     maybe harm reduction could also reduce energy regen
 
-timeSkipBoss
-  sends out waves of 60s time skip every 5 seconds?
-    or 1 cycle skip every other cycle
-  only active when player is inside range
-    immune to harm outside range?
-    
 simulation.timeSkip(60)
-  skip every other cycle inside black holes?
-  maybe run simulation.timeSkip(60) in a map
-    in labs?
-    reactor boss
+  maybe run simulation.timeSkip(60) in a room in labs
   mob fires laser/bullets that timeSkip player
-  maybe an effect when in range of the historyBoss
-  JUNK tech simulation.timeSkip(60) 
-  add CPT graphics to simulation.timeSkip(60)
-    for player
-  tech requires eternalism - 2x time while choosing, gain more damage
 
 Currently, the mob just deals higher damage on impact, which is annoying although not hard to compete with nor unique
 By "redesign" I mean replacing instances of the regular mob, since the same code is used for the tiny red projectiles (I think) just add a new mob and remove the old one from the rotation
@@ -51,7 +66,6 @@ About to explode: animation to dark red
 Exploding: several shockwaves from the explosion points and tiny trails given to the shrapnel for a second or two until they deaccelerate
 
 
-
 make laser gain damage and energy drain from fire delay tech
   wording?  put it in the gun description
 
@@ -61,8 +75,6 @@ pause time like invariant for other things...
   throwing blocks
   charging railgun
   charging anything?
-
-give retrocausality a short delay before it rewinds,  so you can pick up powerups without going back
 
 tech expansion:  should also make other fields do things
   how to make the description work
@@ -733,23 +745,13 @@ possible names for tech
   nuclear pasta - hard matter in neutron star
   nonlocal
   fine-tuned universe
-  eternalism https://en.wikipedia.org/wiki/Eternalism_(philosophy_of_time)
-  axial motor
   hall effect thrusters
   spaghettification
   particle accelerator
   superluminal signalling
   NP-complete
   lenticular lens:  is an array of lenses, designed so that when viewed from slightly different angles, different parts of the image underneath are shown.
- 
-a tutorial / lore intro
-  needs to be optional so it doesn't slow experienced players
-  put something on the intro map
-    maybe a button triggers something
-
-rename ?
-  health -> integrity, unity
-  heal -> also integrity, unity
+  p-zombie
 
 
 plot script:

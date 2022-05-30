@@ -221,7 +221,8 @@ const tech = {
     },
     damageFromTech() {
         let dmg = 1 //m.fieldDamage
-        if (tech.isNoDraftPause) dmg *= 1.5
+        if (tech.isDeathSkipTime) dmg *= 1.67
+        if (tech.isNoDraftPause) dmg *= 1.4
         if (tech.isTechDebt) dmg *= Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount)
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 1 + 0.75 * (1 - m.harmReduction())
         if (tech.OccamDamage) dmg *= tech.OccamDamage
@@ -556,7 +557,7 @@ const tech = {
         {
             name: "cache",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Cache_(computing)' class="link">cache</a>`,
-            description: `${powerUps.orb.ammo()} give <strong>16x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
+            description: `${powerUps.orb.ammo()} give <strong>1600%</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
             // ammo powerups always max out your gun,
             // but the maximum ammo ti limited
             // description: `${powerUps.orb.ammo()} give <strong>13x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
@@ -936,7 +937,7 @@ const tech = {
         },
         {
             name: "reaction inhibitor",
-            description: "mobs spawn with <strong>11%</strong> less <strong>health</strong>",
+            description: "mobs spawn with <strong>13%</strong> less <strong>health</strong>",
             maxCount: 3,
             count: 0,
             frequency: 1,
@@ -946,7 +947,7 @@ const tech = {
             },
             requires: "", //"any mob death tech",
             effect: () => {
-                tech.mobSpawnWithHealth *= 0.89
+                tech.mobSpawnWithHealth *= 0.87
 
                 //set all mobs at full health to 0.85
                 for (let i = 0; i < mob.length; i++) {
@@ -955,6 +956,24 @@ const tech = {
             },
             remove() {
                 tech.mobSpawnWithHealth = 1;
+            }
+        },
+        {
+            name: "propagator",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>67%</strong>, but after<br>mobs <strong>die</strong> lose <strong>0.5</strong> seconds of <strong>time</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                tech.isDeathSkipTime = true
+            },
+            remove() {
+                tech.isDeathSkipTime = false
             }
         },
         {
@@ -1772,6 +1791,24 @@ const tech = {
                 m.eyeFillColor = 'transparent'
             }
         },
+        // {
+        //     name: "spacetime interval",
+        //     description: "increase <strong class='color-d'>damage</strong> by <strong>93%</strong>, but after mobs <strong>die</strong><br>move into the <strong>past</strong> / <strong>future</strong> while <strong class='color-flop'>ON</strong> / <strong class='color-flop'>OFF</strong>",
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 4,
+        //     frequencyDefault: 4,
+        //     allowed() {
+        //         return tech.isFlipFlop || tech.isRelay
+        //     },
+        //     requires: "ON/OFF tech",
+        //     effect() {
+        //         tech.isDeathSkipTime = true
+        //     },
+        //     remove() {
+        //         tech.isDeathSkipTime = false
+        //     }
+        // },
         {
             name: "NAND gate",
             description: "if in the <strong class='color-flop'>ON</strong> state<br>do <strong>55.5%</strong> more <strong class='color-d'>damage</strong>",
@@ -2479,7 +2516,7 @@ const tech = {
         },
         {
             name: "recycling",
-            description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>regain <strong>1%</strong> of max <strong class='color-h'>health</strong> every second",
+            description: "if a mob has <strong>died</strong> in the last <strong>5 seconds</strong><br>regain <strong>0.5%</strong> of max <strong class='color-h'>health</strong> every second",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3172,7 +3209,7 @@ const tech = {
 
         {
             name: "paradigm shift",
-            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>10%</strong> chance to convert that <strong class='color-m'>tech</strong> into ${powerUps.orb.research(1)}`,
+            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>16%</strong> chance to convert that <strong class='color-m'>tech</strong> into ${powerUps.orb.research(1)}`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3191,7 +3228,7 @@ const tech = {
         {
             name: "eternalism",
             // description: `increase <strong class='color-d'>damage</strong> by <strong>60%</strong>, but <strong>time</strong> doesn't <strong>pause</strong><br>while choosing a choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong>`, //${powerUps.orb.heal()} or
-            description: "increase <strong class='color-d'>damage</strong> by <strong>50%</strong>, but<br><strong>time</strong> can't be <strong>paused</strong> <em>(time dilation still works)</em>",
+            description: "increase <strong class='color-d'>damage</strong> by <strong>40%</strong>, but<br><strong>time</strong> can't be <strong>paused</strong> <em>(time dilation still works)</em>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3556,19 +3593,19 @@ const tech = {
             //     return `randomly remove <strong>${this.removePercent * 100}%</strong> of your <strong class='color-m'>tech</strong><br>for each removed gain <strong>${this.damagePerRemoved * 100}%</strong> <strong class='color-d'>damage</strong>`
             // },
             descriptionFunction() {
-                return `randomly remove <strong>half</strong> your <strong class='color-m'>tech</strong><br>for each removed gain <strong>${this.damagePerRemoved * 100}%</strong> <strong class='color-d'>damage</strong> <em>(~${this.damagePerRemoved * 50 * tech.totalCount}%)</em>`
+                return `randomly remove <strong>half</strong> your <strong class='color-m'>tech</strong><br>for each removed gain <strong>${this.damagePerRemoved * 100 }%</strong> <strong class='color-d'>damage</strong> <em>(~${(this.count === 0) ? this.damagePerRemoved * 50 * tech.totalCount : tech.OccamDamage*100}%)</em>`
             },
             maxCount: 1,
             count: 0,
-            frequency: 1,
+            frequency: 199,
             frequencyDefault: 1,
             isNonRefundable: true,
             isBadRandomOption: true,
             allowed() {
                 return (tech.totalCount > 6)
             },
-            requires: "NOT EXPERIMENT MODE, more than 6 tech",
-            removePercent: 0.5,
+            requires: "more than 6 tech",
+            // removePercent: 0.5,
             damagePerRemoved: 0.5,
             effect() {
                 let pool = []
@@ -3577,7 +3614,7 @@ const tech = {
                 }
                 pool = shuffle(pool); //shuffles order of maps
                 let removeCount = 0
-                for (let i = 0, len = pool.length * this.removePercent; i < len; i++) removeCount += tech.removeTech(pool[i])
+                for (let i = 0, len = pool.length * this.damagePerRemoved; i < len; i++) removeCount += tech.removeTech(pool[i])
                 tech.OccamDamage = 1 + this.damagePerRemoved * removeCount
                 // tech.OccamDamage = Math.pow(1.25, removeCount)
             },
@@ -5713,8 +5750,8 @@ const tech = {
                 simulation.updateGunHUD()
             },
             remove() {
+                b.guns[8].ammoPack = 24
                 if (this.count) {
-                    b.guns[8].ammoPack = 24
                     b.guns[8].ammo += this.ammoLost
                     simulation.updateGunHUD()
                 }
@@ -6110,7 +6147,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (tech.haveGunCheck("laser") || tech.isLaserBotUpgrade || tech.isLaserMine) && tech.laserDamage === 0.17
+                return (tech.haveGunCheck("laser") || tech.isLaserBotUpgrade || tech.isLaserMine) && tech.laserDamage === 0.18
             },
             requires: "laser, not free-electron",
             effect() {
@@ -6138,13 +6175,13 @@ const tech = {
             requires: "laser, not pulse, diodes",
             effect() {
                 tech.laserFieldDrain = 0.007 //base is 0.002
-                tech.laserDamage = 0.51; //base is 0.16
+                tech.laserDamage = 0.54; //base is 0.18
                 tech.laserColor = "#83f"
                 tech.laserColorAlpha = "rgba(136, 51, 255,0.5)"
             },
             remove() {
                 tech.laserFieldDrain = 0.002;
-                tech.laserDamage = 0.17; //used in check on pulse and diode: tech.laserDamage === 0.16
+                tech.laserDamage = 0.18; //used in check on pulse and diode: tech.laserDamage === 0.16
                 tech.laserColor = "#f00"
                 tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
             }
@@ -6217,7 +6254,7 @@ const tech = {
         {
             name: "diffuse beam",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Diffuser_(optics)' class="link">diffuse beam</a>`,
-            description: "<strong class='color-laser'>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>200%</strong>",
+            description: "<strong class='color-laser'>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br>increase full beam <strong class='color-d'>damage</strong> by <strong>220%</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6311,7 +6348,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.17 && !tech.isStuckOn
+                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.18 && !tech.isStuckOn
             },
             requires: "laser gun, not specular reflection, diffuse, free-electron laser, optical amplifier",
             effect() {
@@ -7049,7 +7086,7 @@ const tech = {
             },
             requires: "extruder",
             effect() {
-                tech.extruderRange += 60
+                tech.extruderRange += 55
             },
             remove() {
                 tech.extruderRange = 15
@@ -7892,6 +7929,51 @@ const tech = {
                     requestAnimationFrame(loop);
                 }
                 requestAnimationFrame(loop);
+            },
+            remove() {}
+        },
+        {
+            name: "translate",
+            description: "translate n-gon into a random language",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            isNonRefundable: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                // generate a container 
+                const gtElem = document.createElement('div')
+                gtElem.id = "gtElem"
+                gtElem.style.visibility = 'hidden' // make it invisible
+                document.body.append(gtElem)
+
+                // generate a script to run after creation
+                function initGT() {
+                    // create a new translate element
+                    new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'gtElem')
+                    // ok now since it's loaded perform a funny hack to make it work
+                    const langSelect = document.getElementsByClassName("goog-te-combo")[0]
+                    // select a random language. It takes a second for all langauges to load, so wait a second.
+                    setTimeout(() => {
+                        langSelect.selectedIndex = Math.round(langSelect.options.length * Math.random())
+                        // simulate a click
+                        langSelect.dispatchEvent(new Event('change'))
+                        // now make it go away
+                        const bar = document.getElementById(':1.container')
+                        bar.style.display = 'none'
+                        bar.style.visibility = 'hidden'
+                    }, 1000)
+
+                }
+
+                // add the google translate script
+                const translateScript = document.createElement('script')
+                translateScript.src = '//translate.google.com/translate_a/element.js?cb=initGT'
+                document.body.append(translateScript)
             },
             remove() {}
         },
@@ -10223,4 +10305,5 @@ const tech = {
     isClusterExplode: null,
     isCircleExplode: null,
     isPetalsExplode: null,
+    isDeathSkipTime: null
 }

@@ -2529,6 +2529,25 @@ const m = {
                     this.rewindCount = 0
                     m.grabPowerUpRange2 = 300000
                     m.hold = function() {
+
+                        m.grabPowerUp();
+
+                        // //grab power ups
+                        // for (let i = 0, len = powerUp.length; i < len; ++i) {
+                        //     if (
+                        //         Vector.magnitudeSquared(Vector.sub(m.pos, powerUp[i].position)) < 100000 &&
+                        //         !simulation.isChoosing &&
+                        //         (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)
+                        //     ) {
+                        //         powerUps.onPickUp(powerUp[i]);
+                        //         powerUp[i].effect();
+                        //         Matter.Composite.remove(engine.world, powerUp[i]);
+                        //         powerUp.splice(i, 1);
+                        //         break; //because the array order is messed up after splice
+                        //     }
+                        // }
+
+
                         if (m.isHolding) {
                             m.drawHold(m.holdingTarget);
                             m.holding();
@@ -2568,20 +2587,6 @@ const m = {
                                     } else {
                                         m.undoCrouch()
                                     }
-                                    //grab power ups
-                                    for (let i = 0, len = powerUp.length; i < len; ++i) {
-                                        if (
-                                            Vector.magnitudeSquared(Vector.sub(m.pos, powerUp[i].position)) < 100000 &&
-                                            !simulation.isChoosing &&
-                                            (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)
-                                        ) {
-                                            powerUps.onPickUp(powerUp[i]);
-                                            powerUp[i].effect();
-                                            Matter.Composite.remove(engine.world, powerUp[i]);
-                                            powerUp.splice(i, 1);
-                                            break; //because the array order is messed up after splice
-                                        }
-                                    }
                                     if (!(this.rewindCount % 30)) {
                                         if (tech.isRewindBot) {
                                             for (let i = 0; i < tech.isRewindBot; i++) {
@@ -2594,8 +2599,6 @@ const m = {
                                             const who = bullet[bullet.length - 1]
                                             who.endCycle = simulation.cycle + 60
                                         }
-
-
                                     }
                                 }
                             }
@@ -2612,7 +2615,7 @@ const m = {
                 } else {
                     m.fieldFire = true;
                     m.isBodiesAsleep = false;
-                    m.drain = 0.003
+                    m.drain = 0.0025
                     m.hold = function() {
                         if (m.isHolding) {
                             m.wakeCheck();

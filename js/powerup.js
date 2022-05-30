@@ -137,7 +137,7 @@ const powerUps = {
     },
     doDefault() {
         //draw power ups
-        ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
+        ctx.globalAlpha = 0.4 * Math.sin(simulation.cycle * 0.15) + 0.6;
         for (let i = 0, len = powerUp.length; i < len; ++i) {
             ctx.beginPath();
             ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
@@ -237,7 +237,6 @@ const powerUps = {
         }
     },
     choose(type, index) {
-        console.log('choose')
         if (type === "gun") {
             b.giveGuns(index)
             let text = `b.giveGuns("<span class='color-text'>${b.guns[index].name}</span>")`
@@ -356,7 +355,7 @@ const powerUps = {
         // document.body.style.overflow = "hidden"
         // if (m.alive){}
         if (simulation.paused) requestAnimationFrame(cycle);
-        simulation.paused = false;
+        if (m.alive) simulation.paused = false;
         simulation.isChoosing = false; //stops p from un pausing on key down
         build.unPauseGrid()
         if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 30 cycles
@@ -1080,7 +1079,7 @@ const powerUps = {
     },
     pauseEjectTech(index) {
         if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isNonRefundable) {
-            if (Math.random() < 0.1 || tech.tech[index].isFromAppliedScience || (tech.tech[index].bonusResearch !== undefined && tech.tech[index].bonusResearch > powerUps.research.count)) {
+            if (Math.random() < 0.16 || tech.tech[index].isFromAppliedScience || (tech.tech[index].bonusResearch !== undefined && tech.tech[index].bonusResearch > powerUps.research.count)) {
                 tech.removeTech(index)
                 powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
             } else {

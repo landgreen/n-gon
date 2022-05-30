@@ -198,7 +198,7 @@ function collisionChecks(event) {
                             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
                             if (v > 9) {
                                 if (tech.blockDmg) { //electricity
-                                    console.log("hi")
+                                    // console.log("hi")
                                     Matter.Body.setVelocity(mob[k], { x: 0.5 * mob[k].velocity.x, y: 0.5 * mob[k].velocity.y });
                                     if (tech.isBlockRadiation && !mob[k].isShielded && !mob[k].isMobBullet) {
                                         mobs.statusDoT(mob[k], tech.blockDmg * m.dmgScale * 4 / 12, 360) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12

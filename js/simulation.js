@@ -521,9 +521,7 @@ const simulation = {
             }
         }, len * swapPeriod);
     },
-    wipe() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    },
+    wipe() {}, //set in simulation.startGame
     gravity() {
         function addGravity(bodies, magnitude) {
             for (var i = 0; i < bodies.length; i++) {
@@ -1049,7 +1047,7 @@ const simulation = {
 
             if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
                 if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) m.energy += m.maxEnergy * 0.05
-                if (tech.isHealthRecovery) m.addHealth(0.01 * m.maxHealth)
+                if (tech.isHealthRecovery) m.addHealth(0.005 * m.maxHealth)
             }
 
             if (!(m.cycle % 420)) { //once every 7 seconds

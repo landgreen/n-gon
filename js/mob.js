@@ -1119,7 +1119,7 @@ const mobs = {
                     if (tech.iceIXOnDeath && this.isSlowed) {
                         for (let i = 0, len = 2 * Math.sqrt(Math.min(this.mass, 25)) * tech.iceIXOnDeath; i < len; i++) b.iceIX(3, Math.random() * 2 * Math.PI, this.position)
                     }
-                    if (tech.deathSpawnsFromBoss || (tech.deathSpawns && this.isDropPowerUp)) {
+                    if (tech.deathSpawnsFromBoss || tech.deathSpawns) {
                         const spawns = tech.deathSpawns + tech.deathSpawnsFromBoss
                         const len = Math.min(12, spawns * Math.ceil(Math.random() * simulation.difficulty * spawns))
                         for (let i = 0; i < len; i++) {
@@ -1129,6 +1129,22 @@ const mobs = {
                                 y: this.velocity.x + (Math.random() - 0.5) * 10
                             });
                         }
+                    }
+
+                    if (tech.isDeathSkipTime && !m.isBodiesAsleep) {
+                        requestAnimationFrame(() => {
+                            simulation.timePlayerSkip(this.isBoss ? 45 : 25)
+                            simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
+                        }); //wrapping in animation frame prevents errors, probably
+
+                        // if (tech.isFlipFlopOn) {
+                        //     m.rewind(this.isBoss ? 45 : 25)
+                        // } else {
+                        //     requestAnimationFrame(() => {
+                        //         simulation.timePlayerSkip(this.isBoss ? 45 : 25)
+                        //         simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
+                        //     }); //wrapping in animation frame prevents errors, probably
+                        // }
                     }
                     if (tech.isEnergyLoss) m.energy *= 0.75;
                     powerUps.spawnRandomPowerUp(this.position.x, this.position.y);

@@ -17,10 +17,10 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // // simulation.isHorizontalFlipped = true
             // m.addHealth(Infinity)
-            // m.setField("standing wave")
+            // m.setField("time dilation")
             // b.giveGuns("nail gun")
             // tech.giveTech("closed timelike curve")
-            // tech.giveTech("irradiated nails")
+            // tech.giveTech("retrocausality")
             // tech.giveTech("pneumatic actuator")
             // tech.giveTech("6s half-life")
             // for (let i = 0; i < 10; i++) tech.giveTech("replication")
@@ -36,8 +36,8 @@ const level = {
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.testing();
-            // level.reactor(); //not in rotation, used for testing
-            // spawn.timeBoss(1900, -500)
+            // spawn.snakeSpitBoss(1900, -500)
+            // level.reservoir(); //not in rotation, used for testing
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -2681,7 +2681,7 @@ const level = {
         // spawn.shieldingBoss(1700, -500)
 
         // for (let i = 0; i < 10; ++i) spawn.bodyRect(1600 + 5, -500, 30, 40);
-        // for (let i = 0; i < 4; i++) spawn.starter(1900, -500)
+        for (let i = 0; i < 4; i++) spawn.starter(1900, -500)
         // spawn.pulsar(1900, -500)
         // spawn.shield(mob[mob.length - 1], 1900, -500, 1);
         // mob[mob.length - 1].isShielded = true
@@ -3294,8 +3294,8 @@ const level = {
         }
 
         //2nd floor
-        spawn.mapVertex(855, -1936, "-612 50  0 100  612 50  612 -50 -612 -50");
-        spawn.mapVertex(-687, -1936, "-612 50  0 100  612 50  612 -50 -612 -50");
+        spawn.mapVertex(-687, -1936, "-625 50  0 100  625 50  625 -50 -625 -50");
+        spawn.mapVertex(855, -1936, "-625 50  0 100  625 50  625 -50 -625 -50");
 
         //2nd floor right building
         // spawn.mapRect(550, -3050, 600, 175);
@@ -3328,11 +3328,11 @@ const level = {
         spawn.randomMob(950, -1725, 0.1);
         spawn.randomMob(-725, -1775, 0.1);
         spawn.randomMob(-200, -2075, 0);
+        spawn.randomMob(-550, -3500, -0.2);
         spawn.randomMob(375, -2125, 0);
-        spawn.randomMob(1025, -3200, 0);
-        spawn.randomMob(-550, -3500, 0);
         spawn.randomMob(-700, -2450, -0.1);
         spawn.randomMob(-1175, -2775, -0.1);
+        spawn.randomMob(1025, -3200, -0.2);
         spawn.randomMob(-525, -3750, -0.2);
         spawn.randomMob(1350, -2075, -0.3);
         spawn.randomMob(1775, 1000, -0.4);

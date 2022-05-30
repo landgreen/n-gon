@@ -2109,10 +2109,10 @@ const b = {
                 onEnd() {},
                 do() {
                     if (this.endCycle < simulation.cycle + 1) this.isWave = false
-                    if (Matter.Query.point(map, this.position).length) { //check if inside map
+                    if (Matter.Query.point(map, this.position).length) { //check if inside map   //|| Matter.Query.point(body, this.position).length
                         this.isBranch = true;
                         this.do = () => { if (this.endCycle < simulation.cycle + 1) this.isWave = false }
-                    } else { //check if inside a body
+                    } else { //check if inside a mob
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position))
                             const radius = mob[i].radius + tech.extruderRange / 2
@@ -2387,14 +2387,14 @@ const b = {
                 }
                 if (tech.isLaserPush) { //push mobs away
                     const index = path.length - 1
-                    Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.94, y: best.who.velocity.y * 0.94 });
-                    const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.006 * push * Math.min(6, best.who.mass))
+                    Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.95, y: best.who.velocity.y * 0.95 });
+                    const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.005 * push * Math.min(6, best.who.mass))
                     Matter.Body.applyForce(best.who, path[index], force)
                 }
             } else if (tech.isLaserPush && best.who.classType === "body") {
                 const index = path.length - 1
-                Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.94, y: best.who.velocity.y * 0.94 });
-                const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.006 * push * Math.min(6, best.who.mass))
+                Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.95, y: best.who.velocity.y * 0.95 });
+                const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.005 * push * Math.min(6, best.who.mass))
                 Matter.Body.applyForce(best.who, path[index], force)
             }
         };
@@ -6996,7 +6996,7 @@ const b = {
                         x: 7.5 * Math.cos(m.angle - Math.PI / 2),
                         y: 7.5 * Math.sin(m.angle - Math.PI / 2)
                     }
-                    const dmg = 0.66 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
+                    const dmg = 0.70 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
                     const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                     const eye = {
                         x: m.pos.x + 15 * Math.cos(m.angle),
