@@ -595,7 +595,8 @@ const b = {
                     newDist < dist &&
                     !mob[i].isBadTarget &&
                     Matter.Query.ray(map, path[0], mob[i].position).length === 0 &&
-                    Matter.Query.ray(body, path[0], mob[i].position).length === 0
+                    Matter.Query.ray(body, path[0], mob[i].position).length === 0 &&
+                    !mob[i].isInvulnerable
                 ) {
                     dist = newDist
                     best.who = mob[i]
@@ -1271,148 +1272,148 @@ const b = {
             }
         }
     },
-    dart(where, angle = m.angle, size = 0.8) {
-        //find a target
-        const closest = {
-            score: 10000,
-            position: null
-        }
-        for (let i = 0, len = mob.length; i < len; ++i) {
-            if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, where, mob[i].position).length === 0) {
-                const dot = Vector.dot({ x: Math.cos(angle), y: Math.sin(angle) }, Vector.normalise(Vector.sub(mob[i].position, where))) //the dot product of diff and dir will return how much over lap between the vectors
-                const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
-                // if (dist < closest.score && ((dist > 500 && dot > 0) || (dot > 0.9))) { //target closest mob that player is looking at and isn't too close to target
-                if (dist < closest.score && dot > 0.9 - 0.0004 * dist) { //target closest mob that player is looking at and isn't too close to target
-                    closest.score = dist
-                    closest.position = mob[i].position
-                }
-            }
-        }
-        if (!closest.position) {
-            // const unit = Vector.mult(sub(simulation.mouseInGame, where), 10000)
-            closest.position = Vector.mult(Vector.sub(simulation.mouseInGame, where), 10000)
-        }
-        const me = bullet.length;
-        bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -20 * size, y: 2 * size, index: 0, isInternal: false }, { x: -20 * size, y: -2 * size, index: 1, isInternal: false }, { x: 5 * size, y: -2 * size, index: 4, isInternal: false }, { x: 20 * size, y: 0, index: 3, isInternal: false }, { x: 5 * size, y: 2 * size, index: 4, isInternal: false }], {
-            cycle: 0,
-            angle: angle,
-            friction: 1,
-            frictionAir: 0.15,
-            thrustMag: 0.03,
-            turnRate: 0.15, //0.015
-            drawStringControlMagnitude: 3000 + 5000 * Math.random(),
-            drawStringFlip: (Math.round(Math.random()) ? 1 : -1),
-            dmg: 7, //damage done in addition to the damage from momentum
-            classType: "bullet",
-            endCycle: simulation.cycle + 120,
-            collisionFilter: {
-                category: cat.bullet,
-                mask: tech.isShieldPierce ? cat.body | cat.mob | cat.mobBullet : cat.body | cat.mob | cat.mobBullet | cat.mobShield,
-            },
-            minDmgSpeed: 0,
-            lookFrequency: Math.floor(7 + Math.random() * 3),
-            density: 0.001, //0.001 is normal for blocks,  0.008 is normal for harpoon,  0.008*6 when buffed
-            beforeDmg(who) {
-                if (tech.isShieldPierce && who.isShielded) { //disable shields
-                    who.isShielded = false
-                    requestAnimationFrame(() => { who.isShielded = true });
-                }
-                if (tech.fragments) {
-                    b.targetedNail(this.vertices[2], tech.fragments * Math.floor(2 + 1.5 * Math.random()))
-                    this.endCycle = 0;
-                }
-                if (!who.isBadTarget) {
-                    this.frictionAir = 0.01
-                    this.do = this.doNoTargeting
-                }
-            },
-            onEnd() {},
-            doNoTargeting: function() {
-                // this.force.y += this.mass * 0.001;
-                if (Matter.Query.collides(this, map).length) { //stick in walls
-                    this.collisionFilter.mask = 0;
-                    Matter.Body.setAngularVelocity(this, 0)
-                    Matter.Body.setVelocity(this, {
-                        x: 0,
-                        y: 0
-                    });
-                    this.do = () => {
-                        // if (!Matter.Query.collides(this, map).length) this.force.y += this.mass * 0.001;
-                    }
-                }
-            },
-            do() {
-                this.cycle++
-                // if (this.cycle > 40) {
-                //     this.frictionAir = 0.003
-                //     this.do = this.doNoTargeting
-                // }
-                // if (closest.target) { //rotate towards the target
-                const face = { x: Math.cos(this.angle), y: Math.sin(this.angle) };
-                const vectorGoal = Vector.normalise(Vector.sub(this.position, closest.position));
-                const cross = Vector.cross(vectorGoal, face)
-                if (cross > 0.01) {
-                    Matter.Body.rotate(this, this.turnRate * Math.sqrt(cross));
-                } else if (cross < 0.01) {
-                    Matter.Body.rotate(this, -this.turnRate * Math.sqrt(Math.abs(cross)));
-                }
-                this.force.x += this.thrustMag * this.mass * Math.cos(this.angle);
-                this.force.y += this.thrustMag * this.mass * Math.sin(this.angle);
-                // }
-                if (Matter.Query.collides(this, map).length) { //stick in walls
-                    this.collisionFilter.mask = 0;
-                    Matter.Body.setAngularVelocity(this, 0)
-                    Matter.Body.setVelocity(this, {
-                        x: 0,
-                        y: 0
-                    });
-                    this.do = this.doNoTargeting
-                }
-                // else if (!(this.cycle % 2)) { //look for a target if you don't have one
-                //     simulation.drawList.push({ //add dmg to draw queue
-                //         x: this.position.x,
-                //         y: this.position.y,
-                //         radius: 10,
-                //         color: simulation.mobDmgColor,
-                //         time: simulation.drawTime
-                //     });
-                //     let closest = {
-                //         distance: 2000,
-                //         target: null
-                //     }
-                //     const dir = Vector.normalise(this.velocity) //make a vector for direction of length 1
-                //     for (let i = 0, len = mob.length; i < len; ++i) {
-                //         if (
-                //             mob[i].alive && !mob[i].isBadTarget &&
-                //             Matter.Query.ray(map, this.position, mob[i].position).length === 0 && //check for map in Line of sight
-                //             Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, this.position))) > 0.55 //the dot product of diff and dir will return how much over lap between the vectors
-                //         ) {
-                //             const dist = Vector.magnitude(Vector.sub(this.position, mob[i].position))
-                //             if (dist < closest.distance) {
-                //                 closest.distance = dist
-                //                 closest.target = mob[i]
-                //             }
-                //         }
-                //     }
-                //     if (closest.target) {
-                //         target = closest.target
-                //         this.turnRate = 0.05
-                //         this.frictionAir = 0.8
-                //     }
-                // }
-            },
-        });
-        Matter.Body.setVelocity(bullet[me], {
-            x: m.Vx / 2 + 40 * Math.cos(bullet[me].angle),
-            y: m.Vy / 2 + 40 * Math.sin(bullet[me].angle)
-        });
-        // if (!closest.target) {
-        //     bullet[me].frictionAir = 0.002
-        //     bullet[me].do = bullet[me].doNoTargeting
-        // }
-        Composite.add(engine.world, bullet[me]); //add bullet to world
+    // dart(where, angle = m.angle, size = 0.8) {
+    //     //find a target
+    //     const closest = {
+    //         score: 10000,
+    //         position: null
+    //     }
+    //     for (let i = 0, len = mob.length; i < len; ++i) {
+    //         if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, where, mob[i].position).length === 0) {
+    //             const dot = Vector.dot({ x: Math.cos(angle), y: Math.sin(angle) }, Vector.normalise(Vector.sub(mob[i].position, where))) //the dot product of diff and dir will return how much over lap between the vectors
+    //             const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
+    //             // if (dist < closest.score && ((dist > 500 && dot > 0) || (dot > 0.9))) { //target closest mob that player is looking at and isn't too close to target
+    //             if (dist < closest.score && dot > 0.9 - 0.0004 * dist) { //target closest mob that player is looking at and isn't too close to target
+    //                 closest.score = dist
+    //                 closest.position = mob[i].position
+    //             }
+    //         }
+    //     }
+    //     if (!closest.position) {
+    //         // const unit = Vector.mult(sub(simulation.mouseInGame, where), 10000)
+    //         closest.position = Vector.mult(Vector.sub(simulation.mouseInGame, where), 10000)
+    //     }
+    //     const me = bullet.length;
+    //     bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -20 * size, y: 2 * size, index: 0, isInternal: false }, { x: -20 * size, y: -2 * size, index: 1, isInternal: false }, { x: 5 * size, y: -2 * size, index: 4, isInternal: false }, { x: 20 * size, y: 0, index: 3, isInternal: false }, { x: 5 * size, y: 2 * size, index: 4, isInternal: false }], {
+    //         cycle: 0,
+    //         angle: angle,
+    //         friction: 1,
+    //         frictionAir: 0.15,
+    //         thrustMag: 0.03,
+    //         turnRate: 0.15, //0.015
+    //         drawStringControlMagnitude: 3000 + 5000 * Math.random(),
+    //         drawStringFlip: (Math.round(Math.random()) ? 1 : -1),
+    //         dmg: 7, //damage done in addition to the damage from momentum
+    //         classType: "bullet",
+    //         endCycle: simulation.cycle + 120,
+    //         collisionFilter: {
+    //             category: cat.bullet,
+    //             mask: tech.isShieldPierce ? cat.body | cat.mob | cat.mobBullet : cat.body | cat.mob | cat.mobBullet | cat.mobShield,
+    //         },
+    //         minDmgSpeed: 0,
+    //         lookFrequency: Math.floor(7 + Math.random() * 3),
+    //         density: 0.001, //0.001 is normal for blocks,  0.008 is normal for harpoon,  0.008*6 when buffed
+    //         beforeDmg(who) {
+    //             if (tech.isShieldPierce && who.isShielded) { //disable shields
+    //                 who.isShielded = false
+    //                 requestAnimationFrame(() => { who.isShielded = true });
+    //             }
+    //             if (tech.fragments) {
+    //                 b.targetedNail(this.vertices[2], tech.fragments * Math.floor(2 + 1.5 * Math.random()))
+    //                 this.endCycle = 0;
+    //             }
+    //             if (!who.isBadTarget) {
+    //                 this.frictionAir = 0.01
+    //                 this.do = this.doNoTargeting
+    //             }
+    //         },
+    //         onEnd() {},
+    //         doNoTargeting: function() {
+    //             // this.force.y += this.mass * 0.001;
+    //             if (Matter.Query.collides(this, map).length) { //stick in walls
+    //                 this.collisionFilter.mask = 0;
+    //                 Matter.Body.setAngularVelocity(this, 0)
+    //                 Matter.Body.setVelocity(this, {
+    //                     x: 0,
+    //                     y: 0
+    //                 });
+    //                 this.do = () => {
+    //                     // if (!Matter.Query.collides(this, map).length) this.force.y += this.mass * 0.001;
+    //                 }
+    //             }
+    //         },
+    //         do() {
+    //             this.cycle++
+    //             // if (this.cycle > 40) {
+    //             //     this.frictionAir = 0.003
+    //             //     this.do = this.doNoTargeting
+    //             // }
+    //             // if (closest.target) { //rotate towards the target
+    //             const face = { x: Math.cos(this.angle), y: Math.sin(this.angle) };
+    //             const vectorGoal = Vector.normalise(Vector.sub(this.position, closest.position));
+    //             const cross = Vector.cross(vectorGoal, face)
+    //             if (cross > 0.01) {
+    //                 Matter.Body.rotate(this, this.turnRate * Math.sqrt(cross));
+    //             } else if (cross < 0.01) {
+    //                 Matter.Body.rotate(this, -this.turnRate * Math.sqrt(Math.abs(cross)));
+    //             }
+    //             this.force.x += this.thrustMag * this.mass * Math.cos(this.angle);
+    //             this.force.y += this.thrustMag * this.mass * Math.sin(this.angle);
+    //             // }
+    //             if (Matter.Query.collides(this, map).length) { //stick in walls
+    //                 this.collisionFilter.mask = 0;
+    //                 Matter.Body.setAngularVelocity(this, 0)
+    //                 Matter.Body.setVelocity(this, {
+    //                     x: 0,
+    //                     y: 0
+    //                 });
+    //                 this.do = this.doNoTargeting
+    //             }
+    //             // else if (!(this.cycle % 2)) { //look for a target if you don't have one
+    //             //     simulation.drawList.push({ //add dmg to draw queue
+    //             //         x: this.position.x,
+    //             //         y: this.position.y,
+    //             //         radius: 10,
+    //             //         color: simulation.mobDmgColor,
+    //             //         time: simulation.drawTime
+    //             //     });
+    //             //     let closest = {
+    //             //         distance: 2000,
+    //             //         target: null
+    //             //     }
+    //             //     const dir = Vector.normalise(this.velocity) //make a vector for direction of length 1
+    //             //     for (let i = 0, len = mob.length; i < len; ++i) {
+    //             //         if (
+    //             //             mob[i].alive && !mob[i].isBadTarget &&
+    //             //             Matter.Query.ray(map, this.position, mob[i].position).length === 0 && //check for map in Line of sight
+    //             //             Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, this.position))) > 0.55 //the dot product of diff and dir will return how much over lap between the vectors
+    //             //         ) {
+    //             //             const dist = Vector.magnitude(Vector.sub(this.position, mob[i].position))
+    //             //             if (dist < closest.distance) {
+    //             //                 closest.distance = dist
+    //             //                 closest.target = mob[i]
+    //             //             }
+    //             //         }
+    //             //     }
+    //             //     if (closest.target) {
+    //             //         target = closest.target
+    //             //         this.turnRate = 0.05
+    //             //         this.frictionAir = 0.8
+    //             //     }
+    //             // }
+    //         },
+    //     });
+    //     Matter.Body.setVelocity(bullet[me], {
+    //         x: m.Vx / 2 + 40 * Math.cos(bullet[me].angle),
+    //         y: m.Vy / 2 + 40 * Math.sin(bullet[me].angle)
+    //     });
+    //     // if (!closest.target) {
+    //     //     bullet[me].frictionAir = 0.002
+    //     //     bullet[me].do = bullet[me].doNoTargeting
+    //     // }
+    //     Composite.add(engine.world, bullet[me]); //add bullet to world
 
-    },
+    // },
     grapple(where, angle = m.angle, harpoonSize = 1) {
         const me = bullet.length;
         const returnRadius = 100 * Math.sqrt(harpoonSize)
@@ -2012,7 +2013,8 @@ const b = {
                 for (let i = 0, len = mob.length; i < len; ++i) {
                     if (
                         mob[i].alive && !mob[i].isBadTarget &&
-                        Matter.Query.ray(map, this.position, mob[i].position).length === 0
+                        Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                        !mob[i].isInvulnerable
                         // && Matter.Query.ray(body, this.position, mob[i].position).length === 0
                     ) {
                         const futureDist = Vector.magnitude(Vector.sub(futurePos, mob[i].position));
@@ -2639,7 +2641,8 @@ const b = {
                                         !mob[i].isBadTarget &&
                                         Vector.magnitude(Vector.sub(this.position, mob[i].position)) < 700 + mob[i].radius + random &&
                                         Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                        Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                                        Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                                        !mob[i].isInvulnerable
                                     ) {
                                         if (tech.isExplosionStun) b.AoEStunEffect(this.position, 700 + mob[i].radius + random);
                                         if (tech.isMineSentry) {
@@ -2753,7 +2756,7 @@ const b = {
                             this.lockedOn = null;
                             let closeDist = Infinity;
                             for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (!mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+                                if (!mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
                                     const targetVector = Vector.sub(this.position, mob[i].position)
                                     const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
                                     if (dist < closeDist) {
@@ -2841,7 +2844,7 @@ const b = {
                             this.lockedOn = null;
                             let closeDist = Infinity;
                             for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (!mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
+                                if (!mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
                                     const targetVector = Vector.sub(this.position, mob[i].position)
                                     const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
                                     if (dist < closeDist) {
@@ -2957,7 +2960,8 @@ const b = {
                         if (
                             !mob[i].isBadTarget &&
                             Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                            Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                            Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                            !mob[i].isInvulnerable
                         ) {
                             const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
                             const DIST = Vector.magnitude(TARGET_VECTOR);
@@ -3059,7 +3063,6 @@ const b = {
                     Matter.Body.scale(this, scale, scale);
                 } else {
                     this.force.y += this.mass * 0.0002;
-
                     if (!(simulation.cycle % this.lookFrequency)) {
                         //find mob targets
                         this.lockedOn = null;
@@ -3068,7 +3071,8 @@ const b = {
                             if (
                                 !mob[i].isBadTarget &&
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                                Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                                !mob[i].isInvulnerable
                             ) {
                                 const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
                                 const DIST = Vector.magnitude(TARGET_VECTOR);
@@ -3297,7 +3301,8 @@ const b = {
                             if (
                                 !mob[i].isBadTarget &&
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                                Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                                !mob[i].isInvulnerable
                             ) {
                                 const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
                                 const DIST = Vector.magnitude(TARGET_VECTOR);
@@ -3785,9 +3790,10 @@ const b = {
             const dist = Vector.magnitude(Vector.sub(position, mob[i].position));
             if (
                 dist < range + mob[i].radius &&
-                (!mob[i].isBadTarget) && //|| mob[i].isMobBullet
+                !mob[i].isBadTarget && //|| mob[i].isMobBullet
                 Matter.Query.ray(map, position, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, position, mob[i].position).length === 0
+                Matter.Query.ray(body, position, mob[i].position).length === 0 &&
+                !mob[i].isInvulnerable
             ) {
                 targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
             }
@@ -4280,7 +4286,8 @@ const b = {
                                 dist < 3000000 &&
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                 Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
-                                !mob[i].isShielded
+                                !mob[i].isShielded &&
+                                !mob[i].isInvulnerable
                             ) {
                                 const unit = Vector.normalise(Vector.sub(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60)), this.position))
                                 if (this.isUpgraded) {
@@ -4338,7 +4345,8 @@ const b = {
                                 mob[i].alive &&
                                 !mob[i].isBadTarget &&
                                 dist2 > 40000 &&
-                                Matter.Query.ray(map, this.position, mob[i].position).length === 0
+                                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                                !mob[i].isInvulnerable
                             ) {
                                 this.cd = simulation.cycle + this.delay;
                                 const angle = Vector.angle(this.position, mob[i].position)
@@ -4670,10 +4678,12 @@ const b = {
                         let closeDist = tech.isPlasmaRange * 1000;
                         for (let i = 0, len = mob.length; i < len; ++i) {
                             const DIST = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
-                            if (DIST < closeDist &&
-                                (!mob[i].isBadTarget || mob[i].isMobBullet) &&
+                            if (
+                                DIST < closeDist && (!mob[i].isBadTarget || mob[i].isMobBullet) &&
                                 Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
+                                Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                                !mob[i].isInvulnerable
+                            ) {
                                 closeDist = DIST;
                                 this.lockedOn = mob[i]
                             }
@@ -6376,7 +6386,7 @@ const b = {
                             const dir = { x: Math.cos(angle), y: Math.sin(angle) }; //make a vector for the player's direction of length 1; used in dot product
 
                             for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
+                                if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
                                     const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                                     const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
                                     // console.log(dot, 0.95 - Math.min(dist * 0.00015, 0.3))
@@ -6521,7 +6531,7 @@ const b = {
                     const range = 450 * (tech.isFilament ? 1 + 0.005 * Math.min(110, this.ammo) : 1)
                     let targetCount = 0
                     for (let i = 0, len = mob.length; i < len; ++i) {
-                        if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
+                        if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
                             const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                             const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
                             if (dist < range && dot > 0.9) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
@@ -6553,7 +6563,7 @@ const b = {
                     //single harpoon
                     const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
                     for (let i = 0, len = mob.length; i < len; ++i) {
-                        if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
+                        if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
                             const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                             const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
                             if (dist < closest.distance && dot > 0.98 - Math.min(dist * 0.00014, 0.3)) { //target closest mob that player is looking at and isn't too close to target

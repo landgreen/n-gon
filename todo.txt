@@ -1,39 +1,31 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: propagator - 67% damage, lose 1/2 second of time when a mob dies
+boss orbitals and mineBoss mines are destroyed when you deflect them with your field
+drones, spores and other bullets that target mobs, will not target invulnerable mobs
+timeSKipBoss is a bit slower with a bit less time skipping
+  fixed color to better match level background colors
 
-timeSkipBoss is back, maybe it will not cause bugs this time
-  immune to harm unless player is inside horizon
-  player loses time when inside horizon
-
-snake bosses are immune to harm until your remove their tail
-
-mob shields are 30% stronger
-time dilation: retrocausality automatically grabs power ups
-eternalism 50->40% damage
-paradigm shift 10->16% chance to get a research when ejecting tech
-reaction inhibitor 11->13% mob health reduction
-recycling 1->0.5% health for 5 seconds  
-  up to 2.5% per mob kill at normal max health
+JUNK tech: path integral - your next tech choice has almost all possible choices
 
 bug fixes
 
-******************************************************** TODO ********************************************************
 
-make targeting skip invulnerable mobs
-  drones, spores, harpoon, missiles?, mines, nail on death
-  this helps beat snake boss
-    spores are biggest issue
+*********************************************************** TODO *****************************************************
 
-let blocking instantly destroy the red orbitals?  since they can't be deflected
-  also mines on reactor level?
-  also any bullet?
+timeskip flickers with tech: clock gating, and game pause after large hit
+  probably not related to timeskip, related to graphics effect
+  not a big problem, actually it's kinda neat effect
+    only fix if there is a clear solution
+
+JUNK tech show 20+ options in tech selection
+
+bullets that can target the player
+  occurs if no mobs targets around
+  worms? drones? missiles? spores?
+    all of the above?
 
 BUG time skip probably led to player being able to move, and game not being paused for a few seconds while the death screen faded in
   also small chance it happened with rewind instead, but unlikely
-
-make one value to track all the +dmg effects that don't need dynamic calculations
-  update it with a set damage function
 
 block manufacturing - molecular assembler tech
 Holding r-click will create a slowly increasing in size block, which will be thrown on release
@@ -48,10 +40,6 @@ make MEE work with harm reduction
   how to nerf MEE
     maybe harm reduction could also reduce energy regen
 
-simulation.timeSkip(60)
-  maybe run simulation.timeSkip(60) in a room in labs
-  mob fires laser/bullets that timeSkip player
-
 Currently, the mob just deals higher damage on impact, which is annoying although not hard to compete with nor unique
 By "redesign" I mean replacing instances of the regular mob, since the same code is used for the tiny red projectiles (I think) just add a new mob and remove the old one from the rotation
 The new mob should be as such, a "real" exploding mob: 
@@ -64,7 +52,6 @@ Color changing based on the mob explosion status
 Regular state: red
 About to explode: animation to dark red
 Exploding: several shockwaves from the explosion points and tiny trails given to the shrapnel for a second or two until they deaccelerate
-
 
 make laser gain damage and energy drain from fire delay tech
   wording?  put it in the gun description

@@ -52,7 +52,7 @@ const cat = {
 }
 
 const color = { //light
-    background: "#ddd",
+    // background: "#ddd", // used instead:  document.body.style.backgroundColor
     block: "rgba(140,140,140,0.85)",
     blockS: "#222",
     map: "#444",

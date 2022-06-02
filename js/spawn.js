@@ -2398,6 +2398,7 @@ const spawn = {
         me.memory = Infinity
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            ctx.setLineDash([]);
         };
         me.damageReduction = 0.35 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) // me.damageReductionGoal
         me.awake = function() {
@@ -3784,6 +3785,7 @@ const spawn = {
         me.isDropPowerUp = false;
         me.isBadTarget = true;
         me.isMobBullet = true;
+        me.isUnstable = true; //dies when blocked
         me.showHealthBar = false;
         me.explodeRange = 200 + 150 * Math.random()
         me.isExploding = false
@@ -5179,16 +5181,16 @@ const spawn = {
         };
     },
     timeSkipBoss(x, y, radius = 50) {
-        mobs.spawn(x, y, 15, radius, "rgb(150, 150, 255)");
+        mobs.spawn(x, y, 15, radius, "transparent");
         let me = mob[mob.length - 1];
         me.isBoss = true;
         me.eventHorizon = 0; //set in mob loop
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0.004;
-        me.accelMag = 0.0001 + 0.00003 * simulation.accelScale
+        me.accelMag = 0.00008 + 0.00002 * simulation.accelScale
         spawn.shield(me, x, y, 1);
-        spawn.spawnOrbitals(me, radius + 50 + 100 * Math.random(), true)
+        spawn.spawnOrbitals(me, radius + 50 + 100 * Math.random())
 
         Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger
         me.damageReduction = 0.07 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
@@ -5208,14 +5210,14 @@ const spawn = {
             this.seePlayerByHistory();
             this.attraction();
             this.checkStatus();
-            this.eventHorizon = 950 + 170 * Math.sin(simulation.cycle * 0.005)
+            this.eventHorizon = 900 + 200 * Math.sin(simulation.cycle * 0.005)
             if (!simulation.isTimeSkipping) {
                 if (Vector.magnitude(Vector.sub(this.position, m.pos)) < this.eventHorizon) {
                     this.attraction();
                     this.damageReduction = this.startingDamageReduction
                     this.isInvulnerable = false
                     if (!(simulation.cycle % 15)) requestAnimationFrame(() => {
-                        simulation.timePlayerSkip(8)
+                        simulation.timePlayerSkip(5)
                         simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
                     }); //wrapping in animation frame prevents errors, probably
 
@@ -5237,7 +5239,7 @@ const spawn = {
                         simulation.camera();
                         ctx.beginPath(); //gets rid of already draw shapes
                         ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI, false); //part you can't see
-                        ctx.fillStyle = color.background;
+                        ctx.fillStyle = document.body.style.backgroundColor;
                         ctx.fill();
                         ctx.restore();
                     })
@@ -5854,7 +5856,7 @@ const spawn = {
         me.leaveBody = false;
         me.isDropPowerUp = false;
         me.isBadTarget = true;
-        me.isUnblockable = true;
+        me.isUnstable = true; //dies when blocked
         me.showHealthBar = false;
         me.isOrbital = true;
         // me.isShielded = true

@@ -1379,7 +1379,10 @@ const m = {
                 x: player.velocity.x - (15 * unit.x) / massRoot,
                 y: player.velocity.y - (15 * unit.y) / massRoot
             });
-            if (who.isOrbital) Matter.Body.setVelocity(who, { x: 0, y: 0 });
+            if (who.isUnstable) {
+                if (m.fieldCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 30
+                who.death();
+            }
 
             if (m.crouch) {
                 Matter.Body.setVelocity(player, {
@@ -1762,7 +1765,10 @@ const m = {
                                     x: player.velocity.x - (30 * unit.x) / massRoot,
                                     y: player.velocity.y - (30 * unit.y) / massRoot
                                 });
-                                if (mob[i].isOrbital) Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
+                                if (mob[i].isUnstable) {
+                                    if (m.fieldCDcycle < m.cycle + 10) m.fieldCDcycle = m.cycle + 10
+                                    mob[i].death();
+                                }
                                 if (!isFree) { //player knock backs
                                     if (mob[i].isDropPowerUp && player.speed < 12) {
                                         const massRootCap = Math.sqrt(Math.min(10, Math.max(0.2, mob[i].mass)));

@@ -758,6 +758,10 @@ const powerUps = {
                             text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choiceField})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choiceField].name}</div> ${m.fieldUpgrades[choiceField].description}</div>`
                         }
                     }
+                    if (tech.tooManyTechChoices) {
+                        tech.tooManyTechChoices--
+                        for (let i = 0; i < powerUps.tech.lastTotalChoices; i++) pick()
+                    }
 
                     if (tech.isBrainstorm && !tech.isBrainstormActive && !simulation.isChoosing) {
                         tech.isBrainstormActive = true

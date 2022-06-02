@@ -223,22 +223,21 @@ const tech = {
         let dmg = 1 //m.fieldDamage
         if (tech.isDeathSkipTime) dmg *= 1.67
         if (tech.isNoDraftPause) dmg *= 1.4
-        if (tech.isTechDebt) dmg *= Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount)
-        if (tech.isAxion && tech.isHarmMACHO) dmg *= 1 + 0.75 * (1 - m.harmReduction())
-        if (tech.OccamDamage) dmg *= tech.OccamDamage
         if (tech.isCloakingDamage) dmg *= 1.35
-        if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
-        if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
-        if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= tech.sneakAttackDmg
         if (tech.isTechDamage) dmg *= 1.9
-        if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
-        if (tech.isLowEnergyDamage) dmg *= 1 + 0.7 * Math.max(0, 1 - m.energy)
         if (tech.isMaxEnergyTech) dmg *= 1.5
         if (tech.isEnergyNoAmmo) dmg *= 1.88
+        if (tech.isEnergyLoss) dmg *= 1.55
+        if (tech.OccamDamage) dmg *= tech.OccamDamage
+        if (tech.isTechDebt) dmg *= Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount)
+        if (tech.isAxion && tech.isHarmMACHO) dmg *= 1 + 0.75 * (1 - m.harmReduction())
+        if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
+        if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
+        if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
+        if (tech.isLowEnergyDamage) dmg *= 1 + 0.7 * Math.max(0, 1 - m.energy)
         if (tech.isDamageForGuns) dmg *= 1 + 0.13 * b.inventory.length
         if (tech.isLowHealthDmg) dmg *= 1 + Math.max(0, 1 - m.health) * 0.5
         if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
-        if (tech.isEnergyLoss) dmg *= 1.55;
         if (tech.isAcidDmg && m.health > 1) dmg *= 1.35;
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
         if (tech.isEnergyDamage) dmg *= 1 + m.energy * 0.125;
@@ -249,6 +248,7 @@ const tech = {
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
         if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.5
+        if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= tech.sneakAttackDmg
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
@@ -7932,51 +7932,51 @@ const tech = {
             },
             remove() {}
         },
-        {
-            name: "translate",
-            description: "translate n-gon into a random language",
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isJunk: true,
-            isNonRefundable: true,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                // generate a container 
-                const gtElem = document.createElement('div')
-                gtElem.id = "gtElem"
-                gtElem.style.visibility = 'hidden' // make it invisible
-                document.body.append(gtElem)
+        // {
+        //     name: "translate",
+        //     description: "translate n-gon into a random language",
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 0,
+        //     isJunk: true,
+        //     isNonRefundable: true,
+        //     allowed() {
+        //         return true
+        //     },
+        //     requires: "",
+        //     effect() {
+        //         // generate a container 
+        //         const gtElem = document.createElement('div')
+        //         gtElem.id = "gtElem"
+        //         gtElem.style.visibility = 'hidden' // make it invisible
+        //         document.body.append(gtElem)
 
-                // generate a script to run after creation
-                function initGT() {
-                    // create a new translate element
-                    new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'gtElem')
-                    // ok now since it's loaded perform a funny hack to make it work
-                    const langSelect = document.getElementsByClassName("goog-te-combo")[0]
-                    // select a random language. It takes a second for all langauges to load, so wait a second.
-                    setTimeout(() => {
-                        langSelect.selectedIndex = Math.round(langSelect.options.length * Math.random())
-                        // simulate a click
-                        langSelect.dispatchEvent(new Event('change'))
-                        // now make it go away
-                        const bar = document.getElementById(':1.container')
-                        bar.style.display = 'none'
-                        bar.style.visibility = 'hidden'
-                    }, 1000)
+        //         // generate a script to run after creation
+        //         function initGT() {
+        //             // create a new translate element
+        //             new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL }, 'gtElem')
+        //             // ok now since it's loaded perform a funny hack to make it work
+        //             const langSelect = document.getElementsByClassName("goog-te-combo")[0]
+        //             // select a random language. It takes a second for all langauges to load, so wait a second.
+        //             setTimeout(() => {
+        //                 langSelect.selectedIndex = Math.round(langSelect.options.length * Math.random())
+        //                 // simulate a click
+        //                 langSelect.dispatchEvent(new Event('change'))
+        //                 // now make it go away
+        //                 const bar = document.getElementById(':1.container')
+        //                 bar.style.display = 'none'
+        //                 bar.style.visibility = 'hidden'
+        //             }, 1000)
 
-                }
+        //         }
 
-                // add the google translate script
-                const translateScript = document.createElement('script')
-                translateScript.src = '//translate.google.com/translate_a/element.js?cb=initGT'
-                document.body.append(translateScript)
-            },
-            remove() {}
-        },
+        //         // add the google translate script
+        //         const translateScript = document.createElement('script')
+        //         translateScript.src = '//translate.google.com/translate_a/element.js?cb=initGT'
+        //         document.body.append(translateScript)
+        //     },
+        //     remove() {}
+        // },
         {
             name: "discount",
             description: "get 3 random <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> for the price of 1!",
@@ -9675,6 +9675,108 @@ const tech = {
             remove() {}
         },
         {
+            name: "path integral",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Path_integral_formulation' class="link">path integral</a>`,
+            // description: "your next <strong>3</strong> <strong class='color-m'>tech</strong> choices<br>present almost every possible <strong>option</strong>",
+            description: "your next <strong class='color-m'>tech</strong> choice<br>presents almost every possible <strong>option</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                tech.tooManyTechChoices = 1
+                for (let i = 0; i < this.bonusResearch; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
+            },
+            remove() {
+                tech.tooManyTechChoices = 0
+            }
+        },
+        {
+            name: "rule 30",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {},
+            remove() {},
+            state: [
+                [false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+            ],
+            rule(state, a, b, c) {
+                //30
+                if (state[a] && state[b] && state[c]) return false; // TTT => F
+                if (state[a] && state[b] && !state[c]) return false; // TTF => F
+                if (state[a] && !state[b] && state[c]) return false; //TFT => F 
+                if (state[a] && !state[b] && !state[c]) return true; //TFF => T
+                if (!state[a] && state[b] && state[c]) return true; //FTT => T
+                if (!state[a] && state[b] && !state[c]) return true; //FTF => T
+                if (!state[a] && !state[b] && state[c]) return true; //FFT => T
+                if (!state[a] && !state[b] && !state[c]) return false; //FFF => F
+            },
+            id: 0,
+            descriptionFunction() {
+
+                if (this.id === 0 && Math.random() < 0.5) {
+                    // for (let i = 0; i < 29; i++) this.state[0][i] = Math.random() < 0.5 //randomize seed
+                    this.name = "rule 90"
+                    this.link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(this.name).replace(/'/g, '%27')}&title=Special:Search' class="link">${this.name}</a>`
+                    // console.log(this.name)
+                    this.state[0] = [false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false]
+                    this.rule = function(state, a, b, c) {
+                        if (state[a] && state[b] && state[c]) return false; // TTT => F
+                        if (state[a] && state[b] && !state[c]) return true; // TTF => T
+                        if (state[a] && !state[b] && state[c]) return false; //TFT => F 
+                        if (state[a] && !state[b] && !state[c]) return true; //TFF => T
+                        if (!state[a] && state[b] && state[c]) return true; //FTT => T
+                        if (!state[a] && state[b] && !state[c]) return false; //FTF => F
+                        if (!state[a] && !state[b] && state[c]) return true; //FFT => T
+                        if (!state[a] && !state[b] && !state[c]) return false; //FFF => F
+                    }
+                }
+
+                const loop = () => {
+                    if ((simulation.paused || simulation.isChoosing) && m.alive && !build.isExperimentSelection) { //&& (!simulation.isChoosing || this.count === 0)
+                        let b = []; //produce next row
+                        b.push(this.rule(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 1, 0, 1)); //left edge wrap around
+                        for (let i = 1; i < this.state[this.state.length - 1].length - 1; i++) { //apply rule to the rest of the array
+                            b.push(this.rule(this.state[this.state.length - 1], i - 1, i, i + 1));
+                        }
+                        b.push(this.rule(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 2, this.state[this.state.length - 1].length - 1, 0)); //right edge wrap around
+                        this.state.push(b)
+                        if (document.getElementById(`cellular-rule-id${this.id}`)) document.getElementById(`cellular-rule-id${this.id}`).innerHTML = this.outputText() //convert to squares and send HTML
+                        if (this.count && this.state.length < 120 && !(this.state.length % 10)) powerUps.spawn(m.pos.x - 50 + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
+                        setTimeout(() => { loop() }, 400);
+                    }
+                }
+                setTimeout(() => { loop() }, 400);
+                this.id++
+                return `<span id = "cellular-rule-id${this.id}" style = "letter-spacing: 0px;font-size: 50%;line-height: normal;">${this.outputText()}</span>`
+            },
+            outputText() {
+                let text = ""
+                for (let j = 0; j < this.state.length; j++) {
+                    text += "<p style = 'margin-bottom: -11px;'>"
+                    for (let i = 0; i < this.state[j].length; i++) {
+                        if (this.state[j][i]) {
+                            text += "⬛" //"█" //"■"
+                        } else {
+                            text += "⬜" //"&nbsp;&nbsp;&nbsp;&nbsp;" //"□"
+                        }
+                    }
+                    text += "</p>"
+                }
+                return text
+            },
+        },
+        {
             name: "cosmogonic myth",
             description: `<span style = "opacity: 9%;">open a portal to a primordial version of reality<br>in 5 minutes close the portal, spawn 1 of each power up</span>`,
             maxCount: 1,
@@ -9835,87 +9937,7 @@ const tech = {
         //         return text
         //     },
         // },
-        {
-            name: "rule 30",
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isJunk: true,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {},
-            remove() {},
-            state: [
-                [false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
-            ],
-            rule(state, a, b, c) {
-                //30
-                if (state[a] && state[b] && state[c]) return false; // TTT => F
-                if (state[a] && state[b] && !state[c]) return false; // TTF => F
-                if (state[a] && !state[b] && state[c]) return false; //TFT => F 
-                if (state[a] && !state[b] && !state[c]) return true; //TFF => T
-                if (!state[a] && state[b] && state[c]) return true; //FTT => T
-                if (!state[a] && state[b] && !state[c]) return true; //FTF => T
-                if (!state[a] && !state[b] && state[c]) return true; //FFT => T
-                if (!state[a] && !state[b] && !state[c]) return false; //FFF => F
-            },
-            id: 0,
-            descriptionFunction() {
 
-                if (this.id === 0 && Math.random() < 0.5) {
-                    // for (let i = 0; i < 29; i++) this.state[0][i] = Math.random() < 0.5 //randomize seed
-                    this.name = "rule 90"
-                    this.link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(this.name).replace(/'/g, '%27')}&title=Special:Search' class="link">${this.name}</a>`
-                    // console.log(this.name)
-                    this.state[0] = [false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false]
-                    this.rule = function(state, a, b, c) {
-                        if (state[a] && state[b] && state[c]) return false; // TTT => F
-                        if (state[a] && state[b] && !state[c]) return true; // TTF => T
-                        if (state[a] && !state[b] && state[c]) return false; //TFT => F 
-                        if (state[a] && !state[b] && !state[c]) return true; //TFF => T
-                        if (!state[a] && state[b] && state[c]) return true; //FTT => T
-                        if (!state[a] && state[b] && !state[c]) return false; //FTF => F
-                        if (!state[a] && !state[b] && state[c]) return true; //FFT => T
-                        if (!state[a] && !state[b] && !state[c]) return false; //FFF => F
-                    }
-                }
-
-                const loop = () => {
-                    if ((simulation.paused || simulation.isChoosing) && m.alive && !build.isExperimentSelection) { //&& (!simulation.isChoosing || this.count === 0)
-                        let b = []; //produce next row
-                        b.push(this.rule(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 1, 0, 1)); //left edge wrap around
-                        for (let i = 1; i < this.state[this.state.length - 1].length - 1; i++) { //apply rule to the rest of the array
-                            b.push(this.rule(this.state[this.state.length - 1], i - 1, i, i + 1));
-                        }
-                        b.push(this.rule(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 2, this.state[this.state.length - 1].length - 1, 0)); //right edge wrap around
-                        this.state.push(b)
-                        if (document.getElementById(`cellular-rule-id${this.id}`)) document.getElementById(`cellular-rule-id${this.id}`).innerHTML = this.outputText() //convert to squares and send HTML
-                        if (this.count && this.state.length < 120 && !(this.state.length % 10)) powerUps.spawn(m.pos.x - 50 + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
-                        setTimeout(() => { loop() }, 400);
-                    }
-                }
-                setTimeout(() => { loop() }, 400);
-                this.id++
-                return `<span id = "cellular-rule-id${this.id}" style = "letter-spacing: 0px;font-size: 50%;line-height: normal;">${this.outputText()}</span>`
-            },
-            outputText() {
-                let text = ""
-                for (let j = 0; j < this.state.length; j++) {
-                    text += "<p style = 'margin-bottom: -11px;'>"
-                    for (let i = 0; i < this.state[j].length; i++) {
-                        if (this.state[j][i]) {
-                            text += "⬛" //"█" //"■"
-                        } else {
-                            text += "⬜" //"&nbsp;&nbsp;&nbsp;&nbsp;" //"□"
-                        }
-                    }
-                    text += "</p>"
-                }
-                return text
-            },
-        },
         //************************************************** 
         //************************************************** undefined / lore
         //************************************************** tech
