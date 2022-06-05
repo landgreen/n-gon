@@ -1,44 +1,31 @@
 ******************************************************** NEXT PATCH **************************************************
 
-boss orbitals and mineBoss mines are destroyed when you deflect them with your field
-drones, spores and other bullets that target mobs, will not target invulnerable mobs
-timeSKipBoss is a bit slower with a bit less time skipping
-  fixed color to better match level background colors
+laser energy drain and damage now scale with fire delay effects
+  no change for pulse since it already has a fire delay
 
-JUNK tech: path integral - your next tech choice has almost all possible choices
+explosion harm to player no longer scales with explosion radius
+  explosion damage will treat all explosions the same as a basic grenade explosion
+  large radius explosions are much safer
+acetone peroxide 80->70% increased radius, 100->50% increase in harm from explosions
+
+CPT only triggers from damage above 1% per game cycle
+  so no trigger from slime hazards or black holes or mob auras
+level: reactor has a horizontal flipped mode
+regression gives finalBoss(1.0005), Boss(1.0025), mob(1.05) increased damage taken
+
+JUNK tech: return - go back to the intro level, but keep your tech
 
 bug fixes
 
-
 *********************************************************** TODO *****************************************************
 
-timeskip flickers with tech: clock gating, and game pause after large hit
-  probably not related to timeskip, related to graphics effect
-  not a big problem, actually it's kinda neat effect
-    only fix if there is a clear solution
-
-JUNK tech show 20+ options in tech selection
+block manufacturing - molecular assembler tech
+Holding r-click will create a slowly increasing in size block, which will be thrown on release
 
 bullets that can target the player
   occurs if no mobs targets around
   worms? drones? missiles? spores?
     all of the above?
-
-BUG time skip probably led to player being able to move, and game not being paused for a few seconds while the death screen faded in
-  also small chance it happened with rewind instead, but unlikely
-
-block manufacturing - molecular assembler tech
-Holding r-click will create a slowly increasing in size block, which will be thrown on release
-
-if a mob dies in skiptime it doesn't register?
-  is this only for the ondeath event?
-    so far, but needs more tests
-  is this only for timeskip > 1
-    yes I think
-
-make MEE work with harm reduction
-  how to nerf MEE
-    maybe harm reduction could also reduce energy regen
 
 Currently, the mob just deals higher damage on impact, which is annoying although not hard to compete with nor unique
 By "redesign" I mean replacing instances of the regular mob, since the same code is used for the tiny red projectiles (I think) just add a new mob and remove the old one from the rotation
@@ -52,11 +39,6 @@ Color changing based on the mob explosion status
 Regular state: red
 About to explode: animation to dark red
 Exploding: several shockwaves from the explosion points and tiny trails given to the shrapnel for a second or two until they deaccelerate
-
-make laser gain damage and energy drain from fire delay tech
-  wording?  put it in the gun description
-
-reactor:  add horizontal flip mode
 
 pause time like invariant for other things...
   throwing blocks
@@ -139,32 +121,7 @@ tech: harpoons stick into enemies
   attaches mob to wall if possible
   firing while harpoon is stuck into an enemy rips it out of them, inflicting damage and stun and pulling them towards you
 
-bug: often game puts player position at NaN
-  try:
-    cloaking/harpoon grapple on normal, continue past beating the final boss
-  clues:
-    maybe with vanish or other special blocks and grapple hook
-    very high level for tech, duplication
-      happened once with only 13 tech
-        ?&seed=7269&gun0=drones&gun1=matter%20wave&gun2=shotgun&tech0=arsenal&tech1=dead%20reckoning&tech2=regression&tech3=unified%20field%20theory&tech4=rivet%20gun&tech5=phonon&tech6=affine%20connection&field=wormhole&difficulty=2
-    maybe not about JUNK though
-    maybe on tons of bullets
-    maybe grappling hook, Bulk modulus
-  solution: just kill the player if they go NaN
-  vanish elements shouldn't collide with mobs
-    maybe they don't return if mobs are in the way?
-    maybe they kill mobs in the way
-    maybe they should go non-collide with mobs
 
-bug: harpoon attack gave a mob really high levels of health
-  recent events:
-    had 3 harpoons at a time
-    tech: immune with grappling hook, Bulk modulus
-    cancel true colors with pure science
-    attack with harpoon at slasher mobs
-      they didn't die, but they should in one hit  instead they got a huge health bar,  then I just died for no reason after touching one
-
-bug: maybe I can put in an event listener to reset inputs to false when you tab out to prevent key sticking
 
 enemies stuck with foam receive upward force over time
   only form aerogel tech?
@@ -194,19 +151,6 @@ a mine tech that makes mines you can stand on
 setting to remove UI, except health bar
   except active gun? to see ammo
   checkbox in pause and in settings
-
-bug - url sharing still broken sometimes
-    
-tech upgrade to anthropic principle to make it trigger at 50% life and 0% once per map
-
-bug? cloaking field doesn't show energy over max
-
-run more profiles of n-gon to fix performance issues
-
-bug:  possibly clearing away all bullets causes a problem
-  bullet.js 255  (.do() is missing)
-  I died and quantum immortality triggered (I had needles and ice-IX)
-  game crashed but recovered
 
 go non-collide with mobs when immune to damage?
 
@@ -325,9 +269,6 @@ electric motors: increases movement speed and jump height, but jumping and movin
 mob that fires bullets in 4,5,6,7 different directions at once,  no aiming
   grow a bit before it fires to indicate state
 
-bug once:  switching from shotgun to harpoon somehow set b.activeGun to not defined
-  https://discord.com/channels/645222059647172618/646505973610971165/919116288008290324
-
 quasarBoss: inverted pulsar boss that hits everything except where its aiming
 
 intro map: diegeticly draw a mouse with field highlighted
@@ -348,8 +289,6 @@ mob/boss that fires a laser at player, but give player time to avoid
   laser isn't always on
   they target where player was 1 second ago
   they turn to face player?
-
-bug - death while paused crashes game?
 
 tech rocket jump - jumping produces an explosion at your feet that lets you jump extra high, but does some damage
   require electric reactive armor?
@@ -546,6 +485,28 @@ n-gon outreach ideas
   twitch - lets play
 
 ******************************************************** BUGS ********************************************************
+
+timeskip flickers with tech: clock gating, and game pause after large hit
+  probably not related to timeskip, related to graphics effect
+  not a big problem, actually it's kinda neat effect
+    only fix if there is a clear solution
+
+bug: maybe I can put in an event listener to reset inputs to false when you tab out to prevent key sticking
+
+bug - url sharing still broken sometimes
+    
+tech upgrade to anthropic principle to make it trigger at 50% life and 0% once per map
+
+bug? cloaking field doesn't show energy over max
+
+run more profiles of n-gon to fix performance issues
+
+bug - death while paused crashes game?
+
+bug:  possibly clearing away all bullets causes a problem
+  bullet.js 255  (.do() is missing)
+  I died and quantum immortality triggered (I had needles and ice-IX)
+  game crashed but recovered
 
 vanish element bug, crashes on touching element,  happens for 1 person maybe with junk tech?
 

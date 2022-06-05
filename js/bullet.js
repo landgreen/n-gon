@@ -347,14 +347,14 @@ const b = {
         }
     },
     explosionRange() {
-        return tech.explosiveRadius * (tech.isExplosionHarm ? 1.8 : 1) * (tech.isSmallExplosion ? 0.66 : 1) * (tech.isExplodeRadio ? 1.25 : 1)
+        return tech.explosiveRadius * (tech.isExplosionHarm ? 1.7 : 1) * (tech.isSmallExplosion ? 0.66 : 1) * (tech.isExplodeRadio ? 1.25 : 1)
     },
     explosion(where, radius, color = "rgba(255,25,0,0.6)") { // typically explode is used for some bullets with .onEnd
         radius *= tech.explosiveRadius
 
         let dist, sub, knock;
         let dmg = radius * 0.019 * (tech.isExplosionStun ? 0.7 : 1); //* 0.013 * (tech.isExplosionStun ? 0.7 : 1);
-        if (tech.isExplosionHarm) radius *= 1.8 //    1/sqrt(2) radius -> area
+        if (tech.isExplosionHarm) radius *= 1.7 //    1/sqrt(2) radius -> area
         if (tech.isSmallExplosion) {
             // color = "rgba(255,0,30,0.7)"
             radius *= 0.66
@@ -375,7 +375,7 @@ const b = {
 
             //player damage
             if (Vector.magnitude(Vector.sub(where, player.position)) < radius) {
-                const DRAIN = (tech.isExplosionHarm ? 0.9 : 0.45) * (tech.isRadioactiveResistance ? 0.25 : 1)
+                const DRAIN = (tech.isExplosionHarm ? 0.67 : 0.45) * (tech.isRadioactiveResistance ? 0.25 : 1)
                 if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 if (m.energy < 0) {
                     m.energy = 0
@@ -424,7 +424,7 @@ const b = {
 
                 if (dist < radius) {
                     if (simulation.dmgScale) {
-                        const harm = radius * (tech.isExplosionHarm ? 0.00036 : 0.00018)
+                        const harm = tech.isExplosionHarm ? 0.075 : 0.05
                         if (tech.isImmuneExplosion && m.energy > 0.15) {
                             // const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
                             m.energy -= 0.15
@@ -458,14 +458,14 @@ const b = {
                         body[i].force.y += knock.y;
                         if (tech.isBlockExplode) {
                             if (body[i] === m.holdingTarget) m.drop()
-                            const size = 20 + 350 * Math.pow(body[i].mass, 0.25)
+                            const size = 20 + 300 * Math.pow(body[i].mass, 0.25)
                             const where = body[i].position
                             const onLevel = level.onLevel //prevent explosions in the next level
                             Matter.Composite.remove(engine.world, body[i]);
                             body.splice(i, 1);
                             setTimeout(() => {
                                 if (onLevel === level.onLevel) b.explosion(where, size); //makes bullet do explosive damage at end
-                            }, 150 + 300 * Math.random());
+                            }, 250 + 300 * Math.random());
                         }
                     } else if (dist < alertRange) {
                         knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * body[i].mass * 0.011);
@@ -2389,14 +2389,14 @@ const b = {
                 }
                 if (tech.isLaserPush) { //push mobs away
                     const index = path.length - 1
-                    Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.95, y: best.who.velocity.y * 0.95 });
-                    const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.005 * push * Math.min(6, best.who.mass))
+                    Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.97, y: best.who.velocity.y * 0.97 });
+                    const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.003 * push * Math.min(6, best.who.mass))
                     Matter.Body.applyForce(best.who, path[index], force)
                 }
             } else if (tech.isLaserPush && best.who.classType === "body") {
                 const index = path.length - 1
-                Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.95, y: best.who.velocity.y * 0.95 });
-                const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.005 * push * Math.min(6, best.who.mass))
+                Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.97, y: best.who.velocity.y * 0.97 });
+                const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.003 * push * Math.min(6, best.who.mass))
                 Matter.Body.applyForce(best.who, path[index], force)
             }
         };
@@ -4203,7 +4203,7 @@ const b = {
                     }
                 }
 
-                if (!m.isCloak) { //if time dilation isn't active
+                if (!m.isCloak) { //if cloaking field isn't active
                     const size = 33
                     q = Matter.Query.region(mob, {
                         min: {
@@ -6957,8 +6957,15 @@ const b = {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
                     m.fireCDcycle = m.cycle
-                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode
-                    b.laser();
+                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode / b.fireCDscale
+                    const where = {
+                        x: m.pos.x + 20 * Math.cos(m.angle),
+                        y: m.pos.y + 20 * Math.sin(m.angle)
+                    }
+                    b.laser(where, {
+                        x: where.x + 3000 * Math.cos(m.angle),
+                        y: where.y + 3000 * Math.sin(m.angle)
+                    }, tech.laserDamage / b.fireCDscale);
                 }
             },
             firePulse() {
@@ -6969,11 +6976,11 @@ const b = {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
                     m.fireCDcycle = m.cycle
-                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode
+                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode / b.fireCDscale
                     // const divergence = input.down ? 0.15 : 0.2
                     // const scale = Math.pow(0.9, tech.beamSplitter)
                     // const pushScale = scale * scale
-                    let dmg = tech.laserDamage // * scale //Math.pow(0.9, tech.laserDamage)
+                    let dmg = tech.laserDamage / b.fireCDscale // * scale //Math.pow(0.9, tech.laserDamage)
                     const where = {
                         x: m.pos.x + 20 * Math.cos(m.angle),
                         y: m.pos.y + 20 * Math.sin(m.angle)
@@ -6993,7 +7000,7 @@ const b = {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
                     m.fireCDcycle = m.cycle
-                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode
+                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode / b.fireCDscale
                     const range = {
                         x: 5000 * Math.cos(m.angle),
                         y: 5000 * Math.sin(m.angle)
@@ -7006,7 +7013,7 @@ const b = {
                         x: 7.5 * Math.cos(m.angle - Math.PI / 2),
                         y: 7.5 * Math.sin(m.angle - Math.PI / 2)
                     }
-                    const dmg = 0.70 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
+                    const dmg = 0.70 * tech.laserDamage / b.fireCDscale //  3.5 * 0.55 = 200% more damage
                     const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                     const eye = {
                         x: m.pos.x + 15 * Math.cos(m.angle),
@@ -7057,8 +7064,8 @@ const b = {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
                     m.fireCDcycle = m.cycle
-                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode
-                    const dmg = 0.4 * tech.laserDamage //  3.5 * 0.55 = 200% more damage
+                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode / b.fireCDscale
+                    const dmg = 0.4 * tech.laserDamage / b.fireCDscale //  3.5 * 0.55 = 200% more damage
                     const spacing = Math.ceil(4 - 0.3 * tech.historyLaser)
                     ctx.beginPath();
                     b.laser({
@@ -7084,27 +7091,6 @@ const b = {
                     ctx.stroke();
                 }
             },
-            // firePulse() {
-            //     m.fireCDcycle = m.cycle + Math.floor((tech.isPulseAim ? 25 : 50) * b.fireCDscale); // cool down
-            //     let energy = 0.3 * Math.min(m.energy, 1.5)
-            //     m.energy -= energy * tech.isLaserDiode
-            //     if (tech.beamSplitter) {
-            //         // energy *= Math.pow(0.9, tech.beamSplitter)
-            //         // b.pulse(energy, m.angle)
-            //         // for (let i = 1; i < 1 + tech.beamSplitter; i++) {
-            //         //     b.pulse(energy, m.angle - i * 0.27)
-            //         //     b.pulse(energy, m.angle + i * 0.27)
-            //         // }
-            //         const divergence = input.down ? 0.2 : 0.5
-            //         const angle = m.angle - tech.beamSplitter * divergence / 2
-            //         for (let i = 0; i < 1 + tech.beamSplitter; i++) {
-            //             b.pulse(energy, angle + i * divergence)
-            //         }
-
-            //     } else {
-            //         b.pulse(energy, m.angle)
-            //     }
-            // },
         },
     ],
 };

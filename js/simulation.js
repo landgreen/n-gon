@@ -848,7 +848,6 @@ const simulation = {
         m.fireCDcycle = 0
         m.drop();
         m.hole.isOn = false;
-        level.zones = [];
         simulation.drawList = [];
 
         if (tech.isDronesTravel && m.alive) {

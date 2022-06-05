@@ -646,7 +646,7 @@ const m = {
         }
     },
     damage(dmg) {
-        if (tech.isRewindAvoidDeath && m.energy > 0.6) {
+        if (tech.isRewindAvoidDeath && m.energy > 0.6 && dmg > 0.01) {
             const steps = Math.floor(Math.min(299, 150 * m.energy))
             simulation.makeTextLog(`<span class='color-var'>m</span>.rewind(${steps})`)
             m.rewind(steps)
@@ -981,6 +981,7 @@ const m = {
     },
     setMaxEnergy() {
         m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 0.6 * (m.fieldUpgrades[m.fieldMode].name === "standing wave")
+        // if (tech.isEnergyHealth) m.maxEnergy *= Math.sqrt(m.harmReduction())
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",

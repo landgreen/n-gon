@@ -109,7 +109,7 @@ function collisionChecks(event) {
                         let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * simulation.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
                         if (m.isCloak) dmg *= 0.5
                         mob[k].foundPlayer();
-                        if (tech.isRewindAvoidDeath && m.energy > 0.66) { //CPT reversal runs in m.damage, but it stops the rest of the collision code here too
+                        if (tech.isRewindAvoidDeath && m.energy > 0.66 && dmg > 0.01) { //CPT reversal runs in m.damage, but it stops the rest of the collision code here too
                             m.damage(dmg);
                             return
                         }
@@ -190,7 +190,7 @@ function collisionChecks(event) {
                                     time: simulation.drawTime
                                 });
                             }
-                            if (tech.isLessDamageReduction && !mob[k].shield) mob[k].damageReduction *= mob[k].isBoss ? 1.0025 : 1.05
+                            if (tech.isLessDamageReduction && !mob[k].shield) mob[k].damageReduction *= mob[k].isBoss ? (mob[k].isFinalBoss ? 1.0005 : 1.0025) : 1.05
                             return;
                         }
                         //mob + body collisions
@@ -229,7 +229,7 @@ function collisionChecks(event) {
                                 }
 
                                 const stunTime = dmg / Math.sqrt(obj.mass)
-                                if (stunTime > 0.5) mobs.statusStun(mob[k], 60 + 60 * Math.sqrt(stunTime))
+                                if (stunTime > 0.5 && mob[k].memory !== Infinity) mobs.statusStun(mob[k], 60 + 60 * Math.sqrt(stunTime))
                                 if (mob[k].alive && mob[k].distanceToPlayer2() < 1000000 && !m.isCloak) mob[k].foundPlayer();
                                 if (tech.fragments && obj.speed > 10 && !obj.hasFragmented) {
                                     obj.hasFragmented = true;

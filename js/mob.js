@@ -115,13 +115,19 @@ const mobs = {
             who.isStunned = true;
             who.status.push({
                 effect() {
-                    who.seePlayer.yes = false;
-                    who.seePlayer.recall = 0;
-                    who.seePlayer.position = {
-                        x: who.position.x + 100 * (Math.random() - 0.5),
-                        y: who.position.y + 100 * (Math.random() - 0.5)
+                    if (who.memory !== Infinity) {
+                        who.seePlayer.yes = false;
+                        who.seePlayer.recall = 0;
+                        who.seePlayer.position = {
+                            x: who.position.x + 100 * (Math.random() - 0.5),
+                            y: who.position.y + 100 * (Math.random() - 0.5)
+                        }
+                    } else {
+                        Matter.Body.setVelocity(who, {
+                            x: who.velocity.x * 0.6,
+                            y: who.velocity.y * 0.6
+                        });
                     }
-                    // && !who.isBoss
                     if (who.velocity.y < 2) who.force.y += who.mass * 0.0004 //extra gravity
 
                     //draw health bar

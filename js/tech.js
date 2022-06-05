@@ -93,6 +93,8 @@ const tech = {
         //     console.log(count)
         // }
         // count total non junk tech
+        id = "github"
+
         let count = 0
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isJunk) count += tech.tech[i].frequency
@@ -2223,6 +2225,7 @@ const tech = {
         },
         {
             name: "mass-energy equivalence",
+            // description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>√ of <strong class='color-harm'>harm</strong> <strong>reduction</strong> reduces max <strong class='color-f'>energy</strong>",
             description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong class='color-harm'>harm</strong> <strong>reduction</strong> effects provide <strong>no</strong> benefit",
             maxCount: 1,
             count: 0,
@@ -3675,11 +3678,13 @@ const tech = {
         },
         {
             name: "strange attractor",
-            description: `use ${powerUps.orb.research(2)} to spawn <strong>1</strong> <strong class='color-m'>tech</strong><br>with <strong>double</strong> your <strong class='color-dup'>duplication</strong> chance`,
+            descriptionFunction() { return `use ${powerUps.orb.research(2)} to spawn <strong>1</strong> <strong class='color-m'>tech</strong> with <strong>double</strong><br>your <strong class='color-dup'>duplication</strong> chance <em>(${(2*tech.duplicationChance()*100).toFixed(0)}%)</em>` },
+
+            // description: `use ${powerUps.orb.research(2)} to spawn <strong>1</strong> <strong class='color-m'>tech</strong> with <strong>double</strong><br>your <strong class='color-dup'>duplication</strong> chance <em>(${(2*tech.duplicationChance()*100).toFixed(0)}%)</em>`,
             maxCount: 1,
             count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
+            frequency: 1000,
+            frequencyDefault: 1000,
             isNonRefundable: true,
             isBadRandomOption: true,
             allowed() {
@@ -4613,7 +4618,7 @@ const tech = {
             allowed() {
                 return tech.haveGunCheck("missiles") && tech.isMissileBig //&& !tech.isSmartRadius && !tech.isImmuneExplosion
             },
-            requires: "missiles, cruse missile", //, not electric reactive armor, controlled explosions",
+            requires: "missiles, cruse missile",
             effect() {
                 tech.isMissileBiggest = true
             },
@@ -4767,7 +4772,7 @@ const tech = {
         },
         {
             name: "acetone peroxide",
-            description: "increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>80%</strong>, but<br>you take <strong>200%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
+            description: "increase <strong class='color-e'>explosive</strong> <strong>radius</strong> by <strong>70%</strong>, but<br>you take <strong>50%</strong> more <strong class='color-harm'>harm</strong> from <strong class='color-e'>explosions</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -4857,9 +4862,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return !tech.isSmartRadius && !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
+                return !tech.isSmartRadius && !tech.isExplodeRadio && tech.hasExplosiveDamageCheck() && !tech.isEnergyHealth
             },
-            requires: "an explosive damage source, not iridium-192",
+            requires: "an explosive damage source, not iridium-192, mass-energy",
             effect: () => {
                 tech.isImmuneExplosion = true;
             },
@@ -4916,9 +4921,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("grenades") && !tech.isNeutronBomb
+                return tech.haveGunCheck("grenades") && !tech.isNeutronBomb && !tech.isBlockExplode
             },
-            requires: "grenades, not neutron bomb",
+            requires: "grenades, not neutron bomb, chain reaction",
             effect() {
                 tech.isVacuumBomb = true;
                 b.setGrenadeMode()
@@ -4937,9 +4942,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("grenades") && !tech.isExplodeRadio && !tech.isNeutronBomb //tech.isVacuumBomb
+                return tech.haveGunCheck("grenades") && !tech.isExplodeRadio && !tech.isNeutronBomb && !tech.isVacuumBomb
             },
-            requires: "grenades, not iridium-192, neutron bomb",
+            requires: "grenades, not iridium-192, neutron bomb, vacuum bomb",
             effect() {
                 tech.isBlockExplode = true; //chain reaction
             },
@@ -5013,9 +5018,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("grenades") && !tech.fragments && !tech.isVacuumBomb && !tech.isExplodeRadio && !tech.isBlockExplode && !tech.isClusterExplode
+                return tech.haveGunCheck("grenades") && !tech.fragments && !tech.isVacuumBomb && !tech.isExplodeRadio && !tech.isBlockExplode && !tech.isClusterExplode && !tech.isPetalsExplode && !tech.isCircleExplode
             },
-            requires: "grenades, not fragmentation, vacuum bomb, iridium-192, pyrotechnics",
+            requires: "grenades, not fragmentation, vacuum bomb, iridium-192, pyrotechnics, fireworks, flame test",
             effect() {
                 tech.isNeutronBomb = true;
                 b.setGrenadeMode()
@@ -6147,7 +6152,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (tech.haveGunCheck("laser") || tech.isLaserBotUpgrade || tech.isLaserMine) && tech.laserDamage === 0.18
+                return (tech.haveGunCheck("laser") || tech.isLaserBotUpgrade || tech.isLaserMine) && tech.laserDamage === 0.16
             },
             requires: "laser, not free-electron",
             effect() {
@@ -6174,14 +6179,14 @@ const tech = {
             },
             requires: "laser, not pulse, diodes",
             effect() {
-                tech.laserFieldDrain = 0.007 //base is 0.002
-                tech.laserDamage = 0.54; //base is 0.18
+                tech.laserFieldDrain = 0.0063 //base is 0.002
+                tech.laserDamage = 0.48; //base is 0.16
                 tech.laserColor = "#83f"
                 tech.laserColorAlpha = "rgba(136, 51, 255,0.5)"
             },
             remove() {
-                tech.laserFieldDrain = 0.002;
-                tech.laserDamage = 0.18; //used in check on pulse and diode: tech.laserDamage === 0.16
+                tech.laserFieldDrain = 0.0018;
+                tech.laserDamage = 0.18; //used in check on pulse and diode: tech.laserDamage === 0.18
                 tech.laserColor = "#f00"
                 tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
             }
@@ -6348,7 +6353,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.18 && !tech.isStuckOn
+                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.16 && !tech.isStuckOn
             },
             requires: "laser gun, not specular reflection, diffuse, free-electron laser, optical amplifier",
             effect() {
@@ -7838,6 +7843,26 @@ const tech = {
         //     remove() {}
         // },
         {
+            name: "return",
+            description: "return to the introduction level<br>reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            isNonRefundable: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                // level.levelsCleared = 0 //increases chance of power ups spawns, so shouldn't reset
+                level.difficultyDecrease(simulation.difficultyMode * 2)
+                level.onLevel = 0
+                simulation.clearNow = true //end current level
+            },
+            remove() {}
+        },
+        {
             name: "panpsychism",
             description: "awaken all <strong class='color-block'>blocks</strong><br><strong class='color-block'>blocks</strong> have a chance to spawn power ups",
             maxCount: 1,
@@ -7907,7 +7932,7 @@ const tech = {
         },
         {
             name: "closed timelike curve",
-            description: "spawn 5 <strong class='color-f'>field</strong> power ups, but every 12 seconds<br>teleport a second into your future<br>",
+            description: "spawn 5 <strong class='color-f'>field</strong> power ups, but every 12 seconds<br>teleport a second into your future or past",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -7923,7 +7948,14 @@ const tech = {
                 function loop() {
                     if (!simulation.paused && m.alive) {
                         if (!(simulation.cycle % 720)) {
-                            requestAnimationFrame(() => { simulation.timePlayerSkip(60) }); //wrapping in animation frame prevents errors, probably
+                            requestAnimationFrame(() => {
+                                if ((simulation.cycle % 1440) > 720) { //kinda alternate between each option
+                                    m.rewind(60)
+                                    m.energy += 0.4 //to make up for lost energy
+                                } else {
+                                    simulation.timePlayerSkip(60)
+                                }
+                            }); //wrapping in animation frame prevents errors, probably
                         }
                     }
                     requestAnimationFrame(loop);
@@ -9065,7 +9097,10 @@ const tech = {
             allowed() { return true },
             requires: "",
             effect() {
-                setInterval(() => { m.rewind(120) }, 10000);
+                setInterval(() => {
+                    m.rewind(120)
+                    m.energy += 0.4
+                }, 10000);
                 // for (let i = 0; i < 24; i++) {
                 //     setTimeout(() => { m.rewind(120) }, i * 5000);
                 // }
@@ -9083,7 +9118,10 @@ const tech = {
             allowed() { return true },
             requires: "",
             effect() {
-                setInterval(() => { m.rewind(30) }, 4000);
+                setInterval(() => {
+                    m.rewind(30)
+                    m.energy += 0.2
+                }, 4000);
             },
             remove() {}
         },
@@ -9674,6 +9712,28 @@ const tech = {
             },
             remove() {}
         },
+        // {
+        //     name: "JUNKie",  //just crashes the game
+        //     description: "all junk",
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 1,
+        //     frequencyDefault: 1,
+        //     isNonRefundable: true,
+        //     isJunk: true,
+        //     allowed() { return true },
+        //     requires: "",
+        //     effect() {
+
+        //         for (let i = 0, len = tech.tech.length; i < len; i++) {
+        //             if (tech.tech[i].isJunk && tech.tech[i].count < tech.tech[i].maxCount) tech.tech[i].effect()
+        //         }
+
+        //     },
+        //     remove() {
+        //         tech.tooManyTechChoices = 0
+        //     }
+        // },
         {
             name: "path integral",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Path_integral_formulation' class="link">path integral</a>`,

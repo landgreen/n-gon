@@ -289,6 +289,7 @@ const spawn = {
             Composite.add(engine.world, me.constraint);
         }, 2000); //add in a delay in case the level gets flipped left right
         me.isBoss = true;
+        me.isFinalBoss = true;
         me.frictionAir = 0.01;
         me.memory = Infinity;
         me.hasRunDeathScript = false
@@ -956,7 +957,7 @@ const spawn = {
         me.isCell = true;
         me.cellID = cellID
         me.accelMag = 0.000165 * simulation.accelScale;
-        me.memory = 40;
+        me.memory = Infinity;
         me.isVerticesChange = true
         me.frictionAir = 0.012
         me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
