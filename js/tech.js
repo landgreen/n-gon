@@ -2579,7 +2579,7 @@ const tech = {
         },
         {
             name: "Zeno's paradox",
-            description: "reduce <strong class='color-harm'>harm</strong> by <strong>85%</strong>, but every <strong>5</strong> seconds<br>remove <strong>6%</strong> of your current <strong class='color-h'>health</strong>",
+            description: "reduce <strong class='color-harm'>harm</strong> by <strong>85%</strong>, but every <strong>5</strong> seconds<br>remove <strong>5%</strong> of your current <strong class='color-h'>health</strong>",
             // description: "every <strong>5</strong> seconds remove <strong>1/10</strong> of your <strong class='color-h'>health</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>90%</strong>",
             maxCount: 1,
             count: 0,
@@ -3679,12 +3679,11 @@ const tech = {
         {
             name: "strange attractor",
             descriptionFunction() { return `use ${powerUps.orb.research(2)} to spawn <strong>1</strong> <strong class='color-m'>tech</strong> with <strong>double</strong><br>your <strong class='color-dup'>duplication</strong> chance <em>(${(2*tech.duplicationChance()*100).toFixed(0)}%)</em>` },
-
             // description: `use ${powerUps.orb.research(2)} to spawn <strong>1</strong> <strong class='color-m'>tech</strong> with <strong>double</strong><br>your <strong class='color-dup'>duplication</strong> chance <em>(${(2*tech.duplicationChance()*100).toFixed(0)}%)</em>`,
             maxCount: 1,
             count: 0,
-            frequency: 1000,
-            frequencyDefault: 1000,
+            frequency: 1,
+            frequencyDefault: 1,
             isNonRefundable: true,
             isBadRandomOption: true,
             allowed() {
@@ -9623,17 +9622,15 @@ const tech = {
             remove() {}
         },
         {
-            name: "re-arm",
-            description: "remove all your <strong class='color-g'>guns</strong>,<br>and <strong>spawn</strong> new ones",
-            maxCount: 9,
+            name: "translucent",
+            description: "remove your <strong class='color-g'>guns</strong> and <strong>spawn</strong> new ones<br>your <strong class='color-g'>bullets</strong> and bots are transparent",
+            maxCount: 1,
             count: 0,
             frequency: 0,
             isNonRefundable: true,
             isJunk: true,
-            allowed() {
-                return b.inventory.length > 0
-            },
-            requires: "at least 1 gun",
+            allowed() { return true },
+            requires: "",
             effect() {
                 for (let i = 0; i < b.inventory.length; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "gun");
 
@@ -9646,6 +9643,7 @@ const tech = {
                     if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = 0;
                 }
                 simulation.makeGunHUD(); //update gun HUD
+                b.bulletDraw = () => {};
             },
             remove() {}
         },

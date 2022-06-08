@@ -958,13 +958,16 @@ const spawn = {
         me.cellID = cellID
         me.accelMag = 0.000165 * simulation.accelScale;
         me.memory = Infinity;
+        me.leaveBody = false;
         me.isVerticesChange = true
         me.frictionAir = 0.012
         me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
         me.seeAtDistance2 = 1400000;
         me.cellMassMax = 70
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body | cat.map
-        Matter.Body.setDensity(me, 0.00035) // normal density is 0.001 // this reduces life by half and decreases knockback
+        Matter.Body.setDensity(me, 0.0002 + 0.00001 * simulation.difficulty) // normal density is 0.001
+        me.damageReduction = 0.17 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1); //me.damageReductionGoal
+
         const k = 642 //k=r^2/m
         me.split = function() {
             Matter.Body.scale(this, 0.45, 0.45);
@@ -979,7 +982,6 @@ const spawn = {
         me.onDamage = function(dmg) {
             if (Math.random() < 0.34 * dmg * Math.sqrt(this.mass) && this.health > dmg) this.split();
         }
-        me.damageReduction = 0.17 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1); //me.damageReductionGoal
         me.do = function() {
             this.seePlayerByDistOrLOS();
             this.checkStatus();
@@ -1016,7 +1018,6 @@ const spawn = {
             if (count < 1) { //only drop a power up if this is the last cell
                 powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             } else {
-                this.leaveBody = false;
                 this.isDropPowerUp = false;
             }
         }
@@ -2461,7 +2462,6 @@ const spawn = {
                 ctx.fill();
                 ctx.stroke();
             }
-
 
             // ctx.beginPath();
             // ctx.arc(this.position.x, this.position.y, this.laserRange * 0.9, 0, 2 * Math.PI);

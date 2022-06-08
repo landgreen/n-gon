@@ -1,26 +1,20 @@
 ******************************************************** NEXT PATCH **************************************************
 
-laser energy drain and damage now scale with fire delay effects
-  no change for pulse since it already has a fire delay
+new community map: dripp!
+  enable the 13 community maps in settings
 
-explosion harm to player no longer scales with explosion radius
-  explosion damage will treat all explosions the same as a basic grenade explosion
-  large radius explosions are much safer
-acetone peroxide 80->70% increased radius, 100->50% increase in harm from explosions
 
-CPT only triggers from damage above 1% per game cycle
-  so no trigger from slime hazards or black holes or mob auras
-level: reactor has a horizontal flipped mode
-regression gives finalBoss(1.0005), Boss(1.0025), mob(1.05) increased damage taken
-
-JUNK tech: return - go back to the intro level, but keep your tech
-
-bug fixes
 
 *********************************************************** TODO *****************************************************
 
+
 block manufacturing - molecular assembler tech
 Holding r-click will create a slowly increasing in size block, which will be thrown on release
+
+double research
+
+map ban option in settings
+  dropdown list with checkboxes by each map
 
 bullets that can target the player
   occurs if no mobs targets around
@@ -88,13 +82,14 @@ plasma ball
     plasma orb increases in size and power as it eats enemies
       while attached?
 
-make level.do() graphic that only shows direction player is facing
-  pattern it after cloaking field
-    will it work with cloaking field at the same time
+flashlight effect
+  make level.do() graphic that only shows direction player is facing
+    pattern it after cloaking field, or timeSkipBoss
+      will it work with cloaking field at the same time
 
 double jump?
 
-tech coyote time
+tech: coyote time
   you can still jump for 2 seconds after falling off a ledge
   make it a JUNK tech? so you can keep the name
   some other benefit
