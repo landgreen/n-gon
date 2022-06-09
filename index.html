@@ -12,10 +12,12 @@
     <meta name="twitter:title" content="n-gon">
     <meta name="twitter:description" content="Browser-based side scrolling video game with the matter.js physics engine.">
     <title>n-gon</title>
-    <script type="module">
-       import 'https://cdn.jsdelivr.net/npm/@pwabuilder/pwaupdate';
-       const el = document.createElement('pwa-update');
-       document.body.appendChild(el);
+    <script>
+    if('serviceWorker' in navigator) {
+    navigator.serviceWorker
+             .register('/sw.js')
+             .then(function() { console.log("Created service worker"); });
+    }
     </script>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json" />
