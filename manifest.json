@@ -1,0 +1,18 @@
+{
+  "background_color": "#ffffff",
+  "description": "Browser-based side scrolling video game with the matter.js physics engine.",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "n-gon",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "n-gon",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "type": "image/x-icon"
+    }
+  ]
+}
