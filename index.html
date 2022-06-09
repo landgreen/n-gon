@@ -15,7 +15,7 @@
     <script>
     if('serviceWorker' in navigator) {
     navigator.serviceWorker
-             .register('sw.js')
+             .register('/n-gon/sw.js', {scope: '/n-gon/'})
              .then(function() { console.log("Created service worker"); });
     }
     </script>
