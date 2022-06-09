@@ -5,9 +5,9 @@
   "display": "standalone",
   "name": "n-gon",
   "orientation": "any",
-  "scope": "/",
+  "scope": "/n-gon/",
   "short_name": "n-gon",
-  "start_url": "/",
+  "start_url": "/n-gon/",
   "theme_color": "#ffffff",
   "icons": [
     {
