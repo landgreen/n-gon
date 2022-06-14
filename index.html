@@ -12,7 +12,16 @@
     <meta name="twitter:title" content="n-gon">
     <meta name="twitter:description" content="Browser-based side scrolling video game with the matter.js physics engine.">
     <title>n-gon</title>
+    <script>
+    if('serviceWorker' in navigator) {
+    navigator.serviceWorker
+             .register('/n-gon/sw.js', {scope: '/n-gon/'})
+             .then(function() { console.log("Created service worker"); });
+    }
+    </script>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json" />
+    <link rel="canonical" href="https://eris-webservices.github.io/n-gon/" />
     <link rel='shortcut icon' href='favicon.ico' type='image/x-icon' />
 </head>
 
