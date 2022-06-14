@@ -219,6 +219,9 @@ for (let i = 0, len = tech.tech.length; i < len; i++) {
     if (!tech.tech[i].link) tech.tech[i].link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(tech.tech[i].name).replace(/'/g, '%27')}&title=Special:Search' class="link">${tech.tech[i].name}</a>`
 }
 
+
+//<br>effective <strong class='color-defense'>defense</strong>: ${(1-simulation.dmgScale*m.harmReduction()).toPrecision(3)}
+//<br>effective <strong class='color-d'>damage</strong>: ${(tech.damageFromTech() * m.dmgScale).toPrecision(3)}
 const build = {
     pauseGrid() {
         //left side
@@ -238,18 +241,18 @@ const build = {
     <g stroke='none' fill='#333' stroke-width="2" font-size="14px" font-family="Ariel, sans-serif"> <text x="5" y="15">copy build url</text></g>
 </svg><br>`
         text += `
-<br>effective <strong class='color-d'>damage</strong>: ${(tech.damageFromTech() * m.dmgScale).toPrecision(4)}
-<br>damage: ${((tech.damageFromTech())).toPrecision(4)}, difficulty: ${((m.dmgScale)).toPrecision(4)}
+<br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(3)}
+<br>difficulty: ${((m.dmgScale)).toPrecision(3)}
 <br>
-<br>effective <strong class='color-harm'>harm</strong>: ${(simulation.dmgScale*m.harmReduction()).toPrecision(4)}
-<br>reduction: ${(m.harmReduction()).toPrecision(4)}, difficulty: ${(simulation.dmgScale).toPrecision(4)}
+<br>+<strong class='color-defense'>defense</strong>: ${(1-m.harmReduction()).toPrecision(3)}
+<br>difficulty: ${(simulation.dmgScale).toPrecision(3)}
 <br>
 ${botText}
 <br><strong class='color-h'>health</strong>: (${(m.health*100).toFixed(0)} / ${(m.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(m.energy*100).toFixed(0)} / ${(m.maxEnergy*100).toFixed(0)})
 <br><strong class='color-g'>gun</strong>: ${b.activeGun === null || b.activeGun === undefined ? "undefined":b.guns[b.activeGun].name} &nbsp; <strong class='color-g'>ammo</strong>: ${b.activeGun === null || b.activeGun === undefined ? "0":b.guns[b.activeGun].ammo}
 <br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
 <br><strong class='color-dup'>duplication</strong> chance: ${(tech.duplicationChance()*100).toFixed(0)}%
-<br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
+<br><br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
 <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
 <br>mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
 <br>
@@ -507,6 +510,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                     }
                 } else {
                     text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled"><div class="grid-title"> ${tech.tech[i].name}</div> ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+                    // text += `<div id="tech-${i}" class="experiment-grid-module experiment-grid-disabled"><div class="grid-title"> ${tech.tech[i].name}</div> ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
                 }
             }
         }
@@ -963,7 +967,7 @@ window.addEventListener("keydown", function(event) {
                             </tr>                            
                             <tr>
                                 <td class='key-input-pause'>H</td>
-                                <td class='key-used'>harm immunity</td>
+                                <td class='key-used'>+100% defense</td>
                             </tr>
                             <tr>
                                 <td class='key-input-pause'>B</td>

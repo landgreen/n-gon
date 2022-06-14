@@ -514,7 +514,7 @@ const m = {
         dmg *= m.fieldHarmReduction
         if (tech.isZeno) dmg *= 0.15
         if (tech.isFieldHarmReduction) dmg *= 0.5
-        if (tech.isHarmMACHO) dmg *= 0.33
+        if (tech.isHarmMACHO) dmg *= 0.4
         if (tech.isImmortal) dmg *= 0.66
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.33
         if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
@@ -537,7 +537,7 @@ const m = {
     rewind(steps) { // m.rewind(Math.floor(Math.min(599, 137 * m.energy)))
         if (tech.isRewindGrenade) {
             const immunityDuration = 65
-            const immunityCycle = m.cycle + immunityDuration + 10
+            const immunityCycle = m.cycle + immunityDuration + 10 + tech.isPetalsExplode * 30 + tech.isCircleExplode * 21
             if (m.immuneCycle < immunityCycle) m.immuneCycle = immunityCycle; //player is immune to damage until after grenades might explode...
 
             for (let i = 1, len = Math.floor(4 + steps / 40); i < len; i++) {
@@ -1523,9 +1523,9 @@ const m = {
     },
     fieldUpgrades: [{
             name: "field emitter",
-            //<br><strong class='color-f'>energy</strong> regen disabled if immune to <strong class='color-harm'>harm</strong>
-            description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>store up to <strong>100</strong> <strong class='color-f'>energy</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
-            // description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs,<br><strong>grab</strong> power ups, and <strong>throw</strong> <strong class='color-block'>blocks</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/s, when not immune to <strong class='color-harm'>harm</strong>",
+            //<br><strong class='color-f'>energy</strong> regen disabled if immune to <strong class='color-defense'>harm</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>100</strong> max <strong class='color-f'>energy</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
+            // description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs,<br><strong>grab</strong> power ups, and <strong>throw</strong> <strong class='color-block'>blocks</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/s, when not immune to <strong class='color-defense'>harm</strong>",
             effect: () => {
                 m.hold = function() {
                     if (m.isHolding) {
@@ -1551,7 +1551,7 @@ const m = {
         {
             name: "standing wave",
             //<strong>deflecting</strong> protects you in every <strong>direction</strong>
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br>increase your <strong>max</strong> <strong class='color-f'>energy</strong> by <strong>60</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second", //drains <strong class='color-f'>energy</strong>  //<strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br> <strong>+60</strong> max <strong class='color-f'>energy</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //drains <strong class='color-f'>energy</strong>  //<strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>
             drainCD: 0,
             effect: () => {
                 m.fieldBlockCD = 0;
@@ -1652,7 +1652,7 @@ const m = {
         },
         {
             name: "perfect diamagnetism",
-            description: "<strong>deflecting</strong> does not drain <strong class='color-f'>energy</strong><br>maintains <strong>functionality</strong> while <strong>inactive</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
+            description: "<strong>deflecting</strong> does not drain <strong class='color-f'>energy</strong><br>maintains <strong>functionality</strong> while <strong>inactive</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             // <br><strong>attract</strong> power ups from <strong>far away</strong>
             // description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>deflecting</strong> doesn't drain <strong class='color-f'>energy</strong><br>thrown <strong class='color-block'>blocks</strong> have",
             // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
@@ -1864,7 +1864,7 @@ const m = {
         {
             name: "negative mass",
             //<br>hold <strong class='color-block'>blocks</strong> as if they have a lower <strong>mass</strong>
-            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-harm'>harm</strong> by <strong>55%</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
+            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-defense'>harm</strong> by <strong>55%</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             fieldDrawRadius: 0,
             effect: () => {
                 m.fieldFire = true;
@@ -2014,7 +2014,7 @@ const m = {
         },
         {
             name: "molecular assembler",
-            description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong>/second",
+            description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong> per second",
             //<strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration
             effect: () => {
                 // m.fieldMeterColor = "#0c5"
@@ -2150,7 +2150,7 @@ const m = {
         // },
         {
             name: "plasma torch",
-            description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away<br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
+            description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away<br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             set() {
                 b.isExtruderOn = false
                 if (m.plasmaBall) {
@@ -2524,8 +2524,8 @@ const m = {
         },
         {
             name: "time dilation",
-            // description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong>",
-            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br>move, jump, and fire <strong>25%</strong> faster<br>generate <strong>18</strong> <strong class='color-f'>energy</strong>/second",
+            // description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-defense'>harm</strong>",
+            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br>move, jump, and fire <strong>25%</strong> faster<br>generate <strong>18</strong> <strong class='color-f'>energy</strong> per second",
             set() {
                 m.fieldFireRate = 0.75
                 b.setFireCD();
@@ -2684,8 +2684,8 @@ const m = {
         },
         {
             name: "metamaterial cloaking", //"weak photonic coupling" "electromagnetically induced transparency" "optical non-coupling" "slow light field" "electro-optic transparency"
-            //<br><strong>collisions</strong> do <strong>50%</strong> less <strong class='color-harm'>harm</strong> when <strong class='color-cloaked'>cloaked</strong>
-            description: "when not firing activate <strong class='color-cloaked'>cloaking</strong><br><span style = 'font-size:95%;'><strong>+333%</strong> <strong class='color-d'>damage</strong> if no mob has <strong>died</strong> in <strong>4</strong> seconds</span><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
+            //<br><strong>collisions</strong> do <strong>50%</strong> less <strong class='color-defense'>harm</strong> when <strong class='color-cloaked'>cloaked</strong>
+            description: "when not firing activate <strong class='color-cloaked'>cloaking</strong><br><span style = 'font-size:95%;'><strong>+333%</strong> <strong class='color-d'>damage</strong> if no mob has <strong>died</strong> in <strong>4</strong> seconds</span><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             effect: () => {
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
@@ -2984,7 +2984,7 @@ const m = {
             name: "pilot wave",
             //<br><strong class='color-block'>blocks</strong> can't <strong>collide</strong> with <strong>intangible</strong> mobs
             //field <strong>radius</strong> decreases out of <strong>line of sight</strong>
-            description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong>unlock</strong> <strong class='color-m'>tech</strong> from other <strong class='color-f'>fields</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second",
+            description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong>unlock</strong> <strong class='color-m'>tech</strong> from other <strong class='color-f'>fields</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             effect: () => {
                 m.fieldPhase = 0;
                 m.fieldPosition = {
@@ -3180,7 +3180,7 @@ const m = {
         {
             name: "wormhole",
             //<strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br>
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>4%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>4%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             drain: 0,
             effect: function() {
                 m.duplicateChance = 0.04

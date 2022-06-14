@@ -18,9 +18,9 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // m.addHealth(Infinity)
             // m.setField("time dilation")
-            // b.giveGuns("laser")
-            // tech.giveTech("closed timelike curve")
-            // tech.giveTech("translucent")
+            // b.giveGuns("shotgun")
+            // tech.giveTech("ice-shot")
+            // tech.giveTech("MACHO")
             // tech.giveTech("clock gating")
             // tech.giveTech("6s half-life")
             // for (let i = 0; i < 10; i++) tech.giveTech("replication")
@@ -37,10 +37,10 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.testing();
+            // level.reservoir();
             // spawn.cellBossCulture(1900, -500)
-            // spawn.launcherBoss(1900, -500)
-            // level.dripp(); //not in rotation, used for testing
+            // spawn.snakeBoss(1900, -500)
+            // level.testing(); //not in rotation, used for testing
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -609,7 +609,18 @@ const level = {
                             this.frictionAir = friction.up
                         }
                     }
-
+                }
+                //edge limits
+                if (this.position.y < maxHeight) {
+                    Matter.Body.setPosition(this, {
+                        x: this.holdX,
+                        y: maxHeight
+                    });
+                } else if (this.position.y > y) {
+                    Matter.Body.setPosition(this, {
+                        x: this.holdX,
+                        y: y
+                    });
                 }
                 // hold horizontal position
                 Matter.Body.setPosition(this, {
@@ -3436,7 +3447,7 @@ const level = {
         let waterFallX = 0
         let waterFallSmoothX = 0
         let isWaterfallFilling = false
-        const riseRate = 0.25 + Math.min(1, simulation.difficulty * 0.01)
+        const riseRate = 0.30 + Math.min(1, simulation.difficulty * 0.005)
         const spinnerArray = []
 
         // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
@@ -8826,7 +8837,7 @@ const level = {
         }
 
         anotherBoss = (x, y) => {
-            if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) {
+            if (tech.isDuplicateBoss && Math.random() < tech.duplicationChance()) {
                 tech.isScaleMobsWithDuplication = true
                 spawn.randomLevelBoss(x, y, ["historyBoss"]);
                 tech.isScaleMobsWithDuplication = false

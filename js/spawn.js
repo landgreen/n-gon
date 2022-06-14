@@ -51,7 +51,7 @@ const spawn = {
             this[pick](x, y);
         }
 
-        if (tech.isMoreMobs) {
+        if (tech.isMoreMobs || (tech.isDuplicateBoss && Math.random() < tech.duplicationChance())) {
             const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
             this[pick](x, y);
         }
@@ -66,7 +66,7 @@ const spawn = {
                 this[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
             }
         }
-        if (tech.isMoreMobs) {
+        if (tech.isMoreMobs || (tech.isDuplicateBoss && Math.random() < tech.duplicationChance())) {
             for (let i = 0; i < num; ++i) {
                 const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
                 this[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
@@ -109,7 +109,7 @@ const spawn = {
         }
     },
     secondaryBossChance(x, y) {
-        if (tech.isDuplicateBoss && Math.random() < 2 * tech.duplicationChance()) {
+        if (tech.isDuplicateBoss && Math.random() < tech.duplicationChance()) {
             tech.isScaleMobsWithDuplication = true
             spawn.randomLevelBoss(x, y);
             tech.isScaleMobsWithDuplication = false
@@ -215,12 +215,12 @@ const spawn = {
 
             //aoe damage to player
             if (m.immuneCycle < m.cycle && Vector.magnitude(Vector.sub(player.position, this.position)) < this.radius) {
-                const DRAIN = tech.isRadioactiveResistance ? 0.07 * 0.25 : 0.07
+                const DRAIN = tech.isRadioactiveResistance ? 0.05 * 0.25 : 0.05
                 if (m.energy > DRAIN) {
                     if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 } else {
                     m.energy = 0;
-                    m.damage((tech.isRadioactiveResistance ? 0.007 * 0.25 : 0.007) * simulation.dmgScale)
+                    m.damage((tech.isRadioactiveResistance ? 0.005 * 0.25 : 0.005) * simulation.dmgScale)
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,
                         y: this.position.y,
@@ -5564,8 +5564,10 @@ const spawn = {
 
         for (let i = 0; i < nodes; ++i) {
             angle -= 0.15 + i * 0.008
-            mag -= 5
-            spawn.snakeBody(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 20);
+            mag -= (i < 2) ? -15 : 5
+            spawn.snakeBody(x + mag * Math.cos(angle), y + mag * Math.sin(angle), i === 0 ? 25 : 20);
+            // mag -= 5
+            // spawn.snakeBody(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 20);
             if (i === 0) mob[mob.length - 1].snakeHeadID = me.id
             mob[mob.length - 1].previousTailID = previousTailID
             previousTailID = mob[mob.length - 1].id
@@ -5609,11 +5611,11 @@ const spawn = {
         mobs.spawn(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 8, radius, color1); //"rgb(55,170,170)"
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.accelMag = 0.0004 + 0.0003 * Math.sqrt(simulation.accelScale)
+        me.accelMag = 0.00045 + 0.0002 * Math.sqrt(simulation.accelScale)
         me.memory = 250;
         me.laserRange = 500;
         Matter.Body.setDensity(me, 0.00165 + 0.00011 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        me.startingDamageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.startingDamageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.damageReduction = 0
         me.isInvulnerable = true
 
@@ -5642,15 +5644,13 @@ const spawn = {
         let previousTailID = 0
         for (let i = 0; i < nodes; ++i) {
             angle -= 0.15 + i * 0.008
-            mag -= 5
-            spawn.snakeBody(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 20);
+            mag -= (i < 2) ? -15 : 5
+            spawn.snakeBody(x + mag * Math.cos(angle), y + mag * Math.sin(angle), i === 0 ? 25 : 20);
             if (i === 0) mob[mob.length - 1].snakeHeadID = me.id
             mob[mob.length - 1].previousTailID = previousTailID
             previousTailID = mob[mob.length - 1].id
         }
-
         this.constrain2AdjacentMobs(nodes, Math.random() * 0.06 + 0.01);
-
         for (let i = mob.length - 1, len = i - nodes; i > len; i--) { //set alternating colors
             if (i % 2) {
                 mob[i].fill = "#333"
@@ -5683,11 +5683,11 @@ const spawn = {
         mobs.spawn(x, y, 8, radius, "rgba(0,180,180,0.4)");
         let me = mob[mob.length - 1];
         me.collisionFilter.mask = cat.bullet | cat.player | cat.mob //| cat.body
-        me.accelMag = 0.0006 * simulation.accelScale;
+        me.accelMag = 0.0007 * simulation.accelScale;
         me.leaveBody = Math.random() < 0.33 ? true : false;
         me.showHealthBar = false;
         me.isDropPowerUp = false;
-        Matter.Body.setDensity(me, 0.003); //normal is 0.001
+        Matter.Body.setDensity(me, 0.005); //normal is 0.001
         me.frictionAir = 0.015;
         me.isSnakeTail = true;
         me.stroke = "transparent"
