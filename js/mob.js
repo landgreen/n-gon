@@ -59,7 +59,9 @@ const mobs = {
         }
 
         function applySlow(whom) {
-            if (!whom.shield && !whom.isShielded) {
+            if (!whom.shield && !whom.isShielded && who.alive) {
+                if (tech.isIceMaxHealthLoss && who.health > 0.66 && who.damageReduction > 0) who.health = 0.66
+                if (tech.isIceKill && who.health < 0.33 && who.damageReduction > 0) who.death();
                 if (whom.isBoss) cycles = Math.floor(cycles * 0.25)
                 let i = whom.status.length
                 while (i--) {
@@ -68,8 +70,8 @@ const mobs = {
                 whom.isSlowed = true;
                 whom.status.push({
                     effect() {
-                        if (whom.speed > 2) {
-                            const drag = 0.95
+                        if (whom.speed > 1) {
+                            const drag = 0.94
                             Matter.Body.setVelocity(whom, {
                                 x: whom.velocity.x * drag,
                                 y: whom.velocity.y * drag
@@ -1065,7 +1067,7 @@ const mobs = {
                 if ((!this.isShielded || isBypassShield) && this.alive) {
                     dmg *= tech.damageFromTech()
                     //mobs specific damage changes
-                    if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 50% dmg at max range of 3500
+                    if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 33% dmg at max range of 3000
                     dmg *= this.damageReduction
                     //energy and heal drain should be calculated after damage boosts
                     if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon
