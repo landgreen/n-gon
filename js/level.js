@@ -18,10 +18,11 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // m.addHealth(Infinity)
             // m.setField("time dilation")
-            // b.giveGuns("shotgun")
-            // tech.giveTech("ice-shot")
-            // tech.giveTech("MACHO")
-            // tech.giveTech("clock gating")
+            // b.giveGuns("nail gun")
+            // b.giveGuns("mine")
+            // tech.giveTech("laser-mines")
+            // tech.giveTech("free-electron laser")
+            // tech.giveTech("energy conservation")
             // tech.giveTech("6s half-life")
             // for (let i = 0; i < 10; i++) tech.giveTech("replication")
             // tech.giveTech("eternalism")
@@ -37,10 +38,10 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.reservoir();
+            // level.perplex();
             // spawn.cellBossCulture(1900, -500)
-            // spawn.snakeBoss(1900, -500)
             // level.testing(); //not in rotation, used for testing
+            // spawn.starter(1900, -500)
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -7147,7 +7148,7 @@ const level = {
         spawn.mapRect(-1450, -2700, 900, 50); //5-1 ceiling
         spawn.mapRect(-925, -2300, 325, 50); //5-1 right floor
         spawn.mapRect(-1900, -3000, 450, 50); //stair cover
-        spawn.bodyRect(-1150, -2950, 200, 250); //5-2 block
+        spawn.bodyRect(-1150, -2950, 150, 250); //5-2 block
 
         //top left corner stuff    
         spawn.mapRect(-1900, -2450, 250, 450); //

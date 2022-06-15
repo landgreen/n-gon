@@ -1,30 +1,15 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: freezer burn - if a mob is frozen while below 33% health, it dies
-tech: flash freeze - if a mob is above 66% health it's health is set to 66%
 
-snakeBoss 1st tail mob is larger and farther from boss
-parthenogenesis your duplication effects extend to duplicate mobs and bosses
-WIMPs do 33% less harm  (because they are hard to deal with on reactor)
-MACHO 66->60% defense
-axion 75%-> 100% of defense added to damage
-
-full tech wording rewrite (I probably made a few typos)
-  increase damage by 10% -> +10% damage
-  20% fire delay reduction -> +20% fire rate
-  taking harm -> losing health
-  50% harm reduction -> +50% defense
-    new defense text effect
-  extra long minus sign - -> –
-
-bug fixes
+updated pause menu and fields descriptions to new wording style
 
 *********************************************************** TODO *****************************************************
 
 scrap bots can't move?
+  only works for nail, foam, laser
+    might be tricky code?
+      make a new bot type called scrap bot?
 
-if a nail critical hits, fire a nail at the nearest mob
-  similar to mob death targeted nail code
 nail gun needs a small damage buff
 
 JUNK tech: Pacifism
@@ -40,11 +25,9 @@ mob mechanic: beacon
     at random
     if velocity not facing player?
 
-super balls do damage after bouncing?
+super balls do more damage after bouncing?
   how to check for bounce?
   maybe just increases damage after hitting a mob
-
-put a shield on a shield on a shield ...
 
 dark mode:
   look at Tinyfolks, 20 minutes till dawn
