@@ -1172,17 +1172,7 @@ const mobs = {
                     }
                     if (tech.isBotSpawnerReset) {
                         for (let i = 0, len = bullet.length; i < len; i++) {
-                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) {
-                                bullet[i].endCycle = simulation.cycle + 840 //14 seconds
-                                // //draw a flash on top of bot
-                                // ctx.beginPath();
-                                // const v = bullet[i].vertices;
-                                // ctx.moveTo(v[0].x, v[0].y);
-                                // for (let i = 1; i < v.length; ++i) ctx.lineTo(v[i].x, v[i].y);
-                                // ctx.lineTo(v[0].x, v[0].y);
-                                // ctx.fillStyle = "#fff"
-                                // ctx.fill();
-                            }
+                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 840 //14 seconds
                         }
                     }
                     if (Math.random() < tech.botSpawner) {
@@ -1273,10 +1263,8 @@ const mobs = {
             removeConsBB() {
                 for (let i = 0, len = consBB.length; i < len; ++i) {
                     if (consBB[i].bodyA === this) {
-                        if (consBB[i].bodyB.shield) {
-                            consBB[i].bodyB.do = function() {
-                                this.death();
-                            };
+                        if (consBB[i].bodyB.shield) { //&& !this.shield
+                            consBB[i].bodyB.do = function() { this.death() }
                         }
                         consBB[i].bodyA = consBB[i].bodyB;
                         consBB.splice(i, 1);
@@ -1284,9 +1272,7 @@ const mobs = {
                         break;
                     } else if (consBB[i].bodyB === this) {
                         if (consBB[i].bodyA.shield) {
-                            consBB[i].bodyA.do = function() {
-                                this.death();
-                            };
+                            consBB[i].bodyA.do = function() { this.death() }
                         }
                         consBB[i].bodyB = consBB[i].bodyA;
                         consBB.splice(i, 1);

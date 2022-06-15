@@ -3829,6 +3829,9 @@ const b = {
             if (tech.isNailCrit && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
                 b.explosion(this.position, 150 + 30 * Math.random()); //makes bullet do explosive damage at end
             }
+            if (true && !who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.94) {
+                b.targetedNail(this.position, 1, 39 + 6 * Math.random())
+            }
         };
         bullet[me].do = function() {};
     },

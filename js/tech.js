@@ -670,7 +670,7 @@ const tech = {
         },
         {
             name: "Higgs mechanism",
-            description: "if <strong>firing</strong><br><strong>+50%</strong> <strong><em>fire rate</em></strong> and your <strong>position</strong> is locked",
+            description: "<strong>+50%</strong> <strong><em>fire rate</em></strong><br>while <strong>firing</strong> your <strong>position</strong> is fixed",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -940,7 +940,7 @@ const tech = {
         },
         {
             name: "reaction inhibitor",
-            description: "mobs spawn with <strong>–13%</strong> <strong>health</strong>",
+            description: "after mobs <strong>spawn</strong><br>remove <strong>+13%</strong> of their <strong>durability</strong>", //<strong class='color-h'>health</strong>
             maxCount: 3,
             count: 0,
             frequency: 1,
@@ -1890,7 +1890,7 @@ const tech = {
         },
         {
             name: "freezer burn",
-            description: "mobs <strong class='color-s'>frozen</strong> while below <strong>33%</strong> health <strong>die</strong>",
+            description: "mobs <strong class='color-s'>frozen</strong> while below <strong>33%</strong> durability <strong>die</strong>",
             maxCount: 1,
             count: 0,
             frequency: 2,
@@ -1908,7 +1908,7 @@ const tech = {
         },
         {
             name: "flash freeze",
-            description: "mobs <strong class='color-s'>frozen</strong> while above <strong>66%</strong> health<br>have their health reduced to <strong>66%</strong>",
+            description: "mobs <strong class='color-s'>frozen</strong> while above <strong>66%</strong> durability<br>have their durability reduced to <strong>66%</strong>",
             maxCount: 1,
             count: 0,
             frequency: 2,
@@ -1980,7 +1980,7 @@ const tech = {
         },
         {
             name: "liquid cooling",
-            description: `after losing <strong>health</strong><br><strong class='color-s'>freeze</strong> all mobs for <strong>7</strong> seconds`,
+            description: `after losing <strong class='color-h'>health</strong><br><strong class='color-s'>freeze</strong> all mobs for <strong>7</strong> seconds`,
             maxCount: 1,
             count: 0,
             frequency: 2,
@@ -1998,7 +1998,7 @@ const tech = {
         },
         {
             name: "clock gating",
-            description: `after losing <strong>health</strong> <strong>slow</strong> <strong>time</strong> by <strong>50%</strong><br><strong>+20%</strong> <strong class='color-defense'>defense</strong>`,
+            description: `after losing <strong class='color-h'>health</strong> <strong>slow</strong> <strong>time</strong> by <strong>50%</strong><br><strong>+20%</strong> <strong class='color-defense'>defense</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2057,7 +2057,7 @@ const tech = {
         },
         {
             name: "ablative drones",
-            description: "after losing <strong>health</strong> there is a chance<br>to rebuild your broken parts as <strong>drones</strong>",
+            description: "after losing <strong class='color-h'>health</strong> there is a chance<br>to rebuild your broken parts as <strong>drones</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2114,7 +2114,7 @@ const tech = {
         {
             name: "CPT symmetry",
             // description: "<strong>charge</strong>, <strong>parity</strong>, and <strong>time</strong> invert to undo <strong class='color-defense'>defense</strong><br><strong class='color-rewind'>rewind</strong> <strong>(1.5—5)</strong> seconds for <strong>(66—220)</strong> <strong class='color-f'>energy</strong>",
-            description: "if you have <strong>66</strong> <strong class='color-f'>energy</strong> after losing <strong>health</strong><br><strong>rewind</strong> time for <strong>44</strong> <strong class='color-f'>energy</strong> per second",
+            description: "if you have <strong>66</strong> <strong class='color-f'>energy</strong> after losing <strong class='color-h'>health</strong><br><strong>rewind</strong> time for <strong>44</strong> <strong class='color-f'>energy</strong> per second",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2654,7 +2654,7 @@ const tech = {
         },
         {
             name: "negative entropy",
-            description: `at the start of each <strong>level</strong><br>for every <strong>26</strong> missing health spawn ${powerUps.orb.heal()}`,
+            description: `at the start of each <strong>level</strong><br>for every <strong>26</strong> missing <strong class='color-h'>health</strong> spawn ${powerUps.orb.heal()}`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3504,7 +3504,7 @@ const tech = {
         },
         {
             name: "apomixis",
-            description: `when you reach <strong>111%</strong> <strong class='color-dup'>duplication</strong><br>spawn <strong>11 bosses</strong> with <strong>111%</strong> more <strong>health</strong>`,
+            description: `when you reach <strong>111%</strong> <strong class='color-dup'>duplication</strong><br>spawn <strong>11 bosses</strong> with <strong>111%</strong> more <strong>durability</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 6,
@@ -4667,7 +4667,7 @@ const tech = {
         },
         {
             name: "acetone peroxide",
-            description: "<strong>+70%</strong> <strong class='color-e'>explosive</strong> <strong>radius</strong><br><strong>+50%</strong> <strong class='color-e'>explosive</strong> self damage",
+            description: "<strong>+70%</strong> <strong class='color-e'>explosive</strong> <strong>radius</strong><br><strong>–50%</strong> <strong class='color-e'>explosive</strong> <strong class='color-defense'>defense</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -4706,7 +4706,7 @@ const tech = {
         },
         {
             name: "controlled explosion",
-            description: `use ${powerUps.orb.research(4)} to dynamically <strong>reduce</strong><br>all <strong class='color-e'>explosive</strong> radius to prevent self damage`,
+            description: `use ${powerUps.orb.research(4)} to dynamically <strong>reduce</strong><br>all <strong class='color-e'>explosive</strong> radius to prevent <strong class='color-h'>health</strong> loss`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -4730,7 +4730,7 @@ const tech = {
         {
             name: "electric armor",
             // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-defense'>defense</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
-            description: "instead of causing self damage <strong class='color-e'>explosions</strong><br>drain <strong>12</strong> <strong class='color-f'>energy</strong> and have more knockback",
+            description: "instead of causing <strong class='color-h'>health</strong> loss, <strong class='color-e'>explosions</strong><br>drain <strong>12</strong> <strong class='color-f'>energy</strong> and have more knockback",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -4749,7 +4749,7 @@ const tech = {
         },
         {
             name: "MIRV",
-            description: "fire <strong>+1</strong> <strong>missile</strong> and <strong>grenade</strong> per shot<br><strong>–12%</strong> <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and <strong>radius</strong>",
+            description: "fire <strong>+1</strong> <strong>missile</strong> or <strong>grenade</strong> per shot<br><strong>–12%</strong> <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and <strong>radius</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -5050,7 +5050,7 @@ const tech = {
         {
             name: "mycelial fragmentation",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Fungus' class="link">mycelial fragmentation</a>`,
-            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>6</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br>during their <strong>growth</strong> phase",
+            description: "during their <strong>growth</strong> phase<br><strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>+6</strong> <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5070,7 +5070,7 @@ const tech = {
         {
             name: "tinsellated flagella",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Zoospore#Flagella_types' class="link">tinsellated flagella</a>`,
-            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>50% faster</strong>",
+            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>+2</strong> <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>50% faster</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5109,7 +5109,7 @@ const tech = {
         },
         {
             name: "diplochory",
-            description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> use you for <strong>dispersal</strong><br>until they <strong>locate</strong> a viable host",
+            description: "if <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> can't <strong>locate</strong> a viable host<br>they use you for <strong>dispersal</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5128,7 +5128,7 @@ const tech = {
         },
         {
             name: "mutualism",
-            description: "<strong>+150%</strong> <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong>health</strong> until they <strong>die</strong>",
+            description: "<strong>+150%</strong> <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5245,7 +5245,7 @@ const tech = {
         {
             name: "reduced tolerances",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Engineering_tolerance' class="link">reduced tolerances</a>`,
-            description: `<strong>+66%</strong> <strong>drones</strong> per ${powerUps.orb.ammo()} and <strong class='color-f'>energy</strong><br><strong>–40%</strong> drone <strong>durability</strong>`,
+            description: `<strong>+66%</strong> <strong>drones</strong> per ${powerUps.orb.ammo()} and <strong class='color-f'>energy</strong><br><strong>–40%</strong> drone <strong>duration</strong>`,
             isGunTech: true,
             maxCount: 3,
             count: 0,
@@ -5334,7 +5334,7 @@ const tech = {
         },
         {
             name: "axial flux motor",
-            description: "<strong>drones</strong> can <strong>rush</strong> <strong>66%</strong> more often<br><strong>+44%</strong> <strong>drone</strong> collision <strong class='color-d'>damage</strong>",
+            description: "<strong>+66%</strong> <strong>drones</strong> <strong>rush</strong> frequency<br><strong>+44%</strong> <strong>drone</strong> collision <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5428,7 +5428,7 @@ const tech = {
         },
         {
             name: "fault tolerance",
-            description: "spawn <strong>6</strong> <strong>drones</strong> that last <strong>forever</strong><br>remove your <strong>drone gun</strong>",
+            description: "remove your <strong>drone gun</strong><br>spawn <strong>6</strong> <strong>drones</strong> that last <strong>forever</strong>",
             isGunTech: true,
             isRemoveGun: true,
             maxCount: 1,
@@ -5593,7 +5593,7 @@ const tech = {
         },
         {
             name: "foam fractionation",
-            description: "if you have below <strong>300</strong> <strong class='color-ammo'>ammo</strong><br><strong>+100%</strong> <strong>foam</strong> gun bubble size",
+            description: "if you have below <strong>300</strong> <strong class='color-ammo'>ammo</strong><br><strong>+100%</strong> <strong>foam</strong> gun bubble <strong>size</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5639,7 +5639,7 @@ const tech = {
         },
         {
             name: "pressure vessel",
-            description: "build up <strong>charge</strong> while firing <strong>foam</strong> gun<br>after firing automatically <strong>discharge</strong> <strong>foam</strong> bubbles",
+            description: "build up <strong>charge</strong> while firing <strong>foam</strong> gun<br>after firing <strong>discharge</strong> <strong>foam</strong> bubbles",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5776,7 +5776,7 @@ const tech = {
         },
         {
             name: "alternator",
-            description: "<strong>–60%</strong> <strong>harpoon</strong> <strong class='color-f'>energy</strong> drain",
+            description: "<strong>+60%</strong> <strong>harpoon</strong> <strong class='color-f'>energy</strong> efficiency",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5981,7 +5981,7 @@ const tech = {
         },
         {
             name: "laser diode",
-            description: "<strong>–30%</strong> <strong class='color-laser'>lasers</strong> <strong class='color-f'>energy</strong> drain<br><em>affects laser-gun, laser-bot, laser-mines, pulse</em>",
+            description: "<strong>+30%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency<br><em>affects laser-gun, laser-bot, laser-mines, pulse</em>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6004,7 +6004,7 @@ const tech = {
         },
         {
             name: "free-electron laser",
-            description: "<strong>+200%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong> <br><strong >+250%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> drain",
+            description: "<strong>+200%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong> <br><strong>–250%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6095,12 +6095,12 @@ const tech = {
         {
             name: "diffuse beam",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Diffuser_(optics)' class="link">diffuse beam</a>`,
-            description: "<strong class='color-laser'>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br><strong>220%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong class='color-laser'>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br><strong>+220%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
+            frequency: 3,
+            frequencyDefault: 3,
             allowed() {
                 return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser && !tech.historyLaser
             },
@@ -6124,7 +6124,7 @@ const tech = {
         },
         {
             name: "output coupler",
-            description: "<strong>+30%</strong> <strong class='color-laser'>laser</strong> beam <strong>width</strong><br><strong>30%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong>+30%</strong> <strong class='color-laser'>laser</strong> beam <strong>width</strong><br><strong>+30%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -6441,7 +6441,7 @@ const tech = {
         },
         {
             name: "radiative equilibrium",
-            description: "after losing <strong>health</strong><br><strong>+200%</strong> <strong class='color-d'>damage</strong> for <strong>10</strong> seconds",
+            description: "after losing <strong class='color-h'>health</strong><br><strong>+200%</strong> <strong class='color-d'>damage</strong> for <strong>10</strong> seconds",
             isFieldTech: true,
             maxCount: 1,
             count: 0,

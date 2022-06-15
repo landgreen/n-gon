@@ -258,7 +258,7 @@ function collisionChecks(event) {
 Events.on(engine, "collisionStart", function(event) {
     playerOnGroundCheck(event);
     // playerHeadCheck(event);
-    if (m.alive) collisionChecks(event);
+    collisionChecks(event);
 });
 Events.on(engine, "collisionActive", function(event) {
     playerOnGroundCheck(event);

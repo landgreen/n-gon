@@ -1381,7 +1381,7 @@ const m = {
                 y: player.velocity.y - (15 * unit.y) / massRoot
             });
             if (who.isUnstable) {
-                if (m.fieldCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 30
+                if (m.fieldCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 10
                 who.death();
             }
 
@@ -1767,7 +1767,7 @@ const m = {
                                     y: player.velocity.y - (30 * unit.y) / massRoot
                                 });
                                 if (mob[i].isUnstable) {
-                                    if (m.fieldCDcycle < m.cycle + 10) m.fieldCDcycle = m.cycle + 10
+                                    if (m.fieldCDcycle < m.cycle + 10) m.fieldCDcycle = m.cycle + 6
                                     mob[i].death();
                                 }
                                 if (!isFree) { //player knock backs
@@ -1864,7 +1864,7 @@ const m = {
         {
             name: "negative mass",
             //<br>hold <strong class='color-block'>blocks</strong> as if they have a lower <strong>mass</strong>
-            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br>reduce <strong class='color-defense'>harm</strong> by <strong>55%</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
+            description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br><strong>+55%</strong> <strong class='color-defense'>defense</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             fieldDrawRadius: 0,
             effect: () => {
                 m.fieldFire = true;
@@ -2525,7 +2525,7 @@ const m = {
         {
             name: "time dilation",
             // description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-defense'>harm</strong>",
-            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br>move, jump, and fire <strong>25%</strong> faster<br>generate <strong>18</strong> <strong class='color-f'>energy</strong> per second",
+            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>+25%</strong> movement, jumping, and <strong><em>fire rate</em></strong><br>generate <strong>18</strong> <strong class='color-f'>energy</strong> per second",
             set() {
                 m.fieldFireRate = 0.75
                 b.setFireCD();
@@ -3180,7 +3180,7 @@ const m = {
         {
             name: "wormhole",
             //<strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br>
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>4%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+4%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             drain: 0,
             effect: function() {
                 m.duplicateChance = 0.04
