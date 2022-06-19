@@ -59,9 +59,32 @@ const mobs = {
         }
 
         function applySlow(whom) {
-            if (!whom.shield && !whom.isShielded && who.alive) {
-                if (tech.isIceMaxHealthLoss && who.health > 0.66 && who.damageReduction > 0) who.health = 0.66
-                if (tech.isIceKill && who.health < 0.33 && who.damageReduction > 0) who.death();
+            if (!whom.shield && !whom.isShielded && whom.alive) {
+                if (tech.isIceMaxHealthLoss && whom.health > 0.65 && whom.damageReduction > 0) whom.health = 0.66
+                if (tech.isIceKill && whom.health < 0.34 && whom.damageReduction > 0 && whom.alive) {
+                    simulation.drawList.push({
+                        x: whom.position.x,
+                        y: whom.position.y,
+                        radius: whom.radius * 1.2,
+                        color: "rgb(0,100,255)",
+                        time: 8
+                    });
+                    simulation.drawList.push({
+                        x: whom.position.x,
+                        y: whom.position.y,
+                        radius: whom.radius * 0.7,
+                        color: "rgb(0,100,255)",
+                        time: 12
+                    });
+                    simulation.drawList.push({
+                        x: whom.position.x,
+                        y: whom.position.y,
+                        radius: whom.radius * 0.4,
+                        color: "rgb(0,100,255)",
+                        time: 16
+                    });
+                    whom.death();
+                }
                 if (whom.isBoss) cycles = Math.floor(cycles * 0.25)
                 let i = whom.status.length
                 while (i--) {

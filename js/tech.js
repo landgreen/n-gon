@@ -868,7 +868,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.isOrbitBotUpgrade || tech.isExplosionStun
+                return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.isOrbitBotUpgrade || tech.isStun
             },
             requires: "a stun effect",
             effect() {
@@ -1666,7 +1666,7 @@ const tech = {
         },
         {
             name: "Pauli exclusion",
-            description: `after mob collisions<br>become <strong>invulnerable</strong> for <strong>+2.5</strong> seconds`,
+            description: `after mob collisions<br>become <strong>invulnerable</strong> for <strong>+3</strong> seconds`,
             maxCount: 9,
             count: 0,
             frequency: 1,
@@ -1674,7 +1674,7 @@ const tech = {
             allowed() { return true },
             requires: "",
             effect() {
-                tech.collisionImmuneCycles += 150;
+                tech.collisionImmuneCycles += 180;
                 if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
             },
             remove() {
@@ -1683,7 +1683,7 @@ const tech = {
         },
         {
             name: "spin–statistics theorem",
-            description: `every <strong>7</strong> seconds<br>become <strong>invulnerable</strong> for <strong>1.75</strong> seconds`,
+            description: `every <strong>7</strong> seconds<br>become <strong>invulnerable</strong> for <strong>+1.75</strong> seconds`,
             maxCount: 3,
             count: 0,
             frequency: 1,
@@ -1886,96 +1886,6 @@ const tech = {
             },
             remove() {
                 tech.relayIce = 0
-            }
-        },
-        {
-            name: "freezer burn",
-            description: "mobs <strong class='color-s'>frozen</strong> while below <strong>33%</strong> durability <strong>die</strong>",
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1
-            },
-            requires: "a freeze effect",
-            effect() {
-                tech.isIceKill = true
-            },
-            remove() {
-                tech.isIceKill = false
-            }
-        },
-        {
-            name: "flash freeze",
-            description: "mobs <strong class='color-s'>frozen</strong> while above <strong>66%</strong> durability<br>have their durability reduced to <strong>66%</strong>",
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1
-            },
-            requires: "a freeze effect",
-            effect() {
-                tech.isIceMaxHealthLoss = true
-            },
-            remove() {
-                tech.isIceMaxHealthLoss = false
-            }
-        },
-        {
-            name: "crystallizer",
-            description: "after <strong class='color-s'>frozen</strong> mobs <strong>die</strong> they<br>shatter into <strong class='color-s'>ice IX</strong> crystals",
-            maxCount: 9,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return (tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
-            },
-            requires: "a localized freeze effect, no other mob death tech",
-            effect() {
-                tech.iceIXOnDeath++
-            },
-            remove() {
-                tech.iceIXOnDeath = 0
-            }
-        },
-        {
-            name: "thermoelectric effect",
-            description: "<strong>killing</strong> mobs with <strong class='color-s'>ice IX</strong><br>generates <strong>100</strong> <strong class='color-f'>energy</strong>",
-            maxCount: 9,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.isIceField || tech.relayIce || tech.isNeedleIce || tech.blockingIce || tech.iceIXOnDeath || tech.isIceShot
-            },
-            requires: "ice IX",
-            effect() {
-                tech.iceEnergy++
-            },
-            remove() {
-                tech.iceEnergy = 0;
-            }
-        },
-        {
-            name: "superfluidity",
-            description: "<strong class='color-s'>freeze</strong> effects are applied<br>to a small area around the target",
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
-            },
-            requires: "a localized freeze effect",
-            effect() {
-                tech.isAoESlow = true
-            },
-            remove() {
-                tech.isAoESlow = false
             }
         },
         {
@@ -2429,7 +2339,7 @@ const tech = {
         },
         {
             name: "inductive coupling",
-            description: "if <strong>crouched</strong> <strong>+700%</strong> passive <strong class='color-f'>energy</strong> generation<br>if not <strong>crouched</strong> <strong class='color-f'>energy</strong> generation is disabled",
+            description: "if <strong>crouched</strong> <strong>+600%</strong> passive <strong class='color-f'>energy</strong> generation<br>if not <strong>crouched</strong> <strong class='color-f'>energy</strong> generation is disabled",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3245,7 +3155,7 @@ const tech = {
             },
             requires: "at least 4 research, not parthenogenesis",
             effect() {
-                tech.isResearchBoss = true; //abiogenesis
+                tech.isResearchBoss = true;
             },
             remove() {
                 tech.isResearchBoss = false;
@@ -3891,7 +3801,7 @@ const tech = {
         },
         {
             name: "caliber",
-            description: `<strong>rivets</strong>, <strong>needles</strong>, <strong>super balls</strong>, and <strong>nails</strong><br>have <strong>+16%</strong> mass and physical <strong class='color-d'>damage</strong>`,
+            description: `<strong>rivets</strong>, <strong>needles</strong>, <strong>super balls</strong>, and <strong>nails</strong><br>have <strong>+25%</strong> mass and physical <strong class='color-d'>damage</strong>`,
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -3902,7 +3812,7 @@ const tech = {
             },
             requires: "nails, nail gun, rivets, shotgun",
             effect() {
-                tech.bulletSize += 0.16
+                tech.bulletSize += 0.25
             },
             remove() {
                 tech.bulletSize = 1;
@@ -3938,7 +3848,7 @@ const tech = {
         {
             name: "ice crystal nucleation",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Nucleation' class="link">ice crystal nucleation</a>`,
-            description: "the <strong>nail gun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>ice shards</strong>",
+            description: "<strong>nail gun</strong> uses <strong class='color-f'>energy</strong> to condense<br>unlimited <strong class='color-s'>freezing</strong> <strong>ice shards</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -4002,17 +3912,36 @@ const tech = {
             }
         },
         {
-            name: "supercritical fission",
-            description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> can <strong class='color-e'>explode</strong><br>if they strike mobs near their <strong>center</strong>",
+            name: "stress concentration",
+            description: "mobs below <strong>50%</strong> durability <strong>die</strong> after you shoot<br>them near their <strong>center</strong> with <strong>needles</strong> or <strong>rivets</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (tech.isNailShot || tech.isNeedles || tech.isNailBotUpgrade || tech.haveGunCheck("nail gun") || tech.isRivets) && !tech.isIncendiary
+                return (tech.isNeedles || tech.isRivets) && !tech.isNailCrit && !tech.isIncendiary
             },
-            requires: "nail gun, needles, nails, rivets, not incendiary",
+            requires: "needles, rivets, not incendiary, supercritical fission",
+            effect() {
+                tech.isCritKill = true
+            },
+            remove() {
+                tech.isCritKill = false
+            }
+        },
+        {
+            name: "supercritical fission",
+            description: "if bullets strike mobs near their <strong>center</strong><br>they can <strong class='color-e'>explode</strong> <em style = 'font-size:95%;'>(nails, needles, rivets)</em>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return (tech.isNailShot || tech.isNeedles || tech.isNailBotUpgrade || tech.haveGunCheck("nail gun") || tech.isRivets) && !tech.isIncendiary && !tech.isCritKill
+            },
+            requires: "nail gun, needles, nails, rivets, not incendiary, fire-control system",
             effect() {
                 tech.isNailCrit = true
             },
@@ -4217,6 +4146,101 @@ const tech = {
             },
             remove() {
                 tech.isIceShot = false;
+            }
+        },
+        {
+            name: "freezer burn",
+            description: "mobs <strong class='color-s'>frozen</strong> while below <strong>33%</strong> durability <strong>die</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1
+            },
+            requires: "a freeze effect",
+            effect() {
+                tech.isIceKill = true
+            },
+            remove() {
+                tech.isIceKill = false
+            }
+        },
+        {
+            name: "flash freeze",
+            description: "mobs <strong class='color-s'>frozen</strong> while above <strong>66%</strong> durability<br>have their durability reduced to <strong>66%</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1
+            },
+            requires: "a freeze effect",
+            effect() {
+                tech.isIceMaxHealthLoss = true
+            },
+            remove() {
+                tech.isIceMaxHealthLoss = false
+            }
+        },
+        {
+            name: "crystallizer",
+            description: "after <strong class='color-s'>frozen</strong> mobs <strong>die</strong> they<br>shatter into <strong class='color-s'>ice IX</strong> crystals",
+            isGunTech: true,
+            maxCount: 9,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return (tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
+            },
+            requires: "a localized freeze effect, no other mob death tech",
+            effect() {
+                tech.iceIXOnDeath++
+            },
+            remove() {
+                tech.iceIXOnDeath = 0
+            }
+        },
+        {
+            name: "thermoelectric effect",
+            description: "<strong>killing</strong> mobs with <strong class='color-s'>ice IX</strong><br>generates <strong>100</strong> <strong class='color-f'>energy</strong>",
+            isGunTech: true,
+            maxCount: 9,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.isIceField || tech.relayIce || tech.isNeedleIce || tech.blockingIce || tech.iceIXOnDeath || tech.isIceShot
+            },
+            requires: "ice IX",
+            effect() {
+                tech.iceEnergy++
+            },
+            remove() {
+                tech.iceEnergy = 0;
+            }
+        },
+        {
+            name: "superfluidity",
+            description: "<strong class='color-s'>freeze</strong> effects are applied<br>to a small area around the target",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.isIceCrystals || tech.isSporeFreeze || tech.isIceField || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
+            },
+            requires: "a localized freeze effect",
+            effect() {
+                tech.isAoESlow = true
+            },
+            remove() {
+                tech.isAoESlow = false
             }
         },
         {
@@ -4687,26 +4711,26 @@ const tech = {
         },
         {
             name: "shock wave",
-            description: "<strong>mines</strong> and <strong class='color-e'>explosions</strong> <strong>stun</strong> for <strong>1-2</strong> seconds<br><strong>–30%</strong> <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong>mines</strong> and <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> <strong>stun</strong> for <strong>3-5</strong> seconds<br><strong class='color-e'>explosions</strong> <strong>stun</strong> for <strong>0.5</strong> seconds",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return tech.haveGunCheck("mine") || (!tech.isExplodeRadio && tech.hasExplosiveDamageCheck())
+                return tech.haveGunCheck("spores") || tech.haveGunCheck("mine") || (!tech.isExplodeRadio && tech.hasExplosiveDamageCheck())
             },
-            requires: "an explosive damage source, not iridium-192",
+            requires: "mine, spores, an explosive damage source, not iridium-192",
             effect() {
-                tech.isExplosionStun = true;
+                tech.isStun = true;
             },
             remove() {
-                tech.isExplosionStun = false;
+                tech.isStun = false;
             }
         },
         {
             name: "controlled explosion",
-            description: `use ${powerUps.orb.research(4)} to dynamically <strong>reduce</strong><br>all <strong class='color-e'>explosive</strong> radius to prevent <strong class='color-h'>health</strong> loss`,
+            description: `use ${powerUps.orb.research(4)} to dynamically <strong>reduce</strong><br>all <strong class='color-e'>explosions</strong> to prevent <strong class='color-h'>health</strong> loss`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5067,24 +5091,43 @@ const tech = {
                 tech.isSporeGrowth = false
             }
         },
+        // {
+        //     name: "tinsellated flagella",
+        //     link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Zoospore#Flagella_types' class="link">tinsellated flagella</a>`,
+        //     description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>+2</strong> <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>50% faster</strong>",
+        //     isGunTech: true,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
+        //     },
+        //     requires: "spores",
+        //     effect() {
+        //         tech.isFastSpores = true
+        //     },
+        //     remove() {
+        //         tech.isFastSpores = false
+        //     }
+        // },
         {
-            name: "tinsellated flagella",
-            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Zoospore#Flagella_types' class="link">tinsellated flagella</a>`,
-            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>+2</strong> <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>50% faster</strong>",
+            name: "flagella",
+            description: "<strong>+50%</strong> <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> acceleration<br>if they can't find a target <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> follow you",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
+                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isSporeWorm
             },
             requires: "spores",
             effect() {
-                tech.isFastSpores = true
+                tech.isSporeFollow = true //isSporeFollow
             },
             remove() {
-                tech.isFastSpores = false
+                tech.isSporeFollow = false //isFastSpores
             }
         },
         {
@@ -5107,25 +5150,25 @@ const tech = {
                 tech.isSporeFreeze = false
             }
         },
-        {
-            name: "diplochory",
-            description: "if <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> can't <strong>locate</strong> a viable host<br>they use you for <strong>dispersal</strong>",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isSporeWorm
-            },
-            requires: "spores",
-            effect() {
-                tech.isSporeFollow = true
-            },
-            remove() {
-                tech.isSporeFollow = false
-            }
-        },
+        // {
+        //     name: "diplochory",
+        //     description: "if <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> can't <strong>locate</strong> a viable host<br>they use you for <strong>dispersal</strong>",
+        //     isGunTech: true,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isSporeWorm
+        //     },
+        //     requires: "spores",
+        //     effect() {
+        //         tech.isSporeFollow = true
+        //     },
+        //     remove() {
+        //         tech.isSporeFollow = false
+        //     }
+        // },
         {
             name: "mutualism",
             description: "<strong>+150%</strong> <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>",
@@ -7023,7 +7066,7 @@ const tech = {
         },
         {
             name: "time crystals",
-            description: "<strong>+400%</strong> passive <strong class='color-f'>energy</strong> generation",
+            description: "<strong>+300%</strong> passive <strong class='color-f'>energy</strong> generation",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -8959,6 +9002,30 @@ const tech = {
             remove() {}
         },
         {
+            name: "reincarnation",
+            description: "kill all mobs and spawn new ones<br>(also spawn a few extra mobs for fun)",
+            maxCount: 3,
+            count: 0,
+            frequency: 0,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                spawn.setSpawnList();
+                spawn.setSpawnList();
+                for (let i = 0, len = mob.length; i < len; i++) {
+                    if (mob[i].alive && !mob[i].shield && !mob[i].isBadTarget) {
+                        const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
+                        spawn[pick](mob[i].position.x, mob[i].position.y);
+                        if (Math.random() < 0.5) spawn[pick](mob[i].position.x, mob[i].position.y);
+                        mob[i].death();
+                    }
+                }
+            },
+            remove() {}
+        },
+        {
             name: "expert system",
             description: "spawn a <strong class='color-m'>tech</strong> power up<br><strong>+64%</strong> <strong class='color-j'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
             maxCount: 9,
@@ -9902,7 +9969,6 @@ const tech = {
     isBlockRadiation: null,
     isPiezo: null,
     isFastDrones: null,
-    isFastSpores: null,
     oneSuperBall: null,
     laserReflections: null,
     laserDamage: null,
@@ -9934,7 +10000,7 @@ const tech = {
     isSporeFollow: null,
     isNailRadiation: null,
     isEnergyHealth: null,
-    isExplosionStun: null,
+    isStun: null,
     restDamage: null,
     isRPG: null,
     missileCount: null,
@@ -10179,5 +10245,6 @@ const tech = {
     isPetalsExplode: null,
     isDeathSkipTime: null,
     isIceMaxHealthLoss: null,
-    isIceKill: null
+    isIceKill: null,
+    isCritKill: null
 }

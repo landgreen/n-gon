@@ -1,23 +1,62 @@
 ******************************************************** NEXT PATCH **************************************************
 
+nail gun tech: stress concentration - if a mob has below 50% durability after taking damage
+  from needles or rivets near the center of it's body it dies
+
+caliber 16->25% nail, needle, rivet size/damage 
+combined tech: flagella - spores move +50% faster
+  spores follow you if they can't find a target
+shock wave stun also applies to sporangium
+  no longer reduces explosion size
+
+JUNK tech: reincarnation - kill all mobs and spawn new ones
+  (also spawn a few extra mobs for fun)
 
 updated pause menu and fields descriptions to new wording style
 
+bug fixes
+
 *********************************************************** TODO *****************************************************
+
+Tech: florescence
+Hitting a mob makes it emit lasers from its vertices
+  all laser but pulse?
+    should trigger a global cd so it can't occur more then once per cycle
+
+tech spawn bots that last until you get hit
+  bots can check you health every cycle and see if it lower
+    it it's high update the health check value
+  JUNK?
+
+after killing a mob go invulnerable for 1 second
+  critical hit with laser, harpoon, nails, needle, rivet
+
+spawn 2 bots after exiting 1 level
+  or spawn 3 after 2 levels?
+  (randomize 2-5 bots)
+  replace all bot tech with this?
+
+cloaking field
+  for 6 seconds after de-cloaking tell all active mobs that the player is in the wrong position?
+    how to code?
+      just delay setting the m.isCloak for a couple seconds
+        and also set all active bots to remember player in the de-cloaked stop
+
+give laser gun _____ if you fire in an angle range
+  draw angle range as a slowly rotation circle arc around player
+  effect:
+    bonus damage 
+    extra beams
+    extra reflections
 
 scrap bots can't move?
   only works for nail, foam, laser
     might be tricky code?
       make a new bot type called scrap bot?
 
-nail gun needs a small damage buff
-
 JUNK tech: Pacifism
   You cannot attack mobs, mobs cannot attack you
   over write the mob.damage and player.damage methods
-
-JUNK tech: incubation:  spawn something after 5 minutes
-  4 bots?
 
 mob mechanic: beacon
   periodically add locations to an array

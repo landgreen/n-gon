@@ -858,7 +858,7 @@ const m = {
         ctx.fillStyle = m.fillColor;
         m.walk_cycle += m.flipLegs * m.Vx;
         ctx.save();
-        ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
+        ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
         ctx.translate(m.pos.x, m.pos.y);
         m.calcLeg(Math.PI, -3);
         m.drawLeg("#4a4a4a");
@@ -2622,7 +2622,7 @@ const m = {
                 } else {
                     m.fieldFire = true;
                     m.isBodiesAsleep = false;
-                    m.drain = 0.0025
+                    m.drain = 0.002
                     m.hold = function() {
                         if (m.isHolding) {
                             m.wakeCheck();

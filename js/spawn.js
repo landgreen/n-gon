@@ -47,13 +47,13 @@ const spawn = {
     },
     randomMob(x, y, chance = 1) {
         if (spawn.spawnChance(chance) || chance === Infinity) {
-            const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
-            this[pick](x, y);
+            const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
+            spawn[pick](x, y);
         }
 
         if (tech.isMoreMobs || (tech.isDuplicateBoss && Math.random() < tech.duplicationChance())) {
-            const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
-            this[pick](x, y);
+            const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
+            spawn[pick](x, y);
         }
     },
     randomSmallMob(x, y,
@@ -62,14 +62,14 @@ const spawn = {
         chance = 1) {
         if (spawn.spawnChance(chance)) {
             for (let i = 0; i < num; ++i) {
-                const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
-                this[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
+                const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
+                spawn[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
             }
         }
         if (tech.isMoreMobs || (tech.isDuplicateBoss && Math.random() < tech.duplicationChance())) {
             for (let i = 0; i < num; ++i) {
-                const pick = this.pickList[Math.floor(Math.random() * this.pickList.length)];
-                this[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
+                const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
+                spawn[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
             }
         }
     },
@@ -3576,7 +3576,7 @@ const spawn = {
             ctx.setLineDash([]);
         }
     },
-    sprayBoss(x, y, radius = 30, isSpawnBossPowerUp = true) {
+    sprayBoss(x, y, radius = 35, isSpawnBossPowerUp = true) {
         mobs.spawn(x, y, 16, radius, "rgb(255,255,255)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
@@ -3587,7 +3587,7 @@ const spawn = {
         me.friction = 0;
         me.frictionAir = 0;
         me.restitution = 1
-        spawn.spawnOrbitals(me, radius + 50 + 150 * Math.random(), 1)
+        spawn.spawnOrbitals(me, radius + 50 + 125 * Math.random(), 1)
         Matter.Body.setDensity(me, 0.0022 + 0.0001 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.damageReduction = 0.09 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.startingDamageReduction = me.damageReduction
@@ -3630,8 +3630,8 @@ const spawn = {
             if (this.speed < 0.01) {
                 Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(Vector.sub(player.position, this.position)), 0.1));
             } else {
-                if (Math.abs(this.velocity.y) < 12) Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.07 });
-                if (Math.abs(this.velocity.x) < 9) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.07, y: this.velocity.y });
+                if (Math.abs(this.velocity.y) < 11) Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.07 });
+                if (Math.abs(this.velocity.x) < 8) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.07, y: this.velocity.y });
             }
         }
         me.burstFire = function() {
@@ -5188,12 +5188,12 @@ const spawn = {
         me.eventHorizon = 0; //set in mob loop
         me.frictionStatic = 0;
         me.friction = 0;
-        me.frictionAir = 0.004;
+        me.frictionAir = 0.005;
         me.accelMag = 0.00008 + 0.00002 * simulation.accelScale
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 100 * Math.random())
 
-        Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0025); //extra dense //normal is 0.001 //makes effective life much larger
         me.damageReduction = 0.07 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
@@ -5217,10 +5217,14 @@ const spawn = {
                     this.attraction();
                     this.damageReduction = this.startingDamageReduction
                     this.isInvulnerable = false
-                    if (!(simulation.cycle % 15)) requestAnimationFrame(() => {
-                        simulation.timePlayerSkip(5)
-                        simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
-                    }); //wrapping in animation frame prevents errors, probably
+                    // if (!(simulation.cycle % 15)) requestAnimationFrame(() => {
+                    //     simulation.timePlayerSkip(5)
+                    //     // simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
+                    // }); //wrapping in animation frame prevents errors, probably
+                    requestAnimationFrame(() => {
+                        simulation.timePlayerSkip(1)
+                        m.walk_cycle += m.flipLegs * m.Vx //makes the legs look like they are moving fast
+                    }); //wrapping in animation frame prevents errors, probably            
 
                     ctx.beginPath();
                     ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);

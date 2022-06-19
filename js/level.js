@@ -7,9 +7,9 @@ const level = {
     defaultZoom: 1400,
     onLevel: -1,
     levelsCleared: 0,
+    // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     //see level.populateLevels:   (intro, ... , reservoir, reactor, ... , gauntlet, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion"],
-    // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
@@ -20,12 +20,13 @@ const level = {
             // m.setField("time dilation")
             // b.giveGuns("nail gun")
             // b.giveGuns("mine")
-            // tech.giveTech("laser-mines")
-            // tech.giveTech("free-electron laser")
-            // tech.giveTech("energy conservation")
-            // tech.giveTech("6s half-life")
-            // for (let i = 0; i < 10; i++) tech.giveTech("replication")
-            // tech.giveTech("eternalism")
+            // tech.giveTech("needle gun")
+            // tech.giveTech("stress concentration")
+            // for (let i = 0; i < 100; ++i) tech.giveTech("nail-bot")
+            // tech.giveTech("rivet gun")
+            // tech.giveTech("needle ice")
+            // tech.giveTech("flash freeze")
+            // tech.giveTech("superfluidity")
             // m.maxHealth = 100
             // m.health = m.maxHealth
             // for (let i = 0; i < 10; i++) tech.giveTech("tungsten carbide")
@@ -36,12 +37,14 @@ const level = {
             // powerUps.research.changeRerolls(100000)
             // tech.tech[297].frequency = 100
             // m.immuneCycle = Infinity //you can't take damage
-            // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(40) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.perplex();
             // spawn.cellBossCulture(1900, -500)
             // level.testing(); //not in rotation, used for testing
-            // spawn.starter(1900, -500)
+            // spawn.starter(1900, -500, 300)
+            // for (let i = 0; i < 50; ++i) spawn.starter(1900, -500)
+            // spawn.powerUpBoss(1900, -500)
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -1327,10 +1330,10 @@ const level = {
 
                     if (this.height > 0 && Matter.Query.region([player], this).length) {
                         if (m.immuneCycle < m.cycle) {
-                            const DRAIN = 0.002 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen
+                            const DRAIN = 0.0022 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen
                             if (m.energy > DRAIN) {
                                 m.energy -= DRAIN
-                                m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1) * 0.03) //still take 2% damage while you have energy
+                                // m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1) * 0.03) //still take 2% damage while you have energy
                             } else {
                                 m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1))
                             }
@@ -8849,7 +8852,7 @@ const level = {
                 } else {
                     tech.addJunkTechToPool(0.49)
                 }
-                // spawn.randomLevelBoss(x, y, ["historyBoss"]);
+                spawn.randomLevelBoss(x, y, ["historyBoss"]);
             }
         }
 
