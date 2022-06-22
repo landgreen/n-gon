@@ -105,7 +105,7 @@ const simulation = {
         simulation.isTimeSkipping = true;
         for (let i = 0; i < cycles; i++) {
             simulation.cycle++;
-            // m.walk_cycle += (m.flipLegs * m.Vx) * 0.5; //makes the legs look like they are moving fast  (it's times 0.5 because when they move too fast it's a blur)
+            // m.walk_cycle += (m.flipLegs * m.Vx) * 0.5; //makes the legs look like they are moving fast this is just gonna run for each method call since it needs some tweaking
             simulation.gravity();
             Engine.update(engine, simulation.delta);
             // level.custom();

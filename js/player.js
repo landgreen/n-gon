@@ -3367,7 +3367,7 @@ const m = {
                                 const drain = m.fieldRegen + 0.0004
                                 if (m.energy > drain) {
                                     m.energy -= drain
-                                    if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage for 1/4 seconds // and can't regen
+                                    if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage for 1 cycle
                                     m.isBodiesAsleep = true;
 
                                     function sleep(who) {
@@ -3469,7 +3469,7 @@ const m = {
                                     x: velocity.x,
                                     y: velocity.y - 4 //an extra vertical kick so the player hangs in place longer
                                 });
-                                if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 1/4 seconds 
+                                if (m.immuneCycle < m.cycle + 5) m.immuneCycle = m.cycle + 5; //player is immune to damage for 1/4 seconds 
                                 // move bots to player
                                 for (let i = 0; i < bullet.length; i++) {
                                     if (bullet[i].botType) {

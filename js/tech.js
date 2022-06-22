@@ -4,6 +4,7 @@ const tech = {
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             tech.tech[i].count = 0
             tech.tech[i].isLost = false
+            tech.tech[i].isBanished = false
             tech.tech[i].remove();
             if (tech.tech[i].isJunk) {
                 tech.tech[i].frequency = 0
@@ -224,7 +225,7 @@ const tech = {
     damageFromTech() {
         let dmg = 1 //m.fieldDamage
         if (tech.isDeathSkipTime) dmg *= 1.67
-        if (tech.isNoDraftPause) dmg *= 1.4
+        if (tech.isNoDraftPause) dmg *= 1.34
         if (tech.isCloakingDamage) dmg *= 1.35
         if (tech.isTechDamage) dmg *= 1.9
         if (tech.isMaxEnergyTech) dmg *= 1.5
@@ -1795,6 +1796,24 @@ const tech = {
             }
         },
         {
+            name: "integrated circuit",
+            description: "if <strong class='color-flop'>ON</strong> <strong>+7</strong> power up <strong>choices</strong><br>if <strong class='color-flop'>OFF</strong> <strong>-1</strong> power up <strong>choices</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 4,
+            frequencyDefault: 4,
+            allowed() {
+                return (tech.isFlipFlop || tech.isRelay) && !tech.isDeterminism
+            },
+            requires: "ON/OFF tech not determinism",
+            effect() {
+                tech.isFlipFlopChoices = true //do you have this tech
+            },
+            remove() {
+                tech.isFlipFlopChoices = false
+            }
+        },
+        {
             name: "transistor",
             description: "if <strong class='color-flop'>ON</strong> generate <strong>20</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>1</strong> <strong class='color-f'>energy</strong> per second",
             maxCount: 1,
@@ -2107,7 +2126,7 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !tech.isZeno && !tech.isNoHeals && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isTechDamage && !tech.isMutualism //&& !tech.isAmmoFromHealth && !tech.isRewindGun
+                return !tech.isZeno && !tech.isNoHeals && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isMutualism //&& !tech.isAmmoFromHealth && !tech.isRewindGun
             },
             requires: "not Zeno, ergodicity, piezoelectricity, CPT, antiscience, mutualism",
             effect: () => {
@@ -2494,10 +2513,8 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() {
-                return !tech.isEnergyHealth
-            },
-            requires: "not mass-energy",
+            allowed() { return true },
+            requires: "",
             effect() {
                 tech.isTechDamage = true;
             },
@@ -2776,7 +2793,7 @@ const tech = {
         {
             name: "Ψ(t) collapse",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Wave_function_collapse' class="link">Ψ(t) collapse</a>`,
-            description: `after you <strong class='color-r'>research</strong> enter an <strong class='alt'>alternate reality</strong><br>spawn ${powerUps.orb.research(14)}`,
+            description: `after you <strong class='color-r'>research</strong> enter an <strong class='alt'>alternate reality</strong><br>spawn ${powerUps.orb.research(17)}`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2785,7 +2802,7 @@ const tech = {
                 return !tech.isSwitchReality && !tech.isCollisionRealitySwitch && !tech.isJunkResearch
             },
             requires: "not many-worlds, non-unitary, pseudoscience",
-            bonusResearch: 14,
+            bonusResearch: 17,
             effect() {
                 tech.isResearchReality = true;
                 for (let i = 0; i < this.bonusResearch; i++) powerUps.spawn(m.pos.x + Math.random() * 60, m.pos.y + Math.random() * 60, "research", false);
@@ -2958,8 +2975,8 @@ const tech = {
         },
         {
             name: "emergence",
-            description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>5</strong> <strong>choices</strong><br><strong>+5%</strong> <strong class='color-j'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
-            maxCount: 1,
+            description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+2</strong> <strong>choices</strong><br><strong>+4%</strong> <strong class='color-j'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
+            maxCount: 9,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
@@ -2968,12 +2985,12 @@ const tech = {
             },
             requires: "not determinism",
             effect: () => {
-                tech.isExtraChoice = true;
-                this.refundAmount += tech.addJunkTechToPool(0.05)
+                tech.extraChoices += 2;
+                this.refundAmount += tech.addJunkTechToPool(0.04)
             },
             refundAmount: 0,
             remove() {
-                tech.isExtraChoice = false;
+                tech.extraChoices = 0;
                 if (this.count > 0 && this.refundAmount > 0) {
                     tech.removeJunkTechFromPool(this.refundAmount)
                     this.refundAmount = 0
@@ -2981,8 +2998,28 @@ const tech = {
             }
         },
         {
+            name: "path integral",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Path_integral_formulation' class="link">path integral</a>`,
+            description: "your next <strong class='color-m'>tech</strong> choice<br>presents every possible <strong>option</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            isNonRefundable: true,
+            // isJunk: true,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                tech.tooManyTechChoices = 1
+                // for (let i = 0; i < this.bonusResearch; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
+            },
+            remove() {
+                tech.tooManyTechChoices = 0
+            }
+        },
+        {
             name: "determinism",
-            description: "spawn <strong>5</strong> <strong class='color-m'>tech</strong>, but you have only<br> <strong>1 choice</strong> for <strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong>",
+            description: "spawn <strong>5</strong> <strong class='color-m'>tech</strong><br>only <strong>1 choice</strong> for <strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2990,9 +3027,9 @@ const tech = {
             isBadRandomOption: true,
             isNonRefundable: true,
             allowed() {
-                return !tech.isExtraChoice && !tech.isExtraGunField
+                return !tech.extraChoices && !tech.isExtraGunField && !tech.isFlipFlopChoices
             },
-            requires: "NOT EXPERIMENT MODE, not emergence, cross disciplinary",
+            requires: "NOT EXPERIMENT MODE, not emergence, cross disciplinary, integrated circuit",
             effect: () => {
                 tech.isDeterminism = true;
                 //if you change the number spawned also change it in Born rule
@@ -3019,7 +3056,7 @@ const tech = {
         },
         {
             name: "superdeterminism",
-            description: `spawn <strong>5</strong> <strong class='color-m'>tech</strong>, but you have <strong>no cancel</strong><br>and ${powerUps.orb.research(1)}, no longer <strong>spawn</strong>`,
+            description: `spawn <strong>5</strong> <strong class='color-m'>tech</strong><br>you have <strong>no cancel</strong> and ${powerUps.orb.research(1)}, no longer <strong>spawn</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 4,
@@ -3106,7 +3143,7 @@ const tech = {
         {
             name: "eternalism",
             // description: `increase <strong class='color-d'>damage</strong> by <strong>60%</strong>, but <strong>time</strong> doesn't <strong>pause</strong><br>while choosing a choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong>`, //${powerUps.orb.heal()} or
-            description: "<strong>+40%</strong> <strong class='color-d'>damage</strong><br><strong>time</strong> can't be <strong>paused</strong> <em>(time can be dilated)</em>",
+            description: "<strong>+34%</strong> <strong class='color-d'>damage</strong><br><strong>time</strong> can't be <strong>paused</strong> <em>(time can be dilated)</em>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3253,7 +3290,7 @@ const tech = {
         {
             name: "options exchange",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Option_(finance)' class="link">options exchange</a>`,
-            description: `clicking <strong style = 'font-size:150%;'>×</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong> has a <strong>94%</strong><br>chance to randomize <strong>choices</strong> and not <strong>cancel</strong>`,
+            description: `clicking <strong style = 'font-size:150%;'>×</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong> has a <strong>96%</strong><br>chance to randomize <strong>choices</strong> and not <strong>cancel</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3564,7 +3601,7 @@ const tech = {
             allowed() {
                 return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.research.count > 1
             },
-            requires: "NOT EXPERIMENT MODE, some duplication, not super determinism",
+            requires: "NOT EXPERIMENT MODE, some duplication, not superdeterminism",
             effect: () => {
                 powerUps.research.changeRerolls(-2)
                 simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2`)
@@ -3602,7 +3639,7 @@ const tech = {
 
         //         text = ``
         //         let num = 3
-        //         if (tech.isExtraChoice) num = 5
+        //         if (tech.extraChoices) num = 5
         //         if (tech.isDeterminism) num = 1
         //         for (let i = 0; i < num; i++) {
         //             const index = powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - i - 1]
@@ -3627,7 +3664,7 @@ const tech = {
         //     effect: () => {
         //         powerUps.research.changeRerolls(-2)
         //         let num = 3
-        //         if (tech.isExtraChoice) num = 5
+        //         if (tech.extraChoices) num = 5
         //         if (tech.isDeterminism) num = 1
         //         for (let i = 0; i < num; i++) {
         //             const index = powerUps.tech.choiceLog[powerUps.tech.choiceLog.length - i - 1]
@@ -9570,7 +9607,7 @@ const tech = {
             remove() {}
         },
         // {
-        //     name: "JUNKie",  //just crashes the game
+        //     name: "JUNKie", //just crashes the game
         //     description: "all junk",
         //     maxCount: 1,
         //     count: 0,
@@ -9592,27 +9629,6 @@ const tech = {
         //     }
         // },
         {
-            name: "path integral",
-            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Path_integral_formulation' class="link">path integral</a>`,
-            // description: "your next <strong>3</strong> <strong class='color-m'>tech</strong> choices<br>present almost every possible <strong>option</strong>",
-            description: "your next <strong class='color-m'>tech</strong> choice<br>presents almost every possible <strong>option</strong>",
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            isNonRefundable: true,
-            isJunk: true,
-            allowed() { return true },
-            requires: "",
-            effect() {
-                tech.tooManyTechChoices = 1
-                for (let i = 0; i < this.bonusResearch; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
-            },
-            remove() {
-                tech.tooManyTechChoices = 0
-            }
-        },
-        {
             name: "rule 30",
             maxCount: 1,
             count: 0,
@@ -9625,7 +9641,7 @@ const tech = {
             effect() {},
             remove() {},
             state: [
-                [false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+                [Math.random() > 0.8, false, false, false, Math.random() > 0.8, false, false, false, false, false, false, false, false, false, true, false, false, false, Math.random() > 0.8, false, false, false, Math.random() > 0.8, false, false, false, false, Math.random() > 0.8, false]
             ],
             rule(state, a, b, c) {
                 //30
@@ -9640,25 +9656,68 @@ const tech = {
             },
             id: 0,
             descriptionFunction() {
-
-                if (this.id === 0 && Math.random() < 0.5) {
-                    // for (let i = 0; i < 29; i++) this.state[0][i] = Math.random() < 0.5 //randomize seed
-                    this.name = "rule 90"
-                    this.link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(this.name).replace(/'/g, '%27')}&title=Special:Search' class="link">${this.name}</a>`
-                    // console.log(this.name)
-                    this.state[0] = [false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false]
-                    this.rule = function(state, a, b, c) {
-                        if (state[a] && state[b] && state[c]) return false; // TTT => F
-                        if (state[a] && state[b] && !state[c]) return true; // TTF => T
-                        if (state[a] && !state[b] && state[c]) return false; //TFT => F 
-                        if (state[a] && !state[b] && !state[c]) return true; //TFF => T
-                        if (!state[a] && state[b] && state[c]) return true; //FTT => T
-                        if (!state[a] && state[b] && !state[c]) return false; //FTF => F
-                        if (!state[a] && !state[b] && state[c]) return true; //FFT => T
-                        if (!state[a] && !state[b] && !state[c]) return false; //FFF => F
+                const loop = () => {
+                    if ((simulation.paused || simulation.isChoosing) && m.alive && !build.isExperimentSelection) { //&& (!simulation.isChoosing || this.count === 0)
+                        let b = []; //produce next row
+                        b.push(this.rule(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 1, 0, 1)); //left edge wrap around
+                        for (let i = 1; i < this.state[this.state.length - 1].length - 1; i++) { //apply rule to the rest of the array
+                            b.push(this.rule(this.state[this.state.length - 1], i - 1, i, i + 1));
+                        }
+                        b.push(this.rule(this.state[this.state.length - 1], this.state[this.state.length - 1].length - 2, this.state[this.state.length - 1].length - 1, 0)); //right edge wrap around
+                        this.state.push(b)
+                        if (document.getElementById(`cellular-rule-id${this.id}`)) document.getElementById(`cellular-rule-id${this.id}`).innerHTML = this.outputText() //convert to squares and send HTML
+                        if (this.count && this.state.length < 120 && !(this.state.length % 10)) powerUps.spawn(m.pos.x - 50 + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
+                        setTimeout(() => { loop() }, 400);
                     }
                 }
-
+                setTimeout(() => { loop() }, 400);
+                this.id++
+                return `<span id = "cellular-rule-id${this.id}" style = "letter-spacing: 0px;font-size: 50%;line-height: normal;">${this.outputText()}</span>`
+            },
+            outputText() {
+                let text = ""
+                for (let j = 0; j < this.state.length; j++) {
+                    text += "<p style = 'margin-bottom: -11px;'>"
+                    for (let i = 0; i < this.state[j].length; i++) {
+                        if (this.state[j][i]) {
+                            text += "⬛" //"█" //"■"
+                        } else {
+                            text += "⬜" //"&nbsp;&nbsp;&nbsp;&nbsp;" //"□"
+                        }
+                    }
+                    text += "</p>"
+                }
+                return text
+            },
+        },
+        {
+            name: "rule 90",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {},
+            remove() {},
+            state: [
+                [false, false, false, false, Math.random() > 0.8, false, false, false, false, Math.random() > 0.8, false, false, false, Math.random() > 0.8, true, true, false, false, false, false, Math.random() > 0.8, Math.random() > 0.8, false, false, false, false, false, false, Math.random() > 0.8]
+            ],
+            rule(state, a, b, c) { //90
+                if (state[a] && state[b] && state[c]) return false; // TTT => F
+                if (state[a] && state[b] && !state[c]) return true; // TTF => T
+                if (state[a] && !state[b] && state[c]) return false; //TFT => F 
+                if (state[a] && !state[b] && !state[c]) return true; //TFF => T
+                if (!state[a] && state[b] && state[c]) return true; //FTT => T
+                if (!state[a] && state[b] && !state[c]) return false; //FTF => F
+                if (!state[a] && !state[b] && state[c]) return true; //FFT => T
+                if (!state[a] && !state[b] && !state[c]) return false; //FFF => F
+            },
+            id: 90,
+            descriptionFunction() {
+                // this.link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(this.name).replace(/'/g, '%27')}&title=Special:Search' class="link">${this.name}</a>`
                 const loop = () => {
                     if ((simulation.paused || simulation.isChoosing) && m.alive && !build.isExperimentSelection) { //&& (!simulation.isChoosing || this.count === 0)
                         let b = []; //produce next row
@@ -9955,7 +10014,7 @@ const tech = {
     isFarAwayDmg: null,
     isEntanglement: null,
     isMassEnergy: null,
-    isExtraChoice: null,
+    extraChoices: null,
     laserBotCount: null,
     dynamoBotCount: null,
     nailBotCount: null,
@@ -10134,6 +10193,7 @@ const tech = {
     // isFlipFlopLevelReset: null,
     isFlipFlopDamage: null,
     isFlipFlopEnergy: null,
+    isFlipFlopChoices: null,
     isRelay: null,
     relayIce: null,
     isMetaAnalysis: null,

@@ -1,7 +1,7 @@
 //main object for spawning things in a level
 const spawn = {
     nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "growBossCulture"],
-    // other bosses: suckerBoss, laserBoss, tetherBoss, bounceBoss, sprayBoss    //these need a particular level to work so they are not included in the random pool
+    // other bosses: suckerBoss, laserBoss, tetherBoss, bounceBoss, sprayBoss, mineBoss    //these need a particular level to work so they are not included in the random pool
     randomBossList: [
         "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
         "powerUpBoss", "powerUpBossBaby", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss",
@@ -3576,7 +3576,7 @@ const spawn = {
             ctx.setLineDash([]);
         }
     },
-    sprayBoss(x, y, radius = 35, isSpawnBossPowerUp = true) {
+    sprayBoss(x, y, radius = 40, isSpawnBossPowerUp = true) {
         mobs.spawn(x, y, 16, radius, "rgb(255,255,255)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
@@ -3588,7 +3588,7 @@ const spawn = {
         me.frictionAir = 0;
         me.restitution = 1
         spawn.spawnOrbitals(me, radius + 50 + 125 * Math.random(), 1)
-        Matter.Body.setDensity(me, 0.0022 + 0.0001 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.002 + 0.0001 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.damageReduction = 0.09 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
@@ -3630,8 +3630,8 @@ const spawn = {
             if (this.speed < 0.01) {
                 Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(Vector.sub(player.position, this.position)), 0.1));
             } else {
-                if (Math.abs(this.velocity.y) < 11) Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.07 });
-                if (Math.abs(this.velocity.x) < 8) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.07, y: this.velocity.y });
+                if (Math.abs(this.velocity.y) < 10) Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.05 });
+                if (Math.abs(this.velocity.x) < 8) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.05, y: this.velocity.y });
             }
         }
         me.burstFire = function() {
@@ -4816,8 +4816,8 @@ const spawn = {
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
         me.onDeath = function() {
             if (simulation.difficulty > 11) { //explode AoE
-                const radius = 100 + simulation.difficulty + 60 * Math.random()
-                if (m.immuneCycle < m.cycle && Vector.magnitude(Vector.sub(this.position, player.position)) < radius) m.damage(0.0004 * radius * simulation.dmgScale);
+                const radius = 100 + 0.5 * simulation.difficulty + 50 * Math.random()
+                if (m.immuneCycle < m.cycle && Vector.magnitude(Vector.sub(this.position, player.position)) < radius) m.damage(0.0003 * radius * simulation.dmgScale);
                 simulation.drawList.push({ //add dmg to draw queue
                     x: this.position.x,
                     y: this.position.y,

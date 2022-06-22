@@ -1,24 +1,59 @@
 ******************************************************** NEXT PATCH **************************************************
 
-nail gun tech: stress concentration - if a mob has below 50% durability after taking damage
-  from needles or rivets near the center of it's body it dies
+rewrite of the tech,gun,field selection code
+  odds of new bugs is pretty high, but the code is shorter and faster, so easier to fix
+path integral is no longer a JUNK tech
+  lets you choose from every option on next tech
+emergence is stackable
+  +2 power up choices per stack
 
-caliber 16->25% nail, needle, rivet size/damage 
-combined tech: flagella - spores move +50% faster
-  spores follow you if they can't find a target
-shock wave stun also applies to sporangium
-  no longer reduces explosion size
+tech: integrated circuit - if ON +7 power up choices  if OFF -1
 
-JUNK tech: reincarnation - kill all mobs and spawn new ones
-  (also spawn a few extra mobs for fun)
-
-updated pause menu and fields descriptions to new wording style
-
-bug fixes
+update matter.js engine 0.17.1 -> 0.18.0
+  shouldn't change anything
+big fixes
 
 *********************************************************** TODO *****************************************************
 
-Tech: florescence
+
+wormhole tech: entropic gravity - gain defense for each research
+  requires wormhole or negative mass field or pilot wave
+
+shrapnel: a new bullet type: a very small bullet with no targeting that has a high gravity arc
+  maybe 1 bounce or no bounce before it ends on map or mob collision
+  often spawns in groups
+
+testChamber2
+  mechanics
+    companion cube
+      bring cube to the end and use it to unlock research
+      level draws on the block to show it's different
+      only this block can trigger a button
+      if cube no longer exists or is off the map spawn a new one
+    double portal fling chain
+      for player?
+      for cube
+    button that activates a laser beam that hits a target and opens a door
+      in order to enter the door you need to place the cube on the button to activate the laser
+        cube has to fly through a portal in oder to get to the button
+      you can't use your body
+  story:
+    you pick up the cube early on and have to get it to a button
+    you run through the level to get the cube, clearing the level of mobs
+      picking up the cube spawns the boss
+        maybe an extra hard boss that is designed for that level
+        blockBoss?
+    you must get the cube to a button near the start of the level
+    the button opens a door
+      normal blocks don't work
+        normal blocks spawn into mobs like blockBoss
+        or mobs don't spawn blocks
+        or just the code looks for the cube
+        or the cube is resting on a button, and when you take the cube off the button the laser fires
+
+mitosis: after needle,bullets or rivets hit a surface split off into two smaller less damaging versions that have their velocity reset -firerate
+
+tech: florescence
 Hitting a mob makes it emit lasers from its vertices
   all laser but pulse?
     should trigger a global cd so it can't occur more then once per cycle
@@ -67,6 +102,9 @@ mob mechanic: beacon
 super balls do more damage after bouncing?
   how to check for bounce?
   maybe just increases damage after hitting a mob
+
+Make environmental damages also damage mobs
+So if a mob passes through laser, it gets damaged
 
 dark mode:
   look at Tinyfolks, 20 minutes till dawn
