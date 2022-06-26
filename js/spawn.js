@@ -3875,12 +3875,8 @@ const spawn = {
                 // this.isInvulnerable = true
                 // this.damageReduction = 0
             } else {
-                if (Math.abs(this.velocity.y) < 15) {
-                    Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.03 });
-                }
-                if (Math.abs(this.velocity.x) < 11) {
-                    Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y });
-                }
+                if (Math.abs(this.velocity.y) < 15) Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.03 });
+                if (Math.abs(this.velocity.x) < 11) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y });
             }
 
             if (this.isInvulnerable) {
@@ -4956,24 +4952,26 @@ const spawn = {
         spawn.spawnOrbitals(me, radius + 200, 1);
         Matter.Body.setDensity(me, 0.004 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() { //helps collisions functions work better after vertex have been changed
-            for (let i = 0; i < 6; i++) {
-                spawn.grenade(this.position.x, this.position.y, 75 * simulation.CDScale);
-                const who = mob[mob.length - 1]
-                const speed = 4 * simulation.accelScale;
-                const angle = 2 * Math.PI * i / 6
-                Matter.Body.setVelocity(who, {
-                    x: speed * Math.cos(angle),
-                    y: speed * Math.sin(angle)
-                });
-            }
+            setTimeout(() => { //fix mob in place, but allow rotation
+                for (let i = 0, len = 6; i < len; i++) {
+                    const speed = 2.25 * simulation.accelScale;
+                    const angle = 2 * Math.PI * i / len
+                    spawn.grenade(this.position.x, this.position.y, 170 * simulation.CDScale);
+                    const who = mob[mob.length - 1]
+                    Matter.Body.setVelocity(who, {
+                        x: speed * Math.cos(angle),
+                        y: speed * Math.sin(angle)
+                    });
+                }
+            }, 200);
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         }
         me.grenadeLimiter = 0
         me.onDamage = function() {
-            if (this.grenadeLimiter < 240) {
+            if (this.grenadeLimiter < 240 && this.health > 0) {
                 this.grenadeLimiter += 60
                 spawn.grenade(this.position.x, this.position.y, 80 + Math.floor(60 * Math.random()));
-                const who = mob[mob.length - 1]
+                who = mob[mob.length - 1]
                 const velocity = Vector.mult(Vector.normalise(Vector.sub(player.position, who.position)), 3 * Math.sqrt(simulation.accelScale) + 4 * Math.random())
                 Matter.Body.setVelocity(who, {
                     x: this.velocity.x + velocity.x,
@@ -5011,7 +5009,7 @@ const spawn = {
             y: 0
         };
         me.onDeath = function() { //helps collisions functions work better after vertex have been changed
-            spawn.grenade(this.position.x, this.position.y, 75 * simulation.CDScale);
+            spawn.grenade(this.position.x, this.position.y, 200 * simulation.CDScale);
             // mob[mob.length - 1].collisionFilter.category = 0
             mob[mob.length - 1].collisionFilter.mask = cat.player | cat.map;
         }

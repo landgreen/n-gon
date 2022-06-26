@@ -1162,9 +1162,9 @@ const mobs = {
                         }
                     }
 
-                    if (tech.isDeathSkipTime && !m.isBodiesAsleep) {
+                    if (tech.deathSkipTime && !m.isBodiesAsleep) {
                         requestAnimationFrame(() => {
-                            simulation.timePlayerSkip(this.isBoss ? 45 : 25)
+                            simulation.timePlayerSkip((this.isBoss ? 45 : 25) * tech.deathSkipTime)
                             simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
                         }); //wrapping in animation frame prevents errors, probably
 

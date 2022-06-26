@@ -125,7 +125,17 @@ function collisionChecks(event) {
                                 m.eyeFillColor = m.fieldMeterColor //'#0cf'
                                 if (!tech.isFlipFlopHarm) m.damage(dmg);
                             }
-                            if (tech.isFlipFlopHealth) m.setMaxHealth();
+                            if (tech.isFlipFlopHealth) {
+                                m.setMaxHealth();
+                                for (let i = 0; i < powerUp.length; i++) {
+                                    if (powerUp[i].name === "heal") {
+                                        const oldSize = powerUp[i].size
+                                        powerUp[i].size = powerUps.heal.size() //update current heals
+                                        const scale = powerUp[i].size / oldSize
+                                        Matter.Body.scale(powerUp[i], scale, scale); //grow    
+                                    }
+                                }
+                            }
                         } else {
                             m.damage(dmg); //normal damage
                         }

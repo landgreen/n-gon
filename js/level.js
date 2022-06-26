@@ -17,17 +17,18 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
             // m.addHealth(Infinity)
-            // m.setField("time dilation")
+            // m.setField("wormhole")
             // b.giveGuns("nail gun")
+            // b.guns[0].ammo = 10000
             // b.giveGuns("mine")
-            // tech.giveTech("cross disciplinary")
-            // tech.giveTech("determinism")
-            // tech.giveTech("pseudoscience")
+            // tech.giveTech("alternator")
+            // for (let i = 0; i < 3; ++i) tech.giveTech("smelting")
+            // for (let i = 0; i < 9; ++i) tech.giveTech("propagator")
             // for (let i = 0; i < 100; ++i) tech.giveTech("nail-bot")
             // for (let i = 0; i < 9; ++i) tech.giveTech("emergence")
             // tech.giveTech("decoherence")
-            // tech.giveTech("brainstorming")
-            // tech.giveTech("path integral")
+            // tech.giveTech("adiabatic healing")
+            // tech.giveTech("shape-memory alloy")
             // m.maxHealth = 100
             // m.health = m.maxHealth
             // for (let i = 0; i < 10; i++) tech.giveTech("tungsten carbide")
@@ -38,17 +39,17 @@ const level = {
             // powerUps.research.changeRerolls(100000)
             // tech.tech[297].frequency = 100
             // m.immuneCycle = Infinity //you can't take damage
-            // level.difficultyIncrease(40) //30 is near max on hard  //60 is near max on why
             // simulation.enableConstructMode() //used to build maps in testing mode
             // level.testChamber2();
             // spawn.cellBossCulture(1900, -500)
-            // level.testing(); //not in rotation, used for testing
-            // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
-            // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // powerUps.research.changeRerolls(100)
-            // spawn.starter(1900, -500, 300)
-            // for (let i = 0; i < 50; ++i) spawn.starter(1900, -500)
-            // spawn.powerUpBoss(1900, -500)
+            // spawn.starter(1900, -500, 100)
+            // for (let i = 0; i < 20; ++i) spawn.exploder(1900, -500)
+            // spawn.grenadierBoss(1900, -500)
+            // level.difficultyIncrease(20) //30 is near max on hard  //60 is near max on why
+            // level.testing(); //not in rotation, used for testing
+            // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
+            // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
@@ -110,7 +111,7 @@ const level = {
             powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
         }
         if (tech.isHealLowHealth) {
-            const len = Math.ceil((m.maxHealth - m.health) / 0.26)
+            const len = Math.ceil((m.maxHealth - m.health) / 0.29)
             for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "heal", false);
         }
         if (tech.isMACHO) spawn.MACHO()
@@ -1324,6 +1325,17 @@ const level = {
                             });
                         }
                     }
+                    //collision with mobs
+                    if (!(simulation.cycle % 5) && !m.isBodiesAsleep) {
+                        query = Matter.Query.region(mob, this)
+                        for (let i = 0; i < query.length; i++) query[i].damage(5 * damage)
+                    }
+
+                    // for (let i = 0, len = mob.length; i < len; i++) {
+                    //     if (  !mob[i].isBoss) {
+                    //         mob[i].damage(0.1 * damage)
+                    //     }
+                    // }
                 }
             },
             query() {
@@ -2615,6 +2627,7 @@ const level = {
         spawn.mapRect(475, -25, 25, 50); //edge shelf
     },
     testing() {
+        const hazard = level.hazard(6000, -1000, 5, 1000, 0.4) //laser
         const button = level.button(1000, 0)
         spawn.bodyRect(1000, -50, 50, 50);
 
@@ -2628,6 +2641,7 @@ const level = {
             level.enter.draw();
         };
         level.customTopLayer = () => {
+            hazard.opticalQuery();
             button.query();
             button.draw();
             ctx.fillStyle = "rgba(0,0,0,0.1)"

@@ -114,6 +114,7 @@ const simulation = {
                 simulation.checks();
                 mobs.loop();
             }
+            m.hold();
             b.bulletRemove();
             if (!m.isBodiesAsleep) b.bulletDo();
         }

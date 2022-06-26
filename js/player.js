@@ -500,7 +500,7 @@ const m = {
     },
     baseHealth: 1,
     setMaxHealth() {
-        m.maxHealth = m.baseHealth + tech.extraMaxHealth + tech.isFallingDamage + 2 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth
+        m.maxHealth = m.baseHealth + tech.extraMaxHealth + tech.isFallingDamage + 4 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
@@ -512,6 +512,7 @@ const m = {
     harmReduction() {
         let dmg = 1
         dmg *= m.fieldHarmReduction
+        // if (!tech.isFlipFlopOn && tech.isFlipFlopHealth) dmg *= 0.5
         if (tech.isZeno) dmg *= 0.15
         if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.4
@@ -2153,6 +2154,8 @@ const m = {
             description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away<br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             set() {
                 b.isExtruderOn = false
+                // m.fieldCDcycleAlternate = 0
+
                 if (m.plasmaBall) {
                     m.plasmaBall.reset()
                     Matter.Composite.remove(engine.world, m.plasmaBall);

@@ -248,7 +248,8 @@ const powerUps = {
         } else if (type === "field") {
             m.setField(index)
         } else if (type === "tech") {
-            if (tech.isBanish && tech.tech[index].isBanished) tech.tech[index].isBanished = false
+            // if (tech.isBanish && tech.tech[index].isBanished) tech.tech[index].isBanished = false
+            powerUps.tech.banishList
             setTimeout(() => { powerUps.lastTechIndex = index }, 10);
             simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>")`);
             tech.giveTech(index)
@@ -446,48 +447,21 @@ const powerUps = {
         name: "heal",
         color: "#0eb",
         size() {
-            return 40 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5); //(simulation.healScale ** 0.25)  gives a smaller radius as heal scale goes down
-        },
-        calculateHeal(size) {
-            return tech.largerHeals * (size / 40 / Math.sqrt(tech.largerHeals) / (simulation.healScale ** 0.25)) ** 2 //heal scale is undone here because heal scale is properly affected on m.addHealth()
+            return Math.sqrt(0.1 + 0.25) * 40 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * (tech.isFlipFlopOn && tech.isFlipFlopHealth ? Math.sqrt(2) : 1); //(simulation.healScale ** 0.25)  gives a smaller radius as heal scale goes down
         },
         effect() {
-            // if (!tech.isEnergyHealth && m.alive) {
-            //     const heal = powerUps.heal.calculateHeal(this.size)
-            //     if (heal > 0) {
-            //         if (tech.isOverHeal && m.health === m.maxHealth) { //tech quenching
-            //             m.damage(heal * simulation.healScale);
-            //             //draw damage
-            //             simulation.drawList.push({ //add dmg to draw queue
-            //                 x: m.pos.x,
-            //                 y: m.pos.y,
-            //                 radius: heal * 500 * simulation.healScale,
-            //                 color: simulation.mobDmgColor,
-            //                 time: simulation.drawTime
-            //             });
-            //             tech.extraMaxHealth += heal * simulation.healScale //increase max health
-            //             m.setMaxHealth();
-            //         } else {
-            //             const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
-            //             m.addHealth(heal);
-            //             simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
-            //         }
-            //     }
-            // }
             if (!tech.isEnergyHealth && m.alive && !tech.isNoHeals) {
-                const heal = powerUps.heal.calculateHeal(this.size)
+                const heal = (this.size / 40 / (simulation.healScale ** 0.25)) ** 2 //simulation.healScale is undone here because heal scale is already properly affected on m.addHealth()
+                // console.log("size = " + this.size, "heal = " + heal)
                 if (heal > 0) {
                     const overHeal = m.health + heal * simulation.healScale - m.maxHealth //used with tech.isOverHeal
-
                     const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
                     m.addHealth(heal);
                     simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
-
                     if (tech.isOverHeal && overHeal > 0) { //tech quenching
                         const scaledOverHeal = overHeal * 0.7
                         m.damage(scaledOverHeal);
                         simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>-=</span> ${(scaledOverHeal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
-                        //draw damage
                         simulation.drawList.push({ //add dmg to draw queue
                             x: m.pos.x,
                             y: m.pos.y,
@@ -500,7 +474,6 @@ const powerUps = {
                     }
                 }
             }
-
             if (tech.healGiveMaxEnergy) {
                 tech.healMaxEnergyBonus += 0.1
                 m.setMaxEnergy();
@@ -900,17 +873,19 @@ const powerUps = {
                 for (let i = 0; i < tech.tech.length; i++) tech.tech[i].isRecentlyShown = false //reset recently shown back to zero
                 // powerUps.tech.lastTotalChoices = options.length //this is recorded so that banish can know how many tech were available
                 // console.log(optionLengthNoDuplicates, options.length)
+                powerUps.tech.banishList = []
                 if (options.length > 0) {
                     for (let i = 0; i < totalChoices; i++) {
                         if (options.length < 1) break
                         const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options
+
                         if (tech.isBanish) {
                             tech.tech[choose].isBanished = true
                             if (i === 0) simulation.makeTextLog(`options.length = ${optionLengthNoDuplicates}`)
                         }
-                        //avoid displaying repeated tech options at the same time
-                        removeOption(choose)
-                        tech.tech[choose].isRecentlyShown = true
+
+                        removeOption(choose) //move from future options pool to avoid repeats on this selection
+                        tech.tech[choose].isRecentlyShown = true //this flag prevents this option from being shown the next time you pick up a tech power up 
 
                         const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
                         if (tech.tech[choose].isFieldTech) {

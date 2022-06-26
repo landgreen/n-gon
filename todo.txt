@@ -1,20 +1,41 @@
 ******************************************************** NEXT PATCH **************************************************
 
-rewrite of the tech,gun,field selection code
-  odds of new bugs is pretty high, but the code is shorter and faster, so easier to fix
-path integral is no longer a JUNK tech
-  lets you choose from every option on next tech
-emergence is stackable
-  +2 power up choices per stack
+shape-memory alloy now also increases 100% heal power ups when "ON"
 
-tech: integrated circuit - if ON +7 power up choices  if OFF -1
+smelting makes multiple harpoons that fire in a quick succession
+  instead of at different angles
+  costs 2 less ammo
+harpoon tech filament gives +20% longer rope per ammo
+ground state: 66->50% less passive energy generation
 
-update matter.js engine 0.17.1 -> 0.18.0
-  shouldn't change anything
-big fixes
+grenadier mobs have a much longer delay before they explode on death
+level based lasers now damage mobs
+  but don't trick mobs into touching the laser, it's rude
+
+bug fixes
 
 *********************************************************** TODO *****************************************************
 
+improve mob invincible graphic
+  opacity oscillates from 100% to 0%?
+
+hopBossMom
+  spawns lots of small hopBullets
+  drops eggs, that hatch into hopBullets
+    like sporangium
+  normally runs away from player, but goes closer to drop eggs
+  
+
+make plasma ball pick up still work when you have no no energy
+  make a unique CD var for plasma ball?
+
+give laser gun _____ if you fire in an angle range
+  draw angle range as a slowly rotation circle arc around player
+  effect:
+    bonus damage 
+    extra beams
+    extra reflections
+    
 
 wormhole tech: entropic gravity - gain defense for each research
   requires wormhole or negative mass field or pilot wave
@@ -76,13 +97,6 @@ cloaking field
     how to code?
       just delay setting the m.isCloak for a couple seconds
         and also set all active bots to remember player in the de-cloaked stop
-
-give laser gun _____ if you fire in an angle range
-  draw angle range as a slowly rotation circle arc around player
-  effect:
-    bonus damage 
-    extra beams
-    extra reflections
 
 scrap bots can't move?
   only works for nail, foam, laser

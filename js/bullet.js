@@ -1820,8 +1820,9 @@ const b = {
                 } else { //&& simulation.cycle % 2 
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
                         const radius = powerUp[i].circleRadius + 50
-                        if (Vector.magnitudeSquared(Vector.sub(this.vertices[2], powerUp[i].position)) < radius * radius) {
+                        if (Vector.magnitudeSquared(Vector.sub(this.vertices[2], powerUp[i].position)) < radius * radius && !powerUp[i].isGrabbed) {
                             if (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) {
+                                powerUp[i].isGrabbed = true
                                 this.caughtPowerUp = powerUp[i]
                                 Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 })
                                 Matter.Body.setPosition(powerUp[i], this.vertices[2])
@@ -6543,11 +6544,11 @@ const b = {
                     x: m.pos.x + harpoonSize * 40 * Math.cos(m.angle),
                     y: m.pos.y + harpoonSize * 40 * Math.sin(m.angle)
                 }
-                if (tech.extraHarpoons && !input.down) { //multiple harpoons
+                const num = Math.min(this.ammo, tech.extraHarpoons + 1)
+                if (!input.down && num > 1) { //multiple harpoons
                     const SPREAD = 0.06
-                    const len = tech.extraHarpoons + 1
-                    let angle = m.angle - SPREAD * len / 2;
-                    for (let i = 0; i < len; i++) {
+                    let angle = m.angle - SPREAD * num / 2;
+                    for (let i = 0; i < num; i++) {
                         if (this.ammo > 0) {
                             this.ammo--
                             b.grapple(where, angle, true, harpoonSize)
@@ -6576,13 +6577,13 @@ const b = {
                 }
                 //look for closest mob in player's LoS
                 const harpoonSize = (tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1) //* (input.down ? 0.7 : 1)
-                const totalCycles = 6 * (tech.isFilament ? 1 + 0.01 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
+                const totalCycles = 6 * (tech.isFilament ? 1 + 0.012 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
 
                 if (tech.extraHarpoons && !input.down) { //multiple harpoons
                     const SPREAD = 0.1
                     let angle = m.angle - SPREAD * tech.extraHarpoons / 2;
                     const dir = { x: Math.cos(angle), y: Math.sin(angle) }; //make a vector for the player's direction of length 1; used in dot product
-                    const range = 450 * (tech.isFilament ? 1 + 0.005 * Math.min(110, this.ammo) : 1)
+                    const range = 450 * (tech.isFilament ? 1 + 0.006 * Math.min(110, this.ammo) : 1)
                     let targetCount = 0
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
@@ -6601,14 +6602,23 @@ const b = {
                     }
                     //if more harpoons and no targets left
                     if (targetCount < tech.extraHarpoons + 1) {
-                        const num = tech.extraHarpoons + 1 - targetCount
-                        for (let i = 0; i < num; i++) {
-                            if (this.ammo > 0) {
-                                this.ammo--
-                                b.harpoon(where, null, angle, harpoonSize, true, totalCycles) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
-                                angle += SPREAD
+                        const num = tech.extraHarpoons - targetCount
+                        const delay = 7 //Math.floor(Math.max(4, 8 - 0.5 * tech.extraHarpoons))
+                        let count = -1
+                        let harpoonDelay = () => {
+                            if (simulation.paused) { requestAnimationFrame(harpoonDelay) } else {
+                                count++
+                                if (!(count % delay) && this.ammo > 0) {
+                                    this.ammo--
+                                    b.harpoon({
+                                        x: m.pos.x + 30 * Math.cos(m.angle),
+                                        y: m.pos.y + 30 * Math.sin(m.angle)
+                                    }, null, m.angle, harpoonSize, true, totalCycles)
+                                }
+                                if (count < num * delay && m.alive) requestAnimationFrame(harpoonDelay);
                             }
                         }
+                        requestAnimationFrame(harpoonDelay)
                     }
                     this.ammo++ //make up for the ammo used up in fire()
                     simulation.updateGunHUD();

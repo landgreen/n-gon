@@ -224,7 +224,7 @@ const tech = {
     },
     damageFromTech() {
         let dmg = 1 //m.fieldDamage
-        if (tech.isDeathSkipTime) dmg *= 1.67
+        if (tech.deathSkipTime) dmg *= 1 + 0.6 * tech.deathSkipTime
         if (tech.isNoDraftPause) dmg *= 1.34
         if (tech.isCloakingDamage) dmg *= 1.35
         if (tech.isTechDamage) dmg *= 1.9
@@ -964,8 +964,8 @@ const tech = {
         },
         {
             name: "propagator",
-            description: "after mobs <strong>die</strong> advance time <strong>0.5</strong> seconds<br><strong>+67%</strong> <strong class='color-d'>damage</strong>",
-            maxCount: 1,
+            description: "after mobs <strong>die</strong> advance time <strong>0.5</strong> seconds<br><strong>+60%</strong> <strong class='color-d'>damage</strong>",
+            maxCount: 3,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
@@ -974,10 +974,10 @@ const tech = {
             },
             requires: "",
             effect() {
-                tech.isDeathSkipTime = true
+                tech.deathSkipTime++
             },
             remove() {
-                tech.isDeathSkipTime = false
+                tech.deathSkipTime = 0
             }
         },
         {
@@ -1720,7 +1720,7 @@ const tech = {
         },
         {
             name: "shape-memory alloy",
-            description: "if <strong>flip-flop</strong> is <strong class='color-flop'>ON</strong><br><strong>+200</strong> maximum <strong class='color-h'>health</strong>",
+            description: `if <strong>flip-flop</strong> is <strong class='color-flop'>ON</strong><br><strong>+400</strong> maximum <strong class='color-h'>health</strong> and <strong>+100%</strong> ${powerUps.orb.heal()} effect`,
             maxCount: 1,
             count: 0,
             frequency: 4,
@@ -1732,10 +1732,26 @@ const tech = {
             effect() {
                 tech.isFlipFlopHealth = true;
                 m.setMaxHealth();
+                for (let i = 0; i < powerUp.length; i++) {
+                    if (powerUp[i].name === "heal") {
+                        const oldSize = powerUp[i].size
+                        powerUp[i].size = powerUps.heal.size() //update current heals
+                        const scale = powerUp[i].size / oldSize
+                        Matter.Body.scale(powerUp[i], scale, scale); //grow    
+                    }
+                }
             },
             remove() {
                 tech.isFlipFlopHealth = false;
                 m.setMaxHealth();
+                for (let i = 0; i < powerUp.length; i++) {
+                    if (powerUp[i].name === "heal") {
+                        const oldSize = powerUp[i].size
+                        powerUp[i].size = powerUps.heal.size() //update current heals
+                        const scale = powerUp[i].size / oldSize
+                        Matter.Body.scale(powerUp[i], scale, scale); //grow    
+                    }
+                }
             }
         },
         {
@@ -2233,7 +2249,7 @@ const tech = {
         },
         {
             name: "ground state",
-            description: "<strong>+200</strong> maximum <strong class='color-f'>energy</strong><br><strong>–66%</strong> passive <strong class='color-f'>energy</strong> generation",
+            description: "<strong>+200</strong> maximum <strong class='color-f'>energy</strong><br><strong>–50%</strong> passive <strong class='color-f'>energy</strong> generation",
             // description: "reduce <strong class='color-defense'>defense</strong> by <strong>66%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
@@ -2244,7 +2260,7 @@ const tech = {
             },
             requires: "not time crystals",
             effect: () => {
-                m.fieldRegen = 0.00033
+                m.fieldRegen = 0.0005
                 tech.isGroundState = true
                 m.setMaxEnergy()
             },
@@ -2581,16 +2597,16 @@ const tech = {
         },
         {
             name: "negative entropy",
-            description: `at the start of each <strong>level</strong><br>for every <strong>26</strong> missing <strong class='color-h'>health</strong> spawn ${powerUps.orb.heal()}`,
+            description: `at the start of each <strong>level</strong><br>for every <strong>29</strong> missing <strong class='color-h'>health</strong> spawn ${powerUps.orb.heal()}`,
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
             isHealTech: true,
             allowed() {
-                return m.health > 0.1 && !tech.isNoHeals
+                return !tech.isNoHeals
             },
-            requires: "has some health, not ergodicity",
+            requires: "not ergodicity",
             effect() {
                 tech.isHealLowHealth = true;
             },
@@ -2612,15 +2628,27 @@ const tech = {
             requires: "under 70% health, not mass-energy equivalence, ergodicity",
             effect() {
                 tech.largerHeals++;
-                this.refundAmount += tech.addJunkTechToPool(0.05)
-                //update current heals
                 for (let i = 0; i < powerUp.length; i++) {
-                    if (powerUp[i].name === "heal") powerUp[i].size = powerUps.heal.size()
+                    if (powerUp[i].name === "heal") {
+                        const oldSize = powerUp[i].size
+                        powerUp[i].size = powerUps.heal.size() //update current heals
+                        const scale = powerUp[i].size / oldSize
+                        Matter.Body.scale(powerUp[i], scale, scale); //grow    
+                    }
                 }
+                this.refundAmount += tech.addJunkTechToPool(0.05)
             },
             refundAmount: 0,
             remove() {
                 tech.largerHeals = 1;
+                for (let i = 0; i < powerUp.length; i++) {
+                    if (powerUp[i].name === "heal") {
+                        const oldSize = powerUp[i].size
+                        powerUp[i].size = powerUps.heal.size() //update current heals
+                        const scale = powerUp[i].size / oldSize
+                        Matter.Body.scale(powerUp[i], scale, scale); //grow    
+                    }
+                }
                 if (this.count > 0 && this.refundAmount > 0) {
                     tech.removeJunkTechFromPool(this.refundAmount)
                     this.refundAmount = 0
@@ -2814,7 +2842,7 @@ const tech = {
         },
         {
             name: "decoherence",
-            description: `<strong class='color-r'>researched</strong> or <strong>canceled</strong> <strong class='color-m'>tech</strong> won't <strong>reoccur</strong> <br>spawn ${powerUps.orb.research(7)}`,
+            description: `<strong class='color-m'>tech</strong> options you don't <strong>choose</strong> won't <strong>reoccur</strong><br>spawn ${powerUps.orb.research(7)}`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -5917,7 +5945,7 @@ const tech = {
         {
             name: "smelting",
             // description: `forge <strong>3</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot`,
-            descriptionFunction() { return `forge <strong>${(tech.isRailGun ?5:3)*(2+this.count)}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot` },
+            descriptionFunction() { return `forge <strong>${(tech.isRailGun ? 2 : 1) * (4 + 2 * this.count)}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot` },
             // descriptionFunction() { return `forge <strong>${tech.isRailGun? 10: 2}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot` },
             isGunTech: true,
             maxCount: 9,
@@ -5931,7 +5959,7 @@ const tech = {
             effect() {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "harpoon") {
-                        b.guns[i].ammo -= (tech.isRailGun ? 5 : 3) * (1 + this.count)
+                        b.guns[i].ammo -= (tech.isRailGun ? 5 : 2) * (1 + this.count)
                         // console.log(3 + this.count * 3)
                         if (b.guns[i].ammo < 0) b.guns[i].ammo = 0
                         simulation.updateGunHUD();
@@ -5958,7 +5986,7 @@ const tech = {
         {
             name: "UHMWPE",
             descriptionFunction() {
-                return `+${(b.guns[9].ammo).toFixed(0)}% <strong>harpoon</strong> <strong>rope</strong> <strong>length</strong><br><em>(1/100 of harpoon <strong class='color-ammo'>ammo</strong>)</em>`
+                return `+${(b.guns[9].ammo).toFixed(0)}% <strong>harpoon</strong> <strong>rope</strong> <strong>length</strong><br><em>(1/80 of harpoon <strong class='color-ammo'>ammo</strong>)</em>`
             },
             // description: "increase the <strong>length</strong> of your <strong>harpoon</strong>'s <strong>rope</strong><br>by <strong>1%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
             isGunTech: true,
@@ -7437,6 +7465,7 @@ const tech = {
                 tech.isWormHolePause = true
             },
             remove() {
+                if (tech.isWormHolePause && m.isBodiesAsleep) m.wakeCheck();
                 tech.isWormHolePause = false
             }
         },
@@ -10303,7 +10332,7 @@ const tech = {
     isClusterExplode: null,
     isCircleExplode: null,
     isPetalsExplode: null,
-    isDeathSkipTime: null,
+    deathSkipTime: null,
     isIceMaxHealthLoss: null,
     isIceKill: null,
     isCritKill: null
