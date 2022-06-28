@@ -631,6 +631,23 @@ summary {
     /* text-decoration: underline; */
 }
 
+/* .mob {
+    text-shadow: 0px 1px, 1px 0px, 1px 1px;
+} */
+
+/* @keyframes bounce-munch {
+    0% {
+        vertical-align: -40px;
+        }
+    50% {
+        vertical-align: 4px;
+    }
+    100% {
+        vertical-align: 40px;
+    }
+ }  */
+
+ 
 /* .color-bot { */
 /* background-color: #eee; */
 /* color: #555; */

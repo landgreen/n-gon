@@ -1438,9 +1438,13 @@ const b = {
                 if (tech.fragments) {
                     b.targetedNail(this.vertices[2], tech.fragments * Math.floor(2 + Math.random()))
                 }
-                // if (!who.isBadTarget) {
-                //     this.do = this.returnToPlayer
-                // }
+                if (tech.isFoamBall) {
+                    const radius = 5 + 8 * Math.random()
+                    const velocity = { x: Math.max(2, 10 - radius * 0.25), y: 0 }
+                    for (let i = 0, len = 2 * this.mass; i < len; i++) {
+                        b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
+                    }
+                }
             },
             caughtPowerUp: null,
             dropCaughtPowerUp() {
@@ -1714,7 +1718,14 @@ const b = {
                             this.draw();
                         }
                     }
+                }
 
+                if (tech.isFoamBall) {
+                    const radius = 5 + 8 * Math.random()
+                    const velocity = { x: Math.max(2, 10 - radius * 0.25), y: 0 }
+                    for (let i = 0, len = 2 * this.mass; i < len; i++) {
+                        b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
+                    }
                 }
             },
             caughtPowerUp: null,
@@ -5118,10 +5129,7 @@ const b = {
 
                 bullet[me].minDmgSpeed = 10
                 bullet[me].frictionAir = 0.006;
-                bullet[me].do = function() {
-                    this.force.y += this.mass * 0.0008
-
-                    //rotates bullet to face current velocity?
+                bullet[me].rotateToVelocity = function() { //rotates bullet to face current velocity?
                     if (this.speed > 7) {
                         const facing = {
                             x: Math.cos(this.angle),
@@ -5135,6 +5143,22 @@ const b = {
                         }
                     }
                 };
+                if (tech.isIncendiary) {
+                    bullet[me].do = function() {
+                        this.force.y += this.mass * 0.0008
+                        this.rotateToVelocity()
+                        //collide with map
+                        if (Matter.Query.collides(this, map).length) { //penetrate walls
+                            this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                            b.explosion(this.position, 300 + 40 * Math.random()); //makes bullet do explosive damage at end
+                        }
+                    };
+                } else {
+                    bullet[me].do = function() {
+                        this.force.y += this.mass * 0.0008
+                        this.rotateToVelocity()
+                    };
+                }
                 b.muzzleFlash(30);
                 //very complex recoil system
                 if (m.onGround) {
@@ -5192,10 +5216,7 @@ const b = {
 
                 bullet[me].minDmgSpeed = 10
                 bullet[me].frictionAir = 0.006;
-                bullet[me].do = function() {
-                    this.force.y += this.mass * 0.0008
-
-                    //rotates bullet to face current velocity?
+                bullet[me].rotateToVelocity = function() { //rotates bullet to face current velocity?
                     if (this.speed > 7) {
                         const facing = {
                             x: Math.cos(this.angle),
@@ -5209,6 +5230,23 @@ const b = {
                         }
                     }
                 };
+                if (tech.isIncendiary) {
+                    bullet[me].do = function() {
+                        this.force.y += this.mass * 0.0008
+                        this.rotateToVelocity()
+                        //collide with map
+                        if (Matter.Query.collides(this, map).length) { //penetrate walls
+                            this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                            b.explosion(this.position, 100 + (Math.random() - 0.5) * 20); //makes bullet do explosive damage at end
+                        }
+                    };
+                } else {
+                    bullet[me].do = function() {
+                        this.force.y += this.mass * 0.0008
+                        this.rotateToVelocity()
+                    };
+                }
+
                 b.muzzleFlash(30);
                 //very complex recoil system
                 if (m.onGround) {
@@ -5339,6 +5377,9 @@ const b = {
                                 this.torque -= this.turnMag
                             }
                         }
+                        if (tech.isIncendiary && Matter.Query.collides(this, map).length) {
+                            this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                        }
                     };
                     bullet[me].beforeDmg = function(who) {
                         if (this.speed > 4) {
@@ -5373,7 +5414,9 @@ const b = {
                         bullet[me].beforeDmg = function() {
                             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
                         };
-                        bullet[me].do = function() {}
+                        bullet[me].do = function() {
+                            if (Matter.Query.collides(this, map).length) this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                        }
                         Composite.add(engine.world, bullet[me]); //add bullet to world
                     }
                 } else if (tech.isNailShot) {
@@ -5500,6 +5543,19 @@ const b = {
                 bullet[me].do = function() {
                     this.force.y += this.mass * 0.0012;
                 };
+                if (tech.isIncendiary) {
+                    bullet[me].do = function() {
+                        this.force.y += this.mass * 0.0012;
+                        if (Matter.Query.collides(this, map).length) {
+                            b.explosion(this.position, this.mass * 280); //makes bullet do explosive damage at end
+                            this.endCycle = 0
+                        }
+                    };
+                } else {
+                    bullet[me].do = function() {
+                        this.force.y += this.mass * 0.0012;
+                    };
+                }
                 bullet[me].beforeDmg = function(who) {
                     mobs.statusStun(who, 180) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
                     if (tech.isIncendiary) {
@@ -5513,7 +5569,6 @@ const b = {
                             b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
                         }
                         this.endCycle = 0
-                        // this.mass = 0 //prevent damage
                     }
                 };
             },
@@ -5537,9 +5592,19 @@ const b = {
                     bullet[me].minDmgSpeed = 0;
                     bullet[me].restitution = 0.99;
                     bullet[me].friction = 0;
-                    bullet[me].do = function() {
-                        this.force.y += this.mass * 0.001;
-                    };
+                    if (tech.isIncendiary) {
+                        bullet[me].do = function() {
+                            this.force.y += this.mass * 0.0012;
+                            if (Matter.Query.collides(this, map).length) {
+                                b.explosion(this.position, this.mass * 280); //makes bullet do explosive damage at end
+                                this.endCycle = 0
+                            }
+                        };
+                    } else {
+                        bullet[me].do = function() {
+                            this.force.y += this.mass * 0.0012;
+                        };
+                    }
                     bullet[me].beforeDmg = function() {
                         if (tech.isIncendiary) {
                             b.explosion(this.position, this.mass * 320 + 70 * Math.random()); //makes bullet do explosive damage at end
@@ -5579,9 +5644,19 @@ const b = {
                     bullet[me].minDmgSpeed = 0;
                     bullet[me].restitution = 0.99;
                     bullet[me].friction = 0;
-                    bullet[me].do = function() {
-                        this.force.y += this.mass * 0.001;
-                    };
+                    if (tech.isIncendiary) {
+                        bullet[me].do = function() {
+                            this.force.y += this.mass * 0.0012;
+                            if (Matter.Query.collides(this, map).length) {
+                                b.explosion(this.position, this.mass * 280); //makes bullet do explosive damage at end
+                                this.endCycle = 0
+                            }
+                        };
+                    } else {
+                        bullet[me].do = function() {
+                            this.force.y += this.mass * 0.0012;
+                        };
+                    }
                     bullet[me].beforeDmg = function() {
                         if (tech.isIncendiary) {
                             b.explosion(this.position, this.mass * 320 + 70 * Math.random()); //makes bullet do explosive damage at end

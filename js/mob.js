@@ -1205,10 +1205,12 @@ const mobs = {
                     }
                     if (tech.isAddRemoveMaxHealth) {
                         if (this.isBoss && this.isDropPowerUp) {
-                            powerUps.spawn(this.position.x, this.position.y, "tech", false)
-                            // if (0.5 < Math.random()) powerUps.spawn(this.position.x, this.position.y, "tech", false)
+                            powerUps.spawn(this.position.x + 20, this.position.y, "tech", false)
+                            powerUps.spawn(this.position.x - 20, this.position.y, "ammo", false)
+                            powerUps.spawn(this.position.x, this.position.y + 20, "research", false)
+                            powerUps.spawn(this.position.x, this.position.y - 20, "heal", false)
                         } else {
-                            const amount = 0.0045
+                            const amount = 0.005
                             if (tech.isEnergyHealth) {
                                 if (m.maxEnergy > amount) {
                                     tech.healMaxEnergyBonus -= amount

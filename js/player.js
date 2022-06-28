@@ -2772,7 +2772,7 @@ const m = {
                         if (tech.isCloakStun) { //stun nearby mobs after exiting cloak
                             let isMobsAround = false
                             const stunRange = m.fieldDrawRadius * 1.5
-                            const drain = 0.15
+                            const drain = 0.1
                             const stunTime = 240
                             if (m.energy > drain) {
                                 for (let i = 0, len = mob.length; i < len; ++i) {
@@ -2828,7 +2828,10 @@ const m = {
                             let inPlayer = Matter.Query.region(mob, player.bounds)
                             if (inPlayer.length > 0) {
                                 for (let i = 0; i < inPlayer.length; i++) {
-                                    if (m.energy > 0 && inPlayer[i].shield) m.energy -= 0.014;
+                                    if (m.energy > 0) {
+                                        if (inPlayer[i].isUnblockable) m.energy -= 0.003;
+                                        if (inPlayer[i].shield) m.energy -= 0.014;
+                                    }
                                 }
                             }
                         } else {

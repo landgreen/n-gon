@@ -114,7 +114,7 @@ const simulation = {
                 simulation.checks();
                 mobs.loop();
             }
-            m.hold();
+            if (m.fieldMode !== 7) m.hold();
             b.bulletRemove();
             if (!m.isBodiesAsleep) b.bulletDo();
         }
@@ -920,6 +920,13 @@ const simulation = {
                 }
             }
             requestAnimationFrame(respawnWorms);
+        }
+
+        if (tech.isQuantumEraser) {
+            // tech.quantumEraserCount = 0
+            for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].isDropPowerUp && mob[i].alive) tech.quantumEraserCount++
+            }
         }
 
         function removeAll(array) {

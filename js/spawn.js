@@ -16,6 +16,7 @@ const spawn = {
         } else {
             spawn[options[Math.floor(Math.random() * options.length)]](x, y)
         }
+        spawn.quantumEraserCheck(); //remove mobs from tech: quantum eraser
     },
     pickList: ["starter", "starter"],
     fullPickList: [
@@ -45,16 +46,55 @@ const spawn = {
     spawnChance(chance) {
         return Math.random() < chance + 0.07 * simulation.difficulty && mob.length < -1 + 16 * Math.log10(simulation.difficulty + 1)
     },
+    quantumEraserCheck() { //remove mobs from tech: quantum eraser
+        if (tech.isQuantumEraser && tech.quantumEraserCount > 0) {
+            for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].isDropPowerUp && mob[i].alive) { //&& !mob[i].isBoss
+                    tech.isQuantumEraserDuplication = true
+                    mob[i].death()
+                    tech.isQuantumEraserDuplication = false
+
+                    //graphics
+                    const color = 'rgba(255,255,255, 0.8)'
+                    simulation.drawList.push({
+                        x: mob[i].position.x,
+                        y: mob[i].position.y,
+                        radius: mob[i].radius * 2,
+                        color: color, //"rgba(0,0,0,0.6)",
+                        time: 60
+                    });
+                    simulation.drawList.push({
+                        x: mob[i].position.x,
+                        y: mob[i].position.y,
+                        radius: mob[i].radius * 1,
+                        color: color, //"rgba(0,0,0,0.85)",
+                        time: 90
+                    });
+                    simulation.drawList.push({
+                        x: mob[i].position.x,
+                        y: mob[i].position.y,
+                        radius: mob[i].radius * 0.5,
+                        color: color, //"rgb(0,0,0)",
+                        time: 120
+                    });
+
+                    tech.quantumEraserCount--
+                    simulation.makeTextLog(`<span class='color-var'>tech</span>.quantumEraserCount <span class='color-symbol'>=</span> ${tech.quantumEraserCount}`)
+                    if (tech.quantumEraserCount < 1) break
+                }
+            }
+        }
+    },
     randomMob(x, y, chance = 1) {
         if (spawn.spawnChance(chance) || chance === Infinity) {
             const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
             spawn[pick](x, y);
         }
-
         if (tech.isMoreMobs || (tech.isDuplicateBoss && Math.random() < tech.duplicationChance())) {
             const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
             spawn[pick](x, y);
         }
+        spawn.quantumEraserCheck(); //remove mobs from tech: quantum eraser
     },
     randomSmallMob(x, y,
         num = Math.max(Math.min(Math.round(Math.random() * simulation.difficulty * 0.2), 4), 0),
@@ -72,6 +112,7 @@ const spawn = {
                 spawn[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
             }
         }
+        spawn.quantumEraserCheck(); //remove mobs from tech: quantum eraser
     },
     randomGroup(x, y, chance = 1) {
         if (spawn.spawnChance(chance) && simulation.difficulty > 2 || chance === Infinity) {
@@ -106,6 +147,7 @@ const spawn = {
                     }
                 }
             }
+            spawn.quantumEraserCheck(); //remove mobs from tech: quantum eraser
         }
     },
     secondaryBossChance(x, y) {
@@ -2400,7 +2442,9 @@ const spawn = {
         me.memory = Infinity
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
-            ctx.setLineDash([]);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => { ctx.setLineDash([]) })
+            })
         };
         me.damageReduction = 0.35 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) // me.damageReductionGoal
         me.awake = function() {
@@ -3812,8 +3856,8 @@ const spawn = {
                     this.death();
                     //hit player
                     if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.explodeRange && m.immuneCycle < m.cycle) {
-                        m.damage(0.01 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.25 : 1));
-                        m.energy -= 0.1 * (tech.isRadioactiveResistance ? 0.25 : 1)
+                        m.damage(0.015 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.25 : 1));
+                        m.energy -= 0.15 * (tech.isRadioactiveResistance ? 0.25 : 1)
                         if (m.energy < 0) m.energy = 0
                     }
                     // mob[i].isInvulnerable = false //make mineBoss not invulnerable ?
@@ -3931,7 +3975,7 @@ const spawn = {
         me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob
         Matter.Body.setVelocity(me, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) });
         me.seePlayer.recall = 1;
-        spawn.spawnOrbitals(me, radius + 15, 1)
+        spawn.spawnOrbitals(me, radius + 25, 1)
 
         // me.skipRate = 1 + Math.floor(simulation.difficulty*0.02)
         // spawn.shield(me, x, y, 1);
@@ -3940,7 +3984,7 @@ const spawn = {
             if (this.health < this.nextHealthThreshold) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
-                this.invulnerableCount = 360 + simulation.difficulty * 4 //how long does invulnerable time last
+                this.invulnerableCount = 300 + simulation.difficulty * 4 //how long does invulnerable time last
                 this.isInvulnerable = true
                 this.damageReduction = 0
                 // requestAnimationFrame(() => { simulation.timePlayerSkip(300) }); //wrapping in animation frame prevents errors, probably
@@ -3948,7 +3992,7 @@ const spawn = {
         };
         me.onDeath = function() {
             if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
-            requestAnimationFrame(() => { simulation.timePlayerSkip(30) }); //wrapping in animation frame prevents errors, probably
+            requestAnimationFrame(() => { simulation.timePlayerSkip(60) }); //wrapping in animation frame prevents errors, probably
         };
 
         me.cycle = Math.floor(360 * Math.random())
@@ -3977,7 +4021,7 @@ const spawn = {
                 }
                 //time dilation
                 if (!simulation.isTimeSkipping) {
-                    requestAnimationFrame(() => { simulation.timePlayerSkip(1) }); //wrapping in animation frame prevents errors, probably            
+                    requestAnimationFrame(() => { simulation.timePlayerSkip(3) }); //wrapping in animation frame prevents errors, probably            
                     // if (!(simulation.cycle % 10)) 
 
                     //draw invulnerable

@@ -255,7 +255,7 @@ const tech = {
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
-        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0))
+        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication)
     },
     isScaleMobsWithDuplication: false,
     maxDuplicationEvent() {
@@ -3152,7 +3152,7 @@ const tech = {
 
         {
             name: "paradigm shift",
-            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>16%</strong> chance to convert that <strong class='color-m'>tech</strong> into ${powerUps.orb.research(1)}`,
+            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>16%</strong> chance to fail`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -4402,16 +4402,16 @@ const tech = {
         },
         {
             name: "polyurethane foam",
-            description: "<strong>super balls</strong> colliding with <strong>mobs</strong> catalyzes<br>a reaction that yields <strong>foam</strong> bubbles",
+            description: "<strong>super balls</strong> and <strong>harpoons</strong> colliding with <strong>mobs</strong><br>catalyzes a reaction that yields <strong>foam</strong> bubbles",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("super balls")
+                return tech.haveGunCheck("super balls") || (tech.haveGunCheck("harpoon") && !tech.fragments)
             },
-            requires: "super balls",
+            requires: "super balls, harpoon, not fragmentation",
             effect() {
                 tech.isFoamBall = true;
             },
@@ -4706,9 +4706,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !tech.isExplodeRadio && (tech.haveGunCheck("harpoon") || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.missileBotCount || tech.isRivets || tech.blockDamage > 0.075)
+                return !tech.isExplodeRadio && ((tech.haveGunCheck("harpoon") && !tech.isFoamBall) || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || tech.missileBotCount || tech.isRivets || tech.blockDamage > 0.075)
             },
-            requires: "grenades, missiles, rivets, harpoon, or mass driver, not iridium-192",
+            requires: "grenades, missiles, rivets, harpoon, or mass driver, not iridium-192, not polyurethane foam",
             effect() {
                 tech.fragments++
             },
@@ -5536,7 +5536,7 @@ const tech = {
         },
         {
             name: "fault tolerance",
-            description: "remove your <strong>drone gun</strong><br>spawn <strong>6</strong> <strong>drones</strong> that last <strong>forever</strong>",
+            description: "remove your <strong>drone gun</strong><br>spawn <strong>4</strong> <strong>drones</strong> that last <strong>forever</strong>",
             isGunTech: true,
             isRemoveGun: true,
             maxCount: 1,
@@ -5548,7 +5548,7 @@ const tech = {
             },
             requires: "drones, not drone repair, anti-shear topology, autonomous navigation",
             effect() {
-                const num = 6
+                const num = 4
                 tech.isForeverDrones += num
                 if (tech.haveGunCheck("drones", false)) b.removeGun("drones")
                 //spawn drones
@@ -5847,7 +5847,7 @@ const tech = {
             allowed() {
                 return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.isHarpoonPowerUp && !tech.isRailGun && !tech.isFireMoveLock
             },
-            requires: "harpoon, not railgun, filament, toggling harpoon, Higgs mechanism",
+            requires: "harpoon, not railgun, UHMWPE, toggling harpoon, Higgs mechanism",
             effect() {
                 tech.isGrapple = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -5865,7 +5865,7 @@ const tech = {
         },
         {
             name: "bulk modulus",
-            description: `become <strong>immune</strong> to <strong class='color-defense'>defense</strong> while <strong>grappling</strong><br>drains <strong class='color-f'>energy</strong> and prevents <strong>generation</strong>`,
+            description: `while <strong>grappling</strong> become <strong>invulnerable</strong><br>drain <strong class='color-f'>energy</strong>`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -7104,7 +7104,7 @@ const tech = {
         },
         {
             name: "Lorentz transformation",
-            description: `use ${powerUps.orb.research(3)}<br><strong>+50%</strong> <strong>movement</strong>, <strong>jumping</strong>, and <strong>fire rate</strong>`,
+            description: `use ${powerUps.orb.research(3)}<br><strong>+50%</strong> <strong>movement</strong>, <strong>jumping</strong>, and <strong><em>fire rate</em></strong>`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7152,6 +7152,7 @@ const tech = {
         },
         {
             name: "no-cloning theorem",
+            // descriptionFunction() { return `<strong>+45%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a mob <strong>dies</strong> <strong>–2%</strong> <strong class='color-dup'>duplication</strong> <em>(${tech.duplicationChance()})</em>` },
             description: `<strong>+45%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>after a mob <strong>dies</strong> <strong>–2%</strong> <strong class='color-dup'>duplication</strong>`,
             isFieldTech: true,
             maxCount: 1,
@@ -7159,7 +7160,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking")
+                return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking") && !tech.isQuantumEraser
             },
             requires: "cloaking, time dilation",
             effect() {
@@ -7173,15 +7174,38 @@ const tech = {
             }
         },
         {
-            name: "symbiosis",
-            description: "<strong>bosses</strong> spawn <strong>+1</strong> <strong class='color-m'>tech</strong> after they <strong>die</strong><br>after a <strong>mob</strong> <strong>dies</strong> <strong>–0.45</strong> maximum <strong class='color-h'>health</strong>",
+            name: "quantum eraser",
+            description: `<span style = 'font-size:90%;'>for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br><strong>kill</strong> a mob as they spawn at <strong>100%</strong> <strong class='color-dup'>duplication</strong></span>`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "time dilation"
+                return (m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "time dilation") && !tech.cloakDuplication
+            },
+            requires: "cloaking or time dilation",
+            effect() {
+                tech.quantumEraserCount = 0
+                tech.isQuantumEraserDuplication = 0
+                tech.isQuantumEraser = true
+            },
+            remove() {
+                tech.quantumEraserCount = 0
+                tech.isQuantumEraserDuplication = 0
+                tech.isQuantumEraser = false
+            }
+        },
+        {
+            name: "symbiosis",
+            description: `after a <strong>boss</strong> <strong>dies</strong> spawn a <strong class='color-m'>tech</strong>, ${powerUps.orb.ammo(1)}, ${powerUps.orb.research(1)}, and ${powerUps.orb.heal(1)}<br>after a <strong>mob</strong> <strong>dies</strong> <strong>–0.5</strong> maximum <strong class='color-h'>health</strong>`,
+            isFieldTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" //|| m.fieldUpgrades[m.fieldMode].name === "time dilation"
             },
             requires: "cloaking or time dilation",
             effect() {
@@ -7194,7 +7218,7 @@ const tech = {
         {
             name: "boson composite",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Boson' class="link">boson composite</a>`,
-            description: "while <strong class='color-cloaked'>cloaked</strong> you are <strong>intangible</strong><br>to <strong class='color-block'>blocks</strong> and mobs, but <strong>shields</strong> drains <strong class='color-f'>energy</strong>",
+            description: "while <strong class='color-cloaked'>cloaked</strong> you are <strong>intangible</strong><br>to <strong class='color-block'>blocks</strong> and mobs, but <strong>mobs</strong> drain <strong class='color-f'>energy</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7216,7 +7240,7 @@ const tech = {
         },
         {
             name: "dazzler",
-            description: "after <strong class='color-cloaked'>decloaking</strong> <strong>stun</strong> nearby mobs<br>and <strong>–10</strong> <strong class='color-f'>energy</strong>",
+            description: "after <strong class='color-cloaked'>decloaking</strong> <strong>stun</strong> nearby mobs<br>for <strong>–10</strong> <strong class='color-f'>energy</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7285,7 +7309,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
+                return m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
             },
             requires: "cloaking, molecular assembler, plasma torch, pilot wave",
             effect() {
@@ -7325,7 +7349,7 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "wormhole" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+                return m.fieldUpgrades[m.fieldMode].name === "wormhole" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "time dilation"
             },
             requires: "wormhole or pilot wave",
             effect: () => {
@@ -7739,6 +7763,32 @@ const tech = {
         //     requires: "",
         //     effect() {
 
+        //     },
+        //     remove() {}
+        // },
+        // {
+        //     name: "swap meet",
+        //     description: "normal <strong class='color-m'>tech</strong> become <strong class='color-j'>JUNK</strong><br>and <strong class='color-j'>JUNK</strong> become normal <strong class='color-m'>tech</strong>",
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 0,
+        //     isJunk: true,
+        //     isNonRefundable: true,
+        //     allowed() {
+        //         return true
+        //     },
+        //     requires: "",
+        //     effect() {
+        //         for (let i = 0, len = tech.tech.length; i < len; i++) {
+        //             tech.tech[i].isJunk = !tech.tech[i].isJunk
+        //             if (tech.tech[i].isJunk) {} else {}
+
+        //             if (tech.tech[i].frequency > 0) {
+        //                 tech.tech[i].frequency = 0
+        //             } else {
+        //                 tech.tech[i].frequency = 2
+        //             }
+        //         }
         //     },
         //     remove() {}
         // },
@@ -8287,6 +8337,7 @@ const tech = {
             count: 0,
             frequency: 0,
             isJunk: true,
+            isNonRefundable: true,
             allowed() { return true },
             requires: "",
             effect() {
@@ -8322,35 +8373,35 @@ const tech = {
                 }
             },
             remove() {
-                const colors = ["#f7b", "#0eb", "#467", "#0cf", "hsl(246,100%,77%)", "#26a"] //no shuffle
-                powerUps.research.color = colors[0]
-                powerUps.heal.color = colors[1]
-                powerUps.ammo.color = colors[2]
-                powerUps.field.color = colors[3]
-                powerUps.tech.color = colors[4]
-                powerUps.gun.color = colors[5]
-                for (let i = 0; i < powerUp.length; i++) {
-                    switch (powerUp[i].name) {
-                        case "research":
-                            powerUp[i].color = colors[0]
-                            break;
-                        case "heal":
-                            powerUp[i].color = colors[1]
-                            break;
-                        case "ammo":
-                            powerUp[i].color = colors[2]
-                            break;
-                        case "field":
-                            powerUp[i].color = colors[3]
-                            break;
-                        case "tech":
-                            powerUp[i].color = colors[4]
-                            break;
-                        case "gun":
-                            powerUp[i].color = colors[5]
-                            break;
-                    }
-                }
+                // const colors = ["#f7b", "#0eb", "#467", "#0cf", "hsl(246,100%,77%)", "#26a"] //no shuffle
+                // powerUps.research.color = colors[0]
+                // powerUps.heal.color = colors[1]
+                // powerUps.ammo.color = colors[2]
+                // powerUps.field.color = colors[3]
+                // powerUps.tech.color = colors[4]
+                // powerUps.gun.color = colors[5]
+                // for (let i = 0; i < powerUp.length; i++) {
+                //     switch (powerUp[i].name) {
+                //         case "research":
+                //             powerUp[i].color = colors[0]
+                //             break;
+                //         case "heal":
+                //             powerUp[i].color = colors[1]
+                //             break;
+                //         case "ammo":
+                //             powerUp[i].color = colors[2]
+                //             break;
+                //         case "field":
+                //             powerUp[i].color = colors[3]
+                //             break;
+                //         case "tech":
+                //             powerUp[i].color = colors[4]
+                //             break;
+                //         case "gun":
+                //             powerUp[i].color = colors[5]
+                //             break;
+                //     }
+                // }
             }
         },
         {
@@ -10335,5 +10386,8 @@ const tech = {
     deathSkipTime: null,
     isIceMaxHealthLoss: null,
     isIceKill: null,
-    isCritKill: null
+    isCritKill: null,
+    isQuantumEraser: null,
+    isQuantumEraserDuplication: null,
+    quantumEraserCount: null
 }
