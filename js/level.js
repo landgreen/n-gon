@@ -46,13 +46,13 @@ const level = {
             // powerUps.research.changeRerolls(100)
             // spawn.starter(1900, -500, 100)
             // for (let i = 0; i < 20; ++i) spawn.exploder(1900, -500)
-            spawn.slashBoss(1900, -500)
+            // spawn.timeSkipBoss(1900, -500)
             // level.difficultyIncrease(20) //30 is near max on hard  //60 is near max on why
-            level.testing(); //not in rotation, used for testing
+            // level.testing(); //not in rotation, used for testing
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
 
-            // if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
+            if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
