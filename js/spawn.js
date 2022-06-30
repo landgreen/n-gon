@@ -50,9 +50,13 @@ const spawn = {
         if (tech.isQuantumEraser && tech.quantumEraserCount > 0) {
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].isDropPowerUp && mob[i].alive) { //&& !mob[i].isBoss
-                    tech.isQuantumEraserDuplication = true
-                    mob[i].death()
-                    tech.isQuantumEraserDuplication = false
+                    if (mob[i].isFinalBoss) {
+                        mob[i].health = 0.66
+                    } else {
+                        tech.isQuantumEraserDuplication = true
+                        mob[i].death()
+                        tech.isQuantumEraserDuplication = false
+                    }
 
                     //graphics
                     const color = 'rgba(255,255,255, 0.8)'
@@ -4123,6 +4127,7 @@ const spawn = {
                 this.seePlayer.recall &&
                 this.cd < simulation.cycle &&
                 this.distanceToPlayer2() < seeDistance2 &&
+                !m.isCloak &&
                 Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
                 Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
             ) {

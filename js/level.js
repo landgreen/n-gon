@@ -18,18 +18,18 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // m.addHealth(Infinity)
             // m.setField("metamaterial cloaking")
-            // b.giveGuns("harpoon")
+            // b.giveGuns("matter wave")
             // b.giveGuns("shotgun")
             // b.guns[0].ammo = 10000
             // // b.giveGuns("mine")
-            // tech.giveTech("boson composite")
+            // tech.giveTech("phonon")
             // for (let i = 0; i < 3; ++i) tech.giveTech("smelting")
             // for (let i = 0; i < 9; ++i) tech.giveTech("propagator")
             // for (let i = 0; i < 100; ++i) tech.giveTech("nail-bot")
             // for (let i = 0; i < 9; ++i) tech.giveTech("emergence")
-            // tech.giveTech("polyurethane foam")
-            // tech.giveTech("quantum eraser")
-            // tech.giveTech("MACHO")
+            // tech.giveTech("resonance")
+            // tech.giveTech("microtransactions")
+            // tech.giveTech("cross disciplinary")
             // m.maxHealth = 100
             // m.health = m.maxHealth
             // for (let i = 0; i < 10; i++) tech.giveTech("tungsten carbide")
@@ -46,13 +46,13 @@ const level = {
             // powerUps.research.changeRerolls(100)
             // spawn.starter(1900, -500, 100)
             // for (let i = 0; i < 20; ++i) spawn.exploder(1900, -500)
-            // spawn.timeSkipBoss(1900, -500)
+            spawn.slashBoss(1900, -500)
             // level.difficultyIncrease(20) //30 is near max on hard  //60 is near max on why
-            // level.testing(); //not in rotation, used for testing
+            level.testing(); //not in rotation, used for testing
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
 
-            if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
+            // if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // powerUps.research.changeRerolls(3000)
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
@@ -423,7 +423,7 @@ const level = {
         y += height / 2
         const who = body[body.length] = Bodies.rectangle(x, y, width, height, {
             collisionFilter: {
-                category: cat.map,
+                category: cat.body,
                 mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
             },
             isNoSetCollision: true,
@@ -455,7 +455,7 @@ const level = {
         y += height / 2
         const who = body[body.length] = Bodies.rectangle(x, y, width, height, {
             collisionFilter: {
-                category: cat.map,
+                category: cat.body,
                 mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
             },
             isNoSetCollision: true,
@@ -581,7 +581,7 @@ const level = {
         force += simulation.g
         const who = body[body.length] = Bodies.rectangle(x, isAtTop ? maxHeight : y, width, height, {
             collisionFilter: {
-                category: cat.map,
+                category: cat.body, //cat.map,
                 mask: cat.map | cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
             },
             isNoSetCollision: true,

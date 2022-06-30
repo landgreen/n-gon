@@ -918,54 +918,55 @@ const b = {
             Composite.add(engine.world, bullet[me]); //add bullet to world
             bullet[me].endCycle = simulation.cycle + 70;
             bullet[me].frictionAir = 0.07;
+            bullet[me].suckCycles = 40
             const MAG = 0.015
             bullet[me].thrust = {
                 x: bullet[me].mass * MAG * Math.cos(angle),
                 y: bullet[me].mass * MAG * Math.sin(angle)
             }
-            bullet[me].do = function() {
-                const suckCycles = 40
-                if (simulation.cycle > this.endCycle - suckCycles || Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length) { //suck
-                    const that = this
-
-                    function suck(who, radius = that.explodeRad * 3.2) {
-                        for (i = 0, len = who.length; i < len; i++) {
-                            const sub = Vector.sub(that.position, who[i].position);
-                            const dist = Vector.magnitude(sub);
-                            if (dist < radius && dist > 150 && !who.isInvulnerable) {
-                                knock = Vector.mult(Vector.normalise(sub), mag * who[i].mass / Math.sqrt(dist));
-                                who[i].force.x += knock.x;
-                                who[i].force.y += knock.y;
-                            }
+            bullet[me].suck = function() {
+                const suck = (who, radius = this.explodeRad * 3.2) => {
+                    for (i = 0, len = who.length; i < len; i++) {
+                        const sub = Vector.sub(this.position, who[i].position);
+                        const dist = Vector.magnitude(sub);
+                        if (dist < radius && dist > 150 && !who.isInvulnerable && who[i] !== this) {
+                            knock = Vector.mult(Vector.normalise(sub), mag * who[i].mass / Math.sqrt(dist));
+                            who[i].force.x += knock.x;
+                            who[i].force.y += knock.y;
                         }
                     }
-                    let mag = 0.1
-                    if (simulation.cycle > this.endCycle - 5) {
-                        mag = -0.22
-                        suck(mob, this.explodeRad * 3)
-                        suck(body, this.explodeRad * 2)
-                        suck(powerUp, this.explodeRad * 1.5)
-                        suck(bullet, this.explodeRad * 1.5)
-                        suck([player], this.explodeRad * 1.3)
-                    } else {
-                        mag = 0.11
-                        suck(mob, this.explodeRad * 3)
-                        suck(body, this.explodeRad * 2)
-                        suck(powerUp, this.explodeRad * 1.5)
-                        suck(bullet, this.explodeRad * 1.5)
-                        suck([player], this.explodeRad * 1.3)
-                    }
-                    //keep bomb in place
-                    Matter.Body.setVelocity(this, {
-                        x: 0,
-                        y: 0
-                    });
-                    //draw suck
-                    const radius = 2.75 * this.explodeRad * (this.endCycle - simulation.cycle) / suckCycles
-                    ctx.fillStyle = "rgba(0,0,0,0.1)";
-                    ctx.beginPath();
-                    ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
-                    ctx.fill();
+                }
+                let mag = 0.1
+                if (simulation.cycle > this.endCycle - 5) {
+                    mag = -0.22
+                    suck(mob, this.explodeRad * 3)
+                    suck(body, this.explodeRad * 2)
+                    suck(powerUp, this.explodeRad * 1.5)
+                    suck(bullet, this.explodeRad * 1.5)
+                    suck([player], this.explodeRad * 1.3)
+                } else {
+                    mag = 0.11
+                    suck(mob, this.explodeRad * 3)
+                    suck(body, this.explodeRad * 2)
+                    suck(powerUp, this.explodeRad * 1.5)
+                    suck(bullet, this.explodeRad * 1.5)
+                    suck([player], this.explodeRad * 1.3)
+                }
+
+                Matter.Body.setVelocity(this, { x: 0, y: 0 }); //keep bomb in place
+                //draw suck
+                const radius = 2.75 * this.explodeRad * (this.endCycle - simulation.cycle) / this.suckCycles
+                ctx.fillStyle = "rgba(0,0,0,0.1)";
+                ctx.beginPath();
+                ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            bullet[me].do = function() {
+                if (simulation.cycle > this.endCycle - this.suckCycles) { //suck
+                    this.do = this.suck
+                } else if (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length) {
+                    Matter.Body.setPosition(this, Vector.sub(this.position, this.velocity)) //undo last movement
+                    this.do = this.suck
                 } else {
                     this.force.x += this.thrust.x;
                     this.force.y += this.thrust.y;
@@ -3787,7 +3788,7 @@ const b = {
     targetedBlock(who, speed = 50 - Math.min(20, who.mass * 2), range = 1600) {
         let closestMob, dist
         for (let i = 0, len = mob.length; i < len; i++) {
-            if (who !== mob[i]) {
+            if (who !== mob[i] && !mob[i].isBadTarget) {
                 dist = Vector.magnitude(Vector.sub(who.position, mob[i].position));
                 if (dist < range && Matter.Query.ray(map, who.position, mob[i].position).length === 0) { //&& Matter.Query.ray(body, position, mob[i].position).length === 0
                     closestMob = mob[i]
@@ -5704,8 +5705,8 @@ const b = {
             name: "matter wave", //3
             description: "emit a <strong>wave packet</strong> of oscillating particles<br>that propagates through <strong>solids</strong>",
             ammo: 0,
-            ammoPack: 115,
-            defaultAmmoPack: 115,
+            ammoPack: 110,
+            defaultAmmoPack: 110,
             have: false,
             wavePacketCycle: 0,
             delay: 40,
@@ -5776,17 +5777,24 @@ const b = {
                             const dist = Vector.magnitude(Vector.sub(this.waves[i].position, body[j].position))
                             const r = 20
                             if (dist + r > this.waves[i].radius && dist - r < this.waves[i].radius) {
+                                const who = body[j]
                                 //make them shake around
-                                body[j].force.x += 0.01 * (Math.random() - 0.5) * body[j].mass
-                                body[j].force.y += (0.01 * (Math.random() - 0.5) - simulation.g * 0.25) * body[j].mass //remove force of gravity
+                                who.force.x += 0.01 * (Math.random() - 0.5) * who.mass
+                                who.force.y += (0.01 * (Math.random() - 0.5) - simulation.g * 0.25) * who.mass //remove force of gravity
                                 //draw vibes
-                                let vertices = body[j].vertices;
+                                let vertices = who.vertices;
                                 const vibe = 25
                                 ctx.moveTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
                                 for (let k = 1; k < vertices.length; k++) {
                                     ctx.lineTo(vertices[k].x + vibe * (Math.random() - 0.5), vertices[k].y + vibe * (Math.random() - 0.5));
                                 }
                                 ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+
+                                if (tech.isPhononBlock && !who.isNotHoldable && who.speed < 5 && who.angularSpeed < 0.1) {
+                                    if (Math.random() < 0.5) b.targetedBlock(who, 50 - Math.min(25, who.mass * 3)) //    targetedBlock(who, speed = 50 - Math.min(20, who.mass * 2), range = 1600) {
+                                    // Matter.Body.setAngularVelocity(who, (0.25 + 0.1 * Math.random()) * (Math.random() < 0.5 ? -1 : 1));
+                                    who.torque += who.inertia * 0.001 * (Math.random() - 0.5)
+                                }
                             }
                         }
                         this.waves[i].radius += 0.9 * tech.waveBeamSpeed * this.waves[i].expanding //expand / move
@@ -5881,6 +5889,12 @@ const b = {
                                 ctx.lineTo(vertices[j].x + vibe * (Math.random() - 0.5), vertices[j].y + vibe * (Math.random() - 0.5));
                             }
                             ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+
+                            if (tech.isPhononBlock && !who.isNotHoldable && who.speed < 5 && who.angularSpeed < 0.1) {
+                                if (Math.random() < 0.5) b.targetedBlock(who, 50 - Math.min(25, who.mass * 3)) //    targetedBlock(who, speed = 50 - Math.min(20, who.mass * 2), range = 1600) {
+                                // Matter.Body.setAngularVelocity(who, (0.25 + 0.12 * Math.random()) * (Math.random() < 0.5 ? -1 : 1));
+                                who.torque += who.inertia * 0.001 * (Math.random() - 0.5)
+                            }
                         }
                         // ctx.stroke(); //draw vibes
 
@@ -6005,7 +6019,7 @@ const b = {
                 if (tech.isPhaseVelocity) {
                     waveSpeedMap = 3.5
                     waveSpeedBody = 2
-                    bullet[me].dmg *= 1.2
+                    bullet[me].dmg *= 1.4
                 }
                 if (tech.waveReflections) {
                     bullet[me].reflectCycle = totalCycles / tech.waveReflections //tech.waveLengthRange

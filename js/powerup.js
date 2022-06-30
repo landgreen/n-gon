@@ -117,7 +117,6 @@ const powerUps = {
         }
     },
     totalPowerUps: 0, //used for tech that count power ups at the end of a level
-    lastTechIndex: null,
     do() {},
     setDupChance() {
         if (tech.duplicationChance() > 0 || tech.isAnthropicTech) {
@@ -249,8 +248,6 @@ const powerUps = {
             m.setField(index)
         } else if (type === "tech") {
             // if (tech.isBanish && tech.tech[index].isBanished) tech.tech[index].isBanished = false
-            powerUps.tech.banishList
-            setTimeout(() => { powerUps.lastTechIndex = index }, 10);
             simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>")`);
             tech.giveTech(index)
         }
@@ -873,7 +870,6 @@ const powerUps = {
                 for (let i = 0; i < tech.tech.length; i++) tech.tech[i].isRecentlyShown = false //reset recently shown back to zero
                 // powerUps.tech.lastTotalChoices = options.length //this is recorded so that banish can know how many tech were available
                 // console.log(optionLengthNoDuplicates, options.length)
-                powerUps.tech.banishList = []
                 if (options.length > 0) {
                     for (let i = 0; i < totalChoices; i++) {
                         if (options.length < 1) break
@@ -924,9 +920,18 @@ const powerUps = {
                             for (let i = 1; i < m.fieldUpgrades.length; i++) { //skip field emitter
                                 if (i !== m.fieldMode) fieldOptions.push(i);
                             }
-                            const pick = options[Math.floor(Math.seededRandom(0, fieldOptions.length))] //pick an element from the array of options
+                            const pick = fieldOptions[Math.floor(Math.seededRandom(0, fieldOptions.length))] //pick an element from the array of options
                             text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${pick})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[pick].name}</div> ${m.fieldUpgrades[pick].description}</div>`
                         }
+                    }
+                    if (tech.isMicroTransactions && powerUps.research.count > 0) {
+                        const skins = [] //find skins
+                        for (let i = 0; i < tech.tech.length; i++) {
+                            if (tech.tech[i].isSkin) skins.push(i)
+                        }
+                        const choose = skins[Math.floor(Math.seededRandom(0, skins.length))] //pick an element from the array of options
+
+                        text += `<div class="choose-grid-module" onclick="tech.giveTech(${choose});powerUps.research.changeRerolls(-1);powerUps.endDraft('tech');powerUps.tech.effect();"><div class="grid-title"><div class="circle-grid research"></div> <span style = 'font-size:90%; font-weight: 100; letter-spacing: -1.5px;'>microtransaction:</span> ${tech.tech[choose].name}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
                     }
                     if (tech.isBrainstorm && !tech.isBrainstormActive && !simulation.isChoosing) {
                         tech.isBrainstormActive = true

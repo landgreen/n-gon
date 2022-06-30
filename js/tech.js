@@ -134,6 +134,7 @@ const tech = {
         tech.giveTech(name)
         simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${name}</span>")<em>`);
     },
+
     giveTech(index = 'random') {
         if (index === 'random') {
             let options = [];
@@ -255,7 +256,7 @@ const tech = {
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
-        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication)
+        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication)
     },
     isScaleMobsWithDuplication: false,
     maxDuplicationEvent() {
@@ -2985,15 +2986,15 @@ const tech = {
         },
         {
             name: "cross disciplinary",
-            description: "<strong class='color-m'>tech</strong> have an extra <strong class='color-f'>field</strong> or <strong class='color-g'>gun</strong> <strong>choice</strong>",
+            description: "<strong class='color-m'>tech</strong> have an extra <strong class='color-f'>field</strong> or <strong class='color-g'>gun</strong> <strong>choice</strong><br><strong>+5%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !tech.isDeterminism
+                return !tech.isDeterminism && tech.duplicationChance() < 1
             },
-            requires: "not determinism",
+            requires: "below 100% duplication chance not determinism",
             effect: () => {
                 tech.isExtraGunField = true;
             },
@@ -3360,9 +3361,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return tech.duplicationChance() < 1 && !tech.isSuperDeterminism
+                return tech.duplicationChance() < 1.11 && !tech.isSuperDeterminism
             },
-            requires: "below 100% duplication chance, not superdeterminism",
+            requires: "below 111% duplication chance, not superdeterminism",
             effect() {
                 tech.isCancelDuplication = true //search for tech.cancelCount  to balance
                 powerUps.setDupChance(); //needed after adjusting duplication chance
@@ -3380,9 +3381,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return tech.duplicationChance() < 1
+                return tech.duplicationChance() < 1.11
             },
-            requires: "below 100% duplication chance",
+            requires: "below 111% duplication chance",
             effect() {
                 tech.duplicateChance += 0.1
                 powerUps.setDupChance(); //needed after adjusting duplication chance
@@ -3407,9 +3408,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return tech.duplicationChance() < 1
+                return tech.duplicationChance() < 1.11
             },
-            requires: "below 100% duplication chance",
+            requires: "below 111% duplication chance",
             effect: () => {
                 tech.isStimulatedEmission = true
                 powerUps.setDupChance(); //needed after adjusting duplication chance
@@ -3428,9 +3429,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return tech.duplicationChance() < 1
+                return tech.duplicationChance() < 1.11
             },
-            requires: "below 100% duplication chance",
+            requires: "below 111% duplication chance",
             effect: () => {
                 tech.isPowerUpsVanish = true
                 powerUps.setDupChance(); //needed after adjusting duplication chance
@@ -4422,7 +4423,7 @@ const tech = {
         // 
         {
             name: "phase velocity",
-            description: "matter wave <strong>propagates</strong> faster through <strong>solids</strong><br><strong>+20%</strong> matter wave <strong class='color-d'>damage</strong>",
+            description: "matter wave <strong>propagates</strong> faster through <strong>solids</strong><br><strong>+40%</strong> matter wave <strong class='color-d'>damage</strong>",
             // description: "matter wave <strong>propagates</strong> faster through <strong>solids</strong><br>up by <strong>3000%</strong> in the map and <strong>760%</strong> in <strong class='color-block'>blocks</strong>",
             isGunTech: true,
             maxCount: 1,
@@ -4518,8 +4519,8 @@ const tech = {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "matter wave") {
                         b.guns[i].chooseFireMethod()
-                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack / 9
-                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 9);
+                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack / 10
+                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 10);
                         simulation.updateGunHUD();
                         break
                     }
@@ -4532,7 +4533,7 @@ const tech = {
                             tech.isLongitudinal = false;
                             b.guns[i].chooseFireMethod()
                             b.guns[i].ammoPack = b.guns[i].defaultAmmoPack
-                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 9);
+                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 10);
                             simulation.updateGunHUD();
                             break
                         }
@@ -4550,7 +4551,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isLongitudinal
+                return tech.isLongitudinal && tech.haveGunCheck("matter wave")
             },
             requires: "matter wave, phonon",
             effect() {
@@ -4570,6 +4571,25 @@ const tech = {
                         break
                     }
                 }
+            }
+        },
+        {
+            name: "resonance",
+            description: "after a <strong class='color-block'>block</strong> gets vibrated by a <strong>phonon</strong><br>there is a chance it's <strong>flung</strong> at nearby mobs",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.isLongitudinal && tech.haveGunCheck("matter wave")
+            },
+            requires: "matter wave, phonon",
+            effect() {
+                tech.isPhononBlock = true
+            },
+            remove() {
+                tech.isPhononBlock = false
             }
         },
         {
@@ -7428,7 +7448,7 @@ const tech = {
         },
         {
             name: "geodesics",
-            description: `your <strong>projectiles</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn 2 <strong class='color-g'>guns</strong> and ${powerUps.orb.ammo(2)}`,
+            description: `your <strong>projectiles</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn 2 <strong class='color-g'>guns</strong> and ${powerUps.orb.ammo(4)}`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7439,18 +7459,16 @@ const tech = {
             },
             requires: "wormhole",
             effect() {
-                tech.isWormBullets = true
-                for (let i = 0; i < 2; i++) {
-                    powerUps.spawn(m.pos.x, m.pos.y, "gun");
-                    powerUps.spawn(m.pos.x, m.pos.y, "ammo");
-                }
+                tech.isWormHoleBullets = true
+                for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + 200 * (Math.random() - 0.5), m.pos.y + 200 * (Math.random() - 0.5), "gun");
+                for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 200 * (Math.random() - 0.5), m.pos.y + 200 * (Math.random() - 0.5), "ammo");
             },
             remove() {
-                if (tech.isWormBullets) {
+                if (tech.isWormHoleBullets) {
                     for (let i = 0; i < 2; i++) {
                         if (b.inventory.length) b.removeGun(b.guns[b.inventory[b.inventory.length - 1]].name) //remove your last gun
                     }
-                    tech.isWormBullets = false;
+                    tech.isWormHoleBullets = false;
                 }
             }
         },
@@ -8565,44 +8583,6 @@ const tech = {
             remove() {}
         },
         {
-            name: "posture",
-            description: "stand a bit taller",
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isJunk: true,
-            allowed() {
-                return !m.isShipMode
-            },
-            requires: "",
-            effect() {
-                m.yOffWhen.stand = 70
-            },
-            remove() {
-                m.yOffWhen.stand = 49
-            }
-        },
-        {
-            name: "rhythm",
-            description: "you oscillate up and down",
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isJunk: true,
-            isNonRefundable: true,
-            allowed() {
-                return !m.isShipMode
-            },
-            requires: "",
-            effect() {
-                setInterval(() => {
-                    m.yOffWhen.stand = 53 + 28 * Math.sin(simulation.cycle * 0.2)
-                    if (m.onGround && !m.crouch) m.yOffGoal = m.yOffWhen.stand
-                }, 100);
-            },
-            remove() {}
-        },
-        {
             name: "spinor",
             description: "the direction you aim is determined by your position",
             maxCount: 1,
@@ -8799,21 +8779,6 @@ const tech = {
             remove() {}
         },
         {
-            name: "transparency",
-            description: "become invisible to yourself<br><em>mobs can still see you</em>",
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isNonRefundable: true,
-            isJunk: true,
-            allowed() { return true },
-            requires: "",
-            effect() {
-                m.draw = () => {}
-            },
-            remove() {}
-        },
-        {
             name: "quantum leap",
             description: "become an <strong class='alt'>alternate</strong> version of yourself<br>every <strong>20</strong> seconds",
             maxCount: 1,
@@ -8947,24 +8912,6 @@ const tech = {
                 for (let i = tech.tech.length - 1; i > 0; i--) {
                     if (tech.tech[i].isJunk) tech.tech[i].frequency = 0
                 }
-            },
-            remove() {}
-        },
-        {
-            name: "ship",
-            description: "fly around with no legs<br>reduce combat <strong>difficulty</strong> by <strong>1 level</strong>",
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isNonRefundable: true,
-            isJunk: true,
-            allowed() {
-                return !m.isShipMode && m.fieldUpgrades[m.fieldMode].name !== "negative mass"
-            },
-            requires: "",
-            effect() {
-                m.shipMode()
-                level.difficultyDecrease(simulation.difficultyMode)
             },
             remove() {}
         },
@@ -9258,11 +9205,10 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
+            isSkin: true,
             isNonRefundable: true,
             isJunk: true,
-            allowed() {
-                return !m.isShipMode
-            },
+            allowed() { return !m.isShipMode },
             requires: "",
             effect() {
                 m.draw = function() {
@@ -9303,11 +9249,10 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
+            isSkin: true,
             isNonRefundable: true,
             isJunk: true,
-            allowed() {
-                return !m.isShipMode
-            },
+            allowed() { return !m.isShipMode },
             requires: "",
             effect() {
                 m.draw = function() {
@@ -9343,6 +9288,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
+            isSkin: true,
             isNonRefundable: true,
             isJunk: true,
             allowed() {
@@ -9419,11 +9365,68 @@ const tech = {
             remove() {}
         },
         {
+            name: "transparency",
+            description: "become invisible to yourself<br><em>mobs can still see you</em>",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isSkin: true,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                m.draw = () => {}
+            },
+            remove() {}
+        },
+        {
+            name: "posture",
+            description: "stand a bit taller",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isSkin: true,
+            isJunk: true,
+            allowed() {
+                return !m.isShipMode
+            },
+            requires: "",
+            effect() {
+                m.yOffWhen.stand = 70
+            },
+            remove() {
+                m.yOffWhen.stand = 49
+            }
+        },
+        {
+            name: "rhythm",
+            description: "you oscillate up and down",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isSkin: true,
+            isJunk: true,
+            isNonRefundable: true,
+            allowed() {
+                return !m.isShipMode
+            },
+            requires: "",
+            effect() {
+                setInterval(() => {
+                    m.yOffWhen.stand = 53 + 28 * Math.sin(simulation.cycle * 0.2)
+                    if (m.onGround && !m.crouch) m.yOffGoal = m.yOffWhen.stand
+                }, 100);
+            },
+            remove() {}
+        },
+        {
             name: "pareidolia",
             description: "don't",
             maxCount: 1,
             count: 0,
             frequency: 0,
+            isSkin: true,
             isNonRefundable: true,
             isJunk: true,
             allowed() {
@@ -9492,6 +9495,7 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
+            isSkin: true,
             isNonRefundable: true,
             isJunk: true,
             allowed() { return true },
@@ -9506,6 +9510,40 @@ const tech = {
                     m.color.hue++
                     m.setFillColors()
                 }, 10);
+            },
+            remove() {}
+        },
+        {
+            name: "microtransactions",
+            description: `when you choose a <strong class='color-m'>tech</strong> you can<br>use ${powerUps.orb.research(1)} to buy a free in game <strong>skin</strong>`,
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                tech.isMicroTransactions = true
+            },
+            remove() {
+                tech.isMicroTransactions = false
+            }
+        },
+        {
+            name: "ship",
+            description: "fly around with no legs<br>reduce combat <strong>difficulty</strong> by <strong>1 level</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() {
+                return !m.isShipMode && m.fieldUpgrades[m.fieldMode].name !== "negative mass"
+            },
+            requires: "",
+            effect() {
+                m.shipMode()
+                level.difficultyDecrease(simulation.difficultyMode)
             },
             remove() {}
         },
@@ -10213,7 +10251,7 @@ const tech = {
     isNailCrit: null,
     isFlechetteExplode: null,
     isWormholeWorms: null,
-    isWormBullets: null,
+    isWormHoleBullets: null,
     isWideLaser: null,
     wideLaser: null,
     isPulseLaser: null,
@@ -10389,5 +10427,7 @@ const tech = {
     isCritKill: null,
     isQuantumEraser: null,
     isQuantumEraserDuplication: null,
-    quantumEraserCount: null
+    quantumEraserCount: null,
+    isPhononBlock: null,
+    isMicroTransactions: null
 }

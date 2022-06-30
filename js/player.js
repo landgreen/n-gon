@@ -2829,8 +2829,8 @@ const m = {
                             if (inPlayer.length > 0) {
                                 for (let i = 0; i < inPlayer.length; i++) {
                                     if (m.energy > 0) {
-                                        if (inPlayer[i].isUnblockable) m.energy -= 0.003;
-                                        if (inPlayer[i].shield) m.energy -= 0.014;
+                                        if (!inPlayer[i].isUnblockable) m.energy -= 0.004;
+                                        if (inPlayer[i].shield) m.energy -= 0.012;
                                     }
                                 }
                             }
@@ -3333,7 +3333,7 @@ const m = {
                                 }
                             }
                         }
-                        if (tech.isWormBullets) {
+                        if (tech.isWormHoleBullets) {
                             //teleport bullets
                             for (let i = 0, len = bullet.length; i < len; ++i) { //teleport bullets from hole1 to hole2
                                 if (!bullet[i].botType && !bullet[i].isInHole) { //don't teleport bots

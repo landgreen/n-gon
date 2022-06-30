@@ -1,31 +1,27 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: quantum eraser - for each mob left alive after you exit a level
-  kill a spawning mob with 100% duplication
-symbiosis: bosses spawn a tech and also an ammo, research, and heal
-  when mobs dies lose 0.45 -> 0.5 max health
-boson composite - when you move through mobs they drain a little bit of energy
 
-incendiary ammunition makes bullets explode on impact with map
-polyurethane foam now works for harpoons
-reactor level: timeBoss is much faster, mineBoss does 50% mine more damage
-  all bosses spawn fewer numbers
-  spawning all 4 bosses spawns much fewer numbers
+tech: resonance - when a block gets vibrated by phonon, it has a chance to spin towards mobs
+cross disciplinary gives 4% duplication
+boson composite lets you move through elevators again
+
+JUNK tech: microtransactions - buy in-game skins for 1 research anytime you choose a tech
 
 bug fixes
-  loaded a patch to matter.js physics engine 0.18 to fix issues with time dilation
+
 
 *********************************************************** TODO *****************************************************
 
-Tech: Resonant Frequency
-Whenever a block gets vibrated by phonon, it has a chance to split and flywheel towards mobs
+make buying skins from microtransactions have a lasting effect with a local storage list
+  add a dropdown menu to choose in settings
+    maybe just one at a time
 
-JUNK tech: doctorate
-You don't need an explanation of techs! Just look at the title and your scientific knowledge should come into place
-Remove all tech descriptions
+JUNK tech micro transactions
+  all tech selection menus include the option to buy skins for 1 research
 
 improve mob invincible graphic
   opacity oscillates from 100% to 0%?
+  make different from stun
 
 hopBossMom
   spawns lots of small hopBullets
