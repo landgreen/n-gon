@@ -17,19 +17,18 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.isHorizontalFlipped = true
             // m.addHealth(Infinity)
-            // m.setField("metamaterial cloaking")
-            // b.giveGuns("matter wave")
-            // b.giveGuns("shotgun")
+            // m.setField("time dilation")
+            // b.giveGuns("laser")
             // b.guns[0].ammo = 10000
             // // b.giveGuns("mine")
-            // tech.giveTech("phonon")
-            // for (let i = 0; i < 3; ++i) tech.giveTech("smelting")
+            // tech.giveTech("lens")
+            // for (let i = 0; i < 2; ++i) tech.giveTech("diffraction grating")
             // for (let i = 0; i < 9; ++i) tech.giveTech("propagator")
             // for (let i = 0; i < 100; ++i) tech.giveTech("nail-bot")
             // for (let i = 0; i < 9; ++i) tech.giveTech("emergence")
-            // tech.giveTech("resonance")
-            // tech.giveTech("microtransactions")
-            // tech.giveTech("cross disciplinary")
+            // tech.giveTech("laser-bot")
+            // tech.giveTech("slow light")
+            // tech.giveTech("iridescence")
             // m.maxHealth = 100
             // m.health = m.maxHealth
             // for (let i = 0; i < 10; i++) tech.giveTech("tungsten carbide")
@@ -41,13 +40,15 @@ const level = {
             // tech.tech[297].frequency = 100
             // m.immuneCycle = Infinity //you can't take damage
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.testChamber2();
+            // level.temple();
             // spawn.cellBossCulture(1900, -500)
             // powerUps.research.changeRerolls(100)
+            // spawn.starter(1900, -500, 40)
+            // spawn.starter(1900, -500, 20)
             // spawn.starter(1900, -500, 100)
             // for (let i = 0; i < 20; ++i) spawn.exploder(1900, -500)
             // spawn.timeSkipBoss(1900, -500)
-            // level.difficultyIncrease(20) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(50) //30 is near max on hard  //60 is near max on why
             // level.testing(); //not in rotation, used for testing
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
@@ -1466,7 +1467,7 @@ const level = {
     //******************************************************************************************************************
     //******************************************************************************************************************
     labs() {
-        level.isProcedural = true //used in generating text itn he level builder
+        level.isProcedural = true //used in generating text it the level builder
         level.defaultZoom = 1700
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#d9d9de" //"#d3d3db" //"#dcdcdf";
@@ -9812,6 +9813,7 @@ const level = {
         powerUps.spawn(3000, -230, "heal");
         // level.difficultyIncrease(60)
     },
+
     temple() {
         simulation.makeTextLog(`<strong>temple</strong> by <span class='color-var'>Scar1337</span>`);
 
@@ -9993,6 +9995,7 @@ const level = {
             const pulseRadius = args[3] || Math.min(550, 250 + simulation.difficulty * 3)
             let me = mob[mob.length - 1];
             me.fill = "#ace";
+            me.damageReduction = 0;
             me.onDeath = function() {
                 //damage player if in range
                 if (distance(player.position, this.position) < pulseRadius && m.immuneCycle < m.cycle) {
@@ -10033,7 +10036,7 @@ const level = {
             me.isBoss = true;
 
             me.stroke = "transparent";
-            me.eventHorizon = 950;
+            me.eventHorizon = 900;
             me.collisionFilter.mask = cat.player | cat.bullet | cat.body;
 
             me.memory = Infinity;
@@ -10084,9 +10087,9 @@ const level = {
                 id: 2
             }];
             me.ring = function() {
-                const rings = this.isInvulnerable ? [] : this.rings;
+                if (this.isInvulnerable) return;
                 ctx.lineWidth = 10;
-                for (const ring of rings) {
+                for (const ring of this.rings) {
                     const radius = ring.radius * (1 + 0.3 * Math.sin(simulation.cycle / 60 * (ring.id + 2)));
                     if (Math.abs(distance(player.position, this.position) - radius) < 60 && m.immuneCycle < simulation.cycle) {
                         m.damage(0.4 / radius);
@@ -10096,6 +10099,7 @@ const level = {
                 }
             }
             me.horizon = function() {
+                if (this.isInvulnerable) return;
                 // eventHorizon waves in and out
                 const eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(simulation.cycle * 0.008));
 
@@ -10136,7 +10140,7 @@ const level = {
                         this.lastAttackCycle = simulation.cycle;
                         Matter.Body.setVelocity(player, V.add(player.velocity, { x: 0, y: -20 }));
                         if (m.immuneCycle < m.cycle) {
-                            m.damage(0.015 * simulation.dmgScale);
+                            m.damage(0.012 * simulation.dmgScale);
                         }
                     }
                     const lightningCycle = simulation.cycle * 2 / 3 + this.lastAttackCycle / 3;
@@ -10165,7 +10169,7 @@ const level = {
                     }
                 }
                 // Spawn a bunch of mobs
-                if (!(this.spawnCycle % 600)) {
+                if (simulation.difficulty > 10 && !(this.spawnCycle % 600)) {
                     // This is just ripped off of spawn.nodeGroup because I don't want the shield
                     const nodes = 3;
                     const radius = Math.ceil(Math.random() * 10) + 18;
@@ -10248,8 +10252,17 @@ const level = {
                 canvas.style.filter = "";
                 level.nextLevel = oldNextLevel;
                 simulation.fallHeight = oldFallHeight;
+                m.oldDeath();
+            } else {
+                m.switchWorlds();
+                Matter.Body.setPosition(player, {
+                    x: level.enter.x + 50,
+                    y: level.enter.y - 20
+                });
+                makeLore("How did you not die?");
+                setTimeout(() => makeLore("I'll let you off this one time."), 2000);
+                tech.isImmortal = false;
             }
-            m.oldDeath();
         }
         let name = "⥟ᘊ5⪊Ыᳪៗⱕ␥ዘᑧ⍗";
         addPartToMap = (len = map.length - 1) => {
@@ -10405,7 +10418,7 @@ const level = {
         spawn.mapRect(-200, -13100, 800, 200);
         spawn.mapRect(3500, -13110, 100, 20);
         spawn.mapRect(3000, -13100, 800, 200);
-        for (let i = 0; i < 3; i++) spawn.bodyRect(500, -13400 + i * 100, 100, 100);
+        for (let i = 0; i < 4; i++) spawn.bodyRect(570, -13400 + i * 75, 30, 75);
 
         for (let i = 0; i < 3; i++) {
             diamond(1100 + 700 * i, -13000, 30, 30);
@@ -10672,11 +10685,11 @@ const level = {
                     level.exit.y = -10030;
                     makeLore("Pathetic.");
                 }
-                if (templePlayer.room1ToRoom2Anim === 241) {
+                if (templePlayer.room1ToRoom2Anim === 121) {
                     makeLore("You will never succeed.");
                 }
-                if (templePlayer.room1ToRoom2Anim >= 480 && templePlayer.room1ToRoom2Anim <= 960) {
-                    const factor = 200 - 200 * Math.cos((templePlayer.room1ToRoom2Anim / 120) * Math.PI);
+                if (templePlayer.room1ToRoom2Anim >= 360 && templePlayer.room1ToRoom2Anim <= 720) {
+                    const factor = 200 - 200 * Math.cos((templePlayer.room1ToRoom2Anim / 120 - 3) * Math.PI);
                     ctx.translate(factor, factor);
                     Promise.resolve().then(() => {
                         ctx.save();
@@ -10687,16 +10700,16 @@ const level = {
                         ctx.restore();
                     });
                 }
-                if (templePlayer.room1ToRoom2Anim === 960) {
+                if (templePlayer.room1ToRoom2Anim === 720) {
                     makeLore("You are trying too hard.");
                     relocateTo(0, -7050);
                     simulation.fallHeight = -6000;
                     templePlayer.stage = 2;
                 }
-                if (templePlayer.room1ToRoom2Anim === 1200) {
+                if (templePlayer.room1ToRoom2Anim === 960) {
                     makeLore("I have mastered the understandings of the universe.");
                 }
-                if (templePlayer.room1ToRoom2Anim === 1260) {
+                if (templePlayer.room1ToRoom2Anim === 1200) {
                     // Congrats, you discovered the actual words by looking at the source code. Are you happy now?
                     const x = (
                         ["a speck of dust", "an insignificant hindrance", "a tiny obstacle"]
@@ -10719,22 +10732,22 @@ const level = {
                     level.exit.y = -13130;
                     makeLore("Do not try me.");
                 }
-                if (templePlayer.room2ToRoom3Anim === 240) {
+                if (templePlayer.room2ToRoom3Anim === 180) {
                     makeLore("I have absolute power over you.");
                     canvas.style.filter = "hue-rotate(90deg)";
                 }
-                if (templePlayer.room2ToRoom3Anim === 480) {
+                if (templePlayer.room2ToRoom3Anim === 360) {
                     makeLore("You will not succeed...");
                     canvas.style.filter = "invert(0.2)";
                 }
-                if (templePlayer.room2ToRoom3Anim === 600) {
-                    makeLore("<h6 style='display: inline-block'>succeed...</h6>");
+                if (templePlayer.room2ToRoom3Anim === 420) {
+                    makeLore("<h6 style='display: inline-block'>...</h6>");
                     canvas.style.filter = "invert(0.4)";
                 }
-                if (templePlayer.room2ToRoom3Anim > 660 && templePlayer.room2ToRoom3Anim <= 840) {
-                    canvas.style.filter = `sepia(${(templePlayer.room2ToRoom3Anim - 660) / 180}) invert(${0.5 + (templePlayer.room2ToRoom3Anim - 660) / 360})`;
+                if (templePlayer.room2ToRoom3Anim > 480 && templePlayer.room2ToRoom3Anim <= 660) {
+                    canvas.style.filter = `sepia(${(templePlayer.room2ToRoom3Anim - 480) / 180}) invert(${0.5 + (templePlayer.room2ToRoom3Anim - 480) / 180})`;
                 }
-                if (templePlayer.room2ToRoom3Anim === 960) {
+                if (templePlayer.room2ToRoom3Anim === 780) {
                     makeLore("Do not interfere with me.");
                     templePlayer.stage = 3;
                     relocateTo(50, -13150);
@@ -10748,8 +10761,8 @@ const level = {
                         }
                     }
                 }
-                if (templePlayer.room2ToRoom3Anim > 960 && templePlayer.room2ToRoom3Anim <= 1140) {
-                    canvas.style.filter = `sepia(${(1140 - templePlayer.room2ToRoom3Anim) / 180}) invert(${(1140 - templePlayer.room2ToRoom3Anim) / 180})`;
+                if (templePlayer.room2ToRoom3Anim > 780 && templePlayer.room2ToRoom3Anim <= 960) {
+                    canvas.style.filter = `sepia(${(960 - templePlayer.room2ToRoom3Anim) / 180}) invert(${(960 - templePlayer.room2ToRoom3Anim) / 180})`;
                 }
                 templePlayer.room2ToRoom3Anim++;
             },
@@ -10852,10 +10865,12 @@ const level = {
                     level.exitCount + (input.down ? 8 : 2) > 100) {
                     if (templePlayer.stage === 1) {
                         templePlayer.drawExit = false;
+                        level.exitCount = 0;
                         templePlayer.room1ToRoom2Anim = 1;
                     } else if (templePlayer.stage === 2) {
                         templePlayer.drawExit = false;
                         templePlayer.room2ToRoom3Anim = 1;
+                        level.exitCount = 0;
                     } else {
                         level.exitCount = 99 - (input.down ? 8 : 2);
                         if (!templePlayer.clearedCycle) templePlayer.clearedCycle = simulation.cycle;
@@ -10953,7 +10968,7 @@ const level = {
                         ctx.fillStyle = "#0004";
                         ctx.fillRect(canvas.width2 - 288, 50, 576, 20);
                         ctx.fillStyle = "#0cf";
-                        ctx.fillRect(canvas.width2 - 288, 50, 0.8 * (600 - templePlayer.room1.cycles % 600), 20);
+                        ctx.fillRect(canvas.width2 - 288, 50, 0.96 * (600 - templePlayer.room1.cycles % 600), 20);
                         ctx.restore();
                     }
                     // Second Room
@@ -11157,34 +11172,7 @@ const level = {
             setPos(a, b);
             freeze(a);
         };
-        const makeLore = x => simulation.makeTextLog(`<h2 style='color: #f00; display: inline-block'>${name}:</h2> &nbsp; <h3 style='display: inline-block'>${x}</h3>`);
-        // TODO: Remove this before merging
-        window.TempleHelper = {
-            skipInitial() {
-                templePlayer.startAnim = 360;
-            },
-            skipWaves() {
-                this.skipInitial();
-                templePlayer.room1.cycles = 2500;
-            },
-            skipToRoom2() {
-                this.skipInitial();
-                templePlayer.room1ToRoom2Anim = 1;
-            },
-            skipBossWaves() {
-                this.skipToRoom2();
-                templePlayer.room2.spawnInitiatorCycles = Objects.room2Initiator.cap;
-                templePlayer.room2.cycles = 2200;
-                setTimeout(() => trapPlayer(0, -9100), 500);
-            },
-            skipToRoom3() {
-                this.skipToRoom2();
-                requestAnimationFrame(() => templePlayer.room2ToRoom3Anim = 1);
-            },
-            spawnSecondRoomBoss(x, y) {
-                secondRoomBoss(x, y);
-            }
-        };
+        const makeLore = (x, t) => simulation.makeTextLog(`<h2 style='color: #f00; display: inline-block'>${name}:</h2> &nbsp; <h3 style='display: inline-block'>${x}</h3>`, t);
         level.custom = () => {
             // All the logic gets handled here. How nice!
             for (const i in LogicHandler) {
@@ -11212,6 +11200,1406 @@ const level = {
             DrawHandler.room2Top();
         };
     },
+    // temple() {
+    //     simulation.makeTextLog(`<strong>temple</strong> by <span class='color-var'>Scar1337</span>`);
+
+    //     const V = Vector;
+    //     const Equation = (function() {
+    //         function Equation(a, b, c) {
+    //             this.a = a;
+    //             this.b = b;
+    //             this.c = c;
+    //         }
+    //         Equation.prototype.getXfromY = function(y) {
+    //             return (-this.b * y - this.c) / this.a;
+    //         }
+    //         Equation.prototype.getYfromX = function(x) {
+    //             return (-this.a * x - this.c) / this.b;
+    //         }
+    //         Equation.fromPoints = function(v1, v2) {
+    //             if (v1.x === v2.x) return new Equation(1, 0, -v1.x);
+    //             if (v1.y === v2.y) return new Equation(0, 1, -v1.y);
+    //             const d = (v2.y - v1.y) / (v2.x - v1.x);
+    //             return new Equation(-d, 1, d * v1.x - v1.y);
+    //         };
+    //         return Equation;
+    //     })();
+    //     const Rect = (function() {
+    //         function Rect(x, y, w, h) {
+    //             this.pos = { x, y };
+    //             this.width = w;
+    //             this.height = h;
+    //         }
+    //         Rect.prototype.has = function({ x, y }) {
+    //             return x >= this.pos.x && x <= this.pos.x + this.width &&
+    //                 y >= this.pos.y && y <= this.pos.y + this.height;
+    //         }
+    //         Rect.prototype.hasLine = function(eq) {
+    //             const leftInter = eq.getYfromX(this.pos.x);
+    //             const rightInter = eq.getYfromX(this.pos.x + this.width);
+    //             const topInter = eq.getXfromY(this.pos.y);
+    //             return (leftInter >= this.pos.y && leftInter <= this.pos.y + this.height) ||
+    //                 (rightInter >= this.pos.y && rightInter <= this.pos.y + this.height) ||
+    //                 (topInter >= this.pos.x && topInter <= this.pos.x + this.width);
+    //         }
+    //         Rect.prototype.addToMap = function() {
+    //             spawn.mapRect(this.pos.x, this.pos.y, this.width, this.height);
+    //         }
+    //         Object.defineProperty(Rect.prototype, "midPos", {
+    //             get() {
+    //                 return V.add(this.pos, { x: this.width / 2, y: this.height / 2 });
+    //             }
+    //         });
+    //         Rect.fromBounds = function(min, max) {
+    //             return new Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+    //         }
+    //         return Rect;
+    //     })();
+
+    //     function isInBound(bound) {
+    //         return bound.has(player.bounds.min) || bound.has(player.bounds.max);
+    //     }
+
+    //     function addWIMP(x, y) {
+    //         spawn.WIMP(x, y);
+    //         const me = mob[mob.length - 1];
+    //         me.isWIMP = true;
+    //     }
+
+    //     function relocateWIMPs(x, y) {
+    //         for (const i of mob) {
+    //             if (i.isWIMP) {
+    //                 setPos(i, { x: x + 300 * (Math.random() - 0.5), y: y + 300 * (Math.random() - 0.5) });
+    //             }
+    //         }
+    //     }
+
+    //     function secondRoomBoss(x, y, radius = 25, isDark = false) {
+    //         mobs.spawn(x, y, 12, radius, isDark ? "#000" : "#fff");
+    //         let me = mob[mob.length - 1];
+    //         me.isBoss = true;
+    //         me.isDark = isDark;
+
+    //         me.stroke = "transparent";
+    //         me.eventHorizon = 500; // How family friendly content much do I have to reduce this
+    //         me.seeAtDistance2 = 5e6; // Basically just see at all times, in the context it's given
+    //         me.accelMag = 0.00003 * simulation.accelScale;
+    //         me.collisionFilter.mask = cat.player | cat.bullet;
+    //         me.memory = 1600;
+    //         me.randomPRNGMult = Math.random() * 500;
+
+    //         me.attackCycle = 0;
+    //         me.lastAttackCycle = 0;
+    //         Matter.Body.setDensity(me, 0.012); // extra dense, normal is 0.001 // makes effective life much larger
+    //         me.onDeath = function() {
+    //             // applying forces to player doesn't seem to work inside this method, not sure why
+    //             powerUps.spawn(this.position.x + 20, this.position.y, "ammo");
+    //             if (Math.random() > 0.5) powerUps.spawn(this.position.x, this.position.y, "ammo");
+    //             if (Math.random() > 0.3) powerUps.spawn(this.position.x, this.position.y, "heal", true, null, 30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
+    //         };
+    //         me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
+    //         me.do = function() {
+    //             // keep it slow, to stop issues from explosion knock backs
+    //             if (this.speed > 1) {
+    //                 Matter.Body.setVelocity(this, {
+    //                     x: this.velocity.x * 0.95,
+    //                     y: this.velocity.y * 0.95
+    //                 });
+    //             }
+    //             if (!(simulation.cycle % this.seePlayerFreq)) {
+    //                 if (this.distanceToPlayer2() < this.seeAtDistance2) { // ignore cloak for black holes
+    //                     this.locatePlayer();
+    //                     if (!this.seePlayer.yes) this.seePlayer.yes = true;
+    //                 } else if (this.seePlayer.recall) {
+    //                     this.lostPlayer();
+    //                 }
+    //             }
+    //             this.checkStatus();
+    //             if (this.seePlayer.recall) {
+    //                 // accelerate towards the player
+    //                 const forceMag = this.accelMag * this.mass;
+    //                 const dx = this.seePlayer.position.x - this.position.x
+    //                 const dy = this.seePlayer.position.y - this.position.y
+    //                 const mag = Math.sqrt(dx * dx + dy * dy)
+    //                 this.force.x += forceMag * dx / mag;
+    //                 this.force.y += forceMag * dy / mag;
+
+    //                 // eventHorizon waves in and out
+    //                 const eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(simulation.cycle * 0.008));
+
+    //                 // draw darkness
+    //                 ctx.fillStyle = this.isDark ? "rgba(0,20,40,0.6)" : "rgba(225,215,255,0.6)";
+    //                 DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.2, 0, 2 * Math.PI);
+    //                 ctx.fillStyle = this.isDark ? "rgba(0,20,40,0.4)" : "rgba(225,215,255,0.4)";
+    //                 DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.4, 0, 2 * Math.PI);
+    //                 ctx.fillStyle = this.isDark ? "rgba(0,20,40,0.3)" : "rgba(225,215,255,0.3)";
+    //                 DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.6, 0, 2 * Math.PI);
+    //                 ctx.fillStyle = this.isDark ? "rgba(0,20,40,0.2)" : "rgba(225,215,255,0.2)";
+    //                 DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.8, 0, 2 * Math.PI);
+    //                 ctx.fillStyle = this.isDark ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)";
+    //                 DrawTools.arc(this.position.x, this.position.y, eventHorizon, 0, 2 * Math.PI);
+    //                 // when player is inside event horizon
+    //                 if (distance(this.position, player.position) < eventHorizon) {
+    //                     if (this.isDark) {
+    //                         // Standard black hole stuff
+    //                         if (m.immuneCycle < m.cycle) {
+    //                             if (m.energy > 0) m.energy -= 0.003;
+    //                             if (m.energy < 0.1) m.damage(0.00015 * simulation.dmgScale);
+    //                         }
+    //                         const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
+    //                         player.force.x -= 0.0005 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
+    //                         player.force.y -= 0.0005 * Math.sin(angle) * player.mass;
+    //                         // draw line to player
+    //                         ctx.lineWidth = Math.min(60, this.radius * 2);
+    //                         ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    //                         DrawTools.line([this.position, m.pos]);
+    //                         ctx.fillStyle = "rgba(0,0,0,0.3)";
+    //                         DrawTools.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
+    //                     } else {
+    //                         // Lightning attacks
+    //                         this.attackCycle++;
+    //                         if (this.attackCycle >= 30) {
+    //                             this.attackCycle = 0;
+    //                             this.lastAttackCycle = simulation.cycle;
+    //                             Matter.Body.setVelocity(player, V.add(player.velocity, { x: 0, y: -10 }));
+    //                             if (m.immuneCycle < m.cycle) {
+    //                                 if (m.energy > 0) m.energy -= 0.03;
+    //                                 m.damage(0.005 * simulation.dmgScale);
+    //                             }
+    //                         }
+    //                         DrawTools.lightning(this.position, m.pos, this.lastAttackCycle, this.randomPRNGMult);
+    //                         ctx.fillStyle = `rgba(255,240,127,${0.12 * Math.max(15 - simulation.cycle + this.lastAttackCycle, 0)})`;
+    //                         DrawTools.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     };
+
+    //     function mobGrenade(...args) {
+    //         spawn.grenade(...args);
+    //         const pulseRadius = args[3] || Math.min(550, 250 + simulation.difficulty * 3)
+    //         let me = mob[mob.length - 1];
+    //         me.fill = "#ace";
+    //         me.onDeath = function() {
+    //             //damage player if in range
+    //             if (distance(player.position, this.position) < pulseRadius && m.immuneCycle < m.cycle) {
+    //                 m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
+    //                 m.damage(0.02 * simulation.dmgScale);
+    //             }
+    //             simulation.drawList.push({ //add dmg to draw queue
+    //                 x: this.position.x,
+    //                 y: this.position.y,
+    //                 radius: pulseRadius,
+    //                 color: "rgba(170,204,238,0.3)",
+    //                 time: simulation.drawTime
+    //             });
+    //         };
+    //         me.do = function() {
+    //             this.timeLimit();
+    //             ctx.beginPath(); //draw explosion outline
+    //             ctx.arc(this.position.x, this.position.y, pulseRadius * (1.01 - this.timeLeft / this.lifeSpan), 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
+    //             ctx.fillStyle = "rgba(170,204,238,0.1)";
+    //             ctx.fill();
+    //         };
+    //     }
+    //     // Todo: nerf ThirdRoomBoss a bit?
+    //     function thirdRoomBoss(x, y) {
+    //         mobs.spawn(x, y, 6, 60, "#000");
+    //         let me = mob[mob.length - 1];
+    //         // Fix in place
+    //         me.constraint = Constraint.create({
+    //             pointA: {
+    //                 x: me.position.x,
+    //                 y: me.position.y
+    //             },
+    //             bodyB: me,
+    //             stiffness: 1,
+    //             damping: 1
+    //         });
+    //         Composite.add(engine.world, me.constraint);
+    //         me.isBoss = true;
+
+    //         me.stroke = "transparent";
+    //         me.eventHorizon = 950;
+    //         me.collisionFilter.mask = cat.player | cat.bullet | cat.body;
+
+    //         me.memory = Infinity;
+    //         me.attackCycle = 0;
+    //         me.lastAttackCycle = 0;
+    //         me.spawnCycle = 0;
+    //         Matter.Body.setDensity(me, 0.08); //extra dense //normal is 0.001 //makes effective life much larger
+    //         me.onDeath = function() {
+    //             for (let j = 0; j < 8; j++) { //in case some mobs leave things after they die
+    //                 for (let i = 0, len = mob.length; i < len; ++i) {
+    //                     if (mob[i] !== this) {
+    //                         if (mob[i].isInvulnerable) { //disable invulnerability
+    //                             mob[i].isInvulnerable = false
+    //                             mob[i].damageReduction = 1
+    //                         }
+    //                         mob[i].damage(Infinity, true);
+    //                     }
+    //                 }
+    //             }
+    //             // You earned it: One more tech
+    //             powerUps.spawn(this.position.x, this.position.y, "tech");
+    //             powerUps.spawnBossPowerUp(this.position.x, this.position.y);
+    //             templePlayer.room3ToEndAnim = 1;
+    //         };
+    //         me.nextHealthThreshold = 0.75;
+    //         me.trapCycle = 0;
+    //         me.onDamage = function() {
+    //             if (this.health < this.nextHealthThreshold) {
+    //                 this.health = this.nextHealthThreshold - 0.01
+    //                 this.nextHealthThreshold = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
+    //                 this.trapCycle = 1;
+    //                 this.isInvulnerable = true;
+    //                 this.damageReduction = 0;
+    //             }
+    //         };
+    //         me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
+    //         me.rings = [{
+    //             colour: "#65f",
+    //             radius: 300,
+    //             id: 0
+    //         }, {
+    //             colour: "#0f0",
+    //             radius: 400,
+    //             id: 1
+    //         }, {
+    //             colour: "#f00",
+    //             radius: 500,
+    //             id: 2
+    //         }];
+    //         me.ring = function() {
+    //             const rings = this.isInvulnerable ? [] : this.rings;
+    //             ctx.lineWidth = 10;
+    //             for (const ring of rings) {
+    //                 const radius = ring.radius * (1 + 0.3 * Math.sin(simulation.cycle / 60 * (ring.id + 2)));
+    //                 if (Math.abs(distance(player.position, this.position) - radius) < 60 && m.immuneCycle < simulation.cycle) {
+    //                     m.damage(0.4 / radius);
+    //                 }
+    //                 ctx.strokeStyle = ring.colour;
+    //                 DrawTools.arcOut(this.position.x, this.position.y, radius, 0, Math.PI * 2);
+    //             }
+    //         }
+    //         me.horizon = function() {
+    //             // eventHorizon waves in and out
+    //             const eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(simulation.cycle * 0.008));
+
+    //             const charge = this.attackCycle / 90;
+    //             this.fill = this.isInvulnerable ? "#f00" : `rgb(${charge * 255},${charge * 255},${charge * 255})`;
+    //             // draw darkness
+    //             ctx.fillStyle = `rgba(${charge * 225},${20 + charge * 195},${40 + charge * 215},0.6)`;
+    //             DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.2, 0, 2 * Math.PI);
+    //             ctx.fillStyle = `rgba(${charge * 225},${20 + charge * 195},${40 + charge * 215},0.4)`;
+    //             DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.4, 0, 2 * Math.PI);
+    //             ctx.fillStyle = `rgba(${charge * 225},${20 + charge * 195},${40 + charge * 215},0.3)`;
+    //             DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.6, 0, 2 * Math.PI);
+    //             ctx.fillStyle = `rgba(${charge * 225},${20 + charge * 195},${40 + charge * 215},0.2)`;
+    //             DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.8, 0, 2 * Math.PI);
+    //             ctx.fillStyle = `rgba(${charge * 255},${charge * 255},${charge * 255},0.05)`;
+    //             DrawTools.arc(this.position.x, this.position.y, eventHorizon, 0, 2 * Math.PI);
+
+    //             // when player is inside event horizon
+    //             if (V.magnitude(V.sub(this.position, player.position)) < eventHorizon) {
+    //                 // Standard black hole stuff
+    //                 if (m.immuneCycle < m.cycle) {
+    //                     if (m.energy > 0) m.energy -= 0.004;
+    //                     if (m.energy < 0.1) m.damage(0.0002 * simulation.dmgScale);
+    //                 }
+    //                 const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
+    //                 player.force.x -= 0.001 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
+    //                 player.force.y -= 0.001 * Math.sin(angle) * player.mass;
+    //                 // draw line to player
+    //                 ctx.lineWidth = Math.min(60, this.radius * 2);
+    //                 ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    //                 DrawTools.line([this.position, m.pos]);
+    //                 ctx.fillStyle = "rgba(0,0,0,0.3)";
+    //                 DrawTools.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
+    //                 // Lightning attacks
+    //                 this.attackCycle++;
+    //                 if (this.attackCycle >= 90) {
+    //                     this.attackCycle = 0;
+    //                     this.lastAttackCycle = simulation.cycle;
+    //                     Matter.Body.setVelocity(player, V.add(player.velocity, { x: 0, y: -20 }));
+    //                     if (m.immuneCycle < m.cycle) {
+    //                         m.damage(0.015 * simulation.dmgScale);
+    //                     }
+    //                 }
+    //                 const lightningCycle = simulation.cycle * 2 / 3 + this.lastAttackCycle / 3;
+    //                 DrawTools.lightning(this.position, m.pos, lightningCycle, 1, 12);
+    //                 DrawTools.lightning(this.position, m.pos, lightningCycle, 2, 12);
+    //                 ctx.fillStyle = `rgba(255,240,127,${0.12 * Math.max(15 - simulation.cycle + this.lastAttackCycle, 0)})`;
+    //                 DrawTools.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
+    //             }
+    //         }
+    //         me.periodicSpawns = function() {
+    //             if (this.isInvulnerable) return;
+    //             this.spawnCycle++;
+    //             // Spawn annoying purple thing(s) that chases the player
+    //             if (!(this.spawnCycle % 180)) {
+    //                 spawn.seeker(this.position.x, this.position.y, 15 * (0.7 + 0.5 * Math.random()), 7);
+    //                 spawn.seeker(this.position.x, this.position.y, 4 * (0.7 + 0.5 * Math.random()), 7);
+    //                 spawn.seeker(this.position.x, this.position.y, 4 * (0.7 + 0.5 * Math.random()), 7);
+    //             }
+    //             // Spawn the annoying pink (now blue) exploder that doesn't chase the player
+    //             if (!(this.spawnCycle % 300)) {
+    //                 for (let i = 0; i < 3; i++) {
+    //                     mobGrenade(1100 + 700 * i, -13030, undefined, Math.min(700, 300 + simulation.difficulty * 4), 10);
+    //                     setVel(mob[mob.length - 1], { x: 0, y: -10 });
+    //                     mobGrenade(1100 + 700 * i, -14370, undefined, Math.min(700, 300 + simulation.difficulty * 4), 10);
+    //                     setVel(mob[mob.length - 1], { x: 0, y: 10 });
+    //                 }
+    //             }
+    //             // Spawn a bunch of mobs
+    //             if (!(this.spawnCycle % 600)) {
+    //                 // This is just ripped off of spawn.nodeGroup because I don't want the shield
+    //                 const nodes = 3;
+    //                 const radius = Math.ceil(Math.random() * 10) + 18;
+    //                 const sideLength = Math.ceil(Math.random() * 100) + 70;
+    //                 const stiffness = Math.random() * 0.03 + 0.005;
+    //                 spawn.allowShields = false; //don't want shields on individual group mobs
+    //                 const angle = 2 * Math.PI / nodes
+    //                 for (let i = 0; i < nodes; ++i) {
+    //                     spawn.focuser(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius);
+    //                 }
+    //                 spawn.constrainAllMobCombos(nodes, stiffness);
+    //                 spawn.allowShields = true;
+    //             }
+    //         }
+    //         me.invulnerableTrap = function() {
+    //             if (this.trapCycle < 1) return;
+    //             this.trapCycle++;
+    //             // 24 is just an arbitrarily large number
+    //             const spawnCycles = Math.min(24, Math.max(6, 4 + Math.floor(simulation.difficulty / 3)));
+    //             // I have no idea how to balance at all, please help me
+    //             const spawnDelay = Math.floor(5 + 10 / (1 + Math.sqrt(simulation.difficulty) / 5));
+    //             if (this.trapCycle >= 90) {
+    //                 const cycle = this.trapCycle - 90;
+    //                 if (!(cycle % spawnDelay)) {
+    //                     const radius = Math.min(500, 200 + simulation.difficulty * 3);
+    //                     mobGrenade(600, -13050, 30, radius);
+    //                     Matter.Body.setVelocity(mob[mob.length - 1], { x: 35, y: 0 });
+    //                     mobGrenade(3000, -13050, 30, radius);
+    //                     Matter.Body.setVelocity(mob[mob.length - 1], { x: -35, y: 0 });
+    //                     mobGrenade(600, -14350, 30, radius);
+    //                     Matter.Body.setVelocity(mob[mob.length - 1], { x: 35, y: 0 });
+    //                     mobGrenade(3000, -14350, 30, radius);
+    //                     Matter.Body.setVelocity(mob[mob.length - 1], { x: -35, y: 0 });
+    //                     if (Math.floor(cycle / spawnDelay) >= spawnCycles - 1) {
+    //                         this.trapCycle = 0;
+    //                         this.isInvulnerable = false;
+    //                         this.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
+    //                     }
+    //                 }
+    //             }
+    //             ctx.font = "100px Arial";
+    //             ctx.fillStyle = "#f00";
+    //             ctx.shadowBlur = 10;
+    //             ctx.shadowColor = "#f00";
+    //             ctx.textAlign = "center";
+    //             ctx.textBaseLine = "middle";
+    //             ctx.fillText("!", 900, -13050);
+    //             ctx.fillText("!", 900, -14350);
+    //             ctx.fillText("!", 1800, -13050);
+    //             ctx.fillText("!", 1800, -14350);
+    //             ctx.fillText("!", 2700, -13050);
+    //             ctx.fillText("!", 2700, -14350);
+    //             ctx.shadowBlur = 0;
+    //         }
+    //         me.do = function() {
+    //             this.checkStatus();
+    //             this.horizon();
+    //             this.ring();
+    //             this.periodicSpawns();
+    //             this.invulnerableTrap();
+    //         }
+    //     };
+    //     let oldNextLevel = level.nextLevel;
+    //     const oldFallHeight = simulation.fallHeight;
+    //     level.nextLevel = () => {
+    //         color.map = "#444";
+    //         m.death = m.oldDeath;
+    //         canvas.style.filter = "";
+    //         level.nextLevel = oldNextLevel;
+    //         simulation.fallHeight = oldFallHeight;
+    //         oldNextLevel();
+    //     }
+    //     let bounds = [];
+    //     let mobPositionsQueue = Array.from(Array(10), () => []);
+    //     m.oldDeath = m.death;
+    //     m.death = function() {
+    //         if (!tech.isImmortal) {
+    //             requestAnimationFrame(() => color.map = "#444");
+    //             m.death = m.oldDeath;
+    //             canvas.style.filter = "";
+    //             level.nextLevel = oldNextLevel;
+    //             simulation.fallHeight = oldFallHeight;
+    //         }
+    //         m.oldDeath();
+    //     }
+    //     let name = "⥟ᘊ5⪊Ыᳪៗⱕ␥ዘᑧ⍗";
+    //     addPartToMap = (len = map.length - 1) => {
+    //         map[len].collisionFilter.category = cat.map;
+    //         map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+    //         Matter.Body.setStatic(map[len], true); // make static
+    //         Composite.add(engine.world, map[len]);
+    //     }
+    //     level.setPosToSpawn(50, -50); // normal spawn
+    //     // Make the level exit really far away so WIMP powerups don't show up at all
+    //     level.exit.x = 1e6;
+    //     level.exit.y = -1e6;
+    //     Promise.resolve().then(() => {
+    //         // Clear all WIMPS and their research
+    //         for (let i = 0; i < mob.length; i++) {
+    //             while (mob[i] && !mob[i].isMACHO) {
+    //                 mob[i].replace(i);
+    //             }
+    //         }
+    //         for (let i = 0; i < powerUp.length; i++) {
+    //             while (powerUp[i] && powerUp[i].name === "research") {
+    //                 Matter.Composite.remove(engine.world, powerUp[i]);
+    //                 powerUp.splice(i, 1);
+    //             }
+    //         }
+    //         level.exit.x = 1500;
+    //         level.exit.y = -30;
+    //     });
+    //     spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+    //     spawn.mapRect(1500, -10, 100, 20);
+    //     level.defaultZoom = 1800
+    //     simulation.setZoom(1200);
+    //     document.body.style.backgroundColor = "#daa69f";
+    //     color.map = "#600";
+
+    //     function box(x, y, w, h, s) {
+    //         spawn.mapRect(x, y, w, s);
+    //         spawn.mapRect(x, y, s, h);
+    //         spawn.mapRect(x + w - s, y, s, h);
+    //         spawn.mapRect(x, y + h - s, w, s);
+    //     }
+
+    //     function diamond(x, y, s) {
+    //         spawn.mapVertex(x, y, `0 -${s}  -${s} 0  0 ${s}  ${s} 0`);
+    //     }
+
+    //     // Fake level
+    //     bounds.push(new Rect(-200, -500, 2000, 600));
+    //     box(-200, -500, 2000, 600, 100);
+
+    //     // Actual level, Room 1
+    //     const firstRoomBounds = new Rect(-200, -4000, 5000, 2100);
+    //     bounds.push(firstRoomBounds);
+
+    //     box(-200, -4000, 5000, 2100, 100);
+    //     spawn.mapRect(-200, -2500, 1300, 100);
+    //     spawn.mapRect(3500, -2500, 1300, 100);
+    //     spawn.mapRect(-200, -4000, 1000, 1600);
+    //     spawn.mapRect(3800, -4000, 1000, 1600);
+    //     // Enter and Exit platforms
+    //     spawn.mapRect(0, -2010, 100, 20);
+    //     spawn.mapRect(4500, -2010, 100, 20);
+
+    //     // Altar of Room 1
+    //     spawn.mapRect(2100, -2200, 100, 300);
+    //     spawn.mapRect(2400, -2200, 100, 300);
+    //     spawn.mapRect(2070, -2200, 460, 20);
+
+    //     spawn.debris(1700, -2100, 300, 10);
+    //     spawn.debris(2500, -2100, 300, 10);
+
+    //     // Actual level, Room 2
+    //     const secondRoomBounds = new Rect(-1500, -10500, 3000, 3600);
+    //     bounds.push(secondRoomBounds);
+
+    //     box(-1500, -10500, 3000, 3600, 100);
+    //     spawn.mapRect(-2000, -8500, 1600, 1600);
+    //     spawn.mapRect(400, -8500, 1600, 1600);
+    //     // Enter and Exit platforms
+    //     spawn.mapRect(-50, -7010, 100, 20);
+    //     spawn.mapRect(-50, -10010, 100, 20);
+
+    //     // Hazard traversing
+    //     spawn.mapRect(-300, -7320, 800, 20);
+    //     spawn.mapRect(175, -7600, 325, 20);
+    //     spawn.mapRect(200, -7775, 300, 20);
+    //     spawn.mapRect(-500, -7600, 325, 20);
+    //     spawn.mapRect(-500, -7775, 300, 20);
+    //     spawn.mapRect(-500, -7950, 800, 20);
+    //     spawn.mapRect(-300, -8100, 800, 20);
+    //     spawn.mapRect(-500, -8250, 800, 20);
+    //     for (let i = 0; i < 2; i++) spawn.mapRect(-250, -8400 + 150 * i, 500, 60);
+    //     const room2SlimePit = level.hazard(-400, -8410, 800, 1090);
+    //     room2SlimePit.logic = function() {
+    //         if (this.height > 0 && Matter.Query.region([player], this).length) {
+    //             if (m.immuneCycle < m.cycle) {
+    //                 // Trolled
+    //                 const hasCPT = tech.isRewindAvoidDeath;
+    //                 tech.isRewindAvoidDeath = false;
+    //                 const DRAIN = 0.002 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen;
+    //                 if (m.energy > DRAIN && !tech.isEnergyHealth) {
+    //                     m.energy -= DRAIN;
+    //                 }
+    //                 m.damage(0.00015 * (tech.isRadioactiveResistance ? 0.25 : 1));
+    //                 if (tech.isEnergyHealth) {
+    //                     const previousEnergy = m.energy;
+    //                     m.regenEnergy();
+    //                     const energyRegenerated = m.energy - previousEnergy;
+    //                     if (energyRegenerated > 0) {
+    //                         m.energy = previousEnergy;
+    //                         m.damage(energyRegenerated);
+    //                     }
+    //                 }
+    //                 tech.isRewindAvoidDeath = hasCPT;
+    //             }
+    //             player.force.y -= 0.3 * player.mass * simulation.g;
+    //             setVel(player, Vector.sub(player.velocity, { x: 0, y: player.velocity.y * 0.02 }));
+    //         }
+    //         // Float power ups
+    //         powerUpCollide = Matter.Query.region(powerUp, this)
+    //         for (let i = 0, len = powerUpCollide.length; i < len; i++) {
+    //             const diameter = 2 * powerUpCollide[i].size
+    //             const buoyancy = 1 - 0.2 * Math.max(0, Math.min(diameter, this.min.y - powerUpCollide[i].position.y + powerUpCollide[i].size)) / diameter
+    //             powerUpCollide[i].force.y -= buoyancy * 1.14 * powerUpCollide[i].mass * simulation.g;
+    //             setVel(powerUpCollide[i], { x: powerUpCollide[i].velocity.x, y: 0.96 * powerUpCollide[i].velocity.y });
+    //         }
+    //     }
+    //     room2SlimePit.draw = function() {
+    //         if (this.isOn) {
+    //             ctx.fillStyle = "hsla(160, 100%, 35%, 0.75)";
+    //             ctx.fillRect(this.min.x, this.min.y, this.width, this.height);
+    //         }
+    //     }
+    //     // Room 2 spawning bounds
+    //     const secondRoomSpawnBounds = new Rect(-1500, -10500, 3000, 2000);
+    //     spawn.mapRect(-700, -8700, 150, 20);
+    //     spawn.mapRect(550, -8700, 150, 20);
+    //     spawn.mapRect(-400, -8900, 800, 20);
+    //     diamond(-600, -9800, 30);
+    //     diamond(0, -9800, 30);
+    //     diamond(600, -9800, 30);
+
+    //     spawn.mapRect(-1000, -10000, 2000, 30);
+
+    //     // Actual level, Room 3 (Final Boss?)
+    //     const thirdRoomBounds = new Rect(-200, -14500, 4000, 1600);
+    //     bounds.push(thirdRoomBounds);
+    //     box(-200, -14500, 4000, 1600, 100);
+    //     spawn.mapRect(-200, -14500, 800, 1100);
+    //     spawn.mapRect(3000, -14500, 800, 1100);
+    //     // Enter and Exit platforms
+    //     spawn.mapRect(0, -13110, 100, 20);
+    //     spawn.mapRect(-200, -13100, 800, 200);
+    //     spawn.mapRect(3500, -13110, 100, 20);
+    //     spawn.mapRect(3000, -13100, 800, 200);
+    //     for (let i = 0; i < 3; i++) spawn.bodyRect(500, -13400 + i * 100, 100, 100);
+
+    //     for (let i = 0; i < 3; i++) {
+    //         diamond(1100 + 700 * i, -13000, 30, 30);
+    //         diamond(1100 + 700 * i, -14400, 30, 30);
+    //     }
+
+    //     const Objects = {
+    //         altar: {
+    //             get isHeal() {
+    //                 return simulation.cycle % 600 >= 300;
+    //             },
+    //             pos: {
+    //                 x: 2300,
+    //                 y: -2200
+    //             },
+    //             get isActive() {
+    //                 const roughPlayerCentre = V.add(m.pos, { x: 0, y: 40 });
+    //                 return distance(roughPlayerCentre, this.pos) < 240 &&
+    //                     (Math.abs(angle(roughPlayerCentre, this.pos) - Math.PI / 2) < 1);
+    //             },
+    //             logic() {
+    //                 if (!this.isActive) return;
+    //                 if (this.isHeal) {
+    //                     m.energy += 0.005;
+    //                 } else {
+    //                     m.energy = Math.max(m.energy - 0.007 - m.fieldRegen, 0);
+    //                     if (m.energy <= 0.01 && m.immuneCycle < m.cycle) m.damage(0.002);
+    //                 }
+    //             },
+    //             drawTop() {
+    //                 if (!isInBound(firstRoomBounds)) return;
+    //                 const colour = this.isHeal ? m.fieldMeterColor : "#f00";
+    //                 DrawTools.flame([2300, -2200, 26, 4, colour], 7);
+    //                 ctx.fillStyle = colour;
+    //                 ctx.fillRect(2200, -2200, 200, 200);
+    //             },
+    //             drawBottom() {
+    //                 ctx.fillStyle = this.isHeal ? "#fff5" : "#0005";
+    //                 for (const radius of [230, 180, 130, 80, 30]) {
+    //                     DrawTools.arc(2300, -2200, radius, 0, Math.PI, true);
+    //                 }
+    //             }
+    //         },
+    //         room2Initiator: {
+    //             pos: {
+    //                 x: 0,
+    //                 y: -9050
+    //             },
+    //             get distance() {
+    //                 return distance(player.position, this.pos);
+    //             },
+    //             range: 120,
+    //             rings: [{
+    //                 colour: [102, 85, 255],
+    //                 radius: 200
+    //             }, {
+    //                 colour: [0, 255, 0],
+    //                 radius: 300
+    //             }, {
+    //                 colour: [255, 0, 0],
+    //                 radius: 400
+    //             }],
+    //             get ringNumber() {
+    //                 return this.rings.length;
+    //             },
+    //             get cap() {
+    //                 return (this.ringNumber + 1) * 90 + 240;
+    //             },
+    //             get capped() {
+    //                 return templePlayer.room2.spawnInitiatorCycles > this.cap;
+    //             },
+    //             logic() {
+    //                 if (this.distance < this.range) {
+    //                     templePlayer.room2.spawnInitiatorCycles++;
+    //                 }
+    //             },
+    //             draw() {
+    //                 Promise.resolve().then(() => {
+    //                     const cycle = templePlayer.room2.spawnInitiatorCycles;
+    //                     if (!this.capped && this.distance < 400) {
+    //                         ctx.fillStyle = `rgba(0, 0, 0, ${Math.min(1, (400 - this.distance) / (400 - this.range)) * 0.9})`;
+    //                         ctx.fillRect(0, 0, canvas.width, canvas.height);
+    //                     }
+    //                     ctx.save();
+    //                     simulation.camera();
+    //                     if (this.distance < this.range && !this.capped) {
+    //                         DrawTools.lightning(V.sub(this.pos, { x: 300, y: 300 }), V.add(this.pos, { x: 300, y: 300 }), simulation.cycle - 5);
+    //                         DrawTools.lightning(V.add(this.pos, { x: -300, y: 300 }), V.add(this.pos, { x: 300, y: -300 }), simulation.cycle - 5);
+    //                     }
+    //                     if (!this.capped && cycle >= this.cap - 200) {
+    //                         const multCoeff = (cycle - this.cap + 200) * 0.4
+    //                         ctx.translate((Math.random() - 0.5) * multCoeff, (Math.random() - 0.5) * multCoeff);
+    //                     }
+    //                     ctx.shadowBlur = 20;
+    //                     ctx.lineWidth = 12;
+    //                     ctx.strokeStyle = (templePlayer.room2.cycles % 60 < 30) ? "#fff" : "#000";
+    //                     ctx.shadowColor = (templePlayer.room2.cycles % 60 < 30) ? "#fff" : "#000";
+    //                     DrawTools.arcOut(this.pos.x, this.pos.y, 100, 0, Math.PI * 2);
+    //                     if (templePlayer.room2.cycles <= 100) {
+    //                         for (let i = 0; i < this.ringNumber; i++) {
+    //                             if (cycle < i * 90 + 90) break;
+    //                             const ring = this.rings[i];
+    //                             ctx.shadowColor = `rgb(${ring.colour.join(",")})`;
+    //                             const opacity = this.capped ? 1 - 0.01 * templePlayer.room2.cycles : (cycle / 180 - i / 2 - 0.5);
+    //                             ctx.strokeStyle = `rgba(${ring.colour.join(",")}, ${Math.min(opacity, 1)})`;
+    //                             const radius = (this.capped ? 1 + 0.07 * templePlayer.room2.cycles : Math.sin(Math.min(cycle - i * 90 - 90, 45) / 90 * Math.PI)) * ring.radius;
+    //                             DrawTools.arcOut(this.pos.x, this.pos.y, radius, 0, Math.PI * 2);
+    //                         }
+    //                     }
+    //                     ctx.restore();
+    //                 });
+    //             }
+    //         },
+    //         room2Lightning: {
+    //             one: [{ x: -1400, y: -10400 }, { x: 1400, y: -8500 }],
+    //             two: [{ x: -1400, y: -8500 }, { x: 1400, y: -10400 }],
+    //             get isHeal() {
+    //                 return simulation.cycle % 360 < 180;
+    //             },
+    //             get oneEq() {
+    //                 return Equation.fromPoints(this.one[0], this.one[1]);
+    //             },
+    //             get twoEq() {
+    //                 return Equation.fromPoints(this.two[0], this.two[1]);
+    //             },
+    //             logic() {
+    //                 if (!isInBound(secondRoomSpawnBounds) || !templePlayer.room2.cycles) return;
+
+    //                 const playerbounds = Rect.fromBounds(player.bounds.min, player.bounds.max);
+    //                 if (playerbounds.hasLine(this.oneEq) || playerbounds.hasLine(this.twoEq)) {
+    //                     if (this.isHeal) {
+    //                         m.energy += 0.003;
+    //                     } else if (m.immuneCycle < m.cycle) {
+    //                         m.energy -= 0.003;
+    //                     }
+    //                 }
+    //             },
+    //             draw() {
+    //                 if (!isInBound(secondRoomBounds) || !templePlayer.room2.cycles) return;
+
+    //                 const colour = this.isHeal ? undefined : [0, 0, 0];
+    //                 DrawTools.lightning(...this.one, Math.floor(simulation.cycle / 15) * 15, 1, 9, colour);
+    //                 DrawTools.lightning(...this.two, Math.floor(simulation.cycle / 15) * 15, 2, 9, colour);
+    //             }
+    //         },
+    //         room2GeneratedPath: {
+    //             rects: (function() {
+    //                 const rects = [];
+    //                 for (let i = 0; i < 4; i++) {
+    //                     rects.push(new Rect(-1405 + (i & 1) * 200, -9700 + i * 300, 205, 30));
+    //                     rects.push(new Rect(1200 - (i & 1) * 200, -9700 + i * 300, 205, 30));
+    //                 }
+    //                 return rects;
+    //             })(),
+    //             logic() {
+    //                 if (templePlayer.room2.readyPathCycle && simulation.cycle - templePlayer.room2.readyPathCycle === 180) {
+    //                     for (const r of this.rects) {
+    //                         r.addToMap();
+    //                         addPartToMap();
+    //                         simulation.draw.setPaths();
+    //                     }
+    //                 }
+    //             },
+    //             draw() {
+    //                 if (templePlayer.room2.readyPathCycle && simulation.cycle - templePlayer.room2.readyPathCycle < 180) {
+    //                     ctx.fillStyle = "#fe79";
+    //                     for (const r of this.rects) {
+    //                         ctx.fillRect(r.pos.x, r.pos.y, r.width, r.height);
+    //                     }
+    //                 } else if (simulation.cycle - templePlayer.room2.readyPathCycle < 195) {
+    //                     for (const r of this.rects) {
+    //                         DrawTools.lightning(Objects.room2Initiator.pos, r.midPos, templePlayer.room2.readyPathCycle + 180);
+    //                     }
+    //                 }
+    //             }
+    //         },
+    //         room3Rotors: {
+    //             rotor1: (function() {
+    //                 const rotor = level.spinner(900, -13700, 200, 30);
+    //                 rotor.rotate = function() {
+    //                     Matter.Body.setAngularVelocity(this.bodyB, (this.bodyB.angularVelocity + 0.01) * 0.9)
+    //                 }
+    //                 return rotor;
+    //             })(),
+    //             rotor2: (function() {
+    //                 const rotor = level.spinner(2700, -13700, 200, 30);
+    //                 rotor.rotate = function() {
+    //                     Matter.Body.setAngularVelocity(this.bodyB, (this.bodyB.angularVelocity - 0.01) * 0.9)
+    //                 }
+    //                 return rotor;
+    //             })(),
+    //             logic() {
+    //                 this.rotor1.rotate();
+    //                 this.rotor2.rotate();
+    //             }
+    //         },
+    //         room3SlimePits: {
+    //             pit1: level.hazard(-100, -13400, 0, 0, 0.004),
+    //             pit2: level.hazard(3700, -13400, 0, 0, 0.004),
+    //             logic() {
+    //                 if (templePlayer.room2ToRoom3Anim >= 1320 && templePlayer.room2ToRoom3Anim <= 1570) {
+    //                     this.pit1.height = this.pit2.height = 300;
+    //                     this.pit1.max.y = this.pit2.max.y = -13100;
+    //                     this.pit1.width = this.pit2.width = templePlayer.room2ToRoom3Anim * 2 - 2640;
+    //                     this.pit1.max.x = this.pit1.min.x + this.pit1.width;
+    //                     this.pit2.min.x = this.pit2.max.x - this.pit2.width;
+    //                 }
+    //                 if (templePlayer.room3ToEndAnim) {
+    //                     this.pit1.height = this.pit1.width = 0;
+    //                     this.pit2.height = this.pit2.width = 0;
+    //                 }
+    //             },
+    //             draw() {
+    //                 this.pit1.query();
+    //                 this.pit2.query();
+    //             }
+    //         }
+    //     };
+    //     let templePlayer = {
+    //         room1: {
+    //             cycles: 300
+    //         },
+    //         room2: {
+    //             spawnInitiatorCycles: 0,
+    //             cycles: 0,
+    //             readyPathCycle: 0
+    //         },
+    //         stage: 1,
+    //         startAnim: 0,
+    //         room1ToRoom2Anim: 0,
+    //         room2ToRoom3Anim: 0,
+    //         room3ToEndAnim: 0,
+    //         initialTrapY: 0,
+    //         clearedCycle: 0,
+    //         drawExit: true
+    //     };
+
+    //     const RoomTransitionHandler = {
+    //         room0() {
+    //             if (templePlayer.startAnim <= 0) return;
+    //             templePlayer.startAnim++;
+    //             if (templePlayer.startAnim == 120) {
+    //                 makeLore("Not so fast.");
+    //             }
+    //             if (templePlayer.startAnim < 360) {
+    //                 trapPlayer(1000, templePlayer.initialTrapY);
+    //             } else {
+    //                 level.exit.x = 4500;
+    //                 level.exit.y = -2030;
+    //                 relocateTo(50, -2050);
+    //                 simulation.fallHeight = -1000;
+    //                 simulation.setZoom(1800);
+    //                 templePlayer.startAnim = -1;
+    //                 for (let i = 0; i < tech.wimpCount + tech.wimpExperiment; i++) {
+    //                     addWIMP();
+    //                 }
+    //                 templePlayer.drawExit = false;
+    //             }
+    //         },
+    //         room1() {
+    //             if (templePlayer.room1ToRoom2Anim <= 0) return;
+    //             if (templePlayer.room1ToRoom2Anim === 1) {
+    //                 level.exit.x = -50;
+    //                 level.exit.y = -10030;
+    //                 makeLore("Pathetic.");
+    //             }
+    //             if (templePlayer.room1ToRoom2Anim === 241) {
+    //                 makeLore("You will never succeed.");
+    //             }
+    //             if (templePlayer.room1ToRoom2Anim >= 480 && templePlayer.room1ToRoom2Anim <= 960) {
+    //                 const factor = 200 - 200 * Math.cos((templePlayer.room1ToRoom2Anim / 120) * Math.PI);
+    //                 ctx.translate(factor, factor);
+    //                 Promise.resolve().then(() => {
+    //                     ctx.save();
+    //                     ctx.globalCompositeOperation = "color-burn";
+    //                     ctx.fillStyle = DrawTools.randomColours;
+    //                     DrawTools.updateRandomColours(5);
+    //                     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    //                     ctx.restore();
+    //                 });
+    //             }
+    //             if (templePlayer.room1ToRoom2Anim === 960) {
+    //                 makeLore("You are trying too hard.");
+    //                 relocateTo(0, -7050);
+    //                 simulation.fallHeight = -6000;
+    //                 templePlayer.stage = 2;
+    //             }
+    //             if (templePlayer.room1ToRoom2Anim === 1200) {
+    //                 makeLore("I have mastered the understandings of the universe.");
+    //             }
+    //             if (templePlayer.room1ToRoom2Anim === 1260) {
+    //                 // Congrats, you discovered the actual words by looking at the source code. Are you happy now?
+    //                 const x = (
+    //                     ["a speck of dust", "an insignificant hindrance", "a tiny obstacle"]
+    //                 )[Math.floor(Math.random() * 3)].split("");
+    //                 for (let i = 0; i < x.length / 1.6; i++) {
+    //                     const randomIndex = Math.floor(Math.random() * x.length);
+    //                     if (x[randomIndex] !== " ") {
+    //                         x[randomIndex] = String.fromCharCode(Math.floor(Math.random() * 50) + 192);
+    //                     }
+    //                 };
+    //                 makeLore(`You are no more than ${x.join("")} to me.</h3></h2>`);
+    //                 relocateWIMPs(0, -10030);
+    //             }
+    //             templePlayer.room1ToRoom2Anim++;
+    //         },
+    //         room2() {
+    //             if (templePlayer.room2ToRoom3Anim <= 0) return;
+    //             if (templePlayer.room2ToRoom3Anim === 1) {
+    //                 level.exit.x = 3500;
+    //                 level.exit.y = -13130;
+    //                 makeLore("Do not try me.");
+    //             }
+    //             if (templePlayer.room2ToRoom3Anim === 240) {
+    //                 makeLore("I have absolute power over you.");
+    //                 canvas.style.filter = "hue-rotate(90deg)";
+    //             }
+    //             if (templePlayer.room2ToRoom3Anim === 480) {
+    //                 makeLore("You will not succeed...");
+    //                 canvas.style.filter = "invert(0.2)";
+    //             }
+    //             if (templePlayer.room2ToRoom3Anim === 600) {
+    //                 makeLore("<h6 style='display: inline-block'>succeed...</h6>");
+    //                 canvas.style.filter = "invert(0.4)";
+    //             }
+    //             if (templePlayer.room2ToRoom3Anim > 660 && templePlayer.room2ToRoom3Anim <= 840) {
+    //                 canvas.style.filter = `sepia(${(templePlayer.room2ToRoom3Anim - 660) / 180}) invert(${0.5 + (templePlayer.room2ToRoom3Anim - 660) / 360})`;
+    //             }
+    //             if (templePlayer.room2ToRoom3Anim === 960) {
+    //                 makeLore("Do not interfere with me.");
+    //                 templePlayer.stage = 3;
+    //                 relocateTo(50, -13150);
+    //                 simulation.fallHeight = -10000;
+    //                 simulation.zoomTransition(1800);
+    //                 templePlayer.startAnim = -1;
+    //                 // Might be a bit harsh to the player if the WIMPs are involved in the third level
+    //                 for (let i = 0; i < mob.length; i++) {
+    //                     while (mob[i] && !mob[i].isWIMP) {
+    //                         mob[i].replace(i);
+    //                     }
+    //                 }
+    //             }
+    //             if (templePlayer.room2ToRoom3Anim > 960 && templePlayer.room2ToRoom3Anim <= 1140) {
+    //                 canvas.style.filter = `sepia(${(1140 - templePlayer.room2ToRoom3Anim) / 180}) invert(${(1140 - templePlayer.room2ToRoom3Anim) / 180})`;
+    //             }
+    //             templePlayer.room2ToRoom3Anim++;
+    //         },
+    //         room3() {
+    //             if (templePlayer.room3ToEndAnim <= 0) return;
+    //             if (templePlayer.room3ToEndAnim === 1) {
+    //                 makeLore("No.");
+    //             }
+    //             if (templePlayer.room3ToEndAnim === 120) {
+    //                 makeLore("This cannot be.");
+    //             }
+    //             if (templePlayer.room3ToEndAnim === 240) {
+    //                 makeLore("Has my power failed me?");
+    //             }
+    //             if (templePlayer.room3ToEndAnim === 360) {
+    //                 makeLore("Was it worth it, destroying this place?");
+    //             }
+    //             if (templePlayer.room3ToEndAnim === 600) {
+    //                 makeLore("No one is greater than me.");
+    //             }
+    //             const text = "noone-";
+    //             for (let i = 0; i < 12; i++) {
+    //                 if (templePlayer.room3ToEndAnim === 720 + i * 20) {
+    //                     name = name.slice(0, -1);
+    //                     simulation.makeTextLog(`<span style="font-size: 1em"><span style="color: #f00">${name}:</span> &nbsp; ${text[i % 6]}</span>`);
+    //                     canvas.style.filter = `brightness(${1 - i / 22})`;
+    //                 }
+    //             }
+    //             if (templePlayer.room3ToEndAnim === 1060) {
+    //                 templePlayer.drawExit = true;
+    //                 for (let i = 0; i < 5 * tech.wimpCount; i++) {
+    //                     powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false);
+    //                 }
+    //                 canvas.style.filter = "";
+    //             }
+    //             templePlayer.room3ToEndAnim++;
+    //         },
+    //         end() {
+    //             if (!templePlayer.clearedCycle) return;
+    //             Promise.resolve().then(() => {
+    //                 ctx.save();
+    //                 ctx.setTransform(1, 0, 0, 1, 0, 0);
+    //                 ctx.fillStyle = `rgba(0, 0, 0, ${(simulation.cycle - templePlayer.clearedCycle) / 300})`;
+    //                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+    //                 ctx.restore();
+    //             });
+    //             if (simulation.cycle - templePlayer.clearedCycle > 420) level.nextLevel();
+    //         }
+    //     };
+    //     const LogicHandler = {
+    //         bounds() {
+    //             let isInBounds = false;
+    //             for (const b of bounds) {
+    //                 if (isInBound(b)) {
+    //                     isInBounds = true;
+    //                     break;
+    //                 }
+    //             }
+    //             if (!isInBounds) {
+    //                 m.damage(0.1 * simulation.difficultyMode);
+    //                 trapPlayer(level.enter.x, level.enter.y);
+    //                 simulation.makeTextLog("<span style='color: #f00'>" + name + "</span>: &nbsp; You thought I could let you get away with that?");
+    //             }
+    //         },
+    //         room0() {
+    //             // Block the player from entering the first seemingly innocuous exit
+    //             if ((m.pos.x > 1000) && templePlayer.startAnim === 0) {
+    //                 spawn.mapRect(1200, -500, 100, 600);
+    //                 templePlayer.initialTrapY = Math.min(player.position.y, -75);
+    //                 trapPlayer(1000, templePlayer.initialTrapY);
+
+    //                 addPartToMap();
+    //                 simulation.draw.setPaths();
+    //                 templePlayer.startAnim = 1;
+    //             }
+    //         },
+    //         room1() {
+    //             WaveHandler.room1();
+    //             Objects.altar.logic();
+    //         },
+    //         room2() {
+    //             room2SlimePit.logic();
+    //             Objects.room2Initiator.logic();
+    //             Objects.room2Lightning.logic();
+    //             Objects.room2GeneratedPath.logic();
+    //             WaveHandler.room2();
+    //         },
+    //         room3() {
+    //             Objects.room3Rotors.logic();
+    //             Objects.room3SlimePits.logic();
+    //             WaveHandler.room3();
+    //         },
+    //         exit() {
+    //             if (!templePlayer.drawExit) return;
+    //             if (player.position.x > level.exit.x &&
+    //                 player.position.x < level.exit.x + 100 &&
+    //                 player.position.y > level.exit.y - 150 &&
+    //                 player.position.y < level.exit.y - 40 &&
+    //                 player.velocity.y < 0.1 &&
+    //                 level.exitCount + (input.down ? 8 : 2) > 100) {
+    //                 if (templePlayer.stage === 1) {
+    //                     templePlayer.drawExit = false;
+    //                     templePlayer.room1ToRoom2Anim = 1;
+    //                 } else if (templePlayer.stage === 2) {
+    //                     templePlayer.drawExit = false;
+    //                     templePlayer.room2ToRoom3Anim = 1;
+    //                 } else {
+    //                     level.exitCount = 99 - (input.down ? 8 : 2);
+    //                     if (!templePlayer.clearedCycle) templePlayer.clearedCycle = simulation.cycle;
+    //                 }
+    //             }
+    //         }
+    //     };
+    //     const DrawHandler = {
+    //         // Bottom layer
+    //         base() {
+    //             // Draw base red background
+    //             ctx.save();
+    //             ctx.setTransform(1, 0, 0, 1, 0, 0);
+    //             ctx.fillStyle = color.map;
+    //             ctx.fillRect(0, 0, canvas.width, canvas.height);
+    //             ctx.restore();
+
+    //             // Draw the normal bg on the bounds
+    //             ctx.fillStyle = "#eab6af";
+    //             for (const b of bounds) {
+    //                 if (isInBound(b)) ctx.fillRect(b.pos.x + 2, b.pos.y + 2, b.width - 4, b.height - 4);
+    //             }
+    //         },
+    //         entrance() {
+    //             ctx.beginPath();
+    //             ctx.moveTo(level.enter.x, level.enter.y + 30);
+    //             ctx.lineTo(level.enter.x, level.enter.y - 80);
+    //             ctx.bezierCurveTo(level.enter.x, level.enter.y - 170, level.enter.x + 100, level.enter.y - 170, level.enter.x + 100, level.enter.y - 80);
+    //             ctx.lineTo(level.enter.x + 100, level.enter.y + 30);
+    //             ctx.lineTo(level.enter.x, level.enter.y + 30);
+    //             ctx.fillStyle = "#fca";
+    //             ctx.fill();
+    //         },
+    //         room1() {
+    //             if (!isInBound(firstRoomBounds)) return;
+
+    //             // Draw Cross
+    //             ctx.fillStyle = "#fed";
+    //             ctx.fillRect(2200, -3300, 200, 800);
+    //             ctx.fillRect(2000, -3100, 600, 200);
+
+    //             // Final boss-like spawn fire thing. Was it necessary? No!
+    //             const spawnFlameAngle = Math.min(Math.min(templePlayer.room1.cycles, 2520) % 600, 120) * Math.PI / 30 + Math.PI / 2;
+    //             DrawTools.flame([2300, -3000, 26, 4, "#f60", spawnFlameAngle], 7);
+
+    //             Objects.altar.drawBottom();
+    //         },
+    //         room2() {
+    //             if (!isInBound(secondRoomBounds)) return;
+
+    //             if (templePlayer.room2.cycles) {
+    //                 ctx.fillStyle = "#0006";
+    //                 ctx.fillRect(secondRoomBounds.pos.x + 2, secondRoomBounds.pos.y + 2, secondRoomBounds.width - 4, secondRoomBounds.height - 4);
+    //             }
+    //             room2SlimePit.draw();
+    //         },
+    //         room3() {
+    //             if (!isInBound(thirdRoomBounds)) return;
+    //             ctx.fillStyle = "#0006";
+    //             ctx.fillRect(thirdRoomBounds.pos.x + 2, thirdRoomBounds.pos.y + 2, thirdRoomBounds.width - 4, thirdRoomBounds.height - 4);
+    //             Objects.room3SlimePits.draw();
+    //         },
+    //         // Top layer
+    //         mobTrails() {
+    //             if (simulation.cycle % 4 === 0) {
+    //                 let newMobPositions = [];
+    //                 for (const i of mob) {
+    //                     if (!(i.isMACHO || i.isWIMP)) newMobPositions.push({ x: i.position.x, y: i.position.y });
+    //                 }
+    //                 mobPositionsQueue.shift();
+    //                 mobPositionsQueue.push(newMobPositions);
+    //             }
+    //             // Draw "holy" trails for mobs for no particular reason at all
+    //             ctx.strokeStyle = "#bae";
+    //             ctx.lineWidth = 3;
+    //             for (let i = 0; i < 10; i++) {
+    //                 const p = mobPositionsQueue[i];
+    //                 for (const m of p) {
+    //                     DrawTools.holy(m.x, m.y, i / 2 + 10);
+    //                 }
+    //             }
+    //             ctx.shadowBlur = 0;
+    //         },
+    //         waveTimer() {
+    //             const roomConditions = [
+    //                 isInBound(firstRoomBounds) && templePlayer.room1.cycles < 2400,
+    //                 isInBound(secondRoomBounds) && templePlayer.room2.cycles > 0 && templePlayer.room2.cycles < 2160,
+    //                 isInBound(thirdRoomBounds) && templePlayer.room2ToRoom3Anim < 1320
+    //             ];
+    //             Promise.resolve(roomConditions).then(roomConditions => {
+    //                 // First Room
+    //                 if (roomConditions[0]) {
+    //                     ctx.save();
+    //                     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    //                     ctx.fillStyle = "#0004";
+    //                     ctx.fillRect(canvas.width2 - 288, 50, 576, 20);
+    //                     ctx.fillStyle = "#0cf";
+    //                     ctx.fillRect(canvas.width2 - 288, 50, 0.8 * (600 - templePlayer.room1.cycles % 600), 20);
+    //                     ctx.restore();
+    //                 }
+    //                 // Second Room
+    //                 if (roomConditions[1]) {
+    //                     ctx.save();
+    //                     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    //                     ctx.fillStyle = "#0004";
+    //                     ctx.fillRect(canvas.width2 - 288, 50, 576, 20);
+    //                     ctx.fillStyle = (Math.ceil(templePlayer.room2.cycles / 720) & 1) ? "#000" : "#e1d7ff";
+    //                     ctx.fillRect(canvas.width2 - 288, 50, 0.8 * (720 - templePlayer.room2.cycles % 720), 20);
+    //                     ctx.restore();
+    //                 }
+    //                 // Third Room
+    //                 if (roomConditions[2]) {
+    //                     ctx.save();
+    //                     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    //                     ctx.fillStyle = "#0004";
+    //                     ctx.fillRect(canvas.width2 - 288, 50, 576, 20);
+    //                     ctx.fillStyle = "#000";
+    //                     ctx.fillRect(canvas.width2 - 288, 50, 1.6 * (1320 - templePlayer.room2ToRoom3Anim), 20);
+    //                     ctx.restore();
+    //                 }
+    //             });
+    //         },
+    //         room2Top() {
+    //             if (!isInBound(secondRoomBounds)) return;
+    //             Objects.room2Lightning.draw();
+    //             Objects.room2GeneratedPath.draw();
+    //             Objects.room2Initiator.draw();
+    //         }
+    //     };
+    //     const WaveHandler = {
+    //         room1() {
+    //             if (!isInBound(firstRoomBounds)) return;
+    //             if (templePlayer.room1.cycles === 0) powerUps.spawnStartingPowerUps(0, -2050);
+    //             templePlayer.room1.cycles++;
+    //             if (templePlayer.room1.cycles === 2400) {
+    //                 spawn.secondaryBossChance(2300, -2800);
+    //                 powerUps.addResearchToLevel();
+    //             }
+    //             if (templePlayer.room1.cycles % 600 === 0 && templePlayer.room1.cycles <= 2400) {
+    //                 const spawnAmt = Math.min(3 + Math.pow(simulation.difficulty / 1.7, 0.6), 10) + Math.floor(templePlayer.room1.cycles / 720);
+    //                 for (let i = 0; i < spawnAmt; i++) {
+    //                     if (Math.random() < 0.5 + 0.07 * simulation.difficulty) {
+    //                         spawn.randomMob(800 + Math.random() * 3e3, -2400 - Math.random() * 600, Infinity);
+    //                     }
+    //                 }
+    //                 spawn.randomMob(800 + Math.random() * 3e3, -2400 - Math.random() * 600, Infinity);
+    //             }
+    //             if (templePlayer.room1.cycles === 2520) {
+    //                 templePlayer.drawExit = true;
+    //             }
+    //         },
+    //         room2() {
+    //             if (!isInBound(secondRoomBounds)) return;
+    //             if (templePlayer.room2.spawnInitiatorCycles > Objects.room2Initiator.cap) {
+    //                 if (templePlayer.room2.cycles % 720 === 0 && templePlayer.room2.cycles <= 2160) {
+    //                     const isOdd = Math.floor(templePlayer.room2.cycles / 720) & 1;
+    //                     secondRoomBoss(-600, -9800, 25, isOdd);
+    //                     secondRoomBoss(600, -9800, 25, isOdd);
+    //                     secondRoomBoss(0, -9800, 25, !isOdd);
+    //                 }
+    //                 templePlayer.room2.cycles++;
+    //                 if (templePlayer.room2.cycles === 2400) {
+    //                     templePlayer.drawExit = true;
+    //                     templePlayer.room2.readyPathCycle = simulation.cycle;
+    //                 }
+    //             }
+    //         },
+    //         room3() {
+    //             if (templePlayer.room2ToRoom3Anim === 1320) {
+    //                 thirdRoomBoss(1800, -13700);
+    //                 for (let i = 0; i < 3; i++) {
+    //                     powerUps.spawn(m.spawnPos.x, m.spawnPos.y, "heal");
+    //                 }
+    //             }
+    //         }
+    //     };
+    //     const DrawTools = {
+    //         get randomColours() {
+    //             return `rgb(${this._randomColours.join(",")})`
+    //         },
+    //         _randomColours: [Math.random() * 255, Math.random() * 255, Math.random() * 255],
+    //         updateRandomColours(x = 0.8) {
+    //             for (let i = 0; i < this._randomColours.length; i++) {
+    //                 this._randomColours[i] = Math.max(Math.min(this._randomColours[i] + (this.randFact() * x * 2) - x, 255), 0);
+    //             }
+    //         },
+    //         randFact() {
+    //             return Math.random() * 0.8 + Math.sin(Date.now() / 300) * 0.2;
+    //         },
+
+    //         line(vecs) {
+    //             ctx.beginPath();
+    //             ctx.moveTo(vecs[0].x, vecs[0].y);
+    //             for (const v of vecs.slice(1)) ctx.lineTo(v.x, v.y);
+    //             ctx.stroke();
+    //         },
+    //         arc(...x) {
+    //             ctx.beginPath();
+    //             ctx.arc(...x);
+    //             ctx.fill();
+    //         },
+    //         arcOut(...x) {
+    //             ctx.beginPath();
+    //             ctx.arc(...x);
+    //             ctx.stroke();
+    //         },
+    //         flame(props, repeat) {
+    //             for (let i = 0; i < repeat; i++) this.singleFlame(...props);
+    //         },
+    //         singleFlame(x, y, size = 10, repeat = 3, color = "#f00", angle = Math.PI / 2) {
+    //             ctx.strokeStyle = color;
+    //             ctx.lineWidth = 3;
+    //             const path = [{ x, y }];
+    //             for (let i = 0; i < repeat; i++) {
+    //                 const randAng = (Math.random() - 0.5) * 2 + angle;
+    //                 const randLen = 2 * size + Math.random() * size;
+
+    //                 x += Math.cos(randAng) * randLen;
+    //                 y -= Math.sin(randAng) * randLen;
+    //                 path.push({ x, y })
+    //             }
+    //             DrawTools.line(path);
+    //         },
+    //         lightning(from, to, cycle, randomPRNGMult = 1, width = 8, color = [255, 240, 127]) {
+    //             const diff = simulation.cycle - cycle;
+    //             if (diff >= 15) return;
+    //             ctx.strokeStyle = `rgba(${color.join(",")},${(1 - diff / 15) * 255})`;
+    //             ctx.lineWidth = width * (1 - diff / 15);
+    //             ctx.shadowColor = `rgb(${color.join(",")})`;
+    //             ctx.shadowBlur = 20;
+    //             const path = [{ x: from.x, y: from.y }];
+    //             let vector = { x: from.x, y: from.y };
+    //             let distanceLeft = V.magnitude(V.sub(from, to));
+    //             const d = distanceLeft > 800 ? distanceLeft / 40 : 20;
+    //             const normalised = V.normalise(V.sub(to, from));
+    //             while (1) {
+    //                 const randOffset = rotateVector({ y: RNG(Math.floor(cycle * randomPRNGMult + distanceLeft)) * 2 * d - d, x: 0 }, normalised);
+    //                 const randLen = RNG(Math.floor(cycle * (randomPRNGMult + 1) + distanceLeft)) * d + d;
+    //                 distanceLeft -= randLen;
+    //                 if (distanceLeft <= 0) {
+    //                     path.push({ x: to.x, y: to.y });
+    //                     break;
+    //                 }
+    //                 vector = V.add(vector, V.mult(normalised, randLen));
+    //                 path.push({ x: vector.x + randOffset.x, y: vector.y + randOffset.y });
+    //             }
+    //             DrawTools.line(path);
+    //             ctx.shadowBlur = 0;
+    //         },
+    //         holy(x, y, size = 12) {
+    //             this.line([{ x, y: y - size }, { x: x - size, y },
+    //                 { x, y: y + size }, { x: x + size, y }, { x, y: y - size }
+    //             ]);
+    //         }
+    //     };
+
+    //     function RNG(x) {
+    //         x += Math.seed;
+    //         let start = Math.pow(x % 97, 4.3) * 232344573;
+    //         const a = 15485863;
+    //         const b = 521791;
+    //         start = (start * a) % b;
+    //         for (let i = 0; i < (x * x) % 90 + 90; i++) {
+    //             start = (start * a) % b;
+    //         }
+    //         return start / b;
+    //     }
+
+    //     function rotateVector(v, ang) {
+    //         const c = typeof ang === "number" ? { x: Math.cos(ang), y: Math.sin(ang) } : V.normalise(ang);
+    //         return { x: v.x * c.x - v.y * c.y, y: v.y * c.x + v.x * c.y };
+    //     }
+
+    //     function trapPlayer(x, y) {
+    //         setPosAndFreeze(player, { x, y });
+    //         const bLen = bullet.length;
+    //         for (let i = 0; i < bLen; i++) {
+    //             if (bullet[i].botType) setPosAndFreeze(bullet[i], V.add(player.position, { x: 100 * (RNG(i) - 0.5), y: 100 * (RNG(i + bLen) - 0.5) }));
+    //         }
+    //     }
+
+    //     function relocateTo(x, y) {
+    //         level.setPosToSpawn(x, y);
+    //         trapPlayer(x, y);
+    //         for (let i = 0; i < mob.length; i++) {
+    //             if (mob[i].isMACHO) {
+    //                 setPos(mob[i], { x, y });
+    //                 break;
+    //             }
+    //         }
+    //         m.resetHistory();
+    //     }
+    //     const distance = (a, b) => V.magnitude(V.sub(a, b));
+    //     const angle = (a, b) => Math.atan2(b.y - a.y, a.x - b.x);
+    //     const setPos = (a, b) => Matter.Body.setPosition(a, b);
+    //     const setVel = (a, b) => Matter.Body.setVelocity(a, b);
+    //     const freeze = a => setVel(a, { x: 0, y: 0 });
+    //     const setPosAndFreeze = (a, b) => {
+    //         setPos(a, b);
+    //         freeze(a);
+    //     };
+    //     const makeLore = x => simulation.makeTextLog(`<h2 style='color: #f00; display: inline-block'>${name}:</h2> &nbsp; <h3 style='display: inline-block'>${x}</h3>`);
+    //     // TODO: Remove this before merging
+    //     window.TempleHelper = {
+    //         skipInitial() {
+    //             templePlayer.startAnim = 360;
+    //         },
+    //         skipWaves() {
+    //             this.skipInitial();
+    //             templePlayer.room1.cycles = 2500;
+    //         },
+    //         skipToRoom2() {
+    //             this.skipInitial();
+    //             templePlayer.room1ToRoom2Anim = 1;
+    //         },
+    //         skipBossWaves() {
+    //             this.skipToRoom2();
+    //             templePlayer.room2.spawnInitiatorCycles = Objects.room2Initiator.cap;
+    //             templePlayer.room2.cycles = 2200;
+    //             setTimeout(() => trapPlayer(0, -9100), 500);
+    //         },
+    //         skipToRoom3() {
+    //             this.skipToRoom2();
+    //             requestAnimationFrame(() => templePlayer.room2ToRoom3Anim = 1);
+    //         },
+    //         spawnSecondRoomBoss(x, y) {
+    //             secondRoomBoss(x, y);
+    //         }
+    //     };
+    //     level.custom = () => {
+    //         // All the logic gets handled here. How nice!
+    //         for (const i in LogicHandler) {
+    //             LogicHandler[i]();
+    //         }
+
+    //         // Animations and lore for things that seem like exits
+    //         for (const i in RoomTransitionHandler) {
+    //             RoomTransitionHandler[i]();
+    //         }
+
+    //         // Bottom layer graphics
+    //         DrawHandler.base();
+    //         DrawHandler.room1();
+    //         DrawHandler.room2();
+    //         DrawHandler.room3();
+    //         DrawHandler.entrance();
+    //         if (templePlayer.drawExit) level.exit.drawAndCheck();
+    //     };
+    //     level.customTopLayer = () => {
+    //         // Top layer graphics
+    //         DrawHandler.mobTrails();
+    //         Objects.altar.drawTop();
+    //         DrawHandler.waveTimer();
+    //         DrawHandler.room2Top();
+    //     };
+    // },
     dripp() {
         simulation.makeTextLog(`<strong>dripp</strong> by <span class='color-var'>M. B.</span>`);
 

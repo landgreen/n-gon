@@ -256,7 +256,7 @@ const tech = {
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
-        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication)
+        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication * (1 - 0.01 * (simulation.difficultyMode ** 2)))
     },
     isScaleMobsWithDuplication: false,
     maxDuplicationEvent() {
@@ -812,7 +812,7 @@ const tech = {
         {
             name: "microstates",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Microstate_(statistical_mechanics)' class="link">microstates</a>`,
-            description: "for each active <strong>bullets / bots</strong><br><strong>+0.7%</strong> <strong class='color-d'>damage</strong>",
+            description: "for each active <strong>bullet / bot</strong><br><strong>+0.7%</strong> <strong class='color-d'>damage</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3998,7 +3998,7 @@ const tech = {
         },
         {
             name: "supercritical fission",
-            description: "if bullets strike mobs near their <strong>center</strong><br>they can <strong class='color-e'>explode</strong> <em style = 'font-size:95%;'>(nails, needles, rivets)</em>",
+            description: "if <strong>nails</strong>, <strong>needles</strong>, or <strong>rivets</strong> strike mobs<br>near their <strong>center</strong> they can <strong class='color-e'>explode</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5867,7 +5867,7 @@ const tech = {
             allowed() {
                 return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.isHarpoonPowerUp && !tech.isRailGun && !tech.isFireMoveLock
             },
-            requires: "harpoon, not railgun, UHMWPE, toggling harpoon, Higgs mechanism",
+            requires: "harpoon, not railgun, UHMWPE, induction furnace, Higgs mechanism",
             effect() {
                 tech.isGrapple = true;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -6061,7 +6061,7 @@ const tech = {
             effect() {
                 let techGiven = 0
                 for (let j = 0; j < 3; j++) {
-                    const names = ["laser diode", "free-electron laser", "relativistic momentum", "specular reflection", "diffraction grating", "diffuse beam", "output coupler", "slow light"]
+                    const names = ["lens", "arc length", "laser diode", "free-electron laser", "relativistic momentum", "specular reflection", "diffraction grating", "diffuse beam", "output coupler", "slow light"]
                     //convert names into indexes
                     const options = []
                     for (let i = 0; i < names.length; i++) {
@@ -6089,7 +6089,7 @@ const tech = {
                 }
                 if (techGiven > 0) {
                     tech.isStuckOn = true
-                } else {
+                } else { //eject if none found
                     simulation.makeTextLog(`0 <span class='color-var'>tech</span> found <em>//optical amplifier</em>`);
                     const loop = () => {
                         if (!simulation.paused && m.alive) {
@@ -6157,7 +6157,7 @@ const tech = {
         },
         {
             name: "relativistic momentum",
-            description: "all <strong class='color-laser'>lasers</strong> push <strong>mobs</strong> and <strong class='color-block'>blocks</strong><br><em>affects laser-gun, laser-bot, and laser-mines</em>",
+            description: "<strong class='color-laser'>lasers</strong> push <strong>mobs</strong> and <strong class='color-block'>blocks</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6175,8 +6175,68 @@ const tech = {
             }
         },
         {
+            name: "iridescence",
+            // description: "if a <strong class='color-laser'>laser</strong> hits a mob at a low angle of illumination<br><strong>+66%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            description: "if mobs are struck near their <strong>center</strong><br><strong>+66%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            isGunTech: true,
+            maxCount: 3,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return (tech.haveGunCheck("laser") && !tech.isPulseLaser) || tech.isLaserBotUpgrade || tech.isLaserMine
+            },
+            requires: "laser, not pulse",
+            effect() {
+                tech.laserCrit = true;
+            },
+            remove() {
+                tech.laserCrit = false;
+            }
+        },
+        {
+            name: "lens",
+            description: "if directed through a revolving <strong><span style='font-size: 125%;'>π</span> / 4</strong> circular arc<br><strong>+150%</strong> <strong class='color-laser'>laser</strong> gun <strong class='color-d'>damage</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("laser")
+            },
+            requires: "laser",
+            effect() {
+                tech.isLaserLens = true
+                b.guns[11].chooseFireMethod()
+            },
+            remove() {
+                tech.isLaserLens = false
+                b.guns[11].chooseFireMethod()
+            }
+        },
+        {
+            name: "arc length",
+            description: "increase the circular arc of your <strong class='color-laser'>laser</strong> <strong>lens</strong><br>by <strong>+<span style='font-size: 125%;'>π</span> / 4</strong>",
+            isGunTech: true,
+            maxCount: 3,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.isLaserLens && tech.haveGunCheck("laser")
+            },
+            requires: "laser gun, lens",
+            effect() {
+                b.guns[11].arcRange += 0.78
+            },
+            remove() {
+                b.guns[11].arcRange = 0.78
+            }
+        },
+        {
             name: "specular reflection",
-            description: "<strong>+2</strong> <strong class='color-laser'>laser</strong> reflections<br><em>affects laser-gun, laser-bot, and laser-mines</em>",
+            description: "<strong>+2</strong> <strong class='color-laser'>laser</strong> beam reflections",
             isGunTech: true,
             maxCount: 3,
             count: 0,
@@ -6195,7 +6255,7 @@ const tech = {
         },
         {
             name: "diffraction grating",
-            description: `<strong>+1</strong> angled <strong class='color-laser'>laser</strong> gun beam`,
+            description: `<strong>+1</strong> <strong class='color-laser'>laser</strong> gun beam`,
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -6207,23 +6267,19 @@ const tech = {
             requires: "laser gun, not neocognitron, diffuse beam, or slow light",
             effect() {
                 tech.beamSplitter++
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
-                }
+                b.guns[11].chooseFireMethod()
             },
             remove() {
                 if (tech.beamSplitter !== 0) {
                     tech.beamSplitter = 0
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
-                    }
+                    b.guns[11].chooseFireMethod()
                 }
             }
         },
         {
             name: "diffuse beam",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Diffuser_(optics)' class="link">diffuse beam</a>`,
-            description: "<strong class='color-laser'>laser</strong> beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br><strong>+220%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong class='color-laser'>laser</strong> gun beam is <strong>wider</strong> and doesn't <strong>reflect</strong><br><strong>+220%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6236,23 +6292,19 @@ const tech = {
             effect() {
                 if (tech.wideLaser === 0) tech.wideLaser = 3
                 tech.isWideLaser = true;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
-                }
+                b.guns[11].chooseFireMethod()
             },
             remove() {
                 if (tech.isWideLaser) {
                     // tech.wideLaser = 0
                     tech.isWideLaser = false;
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
-                    }
+                    b.guns[11].chooseFireMethod()
                 }
             }
         },
         {
             name: "output coupler",
-            description: "<strong>+30%</strong> <strong class='color-laser'>laser</strong> beam <strong>width</strong><br><strong>+30%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong>+30%</strong> <strong class='color-laser'>laser</strong> gun beam <strong>width</strong><br><strong>+30%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -6264,9 +6316,7 @@ const tech = {
             requires: "laser gun, diffuse beam",
             effect() {
                 tech.wideLaser += 2
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
-                }
+                b.guns[11].chooseFireMethod()
             },
             remove() {
                 if (tech.isWideLaser) {
@@ -6274,14 +6324,12 @@ const tech = {
                 } else {
                     tech.wideLaser = 0
                 }
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
-                }
+                b.guns[11].chooseFireMethod()
             }
         },
         {
             name: "slow light",
-            description: "<strong class='color-laser'>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br><strong>+300%</strong> total beam <strong class='color-d'>damage</strong>",
+            description: "<strong class='color-laser'>laser</strong> gun beam is <strong>spread</strong> into your recent <strong>past</strong><br><strong>+300%</strong> total beam <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -6294,17 +6342,13 @@ const tech = {
             effect() {
                 // this.description = `add 5 more <strong>laser</strong> beams into into your past`
                 tech.historyLaser++
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
-                }
+                b.guns[11].chooseFireMethod()
             },
             remove() {
                 // this.description = "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>300%</strong>"
                 if (tech.historyLaser) {
                     tech.historyLaser = 0
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
-                    }
+                    b.guns[11].chooseFireMethod()
                 }
             }
         },
@@ -6322,16 +6366,12 @@ const tech = {
             requires: "laser gun, not specular reflection, diffuse, free-electron laser, optical amplifier",
             effect() {
                 tech.isPulseLaser = true;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
-                }
+                b.guns[11].chooseFireMethod()
             },
             remove() {
                 if (tech.isPulseLaser) {
                     tech.isPulseLaser = false;
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
-                    }
+                    b.guns[11].chooseFireMethod()
                 }
             }
         },
@@ -6919,25 +6959,6 @@ const tech = {
         //     }
         // },
         {
-            name: "degenerate matter",
-            description: "if your <strong class='color-f'>field</strong> is active<br><strong>+75%</strong> <strong class='color-defense'>defense</strong>",
-            isFieldTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isEnergyHealth
-            },
-            requires: "plasma torch, perfect diamagnetism, pilot wave, not mass-energy",
-            effect() {
-                tech.isHarmReduce = true
-            },
-            remove() {
-                tech.isHarmReduce = false;
-            }
-        },
-        {
             name: "tokamak",
             description: "throwing a <strong class='color-block'>block</strong> converts it into <strong class='color-f'>energy</strong><br>and a pulsed fusion <strong class='color-e'>explosion</strong>",
             isFieldTech: true,
@@ -6954,6 +6975,25 @@ const tech = {
             },
             remove() {
                 tech.isTokamak = false;
+            }
+        },
+        {
+            name: "degenerate matter",
+            description: "if your <strong class='color-f'>field</strong> is active<br><strong>+75%</strong> <strong class='color-defense'>defense</strong>",
+            isFieldTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isEnergyHealth
+            },
+            requires: "plasma torch, perfect diamagnetism, pilot wave, not mass-energy",
+            effect() {
+                tech.isHarmReduce = true
+            },
+            remove() {
+                tech.isHarmReduce = false;
             }
         },
         {
@@ -7195,6 +7235,8 @@ const tech = {
         },
         {
             name: "quantum eraser",
+            descriptionFunction() { return `<span style = 'font-size:90%;'>for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br><strong>kill</strong> a mob as they spawn at <strong>${100-simulation.difficultyMode**2}%</strong> <strong class='color-dup'>duplication</strong></span>` },
+
             description: `<span style = 'font-size:90%;'>for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br><strong>kill</strong> a mob as they spawn at <strong>100%</strong> <strong class='color-dup'>duplication</strong></span>`,
             isFieldTech: true,
             maxCount: 1,
@@ -7366,8 +7408,8 @@ const tech = {
             isFieldTech: true,
             maxCount: 9,
             count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
+            frequency: 2,
+            frequencyDefault: 2,
             allowed() {
                 return m.fieldUpgrades[m.fieldMode].name === "wormhole" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "time dilation"
             },
@@ -7383,33 +7425,33 @@ const tech = {
         },
         {
             name: "virtual particles",
-            description: `use ${powerUps.orb.research(4)}to exploit your <strong class='color-f'>field</strong> for a<br><strong>+12%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
+            description: `use ${powerUps.orb.research(6)}to exploit your <strong class='color-f'>field</strong> for a<br><strong>+11%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return (m.fieldUpgrades[m.fieldMode].name === "negative mass" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "wormhole") && (build.isExperimentSelection || powerUps.research.count > 3)
+                return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "wormhole") && (build.isExperimentSelection || powerUps.research.count > 3)
             },
-            requires: "wormhole, time dilation, negative mass",
+            requires: "wormhole, time dilation, negative mass, pilot wave",
             effect() {
-                tech.fieldDuplicate = 0.12
+                tech.fieldDuplicate = 0.11
                 powerUps.setDupChance(); //needed after adjusting duplication chance
                 if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.13);
-                for (let i = 0; i < 4; i++) {
+                for (let i = 0; i < 6; i++) {
                     if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                 }
             },
             remove() {
                 tech.fieldDuplicate = 0
                 powerUps.setDupChance(); //needed after adjusting duplication chance
-                if (this.count > 0) powerUps.research.changeRerolls(4)
+                if (this.count > 0) powerUps.research.changeRerolls(6)
             }
         },
         {
             name: "Penrose process",
-            description: "after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br><strong>+53</strong> <strong class='color-f'>energy</strong>",
+            description: "after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br><strong>+50</strong> <strong class='color-f'>energy</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7448,7 +7490,7 @@ const tech = {
         },
         {
             name: "geodesics",
-            description: `your <strong>projectiles</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn 2 <strong class='color-g'>guns</strong> and ${powerUps.orb.ammo(4)}`,
+            description: `your <strong>bullets</strong> can traverse <strong class='color-worm'>wormholes</strong><br>spawn 2 <strong class='color-g'>guns</strong> and ${powerUps.orb.ammo(4)}`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7474,7 +7516,7 @@ const tech = {
         },
         {
             name: "cosmic string",
-            description: "after tunneling through mobs with a <strong class='color-worm'>wormhole</strong><br><strong>stun</strong> then and do <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong>",
+            description: "after <strong>tunneling</strong> through mobs with a <strong class='color-worm'>wormhole</strong><br><strong>stun</strong> then and do <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -10429,5 +10471,7 @@ const tech = {
     isQuantumEraserDuplication: null,
     quantumEraserCount: null,
     isPhononBlock: null,
-    isMicroTransactions: null
+    isMicroTransactions: null,
+    isLaserLens: null,
+    laserCrit: null
 }

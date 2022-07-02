@@ -1,33 +1,38 @@
 ******************************************************** NEXT PATCH **************************************************
 
+tech: iridescence - laser does 100% damage to mobs hit near their center
+tech: lens - laser does extra damage if you fire through a lens that revolves around you
+  tech: arc length - increase the size of the lens
 
-tech: resonance - when a block gets vibrated by phonon, it has a chance to spin towards mobs
-cross disciplinary gives 4% duplication
-boson composite lets you move through elevators again
-
-JUNK tech: microtransactions - buy in-game skins for 1 research anytime you choose a tech
+virtual particles costs 4->6 research for 11% duplication
+quantum eraser has less duplication chance at higher difficulty modes
+community map temple updates
 
 bug fixes
 
-
 *********************************************************** TODO *****************************************************
 
-make buying skins from microtransactions have a lasting effect with a local storage list
-  add a dropdown menu to choose in settings
-    maybe just one at a time
+give laser gun _____ if you fire in an angle range
+  draw angle range as a slowly rotation circle arc around player
+  effect:
+    bonus damage 
+    extra beams
+    extra reflections
 
-JUNK tech micro transactions
-  all tech selection menus include the option to buy skins for 1 research
-
-improve mob invincible graphic
-  opacity oscillates from 100% to 0%?
-  make different from stun
+laser tech: critical hits do _______  damage?
+  name? polarized light, iridescence
 
 hopBossMom
   spawns lots of small hopBullets
   drops eggs, that hatch into hopBullets
     like sporangium
   normally runs away from player, but goes closer to drop eggs
+
+level element: exploding barrels
+
+improve mob invincible graphic
+  opacity oscillates from 100% to 0%?
+  make different from stun
   
 junk tech give strange CSS to a keyword
   @keyframes bounce-munch {
@@ -37,14 +42,6 @@ junk tech give strange CSS to a keyword
 
 make plasma ball power up and block pick up still work when you have no no energy
   make a unique CD var for plasma ball?
-
-give laser gun _____ if you fire in an angle range
-  draw angle range as a slowly rotation circle arc around player
-  effect:
-    bonus damage 
-    extra beams
-    extra reflections
-    
 
 wormhole tech: entropic gravity - gain defense for each research
   requires wormhole or negative mass field or pilot wave
