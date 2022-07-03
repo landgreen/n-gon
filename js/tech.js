@@ -6177,7 +6177,7 @@ const tech = {
         {
             name: "iridescence",
             // description: "if a <strong class='color-laser'>laser</strong> hits a mob at a low angle of illumination<br><strong>+66%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
-            description: "if mobs are struck near their <strong>center</strong><br><strong>+66%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            description: "if mobs are struck near their <strong>center</strong><br><strong>+88%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 3,
             count: 0,
@@ -6188,17 +6188,17 @@ const tech = {
             },
             requires: "laser, not pulse",
             effect() {
-                tech.laserCrit = true;
+                tech.laserCrit += 0.88;
             },
             remove() {
-                tech.laserCrit = false;
+                tech.laserCrit = 0;
             }
         },
         {
             name: "lens",
-            description: "if directed through a revolving <strong><span style='font-size: 125%;'>π</span> / 4</strong> circular arc<br><strong>+150%</strong> <strong class='color-laser'>laser</strong> gun <strong class='color-d'>damage</strong>",
+            description: "if directed through a revolving <strong>+<span style='font-size: 125%;'>π</span> / 4</strong> circular arc<br><strong>+150%</strong> <strong class='color-laser'>laser</strong> gun <strong class='color-d'>damage</strong>",
             isGunTech: true,
-            maxCount: 1,
+            maxCount: 3,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
@@ -6208,32 +6208,32 @@ const tech = {
             requires: "laser",
             effect() {
                 tech.isLaserLens = true
+                b.guns[11].arcRange += 0.78
                 b.guns[11].chooseFireMethod()
             },
             remove() {
                 tech.isLaserLens = false
+                b.guns[11].arcRange = 0
                 b.guns[11].chooseFireMethod()
             }
         },
-        {
-            name: "arc length",
-            description: "increase the circular arc of your <strong class='color-laser'>laser</strong> <strong>lens</strong><br>by <strong>+<span style='font-size: 125%;'>π</span> / 4</strong>",
-            isGunTech: true,
-            maxCount: 3,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.isLaserLens && tech.haveGunCheck("laser")
-            },
-            requires: "laser gun, lens",
-            effect() {
-                b.guns[11].arcRange += 0.78
-            },
-            remove() {
-                b.guns[11].arcRange = 0.78
-            }
-        },
+        // {
+        //     name: "arc length",
+        //     description: "increase the circular arc of your <strong class='color-laser'>laser</strong> <strong>lens</strong><br>by <strong>+<span style='font-size: 125%;'>π</span> / 4</strong>",
+        //     isGunTech: true,
+        //     maxCount: 3,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return tech.isLaserLens && tech.haveGunCheck("laser")
+        //     },
+        //     requires: "laser gun, lens",
+        //     effect() {
+        //     },
+        //     remove() {
+        //     }
+        // },
         {
             name: "specular reflection",
             description: "<strong>+2</strong> <strong class='color-laser'>laser</strong> beam reflections",

@@ -2390,7 +2390,7 @@ const b = {
                         tech.laserCrit && !best.who.shield &&
                         Vector.dot(Vector.normalise(Vector.sub(best.who.position, path[path.length - 1])), Vector.normalise(Vector.sub(path[path.length - 1], path[path.length - 2]))) > 0.99 - 0.6 / best.who.radius
                     ) {
-                        damage *= 2
+                        damage *= 1 + tech.laserCrit
                         simulation.drawList.push({ //add dmg to draw queue
                             x: path[path.length - 1].x,
                             y: path[path.length - 1].y,
