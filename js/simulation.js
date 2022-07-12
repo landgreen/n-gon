@@ -120,6 +120,44 @@ const simulation = {
         }
         simulation.isTimeSkipping = false;
     },
+    // timeMobSkip() {
+    //     simulation.gravity();
+    //     Engine.update(engine, simulation.delta);
+    //     simulation.wipe();
+    //     simulation.textLog();
+    //     if (m.onGround) {
+    //         m.groundControl()
+    //     } else {
+    //         m.airControl()
+    //     }
+    //     m.move();
+    //     m.look();
+    //     simulation.camera();
+    //     level.custom();
+    //     powerUps.do();
+    //     mobs.draw();
+    //     simulation.draw.cons();
+    //     simulation.draw.body();
+    //     if (!m.isBodiesAsleep) {
+    //         simulation.checks();
+    //         // mobs.loop();
+    //     }
+    //     mobs.healthBar();
+    //     m.draw();
+    //     m.hold();
+    //     // v.draw(); //working on visibility work in progress
+    //     level.customTopLayer();
+    //     simulation.draw.drawMapPath();
+    //     b.fire();
+    //     b.bulletRemove();
+    //     b.bulletDraw();
+    //     if (!m.isBodiesAsleep) b.bulletDo();
+    //     simulation.drawCircle();
+    //     // simulation.clip();
+    //     ctx.restore();
+    //     simulation.drawCursor();
+    //     // simulation.pixelGraphics();
+    // },
     mouse: {
         x: canvas.width / 2,
         y: canvas.height / 2
@@ -857,6 +895,7 @@ const simulation = {
             let droneCount = 0
             let sporeCount = 0
             let wormCount = 0
+            let fleaCount = 0
             let deliveryCount = 0
             for (let i = 0; i < bullet.length; ++i) {
                 if (bullet[i].isDrone) {
@@ -866,6 +905,8 @@ const simulation = {
                     sporeCount++
                 } else if (bullet[i].wormSize) {
                     wormCount++
+                } else if (bullet[i].isFlea) {
+                    fleaCount++
                 }
             }
 
@@ -920,6 +961,21 @@ const simulation = {
                 }
             }
             requestAnimationFrame(respawnWorms);
+
+            //respawn fleas in animation frame
+            let respawnFleas = () => {
+                if (fleaCount > 0) {
+                    requestAnimationFrame(respawnFleas);
+                    if (!simulation.paused && !simulation.isChoosing) {
+                        fleaCount--
+                        const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
+                        const speed = 6 + 3 * Math.random()
+                        const angle = 2 * Math.PI * Math.random()
+                        b.flea({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 120 * (Math.random() - 0.5) }, { x: speed * Math.cos(angle), y: speed * Math.sin(angle) })
+                    }
+                }
+            }
+            requestAnimationFrame(respawnFleas);
         }
 
         if (tech.isQuantumEraser) {

@@ -263,9 +263,8 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div> ${b.guns[b.inventory[i]].description}</div>`
         }
         let el = document.getElementById("pause-grid-left")
-        el.style.display = "grid"
+        el.style.display = tech.isNoDraftPause ? "none" : "grid" //disabled for eternalism because eternalism lets the player play while this menu is up but the menu doesn't update
         el.innerHTML = text
-
         //right side
         text = "";
         if (tech.isPauseSwitchField && !simulation.isChoosing) {
@@ -304,7 +303,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             }
         }
         el = document.getElementById("pause-grid-right")
-        el.style.display = "grid"
+        el.style.display = tech.isNoDraftPause ? "none" : "grid" //disabled for eternalism because eternalism lets the player play while this menu is up but the menu doesn't update
         el.innerHTML = text
 
         document.getElementById("tech").style.display = "none"
@@ -933,7 +932,7 @@ window.addEventListener("keydown", function(event) {
             if (m.alive && localSettings.loreCount > 0) {
                 if (simulation.difficultyMode > 4) {
                     simulation.makeTextLog("<em>testing mode disabled for this difficulty</em>");
-                    break
+                    // break
                 }
                 if (simulation.testing) {
                     simulation.testing = false;

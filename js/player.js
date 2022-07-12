@@ -1658,6 +1658,9 @@ const m = {
             // description: "<strong>attract</strong> power ups from <strong>far away</strong><br><strong>deflecting</strong> doesn't drain <strong class='color-f'>energy</strong><br>thrown <strong class='color-block'>blocks</strong> have",
             // description: "gain <strong class='color-f'>energy</strong> when <strong>blocking</strong><br>no <strong>recoil</strong> when <strong>blocking</strong>",
             effect: () => {
+                m.fieldMeterColor = "#48f" //"#0c5"
+                m.eyeFillColor = m.fieldMeterColor
+
                 m.fieldShieldingScale = 0;
                 m.fieldBlockCD = 3;
                 m.grabPowerUpRange2 = 10000000
@@ -1724,9 +1727,8 @@ const m = {
                                     ctx.strokeStyle = "#f0f";
                                     ctx.stroke();
                                 } else if (isFree) {
-                                    //when blocking draw this graphic
-                                    ctx.fillStyle = "rgba(110,170,200," + (0.2 + 0.4 * Math.random()) + ")";
-                                    ctx.lineWidth = 2;
+                                    ctx.lineWidth = 2; //when blocking draw this graphic
+                                    ctx.fillStyle = `rgba(110,150,220, ${0.2 + 0.4 * Math.random()})`
                                     ctx.strokeStyle = "#000";
                                     const len = mob[i].vertices.length - 1;
                                     const mag = mob[i].radius
@@ -1739,11 +1741,11 @@ const m = {
                                     ctx.fill();
                                     ctx.stroke();
                                 } else {
-                                    //when blocking draw this graphic
-                                    const eye = 15;
+
+                                    const eye = 15; //when blocking draw this graphic
                                     const len = mob[i].vertices.length - 1;
-                                    ctx.fillStyle = "rgba(110,170,200," + (0.2 + 0.4 * Math.random()) + ")";
                                     ctx.lineWidth = 1;
+                                    ctx.fillStyle = `rgba(110,150,220, ${0.2 + 0.4 * Math.random()})`
                                     ctx.strokeStyle = "#000";
                                     ctx.beginPath();
                                     ctx.moveTo(m.fieldPosition.x + eye * Math.cos(m.fieldAngle), m.fieldPosition.y + eye * Math.sin(m.fieldAngle));
@@ -1800,11 +1802,11 @@ const m = {
                         m.fieldAngle = m.angle
                         //draw field attached to player
                         if (m.holdingTarget) {
-                            ctx.fillStyle = "rgba(110,170,200," + (0.06 + 0.03 * Math.random()) + ")";
-                            ctx.strokeStyle = "rgba(110, 200, 235, " + (0.35 + 0.05 * Math.random()) + ")"
+                            ctx.fillStyle = `rgba(110,150,220, ${0.06 + 0.03 * Math.random()})`
+                            ctx.strokeStyle = `rgba(110,150,220, ${0.35 + 0.05 * Math.random()})`
                         } else {
-                            ctx.fillStyle = "rgba(110,170,200," + (0.27 + 0.2 * Math.random() - 0.1 * wave) + ")";
-                            ctx.strokeStyle = "rgba(110, 200, 235, " + (0.4 + 0.5 * Math.random()) + ")"
+                            ctx.fillStyle = `rgba(110,150,220, ${0.27 + 0.2 * Math.random() - 0.1 * wave})`
+                            ctx.strokeStyle = `rgba(110,150,220, ${0.4 + 0.5 * Math.random()})`
                         }
                         ctx.beginPath();
                         ctx.arc(m.pos.x, m.pos.y, m.fieldRange, m.angle - Math.PI * m.fieldArc, m.angle + Math.PI * m.fieldArc, false);
@@ -1828,8 +1830,8 @@ const m = {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                         if (!input.field) { //&& tech.isFieldFree
                             //draw field free of player
-                            ctx.fillStyle = "rgba(110,170,200," + (0.27 + 0.2 * Math.random() - 0.1 * wave) + ")";
-                            ctx.strokeStyle = "rgba(110, 200, 235, " + (0.4 + 0.5 * Math.random()) + ")"
+                            ctx.fillStyle = `rgba(110,150,220, ${0.27 + 0.2 * Math.random() - 0.1 * wave})`
+                            ctx.strokeStyle = `rgba(110,180,255, ${0.4 + 0.5 * Math.random()})`
                             ctx.beginPath();
                             ctx.arc(m.fieldPosition.x, m.fieldPosition.y, m.fieldRange, m.fieldAngle - Math.PI * m.fieldArc, m.fieldAngle + Math.PI * m.fieldArc, false);
                             ctx.lineWidth = 2.5 - 1.5 * wave;
@@ -1842,7 +1844,8 @@ const m = {
                             m.perfectPush(true);
                         }
                     }
-                    m.drawFieldMeter()
+                    // m.drawFieldMeter()
+                    m.drawFieldMeter("rgba(0,0,0,0.2)")
                     if (tech.isPerfectBrake) { //cap mob speed around player
                         const range = 200 + 140 * wave + 150 * m.energy
                         for (let i = 0; i < mob.length; i++) {
@@ -2018,17 +2021,19 @@ const m = {
             description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong> per second",
             //<strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration
             effect: () => {
-                // m.fieldMeterColor = "#0c5"
-                // m.eyeFillColor = m.fieldMeterColor
+                m.fieldMeterColor = "#ff0"
+                m.eyeFillColor = m.fieldMeterColor
                 m.hold = function() {
                     if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 300 && (m.cycle % 2)) {
-                        // if (tech.isBotField) {
-                        //     b.randomBot(this.position, false)
-                        //     bullet[bullet.length - 1].endCycle = simulation.cycle + 840 //14 seconds
-                        //     m.energy -= 0.35
-                        // } else 
                         if (tech.isSporeField) {
-                            if (tech.isSporeWorm) {
+                            if (tech.isSporeFlea) {
+                                const drain = 0.16 + (Math.max(bullet.length, 130) - 130) * 0.02
+                                if (m.energy > drain) {
+                                    m.energy -= drain
+                                    const speed = m.crouch ? 20 + 8 * Math.random() : 10 + 3 * Math.random()
+                                    b.flea({ x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) }, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) })
+                                }
+                            } else if (tech.isSporeWorm) {
                                 const drain = 0.16 + (Math.max(bullet.length, 130) - 130) * 0.02
                                 if (m.energy > drain) {
                                     m.energy -= drain
@@ -2260,7 +2265,7 @@ const m = {
                                 const damageRadius = circleRadiusScale * this.circleRadius
                                 const dischargeRange = 150 + 1600 * tech.plasmaDischarge + 1.3 * damageRadius
                                 for (let i = 0, len = mob.length; i < len; i++) {
-                                    if (mob[i].alive && (!mob[i].isBadTarget || mob[i].isMobBullet)) {
+                                    if (mob[i].alive && (!mob[i].isBadTarget || mob[i].isMobBullet) && !mob[i].isInvulnerable) {
                                         const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
                                         if (sub < damageRadius + mob[i].radius) {
                                             // if (!this.isAttached && !mob[i].isMobBullet) this.isPopping = true
@@ -2530,11 +2535,43 @@ const m = {
             // description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-defense'>harm</strong>",
             description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>+25%</strong> movement, jumping, and <strong><em>fire rate</em></strong><br>generate <strong>18</strong> <strong class='color-f'>energy</strong> per second",
             set() {
+                // m.fieldMeterColor = "#0fc"
+                // m.fieldMeterColor = "#ff0"
+                m.fieldMeterColor = "#3fe"
+                m.eyeFillColor = m.fieldMeterColor
+
                 m.fieldFireRate = 0.75
                 b.setFireCD();
                 m.fieldFx = 1.2
                 m.fieldJump = 1.09
                 m.setMovement();
+
+                const timeStop = () => {
+                    m.immuneCycle = m.cycle + 10; //immune to harm while time is stopped,  this also disables regen
+                    //draw field everywhere
+                    ctx.globalCompositeOperation = "saturation"
+                    ctx.fillStyle = "#ccc";
+                    ctx.fillRect(-100000, -100000, 200000, 200000)
+                    ctx.globalCompositeOperation = "source-over"
+                    //stop time
+                    m.isBodiesAsleep = true;
+
+                    function sleep(who) {
+                        for (let i = 0, len = who.length; i < len; ++i) {
+                            if (!who[i].isSleeping) {
+                                who[i].storeVelocity = who[i].velocity
+                                who[i].storeAngularVelocity = who[i].angularVelocity
+                            }
+                            Matter.Sleeping.set(who[i], true)
+                        }
+                    }
+                    sleep(mob);
+                    sleep(body);
+                    sleep(bullet);
+
+                    simulation.cycle--; //pause all functions that depend on game cycle increasing
+                }
+
                 if (tech.isRewindField) {
                     this.rewindCount = 0
                     m.grabPowerUpRange2 = 300000
@@ -2562,6 +2599,7 @@ const m = {
                             m.drawHold(m.holdingTarget);
                             m.holding();
                             m.throwBlock();
+                            m.wakeCheck();
                         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
                             m.grabPowerUp();
                             if (this.rewindCount === 0) m.lookForPickUp();
@@ -2612,12 +2650,18 @@ const m = {
                                     }
                                 }
                             }
+                            m.wakeCheck();
                         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                             m.pickUp();
+                            this.rewindCount = 0;
+                            m.wakeCheck();
+                        } else if (tech.isTimeStop && player.speed < 1 && m.onGround && !input.fire) {
+                            timeStop();
                             this.rewindCount = 0;
                         } else {
                             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                             this.rewindCount = 0;
+                            m.wakeCheck();
                         }
                         if (m.energy < m.maxEnergy) m.regenEnergy(); //extra energy regen
                         m.drawFieldMeter() // this calls  m.regenEnergy(); also
@@ -2637,37 +2681,30 @@ const m = {
                             m.lookForPickUp();
                             if (m.energy > m.drain) {
                                 m.energy -= m.drain;
-                                if (m.energy < m.drain) {
+                                if (m.energy < m.drain) { //out of energy
                                     m.fieldCDcycle = m.cycle + 120;
                                     m.energy = 0;
                                     m.wakeCheck();
                                 }
-                                m.immuneCycle = m.cycle + 10; //immune to harm while time is stopped,  this also disables regen
-                                //draw field everywhere
-                                ctx.globalCompositeOperation = "saturation"
-                                ctx.fillStyle = "#ccc";
-                                ctx.fillRect(-100000, -100000, 200000, 200000)
-                                ctx.globalCompositeOperation = "source-over"
-                                //stop time
-                                m.isBodiesAsleep = true;
-
-                                function sleep(who) {
-                                    for (let i = 0, len = who.length; i < len; ++i) {
-                                        if (!who[i].isSleeping) {
-                                            who[i].storeVelocity = who[i].velocity
-                                            who[i].storeAngularVelocity = who[i].angularVelocity
-                                        }
-                                        Matter.Sleeping.set(who[i], true)
-                                    }
-                                }
-                                sleep(mob);
-                                sleep(body);
-                                sleep(bullet);
-
-                                simulation.cycle--; //pause all functions that depend on game cycle increasing
+                                timeStop();
                             } else { //holding, but field button is released
                                 m.wakeCheck();
                             }
+                        } else if (tech.isTimeStop && player.speed < 1 && m.onGround && m.fireCDcycle < m.cycle && !input.fire) {
+                            timeStop();
+                            //makes things move at 1/5 time rate, but has an annoying flicker for mob graphics, and other minor bugs
+                            // if (!(m.cycle % 4)) {
+                            //     // requestAnimationFrame(() => {
+                            //     m.wakeCheck();
+                            //     // simulation.timePlayerSkip(1)
+                            //     // }); //wrapping in animation frame prevents errors, probably          
+                            //     ctx.globalCompositeOperation = "saturation"
+                            //     ctx.fillStyle = "#ccc";
+                            //     ctx.fillRect(-100000, -100000, 200000, 200000)
+                            //     ctx.globalCompositeOperation = "source-over"
+                            // } else {
+                            //     timeStop();
+                            // }
                         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                             m.wakeCheck();
                             m.pickUp();
@@ -2682,6 +2719,11 @@ const m = {
                 }
             },
             effect() {
+                if (tech.isTimeStop) {
+                    m.fieldHarmReduction = 0.66; //33% reduction
+                } else {
+                    m.fieldHarmReduction = 1;
+                }
                 this.set();
             }
         },
@@ -2750,7 +2792,6 @@ const m = {
                     } else {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     }
-
                     //not shooting (or using field) enable cloak
                     if (m.energy < 0.05 && m.fireCDcycle < m.cycle && !input.fire) m.fireCDcycle = m.cycle
                     if (m.fireCDcycle + 30 < m.cycle && !input.fire) { //automatically cloak if not firing
@@ -2992,6 +3033,9 @@ const m = {
             //field <strong>radius</strong> decreases out of <strong>line of sight</strong>
             description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong>unlock</strong> <strong class='color-m'>tech</strong> from other <strong class='color-f'>fields</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             effect: () => {
+                m.fieldMeterColor = "#333"
+                m.eyeFillColor = m.fieldMeterColor
+
                 m.fieldPhase = 0;
                 m.fieldPosition = {
                     x: simulation.mouseInGame.x,
@@ -3179,7 +3223,7 @@ const m = {
                         m.fieldOn = false
                         m.fieldRadius = 0
                     }
-                    m.drawFieldMeter()
+                    m.drawFieldMeter("rgba(0,0,0,0.2)")
                 }
             }
         },
@@ -3189,6 +3233,9 @@ const m = {
             description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+4%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             drain: 0,
             effect: function() {
+                m.fieldMeterColor = "#bbf" //"#0c5"
+                m.eyeFillColor = m.fieldMeterColor
+
                 m.duplicateChance = 0.04
                 m.fieldRange = 0
                 powerUps.setDupChance(); //needed after adjusting duplication chance

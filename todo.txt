@@ -1,32 +1,46 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: iridescence - laser does 100% damage to mobs hit near their center
-tech: lens - laser does extra damage if you fire through a lens that revolves around you
-  tech: arc length - increase the size of the lens
+tech: fleas - replace spores with little hoppers
 
-virtual particles costs 4->6 research for 11% duplication
-quantum eraser has less duplication chance at higher difficulty modes
-community map temple updates
+frame-dragging - time dilation field stops time when you aren't moving or firing, +33% defense
+  the odds of finding this tech is low because I find it kinda annoying, but maybe you will like it
+
+molecular assembler field energy meter is yellow
+  wormhole is lavender
+  perfect diamagnetism is blue
+  time dilation is green blue
+  pilot wave is black
+
+new room in labs:  hopBossMom
+harpoon now auto targets by default, but disabled when crouched
+pulse + neocognitron auto targeting also disabled when crouched
 
 bug fixes
 
 *********************************************************** TODO *****************************************************
 
-give laser gun _____ if you fire in an angle range
-  draw angle range as a slowly rotation circle arc around player
-  effect:
-    bonus damage 
-    extra beams
-    extra reflections
+fleas
+  add very short (2 cycle) delay after each landing -> hop
+    zero velocity while on short delay? try it?
+  flea tech:
+    add a delay to flea jumping also +dmg
+    reduce lifespan after hitting mob, like drones
+      but add in a long cooldown after a hit
+    mid flight attraction towards nearby mobs?
+    if close to mob and line of sight: set isAttached flag = true
+      draw a line to mob, attraction
+       reset isAttached to false after: 1-2s or distance gets too big
+    tech for shotgun?
 
-laser tech: critical hits do _______  damage?
-  name? polarized light, iridescence
+anti-shear topology apply to grenades too? and other less useful bullets
+  then open up tech requirements
 
-hopBossMom
-  spawns lots of small hopBullets
-  drops eggs, that hatch into hopBullets
-    like sporangium
-  normally runs away from player, but goes closer to drop eggs
+menagerie: sporangium release a variety of things
+  spores, worms, hoppers, drones, iceIX?, foam?, missiles?
+  benefit: they release more stuff than normal
+
+swim through slime
+  hold up to float while in slime?
 
 level element: exploding barrels
 
@@ -34,21 +48,11 @@ improve mob invincible graphic
   opacity oscillates from 100% to 0%?
   make different from stun
   
-junk tech give strange CSS to a keyword
-  @keyframes bounce-munch {
-    0% {vertical-align: -40px;}
-    100% {vertical-align: 40px;}
-  } 
-
 make plasma ball power up and block pick up still work when you have no no energy
   make a unique CD var for plasma ball?
 
 wormhole tech: entropic gravity - gain defense for each research
   requires wormhole or negative mass field or pilot wave
-
-shrapnel: a new bullet type: a very small bullet with no targeting that has a high gravity arc
-  maybe 1 bounce or no bounce before it ends on map or mob collision
-  often spawns in groups
 
 testChamber2
   mechanics
@@ -184,6 +188,7 @@ tech expansion:  should also make other fields do things
   perfect diamagnetism moves forward when you hold down the shield
     it's great, but maybe annoying?
     maybe only with crouch?
+  perfect diamagnetism just replace Messier effect
   time dilation drains 1/2 as much energy when paused
   grow plasma torch as you hold it down
   negative mass effects much more space

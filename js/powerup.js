@@ -303,7 +303,7 @@ const powerUps = {
     },
     endDraft(type, isCanceled = false) { //type should be a gun, tech, or field
         if (isCanceled) {
-            if (tech.isCancelTech && Math.random() < 0.96) {
+            if (tech.isCancelTech && Math.random() < 0.94) {
                 // powerUps.research.use('tech')
                 powerUps[type].effect();
                 return
@@ -396,9 +396,6 @@ const powerUps = {
                         }
                     }, delay);
                 }
-                // for (let i = 0, len = tech.tech.length; i < len; i++) {
-                //     if (tech.tech[i].name === "bot fabrication") tech.tech[i].description = `if you collect ${powerUps.orb.research(2 + Math.floor(0.2 * b.totalBots()))}use them to build a<br>random <strong class='color-bot'>bot</strong>  <em>(+1 cost every 5 bots)</em>`
-                // }
             }
             if (tech.isDeathAvoid && document.getElementById("tech-anthropic")) {
                 document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.count}`

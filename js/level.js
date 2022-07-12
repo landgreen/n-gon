@@ -15,40 +15,31 @@ const level = {
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
+            // simulation.enableConstructMode() //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // m.addHealth(Infinity)
-            // m.setField("time dilation")
-            // b.giveGuns("laser")
+            // m.setField("molecular assembler")
+            // b.giveGuns("spores")
+            // tech.giveTech("fleas")
+            // tech.giveTech("flagella")
             // b.guns[0].ammo = 10000
-            // // b.giveGuns("mine")
-            // tech.giveTech("lens")
-            // for (let i = 0; i < 2; ++i) tech.giveTech("diffraction grating")
-            // for (let i = 0; i < 9; ++i) tech.giveTech("propagator")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("mycelium manufacturing")
+            // for (let i = 0; i < 9; ++i) tech.giveTech("WIMPs")
             // for (let i = 0; i < 100; ++i) tech.giveTech("nail-bot")
-            // for (let i = 0; i < 9; ++i) tech.giveTech("emergence")
-            // tech.giveTech("laser-bot")
-            // tech.giveTech("slow light")
-            // tech.giveTech("iridescence")
-            // m.maxHealth = 100
-            // m.health = m.maxHealth
-            // for (let i = 0; i < 10; i++) tech.giveTech("tungsten carbide")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("necrophage")
+            // for (let i = 0; i < 1; i++) tech.giveTech("cryodesiccation")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
-            // for (let i = 0; i < 15; i++) tech.giveTech()
-            // for (let i = 10; i < tech.tech.length; i++) { tech.tech[i].isBanished = true }
+            // m.maxHealth = m.health = 100
             // powerUps.research.changeRerolls(100000)
-            // tech.tech[297].frequency = 100
             // m.immuneCycle = Infinity //you can't take damage
-            // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.temple();
-            // spawn.cellBossCulture(1900, -500)
             // powerUps.research.changeRerolls(100)
-            // spawn.starter(1900, -500, 40)
-            // spawn.starter(1900, -500, 20)
-            // spawn.starter(1900, -500, 100)
-            // for (let i = 0; i < 20; ++i) spawn.exploder(1900, -500)
-            // spawn.timeSkipBoss(1900, -500)
-            // level.difficultyIncrease(50) //30 is near max on hard  //60 is near max on why
+            // tech.tech[297].frequency = 100
+            // spawn.starter(1900, -500, 200)
+            // for (let i = 0; i < 10; ++i) spawn.hopBullet(1900, -500)
+            // spawn.hopMomBoss(1900, -500)
+            // spawn.grenadier(1900, -1450, 10)
+            // level.difficultyIncrease(8 * 4) //30 is near max on hard  //60 is near max on why
             // level.testing(); //not in rotation, used for testing
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
@@ -2215,11 +2206,124 @@ const level = {
             //     spawn.randomLevelBoss(x + 950, y + -2200);
 
             // },
+            // (x = offset.x, y = offset.y) => { //hopBoss1
+            //     const button = level.button(x + 935, y + 0)
+            //     button.isUp = true
+            //     // spawn.mapVertex(x + 5, y + -1318, "0 0  0 -250  125 -250"); //left ledges
+            //     // spawn.mapVertex(x + 1995, y + -1318, "0 0  0 -250  -125 -250"); // right ledges
+            //     doCustomTopLayer.push(
+            //         () => {
+            //             button.draw();
+            //             if (button.isUp) {
+            //                 button.query();
+            //                 if (!button.isUp) {
+            //                     // doCustomTopLayer.push(() => {
+            //                     //     ctx.fillStyle = "rgba(150,255,220,0.15)"
+            //                     //     ctx.fillRect(x + 250, y + -2725, 625, 725)
+            //                     // })
+            //                     const mapStartingLength = map.length //track this so you know how many you added when running addMapToLevelInProgress
+            //                     addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+            //                         who.collisionFilter.category = cat.map;
+            //                         who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+            //                         Matter.Body.setStatic(who, true); //make static
+            //                         Composite.add(engine.world, who); //add to world
+            //                     }
+            //                     //map elements go here
+            //                     // spawn.mapRect(x + -50, y + -1875, 875, 200);
+            //                     // spawn.mapRect(x + 650, y + -2700, 125, 625);
+            //                     // spawn.mapRect(x + 1200, y + -2250, 250, 25);
+
+            //                     spawn.mapRect(x + -25, y + -1875, 1250, 200);
+            //                     // spawn.mapRect(x + 1075, y + -2700, 100, 650);
+            //                     spawn.mapRect(x + 1325, y + -1875, 475, 200);
+            //                     // spawn.mapRect(x + 1900, y + -1600, 125, 25);
+            //                     // spawn.mapRect(x + 900, y + -1875, 325, 25);
+            //                     // spawn.mapRect(x + 1375, y + -1875, 350, 25);
+
+            //                     // spawn.mapRect(x + 675, y + -2725, 50, 650);
+            //                     spawn.mapRect(x + 1900, y + -1675, 125, 25);
+            //                     spawn.mapRect(x + 1700, y + -1400, 325, 25);
+            //                     spawn.mapRect(x + -50, y + -1400, 325, 25);
+
+
+            //                     spawn.mapRect(x + -25, y + -700, 500, 25);
+            //                     spawn.mapRect(x + 675, y + -700, 600, 25);
+            //                     spawn.mapRect(x + 1475, y + -700, 500, 25);
+
+            //                     spawn.mapRect(x + 475, y + -1025, 200, 25);
+            //                     spawn.mapRect(x + 1275, y + -1025, 200, 25);
+            //                     spawn.mapRect(x + 475, y + -300, 200, 25);
+            //                     spawn.mapRect(x + 1275, y + -300, 200, 25);
+
+
+            //                     for (let i = 0, numberOfMapElementsAdded = map.length - mapStartingLength; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
+            //                     simulation.draw.setPaths() //update map graphics
+            //                     //mobs go here
+            //                     powerUps.directSpawn(x + 50, y - 1525, "ammo");
+            //                     powerUps.directSpawn(x + 1950, y - 1525, "ammo");
+            //                     spawn.hopMomBoss(x + 550, y + -2325)
+            //                     for (let i = 0; i < 20; ++i) spawn.hopBullet(x + 50 + 1900 * Math.random(), y + -2325)
+            //                     // spawn.hopper(x + 1500, y + -775);
+            //                     // spawn.hopper(x + 525, y + -775);
+            //                 }
+            //             }
+            //         }
+            //     )
+            // },
+            (x = offset.x, y = offset.y) => { //hopBoss2
+                const button = level.button(x + 935, y + 0)
+                button.isUp = true
+                // spawn.mapVertex(x + 5, y + -1318, "0 0  0 -250  125 -250"); //left ledges
+                // spawn.mapVertex(x + 1995, y + -1318, "0 0  0 -250  -125 -250"); // right ledges
+                doCustomTopLayer.push(
+                    () => {
+                        button.draw();
+                        if (button.isUp) {
+                            button.query();
+                            if (!button.isUp) {
+                                const mapStartingLength = map.length //track this so you know how many you added when running addMapToLevelInProgress
+                                addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+                                    who.collisionFilter.category = cat.map;
+                                    who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+                                    Matter.Body.setStatic(who, true); //make static
+                                    Composite.add(engine.world, who); //add to world
+                                }
+                                //map elements go here
+                                spawn.mapRect(x + 150, y + -1400, 750, 50);
+                                spawn.mapRect(x + 1100, y + -1400, 750, 50);
+                                spawn.mapRect(x + 1825, y + -1050, 200, 50);
+                                spawn.mapRect(x + -25, y + -1050, 200, 50);
+                                spawn.mapRect(x + 1825, y + -325, 200, 50);
+                                spawn.mapRect(x + -25, y + -325, 200, 50);
+                                spawn.mapRect(x + 275, y + -700, 525, 50);
+                                spawn.mapRect(x + 1200, y + -700, 525, 50);
+                                spawn.mapRect(x + -25, y + -1400, 125, 1125); //side walls
+                                spawn.mapRect(x + 1900, y + -1400, 150, 1125);
+                                spawn.mapRect(x + 1900, y + -2700, 125, 1000);
+                                spawn.mapRect(x + -50, y + -2725, 150, 1025);
+                                spawn.mapRect(x + -25, y + -1750, 450, 50);
+                                spawn.mapRect(x + 1575, y + -1750, 450, 50);
+                                spawn.mapRect(x + 525, y + -1750, 950, 50);
+                                for (let i = 0, numberOfMapElementsAdded = map.length - mapStartingLength; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
+                                simulation.draw.setPaths() //update map graphics
+                                //mobs go here
+                                powerUps.directSpawn(x + 50, y - 1525, "ammo");
+                                powerUps.directSpawn(x + 1950, y - 1525, "ammo");
+                                spawn.hopMomBoss(x + 800, y + -2200)
+                                for (let i = 0; i < 10; ++i) spawn.hopBullet(x + 150 + 750 * Math.random(), y + -1600)
+                                for (let i = 0; i < 10; ++i) spawn.hopBullet(x + 1100 + 750 * Math.random(), y + -1600)
+                                spawn.hopper(x + 1500, y + -775);
+                                spawn.hopper(x + 525, y + -775);
+                            }
+                        }
+                    }
+                )
+            },
             (x = offset.x, y = offset.y) => {
                 // const toggle = level.toggle(x + 950, y + 0, false, true) //    toggle(x, y, isOn = false, isLockOn = false) {
                 // toggle.isAddedElements = false
 
-                const button = level.button(x + 950, y + 0)
+                const button = level.button(x + 935, y + 0)
                 button.isUp = true
 
 
@@ -2310,7 +2414,7 @@ const level = {
             (x = offset.x, y = offset.y) => {
                 // const toggle = level.toggle(x + 950, y + 0, false, true) //    toggle(x, y, isOn = false, isLockOn = false) {
                 // toggle.isAddedElements = false
-                const button = level.button(x + 950, y + 0)
+                const button = level.button(x + 935, y + 0)
                 button.isUp = true
                 //left ledges
                 spawn.mapVertex(x + 5, y + -1868, "0 0  0 -250  125 -250");
@@ -2412,7 +2516,7 @@ const level = {
         empty = emptyOptions[Math.floor(Math.random() * emptyOptions.length)];
         loot = lootOptions[Math.floor(Math.random() * lootOptions.length)];
         upDown = upDownOptions[Math.floor(Math.random() * upDownOptions.length)];
-        // upDown = upDownOptions[1] //controls what level spawns for map designing building //********************************* DO   !NOT!  RUN THIS LINE IN THE FINAL VERSION ***************************************
+        // upDown = upDownOptions[0] //controls what level spawns for map designing building //********************************* DO   !NOT!  RUN THIS LINE IN THE FINAL VERSION ***************************************
         //3x2:  4 short rooms (3000x1500),  1 double tall room (3000x3000)
         //rooms
         let rooms = ["exit", "loot", "enter", "empty"]
@@ -2661,7 +2765,7 @@ const level = {
         document.body.style.backgroundColor = "#ddd";
         spawn.mapRect(-950, 0, 8200, 800); //ground
         spawn.mapRect(-950, -1200, 800, 1400); //left wall
-        spawn.mapRect(-950, -1800, 8200, 800); //roof
+        // spawn.mapRect(-950, -1800, 8200, 800); //roof
         spawn.mapRect(-250, -400, 1000, 600); // shelf
         spawn.mapRect(-250, -1200, 1000, 550); // shelf roof
         // for (let i = 0; i < 10; ++i) powerUps.spawn(550, -800, "ammo", false);
@@ -2968,10 +3072,10 @@ const level = {
         };
 
         level.setPosToSpawn(0, -250); //normal spawn
-        spawn.mapRect(5500, -330 + 20, 100, 20); //spawn this because the real exit is in the wrong spot
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-        level.exit.x = 550000;
-        level.exit.y = -330;
+        spawn.mapRect(5500, -330 + 20, 100, 20); //spawn this because the real exit is in the wrong spot
+        level.exit.x = 0;
+        level.exit.y = -8000;
 
         level.defaultZoom = 2500
         simulation.zoomTransition(level.defaultZoom)
@@ -7892,6 +7996,7 @@ const level = {
 
         spawn.bodyRect(-2100, 2050, 290, 30) //Portal platform
         let b = body[body.length - 1];
+        b.isNotHoldable = true
         cons[cons.length] = Constraint.create({
             pointA: {
                 x: -1820,
