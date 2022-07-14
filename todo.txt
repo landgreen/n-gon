@@ -1,21 +1,10 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: fleas - replace spores with little hoppers
 
-frame-dragging - time dilation field stops time when you aren't moving or firing, +33% defense
-  the odds of finding this tech is low because I find it kinda annoying, but maybe you will like it
-
-molecular assembler field energy meter is yellow
-  wormhole is lavender
-  perfect diamagnetism is blue
-  time dilation is green blue
-  pilot wave is black
-
-new room in labs:  hopBossMom
-harpoon now auto targets by default, but disabled when crouched
-pulse + neocognitron auto targeting also disabled when crouched
-
-bug fixes
+tech: colony - sporangium discharge 38% more stuff, but it has a chance to discharge random bullet type
+tech: annelids renamed -> K-selection - fleas and worms are bigger and do more damage
+tech: anti-shear topology now applies to grenades, shotgun so basically everything that matters
+  no longer a "gun tech"
 
 *********************************************************** TODO *****************************************************
 
@@ -24,25 +13,8 @@ fleas
     zero velocity while on short delay? try it?
   flea tech:
     add a delay to flea jumping also +dmg
-    reduce lifespan after hitting mob, like drones
-      but add in a long cooldown after a hit
-    mid flight attraction towards nearby mobs?
-    if close to mob and line of sight: set isAttached flag = true
-      draw a line to mob, attraction
-       reset isAttached to false after: 1-2s or distance gets too big
-    tech for shotgun?
 
-anti-shear topology apply to grenades too? and other less useful bullets
-  then open up tech requirements
-
-menagerie: sporangium release a variety of things
-  spores, worms, hoppers, drones, iceIX?, foam?, missiles?
-  benefit: they release more stuff than normal
-
-swim through slime
-  hold up to float while in slime?
-
-level element: exploding barrels
+molecular fabricator defaults to random type on game load
 
 improve mob invincible graphic
   opacity oscillates from 100% to 0%?

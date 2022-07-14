@@ -16,30 +16,27 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
+            // level.difficultyIncrease(8 * 4) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
-            // m.addHealth(Infinity)
-            // m.setField("molecular assembler")
-            // b.giveGuns("spores")
-            // tech.giveTech("fleas")
-            // tech.giveTech("flagella")
-            // b.guns[0].ammo = 10000
-            // for (let i = 0; i < 1; ++i) tech.giveTech("mycelium manufacturing")
-            // for (let i = 0; i < 9; ++i) tech.giveTech("WIMPs")
-            // for (let i = 0; i < 100; ++i) tech.giveTech("nail-bot")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("necrophage")
-            // for (let i = 0; i < 1; i++) tech.giveTech("cryodesiccation")
-            // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
-            // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
             // m.maxHealth = m.health = 100
             // powerUps.research.changeRerolls(100000)
             // m.immuneCycle = Infinity //you can't take damage
             // powerUps.research.changeRerolls(100)
             // tech.tech[297].frequency = 100
+            // b.guns[0].ammo = 10000
+            // m.setField("molecular assembler") //molecular assembler  time dilation
+            // b.giveGuns("spores")
+            // tech.giveTech("K-selection")
+            // tech.giveTech("fleas")
+            // tech.giveTech("colony")
+            // tech.giveTech("mycelium manufacturing")
+            // for (let i = 0; i < 100; ++i) tech.giveTech("nail-bot")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("necrophage")
+            // for (let i = 0; i < 1; i++) tech.giveTech("cryodesiccation")
+            // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
+            // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
             // spawn.starter(1900, -500, 200)
             // for (let i = 0; i < 10; ++i) spawn.hopBullet(1900, -500)
-            // spawn.hopMomBoss(1900, -500)
-            // spawn.grenadier(1900, -1450, 10)
-            // level.difficultyIncrease(8 * 4) //30 is near max on hard  //60 is near max on why
             // level.testing(); //not in rotation, used for testing
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");

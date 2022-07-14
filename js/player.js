@@ -555,6 +555,8 @@ const m = {
                         x: who.velocity.x * 0.5,
                         y: who.velocity.y * 0.5
                     });
+                    who.endCycle = simulation.cycle + immunityDuration
+
                 } else if (tech.isRPG) {
                     who.endCycle = simulation.cycle + 10
                 } else {
@@ -2027,14 +2029,14 @@ const m = {
                     if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 300 && (m.cycle % 2)) {
                         if (tech.isSporeField) {
                             if (tech.isSporeFlea) {
-                                const drain = 0.16 + (Math.max(bullet.length, 130) - 130) * 0.02
+                                const drain = 0.15 + (Math.max(bullet.length, 130) - 130) * 0.02
                                 if (m.energy > drain) {
                                     m.energy -= drain
                                     const speed = m.crouch ? 20 + 8 * Math.random() : 10 + 3 * Math.random()
                                     b.flea({ x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) }, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) })
                                 }
                             } else if (tech.isSporeWorm) {
-                                const drain = 0.16 + (Math.max(bullet.length, 130) - 130) * 0.02
+                                const drain = 0.15 + (Math.max(bullet.length, 130) - 130) * 0.02
                                 if (m.energy > drain) {
                                     m.energy -= drain
                                     b.worm({ x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) })

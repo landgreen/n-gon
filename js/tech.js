@@ -881,6 +881,26 @@ const tech = {
             }
         },
         {
+            name: "anti-shear topology",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Topology' class="link">anti-shear topology</a>`,
+            description: "<strong>+30%</strong> projectile <strong>duration</strong>", //<br><em style = 'font-size: 83%'>drone spore worm flea missile foam wave neutron ice</em>",
+            isGunTech: true,
+            maxCount: 3,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return true //m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("matter wave") || tech.isNeutronBomb || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1 || tech.isSporeWorm || tech.isFoamBotUpgrade || tech.isFoamBall
+            },
+            requires: "", //drones, spores, missiles, foam, matter wave, neutron bomb, ice IX, flea
+            effect() {
+                tech.isBulletsLastLonger += 0.3
+            },
+            remove() {
+                tech.isBulletsLastLonger = 1;
+            }
+        },
+        {
             name: "thermal runaway",
             description: "after mobs <strong>die</strong><br>they <strong class='color-e'>explode</strong>",
             maxCount: 1,
@@ -919,7 +939,8 @@ const tech = {
         {
             name: "zoospore vector",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Disease_vector' class="link">zoospore vector</a>`,
-            description: "after mobs <strong>die</strong><br>they have a <strong>+10%</strong> chance to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
+            descriptionFunction() { return `after mobs <strong>die</strong><br>they have a <strong>+10%</strong> chance to grow ${b.guns[6].nameString('s')}` },
+            // description: "after mobs <strong>die</strong><br>they have a <strong>+10%</strong> chance to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
             maxCount: 9,
             count: 0,
             frequency: 1,
@@ -5159,7 +5180,7 @@ const tech = {
         {
             name: "mycelial fragmentation",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Fungus' class="link">mycelial fragmentation</a>`,
-            description: "during their <strong>growth</strong> phase<br><strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>+6</strong> <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
+            description: "during their <strong>growth</strong> phase<br><strong>+70%</strong> <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> discharge",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5176,49 +5197,30 @@ const tech = {
                 tech.isSporeGrowth = false
             }
         },
-        // {
-        //     name: "tinsellated flagella",
-        //     link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Zoospore#Flagella_types' class="link">tinsellated flagella</a>`,
-        //     description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>+2</strong> <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> accelerate <strong>50% faster</strong>",
-        //     isGunTech: true,
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 2,
-        //     frequencyDefault: 2,
-        //     allowed() {
-        //         return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField
-        //     },
-        //     requires: "spores",
-        //     effect() {
-        //         tech.isFastSpores = true
-        //     },
-        //     remove() {
-        //         tech.isFastSpores = false
-        //     }
-        // },
         {
-            name: "flagella",
-            description: "<strong>+50%</strong> <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> acceleration<br>if they can't find a target <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> follow you",
+            name: "colony",
+            description: "<strong>+38%</strong> <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> discharge<br><strong>38%</strong> chance to discharge something different",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Colony_(biology)' class="link">colony</a>`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isSporeWorm || tech.isSporeFlea
+                return tech.haveGunCheck("spores")
             },
             requires: "spores",
             effect() {
-                tech.isSporeFollow = true //isSporeFollow
+                tech.isSporeZooid = true
             },
             remove() {
-                tech.isSporeFollow = false //isFastSpores
+                tech.isSporeZooid = false
             }
         },
         {
             name: "cryodesiccation",
-            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> release <strong>2</strong> more <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> <strong class='color-s'>freeze</strong> mobs for <strong>1.5</strong> second",
-            // <br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> do <strong>1/3</strong> <strong class='color-d'>damage</strong>
+            descriptionFunction() { return `<strong>+25%</strong> <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> discharge<br> ${b.guns[6].nameString('s')} <strong class='color-s'>freeze</strong> mobs for <strong>1.5</strong> second` },
+            // description: "<strong>+25%</strong> <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> discharge<br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> <strong class='color-s'>freeze</strong> mobs for <strong>1.5</strong> second",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5235,28 +5237,30 @@ const tech = {
                 tech.isSporeFreeze = false
             }
         },
-        // {
-        //     name: "diplochory",
-        //     description: "if <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> can't <strong>locate</strong> a viable host<br>they use you for <strong>dispersal</strong>",
-        //     isGunTech: true,
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 2,
-        //     frequencyDefault: 2,
-        //     allowed() {
-        //         return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isSporeWorm
-        //     },
-        //     requires: "spores",
-        //     effect() {
-        //         tech.isSporeFollow = true
-        //     },
-        //     remove() {
-        //         tech.isSporeFollow = false
-        //     }
-        // },
+        {
+            name: "flagella",
+            descriptionFunction() { return `<strong>+50%</strong> ${b.guns[6].nameString()} acceleration<br>if they can't find a target ${b.guns[6].nameString('s')} follow you` },
+            // description: "<strong>+50%</strong> <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> acceleration<br>if they can't find a target <strong class='color-p' style='letter-spacing: 2px;'>spores</strong> follow you",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || tech.isSporeField || tech.isSporeWorm || tech.isSporeFlea
+            },
+            requires: "spores",
+            effect() {
+                tech.isSporeFollow = true
+            },
+            remove() {
+                tech.isSporeFollow = false
+            }
+        },
         {
             name: "mutualism",
-            description: "<strong>+150%</strong> <strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-d'>damage</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>",
+            descriptionFunction() { return `<strong>+150%</strong> ${b.guns[6].nameString()} <strong class='color-d'>damage</strong><br>${b.guns[6].nameString('s')} borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>` },
+            // description: `<strong>+150%</strong> ${b.guns[6].name()} <strong class='color-d'>damage</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> borrow <strong>0.5</strong> <strong class='color-h'>health</strong> until they <strong>die</strong>`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5275,7 +5279,7 @@ const tech = {
         },
         {
             name: "fleas",
-            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> hatch <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-m'>tech</strong> applies to <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>",
+            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> hatch <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>", //<br><strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-m'>tech</strong> applies to <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5293,38 +5297,9 @@ const tech = {
 
             }
         },
-
-        // ammoBonus: 8,
-        // effect() {
-        //     tech.isRailGun = true;
-        //     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-        //         if (b.guns[i].name === "harpoon") {
-        //             b.guns[i].chooseFireMethod()
-        //             b.guns[i].ammoPack = this.ammoBonus;
-        //             b.guns[i].ammo = b.guns[i].ammo * this.ammoBonus;
-        //             simulation.updateGunHUD();
-        //             break
-        //         }
-        //     }
-        // },
-        // remove() {
-        //     if (tech.isRailGun) {
-        //         tech.isRailGun = false;
-        //         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-        //             if (b.guns[i].name === "harpoon") {
-        //                 b.guns[i].chooseFireMethod()
-        //                 b.guns[i].ammoPack = 0.6;
-        //                 b.guns[i].ammo = Math.ceil(b.guns[i].ammo / this.ammoBonus);
-        //                 simulation.updateGunHUD();
-        //                 break
-        //             }
-        //         }
-        //     }
-        // }
-
         {
             name: "nematodes",
-            description: "<strong>shotgun</strong> and <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> hatch <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-m'>tech</strong> applies to <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong>",
+            description: "<strong>shotgun</strong> and <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> hatch <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong>", //<br><strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-m'>tech</strong> applies to <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong>
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5342,17 +5317,17 @@ const tech = {
             }
         },
         {
-            name: "annelids",
-            description: "<strong>+37%</strong> <strong class='color-p' style='letter-spacing: -0.8px;'>worm</strong> size and <strong class='color-d'>damage</strong>",
+            name: "K-selection",
+            description: "<strong>+37%</strong> size and <strong class='color-d'>damage</strong><br>for <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> and <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>",
             isGunTech: true,
             maxCount: 3,
             count: 0,
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return tech.isSporeWorm
+                return tech.isSporeWorm || tech.isSporeFlea
             },
-            requires: "spores, shotgun, worms",
+            requires: "spores, shotgun, worms, fleas",
             effect() {
                 tech.wormSize++
             },
@@ -5377,26 +5352,6 @@ const tech = {
             },
             remove() {
                 tech.isDronesTravel = false
-            }
-        },
-        {
-            name: "anti-shear topology",
-            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Topology' class="link">anti-shear topology</a>`,
-            description: "<strong>+30%</strong> projectile <strong>duration</strong><br><em style = 'font-size: 83%'>drone spore worm flea missile foam wave neutron ice</em>",
-            isGunTech: true,
-            maxCount: 3,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || tech.haveGunCheck("spores") || tech.haveGunCheck("drones") || tech.haveGunCheck("missiles") || tech.haveGunCheck("foam") || tech.haveGunCheck("matter wave") || tech.isNeutronBomb || tech.isIceField || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1 || tech.isSporeWorm || tech.isFoamBotUpgrade || tech.isFoamBall
-            },
-            requires: "drones, spores, missiles, foam, matter wave, neutron bomb, ice IX, flea",
-            effect() {
-                tech.isBulletsLastLonger += 0.3
-            },
-            remove() {
-                tech.isBulletsLastLonger = 1;
             }
         },
         {
@@ -6865,8 +6820,8 @@ const tech = {
         {
             name: "mycelium manufacturing",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Mycelium' class="link">mycelium manufacturing</a>`,
-            description: `use ${powerUps.orb.research(1)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>`,
-            // description: "use <strong>3</strong> <strong class='color-r'>research</strong> to repurpose <strong>assembler</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
+            // description: `use ${powerUps.orb.research(1)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>`,
+            descriptionFunction() { return `use ${powerUps.orb.research(1)}to repurpose <strong>molecular assembler</strong><br>excess <strong class='color-f'>energy</strong> used to grow ${b.guns[6].nameString('s')}` },
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -10524,5 +10479,6 @@ const tech = {
     isPhononBlock: null,
     isMicroTransactions: null,
     isLaserLens: null,
-    laserCrit: null
+    laserCrit: null,
+    isSporeZooid: null,
 }

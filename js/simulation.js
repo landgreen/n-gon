@@ -857,7 +857,7 @@ const simulation = {
             if (tech.isMutualism && !tech.isEnergyHealth) {
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].isMutualismActive) {
-                        m.health += 0.005 + 0.005 * tech.isSporeWorm
+                        m.health += 0.005 + 0.005 * (bullet[i].isSpore || bullet[i].isFlea)
                         if (m.health > m.maxHealth) m.health = m.maxHealth;
                         m.displayHealth();
                     }
@@ -878,6 +878,7 @@ const simulation = {
             }
         }
         simulation.lastLogTime = 0; //clear previous messages
+        spawn.allowShields = true;
         powerUps.totalPowerUps = powerUp.length
         let holdTarget = (m.holdingTarget) ? m.holdingTarget : undefined //if player is holding something this remembers it before it gets deleted
         tech.deathSpawnsFromBoss = 0;

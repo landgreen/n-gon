@@ -1181,7 +1181,14 @@ const mobs = {
                     powerUps.spawnRandomPowerUp(this.position.x, this.position.y);
                     m.lastKillCycle = m.cycle; //tracks the last time a kill was made, mostly used in simulation.checks()
                     if (Math.random() < tech.sporesOnDeath) {
-                        if (tech.isSporeWorm) {
+                        if (tech.isSporeFlea) {
+                            const len = Math.min(25, Math.floor(2 + this.mass * (0.5 + 0.5 * Math.random()))) / 2
+                            for (let i = 0; i < len; i++) {
+                                const speed = 10 + 5 * Math.random()
+                                const angle = 2 * Math.PI * Math.random()
+                                b.flea(this.position, { x: speed * Math.cos(angle), y: speed * Math.sin(angle) })
+                            }
+                        } else if (tech.isSporeWorm) {
                             const len = Math.min(25, Math.floor(2 + this.mass * (0.5 + 0.5 * Math.random()))) / 2
                             for (let i = 0; i < len; i++) b.worm(this.position)
                         } else {

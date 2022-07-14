@@ -583,7 +583,7 @@ const b = {
             v1: null,
             v2: null
         };
-        if (tech.isPulseAim && input.down) { //find mobs in line of sight
+        if (tech.isPulseAim && !input.down) { //find mobs in line of sight
             let dist = 2200
             for (let i = 0, len = mob.length; i < len; i++) {
                 const newDist = Vector.magnitude(Vector.sub(path[0], mob[i].position))
@@ -861,7 +861,7 @@ const b = {
                 x: m.Vx / 2 + speed * Math.cos(angle),
                 y: m.Vy / 2 + speed * Math.sin(angle)
             });
-            bullet[me].endCycle = simulation.cycle + Math.floor(input.down ? 120 : 80);
+            bullet[me].endCycle = simulation.cycle + Math.floor(input.down ? 120 : 80) * tech.isBulletsLastLonger;
             bullet[me].restitution = 0.4;
             bullet[me].do = function() {
                 this.force.y += this.mass * 0.0025; //extra gravity for harder arcs
@@ -885,7 +885,7 @@ const b = {
             });
             Composite.add(engine.world, bullet[me]); //add bullet to world
 
-            bullet[me].endCycle = simulation.cycle + 70;
+            bullet[me].endCycle = simulation.cycle + 70 * tech.isBulletsLastLonger;
             bullet[me].frictionAir = 0.07;
             const MAG = 0.015
             bullet[me].thrust = {
@@ -916,7 +916,7 @@ const b = {
                 y: m.Vy / 2 + speed * Math.sin(angle)
             });
             Composite.add(engine.world, bullet[me]); //add bullet to world
-            bullet[me].endCycle = simulation.cycle + 70;
+            bullet[me].endCycle = simulation.cycle + 70 * tech.isBulletsLastLonger;
             bullet[me].frictionAir = 0.07;
             bullet[me].suckCycles = 40
             const MAG = 0.015
@@ -1033,7 +1033,7 @@ const b = {
             speed = 35
             // speed = input.down ? 43 : 32
 
-            bullet[me].endCycle = simulation.cycle + 70;
+            bullet[me].endCycle = simulation.cycle + 70 * tech.isBulletsLastLonger;
             if (input.down) {
                 speed += 9
                 bullet[me].endCycle += 20;
@@ -1086,13 +1086,11 @@ const b = {
                     if (tech.isRPG) this.thrust = { x: 0, y: 0 }
                     this.do = this.radiationMode;
                 }
-
                 const mobCollisions = Matter.Query.collides(this, mob)
                 if (mobCollisions.length) {
                     onCollide()
                     this.stuckTo = mobCollisions[0].bodyA
                     mobs.statusDoT(this.stuckTo, 0.5, 360) //apply radiation damage status effect on direct hits
-
                     if (this.stuckTo.isVerticesChange) {
                         this.stuckToRelativePosition = {
                             x: 0,
@@ -2715,7 +2713,7 @@ const b = {
                 thrust: (tech.isSporeFollow ? 0.0012 : 0.00055) * (1 + 0.5 * (Math.random() - 0.5)),
                 wormSize: wormSize,
                 wormTail: 1 + Math.max(4, Math.min(wormSize - 2 * tech.wormSize, 30)),
-                dmg: (tech.isMutualism ? 7 : 2.9) * wormSize, //bonus damage from tech.isMutualism //2.5 is extra damage as worm
+                dmg: (tech.isMutualism ? 8 : 3.2) * wormSize, //bonus damage from tech.isMutualism //2.5 is extra damage as worm
                 lookFrequency: 100 + Math.floor(37 * Math.random()),
                 classType: "bullet",
                 collisionFilter: {
@@ -3021,7 +3019,7 @@ const b = {
         //   y: m.Vy / 2 + speed * Math.sin(dir)
         // });
     },
-    flea(where, velocity, radius = 7 + 3 * Math.random()) {
+    flea(where, velocity, radius = 6 + 3 * Math.random() + 10 * tech.wormSize * Math.random()) {
         const me = bullet.length;
         bullet[me] = Bodies.polygon(where.x, where.y, 5, radius, {
             isFlea: true,
@@ -3031,9 +3029,8 @@ const b = {
             frictionAir: 0, //0.01,
             restitution: 0,
             density: 0.0005, //  0.001 is normal density
-            dmg: 9 * (tech.isMutualism ? 2.5 : 1), //damage done in addition to the damage from momentum  //spores do 7 dmg, worms do 18
-            lookFrequency: 19 + Math.floor(11 * Math.random()),
-            endCycle: simulation.cycle + Math.floor((780 * tech.isBulletsLastLonger + 360 * Math.random()) + Math.max(0, 150 - bullet.length)), // 13 - 19s
+            lookFrequency: 19 + Math.floor(7 * Math.random()),
+            endCycle: simulation.cycle + Math.floor((900 * tech.isBulletsLastLonger + 360 * Math.random()) + Math.max(0, 150 - bullet.length)), // 13 - 19s
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -3043,6 +3040,10 @@ const b = {
             lockedOn: null,
             delay: 50,
             cd: simulation.cycle + 10,
+            dmg: 0,
+            setDamage() { //dmg is set to zero after doing damage once, and set back to normal after jumping
+                this.dmg = radius * (tech.isMutualism ? 2.5 : 1) //damage done in addition to the damage from momentum  //spores do 7 dmg, worms do 18
+            },
             beforeDmg(who) {
                 // this.endCycle = 0
                 Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), 10 + 10 * Math.random())); //push away from target
@@ -3054,7 +3055,7 @@ const b = {
                 if (tech.isSpawnBulletsOnDeath && who.alive && who.isDropPowerUp) {
                     setTimeout(() => {
                         if (!who.alive) {
-                            for (let i = 0; i < 3; i++) { //spawn 3 more
+                            for (let i = 0; i < 2; i++) { //spawn 2 more
                                 const speed = 10 + 5 * Math.random()
                                 const angle = 2 * Math.PI * Math.random()
                                 b.flea(this.position, { x: speed * Math.cos(angle), y: speed * Math.sin(angle) })
@@ -3063,8 +3064,15 @@ const b = {
                         this.endCycle = 0;
                     }, 1);
                 }
+                setTimeout(() => { this.dmg = 0 })
             },
-            onEnd() {},
+            onEnd() {
+                if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
+                    m.health += 0.01
+                    if (m.health > m.maxHealth) m.health = m.maxHealth;
+                    m.displayHealth();
+                }
+            },
             gravity: 0.002 + 0.002 * tech.isSporeFollow,
             do() {
                 // if (true && this.lockedOn && this.cd < simulation.cycle) {  //blink towards mobs
@@ -3137,11 +3145,17 @@ const b = {
                         this.force.y = -(0.03 + 0.08 * Math.random()) * this.mass
                     }
                     Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                    this.setDamage() //after jumping damage is no longer zero
                 }
             }
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
+        if (tech.isMutualism && m.health > 0.01) {
+            m.health -= 0.005
+            m.displayHealth();
+            bullet[bullet.length - 1].isMutualismActive = true
+        }
     },
     drone(where = { x: m.pos.x + 30 * Math.cos(m.angle) + 20 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 20 * (Math.random() - 0.5) }, speed = 1) {
         const me = bullet.length;
@@ -5544,7 +5558,7 @@ const b = {
                         const me = bullet.length;
                         bullet[me] = Bodies.rectangle(m.pos.x + 50 * Math.cos(m.angle), m.pos.y + 50 * Math.sin(m.angle), 17, 4, b.fireAttributes(dir));
                         const end = END + Math.random() * 4
-                        bullet[me].endCycle = 2 * end + simulation.cycle
+                        bullet[me].endCycle = 2 * end * tech.isBulletsLastLonger + simulation.cycle
                         const speed = 25 * end / END
                         const dirOff = dir + (Math.random() - 0.5) * spread
                         Matter.Body.setVelocity(bullet[me], {
@@ -5644,7 +5658,7 @@ const b = {
                             x: SPEED * Math.cos(dir),
                             y: SPEED * Math.sin(dir)
                         });
-                        bullet[me].endCycle = simulation.cycle + 40
+                        bullet[me].endCycle = simulation.cycle + 40 * tech.isBulletsLastLonger
                         bullet[me].minDmgSpeed = 15
                         if (tech.isShotgunReversed) Matter.Body.setDensity(bullet[me], 0.0016)
                         // bullet[me].restitution = 0.4
@@ -6312,6 +6326,15 @@ const b = {
             ammo: 0,
             ammoPack: 2.6,
             have: false,
+            nameString(suffix = "") {
+                if (tech.isSporeFlea) {
+                    return `<strong class='color-p' style='letter-spacing: -0.8px;'>flea${suffix}</strong>`
+                } else if (tech.isSporeWorm) {
+                    return `<strong class='color-p' style='letter-spacing: -0.8px;'>worm${suffix}</strong>`
+                } else {
+                    return `<strong class='color-p' style='letter-spacing: 2px;'>spore${suffix}</strong>`
+                }
+            },
             do() {},
             fire() {
                 const me = bullet.length;
@@ -6326,16 +6349,13 @@ const b = {
                 bullet[me].maxRadius = 30;
                 bullet[me].restitution = 0.3;
                 bullet[me].minDmgSpeed = 0;
-                bullet[me].totalSpores = 8 + 2 * tech.isSporeFreeze * (tech.isSporeWorm ? 0.5 : 1)
+                bullet[me].totalSpores = 8 + 2 * tech.isSporeFreeze + 3 * tech.isSporeZooid
                 bullet[me].stuck = function() {};
                 bullet[me].beforeDmg = function() {};
                 bullet[me].do = function() {
                     function onCollide(that) {
                         that.collisionFilter.mask = 0; //non collide with everything
-                        Matter.Body.setVelocity(that, {
-                            x: 0,
-                            y: 0
-                        });
+                        Matter.Body.setVelocity(that, { x: 0, y: 0 });
                         that.do = that.grow;
                     }
 
@@ -6345,10 +6365,7 @@ const b = {
                         this.stuckTo = mobCollisions[0].bodyA
 
                         if (this.stuckTo.isVerticesChange) {
-                            this.stuckToRelativePosition = {
-                                x: 0,
-                                y: 0
-                            }
+                            this.stuckToRelativePosition = { x: 0, y: 0 }
                         } else {
                             //find the relative position for when the mob is at angle zero by undoing the mobs rotation
                             this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
@@ -6432,17 +6449,55 @@ const b = {
                 };
                 //spawn bullets on end
                 bullet[me].onEnd = function() {
-                    if (tech.isSporeFlea) {
-                        for (let i = 0, len = this.totalSpores * 0.5; i < len; i++) {
+
+                    let count = 0 //used in for loop below
+                    const things = [
+                        () => { //spore
+                            b.spore(this.position)
+                        },
+                        () => { //worm
+                            count++ //count as 2 things
+                            b.worm(this.position)
+                        },
+                        () => { //flea
+                            count++ //count as 2 things
                             const speed = 10 + 5 * Math.random()
                             const angle = 2 * Math.PI * Math.random()
                             b.flea(this.position, { x: speed * Math.cos(angle), y: speed * Math.sin(angle) })
+                        },
+                        () => { // drones
+                            b.drone(this.position)
+                        },
+                        () => { // ice IX
+                            b.iceIX(1, Math.random() * 2 * Math.PI, this.position)
+                        },
+                        () => { //missile
+                            count++ //count as 2 things
+                            b.missile(this.position, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
+                        },
+                        () => { //nail
+                            b.targetedNail(this.position, 1, 39 + 6 * Math.random())
+                        },
+                    ]
+
+                    for (len = this.totalSpores; count < len; count++) {
+                        if (tech.isSporeZooid && Math.random() < 0.5) {
+                            things[Math.floor(Math.random() * things.length)]()
+                        } else if (tech.isSporeFlea) {
+                            things[2]()
+                        } else if (tech.isSporeWorm) {
+                            things[1]()
+                        } else {
+                            things[0]() //spores
                         }
-                    } else if (tech.isSporeWorm) {
-                        for (let i = 0, len = this.totalSpores * 0.5; i < len; i++) b.worm(this.position)
-                    } else {
-                        for (let i = 0; i < this.totalSpores; i++) b.spore(this.position)
                     }
+                    // } else if (tech.isSporeFlea) {
+                    //     for (let i = 0, len = this.totalSpores; i < len; i++) things[2]()
+                    // } else if (tech.isSporeWorm) {
+                    //     for (let i = 0, len = this.totalSpores; i < len; i++) things[1]()
+                    // } else {
+                    //     for (let i = 0; i < this.totalSpores; i++) things[0]()
+                    // }
                     if (tech.isStun) b.AoEStunEffect(this.position, 600, 270 + 120 * Math.random()); //AoEStunEffect(where, range, cycles = 120 + 60 * Math.random()) {
                 }
             }
@@ -6721,7 +6776,7 @@ const b = {
                                     }
                                 }
                             }
-                            b.harpoon(where, input.down ? closest.target : null, m.angle, harpoonSize, false)
+                            b.harpoon(where, input.down ? null : closest.target, m.angle, harpoonSize, false)
                         }
 
                         this.charge = 0;
