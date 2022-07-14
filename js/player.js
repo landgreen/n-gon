@@ -2020,23 +2020,23 @@ const m = {
         },
         {
             name: "molecular assembler",
-            description: "excess <strong class='color-f'>energy</strong> used to build <strong>drones</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong> per second",
-            //<strong>double</strong> your default <strong class='color-f'>energy</strong> regeneration
+            description: `excess <strong class='color-f'>energy</strong> used to build <strong>${simulation.molecularMode === 0 ? "spores" : simulation.molecularMode === 1 ? "missiles" : simulation.molecularMode === 2 ? "ice IX" : "drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong> per second`,
+            //   simulation.molecularMode: Math.floor(4 * Math.random()), //0 spores, 1 missile, 2 ice IX, 3 drones
             effect: () => {
                 m.fieldMeterColor = "#ff0"
                 m.eyeFillColor = m.fieldMeterColor
                 m.hold = function() {
                     if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 300 && (m.cycle % 2)) {
-                        if (tech.isSporeField) {
+                        if (simulation.molecularMode === 0) {
                             if (tech.isSporeFlea) {
-                                const drain = 0.15 + (Math.max(bullet.length, 130) - 130) * 0.02
+                                const drain = 0.18 + (Math.max(bullet.length, 130) - 130) * 0.02
                                 if (m.energy > drain) {
                                     m.energy -= drain
                                     const speed = m.crouch ? 20 + 8 * Math.random() : 10 + 3 * Math.random()
                                     b.flea({ x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) }, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) })
                                 }
                             } else if (tech.isSporeWorm) {
-                                const drain = 0.15 + (Math.max(bullet.length, 130) - 130) * 0.02
+                                const drain = 0.18 + (Math.max(bullet.length, 130) - 130) * 0.02
                                 if (m.energy > drain) {
                                     m.energy -= drain
                                     b.worm({ x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) })
@@ -2047,7 +2047,7 @@ const m = {
                                     });
                                 }
                             } else {
-                                const drain = 0.08 + (Math.max(bullet.length, 130) - 130) * 0.01
+                                const drain = 0.1 + (Math.max(bullet.length, 130) - 130) * 0.01
                                 for (let i = 0, len = Math.random() * 20; i < len; i++) {
                                     if (m.energy > drain) {
                                         m.energy -= drain
@@ -2057,25 +2057,27 @@ const m = {
                                     }
                                 }
                             }
-                        } else if (tech.isMissileField) {
-                            m.energy -= 0.3;
+                        } else if (simulation.molecularMode === 1) {
+                            m.energy -= 0.35;
                             b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
-                        } else if (tech.isIceField) {
-                            m.energy -= 0.04;
+                        } else if (simulation.molecularMode === 2) {
+                            m.energy -= 0.05;
                             b.iceIX(1)
-                        } else if (tech.isDroneRadioactive) {
-                            const drain = 0.8 + (Math.max(bullet.length, 50) - 50) * 0.01
-                            if (m.energy > drain) {
-                                m.energy -= drain
-                                b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 25)
-                            }
-                        } else {
-                            //every bullet above 100 adds 0.005 to the energy cost per drone
-                            //at 200 bullets the energy cost is 0.45 + 100*0.006 = 1.05
-                            const drain = (0.45 + (Math.max(bullet.length, 100) - 100) * 0.006) * tech.droneEnergyReduction
-                            if (m.energy > drain) {
-                                m.energy -= drain
-                                b.drone()
+                        } else if (simulation.molecularMode === 3) {
+                            if (tech.isDroneRadioactive) {
+                                const drain = 0.8 + (Math.max(bullet.length, 50) - 50) * 0.01
+                                if (m.energy > drain) {
+                                    m.energy -= drain
+                                    b.droneRadioactive({ x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5) }, 25)
+                                }
+                            } else {
+                                //every bullet above 100 adds 0.005 to the energy cost per drone
+                                //at 200 bullets the energy cost is 0.45 + 100*0.006 = 1.05
+                                const drain = (0.45 + (Math.max(bullet.length, 100) - 100) * 0.006) * tech.droneEnergyReduction
+                                if (m.energy > drain) {
+                                    m.energy -= drain
+                                    b.drone()
+                                }
                             }
                         }
                     }

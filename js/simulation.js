@@ -191,6 +191,7 @@ const simulation = {
     accelScale: null, //set in levels.setDifficulty
     CDScale: null, //set in levels.setDifficulty
     isNoPowerUps: false,
+    molecularMode: Math.floor(4 * Math.random()), //0 spores, 1 missile, 2 ice IX, 3 drones
     // dropFPS(cap = 40, time = 15) {
     //   simulation.fpsCap = cap
     //   simulation.fpsInterval = 1000 / simulation.fpsCap;

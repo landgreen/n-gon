@@ -1,10 +1,11 @@
 ******************************************************** NEXT PATCH **************************************************
 
+molecular fabricator defaults to random type on game load
+  spores, missile, ice IX, drones
 
-tech: colony - sporangium discharge 38% more stuff, but it has a chance to discharge random bullet type
-tech: annelids renamed -> K-selection - fleas and worms are bigger and do more damage
-tech: anti-shear topology now applies to grenades, shotgun so basically everything that matters
-  no longer a "gun tech"
+renamed fleas -> siphonaptera
+
+
 
 *********************************************************** TODO *****************************************************
 
@@ -13,8 +14,6 @@ fleas
     zero velocity while on short delay? try it?
   flea tech:
     add a delay to flea jumping also +dmg
-
-molecular fabricator defaults to random type on game load
 
 improve mob invincible graphic
   opacity oscillates from 100% to 0%?
