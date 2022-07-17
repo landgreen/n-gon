@@ -221,7 +221,7 @@ const tech = {
         }
     },
     hasExplosiveDamageCheck() {
-        return tech.haveGunCheck("missiles") || simulation.molecularMode === 1 || tech.missileBotCount > 0 || tech.isBoomBotUpgrade || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb)
+        return tech.haveGunCheck("missiles") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isBoomBotUpgrade || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb)
     },
     damageFromTech() {
         let dmg = 1 //m.fieldDamage
@@ -884,7 +884,6 @@ const tech = {
             name: "anti-shear topology",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Topology' class="link">anti-shear topology</a>`,
             description: "<strong>+30%</strong> projectile <strong>duration</strong>", //<br><em style = 'font-size: 83%'>drone spore worm flea missile foam wave neutron ice</em>",
-            isGunTech: true,
             maxCount: 3,
             count: 0,
             frequency: 1,
@@ -3087,26 +3086,11 @@ const tech = {
             },
             remove() {
                 tech.isDeterminism = false;
-                // if (this.count > 0) {
-                //     for (let i = 0; i < 5; i++) {
-                //         const numberRemoved = tech.removeTech()
-                //         console.log(numberRemoved)
-                //         if (numberRemoved === 0) { //if the player didn't remove a power up then remove 1 tech for the map
-                //             for (let j = powerUp.length - 1; j > -1; j--) {
-                //                 if (powerUp[j].name === "tech") {
-                //                     Matter.Composite.remove(engine.world, powerUp[j]);
-                //                     powerUp.splice(j, 1);
-                //                     break;
-                //                 }
-                //             }
-                //         }
-                //     }
-                // }
             }
         },
         {
             name: "superdeterminism",
-            description: `spawn <strong>5</strong> <strong class='color-m'>tech</strong><br>you have <strong>no cancel</strong> and ${powerUps.orb.research(1)}, no longer <strong>spawn</strong>`,
+            description: `spawn <strong>5</strong> <strong class='color-m'>tech</strong><br>you have <strong>no cancel</strong> and ${powerUps.orb.research(1)} no longer <strong>spawn</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 4,
@@ -3124,10 +3108,6 @@ const tech = {
             },
             remove() {
                 tech.isSuperDeterminism = false;
-                // tech.isSuperDeterminism = false;
-                // if (this.count) {
-                //     for (let i = 0; i < 5; i++) tech.removeTech()
-                // }
             }
         },
         {
@@ -3156,22 +3136,6 @@ const tech = {
                 }
             }
         },
-
-
-        //         for (let i = 0, len = tech.tech.length; i < len; i++) {
-        //             if (tech.tech[i].isFieldTech) tech.tech[i].frequency *= 3
-        //         }
-        //     },
-        //     remove() {
-        //         // powerUps.research.changeRerolls(-6)
-        //         // if (this.count > 1) {
-        //         //     for (let i = 0, len = tech.tech.length; i < len; i++) {
-        //         //         if (tech.tech[i].isFieldTech) tech.tech[i].frequency /= 3
-        //         //     }
-        //         // }
-
-
-
         {
             name: "paradigm shift",
             description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>16%</strong> chance to fail`,
@@ -3211,10 +3175,7 @@ const tech = {
         },
         {
             name: "technical debt", // overengineering
-            // description: `increase <strong class='color-d'>damage</strong> by <strong>300%</strong> minus <strong>10%</strong> for <strong class='color-m'>tech</strong> you have learned(${4 - 0.1 * tech.totalCount})`,
-            // description: `increase <strong class='color-d'>damage</strong> by <strong>300%</strong>, but reduce <strong class='color-d'>damage</strong><br>by <strong>10%</strong> for <strong class='color-m'>tech</strong> you have learned`,
             descriptionFunction() {
-                // return `increase <strong class='color-d'>damage</strong> by <strong>300%</strong> minus <strong>15%</strong><br>for each <strong class='color-m'>tech</strong> you have learned <em>(${Math.floor(100*(4 - 0.14 * tech.totalCount))-100}%)</em>`
                 return `<strong>+300%</strong> <strong class='color-d'>damage</strong> <strong>–15%</strong> <strong class='color-d'>damage</strong><br>for each <strong class='color-m'>tech</strong> you have learned <em>(${Math.floor(100*(Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount) ))-100}%)</em>`
             },
             maxCount: 1,
@@ -3777,7 +3738,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return ((tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.nailRecoil) || (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isFoamShot && !tech.isSporeWorm)) && !tech.isRivets && !tech.isIncendiary && !tech.isIceCrystals && !tech.isIceShot
+                return ((tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.nailRecoil) || (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea)) && !tech.isRivets && !tech.isIncendiary && !tech.isIceCrystals && !tech.isIceShot
             },
             requires: "nail gun, shotgun, not ice crystal, rivets, rotary cannon, or pneumatic, incendiary, nail-shot, rivets, foam-shot, worm-shot, ice-shot",
             effect() {
@@ -3816,7 +3777,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return ((tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate) || (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isFoamShot && !tech.isSporeWorm)) && !tech.isNeedles && !tech.isIceCrystals && !tech.isIceShot
+                return ((tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate) || (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea)) && !tech.isNeedles && !tech.isIceCrystals && !tech.isIceShot
             },
             requires: "nail gun, shotgun, not ice crystal, needles, or pneumatic actuator",
             effect() {
@@ -4140,7 +4101,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isFoamShot && !tech.isSporeWorm && !tech.isNeedles
+                return tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles
             },
             requires: "shotgun, not incendiary, rivets, foam-shot, worm-shot, ice-shot, needles",
             effect() {
@@ -4160,7 +4121,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isSporeWorm && !tech.isNeedles
+                return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles
             },
             requires: "shotgun, not incendiary, nail-shot, rivet, worm-shot, ice-shot, needle",
             effect() {
@@ -4180,7 +4141,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isNeedles
+                return tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIncendiary && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles
             },
             requires: "shotgun, not incendiary, nail-shot, rivet, foam-shot, worm-shot",
             effect() {
@@ -4199,7 +4160,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isIceCrystals || tech.isSporeFreeze || simulation.molecularMode === 2 || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1
+                return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1
             },
             requires: "a freeze effect",
             effect() {
@@ -4218,7 +4179,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isIceCrystals || tech.isSporeFreeze || simulation.molecularMode === 2 || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1
+                return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1
             },
             requires: "a freeze effect",
             effect() {
@@ -4237,7 +4198,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (tech.isIceCrystals || tech.isSporeFreeze || simulation.molecularMode === 2 || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
+                return (tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
             },
             requires: "a localized freeze effect, no other mob death tech",
             effect() {
@@ -4256,7 +4217,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return simulation.molecularMode === 2 || tech.relayIce || tech.isNeedleIce || tech.blockingIce || tech.iceIXOnDeath || tech.isIceShot
+                return (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || tech.blockingIce || tech.iceIXOnDeath || tech.isIceShot
             },
             requires: "ice IX",
             effect() {
@@ -4275,7 +4236,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isIceCrystals || tech.isSporeFreeze || simulation.molecularMode === 2 || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
+                return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
             },
             requires: "a localized freeze effect",
             effect() {
@@ -4294,7 +4255,7 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isNeedles) || (tech.haveGunCheck("super balls") && !tech.isFoamBall) || (tech.isRivets && !tech.isNailCrit) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
+                return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles) || (tech.haveGunCheck("super balls") && !tech.isFoamBall) || (tech.isRivets && !tech.isNailCrit) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
             },
             requires: "shotgun, super balls, rivets, drones, not irradiated drones, burst drones, polyurethane",
             effect() {
@@ -4577,7 +4538,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (tech.haveGunCheck("missiles") && tech.missileFireCD === 45) || simulation.molecularMode === 1 || tech.missileBotCount
+                return (tech.haveGunCheck("missiles") && tech.missileFireCD === 45) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.missileBotCount
             },
             requires: "missiles",
             effect() {
@@ -4596,9 +4557,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (tech.haveGunCheck("missiles") || simulation.molecularMode === 1) && tech.isMissileBig
+                return (tech.haveGunCheck("missiles") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1)) && tech.isMissileBig
             },
-            requires: "missiles, cruse missile",
+            requires: "missiles, cruise missile",
             effect() {
                 tech.isMissileBiggest = true
             },
@@ -4683,7 +4644,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.explosiveRadius === 1 && !tech.isSmallExplosion && !tech.isBlockExplode && !tech.fragments && (tech.haveGunCheck("missiles") || tech.missileBotCount || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || simulation.molecularMode === 1 || tech.isBoomBotUpgrade || tech.isTokamak)
+                return tech.explosiveRadius === 1 && !tech.isSmallExplosion && !tech.isBlockExplode && !tech.fragments && (tech.haveGunCheck("missiles") || tech.missileBotCount || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.isBoomBotUpgrade || tech.isTokamak)
             },
             requires: "an explosive damage source, not ammonium nitrate, nitroglycerin, chain reaction, fragmentation",
             effect: () => {
@@ -4702,7 +4663,7 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !tech.isExplodeRadio && ((tech.haveGunCheck("harpoon") && !tech.isFoamBall) || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || simulation.molecularMode === 1 || tech.missileBotCount || tech.isRivets || tech.blockDamage > 0.075)
+                return !tech.isExplodeRadio && ((tech.haveGunCheck("harpoon") && !tech.isFoamBall) || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.missileBotCount || tech.isRivets || tech.blockDamage > 0.075)
             },
             requires: "grenades, missiles, rivets, harpoon, or mass driver, not iridium-192, not polyurethane foam",
             effect() {
@@ -4798,7 +4759,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 3) && (tech.haveGunCheck("missiles") || simulation.molecularMode === 1 || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
+                return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 3) && (tech.haveGunCheck("missiles") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
             },
             requires: "an explosive damage source, not electric reactive armor",
             effect: () => {
@@ -4841,7 +4802,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("missiles") || tech.missileBotCount || tech.haveGunCheck("grenades") || simulation.molecularMode === 1
+                return tech.haveGunCheck("missiles") || tech.missileBotCount || tech.haveGunCheck("grenades")
             },
             requires: "missiles, grenades",
             effect() {
@@ -5154,7 +5115,7 @@ const tech = {
         },
         {
             name: "colony",
-            description: "<strong>+38%</strong> <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> discharge<br><strong>38%</strong> chance to discharge something different",
+            description: "<strong>+50%</strong> <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> discharge<br><strong>40%</strong> chance to discharge something different",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Colony_(biology)' class="link">colony</a>`,
             isGunTech: true,
             maxCount: 1,
@@ -5166,10 +5127,10 @@ const tech = {
             },
             requires: "spores",
             effect() {
-                tech.isSporeZooid = true
+                tech.isSporeColony = true
             },
             remove() {
-                tech.isSporeZooid = false
+                tech.isSporeColony = false
             }
         },
         {
@@ -5182,7 +5143,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || simulation.molecularMode === 0 || tech.isSporeWorm || tech.isSporeFlea
+                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0) || tech.isSporeWorm || tech.isSporeFlea
             },
             requires: "spores",
             effect() {
@@ -5202,7 +5163,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || simulation.molecularMode === 0 || tech.isSporeWorm || tech.isSporeFlea
+                return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0) || tech.isSporeWorm || tech.isSporeFlea
             },
             requires: "spores",
             effect() {
@@ -5222,7 +5183,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || simulation.molecularMode === 0) && !tech.isEnergyHealth || tech.isSporeWorm || tech.isSporeFlea
+                return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0)) && !tech.isEnergyHealth || tech.isSporeWorm || tech.isSporeFlea
             },
             requires: "spores, not mass-energy",
             effect() {
@@ -5234,14 +5195,14 @@ const tech = {
         },
         {
             name: "siphonaptera",
-            description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> hatch <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>", //<br><strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-m'>tech</strong> applies to <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>
+            description: "<strong>shotgun</strong> and <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> hatch <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>", //<br><strong class='color-p' style='letter-spacing: 2px;'>spore</strong> <strong class='color-m'>tech</strong> applies to <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || simulation.molecularMode === 0) && !tech.isSporeWorm
+                return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0) || (tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isFoamShot && !tech.isNeedles && !tech.isNailShot)) && !tech.isSporeWorm
             },
             requires: "spores, not worms",
             effect() {
@@ -5261,7 +5222,7 @@ const tech = {
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || simulation.molecularMode === 0 || (tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isFoamShot && !tech.isNeedles && !tech.isNailShot)) && !tech.isSporeFlea
+                return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0) || (tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isFoamShot && !tech.isNeedles && !tech.isNailShot)) && !tech.isSporeFlea
             },
             requires: "spores, not fleas",
             effect() {
@@ -5582,7 +5543,7 @@ const tech = {
         },
         {
             name: "uncertainty principle",
-            description: "<strong>foam</strong> and <strong>wave</strong> positions are erratic<br><strong>+47%</strong> <strong>foam</strong> and <strong>wave</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong>foam</strong> and <strong>wave</strong> positions are erratic<br><strong>+53%</strong> <strong>foam</strong> and <strong>wave</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5620,7 +5581,7 @@ const tech = {
         },
         {
             name: "aerogel",
-            description: "<strong>–50%</strong> <strong>foam</strong> duration and <strong>foam</strong> bubbles <strong>float</strong><br><strong>+150%</strong> <strong>foam</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong>–50%</strong> <strong>foam</strong> duration and <strong>foam</strong> bubbles <strong>float</strong><br><strong>+180%</strong> <strong>foam</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5641,7 +5602,7 @@ const tech = {
         },
         {
             name: "surface tension",
-            description: "<strong>+41%</strong> <strong>foam</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong>+43%</strong> <strong>foam</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -5652,7 +5613,7 @@ const tech = {
             },
             requires: "foam",
             effect() {
-                tech.foamDamage += 0.011 * 0.41
+                tech.foamDamage += 0.011 * 0.43
             },
             remove() {
                 tech.foamDamage = 0.011;
@@ -6048,7 +6009,7 @@ const tech = {
         },
         {
             name: "laser diode",
-            description: "<strong>+33%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency",
+            description: "<strong>+40%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6059,7 +6020,7 @@ const tech = {
             },
             requires: "laser, not free-electron",
             effect() {
-                tech.isLaserDiode = 0.66; //100%-37%
+                tech.isLaserDiode = 0.6; //100%-40%
                 tech.laserColor = "rgb(0, 11, 255)"
                 tech.laserColorAlpha = "rgba(0, 11, 255,0.5)"
             },
@@ -6071,7 +6032,7 @@ const tech = {
         },
         {
             name: "free-electron laser",
-            description: "<strong>+200%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong> <br><strong>–250%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency",
+            description: "<strong>+225%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong> <br><strong>–250%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6083,7 +6044,7 @@ const tech = {
             requires: "laser, not pulse, diodes",
             effect() {
                 tech.laserFieldDrain = 0.0063 //base is 0.002
-                tech.laserDamage = 0.48; //base is 0.16
+                tech.laserDamage = 0.52; //base is 0.16,  0.16 * (1 + 2.25)
                 tech.laserColor = "#83f"
                 tech.laserColorAlpha = "rgba(136, 51, 255,0.5)"
             },
@@ -7348,7 +7309,7 @@ const tech = {
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "wormhole") && (build.isExperimentSelection || powerUps.research.count > 3)
+                return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "wormhole") && (build.isExperimentSelection || powerUps.research.count > 6)
             },
             requires: "wormhole, time dilation, negative mass, pilot wave",
             effect() {
@@ -10388,5 +10349,5 @@ const tech = {
     isMicroTransactions: null,
     isLaserLens: null,
     laserCrit: null,
-    isSporeZooid: null,
+    isSporeColony: null,
 }

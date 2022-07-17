@@ -3040,17 +3040,14 @@ const b = {
             lockedOn: null,
             delay: 50,
             cd: simulation.cycle + 10,
-            dmg: 0,
+            dmg: radius * (tech.isMutualism ? 2.5 : 1),
             setDamage() { //dmg is set to zero after doing damage once, and set back to normal after jumping
                 this.dmg = radius * (tech.isMutualism ? 2.5 : 1) //damage done in addition to the damage from momentum  //spores do 7 dmg, worms do 18
             },
             beforeDmg(who) {
-                // this.endCycle = 0
                 Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), 10 + 10 * Math.random())); //push away from target
-
                 this.endCycle -= 180
                 this.cd = simulation.cycle + this.delay;
-                // this.collisionFilter.mask = cat.map
                 if (tech.isSporeFreeze) mobs.statusSlow(who, 90)
                 if (tech.isSpawnBulletsOnDeath && who.alive && who.isDropPowerUp) {
                     setTimeout(() => {
@@ -3075,29 +3072,8 @@ const b = {
             },
             gravity: 0.002 + 0.002 * tech.isSporeFollow,
             do() {
-                // if (true && this.lockedOn && this.cd < simulation.cycle) {  //blink towards mobs
-                //     //needs it's own cooldown variables
-                //     // this.cd = simulation.cycle + this.delay;
-
-                //     const sub = Vector.sub(this.lockedOn.position, this.position);
-                //     const distMag = Vector.magnitude(sub);
-                //     if (distMag < 500) {
-                //         const unit = Vector.normalise(sub)
-                //         Matter.Body.setVelocity(this, Vector.mult(unit, Math.max(20, this.speed * 1.5)));
-                //         ctx.beginPath();
-                //         ctx.moveTo(this.position.x, this.position.y);
-                //         Matter.Body.translate(this, Vector.mult(unit, Math.min(350, distMag - this.lockedOn.radius + 10)));
-                //         ctx.lineTo(this.position.x, this.position.y);
-                //         ctx.lineWidth = radius * 2;
-                //         ctx.strokeStyle = "rgba(0,0,0,0.5)";
-                //         ctx.stroke();
-                //     }
-                // }
-
                 this.force.y += this.gravity * this.mass
                 if (this.cd < simulation.cycle && (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length)) { //if on the ground and not on jump cooldown //
-                    // this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield
-
                     this.cd = simulation.cycle + this.delay;
                     this.lockedOn = null; //find a target
                     let closeDist = Infinity;
@@ -3160,7 +3136,6 @@ const b = {
     drone(where = { x: m.pos.x + 30 * Math.cos(m.angle) + 20 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 20 * (Math.random() - 0.5) }, speed = 1) {
         const me = bullet.length;
         const THRUST = 0.0015
-        // const FRICTION = tech.isFastDrones ? 0.008 : 0.0005
         const dir = m.angle + 0.4 * (Math.random() - 0.5);
         const RADIUS = (4.5 + 3 * Math.random())
         bullet[me] = Bodies.polygon(where.x, where.y, 8, RADIUS, {
@@ -3170,7 +3145,6 @@ const b = {
             frictionAir: 0,
             restitution: 1,
             density: 0.0005, //  0.001 is normal density
-            //total 0.24 + 0.3 average
             dmg: 0.34 + 0.12 * tech.isDroneTeleport + 0.15 * tech.isDroneFastLook, //damage done in addition to the damage from momentum
             lookFrequency: (tech.isDroneFastLook ? 20 : 70) + Math.floor(17 * Math.random()),
             endCycle: simulation.cycle + Math.floor((950 + 400 * Math.random()) * tech.isBulletsLastLonger * tech.droneCycleReduction) + 5 * RADIUS + Math.max(0, 150 - bullet.length),
@@ -3749,7 +3723,7 @@ const b = {
             inertia: Infinity,
             frictionAir: 0.003,
             dmg: 0, //damage on impact
-            damage: tech.foamDamage * (tech.isFastFoam ? 2.5 : 1) * (tech.isBulletTeleport ? 1.47 : 1), //damage done over time
+            damage: tech.foamDamage * (tech.isFastFoam ? 2.8 : 1) * (tech.isBulletTeleport ? 1.53 : 1), //damage done over time
             scale: 1 - 0.006 / tech.isBulletsLastLonger * (tech.isFastFoam ? 1.65 : 1),
             classType: "bullet",
             collisionFilter: {
@@ -3816,9 +3790,9 @@ const b = {
                         Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.target.velocity), this.target.position))
                     }
                     if (this.target.isBoss) {
-                        if (this.target.speed > 8) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.98))
+                        if (this.target.speed > 7.5) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.98))
                     } else {
-                        if (this.target.speed > 4) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.95))
+                        if (this.target.speed > 3.5) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.95))
                     }
 
                     Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9);
@@ -5606,10 +5580,18 @@ const b = {
                             }, dmg)
                         }
                     }
+                } else if (tech.isSporeFlea) {
+                    const where = { x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) }
+                    const number = 4 * (tech.isShotgunReversed ? 1.6 : 1)
+                    for (let i = 0; i < number; i++) {
+                        const angle = m.angle + 0.2 * (Math.random() - 0.5)
+                        const speed = (input.down ? 33 : 20) * (1 + 0.1 * Math.random())
+                        b.flea(where, { x: speed * Math.cos(angle), y: speed * Math.sin(angle) })
+                    }
                 } else if (tech.isSporeWorm) {
                     const where = { x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) }
                     const spread = (input.down ? 0.02 : 0.07)
-                    const number = 3 * (tech.isShotgunReversed ? 1.6 : 1) + Math.random()
+                    const number = 4 * (tech.isShotgunReversed ? 1.6 : 1)
                     let angle = m.angle - (number - 1) * spread * 0.5
                     for (let i = 0; i < number; i++) {
                         b.worm(where)
@@ -6349,7 +6331,7 @@ const b = {
                 bullet[me].maxRadius = 30;
                 bullet[me].restitution = 0.3;
                 bullet[me].minDmgSpeed = 0;
-                bullet[me].totalSpores = 8 + 2 * tech.isSporeFreeze + 3 * tech.isSporeZooid
+                bullet[me].totalSpores = 8 + 2 * tech.isSporeFreeze + 4 * tech.isSporeColony
                 bullet[me].stuck = function() {};
                 bullet[me].beforeDmg = function() {};
                 bullet[me].do = function() {
@@ -6481,7 +6463,7 @@ const b = {
                     ]
 
                     for (len = this.totalSpores; count < len; count++) {
-                        if (tech.isSporeZooid && Math.random() < 0.5) {
+                        if (tech.isSporeColony && Math.random() < 0.5) {
                             things[Math.floor(Math.random() * things.length)]()
                         } else if (tech.isSporeFlea) {
                             things[2]()

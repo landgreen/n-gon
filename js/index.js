@@ -358,7 +358,27 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                 document.getElementById("field-" + m.fieldMode).classList.remove("build-field-selected");
                 m.setField(index)
                 who.classList.add("build-field-selected");
+            } else if (m.fieldMode === 4) {
+                const i = 4 //update experiment text
+                simulation.molecularMode++
+                if (simulation.molecularMode > i - 1) simulation.molecularMode = 0
+                m.fieldUpgrades[i].description = m.fieldUpgrades[i].setDescription()
+                document.getElementById(`field-${i}`).innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div> ${m.fieldUpgrades[i].description}`
             }
+
+            // if (m.fieldMode === 4 && simulation.molecularMode < 3) {
+            //     simulation.molecularMode++
+            //     m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
+            // } else {
+            //     m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field
+
+            //     if (m.fieldMode === 4) {
+            //         simulation.molecularMode = 0
+            //         m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
+            //     }
+            // }
+
+
         } else if (type === "tech") {
             if (tech.tech[index].count < tech.tech[index].maxCount) {
                 // if (!tech.tech[index].isLore && !tech.tech[index].isNonRefundable && !who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
@@ -920,7 +940,16 @@ window.addEventListener("keydown", function(event) {
                     if (tech.isPauseSwitchField || simulation.testing) {
                         document.getElementById("pause-field").addEventListener("click", () => {
                             const energy = m.energy
-                            m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field
+                            if (m.fieldMode === 4 && simulation.molecularMode < 3) {
+                                simulation.molecularMode++
+                                m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
+                            } else {
+                                m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field
+                                if (m.fieldMode === 4) {
+                                    simulation.molecularMode = 0
+                                    m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
+                                }
+                            }
                             m.energy = energy
                             document.getElementById("pause-field").innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}`
                         });
@@ -1125,18 +1154,18 @@ document.body.addEventListener("mousemove", (e) => {
 document.body.addEventListener("mouseup", (e) => {
     // input.fire = false;
     // console.log(e)
-    if (e.which === 3) {
-        input.field = false;
-    } else {
+    if (e.button === 0) {
         input.fire = false;
+    } else if (e.button === 2) {
+        input.field = false;
     }
 });
 
 document.body.addEventListener("mousedown", (e) => {
-    if (e.which === 3) {
-        input.field = true;
-    } else {
+    if (e.button === 0) {
         input.fire = true;
+    } else if (e.button === 2) {
+        input.field = true;
     }
 });
 

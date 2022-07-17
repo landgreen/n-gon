@@ -1,13 +1,24 @@
 ******************************************************** NEXT PATCH **************************************************
 
-molecular fabricator defaults to random type on game load
-  spores, missile, ice IX, drones
+siphonaptera makes shotgun fire fleas
+colony 37% -> 50% more stuff in sporangium
+foam bullets have a +7% slow effect
+  about +7% damage for some foam tech
+laser diode 33% -> 40% less energy cost
+free-electron laser 200% -> 225% damage
 
-renamed fleas -> siphonaptera
+extra clicks in experiment and unified field theory pause now switches molecular fab types
 
-
+bug fixes
+  mob stun graphics is more consistent and less like mob invincibility
 
 *********************************************************** TODO *****************************************************
+
+tech ______ effect that last until you get hit
+  field or bots can check your health every cycle and see if it lower
+    if it's high update the health check value
+  effect:
+    +damage until getting hit for cloaking field
 
 fleas
   add very short (2 cycle) delay after each landing -> hop
@@ -15,10 +26,6 @@ fleas
   flea tech:
     add a delay to flea jumping also +dmg
 
-improve mob invincible graphic
-  opacity oscillates from 100% to 0%?
-  make different from stun
-  
 make plasma ball power up and block pick up still work when you have no no energy
   make a unique CD var for plasma ball?
 
@@ -37,7 +44,7 @@ testChamber2
       for cube
     button that activates a laser beam that hits a target and opens a door
       in order to enter the door you need to place the cube on the button to activate the laser
-        cube has to fly through a portal in oder to get to the button
+        cube has to fly through a portal in order to get to the button
       you can't use your body
   story:
     you pick up the cube early on and have to get it to a button
@@ -54,16 +61,6 @@ testChamber2
         or the cube is resting on a button, and when you take the cube off the button the laser fires
 
 mitosis: after needle,bullets or rivets hit a surface split off into two smaller less damaging versions that have their velocity reset -firerate
-
-tech: florescence
-Hitting a mob makes it emit lasers from its vertices
-  all laser but pulse?
-    should trigger a global cd so it can't occur more then once per cycle
-
-tech spawn bots that last until you get hit
-  bots can check you health every cycle and see if it lower
-    it it's high update the health check value
-  JUNK?
 
 after killing a mob go invulnerable for 1 second
   critical hit with laser, harpoon, nails, needle, rivet

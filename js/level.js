@@ -24,9 +24,9 @@ const level = {
             // powerUps.research.changeRerolls(100)
             // tech.tech[297].frequency = 100
             // b.guns[0].ammo = 10000
-            // m.setField("molecular assembler") //molecular assembler  time dilation
-            // b.giveGuns("spores")
-            // tech.giveTech("K-selection")
+            // m.setField("perfect diamagnetism") //molecular assembler  time dilation   perfect diamagnetism
+            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // tech.giveTech("siphonaptera")
             // tech.giveTech("fleas")
             // tech.giveTech("colony")
             // tech.giveTech("mycelium manufacturing")
@@ -36,7 +36,8 @@ const level = {
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
             // spawn.starter(1900, -500, 200)
-            // for (let i = 0; i < 10; ++i) spawn.hopBullet(1900, -500)
+            // spawn.powerUpBossBaby(1900, -500)
+            // for (let i = 0; i < 10; ++i) spawn.grower(1900, -500)
             // level.testing(); //not in rotation, used for testing
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");

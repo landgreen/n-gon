@@ -172,7 +172,6 @@ const mobs = {
                         ctx.lineTo(who.vertices[j].x, who.vertices[j].y);
                     }
                     ctx.lineTo(who.vertices[0].x, who.vertices[0].y);
-                    ctx.stroke();
                     ctx.fill();
                 },
                 endEffect() {

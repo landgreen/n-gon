@@ -191,7 +191,7 @@ const simulation = {
     accelScale: null, //set in levels.setDifficulty
     CDScale: null, //set in levels.setDifficulty
     isNoPowerUps: false,
-    molecularMode: Math.floor(4 * Math.random()), //0 spores, 1 missile, 2 ice IX, 3 drones
+    molecularMode: Math.floor(4 * Math.random()), //0 spores, 1 missile, 2 ice IX, 3 drones //randomize molecular assembler field type
     // dropFPS(cap = 40, time = 15) {
     //   simulation.fpsCap = cap
     //   simulation.fpsInterval = 1000 / simulation.fpsCap;
@@ -577,7 +577,6 @@ const simulation = {
     },
     firstRun: true,
     splashReturn() {
-
         document.getElementById("previous-seed").innerHTML = `previous seed: <span style="font-size:80%;">${Math.initialSeed}</span><br>`
         document.getElementById("seed").value = Math.initialSeed = Math.seed //randomize initial seed
 
@@ -1425,15 +1424,16 @@ const simulation = {
                 const dx = Math.max(25, round(simulation.mouseInGame.x) - x)
                 const dy = Math.max(25, round(simulation.mouseInGame.y) - y)
 
-                if (e.which === 2) {
+                if (e.button === 2) {
                     if (level.isProcedural) {
                         simulation.outputMapString(`spawn.randomMob(x+${x}, y+${y}, 0);`);
                     } else {
                         simulation.outputMapString(`spawn.randomMob(${x}, ${y}, 0);`);
                     }
-
+                } else if (e.button === 4) {
+                    simulation.outputMapString(`${Math.floor(simulation.constructMouseDownPosition.x)}, ${Math.floor(simulation.constructMouseDownPosition.y)}`);
                 } else if (simulation.mouseInGame.x > simulation.constructMouseDownPosition.x && simulation.mouseInGame.y > simulation.constructMouseDownPosition.y) { //make sure that the width and height are positive
-                    if (e.which === 1) { //add map
+                    if (e.button === 1) { //add map
                         if (level.isProcedural) {
                             simulation.outputMapString(`spawn.mapRect(x+${x}, y+${y}, ${dx}, ${dy});`);
                         } else {
@@ -1449,7 +1449,7 @@ const simulation = {
                         Composite.add(engine.world, map[len]); //add to world
                         simulation.draw.setPaths() //update map graphics
 
-                    } else if (e.which === 3) { //add body
+                    } else if (e.button === 3) { //add body
                         if (level.isProcedural) {
                             simulation.outputMapString(`spawn.bodyRect(x+${x}, y+${y}, ${dx}, ${dy});`);
                         } else {

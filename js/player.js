@@ -2020,8 +2020,11 @@ const m = {
         },
         {
             name: "molecular assembler",
-            description: `excess <strong class='color-f'>energy</strong> used to build <strong>${simulation.molecularMode === 0 ? "spores" : simulation.molecularMode === 1 ? "missiles" : simulation.molecularMode === 2 ? "ice IX" : "drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong> per second`,
+            description: `excess <strong class='color-f'>energy</strong> used to build ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong> per second`,
             //   simulation.molecularMode: Math.floor(4 * Math.random()), //0 spores, 1 missile, 2 ice IX, 3 drones
+            setDescription() {
+                return `excess <strong class='color-f'>energy</strong> used to build ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong> per second`
+            },
             effect: () => {
                 m.fieldMeterColor = "#ff0"
                 m.eyeFillColor = m.fieldMeterColor
