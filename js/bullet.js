@@ -3040,7 +3040,7 @@ const b = {
             lockedOn: null,
             delay: 50,
             cd: simulation.cycle + 10,
-            dmg: radius * (tech.isMutualism ? 2.5 : 1),
+            dmg: 0, //radius * (tech.isMutualism ? 2.5 : 1),
             setDamage() { //dmg is set to zero after doing damage once, and set back to normal after jumping
                 this.dmg = radius * (tech.isMutualism ? 2.5 : 1) //damage done in addition to the damage from momentum  //spores do 7 dmg, worms do 18
             },
@@ -5587,6 +5587,7 @@ const b = {
                         const angle = m.angle + 0.2 * (Math.random() - 0.5)
                         const speed = (input.down ? 33 : 20) * (1 + 0.1 * Math.random())
                         b.flea(where, { x: speed * Math.cos(angle), y: speed * Math.sin(angle) })
+                        bullet[bullet.length - 1].setDamage()
                     }
                 } else if (tech.isSporeWorm) {
                     const where = { x: m.pos.x + 35 * Math.cos(m.angle), y: m.pos.y + 35 * Math.sin(m.angle) }

@@ -36,7 +36,7 @@ const level = {
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
             // spawn.starter(1900, -500, 200)
-            // spawn.powerUpBossBaby(1900, -500)
+            // spawn.laserTargetingBoss(1900, -500)
             // for (let i = 0; i < 10; ++i) spawn.grower(1900, -500)
             // level.testing(); //not in rotation, used for testing
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
@@ -2902,11 +2902,11 @@ const level = {
                             for (let i = 0; i < 9; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1700, "ammo")
                             for (let i = 0; i < 3; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1700, "heal");
                             const scale = Math.pow(simulation.difficulty, 0.7) //hard around 30, why around 54
-                            if (Math.random() < 0.07 && simulation.difficulty > 30) {
-                                for (let i = 0, len = scale * 0.25 / 5; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
-                                for (let i = 0, len = scale * 0.1 / 5; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false);
-                                for (let i = 0, len = scale * 0.15 / 5; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false)
-                                for (let i = 0, len = scale * 0.26 / 5; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false);
+                            if (Math.random() < 0.07 && simulation.difficulty > 35) {
+                                for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
+                                for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false);
+                                for (let i = 0, len = scale * 0.15 / 6; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false)
+                                for (let i = 0, len = scale * 0.26 / 6; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false);
                             } else {
                                 if (Math.random() < 0.25) {
                                     for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
@@ -2982,11 +2982,11 @@ const level = {
                             for (let i = 0; i < 9; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo")
                             for (let i = 0; i < 3; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "heal");
                             const scale = Math.pow(simulation.difficulty, 0.7) //hard around 30, why around 54
-                            if (Math.random() < 0.07 && simulation.difficulty > 30) {
-                                for (let i = 0, len = scale * 0.25 / 5; i < len; ++i) spawn.timeBoss(1487 + 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
-                                for (let i = 0, len = scale * 0.1 / 5; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
-                                for (let i = 0, len = scale * 0.15 / 5; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false)
-                                for (let i = 0, len = scale * 0.26 / 5; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false);
+                            if (Math.random() < 0.07 && simulation.difficulty > 35) {
+                                for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.timeBoss(1487 + 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
+                                for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
+                                for (let i = 0, len = scale * 0.15 / 6; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false)
+                                for (let i = 0, len = scale * 0.26 / 6; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false);
                             } else {
                                 if (Math.random() < 0.25) {
                                     for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.timeBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 

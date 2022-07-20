@@ -234,25 +234,25 @@ const tech = {
         if (tech.isEnergyLoss) dmg *= 1.55
         if (tech.OccamDamage) dmg *= tech.OccamDamage
         if (tech.isTechDebt) dmg *= Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount)
-        if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.harmReduction()
         if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
         if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
         if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
-        if (tech.isLowEnergyDamage) dmg *= 1 + 0.7 * Math.max(0, 1 - m.energy)
         if (tech.isDamageForGuns) dmg *= 1 + 0.13 * b.inventory.length
         if (tech.isLowHealthDmg) dmg *= 1 + Math.max(0, 1 - m.health) * 0.5
         if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
+        if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (tech.isAcidDmg && m.health > 1) dmg *= 1.35;
+        if (tech.isRerollDamage) dmg *= 1 + 0.038 * powerUps.research.count
+        if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
+        if (tech.isLowEnergyDamage) dmg *= 1 + 0.7 * Math.max(0, 1 - m.energy)
         if (tech.isEnergyDamage) dmg *= 1 + m.energy * 0.125;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
-        if (tech.isRerollDamage) dmg *= 1 + 0.038 * powerUps.research.count
-        if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
-        if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.6
         if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= tech.sneakAttackDmg
+        if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.harmReduction()
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
@@ -4255,7 +4255,7 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles) || (tech.haveGunCheck("super balls") && !tech.isFoamBall) || (tech.isRivets && !tech.isNailCrit) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
+                return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles) || (tech.haveGunCheck("super balls") && !tech.isFoamBall) || (tech.isRivets && !tech.isNailCrit) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 3) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
             },
             requires: "shotgun, super balls, rivets, drones, not irradiated drones, burst drones, polyurethane",
             effect() {

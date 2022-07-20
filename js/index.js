@@ -152,6 +152,12 @@ window.addEventListener('load', () => {
             }
             if (property === "level") document.getElementById("starting-level").value = Math.max(Number(set[property]) - 1, 0)
             if (property === "noPower") document.getElementById("no-power-ups").checked = Number(set[property])
+            if (property === "molMode") {
+                simulation.molecularMode = Number(set[property])
+                const i = 4 //update experiment text
+                m.fieldUpgrades[i].description = m.fieldUpgrades[i].setDescription()
+                document.getElementById(`field-${i}`).innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div> ${m.fieldUpgrades[i].description}`
+            }
             // if (property === "seed") {
             //     document.getElementById("seed").placeholder = Math.initialSeed = String(set[property])
             //     Math.seed = Math.abs(Math.hash(Math.initialSeed))
@@ -590,6 +596,13 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                 }
             }
         }
+        url += `&molMode=${encodeURIComponent(simulation.molecularMode)}`
+        // if (property === "molMode") {
+        //     simulation.molecularMode = Number(set[property])
+        //     m.fieldUpgrades[i].description = m.fieldUpgrades[i].setDescription()
+        //     document.getElementById(`field-${i}`).innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div> ${m.fieldUpgrades[i].description}`
+        // }
+
         url += `&field=${encodeURIComponent(m.fieldUpgrades[m.fieldMode].name.trim())}`
         url += `&difficulty=${simulation.difficultyMode}`
         if (isCustom) {

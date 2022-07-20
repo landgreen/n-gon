@@ -1,18 +1,34 @@
 ******************************************************** NEXT PATCH **************************************************
 
-siphonaptera makes shotgun fire fleas
-colony 37% -> 50% more stuff in sporangium
-foam bullets have a +7% slow effect
-  about +7% damage for some foam tech
-laser diode 33% -> 40% less energy cost
-free-electron laser 200% -> 225% damage
+finalBoss pushes away things between every phase
+  it's much smaller in black hole phase and very hard to hit
 
-extra clicks in experiment and unified field theory pause now switches molecular fab types
+timeBoss, shooterBoss, orbitalBoss, laserTargetingBoss have "orbital armor"
+  orbitals have less health and move a bit slower
+  orbitalBoss is slower and has more health
+blinkBoss does much less collision damage
+laserTargetingBoss does 2.5x damage but it's laser is only on 1/2 the time
 
-bug fixes
-  mob stun graphics is more consistent and less like mob invincibility
+URL builds share what mode molecular assembler is on
 
 *********************************************************** TODO *****************************************************
+
+make final Boss hidden for the mob spawning phase?
+
+tech for molecular assembler that generates research?
+
+show damage and defense in game?
+  defense and damage without difficulty included?
+  update every: 15 cycles?, 30?, 10?
+  make a m.damage variable that stores the player damage for all slow changing tech
+    update m.damage variable when:
+      new tech
+      flipFlip triggers
+      duplicationChance changes
+      add or remove guns
+      player health changes
+      research changes
+      bot count changes
 
 tech ______ effect that last until you get hit
   field or bots can check your health every cycle and see if it lower
@@ -20,17 +36,11 @@ tech ______ effect that last until you get hit
   effect:
     +damage until getting hit for cloaking field
 
-fleas
-  add very short (2 cycle) delay after each landing -> hop
-    zero velocity while on short delay? try it?
-  flea tech:
-    add a delay to flea jumping also +dmg
-
 make plasma ball power up and block pick up still work when you have no no energy
   make a unique CD var for plasma ball?
 
-wormhole tech: entropic gravity - gain defense for each research
-  requires wormhole or negative mass field or pilot wave
+tech: entropic gravity - gain defense for each research
+  requires wormhole or pilot wave or negative mass field?
 
 testChamber2
   mechanics
