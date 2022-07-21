@@ -251,7 +251,8 @@ const tech = {
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.6
-        if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= tech.sneakAttackDmg
+        // if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= tech.sneakAttackDmg
+        if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.3 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= tech.sneakAttackDmg
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.harmReduction()
         return dmg * tech.slowFire * tech.aimDamage
     },
@@ -4078,8 +4079,8 @@ const tech = {
             isGunTech: true,
             maxCount: 1,
             count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
+            frequency: 1,
+            frequencyDefault: 1,
             allowed() {
                 return (tech.haveGunCheck("shotgun")) && !tech.isShotgunRecoil
             },
@@ -5864,42 +5865,44 @@ const tech = {
         },
         {
             name: "smelting",
-            // description: `forge <strong>3</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot`,
-            descriptionFunction() { return `forge <strong>${(tech.isRailGun ? 2 : 1) * (4 + 2 * this.count)}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot` },
-            // descriptionFunction() { return `forge <strong>${tech.isRailGun? 10: 2}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot` },
+            descriptionFunction() { return `forge <strong>${this.removeAmmo()}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot` },
             isGunTech: true,
             maxCount: 9,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
+            ammoRemoved: 0,
+            removeAmmo() {
+                return (tech.isRailGun ? 5 : 1) * (2 + 2 * this.count)
+            },
             allowed() {
-                return tech.haveGunCheck("harpoon") && b.returnGunAmmo('harpoon') >= (tech.isRailGun ? 5 : 3) * (1 + this.count)
+                return tech.haveGunCheck("harpoon") && b.returnGunAmmo('harpoon') >= this.removeAmmo()
             },
             requires: "harpoon",
             effect() {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "harpoon") {
-                        b.guns[i].ammo -= (tech.isRailGun ? 5 : 2) * (1 + this.count)
-                        // console.log(3 + this.count * 3)
+                        const removeAmmo = this.removeAmmo()
+                        this.ammoRemoved += removeAmmo
+                        b.guns[i].ammo -= removeAmmo
                         if (b.guns[i].ammo < 0) b.guns[i].ammo = 0
                         simulation.updateGunHUD();
                         tech.extraHarpoons++;
                         break
                     }
                 }
-                // this.description = `forge <strong>${3+(this.count+1)*3}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot`
             },
             remove() {
                 if (tech.extraHarpoons) {
-                    // this.description = `forge <strong>${2}</strong> <strong class='color-ammo'>ammo</strong> into a new harpoon<br>fire <strong>+1</strong> <strong>harpoon</strong> with each shot`
                     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         if (b.guns[i].name === "harpoon") {
-                            b.guns[i].ammo += (tech.isRailGun ? 5 : 3)
+                            b.guns[i].ammo += this.ammoRemoved
                             simulation.updateGunHUD();
                             break
                         }
                     }
                 }
+                this.ammoRemoved = 0
                 tech.extraHarpoons = 0;
             }
         },
@@ -7113,8 +7116,7 @@ const tech = {
         {
             name: "quantum eraser",
             descriptionFunction() { return `<span style = 'font-size:90%;'>for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br><strong>kill</strong> a mob as they spawn at <strong>+${100-1.6*simulation.difficultyMode**2}%</strong> <strong class='color-dup'>duplication</strong></span>` },
-
-            description: `<span style = 'font-size:90%;'>for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br><strong>kill</strong> a mob as they spawn at <strong>100%</strong> <strong class='color-dup'>duplication</strong></span>`,
+            // description: `<span style = 'font-size:90%;'>for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br><strong>kill</strong> a mob as they spawn at <strong>100%</strong> <strong class='color-dup'>duplication</strong></span>`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7137,7 +7139,8 @@ const tech = {
         },
         {
             name: "symbiosis",
-            description: `after a <strong>boss</strong> <strong>dies</strong> spawn a <strong class='color-m'>tech</strong>, ${powerUps.orb.ammo(1)}, ${powerUps.orb.research(1)}, and ${powerUps.orb.heal(1)}<br>after a <strong>mob</strong> <strong>dies</strong> <strong>–0.5</strong> maximum <strong class='color-h'>health</strong>`,
+            descriptionFunction() { return `after a <strong>boss</strong> <strong>dies</strong> spawn a <strong class='color-m'>tech</strong>, ${powerUps.orb.ammo(1)}, ${powerUps.orb.research(1)}, and ${powerUps.orb.heal(1)}<br>after a <strong>mob</strong> <strong>dies</strong> <strong>–0.5</strong> maximum ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"}` },
+            // description: `after a <strong>boss</strong> <strong>dies</strong> spawn a <strong class='color-m'>tech</strong>, ${powerUps.orb.ammo(1)}, ${powerUps.orb.research(1)}, and ${powerUps.orb.heal(1)}<br>after a <strong>mob</strong> <strong>dies</strong> <strong>–0.5</strong> maximum <strong class='color-h'>health</strong>`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7198,7 +7201,7 @@ const tech = {
         },
         {
             name: "ambush",
-            description: "metamaterial cloaking field <strong class='color-d'>damage</strong> effect<br>is increased from <span style = 'text-decoration: line-through;'>333%</span> to <strong>666%</strong>",
+            description: "metamaterial cloaking field <strong class='color-d'>damage</strong> effect<br>is increased from <span style = 'text-decoration: line-through;'>333%</span> to <strong>555%</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7209,10 +7212,10 @@ const tech = {
             },
             requires: "metamaterial cloaking",
             effect() {
-                tech.sneakAttackDmg = 7.66
+                tech.sneakAttackDmg = 6.55 //555% + 100%
             },
             remove() {
-                tech.sneakAttackDmg = 4.33
+                tech.sneakAttackDmg = 4.33 //333% + 100%
             }
         },
         {

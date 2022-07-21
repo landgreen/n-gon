@@ -813,14 +813,14 @@ const b = {
                         const color = `hsla(${360*Math.random()},100%,66%,0.6)`
                         for (let i = 0, len = 6; i < len; i++) {
                             const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * i / len)
-                            b.explosion(Vector.add(where, Vector.mult(unit, 1.2 * range)), size * 0.6, color); //makes bullet do explosive damage at end
+                            b.explosion(Vector.add(where, Vector.mult(unit, 1.1 * range)), size * 0.6, color); //makes bullet do explosive damage at end
                         }
                     }
                     if (count === 16) {
                         const color = `hsla(${360*Math.random()},100%,66%,0.6)`
                         for (let i = 0, len = 10; i < len; i++) {
                             const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * i / len)
-                            b.explosion(Vector.add(where, Vector.mult(unit, 1.75 * range)), size * 0.45, color); //makes bullet do explosive damage at end
+                            b.explosion(Vector.add(where, Vector.mult(unit, 1.4 * range)), size * 0.45, color); //makes bullet do explosive damage at end
                         }
                     }
                     count++
@@ -1792,7 +1792,6 @@ const b = {
             returnToPlayer() {
                 if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius) { //near player
                     this.endCycle = 0;
-
                     if (m.energy < 0.05) {
                         m.fireCDcycle = m.cycle + 120; //fire cooldown
                     } else if (m.cycle + 25 * b.fireCDscale < m.fireCDcycle) {
@@ -1854,23 +1853,20 @@ const b = {
                             this.do = this.returnToPlayer
                             if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
                             Matter.Sleeping.set(this, false)
-                            this.collisionFilter.category = 0
-                            this.collisionFilter.mask = 0
                             this.endCycle = simulation.cycle + 60
-                            //recoil on jerking line
-                            const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.00015 : 0.0003))
+                            const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.00015 : 0.0003)) //recoil on jerking line
                             player.force.x += momentum.x
                             player.force.y += momentum.y
+                            requestAnimationFrame(() => { //delay this for 1 cycle to get the proper hit graphics
+                                this.collisionFilter.category = 0
+                                this.collisionFilter.mask = 0
+                            });
                         } else {
                             this.grabPowerUp()
                         }
                     }
-
                     if (target) { //rotate towards the target
-                        const face = {
-                            x: Math.cos(this.angle),
-                            y: Math.sin(this.angle)
-                        };
+                        const face = { x: Math.cos(this.angle), y: Math.sin(this.angle) };
                         const vectorGoal = Vector.normalise(Vector.sub(this.position, target.position));
                         if (Vector.cross(vectorGoal, face) > 0) {
                             Matter.Body.rotate(this, this.turnRate);
@@ -1878,75 +1874,9 @@ const b = {
                             Matter.Body.rotate(this, -this.turnRate);
                         }
                     }
-                    //grappling hook
-                    // if (input.fire && !input.down && Matter.Query.collides(this, map).length) {
-                    //     const pull = Vector.mult(Vector.normalise(Vector.sub(this.position, m.pos)), 0.1)
-                    //     player.force.x += pull.x
-                    //     player.force.y += pull.y - player.mass * 0.02
-                    //     Matter.Body.setStatic(this, true)
-                    //     this.endCycle = simulation.cycle + 5
-                    //     this.dropCaughtPowerUp()
-                    //     this.do = () => {
-                    //         const sub = Vector.sub(this.position, m.pos)
-                    //         const dist = Vector.magnitude(sub)
-                    //         if (input.fire) {
-                    //             m.fireCDcycle = m.cycle + 30; // cool down if out of energy
-                    //             this.endCycle = simulation.cycle + 10
-                    //             const pull = Vector.mult(Vector.normalise(sub), 0.001 * Math.min(Math.max(1, dist), 100))
-                    //             player.force.x += pull.x
-                    //             player.force.y += pull.y
-                    //             Matter.Body.setVelocity(player, { x: player.velocity.x * 0.8, y: player.velocity.y * 0.8 });
-                    //         } else { //if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius + 200)
-                    //             //automatically get ammo back
-                    //             this.endCycle = 0;
-                    //             if (m.cycle + 15 * b.fireCDscale < m.fireCDcycle) m.fireCDcycle = m.cycle + 15 * b.fireCDscale //lower cd to 15 if it is above 15
-                    //             // refund ammo
-                    //             for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    //                 if (b.guns[i].name === "harpoon") {
-                    //                     b.guns[i].ammo++;
-                    //                     simulation.updateGunHUD();
-                    //                     break;
-                    //                 }
-                    //             }
-                    //         }
-                    //         if (dist > returnRadius) this.draw();
-                    //     }
-                    // }
                     this.force.x += this.thrustMag * this.mass * Math.cos(this.angle);
                     this.force.y += this.thrustMag * this.mass * Math.sin(this.angle);
                 }
-                // else if (!(this.cycle % 2)) { //look for a target if you don't have one
-                //     simulation.drawList.push({ //add dmg to draw queue
-                //         x: this.position.x,
-                //         y: this.position.y,
-                //         radius: 10,
-                //         color: simulation.mobDmgColor,
-                //         time: simulation.drawTime
-                //     });
-                //     let closest = {
-                //         distance: 2000,
-                //         target: null
-                //     }
-                //     const dir = Vector.normalise(this.velocity) //make a vector for direction of length 1
-                //     for (let i = 0, len = mob.length; i < len; ++i) {
-                //         if (
-                //             mob[i].alive && !mob[i].isBadTarget &&
-                //             Matter.Query.ray(map, this.position, mob[i].position).length === 0 && //check for map in Line of sight
-                //             Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, this.position))) > 0.55 //the dot product of diff and dir will return how much over lap between the vectors
-                //         ) {
-                //             const dist = Vector.magnitude(Vector.sub(this.position, mob[i].position))
-                //             if (dist < closest.distance) {
-                //                 closest.distance = dist
-                //                 closest.target = mob[i]
-                //             }
-                //         }
-                //     }
-                //     if (closest.target) {
-                //         target = closest.target
-                //         this.turnRate = 0.05
-                //         this.frictionAir = 0.8
-                //     }
-                // }
                 this.draw()
             },
         });
@@ -5131,8 +5061,8 @@ const b = {
             name: "nail gun", // 0
             description: "use compressed air to fire a stream of <strong>nails</strong><br><strong><em>delay</em></strong> after firing <strong>decreases</strong> as you shoot",
             ammo: 0,
-            ammoPack: 50,
-            defaultAmmoPack: 50,
+            ammoPack: 60,
+            defaultAmmoPack: 60,
             recordedAmmo: 0,
             have: false,
             nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -6854,7 +6784,7 @@ const b = {
                 }
                 //look for closest mob in player's LoS
                 const harpoonSize = (tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1) //* (input.down ? 0.7 : 1)
-                const totalCycles = 6 * (tech.isFilament ? 1 + 0.012 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
+                const totalCycles = 5 * (tech.isFilament ? 1 + 0.012 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
 
                 if (tech.extraHarpoons && !input.down) { //multiple harpoons
                     const SPREAD = 0.1
@@ -6913,7 +6843,7 @@ const b = {
                             }
                         }
                     }
-                    if (input.down) {
+                    if (input.down && m.onGround) {
                         b.harpoon(where, null, m.angle, harpoonSize, true, 1.5 * totalCycles, (input.down && tech.crouchAmmoCount && (tech.crouchAmmoCount - 1) % 2) ? false : true)
                     } else {
                         b.harpoon(where, closest.target, m.angle, harpoonSize, true, totalCycles)
@@ -6925,226 +6855,6 @@ const b = {
                 player.force.y -= recoil.y
                 tech.harpoonDensity = 0.004 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
             },
-            // railGun2() {
-            //     const where = {
-            //         x: m.pos.x + 30 * Math.cos(m.angle),
-            //         y: m.pos.y + 30 * Math.sin(m.angle)
-            //     }
-            //     const closest = {
-            //         distance: 10000,
-            //         target: null
-            //     }
-            //     //look for closest mob in player's LoS
-            //     const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
-            //     const harpoonSize = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
-            //     const totalCycles = 7 * (tech.isFilament ? 1 + 0.01 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
-
-            //     function pushAway(range) { //push away blocks when firing
-            //         for (let i = 0, len = mob.length; i < len; ++i) {
-            //             const SUB = Vector.sub(mob[i].position, m.pos)
-            //             const DISTANCE = Vector.magnitude(SUB)
-            //             if (DISTANCE < range) {
-            //                 const DEPTH = Math.min(range - DISTANCE, 1500)
-            //                 const FORCE = Vector.mult(Vector.normalise(SUB), 0.001 * Math.sqrt(DEPTH) * mob[i].mass)
-            //                 mob[i].force.x += FORCE.x;
-            //                 mob[i].force.y += FORCE.y;
-            //             }
-            //         }
-            //         for (let i = 0, len = body.length; i < len; ++i) {
-            //             const SUB = Vector.sub(body[i].position, m.pos)
-            //             const DISTANCE = Vector.magnitude(SUB)
-            //             if (DISTANCE < range) {
-            //                 const DEPTH = Math.min(range - DISTANCE, 500)
-            //                 const FORCE = Vector.mult(Vector.normalise(SUB), 0.002 * Math.sqrt(DEPTH) * body[i].mass)
-            //                 body[i].force.x += FORCE.x;
-            //                 body[i].force.y += FORCE.y - body[i].mass * simulation.g * 1.5; //kick up a bit to give them some arc
-            //             }
-            //         }
-            //     }
-
-            //     const me = bullet.length;
-            //     bullet[me] = Bodies.rectangle(0, 0, 0.015, 0.0015, { //start as a small shape that can't even be seen
-            //         vertexGoal: [{ x: -40 * harpoonSize, y: 2 * harpoonSize, index: 0, isInternal: false }, { x: -40 * harpoonSize, y: -2 * harpoonSize, index: 1, isInternal: false }, { x: 50 * harpoonSize, y: -3 * harpoonSize, index: 3, isInternal: false }, { x: 30 * harpoonSize, y: 2 * harpoonSize, index: 4, isInternal: false }],
-            //         density: 0.03, //0.001 is normal
-            //         restitution: 0,
-            //         frictionAir: 0,
-            //         dmg: 0, //damage done in addition to the damage from momentum
-            //         classType: "bullet",
-            //         collisionFilter: {
-            //             category: 0,
-            //             mask: cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
-            //         },
-            //         minDmgSpeed: 5,
-            //         beforeDmg(who) {
-            //             if (tech.isShieldPierce && who.isShielded) { //disable shields
-            //                 who.isShielded = false
-            //                 requestAnimationFrame(() => { who.isShielded = true });
-            //             }
-            //             if (who.shield && !tech.isShieldPierce) {
-            //                 for (let i = 0, len = mob.length; i < len; i++) {
-            //                     if (mob[i].id === who.shieldTargetID) { //apply some knock back to shield mob before shield breaks
-            //                         Matter.Body.setVelocity(mob[i], Vector.mult(Vector.normalise(this.velocity), 10));
-            //                         break
-            //                     }
-            //                 }
-            //                 Matter.Body.setVelocity(this, { x: -0.4 * this.velocity.x, y: -0.4 * this.velocity.y });
-            //             } else {
-            //                 if (tech.fragments && this.speed > 10) {
-            //                     b.targetedNail(this.position, tech.fragments * 13)
-            //                     this.endCycle = 0 //triggers despawn
-            //                 }
-            //             }
-            //         },
-            //         onEnd() {}
-            //     });
-            //     m.fireCDcycle = Infinity; // cool down
-            //     Composite.add(engine.world, bullet[me]); //add bullet to world
-            //     bullet[me].endCycle = Infinity
-            //     bullet[me].charge = 0;
-            //     bullet[me].do = function() {
-            //         if ((m.energy < 0.005 && !tech.isRailEnergyGain) || (!input.down && !tech.isRailGun)) {
-            //             m.energy += 0.05 + this.charge * 0.2
-            //             m.fireCDcycle = m.cycle + 120; // cool down if out of energy
-            //             this.endCycle = 0;
-            //             b.refundAmmo()
-            //             return
-            //         }
-
-            //         if ((!input.fire && this.charge > 0.6)) { //fire on mouse release or on low energy
-            //             Matter.Body.setVertices(this, this.vertexGoal) //take on harpoon shape
-            //             m.fireCDcycle = m.cycle + 2; // set fire cool down
-            //             //normal bullet behavior occurs after firing, overwrites this function
-            //             this.endCycle = simulation.cycle + 140
-            //             this.collisionFilter.category = cat.bullet
-            //             Matter.Body.setPosition(this, { x: m.pos.x, y: m.pos.y })
-            //             Matter.Body.setAngle(this, m.angle)
-            //             const speed = 120
-            //             Matter.Body.setVelocity(this, {
-            //                 x: m.Vx / 2 + speed * this.charge * Math.cos(m.angle),
-            //                 y: m.Vy / 2 + speed * this.charge * Math.sin(m.angle)
-            //             });
-            //             this.do = function() {
-            //                 this.force.y += this.mass * 0.0003 / this.charge; // low gravity that scales with charge
-            //             }
-            //             const KNOCK = ((input.down) ? 0.1 : 0.5) * this.charge * this.charge
-            //             player.force.x -= KNOCK * Math.cos(m.angle)
-            //             player.force.y -= KNOCK * Math.sin(m.angle) * 0.35 //reduce knock back in vertical direction to stop super jumps
-            //             pushAway(1200 * this.charge)
-            //         } else { // charging on mouse down
-            //             if (tech.isFireMoveLock) {
-            //                 Matter.Body.setVelocity(player, {
-            //                     x: 0,
-            //                     y: -55 * player.mass * simulation.g //undo gravity before it is added
-            //                 });
-            //                 player.force.x = 0
-            //                 player.force.y = 0
-            //             }
-
-            //             m.fireCDcycle = Infinity //can't fire until mouse is released
-            //             const previousCharge = this.charge
-            //             //small b.fireCDscale = faster shots, b.fireCDscale=1 = normal shot,  big b.fireCDscale = slower chot
-            //             let smoothRate = tech.isCapacitor ? 0.85 : Math.min(0.998, 0.985 * (0.98 + 0.02 * b.fireCDscale))
-
-            //             this.charge = this.charge * smoothRate + 1 - smoothRate
-            //             m.energy += (this.charge - previousCharge) * (tech.isRailEnergyGain ? 1 : -0.25) //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
-            //             //draw targeting
-            //             let best;
-            //             let range = 3000
-            //             const dir = m.angle
-            //             const path = [{
-            //                     x: m.pos.x + 20 * Math.cos(dir),
-            //                     y: m.pos.y + 20 * Math.sin(dir)
-            //                 },
-            //                 {
-            //                     x: m.pos.x + range * Math.cos(dir),
-            //                     y: m.pos.y + range * Math.sin(dir)
-            //                 }
-            //             ];
-            //             const vertexCollision = function(v1, v1End, domain) {
-            //                 for (let i = 0; i < domain.length; ++i) {
-            //                     let vertices = domain[i].vertices;
-            //                     const len = vertices.length - 1;
-            //                     for (let j = 0; j < len; j++) {
-            //                         results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-            //                         if (results.onLine1 && results.onLine2) {
-            //                             const dx = v1.x - results.x;
-            //                             const dy = v1.y - results.y;
-            //                             const dist2 = dx * dx + dy * dy;
-            //                             if (dist2 < best.dist2) {
-            //                                 best = {
-            //                                     x: results.x,
-            //                                     y: results.y,
-            //                                     dist2: dist2,
-            //                                     who: domain[i],
-            //                                     v1: vertices[j],
-            //                                     v2: vertices[j + 1]
-            //                                 };
-            //                             }
-            //                         }
-            //                     }
-            //                     results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-            //                     if (results.onLine1 && results.onLine2) {
-            //                         const dx = v1.x - results.x;
-            //                         const dy = v1.y - results.y;
-            //                         const dist2 = dx * dx + dy * dy;
-            //                         if (dist2 < best.dist2) {
-            //                             best = {
-            //                                 x: results.x,
-            //                                 y: results.y,
-            //                                 dist2: dist2,
-            //                                 who: domain[i],
-            //                                 v1: vertices[0],
-            //                                 v2: vertices[len]
-            //                             };
-            //                         }
-            //                     }
-            //                 }
-            //             };
-
-            //             //check for collisions
-            //             best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
-            //             vertexCollision(path[0], path[1], mob);
-            //             vertexCollision(path[0], path[1], map);
-            //             vertexCollision(path[0], path[1], body);
-            //             if (best.dist2 != Infinity) path[path.length - 1] = { x: best.x, y: best.y }; //if hitting something
-            //             //draw beam
-            //             ctx.beginPath();
-            //             ctx.moveTo(path[0].x, path[0].y);
-            //             ctx.lineTo(path[1].x, path[1].y);
-            //             ctx.strokeStyle = `rgba(100,0,180,0.7)`;
-            //             ctx.lineWidth = this.charge * 1
-            //             ctx.setLineDash([10, 20]);
-            //             ctx.stroke();
-            //             ctx.setLineDash([]);
-            //             //draw magnetic field
-            //             const X = m.pos.x
-            //             const Y = m.pos.y
-            //             const unitVector = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
-            //             const unitVectorPerp = Vector.perp(unitVector)
-
-            //             function magField(mag, arc) {
-            //                 ctx.moveTo(X, Y);
-            //                 ctx.bezierCurveTo(
-            //                     X + unitVector.x * mag, Y + unitVector.y * mag,
-            //                     X + unitVector.x * mag + unitVectorPerp.x * arc, Y + unitVector.y * mag + unitVectorPerp.y * arc,
-            //                     X + unitVectorPerp.x * arc, Y + unitVectorPerp.y * arc)
-            //                 ctx.bezierCurveTo(
-            //                     X - unitVector.x * mag + unitVectorPerp.x * arc, Y - unitVector.y * mag + unitVectorPerp.y * arc,
-            //                     X - unitVector.x * mag, Y - unitVector.y * mag,
-            //                     X, Y)
-            //             }
-            //             ctx.fillStyle = `rgba(50,0,100,0.05)`;
-            //             for (let i = 3; i < 7; i++) {
-            //                 const MAG = 8 * i * i * this.charge * (0.93 + 0.07 * Math.random())
-            //                 const ARC = 6 * i * i * this.charge * (0.93 + 0.07 * Math.random())
-            //                 ctx.beginPath();
-            //                 magField(MAG, ARC)
-            //                 magField(MAG, -ARC)
-            //                 ctx.fill();
-            //             }
-            //         }
-            //     }
-            // },
         }, {
             name: "mine", //10
             description: "toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>refund <strong>undetonated</strong> mines on <strong>exiting</strong> a level", //fires <strong>nails</strong> at mobs within range

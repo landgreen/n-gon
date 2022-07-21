@@ -906,6 +906,8 @@ const m = {
     fieldShieldingScale: 1,
     // fieldDamage: 1,
     isSneakAttack: false,
+    sneakAttackCycle: 0,
+    enterCloakCycle: 0,
     duplicateChance: 0,
     energy: 0,
     fieldRegen: 0.001,
@@ -1554,13 +1556,14 @@ const m = {
         {
             name: "standing wave",
             //<strong>deflecting</strong> protects you in every <strong>direction</strong>
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br> <strong>+60</strong> max <strong class='color-f'>energy</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //drains <strong class='color-f'>energy</strong>  //<strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>
+            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>+60</strong> max <strong class='color-f'>energy</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //drains <strong class='color-f'>energy</strong>  //<strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>
             drainCD: 0,
             effect: () => {
                 m.fieldBlockCD = 0;
                 m.blockingRecoil = 2 //4 is normal
                 m.fieldRange = 175
                 m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
+                // m.fieldHarmReduction = 0.66; //33% reduction
 
                 m.harmonic3Phase = () => { //normal standard 3 different 2-d circles
                     const fieldRange1 = (0.75 + 0.3 * Math.sin(m.cycle / 23)) * m.fieldRange * m.harmonicRadius
@@ -2735,9 +2738,8 @@ const m = {
             }
         },
         {
-            name: "metamaterial cloaking", //"weak photonic coupling" "electromagnetically induced transparency" "optical non-coupling" "slow light field" "electro-optic transparency"
-            //<br><strong>collisions</strong> do <strong>50%</strong> less <strong class='color-defense'>harm</strong> when <strong class='color-cloaked'>cloaked</strong>
-            description: "when not firing activate <strong class='color-cloaked'>cloaking</strong><br><span style = 'font-size:95%;'><strong>+333%</strong> <strong class='color-d'>damage</strong> if no mob has <strong>died</strong> in <strong>4</strong> seconds</span><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
+            name: "metamaterial cloaking",
+            description: "when not firing activate <strong class='color-cloaked'>cloaking</strong><br><span style = 'font-size:90%;'><strong>+333%</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> seconds after <strong class='color-cloaked'>decloaking</strong></span><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             effect: () => {
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
@@ -2748,6 +2750,8 @@ const m = {
                 // m.fieldDamage = 2.46 // 1 + 146/100
                 m.fieldDrawRadius = 0
                 m.isSneakAttack = true;
+                m.sneakAttackCycle = 0;
+                m.enterCloakCycle = 0
                 const drawRadius = 800
                 m.drawCloak = function() {
                     m.fieldPhase += 0.007
@@ -2765,27 +2769,6 @@ const m = {
                     ctx.globalCompositeOperation = "source-over";
                     ctx.clip();
                 }
-                // m.drawCloak = function() { //controlled by player look direction
-                //     m.fieldPhase = m.angle
-                //     const wiggle = 0.15 * Math.sin(m.angle)
-                //     const off = {
-                //         x: Math.cos(m.angle),
-                //         y: Math.sin(m.angle)
-                //     }
-                //     const look = Vector.add(m.pos, Vector.mult(off, 500))
-                //     ctx.beginPath();
-                //     ctx.ellipse(look.x, look.y, m.fieldDrawRadius * (1 - wiggle), m.fieldDrawRadius * (1 + wiggle), m.fieldPhase, 0, 2 * Math.PI);
-                //     // if (m.fireCDcycle > m.cycle && (input.field)) {}
-                //     ctx.fillStyle = "#fff"
-                //     ctx.lineWidth = 2;
-                //     ctx.strokeStyle = "#000"
-                //     ctx.stroke()
-                //     // ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*m.energy})`;
-                //     ctx.globalCompositeOperation = "destination-in";
-                //     ctx.fill();
-                //     ctx.globalCompositeOperation = "source-over";
-                //     ctx.clip();
-                // }
                 m.hold = function() {
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
@@ -2804,6 +2787,8 @@ const m = {
                     if (m.fireCDcycle + 30 < m.cycle && !input.fire) { //automatically cloak if not firing
                         if (!m.isCloak) {
                             m.isCloak = true //enter cloak
+                            m.enterCloakCycle = m.cycle
+                            // console.log(m.enterCloakCycle)
                             if (tech.isIntangible) {
                                 for (let i = 0; i < bullet.length; i++) {
                                     if (bullet[i].botType && bullet[i].botType !== "orbit") bullet[i].collisionFilter.mask = cat.map | cat.bullet | cat.mobBullet | cat.mobShield
@@ -2811,6 +2796,7 @@ const m = {
                             }
                         }
                     } else if (m.isCloak) { //exit cloak
+                        m.sneakAttackCycle = m.cycle
                         m.isCloak = false
                         if (tech.isIntangible) {
                             for (let i = 0; i < bullet.length; i++) {
@@ -2842,25 +2828,6 @@ const m = {
                             }
                         }
                     }
-
-                    // function drawField() {
-                    //     m.fieldPhase += 0.007
-                    //     const wiggle = 0.15 * Math.sin(m.fieldPhase * 0.5)
-                    //     ctx.beginPath();
-                    //     ctx.ellipse(m.pos.x, m.pos.y, m.fieldDrawRadius * (1 - wiggle), m.fieldDrawRadius * (1 + wiggle), m.fieldPhase, 0, 2 * Math.PI);
-                    //     // if (m.fireCDcycle > m.cycle && (input.field)) {}
-                    //     ctx.fillStyle = "#fff"
-                    //     ctx.lineWidth = 2;
-                    //     ctx.strokeStyle = "#000"
-                    //     ctx.stroke()
-                    //     // ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*m.energy})`;
-                    //     ctx.globalCompositeOperation = "destination-in";
-                    //     ctx.fill();
-                    //     ctx.globalCompositeOperation = "source-over";
-                    //     ctx.clip();
-                    // }
-
-                    // const energy = Math.max(0.01, Math.min(m.energy, 1))
                     if (m.isCloak) {
                         this.fieldRange = this.fieldRange * 0.9 + 0.1 * drawRadius
                         m.fieldDrawRadius = this.fieldRange * 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
@@ -2877,8 +2844,8 @@ const m = {
                             if (inPlayer.length > 0) {
                                 for (let i = 0; i < inPlayer.length; i++) {
                                     if (m.energy > 0) {
-                                        if (!inPlayer[i].isUnblockable) m.energy -= 0.004;
-                                        if (inPlayer[i].shield) m.energy -= 0.012;
+                                        if (!inPlayer[i].isUnblockable) m.energy -= 0.007;
+                                        if (inPlayer[i].shield) m.energy -= 0.025;
                                     }
                                 }
                             }
@@ -2886,15 +2853,14 @@ const m = {
                             player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
                         }
                     }
-
                     this.drawFieldMeterCloaking()
                     //show sneak attack status 
-
-                    if (m.cycle > m.lastKillCycle + 240) {
-                        ctx.strokeStyle = "rgba(0,0,0,0.4)" //m.fieldMeterColor; //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
+                    // if (m.cycle > m.lastKillCycle + 240) {
+                    if (m.sneakAttackCycle + Math.min(120, 0.3 * (m.cycle - m.enterCloakCycle)) > m.cycle) {
+                        ctx.strokeStyle = "rgba(0,0,0,0.5)" //m.fieldMeterColor; //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
                         ctx.beginPath();
                         ctx.arc(m.pos.x, m.pos.y, 28, 0, 2 * Math.PI);
-                        ctx.lineWidth = 2
+                        ctx.lineWidth = 3
                         ctx.stroke();
                     }
                 }

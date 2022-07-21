@@ -24,8 +24,8 @@ const level = {
             // powerUps.research.changeRerolls(100)
             // tech.tech[297].frequency = 100
             // b.guns[0].ammo = 10000
-            // m.setField("perfect diamagnetism") //molecular assembler  time dilation   perfect diamagnetism
-            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // m.setField("metamaterial cloaking") //molecular assembler  time dilation   perfect diamagnetism
+            // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // tech.giveTech("siphonaptera")
             // tech.giveTech("fleas")
             // tech.giveTech("colony")
@@ -35,7 +35,7 @@ const level = {
             // for (let i = 0; i < 1; i++) tech.giveTech("cryodesiccation")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
-            // spawn.starter(1900, -500, 200)
+            // spawn.starter(1900, -500)
             // spawn.laserTargetingBoss(1900, -500)
             // for (let i = 0; i < 10; ++i) spawn.grower(1900, -500)
             // level.testing(); //not in rotation, used for testing
@@ -2763,7 +2763,7 @@ const level = {
         document.body.style.backgroundColor = "#ddd";
         spawn.mapRect(-950, 0, 8200, 800); //ground
         spawn.mapRect(-950, -1200, 800, 1400); //left wall
-        // spawn.mapRect(-950, -1800, 8200, 800); //roof
+        spawn.mapRect(-950, -1800, 8200, 800); //roof
         spawn.mapRect(-250, -400, 1000, 600); // shelf
         spawn.mapRect(-250, -1200, 1000, 550); // shelf roof
         // for (let i = 0; i < 10; ++i) powerUps.spawn(550, -800, "ammo", false);

@@ -1,34 +1,16 @@
 ******************************************************** NEXT PATCH **************************************************
 
-finalBoss pushes away things between every phase
-  it's much smaller in black hole phase and very hard to hit
+cloaking +damage occurs for 2 seconds after decloaking
+  need to cloak for 4 seconds to get the full 2 seconds of +damage
+  ambush 666% -> 555% damage
+boson composite drains 25% more energy when you move through mobs
 
-timeBoss, shooterBoss, orbitalBoss, laserTargetingBoss have "orbital armor"
-  orbitals have less health and move a bit slower
-  orbitalBoss is slower and has more health
-blinkBoss does much less collision damage
-laserTargetingBoss does 2.5x damage but it's laser is only on 1/2 the time
-
-URL builds share what mode molecular assembler is on
+nail gun gets 20% more ammo
+harpoons now properly do damage on the frame before they retract
+  smelting removes 10% more ammo to get another harpoon for railgun
+grenade fireworks explosive petals are 25% closer together
 
 *********************************************************** TODO *****************************************************
-
-make final Boss hidden for the mob spawning phase?
-
-tech for molecular assembler that generates research?
-
-show damage and defense in game?
-  defense and damage without difficulty included?
-  update every: 15 cycles?, 30?, 10?
-  make a m.damage variable that stores the player damage for all slow changing tech
-    update m.damage variable when:
-      new tech
-      flipFlip triggers
-      duplicationChance changes
-      add or remove guns
-      player health changes
-      research changes
-      bot count changes
 
 tech ______ effect that last until you get hit
   field or bots can check your health every cycle and see if it lower

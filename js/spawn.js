@@ -245,7 +245,7 @@ const spawn = {
         me.showHealthBar = false;
         me.collisionFilter.category = 0;
         me.collisionFilter.mask = 0; //cat.player //| cat.body
-        me.chaseSpeed = 1 + 1.5 * Math.random()
+        me.chaseSpeed = 1 + 2 * Math.random()
 
         me.awake = function() {
             //chase player
@@ -275,35 +275,11 @@ const spawn = {
                     });
                 }
             }
-
-            //aoe damage to mobs
-            // for (let i = 0, len = mob.length; i < len; i++) {
-            //     if (!mob[i].isShielded && Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radius) {
-            //         let dmg = m.dmgScale * 0.082
-            //         if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
-            //         if (mob[i].shield) dmg *= 4 //x5 to make up for the /5 that shields normally take
-            //         mob[i].damage(dmg);
-            //         if (tech.isNeutronSlow) {
-            //             Matter.Body.setVelocity(mob[i], {
-            //                 x: mob[i].velocity.x * this.vacuumSlow,
-            //                 y: mob[i].velocity.y * this.vacuumSlow
-            //             });
-            //         }
-            //     }
-            // }
-
-            //draw
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-            // ctx.fillStyle = "hsla(160, 100%, 35%,0.75)" //"rgba(255,0,255,0.2)";
-            // ctx.globalCompositeOperation = "lighter"
             ctx.fillStyle = `rgba(25,139,170,${0.2 + 0.12 * Math.random()})`;
             ctx.fill();
             this.radius = 100 * (1 + 0.25 * Math.sin(simulation.cycle * 0.03))
-            // ctx.fillStyle = "#fff";
-            // ctx.globalCompositeOperation = "difference";
-            // ctx.fill();
-            // ctx.globalCompositeOperation = "source-over"
         }
         me.do = function() { //wake up after the player moves
             if (player.speed > 1 && !m.isCloak) {
