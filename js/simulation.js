@@ -180,7 +180,7 @@ const simulation = {
     cyclePaused: 0,
     fallHeight: 6000, //below this y position the player dies
     lastTimeStamp: 0, //tracks time stamps for measuring delta
-    delta: 1000 / 60, //speed of game engine //looks like it has to be 16 to match player input
+    delta: 1000 / 60, //speed of game engine //looks like it has to be 16.6666 to match player input
     buttonCD: 0,
     isHorizontalFlipped: false, //makes some maps flipped horizontally
     levelsCleared: 0,

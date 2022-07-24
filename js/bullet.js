@@ -96,10 +96,21 @@ const b = {
     outOfAmmo() { //triggers after firing when you have NO ammo
         simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-g'>ammo</span><span class='color-symbol'>:</span> 0`);
         m.fireCDcycle = m.cycle + 30; //fire cooldown       
-        if (tech.isAmmoFromHealth && m.health > 0.01) {
-            tech.extraMaxHealth -= 0.01 //decrease max health
-            m.setMaxHealth();
-            for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "ammo");
+        if (tech.isAmmoFromHealth) {
+            const amount = 0.01
+            if (tech.isEnergyHealth) {
+                if (m.maxEnergy > amount) {
+                    tech.healMaxEnergyBonus -= amount
+                    m.setMaxEnergy();
+                    for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "ammo");
+                }
+            } else {
+                if (m.health > amount) {
+                    tech.extraMaxHealth -= amount //decrease max health
+                    m.setMaxHealth();
+                    for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "ammo");
+                }
+            }
         }
     },
     refundAmmo() { //triggers after firing when you removed ammo for a gun, but didn't need to
@@ -2888,7 +2899,7 @@ const b = {
             friction: 0,
             frictionAir: 0.023,
             restitution: 0.9,
-            dmg: 1.2, //damage done in addition to the damage from momentum
+            dmg: 1.3, //damage done in addition to the damage from momentum
             lookFrequency: 14 + Math.floor(8 * Math.random()),
             endCycle: simulation.cycle + 100 * tech.isBulletsLastLonger + Math.floor(25 * Math.random()),
             classType: "bullet",
@@ -4376,7 +4387,7 @@ const b = {
             minDmgSpeed: 2,
             // lookFrequency: 56 + Math.floor(17 * Math.random()) - isUpgraded * 20,
             lastLookCycle: simulation.cycle + 60 * Math.random(),
-            delay: Math.floor((tech.isNailBotUpgrade ? 20 : 105) * b.fireCDscale),
+            delay: Math.floor((tech.isNailBotUpgrade ? 20 : 110) * b.fireCDscale),
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(),
             endCycle: Infinity,
@@ -4407,7 +4418,7 @@ const b = {
                             ) {
                                 const unit = Vector.normalise(Vector.sub(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist) / 60)), this.position))
                                 if (this.isUpgraded) {
-                                    const SPEED = 50
+                                    const SPEED = 55
                                     b.nail(this.position, Vector.mult(unit, SPEED))
                                     this.force = Vector.mult(unit, -0.018 * this.mass)
                                 } else {
@@ -4513,9 +4524,9 @@ const b = {
             restitution: 0.6 * (1 + 0.5 * Math.random()),
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
-            lookFrequency: 60 + Math.floor(17 * Math.random()) - 40 * tech.isFoamBotUpgrade,
+            lookFrequency: 60 + Math.floor(17 * Math.random()) - 45 * tech.isFoamBotUpgrade,
             cd: 0,
-            delay: Math.floor(105 * b.fireCDscale),
+            delay: 20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(),
             endCycle: Infinity,
@@ -4543,7 +4554,7 @@ const b = {
                                 const radius = 6 + 7 * Math.random()
                                 const SPEED = 29 - radius * 0.4; //(input.down ? 32 : 20) - radius * 0.7;
                                 const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
-                                b.foam(this.position, velocity, radius + 7 * this.isUpgraded)
+                                b.foam(this.position, velocity, radius + 7.5 * this.isUpgraded)
                                 break;
                             }
                         }
@@ -4559,7 +4570,7 @@ const b = {
         const dir = m.angle;
         const RADIUS = (14 + 6 * Math.random())
         bullet[me] = Bodies.polygon(position.x, position.y, 3, RADIUS, {
-            isUpgraded: tech.isLaserBotUpgrade,
+            // isUpgraded: tech.isLaserBotUpgrade,
             botType: "laser",
             angle: dir,
             friction: 0,
@@ -4571,11 +4582,11 @@ const b = {
             offPlayer: { x: 0, y: 0, },
             dmg: 0, //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
-            lookFrequency: 40 + Math.floor(7 * Math.random()) - 10 * tech.isLaserBotUpgrade,
-            range: (700 + 450 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
+            lookFrequency: 40 + Math.floor(7 * Math.random()) - 13 * tech.isLaserBotUpgrade,
+            range: (700 + 500 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
             drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
-            drain: (0.5 - 0.43 * tech.isLaserBotUpgrade) * tech.laserFieldDrain * tech.isLaserDiode,
-            laserDamage: 0.85 + 0.7 * tech.isLaserBotUpgrade,
+            drain: (0.5 - 0.44 * tech.isLaserBotUpgrade) * tech.laserFieldDrain * tech.isLaserDiode,
+            laserDamage: 0.85 + 0.8 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -4684,10 +4695,10 @@ const b = {
             restitution: 1,
             dmg: 0,
             minDmgSpeed: 0,
-            lookFrequency: 43 + Math.floor(7 * Math.random()) - 10 * tech.isBoomBotUpgrade,
+            lookFrequency: 43 + Math.floor(7 * Math.random()) - 13 * tech.isBoomBotUpgrade,
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
-            attackAcceleration: 0.012 + 0.005 * tech.isBoomBotUpgrade,
-            range: 500 * (1 + 0.1 * Math.random()) + 320 * tech.isBoomBotUpgrade,
+            attackAcceleration: 0.012 + 0.006 * tech.isBoomBotUpgrade,
+            range: 500 * (1 + 0.1 * Math.random()) + 350 * tech.isBoomBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -4698,7 +4709,7 @@ const b = {
             explode: 0,
             beforeDmg() {
                 if (this.lockedOn) {
-                    const explosionRadius = Math.min(136 + 200 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, m.pos)) - 30)
+                    const explosionRadius = Math.min(136 + 230 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, m.pos)) - 30)
                     if (explosionRadius > 60) {
                         this.explode = explosionRadius
                         // 
@@ -4984,7 +4995,7 @@ const b = {
                     }
                 }
             },
-            range: 190 + 120 * tech.isOrbitBotUpgrade, //range is set in bot upgrade too!
+            range: 190 + 130 * tech.isOrbitBotUpgrade, //range is set in bot upgrade too!
             orbitalSpeed: 0,
             phase: 2 * Math.PI * Math.random(),
             do() {
@@ -4996,8 +5007,8 @@ const b = {
                     })
                     for (let i = 0; i < q.length; i++) {
                         if (!q[i].isShielded) {
-                            mobs.statusStun(q[i], 210)
-                            const dmg = 0.4 * m.dmgScale * (this.isUpgraded ? 4 : 1) * (tech.isCrit ? 4 : 1)
+                            mobs.statusStun(q[i], 210 + 90 * this.isUpgraded)
+                            const dmg = 0.4 * m.dmgScale * (this.isUpgraded ? 4.5 : 1) * (tech.isCrit ? 4 : 1)
                             q[i].damage(dmg);
                             if (q[i].alive) q[i].foundPlayer();
                             if (q[i].damageReduction) {
@@ -6908,7 +6919,6 @@ const b = {
             charge: 0,
             isStuckOn: false,
             angle: 0,
-            arcRange: 0.78, //1.57,
             isInsideArc(angle) {
                 const mod = (a, n) => {
                     return a - Math.floor(a / n) * n
@@ -6916,21 +6926,22 @@ const b = {
                 let diff = mod(angle - this.angle + Math.PI, 2 * Math.PI) - Math.PI
                 return Math.abs(diff) < this.arcRange
             },
+            arcRange: 0.78, //1.57,
             lensDamage: 1,
+            lensDamageOn: 0, //set in tech
             lens() {
                 this.stuckOn();
                 this.angle += 0.02
                 if (this.isInsideArc(m.angle)) {
-                    this.lensDamage = 2.5 //150% damage increase
+                    this.lensDamage = this.lensDamageOn
+                    ctx.lineWidth = 6 + this.lensDamageOn
                 } else {
                     this.lensDamage = 1
+                    ctx.lineWidth = 2
                 }
-
-                const radius = 60
                 ctx.beginPath();
-                ctx.arc(m.pos.x, m.pos.y, radius, this.angle - this.arcRange, this.angle + this.arcRange);
+                ctx.arc(m.pos.x, m.pos.y, 60, this.angle - this.arcRange, this.angle + this.arcRange);
                 ctx.strokeStyle = '#fff' //'rgba(255,255,255,0.9)' //'hsl(189, 100%, 95%)' //tech.laserColor
-                ctx.lineWidth = (this.lensDamage > 1) ? 10 : 2 //3
                 ctx.stroke();
                 // const a = { x: radius * Math.cos(this.angle + this.arcRange), y: radius * Math.sin(this.angle + this.arcRange) }
                 // const b = Vector.add(m.pos, a)

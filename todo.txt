@@ -1,16 +1,53 @@
 ******************************************************** NEXT PATCH **************************************************
 
-cloaking +damage occurs for 2 seconds after decloaking
-  need to cloak for 4 seconds to get the full 2 seconds of +damage
-  ambush 666% -> 555% damage
-boson composite drains 25% more energy when you move through mobs
+tech: electric generator - deflecting mobs generates energy for molecular assembler
+tech: homeostasis - for each health below 100 +0.8% defense
+tech: compound lens - +77% laser lens damage, +10° lens arc
 
-nail gun gets 20% more ammo
-harpoons now properly do damage on the frame before they retract
-  smelting removes 10% more ammo to get another harpoon for railgun
-grenade fireworks explosive petals are 25% closer together
+tech: robotics - 2 random bots, power up choices include a bot tech option
+tech: open-source - 3 random bots, 4x bot tech frequency
+  renamed from previous robotics tech
+slightly buffed all bot upgrades
+
++9% iceIX damage
+catabolism uses energy instead of health if you have mass-energy
+optical amplifier laser tech options include laser-bot
+rule 90 and rule 30 looks better on more browsers, I hope
 
 *********************************************************** TODO *****************************************************
+
+store value of last hit health lost
+  names: patch
+
+  tech: after cloaking regen 1/2 of the last hit
+    spawning a heal power up is annoying because you'd be cloaked, so direct healing?
+    time limit for effect?
+      while still under ambush damage?
+
+  tech: killing the mob that caused the last hit spawns a heal power up equal to 1/2 of last hit
+    time limit for effect? 3-4 seconds?
+
+  tech: doing damage can recover up to 1/2 of the last hit
+    spawn a heal equal to 1/2 of last hit
+    time limit for effect? 3-4 seconds?
+
+  tech increase damage by how much health was lost in last hit
+    +damage = 3x health lost?
+      if you went from 100 -> 60 health = +40%*3  = 120% damage
+    negative mass field tech?
+    too similar to radiative equilibrium
+      pick between them?
+
+
+path-finding
+  build a path-finding map on level load
+  how to convert vertices into block grid?
+    check points for map collisions and build grid
+    is there a path-finding algorithm for vertices, instead of block grid
+  use for:
+    mobs,
+    drones?
+    bots that can go far from player and return
 
 tech ______ effect that last until you get hit
   field or bots can check your health every cycle and see if it lower

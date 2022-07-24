@@ -133,25 +133,26 @@ const m = {
     legLength2: 45,
     transX: 0,
     transY: 0,
-    history: [], //tracks the last second of player position
+    history: new Array(600), //[], //tracks the last second of player position
     rewindCount: 0, //used with CPT
     resetHistory() {
+        const set = {
+            position: {
+                x: player.position.x,
+                y: player.position.y,
+            },
+            velocity: {
+                x: player.velocity.x,
+                y: player.velocity.y
+            },
+            yOff: m.yOff,
+            angle: m.angle,
+            health: m.health,
+            energy: m.energy,
+            activeGun: b.activeGun
+        }
         for (let i = 0; i < 600; i++) { //reset history
-            m.history[i] = {
-                position: {
-                    x: player.position.x,
-                    y: player.position.y,
-                },
-                velocity: {
-                    x: player.velocity.x,
-                    y: player.velocity.y
-                },
-                yOff: m.yOff,
-                angle: m.angle,
-                health: m.health,
-                energy: m.energy,
-                activeGun: b.activeGun
-            }
+            m.history[i] = set
         }
     },
     move() {
@@ -513,6 +514,7 @@ const m = {
         let dmg = 1
         dmg *= m.fieldHarmReduction
         // if (!tech.isFlipFlopOn && tech.isFlipFlopHealth) dmg *= 0.5
+        if (tech.isLowHealthDefense) dmg *= 1 - Math.max(0, 1 - m.health) * 0.8
         if (tech.isZeno) dmg *= 0.15
         if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.4
@@ -1413,7 +1415,11 @@ const m = {
             ) {
                 mob[i].locatePlayer();
                 m.pushMass(mob[i]);
-                if (mob[i].isShielded) m.fieldCDcycle = m.cycle + 60
+                if (mob[i].isShielded) {
+                    m.fieldCDcycle = m.cycle + 60
+                } else if (tech.deflectEnergy && !mob[i].isInvulnerable) {
+                    m.energy += tech.deflectEnergy
+                }
             }
         }
     },
@@ -2739,7 +2745,7 @@ const m = {
         },
         {
             name: "metamaterial cloaking",
-            description: "when not firing activate <strong class='color-cloaked'>cloaking</strong><br><span style = 'font-size:90%;'><strong>+333%</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> seconds after <strong class='color-cloaked'>decloaking</strong></span><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
+            description: "when not firing activate <strong class='color-cloaked'>cloaking</strong><br><span style = 'font-size:92%;'>after <strong class='color-cloaked'>decloaking</strong> <strong>+333%</strong> <strong class='color-d'>damage</strong> for up to <strong>2</strong> s</span><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             effect: () => {
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
@@ -2750,8 +2756,9 @@ const m = {
                 // m.fieldDamage = 2.46 // 1 + 146/100
                 m.fieldDrawRadius = 0
                 m.isSneakAttack = true;
+                // m.sneakAttackCharge = 0;
                 m.sneakAttackCycle = 0;
-                m.enterCloakCycle = 0
+                m.enterCloakCycle = 0;
                 const drawRadius = 800
                 m.drawCloak = function() {
                     m.fieldPhase += 0.007
@@ -2770,6 +2777,12 @@ const m = {
                     ctx.clip();
                 }
                 m.hold = function() {
+                    // if (m.isCloak) {
+                    //     if (m.sneakAttackCharge < 120) m.sneakAttackCharge += 0.5
+                    // } else {
+                    //     if (m.sneakAttackCharge > 0) m.sneakAttackCharge--
+                    // }
+
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
                         m.holding();
@@ -2806,13 +2819,12 @@ const m = {
                         if (tech.isCloakStun) { //stun nearby mobs after exiting cloak
                             let isMobsAround = false
                             const stunRange = m.fieldDrawRadius * 1.5
-                            const drain = 0.1
-                            const stunTime = 240
+                            const drain = 0.2
                             if (m.energy > drain) {
                                 for (let i = 0, len = mob.length; i < len; ++i) {
                                     if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) < stunRange && Matter.Query.ray(map, mob[i].position, m.pos).length === 0 && !mob[i].isBadTarget) {
                                         isMobsAround = true
-                                        mobs.statusStun(mob[i], stunTime)
+                                        mobs.statusStun(mob[i], 180)
                                     }
                                 }
                                 if (isMobsAround) {
@@ -2856,7 +2868,8 @@ const m = {
                     this.drawFieldMeterCloaking()
                     //show sneak attack status 
                     // if (m.cycle > m.lastKillCycle + 240) {
-                    if (m.sneakAttackCycle + Math.min(120, 0.3 * (m.cycle - m.enterCloakCycle)) > m.cycle) {
+                    // if (m.sneakAttackCharge > 0) {
+                    if (m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) {
                         ctx.strokeStyle = "rgba(0,0,0,0.5)" //m.fieldMeterColor; //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
                         ctx.beginPath();
                         ctx.arc(m.pos.x, m.pos.y, 28, 0, 2 * Math.PI);

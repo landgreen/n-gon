@@ -551,15 +551,12 @@ const powerUps = {
                 let text = ""
                 if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("gun",true)'>${tech.isCancelTech ? "?":"✕"}</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>gun</h3>`
-
                 let options = [];
                 for (let i = 0; i < b.guns.length; i++) {
                     if (!b.guns[i].have) options.push(i);
                 }
                 let totalChoices = Math.min(options.length, tech.isDeterminism ? 1 : 3 + tech.extraChoices)
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
-
-
                 function removeOption(index) {
                     for (let i = 0; i < options.length; i++) {
                         if (options[i] === index) {
@@ -568,14 +565,12 @@ const powerUps = {
                         }
                     }
                 }
-
                 //check for guns that were a choice last time and remove them
                 for (let i = 0; i < b.guns.length; i++) {
                     if (options.length - 1 < totalChoices) break //you have to repeat choices if there are not enough choices left to display
                     if (b.guns[i].isRecentlyShown) removeOption(i)
                 }
                 for (let i = 0; i < b.guns.length; i++) b.guns[i].isRecentlyShown = false //reset recently shown back to zero
-
                 if (options.length > 0) {
                     for (let i = 0; i < totalChoices; i++) {
                         const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options
@@ -583,6 +578,17 @@ const powerUps = {
                         b.guns[choose].isRecentlyShown = true
                         removeOption(choose)
                         if (options.length < 1) break
+                    }
+                    if (tech.isExtraBotOption) {
+                        const botTech = [] //make an array of bot options
+                        for (let i = 0, len = tech.tech.length; i < len; i++) {
+                            if (tech.tech[i].isBotTech && tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed()) botTech.push(i)
+                        }
+                        if (botTech.length > 0) { //pick random bot tech
+                            const choose = botTech[Math.floor(Math.random() * botTech.length)];
+                            const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"> <span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                        }
                     }
                     if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
                         tech.junkResearchNumber = Math.floor(5 * Math.random())
@@ -704,13 +710,24 @@ const powerUps = {
                 }
                 for (let i = 0; i < m.fieldUpgrades.length; i++) m.fieldUpgrades[i].isRecentlyShown = false //reset recently shown back to zero
 
-                if (options.length > 0) {
+                if (options.length > 0 || tech.isExtraBotOption) {
                     for (let i = 0; i < totalChoices; i++) {
                         const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options
                         text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choose})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div> ${m.fieldUpgrades[choose].description}</div>`
                         m.fieldUpgrades[choose].isRecentlyShown = true
                         removeOption(choose)
                         if (options.length < 1) break
+                    }
+                    if (tech.isExtraBotOption) {
+                        const botTech = [] //make an array of bot options
+                        for (let i = 0, len = tech.tech.length; i < len; i++) {
+                            if (tech.tech[i].isBotTech && tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed()) botTech.push(i)
+                        }
+                        if (botTech.length > 0) { //pick random bot tech
+                            const choose = botTech[Math.floor(Math.random() * botTech.length)];
+                            const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"> <span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                        }
                     }
                     if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
                         tech.junkResearchNumber = Math.floor(5 * Math.random())
@@ -846,9 +863,6 @@ const powerUps = {
                     tech.tooManyTechChoices = false
                     totalChoices = optionLengthNoDuplicates
                 }
-
-
-
                 //check for tech that were a choice last time and remove them
                 if (optionLengthNoDuplicates > totalChoices) {
                     // console.log('check for tech that were a choice last time and remove them', optionLengthNoDuplicates, options.length)
@@ -904,6 +918,18 @@ const powerUps = {
                         }
                         if (options.length < 1) break
                     }
+                    if (tech.isExtraBotOption) {
+                        const botTech = [] //make an array of bot options
+                        for (let i = 0, len = tech.tech.length; i < len; i++) {
+                            if (tech.tech[i].isBotTech && tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed()) botTech.push(i)
+                        }
+                        if (botTech.length > 0) { //pick random bot tech
+                            const choose = botTech[Math.floor(Math.random() * botTech.length)];
+                            const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"> <span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                        }
+                    }
+
                     if (tech.isExtraGunField) {
                         if (Math.random() > 0.5 && b.inventory.length < b.guns.length) {
                             let gunOptions = [];
