@@ -24,7 +24,7 @@ const level = {
             // powerUps.research.changeRerolls(100)
             // tech.tech[297].frequency = 100
             // b.guns[0].ammo = 10000
-            // m.setField("metamaterial cloaking") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // m.setField("negative mass") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // tech.giveTech("dynamic equilibrium")
             // tech.giveTech("quantum eraser");

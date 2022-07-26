@@ -253,7 +253,7 @@ const tech = {
         if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= tech.sneakAttackDmg
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.harmReduction()
         if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
-        if (tech.isLastHitDamage && m.lastHit) dmg *= 1 + 5 * m.lastHit // if (!simulation.paused) m.lastHit = 0
+        if (tech.isLastHitDamage && m.lastHit) dmg *= 1 + 10 * m.lastHit // if (!simulation.paused) m.lastHit = 0
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
@@ -6661,7 +6661,7 @@ const tech = {
         },
         {
             name: "dynamic equilibrium",
-            descriptionFunction() { return `increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>of your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss` },
+            descriptionFunction() { return `increase <strong class='color-d'>damage</strong> by <strong>10%</strong><br>of your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss` },
             // description: `increase <strong class='color-d'>damage</strong> by <strong>500%</strong><br>of your last <strong class='color-h'>health</strong> loss`,
             isFieldTech: true,
             maxCount: 1,
