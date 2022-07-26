@@ -239,7 +239,6 @@ const tech = {
         if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
         if (tech.isDamageForGuns) dmg *= 1 + 0.13 * b.inventory.length
         if (tech.isLowHealthDmg) dmg *= 1 + Math.max(0, 1 - m.health) * 0.5
-        if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
         if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.25
         if (tech.isAcidDmg && m.health > 1) dmg *= 1.35;
         if (tech.isRerollDamage) dmg *= 1 + 0.038 * powerUps.research.count
@@ -251,10 +250,10 @@ const tech = {
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.6
-        // if (m.isSneakAttack && m.cycle > m.lastKillCycle + 240) dmg *= tech.sneakAttackDmg
         if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= tech.sneakAttackDmg
-        // if (m.isSneakAttack && m.sneakAttackCharge > 0) dmg *= tech.sneakAttackDmg
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.harmReduction()
+        if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
+        if (tech.isLastHitDamage && m.lastHit) dmg *= 1 + 5 * m.lastHit // if (!simulation.paused) m.lastHit = 0
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
@@ -2115,24 +2114,6 @@ const tech = {
                 tech.isHarmArmor = false;
             }
         },
-        // {
-        //     name: "radiative equilibrium",
-        //     description: "for <strong>10 seconds</strong> after receiving <strong class='color-defense'>defense</strong><br>increase <strong class='color-d'>damage</strong> by <strong>200%</strong>",
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 1,
-        //     frequencyDefault: 1,
-        //     allowed() {
-        //         return true
-        //     },
-        //     requires: "",
-        //     effect() {
-        //         tech.isHarmDamage = true;
-        //     },
-        //     remove() {
-        //         tech.isHarmDamage = false;
-        //     }
-        // },
         {
             name: "CPT symmetry",
             // description: "<strong>charge</strong>, <strong>parity</strong>, and <strong>time</strong> invert to undo <strong class='color-defense'>defense</strong><br><strong class='color-rewind'>rewind</strong> <strong>(1.5—5)</strong> seconds for <strong>(66—220)</strong> <strong class='color-f'>energy</strong>",
@@ -2272,42 +2253,42 @@ const tech = {
                 }
             }
         },
-        {
-            name: "weak interaction",
-            description: "for each unused <strong>power up</strong> at the end of a <strong>level</strong><br><strong>+10</strong> maximum <strong class='color-f'>energy</strong>", // <em>(up to 51 health per level)</em>",
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return !tech.isDroneGrab
-            },
-            requires: "not delivery drone",
-            effect() {
-                tech.isExtraMaxEnergy = true; //tracked by  tech.extraMaxHealth
-            },
-            remove() {
-                tech.isExtraMaxEnergy = false;
-            }
-        },
-        {
-            name: "electroweak interaction",
-            description: "unused <strong>power ups</strong> at the end of a <strong>level</strong><br>are still activated <em>(selections are random)</em>",
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.isExtraMaxEnergy
-            },
-            requires: "weak interaction",
-            effect() {
-                tech.isEndLevelPowerUp = true;
-            },
-            remove() {
-                tech.isEndLevelPowerUp = false;
-            }
-        },
+        // {
+        //     name: "weak interaction",
+        //     description: "for each unused <strong>power up</strong> at the end of a <strong>level</strong><br><strong>+10</strong> maximum <strong class='color-f'>energy</strong>", // <em>(up to 51 health per level)</em>",
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 1,
+        //     frequencyDefault: 1,
+        //     allowed() {
+        //         return !tech.isDroneGrab
+        //     },
+        //     requires: "not delivery drone",
+        //     effect() {
+        //         tech.isExtraMaxEnergy = true; //tracked by  tech.extraMaxHealth
+        //     },
+        //     remove() {
+        //         tech.isExtraMaxEnergy = false;
+        //     }
+        // },
+        // {
+        //     name: "electroweak interaction",
+        //     description: "unused <strong>power ups</strong> at the end of a <strong>level</strong><br>are still activated <em>(selections are random)</em>",
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return tech.isExtraMaxEnergy
+        //     },
+        //     requires: "weak interaction",
+        //     effect() {
+        //         tech.isEndLevelPowerUp = true;
+        //     },
+        //     remove() {
+        //         tech.isEndLevelPowerUp = false;
+        //     }
+        // },
         {
             name: "electronegativity",
             description: "<strong>+1%</strong> <strong class='color-d'>damage</strong> per <strong>8</strong> stored <strong class='color-f'>energy</strong>",
@@ -4107,7 +4088,7 @@ const tech = {
         {
             name: "spin-statistics",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Spin%E2%80%93statistics_theorem' class="link">spin-statistics</a>`,
-            description: "<strong>invulnerable</strong> while firing the <strong>shotgun</strong><br>shotgun has <strong>50%</strong> fewer shots",
+            description: "after firing the <strong>shotgun</strong> you are <strong>invulnerable</strong><br>shotgun has <strong>50%</strong> fewer shots",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6665,8 +6646,8 @@ const tech = {
             isFieldTech: true,
             maxCount: 1,
             count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
+            frequency: 2,
+            frequencyDefault: 2,
             allowed() {
                 return m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass"
             },
@@ -6676,6 +6657,26 @@ const tech = {
             },
             remove() {
                 tech.isHarmDamage = false;
+            }
+        },
+        {
+            name: "dynamic equilibrium",
+            descriptionFunction() { return `increase <strong class='color-d'>damage</strong> by <strong>5%</strong><br>of your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss` },
+            // description: `increase <strong class='color-d'>damage</strong> by <strong>500%</strong><br>of your last <strong class='color-h'>health</strong> loss`,
+            isFieldTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass" || m.fieldUpgrades[m.fieldMode].name === "standing wave") && !tech.isCloakHealLastHit
+            },
+            requires: "negative mass, pilot wave, not patch",
+            effect() {
+                tech.isLastHitDamage = true;
+            },
+            remove() {
+                tech.isLastHitDamage = false;
             }
         },
         {
@@ -7345,6 +7346,26 @@ const tech = {
                     tech.isIntangible = false;
                     player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
                 }
+            }
+        },
+        {
+            name: "patch",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Patch_(computing)' class="link">patch</a>`,
+            description: "after <strong class='color-cloaked'>cloaking</strong> recover <strong>75%</strong> of your<br>last <strong class='color-h'>health</strong> loss using that much <strong class='color-f'>energy</strong>",
+            isFieldTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" && !tech.isLastHitDamage && !tech.isEnergyHealth
+            },
+            requires: "metamaterial cloaking, not dynamic equilibrium, mass-energy",
+            effect() {
+                tech.isCloakHealLastHit = true;
+            },
+            remove() {
+                tech.isCloakHealLastHit = false;
             }
         },
         {
@@ -10528,5 +10549,7 @@ const tech = {
     isLaserLens: null,
     laserCrit: null,
     isSporeColony: null,
-    isExtraBotOption: null
+    isExtraBotOption: null,
+    isLastHitDamage: null,
+    isCloakHealLastHit: null
 }

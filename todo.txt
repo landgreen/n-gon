@@ -1,43 +1,62 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: electric generator - deflecting mobs generates energy for molecular assembler
-tech: homeostasis - for each health below 100 +0.8% defense
-tech: compound lens - +77% laser lens damage, +10° lens arc
+field tech: patch - after cloaking recover 75% of last health lost using that much energy
+  taking damage now forces decloaking
+field tech: dynamic equilibrium - increase damage by 5% the value of your last health loss
 
-tech: robotics - 2 random bots, power up choices include a bot tech option
-tech: open-source - 3 random bots, 4x bot tech frequency
-  renamed from previous robotics tech
-slightly buffed all bot upgrades
+foam has less velocity after a mob it's stuck to dies
+snakeBoss becomes vulnerable if you remove any of the first 3 body segments
+  body segments have more health
 
-+9% iceIX damage
-catabolism uses energy instead of health if you have mass-energy
-optical amplifier laser tech options include laser-bot
-rule 90 and rule 30 looks better on more browsers, I hope
+bug fix: quantum eraser now removes mobs in a more random order
+  it used to have a too low chance to remove bosses
 
 *********************************************************** TODO *****************************************************
 
+labs room:
+  low gravity zone
+  a button that toggles it on/off
+
+boss mechanics
+  bullets hit player and stay attached for 4-5 seconds, slowing player
+    hopperBullets?
+  black hole sucker effect on tail
+  flickering wings
+    draw pair of circles at 2 different locations, like beetle wings flapping
+      draw as ellipse
+      damage player if caught in wings
+
+tech: ricochet after nails do damage, the nail fires at a different nearby mobs
+  can reuse some targeted nail code
+    don't target 'who' you just damaged
+
+tech: You can place an extra perfect diamagnatism field on the map
+
+standing wave no longer pushes mobs away, but it can do damage to mobs caught in area effect
+negative mass field does damage to mobs inside field
+  combine with standing wave effect? pilot wave?
+
 store value of last hit health lost
-  names: patch
-
-  tech: after cloaking regen 1/2 of the last hit
-    spawning a heal power up is annoying because you'd be cloaked, so direct healing?
-    time limit for effect?
-      while still under ambush damage?
-
   tech: killing the mob that caused the last hit spawns a heal power up equal to 1/2 of last hit
-    time limit for effect? 3-4 seconds?
+    time limit for effect?
+    need to also store who hit player
 
-  tech: doing damage can recover up to 1/2 of the last hit
-    spawn a heal equal to 1/2 of last hit
-    time limit for effect? 3-4 seconds?
-
-  tech increase damage by how much health was lost in last hit
-    +damage = 3x health lost?
-      if you went from 100 -> 60 health = +40%*3  = 120% damage
-    negative mass field tech?
-    too similar to radiative equilibrium
-      pick between them?
-
+add small SVG pics to in-game console
+  when?
+    one for each field?
+  use stuff on physics notes:
+simulation.makeTextLog(`
+<svg class="SVG-title" width="160" height="120">
+    <g fill="transparent" stroke="#333" stroke-width="1" transform="translate(78,75)" stroke-linecap="round">
+        <path d="M-34 -34 l31 31 m6 6 l31 31    M34 -34 l-31 31 m-6 6 l-31 31"></path>
+        <ellipse cx="0" cy="35" rx="34.5" ry="7"/>
+        <ellipse cx="0" cy="-35" rx="34.5" ry="7"/>
+        <g stroke="none" fill="#333">
+            <circle cx="0" cy="0" r="1.5" />
+        </g>
+    </g>
+</svg>
+`);
 
 path-finding
   build a path-finding map on level load
@@ -48,12 +67,6 @@ path-finding
     mobs,
     drones?
     bots that can go far from player and return
-
-tech ______ effect that last until you get hit
-  field or bots can check your health every cycle and see if it lower
-    if it's high update the health check value
-  effect:
-    +damage until getting hit for cloaking field
 
 make plasma ball power up and block pick up still work when you have no no energy
   make a unique CD var for plasma ball?

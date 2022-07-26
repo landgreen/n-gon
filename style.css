@@ -532,6 +532,8 @@ summary {
     transition: opacity 0.25s;
     pointer-events: none;
     user-select: none;
+    /* white-space: pre;
+    font-family: 'Menlo', 'Monaco', monospace; */
 }
 
 /* color for in game console output */

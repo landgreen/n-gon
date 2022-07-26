@@ -363,11 +363,8 @@ const m = {
         m.health = m.health * (1 + 0.5 * (Math.random() - 0.5))
         if (m.health > 1) m.health = 1;
         m.displayHealth();
-
         //randomize field
         m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1)))
-
-
         //removes guns and ammo  
         b.inventory = [];
         b.activeGun = null;
@@ -726,7 +723,11 @@ const m = {
             document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
         }
 
-        if (dmg > 0.06 / m.holdingMassScale) m.drop(); //drop block if holding
+        if (dmg > 0.03) {
+            m.lastHit = dmg;
+            if (dmg > 0.06 / m.holdingMassScale) m.drop(); //drop block if holding  // m.holdingMassScale = 0.5 for most fields
+            if (m.isCloak) m.fireCDcycle = m.cycle //forced exit cloak
+        }
         const normalFPS = function() {
             if (m.defaultFPSCycle < m.cycle) { //back to default values
                 simulation.fpsCap = simulation.fpsCapDefault
@@ -908,6 +909,7 @@ const m = {
     fieldShieldingScale: 1,
     // fieldDamage: 1,
     isSneakAttack: false,
+    lastHit: 0, //stores value of last damage player took above a threshold, in m.damage
     sneakAttackCycle: 0,
     enterCloakCycle: 0,
     duplicateChance: 0,
@@ -950,6 +952,7 @@ const m = {
         m.fieldShieldingScale = 1;
         m.fieldBlockCD = 10;
         m.fieldHarmReduction = 1;
+        m.lastHit = 0
         m.isSneakAttack = false
         m.duplicateChance = 0
         powerUps.setDupChance();
@@ -1015,7 +1018,7 @@ const m = {
             m.regenEnergy();
             const xOff = m.pos.x - m.radius * m.maxEnergy
             const yOff = m.pos.y - 50
-            ctx.fillStyle = "rgba(0, 0, 0, 0.3)" //
+            ctx.fillStyle = "rgba(0, 0, 0, 0.2)" //
             ctx.fillRect(xOff, yOff, 60 * m.maxEnergy, 10);
             ctx.fillStyle = "#fff" //m.cycle > m.lastKillCycle + 300 ? "#000" : "#fff" //"#fff";
             ctx.fillRect(xOff, yOff, 60 * m.energy, 10);
@@ -2750,39 +2753,27 @@ const m = {
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
                 m.eyeFillColor = m.fieldMeterColor
-                // m.eyeFillColor = '#333'
                 m.fieldPhase = 0;
                 m.isCloak = false
-                // m.fieldDamage = 2.46 // 1 + 146/100
                 m.fieldDrawRadius = 0
                 m.isSneakAttack = true;
-                // m.sneakAttackCharge = 0;
                 m.sneakAttackCycle = 0;
                 m.enterCloakCycle = 0;
-                const drawRadius = 800
                 m.drawCloak = function() {
                     m.fieldPhase += 0.007
                     const wiggle = 0.15 * Math.sin(m.fieldPhase * 0.5)
                     ctx.beginPath();
                     ctx.ellipse(m.pos.x, m.pos.y, m.fieldDrawRadius * (1 - wiggle), m.fieldDrawRadius * (1 + wiggle), m.fieldPhase, 0, 2 * Math.PI);
-                    // if (m.fireCDcycle > m.cycle && (input.field)) {}
                     ctx.fillStyle = "#fff"
                     ctx.lineWidth = 2;
                     ctx.strokeStyle = "#000"
                     ctx.stroke()
-                    // ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*m.energy})`;
                     ctx.globalCompositeOperation = "destination-in";
                     ctx.fill();
                     ctx.globalCompositeOperation = "source-over";
                     ctx.clip();
                 }
                 m.hold = function() {
-                    // if (m.isCloak) {
-                    //     if (m.sneakAttackCharge < 120) m.sneakAttackCharge += 0.5
-                    // } else {
-                    //     if (m.sneakAttackCharge > 0) m.sneakAttackCharge--
-                    // }
-
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
                         m.holding();
@@ -2801,7 +2792,31 @@ const m = {
                         if (!m.isCloak) {
                             m.isCloak = true //enter cloak
                             m.enterCloakCycle = m.cycle
-                            // console.log(m.enterCloakCycle)
+                            if (tech.isCloakHealLastHit && m.lastHit > 0) {
+                                const heal = Math.min(0.75 * m.lastHit, m.energy)
+                                m.energy -= heal
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: m.pos.x,
+                                    y: m.pos.y,
+                                    radius: Math.sqrt(heal) * 200,
+                                    color: "rgba(0,255,200,0.6)",
+                                    time: 16
+                                });
+                                m.addHealth(heal); //heal from last hit
+                                // if (tech.isEnergyHealth) {
+                                //     simulation.drawList.push({ //add dmg to draw queue
+                                //         x: m.pos.x,
+                                //         y: m.pos.y,
+                                //         radius: Math.sqrt(heal) * 200,
+                                //         color: "#0ad", //simulation.mobDmgColor
+                                //         time: 16
+                                //     });
+                                //     m.energy += heal
+                                // } else {
+                                // }
+                                m.lastHit = 0
+                                // simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(heal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+                            }
                             if (tech.isIntangible) {
                                 for (let i = 0; i < bullet.length; i++) {
                                     if (bullet[i].botType && bullet[i].botType !== "orbit") bullet[i].collisionFilter.mask = cat.map | cat.bullet | cat.mobBullet | cat.mobShield
@@ -2841,12 +2856,12 @@ const m = {
                         }
                     }
                     if (m.isCloak) {
-                        this.fieldRange = this.fieldRange * 0.9 + 0.1 * drawRadius
-                        m.fieldDrawRadius = this.fieldRange * 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
+                        m.fieldRange = m.fieldRange * 0.9 + 80
+                        m.fieldDrawRadius = m.fieldRange * 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                         m.drawCloak()
-                    } else if (this.fieldRange < 4000) {
-                        this.fieldRange += 50
-                        m.fieldDrawRadius = this.fieldRange //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
+                    } else if (m.fieldRange < 4000) {
+                        m.fieldRange += 50
+                        m.fieldDrawRadius = m.fieldRange //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                         m.drawCloak()
                     }
                     if (tech.isIntangible) {

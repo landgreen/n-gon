@@ -16,7 +16,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(8 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(4 * 4) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.maxHealth = m.health = 100
             // powerUps.research.changeRerolls(100000)
@@ -24,19 +24,19 @@ const level = {
             // powerUps.research.changeRerolls(100)
             // tech.tech[297].frequency = 100
             // b.guns[0].ammo = 10000
-            // m.setField("metamaterial cloaking") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole
-            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // tech.giveTech("robotics")
-            // tech.giveTech("CPT symmetry");
-            // tech.giveTech("lens");
-            // tech.giveTech("robotics")
+            // m.setField("metamaterial cloaking") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // tech.giveTech("dynamic equilibrium")
+            // tech.giveTech("quantum eraser");
+            // tech.giveTech("patch");
+            // tech.giveTech("polyurethane foam")
             // for (let i = 0; i < 100; ++i) tech.giveTech("nail-bot")
             // for (let i = 0; i < 1; ++i) tech.giveTech("electric generator")
             // for (let i = 0; i < 9; i++) tech.giveTech("compound lens")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
-            // spawn.starter(1900, -500)
-            // spawn.laserTargetingBoss(1900, -500)
+            // spawn.starter(1900, -500, 100)
+            // spawn.snakeBoss(1900, -500)
             // for (let i = 0; i < 10; ++i) spawn.grower(1900, -500)
             // level.testing(); //not in rotation, used for testing
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");

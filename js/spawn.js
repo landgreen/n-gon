@@ -48,7 +48,13 @@ const spawn = {
     },
     quantumEraserCheck() { //remove mobs from tech: quantum eraser
         if (tech.isQuantumEraser && tech.quantumEraserCount > 0) {
-            for (let i = 0, len = mob.length; i < len; i++) {
+
+            //start at a random location in array
+            const randomMiddle = Math.floor(mob.length * Math.random())
+            let i = randomMiddle
+            for (let j = 0; j < mob.length; j++) {
+                i++
+                if (i > mob.length - 1) i = 0
                 if (mob[i].isDropPowerUp && mob[i].alive) { //&& !mob[i].isBoss
                     if (mob[i].isFinalBoss) {
                         tech.quantumEraserCount = 0;
@@ -86,6 +92,47 @@ const spawn = {
                     if (tech.quantumEraserCount < 1) break
                 }
             }
+
+
+
+            // for (let i = 0, len = mob.length; i < len; i++) {
+            //     if (mob[i].isDropPowerUp && mob[i].alive) { //&& !mob[i].isBoss
+            //         if (mob[i].isFinalBoss) {
+            //             tech.quantumEraserCount = 0;
+            //             return
+            //         } else {
+            //             tech.isQuantumEraserDuplication = true
+            //             mob[i].death()
+            //             tech.isQuantumEraserDuplication = false
+            //         }
+            //         //graphics
+            //         const color = 'rgba(255,255,255, 0.8)'
+            //         simulation.drawList.push({
+            //             x: mob[i].position.x,
+            //             y: mob[i].position.y,
+            //             radius: mob[i].radius * 2,
+            //             color: color, //"rgba(0,0,0,0.6)",
+            //             time: 60
+            //         });
+            //         simulation.drawList.push({
+            //             x: mob[i].position.x,
+            //             y: mob[i].position.y,
+            //             radius: mob[i].radius * 1,
+            //             color: color, //"rgba(0,0,0,0.85)",
+            //             time: 90
+            //         });
+            //         simulation.drawList.push({
+            //             x: mob[i].position.x,
+            //             y: mob[i].position.y,
+            //             radius: mob[i].radius * 0.5,
+            //             color: color, //"rgb(0,0,0)",
+            //             time: 120
+            //         });
+            //         tech.quantumEraserCount--
+            //         simulation.makeTextLog(`<span class='color-var'>tech</span>.quantumEraserCount <span class='color-symbol'>=</span> ${tech.quantumEraserCount}`)
+            //         if (tech.quantumEraserCount < 1) break
+            //     }
+            // }
         }
     },
     randomMob(x, y, chance = 1) {
@@ -2786,6 +2833,7 @@ const spawn = {
         mobs.spawn(x, y, 3, radius, "rgb(0,235,255)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
@@ -2808,11 +2856,29 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.targetingCount = 0;
         me.targetingTime = 60 - Math.min(58, 3 * simulation.difficulty)
         me.do = function() {
-            // this.armor();
+
+            // //wings
+            // const wing = (simulation.cycle % 9) > 4 ? this.vertices[0] : this.vertices[2] //Vector.add(this.position, { x: 100, y: 0 })
+            // const radius = 200
+            // //draw
+            // ctx.beginPath();
+            // ctx.arc(wing.x, wing.y, radius, 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
+            // ctx.fillStyle = "rgba(0,235,255,0.3)";
+            // ctx.fill();
+            // //check damage
+            // const hitPlayer = Matter.Query.ray([player], this.position, wing, radius)
+            // if (hitPlayer.length && m.immuneCycle < m.cycle) {
+            //     m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
+            //     m.damage(0.02 * simulation.dmgScale);
+            // }
+
+
+
+
+
             this.seePlayerByLookingAt();
             this.checkStatus();
             this.attraction();
@@ -5566,7 +5632,7 @@ const spawn = {
         mobs.spawn(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 8, radius, color1); //"rgb(55,170,170)"
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.accelMag = 0.0003 + 0.0002 * Math.sqrt(simulation.accelScale)
+        me.accelMag = 0.0004 + 0.0002 * Math.sqrt(simulation.accelScale)
         me.memory = 250;
         me.laserRange = 500;
         Matter.Body.setDensity(me, 0.0022 + 0.00022 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
@@ -5576,13 +5642,12 @@ const spawn = {
 
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
-            for (let i = 0; i < mob.length; i++) { //wake up tail mobs
-                if (mob[i].isSnakeTail && mob[i].alive) {
-                    mob[i].isSnakeTail = false;
-                    mob[i].do = mob[i].doActive
-                    // mob[i].removeConsBB();
+            me.onDeath = function() {
+                powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+                for (let i = 0, len = mob.length; i < len; i++) {
+                    if (this.id === mob[i].snakeHeadID && mob[i].alive) mob[i].death()
                 }
-            }
+            };
         };
         me.canFire = false;
         me.closestVertex1 = 0;
@@ -5660,7 +5725,7 @@ const spawn = {
             spawn.snakeBody(x + mag * Math.cos(angle), y + mag * Math.sin(angle), i === 0 ? 25 : 20);
             // mag -= 5
             // spawn.snakeBody(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 20);
-            if (i === 0) mob[mob.length - 1].snakeHeadID = me.id
+            if (i < 3) mob[mob.length - 1].snakeHeadID = me.id
             mob[mob.length - 1].previousTailID = previousTailID
             previousTailID = mob[mob.length - 1].id
         }
@@ -5703,9 +5768,9 @@ const spawn = {
         mobs.spawn(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 8, radius, color1); //"rgb(55,170,170)"
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.accelMag = 0.00045 + 0.0002 * Math.sqrt(simulation.accelScale)
+        me.accelMag = 0.0009 + 0.0002 * Math.sqrt(simulation.accelScale)
         me.memory = 250;
-        me.laserRange = 500;
+        me.laserRange = 400;
         Matter.Body.setDensity(me, 0.00165 + 0.00011 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.startingDamageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.damageReduction = 0
@@ -5713,6 +5778,9 @@ const spawn = {
 
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            for (let i = 0, len = mob.length; i < len; i++) {
+                if (this.id === mob[i].snakeHeadID && mob[i].alive) mob[i].death()
+            }
         };
         me.do = function() {
             this.seePlayerByHistory()
@@ -5738,7 +5806,7 @@ const spawn = {
             angle -= 0.15 + i * 0.008
             mag -= (i < 2) ? -15 : 5
             spawn.snakeBody(x + mag * Math.cos(angle), y + mag * Math.sin(angle), i === 0 ? 25 : 20);
-            if (i === 0) mob[mob.length - 1].snakeHeadID = me.id
+            if (i < 3) mob[mob.length - 1].snakeHeadID = me.id
             mob[mob.length - 1].previousTailID = previousTailID
             previousTailID = mob[mob.length - 1].id
         }
@@ -5775,11 +5843,13 @@ const spawn = {
         mobs.spawn(x, y, 8, radius, "rgba(0,180,180,0.4)");
         let me = mob[mob.length - 1];
         me.collisionFilter.mask = cat.bullet | cat.player | cat.mob //| cat.body
-        me.accelMag = 0.0007 * simulation.accelScale;
+        me.damageReduction = 0.2
+        Matter.Body.setDensity(me, 0.005); //normal is 0.001
+
+        // me.accelMag = 0.0007 * simulation.accelScale;
         me.leaveBody = Math.random() < 0.33 ? true : false;
         me.showHealthBar = false;
         me.isDropPowerUp = false;
-        Matter.Body.setDensity(me, 0.005); //normal is 0.001
         me.frictionAir = 0.015;
         me.isSnakeTail = true;
         me.stroke = "transparent"
@@ -5792,16 +5862,16 @@ const spawn = {
                         mob[i].damageReduction = mob[i].startingDamageReduction
                     }
                 }
-            }, 150);
+            }, 500);
         };
         me.do = function() {
             this.checkStatus();
         };
-        me.doActive = function() {
-            this.checkStatus();
-            this.alwaysSeePlayer();
-            this.attraction();
-        };
+        // me.doActive = function() {
+        //     this.checkStatus();
+        //     this.alwaysSeePlayer();
+        //     this.attraction();
+        // };
     },
     tetherBoss(x, y, constraint, radius = 90) {
         // constrained mob boss for the towers level

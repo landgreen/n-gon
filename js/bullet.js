@@ -1450,7 +1450,7 @@ const b = {
                 }
                 if (tech.isFoamBall) {
                     const radius = 5 + 8 * Math.random()
-                    const velocity = { x: Math.max(2, 10 - radius * 0.25), y: 0 }
+                    const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                     for (let i = 0, len = 2 * this.mass; i < len; i++) {
                         b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
                     }
@@ -1732,7 +1732,7 @@ const b = {
 
                 if (tech.isFoamBall) {
                     const radius = 5 + 8 * Math.random()
-                    const velocity = { x: Math.max(2, 10 - radius * 0.25), y: 0 }
+                    const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                     for (let i = 0, len = 2 * this.mass; i < len; i++) {
                         b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
                     }
@@ -3707,6 +3707,10 @@ const b = {
                         }
                     }
                     this.targetVertex = bestVertex
+                    Matter.Body.setVelocity(this, {
+                        x: 0,
+                        y: 0
+                    });
                 }
             },
             onEnd() {},
@@ -3778,6 +3782,10 @@ const b = {
                 } else if (this.target !== null) { //look for a new target
                     this.collisionFilter.category = cat.bullet;
                     this.collisionFilter.mask = cat.mob //| cat.mobShield //cat.map | cat.body | cat.mob | cat.mobBullet | cat.mobShield
+                    Matter.Body.setVelocity(this, {
+                        x: this.target.velocity.x,
+                        y: this.target.velocity.y
+                    });
                     if (tech.isSpawnBulletsOnDeath && bullet.length < 180 && !this.target.isMobBullet) {
                         let targets = []
                         for (let i = 0, len = mob.length; i < len; i++) {
@@ -5645,7 +5653,8 @@ const b = {
                     }
                     if (tech.isFoamBall) {
                         const radius = 5 + 8 * Math.random()
-                        const velocity = { x: Math.max(2, 10 - radius * 0.25), y: 0 }
+                        // const velocity = { x: Math.max(2, 10 - radius * 0.25), y: 0 }
+                        const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                         for (let i = 0, len = 6 * this.mass; i < len; i++) {
                             b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
                         }
@@ -5693,7 +5702,7 @@ const b = {
                         }
                         if (tech.isFoamBall) {
                             const radius = 5 + 8 * Math.random()
-                            const velocity = { x: Math.max(2, 10 - radius * 0.25), y: 0 }
+                            const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                             for (let i = 0, len = 6 * this.mass; i < len; i++) {
                                 b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
                             }
@@ -5745,7 +5754,7 @@ const b = {
                         }
                         if (tech.isFoamBall) {
                             const radius = 5 + 8 * Math.random()
-                            const velocity = { x: Math.max(2, 10 - radius * 0.25), y: 0 }
+                            const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                             for (let i = 0, len = 6 * this.mass; i < len; i++) {
                                 b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
                             }

@@ -980,7 +980,6 @@ const simulation = {
         }
 
         if (tech.isQuantumEraser) {
-            // tech.quantumEraserCount = 0
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].isDropPowerUp && mob[i].alive) tech.quantumEraserCount++
             }
