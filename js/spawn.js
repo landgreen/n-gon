@@ -3621,11 +3621,11 @@ const spawn = {
         mobs.spawn(x, y, sides, radius, "rgb(201,202,225)");
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
-        me.accelMag = 0.00038 * Math.sqrt(simulation.accelScale);
+        me.accelMag = 0.00018 + 0.00018 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.01;
-        me.swordRadiusMax = 550 + 10 * simulation.difficulty;
+        me.swordRadiusMax = 400 + 10 * simulation.difficulty;
         me.laserAngle = 0;
-        me.swordDamage = 0.0025 * simulation.dmgScale
+        me.swordDamage = 0.025 * simulation.dmgScale //0.033 * simulation.dmgScale; previous      //0.14 * simulation.dmgScale;laserBoss
 
         // spawn.shield(me, x, y, 1);
         Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger
@@ -3652,7 +3652,7 @@ const spawn = {
             if (this.isInvulnerable) {
                 if (this.invulnerabilityCountDown > 0) {
                     this.invulnerabilityCountDown--
-                    //graphics //draw a super shield?
+                    //draw invulnerability
                     ctx.beginPath();
                     let vertices = this.vertices;
                     ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -3673,7 +3673,7 @@ const spawn = {
             this.seePlayerByHistory(60);
             this.attraction();
             //traveling laser
-            this.laserAngle += this.isInvulnerable ? 0.06 : 0.015
+            this.laserAngle += this.isInvulnerable ? 0.025 : 0.006
             for (let i = 0, len = this.vertices.length; i < len; i++) {
                 // this.laserSword(this.vertices[1], this.angle + laserAngle);
                 const bend = bendFactor * Math.cos(this.laserAngle + 2 * Math.PI * i / len)
@@ -3710,15 +3710,15 @@ const spawn = {
             vertexCollision(where, look, map);
             if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
             if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
-                // m.immuneCycle = m.cycle + tech.collisionImmuneCycles + 60; //player is immune to damage for an extra second
+                m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for an extra second
                 m.damage(this.swordDamage);
-                // simulation.drawList.push({ //add dmg to draw queue
-                //     x: best.x,
-                //     y: best.y,
-                //     radius: this.swordDamage * 1500,
-                //     color: "rgba(80,0,255,0.5)",
-                //     time: 20
-                // });
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: best.x,
+                    y: best.y,
+                    radius: this.swordDamage * 1500,
+                    color: "rgba(80,0,255,0.5)",
+                    time: 20
+                });
             }
             if (best.dist2 === Infinity) best = look;
             ctx.beginPath(); //draw beam

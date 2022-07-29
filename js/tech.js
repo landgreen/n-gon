@@ -253,7 +253,7 @@ const tech = {
         if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= tech.sneakAttackDmg
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.harmReduction()
         if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
-        if (tech.isLastHitDamage && m.lastHit) dmg *= 1 + 10 * m.lastHit // if (!simulation.paused) m.lastHit = 0
+        if (tech.lastHitDamage && m.lastHit) dmg *= 1 + tech.lastHitDamage * m.lastHit * (2 - m.harmReduction()) // if (!simulation.paused) m.lastHit = 0
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
@@ -397,9 +397,6 @@ const tech = {
         },
         {
             name: "arsenal",
-            // descriptionFunction() {
-            //     return `increase <strong class='color-d'>damage</strong> by <strong>${14 * b.inventory.length}%</strong><br><strong>14%</strong> for each <strong class='color-g'>gun</strong> in your inventory`
-            // },
             description: "for each <strong class='color-g'>gun</strong> in your inventory<br><strong>+13%</strong> <strong class='color-d'>damage</strong>",
             maxCount: 1,
             count: 0,
@@ -439,7 +436,7 @@ const tech = {
         {
             name: "integrated armament",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Weapon' class="link">integrated armament</a>`,
-            description: `<span style = 'font-size:95%;'>increase <strong class='color-d'>damage</strong> by <strong>25%</strong>, but new <strong class='color-g'>guns</strong><br>replace your current <strong class='color-g'>gun</strong> and convert <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></span>`,
+            description: `<span style = 'font-size:95%;'>+<strong>25%</strong> <strong class='color-d'>damage</strong>, but new <strong class='color-g'>guns</strong><br>replace your current <strong class='color-g'>gun</strong> and convert <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></span>`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -780,7 +777,6 @@ const tech = {
         {
             name: "kinetic bombardment",
             description: "<strong class='color-d'>damage</strong> is proportional to mob <strong>distance</strong><br>up to <strong>+33%</strong> <strong class='color-d'>damage</strong> at <strong>3000</strong> displacement",
-            // description: "increase <strong class='color-d'>damage</strong> by up to <strong>33%</strong> at a <strong>distance</strong><br>of up to 50 player widths from the target",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -1022,7 +1018,7 @@ const tech = {
         },
         {
             name: "anticorrelation",
-            description: "increase <strong class='color-d'>damage</strong> by <strong>100%</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+            description: "<strong>+100%</strong> <strong class='color-d'>damage</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -1161,7 +1157,7 @@ const tech = {
         {
             name: "foam-bot upgrade",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">foam-bot upgrade</a>`,
-            description: "<strong>convert</strong> your bots to <strong>foam-bots</strong><br><strong>300%</strong> increased foam <strong>size</strong> and <strong>fire rate</strong>",
+            description: "<strong>convert</strong> your bots to <strong>foam-bots</strong><br><strong>+300%</strong> foam <strong>size</strong> and <strong>fire rate</strong>",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -1217,7 +1213,7 @@ const tech = {
         {
             name: "boom-bot upgrade",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">boom-bot upgrade</a>`,
-            description: "<strong>convert</strong> your bots to <strong>boom-bots</strong><br><strong>300%</strong> increased <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size",
+            description: "<strong>convert</strong> your bots to <strong>boom-bots</strong><br><strong>+300%</strong> <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and size",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -1275,7 +1271,7 @@ const tech = {
         {
             name: "laser-bot upgrade",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">laser-bot upgrade</a>`,
-            description: "<strong>convert</strong> your bots to <strong>laser-bots</strong><br><strong>100%</strong> improved <strong class='color-d'>damage</strong>, efficiency, and range", //  <strong>400%</strong> increased <strong>laser-bot</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong>convert</strong> your bots to <strong>laser-bots</strong><br><strong>+100%</strong> <strong class='color-d'>damage</strong>, efficiency, and range",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -1331,7 +1327,7 @@ const tech = {
         {
             name: "orbital-bot upgrade",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">orbital-bot upgrade</a>`,
-            description: "<strong>convert</strong> your bots to <strong>orbital-bots</strong><br>increase <strong class='color-d'>damage</strong> by <strong>300%</strong> and <strong>radius</strong> by <strong>50%</strong>",
+            description: "<strong>convert</strong> your bots to <strong>orbital-bots</strong><br><strong>+300%</strong> orbital <strong class='color-d'>damage</strong> and <strong>+50%</strong> <strong>radius</strong>",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -2229,6 +2225,7 @@ const tech = {
             name: "1st ionization energy",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ionization_energy' class="link">1st ionization energy</a>`,
             description: `after you collect ${powerUps.orb.heal()}<br><strong>+10</strong> maximum <strong class='color-f'>energy</strong>`,
+            description: `convert ${powerUps.orb.heal()} into <div class="heal-circle" style = "background-color: #0ae;"></div><br><div class="heal-circle" style = "background-color: #0ae;"></div> give <strong>+10</strong> maximum <strong class='color-f'>energy</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 2,
@@ -3129,8 +3126,8 @@ const tech = {
             frequencyDefault: 1,
             isNonRefundable: true,
             // isJunk: true,
-            allowed() { return true },
-            requires: "",
+            allowed() { return !tech.isDeterminism },
+            requires: "not determinism",
             effect() {
                 tech.tooManyTechChoices = 1
                 // for (let i = 0; i < this.bonusResearch; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
@@ -3229,7 +3226,6 @@ const tech = {
         },
         {
             name: "eternalism",
-            // description: `increase <strong class='color-d'>damage</strong> by <strong>60%</strong>, but <strong>time</strong> doesn't <strong>pause</strong><br>while choosing a choosing a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong>`, //${powerUps.orb.heal()} or
             description: "<strong>+34%</strong> <strong class='color-d'>damage</strong><br><strong>time</strong> can't be <strong>paused</strong> <em>(time can be dilated)</em>",
             maxCount: 1,
             count: 0,
@@ -3892,6 +3888,27 @@ const tech = {
             },
             remove() {
                 tech.bulletSize = 1;
+            }
+        },
+        {
+            name: "ricochet",
+            description: "after <strong>nails</strong> hit a mob they <strong>rebound</strong> towards<br>a new mob with <strong>+180%</strong> <strong class='color-d'>damage</strong> per bounce",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                // return (tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles) || (tech.haveGunCheck("mines"))
+                return tech.isMineDrop || tech.isNailBotUpgrade || tech.fragments || tech.nailsDeathMob || (tech.haveGunCheck("mine") && !tech.isLaserMine) || (tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles) || (tech.haveGunCheck("shotgun") && (tech.isNeedles || tech.isNailShot))
+            },
+            //
+            requires: "nail gun, not rotary cannon, rivets, or needles",
+            effect() {
+                tech.isRicochet = true
+            },
+            remove() {
+                tech.isRicochet = false
             }
         },
         {
@@ -5026,7 +5043,7 @@ const tech = {
         },
         {
             name: "vacuum permittivity",
-            description: "increase <strong class='color-p'>radioactive</strong> range by <strong>20%</strong><br>objects in range of the bomb are <strong>slowed</strong>",
+            description: "<strong>+20%</strong> <strong class='color-p'>radioactive</strong> range<br>objects in range of the bomb are <strong>slowed</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5918,7 +5935,6 @@ const tech = {
             descriptionFunction() {
                 return `+${(10 * Math.sqrt(b.guns[9].ammo)).toFixed(0)}% <strong>harpoon</strong> size and <strong class='color-d'>damage</strong><br><em>(1/10 √ harpoon <strong class='color-ammo'>ammo</strong>)</em>`
             },
-            // description: "increase the <strong>size</strong> of your <strong>harpoon</strong><br>by <strong>10%</strong> of √ of harpoon <strong class='color-ammo'>ammo</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5983,7 +5999,6 @@ const tech = {
             descriptionFunction() {
                 return `+${(b.guns[9].ammo).toFixed(0)}% <strong>harpoon</strong> <strong>rope</strong> <strong>length</strong><br><em>(1/80 of harpoon <strong class='color-ammo'>ammo</strong>)</em>`
             },
-            // description: "increase the <strong>length</strong> of your <strong>harpoon</strong>'s <strong>rope</strong><br>by <strong>1%</strong> per harpoon <strong class='color-ammo'>ammo</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6036,7 +6051,7 @@ const tech = {
             effect() {
                 let techGiven = 0
                 for (let j = 0; j < 3; j++) {
-                    const names = ["lens", "compound lens", "arc length", "laser diode", "free-electron laser", "relativistic momentum", "specular reflection", "diffraction grating", "diffuse beam", "output coupler", "slow light", "laser-bot", "laser-bot upgrade"]
+                    const names = ["lens", "compound lens", "arc length", "infrared diode", "free-electron laser", "dye laser", "relativistic momentum", "specular reflection", "diffraction grating", "diffuse beam", "output coupler", "slow light", "laser-bot", "laser-bot upgrade"]
                     //convert names into indexes
                     const options = []
                     for (let i = 0; i < names.length; i++) {
@@ -6083,54 +6098,6 @@ const tech = {
             }
         },
         {
-            name: "laser diode",
-            description: "<strong>+40%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return (tech.haveGunCheck("laser") || tech.isLaserBotUpgrade || tech.isLaserMine) && tech.laserDamage === 0.18
-            },
-            requires: "laser, not free-electron",
-            effect() {
-                tech.isLaserDiode = 0.6; //100%-40%
-                tech.laserColor = "rgb(0, 11, 255)"
-                tech.laserColorAlpha = "rgba(0, 11, 255,0.5)"
-            },
-            remove() {
-                tech.isLaserDiode = 1;
-                tech.laserColor = "#f02"
-                tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
-            }
-        },
-        {
-            name: "free-electron laser",
-            description: "<strong>+225%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong> <br><strong>–250%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.isLaserBotUpgrade) && !tech.isPulseLaser && tech.isLaserDiode === 1
-            },
-            requires: "laser, not pulse, diodes",
-            effect() {
-                tech.laserFieldDrain = 0.0063 //base is 0.002
-                tech.laserDamage = 0.52; //base is 0.16,  0.16 * (1 + 2.25)
-                tech.laserColor = "#83f"
-                tech.laserColorAlpha = "rgba(136, 51, 255,0.5)"
-            },
-            remove() {
-                tech.laserFieldDrain = 0.0018;
-                tech.laserDamage = 0.18; //used in check on pulse and diode: tech.laserDamage === 0.18
-                tech.laserColor = "#f00"
-                tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
-            }
-        },
-        {
             name: "relativistic momentum",
             description: "<strong class='color-laser'>lasers</strong> push <strong>mobs</strong> and <strong class='color-block'>blocks</strong>",
             isGunTech: true,
@@ -6152,9 +6119,9 @@ const tech = {
         {
             name: "iridescence",
             // description: "if a <strong class='color-laser'>laser</strong> hits a mob at a low angle of illumination<br><strong>+66%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
-            description: "if <strong class='color-laser'>laser</strong> beams hit mobs near their <strong>center</strong><br><strong>+88%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            description: "if <strong class='color-laser'>laser</strong> beams hit mobs near their <strong>center</strong><br><strong>+100%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
-            maxCount: 3,
+            maxCount: 9,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
@@ -6163,7 +6130,7 @@ const tech = {
             },
             requires: "laser, not pulse",
             effect() {
-                tech.laserCrit += 0.88;
+                tech.laserCrit += 1;
             },
             remove() {
                 tech.laserCrit = 0;
@@ -6215,58 +6182,6 @@ const tech = {
                 b.guns[11].lensDamageOn = 2.5
             }
         },
-        // {
-        //     name: "lens",
-        //     // description: "<strong>+150%</strong> <strong class='color-laser'>laser</strong> gun <strong class='color-d'>damage</strong> if it passes<br>through a revolving <strong>+90°</strong> arc circular lens", //<span style='font-size: 125%;'>π</span> / 2</strong>
-        //     descriptionFunction() {
-        //         if (this.count) {
-        //             return `<strong>+70%</strong> lens <strong class='color-d'>damage</strong><br><strong>+20°</strong> arc circular lens`
-        //         } else {
-        //             return `<strong>+150%</strong> <strong class='color-laser'>laser</strong> gun <strong class='color-d'>damage</strong> if it passes<br>through a revolving <strong>90°</strong> arc circular lens`
-        //         }
-        //     },
-        //     isGunTech: true,
-        //     maxCount: 3,
-        //     count: 0,
-        //     frequency: 2,
-        //     frequencyDefault: 2,
-        //     allowed() {
-        //         return tech.haveGunCheck("laser")
-        //     },
-        //     requires: "laser",
-        //     effect() {
-        //         tech.isLaserLens = true
-        //         if (this.count) {
-        //             b.guns[11].lensDamageOn += 0.7
-        //             b.guns[11].arcRange += 20 * Math.PI / 180
-        //         } else [
-        //             b.guns[11].lensDamageOn = 2.5 // 100% + 150%
-        //         ]
-        //         b.guns[11].chooseFireMethod()
-        //     },
-        //     remove() {
-        //         tech.isLaserLens = false
-        //         b.guns[11].arcRange = 90 * Math.PI / 180
-        //         b.guns[11].chooseFireMethod()
-        //     }
-        // },
-        // {
-        //     name: "arc length",
-        //     description: "increase the circular arc of your <strong class='color-laser'>laser</strong> <strong>lens</strong><br>by <strong>+<span style='font-size: 125%;'>π</span> / 4</strong>",
-        //     isGunTech: true,
-        //     maxCount: 3,
-        //     count: 0,
-        //     frequency: 2,
-        //     frequencyDefault: 2,
-        //     allowed() {
-        //         return tech.isLaserLens && tech.haveGunCheck("laser")
-        //     },
-        //     requires: "laser gun, lens",
-        //     effect() {
-        //     },
-        //     remove() {
-        //     }
-        // },
         {
             name: "specular reflection",
             description: "<strong>+2</strong> <strong class='color-laser'>laser</strong> beam reflections",
@@ -6378,11 +6293,83 @@ const tech = {
                 b.guns[11].chooseFireMethod()
             },
             remove() {
-                // this.description = "<strong>laser</strong> beam is <strong>spread</strong> into your recent <strong>past</strong><br>increase total beam <strong class='color-d'>damage</strong> by <strong>300%</strong>"
                 if (tech.historyLaser) {
                     tech.historyLaser = 0
                     b.guns[11].chooseFireMethod()
                 }
+            }
+        },
+        {
+            name: "infrared diode",
+            description: "<strong>+50%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency<br><em>infrared light is outside visual perception</em>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return (tech.haveGunCheck("laser") || tech.isLaserBotUpgrade || tech.isLaserMine) && !tech.isPulseLaser && tech.laserDrain === 0.0018
+            },
+            requires: "laser, not free-electron",
+            effect() {
+                tech.laserDrain *= 0.5; //100%-50%
+                tech.laserColor = "transparent" //"rgb(255,0,20,0.02)"
+                // tech.laserColorAlpha = "rgba(255,0,20,0.05)"
+            },
+            remove() {
+                tech.laserDrain = 0.0018;
+                tech.laserColor = "#f02"
+                tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
+            }
+        },
+        {
+            name: "dye laser",
+            description: "<strong>+20%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency<br><strong>+20%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.isLaserBotUpgrade) && !tech.isPulseLaser && tech.laserDrain === 0.0018
+            },
+            requires: "laser, not pulse, infrared diode",
+            effect() {
+                tech.laserDrain *= 0.8
+                tech.laserDamage *= 1 + 0.2
+                tech.laserColor = "rgb(0, 11, 255)"
+                tech.laserColorAlpha = "rgba(0, 11, 255,0.5)"
+            },
+            remove() {
+                tech.laserDrain = 0.0018;
+                tech.laserDamage = 0.18; //used in check on pulse and diode: tech.laserDamage === 0.18
+                tech.laserColor = "#f00"
+                tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
+            }
+        },
+        {
+            name: "free-electron laser",
+            description: "<strong>–250%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency<br><strong>+190%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.isLaserBotUpgrade) && !tech.isPulseLaser && tech.laserDrain === 0.0018
+            },
+            requires: "laser, not pulse, infrared diode",
+            effect() {
+                tech.laserDrain *= 1 + 2.5 //250% more drain
+                tech.laserDamage *= 1 + 1.9 //190% more damage
+                tech.laserColor = "#83f"
+                tech.laserColorAlpha = "rgba(136, 51, 255,0.5)"
+            },
+            remove() {
+                tech.laserDrain = 0.0018;
+                tech.laserDamage = 0.18; //used in check on pulse and diode: tech.laserDamage === 0.18
+                tech.laserColor = "#f00"
+                tech.laserColorAlpha = "rgba(255, 0, 0, 0.5)"
             }
         },
         {
@@ -6394,7 +6381,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDamage === 0.18 && !tech.isStuckOn
+                return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDrain === 0.0018 && !tech.isStuckOn
             },
             requires: "laser gun, not specular reflection, diffuse, free-electron laser, optical amplifier",
             effect() {
@@ -6661,10 +6648,10 @@ const tech = {
         },
         {
             name: "dynamic equilibrium",
-            descriptionFunction() { return `increase <strong class='color-d'>damage</strong> by <strong>10%</strong><br>of your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss` },
-            // description: `increase <strong class='color-d'>damage</strong> by <strong>500%</strong><br>of your last <strong class='color-h'>health</strong> loss`,
+            descriptionFunction() { return `increase <strong class='color-d'>damage</strong> by your <strong class='color-defense'>defense</strong> times<br><strong>5%</strong> of your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss &nbsp; <em style = 'font-size:94%;'>(+${(100*tech.lastHitDamage * m.lastHit * (2 - m.harmReduction())).toFixed(0)}% damage)</em>` }, // = <strong>+${10*m.harmReduction()}%</strong>
+            // descriptionFunction() { return `increase <strong class='color-d'>damage</strong> by your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss<br><strong style = 'font-size:90%;'>(${(tech.lastHitDamage).toFixed(0)}%)(${(100*m.lastHit).toFixed(0)} ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"})(${2 - m.harmReduction()} <strong class='color-defense'>defense</strong>) = ${(100*tech.lastHitDamage * m.lastHit * (2 - m.harmReduction())).toFixed(0)}% <strong class='color-d'>damage</strong></strong> ` }, // = <strong>+${10*m.harmReduction()}%</strong>
             isFieldTech: true,
-            maxCount: 1,
+            maxCount: 9,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
@@ -6673,15 +6660,15 @@ const tech = {
             },
             requires: "negative mass, pilot wave, not patch",
             effect() {
-                tech.isLastHitDamage = true;
+                tech.lastHitDamage += 5;
             },
             remove() {
-                tech.isLastHitDamage = false;
+                tech.lastHitDamage = 0;
             }
         },
         {
             name: "neutronium",
-            description: `<strong>move</strong> and <strong>jump</strong> <strong>25%</strong> <strong>slower</strong><br>if your <strong class='color-f'>field</strong> is active <strong>+90%</strong> <strong class='color-defense'>defense</strong>`,
+            description: `<strong>move</strong> and <strong>jump</strong> <strong>20%</strong> <strong>slower</strong><br>if your <strong class='color-f'>field</strong> is active <strong>+90%</strong> <strong class='color-defense'>defense</strong>`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -6693,8 +6680,8 @@ const tech = {
             requires: "negative mass, not mass-energy",
             effect() {
                 tech.isNeutronium = true
-                tech.baseFx *= 0.75
-                tech.baseJumpForce *= 0.75
+                tech.baseFx *= 0.8
+                tech.baseJumpForce *= 0.8
                 m.setMovement()
             },
             //also removed in m.setHoldDefaults() if player switches into a bad field
@@ -7066,7 +7053,6 @@ const tech = {
             name: "plasma jet",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Plasma_(physics)' class="link">plasma jet</a>`,
             description: `use ${powerUps.orb.research(2)}<br><strong>+50%</strong> <strong class='color-plasma'>plasma</strong> <strong>torch</strong> range`,
-            // description: "use <strong>1</strong> <strong class='color-r'>research</strong> to <br>increase <strong class='color-plasma'>plasma</strong> <strong>torch's</strong> range by <strong>50%</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7358,7 +7344,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" && !tech.isLastHitDamage && !tech.isEnergyHealth
+                return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" && !tech.lastHitDamage && !tech.isEnergyHealth
             },
             requires: "metamaterial cloaking, not dynamic equilibrium, mass-energy",
             effect() {
@@ -7410,7 +7396,6 @@ const tech = {
         {
             name: "dynamical systems",
             description: `use ${powerUps.orb.research(2)}<br><strong>+35%</strong> <strong class='color-d'>damage</strong>`,
-            // description: "use <strong>1</strong> <strong class='color-r'>research</strong><br>increase your <strong class='color-d'>damage</strong> by <strong>35%</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7452,25 +7437,6 @@ const tech = {
                 b.setFireCD();
             }
         },
-        // {
-        //     name: "potential well",
-        //     description: "the force that <strong>pilot wave</strong> generates<br>to trap <strong class='color-block'>blocks</strong> is greatly increased",
-        //     isFieldTech: true,
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 2,
-        //     frequencyDefault: 2,
-        //     allowed() {
-        //         return m.fieldUpgrades[m.fieldMode].name === "pilot wave"
-        //     },
-        //     requires: "pilot wave",
-        //     effect() {
-        //         tech.pilotForce = 0.0006
-        //     },
-        //     remove() {
-        //         tech.pilotForce = 0.00002
-        //     }
-        // },
         {
             name: "WIMPs",
             description: `at the end of each <strong>level</strong> spawn ${powerUps.orb.research(5)}<br> and a <strong class='color-defense'>harmful</strong> particle that slowly <strong>chases</strong> you`,
@@ -7934,7 +7900,6 @@ const tech = {
             },
             requires: "",
             effect() {
-                // level.levelsCleared = 0 //increases chance of power ups spawns, so shouldn't reset
                 level.difficultyDecrease(simulation.difficultyMode * 2)
                 level.onLevel = 0
                 simulation.clearNow = true //end current level
@@ -10266,7 +10231,6 @@ const tech = {
     oneSuperBall: null,
     laserReflections: null,
     laserDamage: null,
-    laserFieldDrain: null,
     isAmmoFromHealth: null,
     mobSpawnWithHealth: null,
     isEnergyRecovery: null,
@@ -10303,7 +10267,7 @@ const tech = {
     isNeutronStun: null,
     isAnsatz: null,
     isDamageFromBulletCount: null,
-    isLaserDiode: null,
+    laserDrain: null,
     isNailShot: null,
     slowFire: null,
     fastTime: null,
@@ -10551,5 +10515,6 @@ const tech = {
     isSporeColony: null,
     isExtraBotOption: null,
     isLastHitDamage: null,
-    isCloakHealLastHit: null
+    isCloakHealLastHit: null,
+    isRicochet: null
 }

@@ -1964,7 +1964,6 @@ const b = {
                         mob[i].alive && !mob[i].isBadTarget &&
                         Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                         !mob[i].isInvulnerable
-                        // && Matter.Query.ray(body, this.position, mob[i].position).length === 0
                     ) {
                         const futureDist = Vector.magnitude(Vector.sub(futurePos, mob[i].position));
                         if (futureDist < closeDist) {
@@ -2327,7 +2326,7 @@ const b = {
                 if (best.who.damageReduction) {
                     if ( //iridescence
                         tech.laserCrit && !best.who.shield &&
-                        Vector.dot(Vector.normalise(Vector.sub(best.who.position, path[path.length - 1])), Vector.normalise(Vector.sub(path[path.length - 1], path[path.length - 2]))) > 0.995 - 0.6 / best.who.radius
+                        Vector.dot(Vector.normalise(Vector.sub(best.who.position, path[path.length - 1])), Vector.normalise(Vector.sub(path[path.length - 1], path[path.length - 2]))) > 0.997 - 0.6 / best.who.radius
                     ) {
                         damage *= 1 + tech.laserCrit
                         simulation.drawList.push({ //add dmg to draw queue
@@ -2449,7 +2448,7 @@ const b = {
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
             lookFrequency: 67 + Math.floor(7 * Math.random()),
-            drain: 0.7 * tech.isLaserDiode * tech.laserFieldDrain,
+            drain: 0.7 * tech.laserDrain,
             isDetonated: false,
             torqueMagnitude: 0.000003 * (Math.round(Math.random()) ? 1 : -1),
             range: 1500,
@@ -3958,7 +3957,33 @@ const b = {
                     b.explosion(this.position, 150 + 30 * Math.random()); //makes bullet do explosive damage at end
                 }
             }
+            this.ricochet(who)
         };
+        bullet[me].ricochet = function(who) { //use for normal nails, and ice crystal nails
+            if (tech.isRicochet) {
+                const targets = [] //target nearby mobs
+                for (let i = 0, len = mob.length; i < len; i++) {
+                    const dist = Vector.magnitude(Vector.sub(this.position, mob[i].position));
+                    if (
+                        mob[i] !== who &&
+                        dist < 2500 + mob[i].radius &&
+                        !mob[i].isBadTarget && //|| mob[i].isMobBullet
+                        !mob[i].isInvulnerable &&
+                        Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                        Matter.Query.ray(map, this.position, mob[i].position).length === 0
+                    ) {
+                        targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
+                    }
+                }
+                if (targets.length > 0) { // aim near a random target in array
+                    const index = Math.floor(Math.random() * targets.length)
+                    Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(Vector.sub(targets[index], this.position)), 45));
+                    Matter.Body.setAngle(this, Math.atan2(this.velocity.y, this.velocity.x))
+                    Matter.Body.setAngularVelocity(this, 0);
+                }
+                this.dmg += 2
+            }
+        }
         bullet[me].do = function() {};
     },
     needle(angle = m.angle) {
@@ -4590,10 +4615,10 @@ const b = {
             offPlayer: { x: 0, y: 0, },
             dmg: 0, //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
-            lookFrequency: 40 + Math.floor(7 * Math.random()) - 13 * tech.isLaserBotUpgrade,
+            lookFrequency: 20 + Math.floor(7 * Math.random()) - 13 * tech.isLaserBotUpgrade,
             range: (700 + 500 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
             drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,
-            drain: (0.5 - 0.44 * tech.isLaserBotUpgrade) * tech.laserFieldDrain * tech.isLaserDiode,
+            drain: (0.5 - 0.44 * tech.isLaserBotUpgrade) * tech.laserDrain,
             laserDamage: 0.85 + 0.8 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
@@ -5375,6 +5400,7 @@ const b = {
                                 b.explosion(this.position, 150 + 30 * Math.random()); //makes bullet do explosive damage at end
                             }
                         }
+                        this.ricochet(who)
                     };
                     if (m.energy < 0.01) {
                         m.fireCDcycle = m.cycle + 60; // cool down
@@ -6950,7 +6976,7 @@ const b = {
                 }
                 ctx.beginPath();
                 ctx.arc(m.pos.x, m.pos.y, 60, this.angle - this.arcRange, this.angle + this.arcRange);
-                ctx.strokeStyle = '#fff' //'rgba(255,255,255,0.9)' //'hsl(189, 100%, 95%)' //tech.laserColor
+                ctx.strokeStyle = '#fff' //'rgba(255,255,255,0.9)' //'hsl(189, 100%, 95%)'
                 ctx.stroke();
                 // const a = { x: radius * Math.cos(this.angle + this.arcRange), y: radius * Math.sin(this.angle + this.arcRange) }
                 // const b = Vector.add(m.pos, a)
@@ -6962,7 +6988,7 @@ const b = {
                 if (tech.isStuckOn) {
                     if (this.isStuckOn) {
                         if (!input.fire) this.fire();
-                        if (m.energy < tech.laserFieldDrain * tech.isLaserDiode) this.isStuckOn = false
+                        if (m.energy < tech.laserDrain) this.isStuckOn = false
                     } else if (input.fire) {
                         this.isStuckOn = true
                     }
@@ -6979,7 +7005,7 @@ const b = {
                 }
                 if (tech.isPulseLaser) {
                     this.fire = () => {
-                        const drain = 0.01 * tech.isLaserDiode * (tech.isCapacitor ? 10 : 1)
+                        const drain = 0.01 * (tech.isCapacitor ? 10 : 1) / b.fireCDscale
                         if (m.energy > drain) {
                             // m.energy -= m.fieldRegen
                             if (this.charge < 50 * m.maxEnergy) {
@@ -7003,7 +7029,7 @@ const b = {
                                     ctx.moveTo(history.position.x, history.position.y - off);
                                     ctx.ellipse(history.position.x, history.position.y - off, mag, mag * 0.65, history.angle, 0, 2 * Math.PI)
                                 }
-                                ctx.fillStyle = tech.isLaserDiode === 1 ? `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})` : `rgba(0,0,255,${0.09 * Math.sqrt(this.charge)})`;
+                                ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
                                 ctx.fill();
                                 //fire
                                 if (!input.fire) {
@@ -7027,7 +7053,7 @@ const b = {
                                 ctx.beginPath();
                                 ctx.arc(m.pos.x, m.pos.y, 4.2 * Math.sqrt(this.charge), 0, 2 * Math.PI);
                                 // ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
-                                ctx.fillStyle = tech.isLaserDiode === 1 ? `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})` : `rgba(0,0,255,${0.09 * Math.sqrt(this.charge)})`;
+                                ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
                                 ctx.fill();
                                 //fire  
                                 if (!input.fire) {
@@ -7063,11 +7089,12 @@ const b = {
             //     b.photon({ x: m.pos.x + 23 * Math.cos(m.angle), y: m.pos.y + 23 * Math.sin(m.angle) }, m.angle)
             // },
             fireLaser() {
-                if (m.energy < tech.laserFieldDrain) {
+                const drain = m.fieldRegen + tech.laserDrain / b.fireCDscale
+                if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
                     m.fireCDcycle = m.cycle
-                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode / b.fireCDscale
+                    m.energy -= drain
                     const where = {
                         x: m.pos.x + 20 * Math.cos(m.angle),
                         y: m.pos.y + 20 * Math.sin(m.angle)
@@ -7080,11 +7107,12 @@ const b = {
             },
             firePulse() {},
             fireSplit() {
-                if (m.energy < tech.laserFieldDrain) {
+                const drain = m.fieldRegen + tech.laserDrain / b.fireCDscale
+                if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
                     m.fireCDcycle = m.cycle
-                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode / b.fireCDscale
+                    m.energy -= drain
                     // const divergence = input.down ? 0.15 : 0.2
                     // const scale = Math.pow(0.9, tech.beamSplitter)
                     // const pushScale = scale * scale
@@ -7104,11 +7132,12 @@ const b = {
                 }
             },
             fireWideBeam() {
-                if (m.energy < tech.laserFieldDrain) {
+                const drain = m.fieldRegen + tech.laserDrain / b.fireCDscale
+                if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
                     m.fireCDcycle = m.cycle
-                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode / b.fireCDscale
+                    m.energy -= drain
                     const range = {
                         x: 5000 * Math.cos(m.angle),
                         y: 5000 * Math.sin(m.angle)
@@ -7132,9 +7161,6 @@ const b = {
                     ctx.globalAlpha = 0.5;
                     ctx.beginPath();
                     if (Matter.Query.ray(map, eye, where).length === 0 && Matter.Query.ray(body, eye, where).length === 0) {
-                        // this.isInsideArc(m.angle) ? 8 : 3
-
-                        //where = {x: m.pos.x + 20 * Math.cos(m.angle),y: m.pos.y + 20 * Math.sin(m.angle)}, whereEnd = {x: where.x + 3000 * Math.cos(m.angle),y: where.y + 3000 * Math.sin(m.angle)}, dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1) {
                         b.laser(eye, {
                             x: eye.x + range.x,
                             y: eye.y + range.y
@@ -7171,13 +7197,14 @@ const b = {
                 }
             },
             fireHistory() {
-                if (m.energy < tech.laserFieldDrain) {
+                drain = m.fieldRegen + tech.laserDrain / b.fireCDscale
+                if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
                     m.fireCDcycle = m.cycle
-                    m.energy -= m.fieldRegen + tech.laserFieldDrain * tech.isLaserDiode / b.fireCDscale
+                    m.energy -= drain
                     const dmg = 0.4 * tech.laserDamage / b.fireCDscale * this.lensDamage //  3.5 * 0.55 = 200% more damage
-                    const spacing = Math.ceil(4 - 0.3 * tech.historyLaser)
+                    const spacing = Math.ceil(5 - 0.4 * tech.historyLaser)
                     ctx.beginPath();
                     b.laser({
                         x: m.pos.x + 20 * Math.cos(m.angle),

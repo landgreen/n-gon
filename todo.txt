@@ -1,23 +1,24 @@
 ******************************************************** NEXT PATCH **************************************************
 
-field tech: patch - after cloaking recover 75% of last health lost using that much energy
-  taking damage now forces decloaking
-field tech: dynamic equilibrium - increase damage by 5% the value of your last health loss
+tech: ricochet -  nails bounce off mobs and hit other mobs with extra damage per ricochet
 
-foam has less velocity after a mob it's stuck to dies
-snakeBoss becomes vulnerable if you remove any of the first 3 body segments
-  body segments have more health
+tech: dye laser - 20% efficiency and 20% damage
+laser diode renamed infrared diode
+  40 -> 50% efficiency but you can't see the laser beam
+laser-bots acquire new targets much faster
+iridescence 88 -> 100% damage, a tiny bit harder to hit center of mobs
+   stacks up to 3 -> 9
 
-bug fix: quantum eraser now removes mobs in a more random order
-  it used to have a too low chance to remove bosses
+dynamic equilibrium scales damage with defense
+  goes up to 9x stacks
+neutronium 25 -> 20% slower movement
+
+revolutionBoss laser swords are much slower and shorter
+  but they do more damage
 
 *********************************************************** TODO *****************************************************
 
-labs room:
-  low gravity zone
-  a button that toggles it on/off
-
-boss mechanics
+mob mechanics
   bullets hit player and stay attached for 4-5 seconds, slowing player
     hopperBullets?
   black hole sucker effect on tail
@@ -25,10 +26,14 @@ boss mechanics
     draw pair of circles at 2 different locations, like beetle wings flapping
       draw as ellipse
       damage player if caught in wings
-
-tech: ricochet after nails do damage, the nail fires at a different nearby mobs
-  can reuse some targeted nail code
-    don't target 'who' you just damaged
+  vines
+    attached to map and grows, a series of spheres connected by vines
+      if node dies it's removed from tree
+      vine do
+        keeps track of connection tree
+          nested object with nesting to show connection
+        spawns new nodes
+        draws connections as quad lines
 
 tech: You can place an extra perfect diamagnatism field on the map
 

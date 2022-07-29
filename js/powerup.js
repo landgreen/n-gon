@@ -284,7 +284,7 @@ const powerUps = {
                 // }
                 // requestAnimationFrame(cycle);
 
-                document.getElementById("choose-grid").style.opacity = "0.8"
+                document.getElementById("choose-grid").style.opacity = "0.9"
             } else {
                 simulation.paused = true;
                 document.getElementById("choose-grid").style.opacity = "1"
