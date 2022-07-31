@@ -2884,7 +2884,7 @@ const m = {
                     //show sneak attack status 
                     // if (m.cycle > m.lastKillCycle + 240) {
                     // if (m.sneakAttackCharge > 0) {
-                    if (m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) {
+                    if (m.sneakAttackCycle + Math.min(120, 0.7 * (m.cycle - m.enterCloakCycle)) > m.cycle) {
                         ctx.strokeStyle = "rgba(0,0,0,0.5)" //m.fieldMeterColor; //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
                         ctx.beginPath();
                         ctx.arc(m.pos.x, m.pos.y, 28, 0, 2 * Math.PI);

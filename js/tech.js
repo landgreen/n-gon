@@ -317,9 +317,9 @@ const tech = {
             // isExperimentHide: true,
             isBadRandomOption: true,
             allowed() {
-                return !tech.isSuperDeterminism
+                return true
             },
-            requires: "not superdeterminism",
+            requires: "",
             effect() {
                 powerUps.spawn(m.pos.x, m.pos.y, "gun");
                 // this.count--
@@ -3043,9 +3043,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !tech.isResearchReality //tech.isResearchBoss || tech.isMetaAnalysis || tech.isRerollBots || tech.isDeathAvoid || tech.isRerollDamage || build.isExperimentSelection
+                return !tech.isResearchReality && !tech.isSuperDeterminism //tech.isResearchBoss || tech.isMetaAnalysis || tech.isRerollBots || tech.isDeathAvoid || tech.isRerollDamage || build.isExperimentSelection
             },
-            requires: "not Ψ(t) collapse", //"abiogenesis, meta-analysis, bot fabrication, anthropic principle, or Bayesian statistics, not Ψ(t) collapse",
+            requires: "not Ψ(t) collapse, superdeterminism", //"abiogenesis, meta-analysis, bot fabrication, anthropic principle, or Bayesian statistics, not Ψ(t) collapse",
             effect() {
                 tech.isJunkResearch = true;
             },
@@ -3061,9 +3061,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return true
+                return !tech.isSuperDeterminism
             },
-            requires: "",
+            requires: "not superdeterminism",
             effect() {
                 tech.isBrainstorm = true
                 tech.isBrainstormActive = false

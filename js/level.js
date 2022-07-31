@@ -16,7 +16,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(6 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(8 * 4) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.maxHealth = m.health = 100
             // powerUps.research.changeRerolls(100000)
@@ -24,7 +24,7 @@ const level = {
             // powerUps.research.changeRerolls(100)
             // tech.tech[297].frequency = 100
             // b.guns[0].ammo = 10000
-            // m.setField("molecular assembler") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // m.setField("time dilation") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // tech.giveTech("infrared diode");
             // tech.giveTech("active cooling");
@@ -37,8 +37,8 @@ const level = {
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
             // spawn.starter(1900, -500, 200)
             // spawn.starter(1900, -500, 50)
-            // spawn.revolutionBoss(1900, -500)
-            // for (let i = 0; i < 10; ++i) spawn.starter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
+            // spawn.beetleBoss(1900, -400)
+            // for (let i = 0; i < 10; ++i) spawn.flutter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
             // level.testing(); //not in rotation, used for testing
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
@@ -148,7 +148,7 @@ const level = {
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
-            m.dmgScale *= 0.925; //damage done by player decreases each level
+            m.dmgScale *= 0.922; //damage done by player decreases each level
             if (simulation.accelScale < 6) simulation.accelScale *= 1.025 //mob acceleration increases each level
             if (simulation.CDScale > 0.15) simulation.CDScale *= 0.965 //mob CD time decreases each level
         }
@@ -159,7 +159,7 @@ const level = {
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
-            m.dmgScale /= 0.925; //damage done by player decreases each level
+            m.dmgScale /= 0.922; //damage done by player decreases each level
             if (simulation.accelScale > 1) simulation.accelScale /= 1.025 //mob acceleration increases each level
             if (simulation.CDScale < 1) simulation.CDScale /= 0.965 //mob CD time decreases each level
         }
@@ -254,8 +254,10 @@ const level = {
                 level.levels = shuffle(level.levels); //shuffles order of maps
             }
             // level.levels.splice(Math.floor(level.levels.length * (0.4 + 0.6 * Math.random())), 0, "reservoir"); //add level to the back half of the randomized levels list
-            level.levels.splice(Math.floor(Math.seededRandom((level.levels.length) * 0.6, level.levels.length)), 0, "reservoir"); //add level to the back half of the randomized levels list
-            level.levels.splice(Math.floor(Math.seededRandom((level.levels.length) * 0.6, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
+            level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, "reservoir"); //add level to the back half of the randomized levels list
+            level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
+            // level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.2, level.levels.length * 0.5)), 0, "reactor"); //add level to the back half of the randomized levels list
+            // level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.7, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
             level.levels.splice(0, 2); //remove 2 levels from the start of the array
             if (!build.isExperimentSelection || (build.hasExperimentalMode && !simulation.isCheating)) { //experimental mode is endless, unless you only have an experiment Tech
                 level.levels.unshift("intro"); //add level to the start of the randomized levels list
@@ -2733,7 +2735,7 @@ const level = {
         spawn.mapRect(475, -25, 25, 50); //edge shelf
     },
     testing() {
-        const hazard = level.hazard(6000, -1000, 5, 1000, 0.4) //laser
+        // const hazard = level.hazard(6000, -1000, 5, 1000, 0.4) //laser
         const button = level.button(1000, 0)
         spawn.bodyRect(1000, -50, 50, 50);
 
@@ -2747,7 +2749,7 @@ const level = {
             level.enter.draw();
         };
         level.customTopLayer = () => {
-            hazard.opticalQuery();
+            // hazard.opticalQuery();
             button.query();
             button.draw();
             ctx.fillStyle = "rgba(0,0,0,0.1)"

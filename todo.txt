@@ -1,22 +1,18 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: ricochet -  nails bounce off mobs and hit other mobs with extra damage per ricochet
+mob: beetleBoss
+mob: flutter
 
-tech: dye laser - 20% efficiency and 20% damage
-laser diode renamed infrared diode
-  40 -> 50% efficiency but you can't see the laser beam
-laser-bots acquire new targets much faster
-iridescence 88 -> 100% damage, a tiny bit harder to hit center of mobs
-   stacks up to 3 -> 9
-
-dynamic equilibrium scales damage with defense
-  goes up to 9x stacks
-neutronium 25 -> 20% slower movement
-
-revolutionBoss laser swords are much slower and shorter
-  but they do more damage
+balance: all mobs at every level are about 2%-3% harder to kill
 
 *********************************************************** TODO *****************************************************
+
+wings
+  put in mob as a method?
+    add parameter for ellipticity
+  give snakeBoss wings?
+
+
 
 mob mechanics
   bullets hit player and stay attached for 4-5 seconds, slowing player
