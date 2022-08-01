@@ -589,7 +589,7 @@ const mobs = {
                     ctx.setLineDash([]);
                 }
             },
-            wing(a, radius = 250, ellipticity = 0.4) {
+            wing(a, radius = 250, ellipticity = 0.4, dmg = 0.0004) {
                 const minorRadius = radius * ellipticity
                 const perp = { x: Math.cos(a), y: Math.sin(a) } //
                 const where = Vector.add(this.position, Vector.mult(perp, radius + 0.8 * this.radius))
@@ -601,8 +601,8 @@ const mobs = {
                 //check for wing -> player damage
                 const hitPlayer = Matter.Query.ray([player], this.position, Vector.add(this.position, Vector.mult(perp, radius * 2.05)), minorRadius)
                 if (hitPlayer.length && m.immuneCycle < m.cycle) {
-                    m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
-                    m.damage(0.00008 * radius * simulation.dmgScale);
+                    m.damage(dmg * simulation.dmgScale);
+                    // m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
                 }
             },
             searchSpring() {

@@ -5433,8 +5433,8 @@ const b = {
                 }
 
                 if (tech.isShotgunReversed) {
-                    player.force.x += 4 * knock * Math.cos(m.angle)
-                    player.force.y += 4 * knock * Math.sin(m.angle) - 6 * player.mass * simulation.g
+                    player.force.x += 1.6 * knock * Math.cos(m.angle)
+                    player.force.y += 1.6 * knock * Math.sin(m.angle) - 3 * player.mass * simulation.g
                 } else if (tech.isShotgunRecoil) {
                     m.fireCDcycle -= 0.66 * (56 * b.fireCDscale)
                     player.force.x -= 2 * knock * Math.cos(m.angle)
@@ -5585,16 +5585,16 @@ const b = {
                         b.iceIX(25 + 20 * Math.random(), m.angle + spread * (Math.random() - 0.5))
                     }
                 } else if (tech.isFoamShot) {
-                    const spread = (input.down ? 0.2 : 0.6)
+                    const spread = (input.down ? 0.15 : 0.4)
                     const where = {
                         x: m.pos.x + 25 * Math.cos(m.angle),
                         y: m.pos.y + 25 * Math.sin(m.angle)
                     }
-                    const number = 15 * (tech.isShotgunReversed ? 1.6 : 1)
+                    const number = 16 * (tech.isShotgunReversed ? 1.6 : 1)
                     for (let i = 0; i < number; i++) {
-                        const SPEED = 13 + 4 * Math.random();
+                        const SPEED = 11 + 4 * Math.random();
                         const angle = m.angle + spread * (Math.random() - 0.5)
-                        b.foam(where, { x: SPEED * Math.cos(angle), y: SPEED * Math.sin(angle) }, 6 + 8 * Math.random())
+                        b.foam(where, { x: SPEED * Math.cos(angle), y: SPEED * Math.sin(angle) }, 8 + 7 * Math.random())
                     }
                 } else if (tech.isNeedles) {
                     const number = 9 * (tech.isShotgunReversed ? 1.6 : 1)

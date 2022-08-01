@@ -1,27 +1,18 @@
 ******************************************************** NEXT PATCH **************************************************
 
-mob: beetleBoss
-mob: flutter
+snakeBoss is now dragonFlyBoss
+  snakeSpitBoss till exists, don't worry
 
-balance: all mobs at every level are about 2%-3% harder to kill
+flutter and beetle mobs changes
+
+Noether violation has 50% less forward recoil for shotgun
 
 *********************************************************** TODO *****************************************************
-
-wings
-  put in mob as a method?
-    add parameter for ellipticity
-  give snakeBoss wings?
-
-
 
 mob mechanics
   bullets hit player and stay attached for 4-5 seconds, slowing player
     hopperBullets?
   black hole sucker effect on tail
-  flickering wings
-    draw pair of circles at 2 different locations, like beetle wings flapping
-      draw as ellipse
-      damage player if caught in wings
   vines
     attached to map and grows, a series of spheres connected by vines
       if node dies it's removed from tree

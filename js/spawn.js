@@ -5,8 +5,8 @@ const spawn = {
     randomBossList: [
         "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
         "powerUpBoss", "powerUpBossBaby", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss",
-        "snakeBoss", "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss", "shieldingBoss", "timeSkipBoss",
-        "beetleBoss"
+        "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss", "shieldingBoss", "timeSkipBoss",
+        "dragonFlyBoss", "beetleBoss"
     ],
     bossTypeSpawnOrder: [], //preset list of boss names calculated at the start of a run by the randomSeed
     bossTypeSpawnIndex: 0, //increases as the boss type cycles
@@ -21,11 +21,11 @@ const spawn = {
     },
     pickList: ["starter", "starter"],
     fullPickList: [
+        "flutter", "flutter", "flutter",
         "hopper", "hopper", "hopper",
         "slasher", "slasher", "slasher",
         "stabber", "stabber", "stabber",
         "springer", "springer", "springer",
-        "flutter", "flutter",
         "shooter", "shooter",
         "grenadier", "grenadier",
         "striker", "striker",
@@ -2696,7 +2696,7 @@ const spawn = {
         mobs.spawn(x, y, 7, radius, '#16576b');
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0016); //extra dense //normal is 0.001 //makes effective life much larger
         // me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
@@ -2714,7 +2714,7 @@ const spawn = {
 
         // me.onDeath = function() {};
         me.flapRate = 0.3 + Math.floor(3 * Math.random()) / 10 + 100 * me.accelMag
-        me.flapRadius = 100 + 75 * Math.random() + radius * 2
+        me.flapRadius = 75 + 50 * Math.random() + radius * 2
         me.do = function() {
             this.seePlayerByHistory()
             this.checkStatus();
@@ -2764,9 +2764,12 @@ const spawn = {
         me.nextHealthThreshold = 0.75
         me.invulnerableCount = 0
 
+        me.flapRate = 0.25
+        me.wingSize = 0
+        me.wingGoal = 250
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-        me.accelMag = 0.0006 + 0.0006 * Math.sqrt(simulation.accelScale);
+        me.accelMag = 0.0005 + 0.0005 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.05;
         me.seePlayerFreq = 30
         me.memory = 420;
@@ -2777,22 +2780,53 @@ const spawn = {
         me.fireDir = { x: 0, y: 0 }
         spawn.shield(me, x, y);
 
-        // for (let i = 0, len = 4 + 0.2 * simulation.difficulty; i < len; ++i) {
-        //     const phase = i / len * 2 * Math.PI
-        //     const where = Vector.add(me.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
-        //     spawn.flutter(where.x, where.y)
+        // len = 0.3 * simulation.difficulty //spawn some baby flutters
+        // if (len > 3) {
+        //     for (let i = 0; i < len; ++i) {
+        //         const phase = i / len * 2 * Math.PI
+        //         const where = Vector.add(me.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
+        //         spawn.flutter(where.x, where.y)
+        //     }
         // }
+
+        if (Math.random() < 0.3) {
+            const len = 0.1 * simulation.difficulty //spawn some baby flutters
+            let i = 0
+            let spawnFlutters = () => {
+                if (i < len) {
+                    if (!(simulation.cycle % 30) && !simulation.paused && !simulation.isChoosing) {
+                        const phase = i / len * 2 * Math.PI
+                        const where = Vector.add(me.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
+                        spawn.flutter(where.x, where.y)
+                        i++
+                    }
+                    requestAnimationFrame(spawnFlutters);
+                }
+            }
+            requestAnimationFrame(spawnFlutters);
+            me.isAlreadyHadBabies = true
+        }
+
+
 
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
 
-            len = 0.2 * simulation.difficulty
-            if (len > 3) {
-                for (let i = 0; i < len; ++i) {
-                    const phase = i / len * 2 * Math.PI
-                    const where = Vector.add(this.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
-                    spawn.flutter(where.x, where.y)
+            const len = 0.1 * simulation.difficulty //spawn some baby flutters
+            if (len > 3 && !this.isAlreadyHadBabies) {
+                let i = 0
+                let spawnFlutters = () => {
+                    if (i < len) {
+                        if (!(simulation.cycle % 20) && !simulation.paused && !simulation.isChoosing) {
+                            const phase = i / len * 2 * Math.PI
+                            const where = Vector.add(me.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
+                            spawn.flutter(where.x, where.y)
+                            i++
+                        }
+                        requestAnimationFrame(spawnFlutters);
+                    }
                 }
+                requestAnimationFrame(spawnFlutters);
             }
         };
         me.onDamage = function() {
@@ -2803,6 +2837,10 @@ const spawn = {
                 this.isInvulnerable = true
                 this.damageReduction = 0
                 this.frictionAir = 0
+                this.wingGoal = 0
+                this.wingSize = 0
+                this.flapRate += 0.1
+                this.accelMag *= 1.25
             }
         };
         me.do = function() {
@@ -2814,6 +2852,7 @@ const spawn = {
                     this.isInvulnerable = false
                     this.damageReduction = this.startingDamageReduction
                     this.frictionAir = 0.05
+                    this.wingGoal = 250
                 }
                 // //draw wings as if they are protecting
                 // const wingShield = (a, size) => {
@@ -2868,11 +2907,13 @@ const spawn = {
                 } else if (c < -threshold) {
                     this.torque -= turn;
                 }
-                const flapRate = 0.5
                 const flapArc = 0.7 //don't go past 1.57 for normal flaps
+                this.wingSize = 0.98 * this.wingSize + 0.02 * this.wingGoal
                 ctx.fillStyle = this.fill = `hsla(${160+40*Math.random()}, 100%, ${25 + 25*Math.random()*Math.random()}%, 0.9)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
-                this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * flapRate), 250, 0.5)
-                this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * flapRate), 250, 0.5)
+                this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.0008)
+                this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.0008)
+            } else {
+                this.wingSize = 0.96 * this.wingSize + 0 //shrink while stunned
             }
         };
     },
@@ -5944,13 +5985,13 @@ const spawn = {
         Composite.add(engine.world, consBB[consBB.length - 1]);
         // spawn.shield(me, x, y, 1);
     },
-    snakeBoss(x, y, radius = 50) { //snake boss with a laser head
+    dragonFlyBoss(x, y, radius = 42) { //snake boss with a laser head
         const nodes = Math.min(8 + Math.ceil(0.5 * simulation.difficulty), 40)
         let angle = Math.PI
         let mag = 300
 
-        const color1 = "#f27"
-        mobs.spawn(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 8, radius, color1); //"rgb(55,170,170)"
+        const color1 = "#00bfd9" //"#f27"
+        mobs.spawn(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 8, radius, "#000"); //"rgb(55,170,170)"
         let me = mob[mob.length - 1];
         me.isBoss = true;
         me.accelMag = 0.0009 + 0.0002 * Math.sqrt(simulation.accelScale)
@@ -5971,18 +6012,34 @@ const spawn = {
             this.seePlayerByHistory()
             this.checkStatus();
             this.attraction();
-            this.harmZone();
+
+            let a //used to set the angle of wings
             if (this.isInvulnerable) {
                 ctx.beginPath();
                 let vertices = this.vertices;
                 ctx.moveTo(vertices[0].x, vertices[0].y);
                 for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
                 ctx.lineTo(vertices[0].x, vertices[0].y);
-                ctx.lineWidth = 20;
-                ctx.strokeStyle = "rgba(255,255,255,0.7)";
+                ctx.lineWidth = 12;
+                ctx.strokeStyle = "rgba(255,255,255,0.9)";
                 ctx.stroke();
+                const sub = Vector.sub(this.position, this.snakeBody1.position)
+                a = Math.atan2(sub.y, sub.x)
+            } else {
+                a = Math.atan2(this.velocity.y, this.velocity.x)
             }
+
+            ctx.fillStyle = `hsla(${160+40*Math.random()}, 100%, ${25 + 25*Math.random()*Math.random()}%, 0.9)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
+            this.wing(a + Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity)
+            this.wing(a - Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity)
+            this.wing(a - Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity)
+            this.wing(a + Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity)
         };
+        me.flapRate = 0.4
+        me.flapArc = 0.2 //don't go past 1.57 for normal flaps
+        me.wingLength = 150
+        me.ellipticity = 0.3
+        me.angleOff = 0.4
         //extra space to give head room
         angle -= 0.1
         mag -= 10
@@ -5992,16 +6049,13 @@ const spawn = {
             mag -= (i < 2) ? -15 : 5
             spawn.snakeBody(x + mag * Math.cos(angle), y + mag * Math.sin(angle), i === 0 ? 25 : 20);
             if (i < 3) mob[mob.length - 1].snakeHeadID = me.id
+            if (i === 0) me.snakeBody1 = mob[mob.length - 1] //track this segment, so the difference in position between this segment and the head can be used to angle the wings
             mob[mob.length - 1].previousTailID = previousTailID
             previousTailID = mob[mob.length - 1].id
         }
         this.constrain2AdjacentMobs(nodes, Math.random() * 0.06 + 0.01);
         for (let i = mob.length - 1, len = i - nodes; i > len; i--) { //set alternating colors
-            if (i % 2) {
-                mob[i].fill = "#333"
-            } else {
-                mob[i].fill = color1
-            }
+            mob[i].fill = `hsla(${160+40*Math.random()}, 100%, ${5 + 25*Math.random()*Math.random()}%, 0.9)`
         }
         //constraint with first 3 mobs in line
         consBB[consBB.length] = Constraint.create({
@@ -6028,7 +6082,7 @@ const spawn = {
         mobs.spawn(x, y, 8, radius, "rgba(0,180,180,0.4)");
         let me = mob[mob.length - 1];
         me.collisionFilter.mask = cat.bullet | cat.player | cat.mob //| cat.body
-        me.damageReduction = 0.2
+        me.damageReduction = 0.23
         Matter.Body.setDensity(me, 0.005); //normal is 0.001
 
         // me.accelMag = 0.0007 * simulation.accelScale;

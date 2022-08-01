@@ -16,7 +16,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(8 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(2 * 4) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.maxHealth = m.health = 100
             // powerUps.research.changeRerolls(100000)
@@ -24,8 +24,9 @@ const level = {
             // powerUps.research.changeRerolls(100)
             // tech.tech[297].frequency = 100
             // b.guns[0].ammo = 10000
+
             // m.setField("time dilation") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
-            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // tech.giveTech("infrared diode");
             // tech.giveTech("active cooling");
             // tech.giveTech("pulse")
@@ -35,10 +36,12 @@ const level = {
             // for (let i = 0; i < 1; i++) tech.giveTech("dynamic equilibrium")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
+
             // spawn.starter(1900, -500, 200)
             // spawn.starter(1900, -500, 50)
+            // spawn.dragonFlyBoss(1900, -400)
             // spawn.beetleBoss(1900, -400)
-            // for (let i = 0; i < 10; ++i) spawn.flutter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
+            // for (let i = 0; i < 2; ++i) spawn.flutter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
             // level.testing(); //not in rotation, used for testing
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
@@ -2805,7 +2808,7 @@ const level = {
         // spawn.laserTargetingBoss(1700, -500)
         // spawn.powerUpBoss(1900, -500)
         // spawn.powerUpBossBaby(3200, -500)
-        // spawn.snakeBoss(1700, -500)
+        // spawn.dragonFlyBoss(1700, -500)
         // spawn.streamBoss(3200, -500)
         // spawn.pulsarBoss(1700, -500)
         // spawn.spawnerBossCulture(3200, -500)
@@ -5863,10 +5866,10 @@ const level = {
         spawn.randomSmallMob(-900, 825);
 
         if (simulation.difficulty > 1) {
-            if (Math.random() < 0.70) {
+            if (Math.random() < 0.80) {
                 spawn.randomLevelBoss(-800, -1300)
             } else {
-                spawn.snakeBoss(-1000 + Math.random() * 2500, -1300); //boss snake with head
+                spawn.dragonFlyBoss(-1000 + Math.random() * 2500, -1300); //boss snake with head
             }
         }
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
@@ -6546,7 +6549,7 @@ const level = {
                     spawn.tetherBoss(2300, -1300, { x: 2300, y: -1750 })
                     if (simulation.difficulty > 4) spawn.nodeGroup(2350, -1300, "spawns", 8, 20, 105);
                 } else {
-                    spawn.randomLevelBoss(2300, -1400, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "snakeBoss", "pulsarBoss"]);
+                    spawn.randomLevelBoss(2300, -1400, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "dragonFlyBoss", "pulsarBoss"]);
                 }
             }
         }
@@ -7394,7 +7397,7 @@ const level = {
                 spawn.tetherBoss(3380, -1775, { x: 3775, y: -1775 })
                 if (simulation.difficulty > 4) spawn.nodeGroup(3380, -1775, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
             } else {
-                spawn.randomLevelBoss(3100, -1850, ["shooterBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "snakeBoss", "laserBoss"]);
+                spawn.randomLevelBoss(3100, -1850, ["shooterBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "dragonFlyBoss", "laserBoss"]);
             }
         }
     },
@@ -7843,7 +7846,7 @@ const level = {
         // spawn.randomGroup(7700, -1100, 0.5);
         spawn.randomGroup(9800, -1100, 0.5);
 
-        if (simulation.difficulty > 3) spawn.randomLevelBoss(8600, -600, ["powerUpBoss", "bomberBoss", "snakeBoss", "spiderBoss", "historyBoss"])
+        if (simulation.difficulty > 3) spawn.randomLevelBoss(8600, -600, ["powerUpBoss", "bomberBoss", "dragonFlyBoss", "spiderBoss", "historyBoss"])
         spawn.secondaryBossChance(7900, -400)
 
         //Boss Spawning

@@ -4164,7 +4164,7 @@ const tech = {
         {
             name: "Noether violation",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Noether%27s_theorem' class="link">Noether violation</a>`,
-            description: "<strong>+60%</strong> <strong>shotgun</strong> <strong class='color-d'>damage</strong><br><strong>shotgun</strong> <strong>recoil</strong> is increased and <strong>reversed</strong>",
+            description: "<strong>+60%</strong> <strong>shotgun</strong> <strong class='color-d'>damage</strong><br><strong>shotgun</strong> <strong>recoil</strong> is <strong>reversed</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
