@@ -1614,7 +1614,7 @@ const spawn = {
         // me.isBadTarget = true;
         me.isMobBullet = true;
         me.showHealthBar = false;
-        me.timeLeft = 1500 + Math.floor(600 * Math.random());
+        me.timeLeft = 1200 + Math.floor(600 * Math.random());
 
         me.isRandomMove = Math.random() < 0.3 //most chase player, some don't
         me.accelMag = 0.01; //jump height
@@ -1649,7 +1649,7 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.damageReduction = 0.05 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.06 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.accelMag = 0.05; //jump height
         me.g = 0.003; //required if using this.gravity
         me.frictionAir = 0.01;
@@ -2696,12 +2696,12 @@ const spawn = {
         mobs.spawn(x, y, 7, radius, '#16576b');
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        Matter.Body.setDensity(me, 0.0016); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
         // me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-        me.accelMag = 0.0006 + 0.0006 * Math.sqrt(simulation.accelScale);
+        me.accelMag = 0.0006 + 0.0007 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.05;
         // me.seePlayerFreq = 40 + Math.floor(13 * Math.random())
         me.memory = 240;
@@ -2714,7 +2714,7 @@ const spawn = {
 
         // me.onDeath = function() {};
         me.flapRate = 0.3 + Math.floor(3 * Math.random()) / 10 + 100 * me.accelMag
-        me.flapRadius = 75 + 50 * Math.random() + radius * 2
+        me.flapRadius = 75 + radius * 3
         me.do = function() {
             this.seePlayerByHistory()
             this.checkStatus();
@@ -2753,7 +2753,7 @@ const spawn = {
             }
         };
     },
-    beetleBoss(x, y, radius = 60) {
+    beetleBoss(x, y, radius = 50) {
         mobs.spawn(x, y, 7, radius, '#16576b');
         let me = mob[mob.length - 1];
         me.isBoss = true;
@@ -2764,14 +2764,14 @@ const spawn = {
         me.nextHealthThreshold = 0.75
         me.invulnerableCount = 0
 
-        me.flapRate = 0.25
+        me.flapRate = 0.2
         me.wingSize = 0
-        me.wingGoal = 250
+        me.wingGoal = 250 + simulation.difficulty
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-        me.accelMag = 0.0005 + 0.0005 * Math.sqrt(simulation.accelScale);
+        me.accelMag = 0.00045 + 0.0005 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.05;
-        me.seePlayerFreq = 30
+        me.seePlayerFreq = 20
         me.memory = 420;
         me.restitution = 1;
         me.frictionStatic = 0;
@@ -2789,58 +2789,94 @@ const spawn = {
         //     }
         // }
 
-        if (Math.random() < 0.3) {
-            const len = 0.1 * simulation.difficulty //spawn some baby flutters
+        // if (Math.random() < 0.3) {
+        //     const len = 0.1 * simulation.difficulty //spawn some baby flutters
+        //     let i = 0
+        //     let spawnFlutters = () => {
+        //         if (i < len) {
+        //             if (!(simulation.cycle % 30) && !simulation.paused && !simulation.isChoosing) {
+        //                 const phase = i / len * 2 * Math.PI
+        //                 const where = Vector.add(me.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
+        //                 spawn.flutter(where.x, where.y)
+        //                 i++
+        //             }
+        //             requestAnimationFrame(spawnFlutters);
+        //         }
+        //     }
+        //     requestAnimationFrame(spawnFlutters);
+        //     me.isAlreadyHadBabies = true
+        // }
+
+        me.pushAway = function(magX = 0.13, magY = 0.05) {
+            for (let i = 0, len = body.length; i < len; ++i) { //push blocks away horizontally
+                if (Vector.magnitudeSquared(Vector.sub(body[i].position, this.position)) < 4000000) { //2000
+                    body[i].force.x += magX * body[i].mass * (body[i].position.x > this.position.x ? 1 : -1)
+                    body[i].force.y -= magY * body[i].mass
+                }
+            }
+            for (let i = 0, len = bullet.length; i < len; ++i) { //push blocks away horizontally
+                if (Vector.magnitudeSquared(Vector.sub(bullet[i].position, this.position)) < 4000000) { //2000
+                    bullet[i].force.x += magX * bullet[i].mass * (bullet[i].position.x > this.position.x ? 1 : -1)
+                    bullet[i].force.y -= magY * bullet[i].mass
+                }
+            }
+            for (let i = 0, len = powerUp.length; i < len; ++i) { //push blocks away horizontally
+                if (Vector.magnitudeSquared(Vector.sub(powerUp[i].position, this.position)) < 4000000) { //2000
+                    powerUp[i].force.x += magX * powerUp[i].mass * (powerUp[i].position.x > this.position.x ? 1 : -1)
+                    powerUp[i].force.y -= magY * powerUp[i].mass
+                }
+            }
+            if (Vector.magnitudeSquared(Vector.sub(player.position, this.position)) < 4000000) { //2000
+                player.force.x += magX * player.mass * (player.position.x > this.position.x ? 1 : -1)
+                player.force.y -= magY * player.mass
+            }
+        }
+
+        me.babies = function(len) {
+            const delay = Math.max(3, Math.floor(15 - len / 2))
             let i = 0
             let spawnFlutters = () => {
                 if (i < len) {
-                    if (!(simulation.cycle % 30) && !simulation.paused && !simulation.isChoosing) {
-                        const phase = i / len * 2 * Math.PI
-                        const where = Vector.add(me.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
-                        spawn.flutter(where.x, where.y)
+                    if (!(simulation.cycle % delay) && !simulation.paused && !simulation.isChoosing) {
+                        // const phase = i / len * 2 * Math.PI
+                        // const where = Vector.add(this.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
+                        const unit = Vector.normalise(Vector.sub(player.position, this.position))
+                        const velocity = Vector.mult(unit, 10 + 10 * Math.random())
+                        const where = Vector.add(this.position, Vector.mult(unit, radius * 1.2))
+                        spawn.allowShields = false
+                        spawn.flutter(where.x, where.y, Math.floor(7 + 8 * Math.random()))
+                        const who = mob[mob.length - 1]
+                        Matter.Body.setDensity(who, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
+                        Matter.Body.setVelocity(who, velocity);
+                        Matter.Body.setAngle(who, Math.atan2(velocity.y, velocity.x))
+
+                        this.alertNearByMobs();
+                        spawn.allowShields = true
                         i++
                     }
                     requestAnimationFrame(spawnFlutters);
                 }
             }
             requestAnimationFrame(spawnFlutters);
-            me.isAlreadyHadBabies = true
         }
-
-
+        // me.babies(0.05 * simulation.difficulty + 1)
 
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
-
-            const len = 0.1 * simulation.difficulty //spawn some baby flutters
-            if (len > 3 && !this.isAlreadyHadBabies) {
-                let i = 0
-                let spawnFlutters = () => {
-                    if (i < len) {
-                        if (!(simulation.cycle % 20) && !simulation.paused && !simulation.isChoosing) {
-                            const phase = i / len * 2 * Math.PI
-                            const where = Vector.add(me.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
-                            spawn.flutter(where.x, where.y)
-                            i++
-                        }
-                        requestAnimationFrame(spawnFlutters);
-                    }
-                }
-                requestAnimationFrame(spawnFlutters);
-            }
+            me.babies(0.05 * simulation.difficulty + 1)
         };
         me.onDamage = function() {
-            if (this.health < this.nextHealthThreshold) {
+            if (this.health < this.nextHealthThreshold && this.alive) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 4) / 4
-                this.invulnerableCount = 180 + Math.floor(60 * Math.random())
+                this.invulnerableCount = 90 + Math.floor(30 * Math.random())
                 this.isInvulnerable = true
                 this.damageReduction = 0
                 this.frictionAir = 0
                 this.wingGoal = 0
                 this.wingSize = 0
-                this.flapRate += 0.1
-                this.accelMag *= 1.25
+                this.flapRate += 0.13
+                this.accelMag *= 1.4
             }
         };
         me.do = function() {
@@ -2853,6 +2889,8 @@ const spawn = {
                     this.damageReduction = this.startingDamageReduction
                     this.frictionAir = 0.05
                     this.wingGoal = 250
+                    this.pushAway(Math.sqrt(this.flapRate) * 0.13, Math.sqrt(this.flapRate) * 0.06) //this.flapRate = 0.2, +0.13x3 -> 0.6
+                    me.babies(0.05 * simulation.difficulty + 1)
                 }
                 // //draw wings as if they are protecting
                 // const wingShield = (a, size) => {
@@ -2908,10 +2946,10 @@ const spawn = {
                     this.torque -= turn;
                 }
                 const flapArc = 0.7 //don't go past 1.57 for normal flaps
-                this.wingSize = 0.98 * this.wingSize + 0.02 * this.wingGoal
+                this.wingSize = 0.97 * this.wingSize + 0.03 * this.wingGoal
                 ctx.fillStyle = this.fill = `hsla(${160+40*Math.random()}, 100%, ${25 + 25*Math.random()*Math.random()}%, 0.9)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
-                this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.0008)
-                this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.0008)
+                this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.0012)
+                this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.0012)
             } else {
                 this.wingSize = 0.96 * this.wingSize + 0 //shrink while stunned
             }
@@ -4175,7 +4213,7 @@ const spawn = {
         me.isMobBullet = true;
         me.isUnstable = true; //dies when blocked
         me.showHealthBar = false;
-        me.explodeRange = 200 + 150 * Math.random()
+        me.explodeRange = 210 + 140 * Math.random()
         me.isExploding = false
         me.countDown = Math.ceil(4 * Math.random())
         me.isInvulnerable = true //not actually invulnerable, just prevents block + ice-9 interaction
@@ -4199,7 +4237,7 @@ const spawn = {
                     this.death();
                     //hit player
                     if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.explodeRange && m.immuneCycle < m.cycle) {
-                        m.damage(0.01 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.25 : 1));
+                        m.damage(0.015 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.25 : 1));
                         m.energy -= 0.15 * (tech.isRadioactiveResistance ? 0.25 : 1)
                         if (m.energy < 0) m.energy = 0
                     }

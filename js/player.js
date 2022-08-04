@@ -1124,9 +1124,9 @@ const m = {
                 if (m.energy > 0.001) {
                     if (m.fireCDcycle < m.cycle) m.fireCDcycle = m.cycle
                     if (tech.isCapacitor && m.throwCharge < 4) m.throwCharge = 4
-                    m.throwCharge += 0.5 / m.holdingTarget.mass
+                    m.throwCharge += 0.5 / m.holdingTarget.mass / b.fireCDscale
 
-                    if (m.throwCharge < 6) m.energy -= 0.001; // m.throwCharge caps at 5 
+                    if (m.throwCharge < 6) m.energy -= 0.001 / b.fireCDscale; // m.throwCharge caps at 5 
 
                     //trajectory path prediction
                     if (tech.isTokamak) {
@@ -2073,10 +2073,19 @@ const m = {
                                 }
                             }
                         } else if (simulation.molecularMode === 1) {
-                            m.energy -= 0.35;
-                            b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
+                            m.energy -= 0.33;
+                            const direction = {
+                                x: Math.cos(m.angle),
+                                y: Math.sin(m.angle)
+                            }
+                            const push = Vector.mult(Vector.perp(direction), 0.08)
+                            b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, -15)
+                            bullet[bullet.length - 1].force.x += push.x * (Math.random() - 0.5)
+                            bullet[bullet.length - 1].force.y += 0.005 + push.y * (Math.random() - 0.5)
+
+                            // b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
                         } else if (simulation.molecularMode === 2) {
-                            m.energy -= 0.05;
+                            m.energy -= 0.045;
                             b.iceIX(1)
                         } else if (simulation.molecularMode === 3) {
                             if (tech.isDroneRadioactive) {

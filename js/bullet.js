@@ -1439,7 +1439,7 @@ const b = {
             minDmgSpeed: 4,
             lookFrequency: Math.floor(7 + Math.random() * 3),
             density: tech.harpoonDensity, //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
-            drain: tech.isRailEnergyGain ? 0.002 : 0.006,
+            drain: tech.isRailEnergy ? 0.002 : 0.006,
             beforeDmg(who) {
                 if (tech.isShieldPierce && who.isShielded) { //disable shields
                     who.isShielded = false
@@ -1695,7 +1695,7 @@ const b = {
             friction: 1,
             frictionAir: 0.4,
             thrustMag: 0.1,
-            drain: tech.isRailEnergyGain ? 0.002 : 0.006,
+            drain: tech.isRailEnergy ? 0.002 : 0.006,
             turnRate: isReturn ? 0.1 : 0.03, //0.015
             drawStringControlMagnitude: 3000 + 5000 * Math.random(),
             drawStringFlip: (Math.round(Math.random()) ? 1 : -1),
@@ -2247,7 +2247,7 @@ const b = {
         x: where.x + 3000 * Math.cos(m.angle),
         y: where.y + 3000 * Math.sin(m.angle)
     }, dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1) {
-        const reflectivity = 1 - 1 / (reflections * 1.5)
+        const reflectivity = 1 - 1 / (reflections * 3)
         let damage = m.dmgScale * dmg
         let best = {
             x: 1,
@@ -2528,10 +2528,56 @@ const b = {
             isArmed: false,
             endCycle: Infinity,
             lookFrequency: 0,
-            range: 700,
+            range: 700 - 300 * tech.isFoamMine,
             beforeDmg() {},
             onEnd() {
-                if (this.isArmed) b.targetedNail(this.position, tech.isMineSentry ? 7 : 22, 40 + 10 * Math.random(), 1200, true, 2.2) //targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true, damage = 1.4) {
+                if (tech.isFoamMine) {
+                    for (let i = 0; i < 14; i++) {
+                        const radius = 13 + 8 * Math.random()
+                        const velocity = { x: 5.5 * Math.random(), y: 0 }
+                        b.foam(this.position, Vector.rotate(velocity, this.angle + 1.57 + 3 * (Math.random() - 0.5)), radius) //6.28 * Math.random()
+                    }
+
+                    let count = 0
+                    let cycle = () => {
+                        if (count < 40) {
+                            if (!simulation.paused && !simulation.isChoosing) { //!(simulation.cycle % 1) &&
+                                count++
+
+                                const targets = [] //target nearby mobs
+                                for (let i = 0, len = mob.length; i < len; i++) {
+                                    if (
+                                        Vector.magnitude(Vector.sub(this.position, mob[i].position)) < this.range + mob[i].radius + 300 &&
+                                        !mob[i].isBadTarget && //|| mob[i].isMobBullet
+                                        Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                                        !mob[i].isInvulnerable
+                                    ) {
+                                        // targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 50))) //predict where the mob will be in a few cycles
+                                        targets.push(mob[i]) //predict where the mob will be in a few cycles
+                                    }
+                                }
+                                if (targets.length > 0) { // aim near a random target in array
+                                    const index = Math.floor(Math.random() * targets.length) //pick random target from list
+                                    const radius = 7 + 10 * Math.random()
+                                    const SPEED = 23 + 6 * Math.random() - radius * 0.3 + 0.5 * targets[index].speed
+                                    const predict = Vector.mult(targets[index].velocity, Vector.magnitude(Vector.sub(this.position, targets[index].position)) / 60)
+                                    const where = Vector.add(targets[index].position, predict)
+                                    const velocity = Vector.mult(Vector.normalise(Vector.sub(where, this.position)), SPEED)
+                                    b.foam(this.position, Vector.rotate(velocity, 0.2 * (Math.random() - 0.5)), radius)
+                                } else {
+                                    const radius = 7 + 10 * Math.random()
+                                    const velocity = { x: 10 + 8 * Math.random(), y: 0 }
+                                    b.foam(this.position, Vector.rotate(velocity, this.angle + 1.57 + 2.8 * (Math.random() - 0.5)), radius) //6.28 * Math.random()
+                                }
+                            }
+                            requestAnimationFrame(cycle);
+                        }
+                    }
+                    requestAnimationFrame(cycle)
+
+                } else if (this.isArmed && !tech.isMineSentry) {
+                    b.targetedNail(this.position, tech.isMineSentry ? 7 : 22, 40 + 10 * Math.random(), 1200, true, 2.2) //targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true, damage = 1.4) {
+                }
             },
             do() {
                 this.force.y += this.mass * 0.002; //extra gravity
@@ -2556,14 +2602,13 @@ const b = {
                                     this.arm();
 
                                     //sometimes the mine can't attach to map and it just needs to be reset
-                                    const that = this
-                                    setTimeout(function() {
-                                        if (Matter.Query.collides(that, map).length === 0 || Matter.Query.point(map, that.position).length > 0) {
-                                            that.endCycle = 0 // if not touching map explode
-                                            that.isArmed = false
-                                            b.mine(that.position, that.velocity, that.angle)
+                                    setTimeout(() => {
+                                        if (Matter.Query.collides(this, map).length === 0 || Matter.Query.point(map, this.position).length > 0) {
+                                            this.endCycle = 0 // if not touching map explode
+                                            this.isArmed = false
+                                            b.mine(this.position, this.velocity, this.angle)
                                         }
-                                    }, 100, that);
+                                    }, 100);
                                     break
                                 }
                                 //move until you are touching the wall
@@ -2599,17 +2644,18 @@ const b = {
                                 for (let i = 0, len = mob.length; i < len; ++i) {
                                     if (
                                         !mob[i].isBadTarget &&
-                                        Vector.magnitude(Vector.sub(this.position, mob[i].position)) < 700 + mob[i].radius + random &&
+                                        Vector.magnitude(Vector.sub(this.position, mob[i].position)) < this.range + mob[i].radius + random &&
                                         Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                         Matter.Query.ray(body, this.position, mob[i].position).length === 0
                                     ) {
-                                        if (tech.isStun) b.AoEStunEffect(this.position, 700 + mob[i].radius + random); //AoEStunEffect(where, range, cycles = 90 + 60 * Math.random()) {
+                                        if (tech.isStun) b.AoEStunEffect(this.position, this.range + mob[i].radius + random); //AoEStunEffect(where, range, cycles = 90 + 60 * Math.random()) {
                                         if (tech.isMineSentry) {
-                                            this.lookFrequency = 8 + Math.floor(3 * Math.random())
+                                            this.lookFrequency = 6
                                             this.endCycle = simulation.cycle + 1020
                                             this.do = function() { //overwrite the do method for this bullet
                                                 this.force.y += this.mass * 0.002; //extra gravity
                                                 if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
+                                                    this.endCycle -= 5
                                                     b.targetedNail(this.position, 1, 45 + 5 * Math.random(), 1100, false, 2.3) //targetedNail(position, num = 1, speed = 40 + 10 * Math.random(), range = 1200, isRandomAim = true, damage = 1.4) {
                                                     if (!(simulation.cycle % (this.lookFrequency * 6))) {
                                                         simulation.drawList.push({
@@ -3734,9 +3780,9 @@ const b = {
                         Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.target.velocity), this.target.position))
                     }
                     if (this.target.isBoss) {
-                        if (this.target.speed > 7.5) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.98))
+                        if (this.target.speed > 6.5) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.975))
                     } else {
-                        if (this.target.speed > 3.5) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.95))
+                        if (this.target.speed > 2.5) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.94))
                     }
 
                     Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9);
@@ -3746,35 +3792,6 @@ const b = {
                         const SCALE = 1 - 0.004 / tech.isBulletsLastLonger //shrink if mob is shielded
                         Matter.Body.scale(this, SCALE, SCALE);
                         this.radius *= SCALE;
-
-                        // if (true && !(simulation.cycle % 20)) {
-                        //     let electricity = (who) => {
-                        //         who.damage(2 * m.dmgScale, true)
-                        //         const unit = Vector.normalise(Vector.sub(this.position, who.position))
-                        //         //draw electricity
-                        //         const step = 80
-                        //         ctx.beginPath();
-                        //         let x = this.position.x - 20 * unit.x;
-                        //         let y = this.position.y - 20 * unit.y;
-                        //         ctx.moveTo(x, y);
-                        //         for (let i = 0; i < 3; i++) {
-                        //             x += step * (-unit.x + 1.5 * (Math.random() - 0.5))
-                        //             y += step * (-unit.y + 1.5 * (Math.random() - 0.5))
-                        //             ctx.lineTo(x, y);
-                        //         }
-                        //         ctx.lineWidth = 3;
-                        //         ctx.strokeStyle = "#f0f";
-                        //         ctx.stroke();
-                        //     }
-
-                        //     //find mobs that are close
-                        //     for (let i = 0, len = mob.length; i < len; ++i) {
-                        //         if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) - mob[i].radius < 5000 && !mob[i].isBadTarget) {
-                        //             electricity(mob[0])
-                        //         }
-                        //     }
-                        // }
-
                     } else {
                         this.target.damage(m.dmgScale * this.damage);
                     }
@@ -3808,23 +3825,23 @@ const b = {
                         }
                     }
                     this.target = null
-                } else if (Matter.Query.point(map, this.position).length > 0) { //slow when touching map or blocks
-                    const slow = 0.85
+                } else if (Matter.Query.point(map, this.position).length > 0) { //slow when touching map
+                    const slow = 0.87
                     Matter.Body.setVelocity(this, {
                         x: this.velocity.x * slow,
                         y: this.velocity.y * slow
                     });
-                    const SCALE = 0.96
+                    const SCALE = 0.97
                     Matter.Body.scale(this, SCALE, SCALE);
                     this.radius *= SCALE;
                     // } else if (Matter.Query.collides(this, body).length > 0) {
-                } else if (Matter.Query.point(body, this.position).length > 0) {
-                    const slow = 0.9
+                } else if (Matter.Query.point(body, this.position).length > 0) { //slow when touching blocks
+                    const slow = 0.94
                     Matter.Body.setVelocity(this, {
                         x: this.velocity.x * slow,
                         y: this.velocity.y * slow
                     });
-                    const SCALE = 0.96
+                    const SCALE = 0.99
                     Matter.Body.scale(this, SCALE, SCALE);
                     this.radius *= SCALE;
                 } else {
@@ -6617,7 +6634,7 @@ const b = {
             charge: 0,
             railDo() {
                 if (this.charge > 0) {
-                    const DRAIN = (tech.isRailEnergyGain ? 0.0005 : 0.002)
+                    const DRAIN = (tech.isRailEnergy ? 0.0005 : 0.002)
                     //exit railgun charging without firing
                     if (m.energy < DRAIN) {
                         // m.energy += 0.025 + this.charge * 22 * this.drain
@@ -6756,7 +6773,7 @@ const b = {
 
                         this.charge = this.charge * smoothRate + 1 - smoothRate
                         if (m.energy > DRAIN) m.energy -= DRAIN
-                        // m.energy += (this.charge - previousCharge) * ((tech.isRailEnergyGain ? 0.5 : -0.3)) //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
+                        // m.energy += (this.charge - previousCharge) * ((tech.isRailEnergy ? 0.5 : -0.3)) //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
 
                         //draw magnetic field
                         const X = m.pos.x

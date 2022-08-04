@@ -589,7 +589,7 @@ const mobs = {
                     ctx.setLineDash([]);
                 }
             },
-            wing(a, radius = 250, ellipticity = 0.4, dmg = 0.0004) {
+            wing(a, radius = 250, ellipticity = 0.4, dmg = 0.0006) {
                 const minorRadius = radius * ellipticity
                 const perp = { x: Math.cos(a), y: Math.sin(a) } //
                 const where = Vector.add(this.position, Vector.mult(perp, radius + 0.8 * this.radius))

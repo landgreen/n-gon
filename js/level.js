@@ -16,20 +16,20 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(2 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(9 * 4) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.maxHealth = m.health = 100
+            // tech.isRerollDamage = true
             // powerUps.research.changeRerolls(100000)
             // m.immuneCycle = Infinity //you can't take damage
-            // powerUps.research.changeRerolls(100)
             // tech.tech[297].frequency = 100
             // b.guns[0].ammo = 10000
 
-            // m.setField("time dilation") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
-            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // tech.giveTech("infrared diode");
-            // tech.giveTech("active cooling");
-            // tech.giveTech("pulse")
+            // m.setField("perfect diamagnetism") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // b.giveGuns("mine") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // tech.giveTech("sentry");
+            // tech.giveTech("laser-mines");
+            // tech.giveTech("elephant's toothpaste")
             // for (let i = 0; i < 1; ++i) tech.giveTech("slow light")
             // for (let i = 0; i < 1; ++i) tech.giveTech("free-electron laser")
             // m.damage(0.1);
@@ -37,8 +37,8 @@ const level = {
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
 
+            // spawn.flutter(1900, -500, 10)
             // spawn.starter(1900, -500, 200)
-            // spawn.starter(1900, -500, 50)
             // spawn.dragonFlyBoss(1900, -400)
             // spawn.beetleBoss(1900, -400)
             // for (let i = 0; i < 2; ++i) spawn.flutter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
@@ -4586,7 +4586,7 @@ const level = {
         spawn.randomMob(3600, 1725, 0.9);
         spawn.randomMob(4100, 1225, 0.9);
         spawn.randomMob(2825, 400, 0.9);
-        if (simulation.difficulty > 1) spawn.randomLevelBoss(6000, 2300, ["spiderBoss", "launcherBoss", "laserTargetingBoss", "blinkBoss", "streamBoss", "historyBoss", "orbitalBoss", "grenadierBoss", "blockBoss", "revolutionBoss", "slashBoss"]);
+        if (simulation.difficulty > 1) spawn.randomLevelBoss(6000, 2300, ["dragonFlyBoss", "beetleBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "blinkBoss", "streamBoss", "historyBoss", "orbitalBoss", "grenadierBoss", "blockBoss", "revolutionBoss", "slashBoss"]);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
         spawn.secondaryBossChance(7725, 2275)
 
@@ -5144,7 +5144,7 @@ const level = {
         spawn.randomMob(3975, -3900, 0.5);
         spawn.randomMob(1725, 125, 0.5);
         if (simulation.difficulty > 1) {
-            if (Math.random() < 0.33) {
+            if (Math.random() < 0.5) {
                 spawn.randomLevelBoss(4250, -250);
                 spawn.debris(-250, 50, 1650, 2); //16 debris per level
                 spawn.debris(2475, 0, 750, 2); //16 debris per level

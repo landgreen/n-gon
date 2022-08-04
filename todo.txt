@@ -1,13 +1,26 @@
 ******************************************************** NEXT PATCH **************************************************
 
-snakeBoss is now dragonFlyBoss
-  snakeSpitBoss till exists, don't worry
+elephant's toothpaste: mines make foam
 
-flutter and beetle mobs changes
+sentry fires about 40% faster
+  but each shot slightly reduces the total duration
+  (duration = 17s - 1/10 s per shot)
 
-Noether violation has 50% less forward recoil for shotgun
+foam can move through blocks a bit faster
+laser reflection damage is increased
+  about 15% -> 8% damage loss per reflection
+beetleBoss pushes player away and spawns baby flutter mobs
+fire rate affects block throwing charge rate
 
 *********************************************************** TODO *****************************************************
+
+bug blocks and power ups falling through map
+  always foam gun  (4-5 times)
+    might be about tech pressure vessel
+  happens rarely, doesn't repeat
+  normally after level 6
+
+seed isn't working right from shared URL
 
 mob mechanics
   bullets hit player and stay attached for 4-5 seconds, slowing player
