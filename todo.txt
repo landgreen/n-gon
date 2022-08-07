@@ -1,18 +1,41 @@
 ******************************************************** NEXT PATCH **************************************************
 
-elephant's toothpaste: mines make foam
+finalBoss black hole phase:
+  makes 100% more bullets
+  grows and shrinks smoothly near start and end of phase
+  does 20% more damage to player
 
-sentry fires about 40% faster
-  but each shot slightly reduces the total duration
-  (duration = 17s - 1/10 s per shot)
+historyBoss has a "fun" graphical effect
+acetone peroxide has 50 -> 40% less explosion defense
 
-foam can move through blocks a bit faster
-laser reflection damage is increased
-  about 15% -> 8% damage loss per reflection
-beetleBoss pushes player away and spawns baby flutter mobs
-fire rate affects block throwing charge rate
+bug fix: timeSkip graphic glitch
+  there is a chance to cause other bugs with timeSkip effects
 
 *********************************************************** TODO *****************************************************
+
+screen shake effect - add random numbers to ctx.translate
+
+quantum immortality: send you to a new tab after you die with a random load out
+  basically everything is the same as it is now, but you switch tabs
+
+tech: get sent to a new tab that closes in 3 minutes
+  in the new tab you play reactor
+  if you die in reactor you die in game, if you win you get 2-3 tech in the original game?
+  give player equipment like many-worlds
+    count guns, field, tech and give random stuff on new tab
+  i-frame instead of tab?
+
+field efficiency - Give each field an extra numerical effect, and add a 'field efficiency' stat that increases it
+  field numbers
+    standing wave, molecular assembler: energy efficiency
+    plasma, metamaterial: damage
+    time dilation: movement, jump, fire rate
+    negative mass: defense
+    diamagnetism: arc length
+    wormhole: (i dislike it but idk of other things) dupe chance
+  tech: +x% field efficiency, your field changes randomly every y seconds
+  tech: starts at 200%, but decays when the field is in use, efficiency recharges when the field is not in use
+
 
 bug blocks and power ups falling through map
   always foam gun  (4-5 times)
@@ -38,6 +61,7 @@ mob mechanics
 tech: You can place an extra perfect diamagnatism field on the map
 
 standing wave no longer pushes mobs away, but it can do damage to mobs caught in area effect
+  Standing wave harmonics no longer deflects, but instead discharges excess energy as lightning toward nearby enemies 
 negative mass field does damage to mobs inside field
   combine with standing wave effect? pilot wave?
 

@@ -384,7 +384,7 @@ const b = {
 
             //player damage
             if (Vector.magnitude(Vector.sub(where, player.position)) < radius) {
-                const DRAIN = (tech.isExplosionHarm ? 0.67 : 0.45) * (tech.isRadioactiveResistance ? 0.25 : 1)
+                const DRAIN = (tech.isExplosionHarm ? 0.63 : 0.45) * (tech.isRadioactiveResistance ? 0.25 : 1)
                 if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 if (m.energy < 0) {
                     m.energy = 0
@@ -433,7 +433,7 @@ const b = {
 
                 if (dist < radius) {
                     if (simulation.dmgScale) {
-                        const harm = tech.isExplosionHarm ? 0.075 : 0.05
+                        const harm = tech.isExplosionHarm ? 0.07 : 0.05
                         if (tech.isImmuneExplosion && m.energy > 0.12) {
                             // const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
                             m.energy -= 0.12

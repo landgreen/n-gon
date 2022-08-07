@@ -4803,7 +4803,7 @@ const tech = {
         },
         {
             name: "acetone peroxide",
-            description: "<strong>+70%</strong> <strong class='color-e'>explosive</strong> <strong>radius</strong><br><strong>–50%</strong> <strong class='color-e'>explosive</strong> <strong class='color-defense'>defense</strong>",
+            description: "<strong>+70%</strong> <strong class='color-e'>explosive</strong> <strong>radius</strong><br><strong>–40%</strong> <strong class='color-e'>explosive</strong> <strong class='color-defense'>defense</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5671,7 +5671,7 @@ const tech = {
         },
         {
             name: "necrophage",
-            description: "if <strong>foam</strong>, <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>, or <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> <strong>kill</strong> their target<br>grow 3 <strong>copies</strong>",
+            description: "if <strong>foam</strong>, <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>, or <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> <strong>kill</strong> their target<br>they grow 3 <strong>copies</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,

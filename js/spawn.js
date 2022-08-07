@@ -530,6 +530,7 @@ const spawn = {
             this.totalCycles++;
             if (this.health > 0.25) {
                 if (this.cycle > this.endCycle) {
+                    this.showHealthBar = true
                     this.cycle = 0;
                     this.mode++
                     this.damageReduction = 0.25
@@ -550,6 +551,7 @@ const spawn = {
                         this.modeDo = this.modeSuck
                         Matter.Body.scale(this, 0.001, 0.001);
                         this.damageReduction = 0.000025
+                        this.showHealthBar = false
                     }
                     if (tech.isGunCycle) {
                         b.inventoryGun++;
@@ -557,9 +559,11 @@ const spawn = {
                         simulation.switchGun();
                     }
                 }
-            } else if (this.mode !== 3) { //all three modes at once
+            } else if (this.mode !== 3) { //all three modes at once ,  this runs once
+                this.showHealthBar = true
                 this.pushAway();
                 this.cycle = 0;
+                this.endCycle = Infinity
                 this.damageReduction = 0.15
                 if (this.mode === 2) {
                     Matter.Body.scale(this, 500, 500);
@@ -573,6 +577,7 @@ const spawn = {
                 this.rotateVelocity = 0.001 * (player.position.x > this.position.x ? 1 : -1) //rotate so that the player can get away                    
                 // if (!this.isShielded) spawn.shield(this, x, y, 1); //regen shield here ?
                 this.modeDo = this.modeAll
+                this.eventHorizonRadius = 700
                 if (tech.isGunCycle) {
                     b.inventoryGun++;
                     if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
@@ -610,15 +615,15 @@ const spawn = {
                 }
             }
         }
-        me.eventHorizon = 1300
-        me.eventHorizonCycleRate = 4 * Math.PI / me.endCycle
+        me.eventHorizon = 0
+        me.eventHorizonRadius = 1300
         me.modeSuck = function() {
-            if (!(this.cycle % 60)) {
+            if (!(this.cycle % 30)) {
                 const index = Math.floor((this.cycle % 360) / 60)
                 spawn.seeker(this.vertices[index].x, this.vertices[index].y, 20 * (0.5 + Math.random()), 9); //give the bullet a rotational velocity as if they were attached to a vertex
                 const who = mob[mob.length - 1]
                 Matter.Body.setDensity(who, 0.00003); //normal is 0.001
-                who.timeLeft = 760 //* (0.8 + 0.4 * Math.random());
+                who.timeLeft = 720 + 10 * simulation.difficulty //* (0.8 + 0.4 * Math.random());
                 who.accelMag = 0.0003 * simulation.accelScale; //* (0.8 + 0.4 * Math.random())
                 who.frictionAir = 0.01 //* (0.8 + 0.4 * Math.random());
                 const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[index]))), -7)
@@ -629,33 +634,37 @@ const spawn = {
             }
 
             //eventHorizon waves in and out
-            const eventHorizon = this.eventHorizon * (1 - 0.25 * Math.cos(simulation.cycle * this.eventHorizonCycleRate)) //0.014
+            if (this.cycle + 30 > this.endCycle) { //shrink fast in last bit of cycle 
+                this.eventHorizon = 0.93 * this.eventHorizon
+            } else {
+                this.eventHorizon = 0.97 * this.eventHorizon + 0.03 * (this.eventHorizonRadius * (1 - 0.5 * Math.cos(this.cycle * 0.015)))
+            }
             //draw darkness
             ctx.beginPath();
-            ctx.arc(this.position.x, this.position.y, eventHorizon * 0.2, 0, 2 * Math.PI);
+            ctx.arc(this.position.x, this.position.y, this.eventHorizon * 0.2, 0, 2 * Math.PI);
             ctx.fillStyle = "rgba(0,20,40,0.6)";
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(this.position.x, this.position.y, eventHorizon * 0.4, 0, 2 * Math.PI);
+            ctx.arc(this.position.x, this.position.y, this.eventHorizon * 0.4, 0, 2 * Math.PI);
             ctx.fillStyle = "rgba(0,20,40,0.4)";
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(this.position.x, this.position.y, eventHorizon * 0.6, 0, 2 * Math.PI);
+            ctx.arc(this.position.x, this.position.y, this.eventHorizon * 0.6, 0, 2 * Math.PI);
             ctx.fillStyle = "rgba(0,20,40,0.3)";
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(this.position.x, this.position.y, eventHorizon * 0.8, 0, 2 * Math.PI);
+            ctx.arc(this.position.x, this.position.y, this.eventHorizon * 0.8, 0, 2 * Math.PI);
             ctx.fillStyle = "rgba(0,20,40,0.2)";
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(this.position.x, this.position.y, eventHorizon, 0, 2 * Math.PI);
+            ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
             ctx.fillStyle = "rgba(0,0,0,0.05)";
             ctx.fill();
             //when player is inside event horizon
-            if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
+            if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.eventHorizon) {
                 if (m.immuneCycle < m.cycle) {
-                    if (m.energy > 0) m.energy -= 0.01
-                    if (m.energy < 0.15 && m.immuneCycle < m.cycle) m.damage(0.0004 * simulation.dmgScale);
+                    if (m.energy > 0) m.energy -= 0.015
+                    if (m.energy < 0.05 && m.immuneCycle < m.cycle) m.damage(0.0005 * simulation.dmgScale);
                 }
                 const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                 player.force.x -= 0.0017 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
@@ -672,7 +681,7 @@ const spawn = {
                 ctx.fillStyle = "rgba(0,0,0,0.3)";
                 ctx.fill();
             }
-            this.curl(eventHorizon);
+            this.curl(this.eventHorizon);
         }
         me.rotateVelocity = 0.0025
         me.rotateCount = 0;
@@ -2529,6 +2538,7 @@ const spawn = {
         me.laserRange = 350;
         me.seeAtDistance2 = 2000000;
         me.isBoss = true;
+        me.damageReduction = 0.35 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) // me.damageReductionGoal
 
         me.showHealthBar = false; //drawn in this.awake
         me.delayLimit = 60 + Math.floor(30 * Math.random());
@@ -2539,10 +2549,13 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             requestAnimationFrame(() => {
-                requestAnimationFrame(() => { ctx.setLineDash([]) })
+                requestAnimationFrame(() => {
+                    ctx.setTransform(1, 0, 0, 1, 0, 0); //reset warp effect
+                    ctx.setLineDash([]) //reset stroke dash effect
+                })
             })
         };
-        me.damageReduction = 0.35 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) // me.damageReductionGoal
+        me.warpIntensity = 0
         me.awake = function() {
             // this.armor();
             this.checkStatus();
@@ -2577,6 +2590,13 @@ const spawn = {
                         m.damage(0.0004 * simulation.dmgScale)
                     }
                 }
+                this.warpIntensity += 0.0004
+                requestAnimationFrame(() => {
+                    if (!simulation.paused && m.alive) {
+                        ctx.transform(1, this.warpIntensity * (Math.random() - 0.5), this.warpIntensity * (Math.random() - 0.5), 1, 0, 0); //ctx.transform(Horizontal scaling. A value of 1 results in no scaling,  Vertical skewing,   Horizontal skewing,   Vertical scaling. A value of 1 results in no scaling,   Horizontal translation (moving),   Vertical translation (moving)) //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setTransform
+                        // ctx.transform(1 - scale * (Math.random() - 0.5), skew * (Math.random() - 0.5), skew * (Math.random() - 0.5), 1 - scale * (Math.random() - 0.5), translation * (Math.random() - 0.5), translation * (Math.random() - 0.5)); //ctx.transform(Horizontal scaling. A value of 1 results in no scaling,  Vertical skewing,   Horizontal skewing,   Vertical scaling. A value of 1 results in no scaling,   Horizontal translation (moving),   Vertical translation (moving)) //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setTransform
+                    }
+                })
                 ctx.beginPath();
                 ctx.moveTo(eye.x, eye.y);
                 ctx.lineTo(m.pos.x, m.pos.y);
@@ -2588,6 +2608,8 @@ const spawn = {
                 ctx.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
                 ctx.fillStyle = "rgba(150,0,255,0.1)";
                 ctx.fill();
+            } else {
+                this.warpIntensity = 0;
             }
 
             //several ellipses spinning about the same axis
@@ -4402,11 +4424,13 @@ const spawn = {
                 }
                 //time dilation
                 if (!simulation.isTimeSkipping) {
-                    requestAnimationFrame(() => {
-                        simulation.timePlayerSkip(2)
-                        m.walk_cycle += m.flipLegs * m.Vx //makes the legs look like they are moving fast
-                    }); //wrapping in animation frame prevents errors, probably            
-                    // if (!(simulation.cycle % 10)) 
+                    // requestAnimationFrame(() => {
+                    //     simulation.timePlayerSkip(2)
+                    //     m.walk_cycle += m.flipLegs * m.Vx //makes the legs look like they are moving fast
+                    // }); //wrapping in animation frame prevents errors, probably            
+
+                    simulation.timePlayerSkip(2)
+                    m.walk_cycle += m.flipLegs * m.Vx //makes the legs look like they are moving fast
 
                     //draw invulnerable
                     ctx.beginPath();
@@ -5639,10 +5663,14 @@ const spawn = {
                     //     simulation.timePlayerSkip(5)
                     //     // simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
                     // }); //wrapping in animation frame prevents errors, probably
-                    requestAnimationFrame(() => {
-                        simulation.timePlayerSkip(1)
-                        m.walk_cycle += m.flipLegs * m.Vx //makes the legs look like they are moving fast
-                    }); //wrapping in animation frame prevents errors, probably            
+
+                    // requestAnimationFrame(() => {
+                    //     simulation.timePlayerSkip(1)
+                    //     m.walk_cycle += m.flipLegs * m.Vx //makes the legs look like they are moving fast
+                    // }); //wrapping in animation frame prevents errors, probably            
+
+                    simulation.timePlayerSkip(1)
+                    m.walk_cycle += m.flipLegs * m.Vx //makes the legs look like they are moving fast
 
                     ctx.beginPath();
                     ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);

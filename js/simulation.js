@@ -562,6 +562,38 @@ const simulation = {
             }
         }, len * swapPeriod);
     },
+    // warp(translation = 5, skew = 0.05, scale = 0.05) {
+    // if (simulation.cycle % 2) { //have to alternate frames or else successive rumbles over write the effects of the previous rumble
+    // requestAnimationFrame(() => { ctx.setTransform(1, 0, 0, 1, 0, 0); }) //reset
+    // requestAnimationFrame(() => {
+    //     if (!simulation.paused && m.alive) {
+    //         ctx.transform(1 - scale * (Math.random() - 0.5), skew * (Math.random() - 0.5), skew * (Math.random() - 0.5), 1 - scale * (Math.random() - 0.5), translation * (Math.random() - 0.5), translation * (Math.random() - 0.5)); //ctx.transform(Horizontal scaling. A value of 1 results in no scaling,  Vertical skewing,   Horizontal skewing,   Vertical scaling. A value of 1 results in no scaling,   Horizontal translation (moving),   Vertical translation (moving)) //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setTransform
+    //     }
+    // })
+
+    //reset
+    // ctx.transform(1, 0, 0, 1, 0, 0); //ctx.transform(Horizontal scaling. A value of 1 results in no scaling,  Vertical skewing,   Horizontal skewing,   Vertical scaling. A value of 1 results in no scaling,   Horizontal translation (moving),   Vertical translation (moving)) //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setTransform
+
+    // }
+    // const loop = () => {
+    //     if (!simulation.paused && m.alive) {
+    //         ctx.save();
+    //         ctx.transform(1 - scale * (Math.random() - 0.5), skew * (Math.random() - 0.5), skew * (Math.random() - 0.5), 1 - scale * (Math.random() - 0.5), translation * (Math.random() - 0.5), translation * (Math.random() - 0.5)); //ctx.transform(Horizontal scaling. A value of 1 results in no scaling,  Vertical skewing,   Horizontal skewing,   Vertical scaling. A value of 1 results in no scaling,   Horizontal translation (moving),   Vertical translation (moving))
+    //         requestAnimationFrame(() => { ctx.restore(); })
+    //     }
+    // }
+    // requestAnimationFrame(loop);
+
+    // function loop() {
+    //     if (!simulation.paused && m.alive) {
+    //         ctx.save();
+    //         ctx.transform(1 - scale * (Math.random() - 0.5), skew * (Math.random() - 0.5), skew * (Math.random() - 0.5), 1 - scale * (Math.random() - 0.5), translation * (Math.random() - 0.5), translation * (Math.random() - 0.5)); //ctx.transform(Horizontal scaling. A value of 1 results in no scaling,  Vertical skewing,   Horizontal skewing,   Vertical scaling. A value of 1 results in no scaling,   Horizontal translation (moving),   Vertical translation (moving))
+    //         requestAnimationFrame(() => { ctx.restore(); })
+    //     }
+    //     requestAnimationFrame(loop);
+    // }
+    // requestAnimationFrame(loop);
+    // },
     wipe() {}, //set in simulation.startGame
     gravity() {
         function addGravity(bodies, magnitude) {
@@ -699,6 +731,10 @@ const simulation = {
         document.getElementById("pause-grid-left").style.opacity = "1"
         ctx.globalCompositeOperation = "source-over"
         ctx.shadowBlur = 0;
+        requestAnimationFrame(() => {
+            ctx.setTransform(1, 0, 0, 1, 0, 0); //reset warp effect
+            ctx.setLineDash([]) //reset stroke dash effect
+        })
         // ctx.shadowColor = '#000';
         if (!m.isShipMode) {
             m.draw = m.drawDefault //set the play draw to normal, undoing some junk tech
@@ -830,6 +866,7 @@ const simulation = {
     },
     clearNow: false,
     clearMap() {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (m.alive) {
             if (tech.isLongitudinal) {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
