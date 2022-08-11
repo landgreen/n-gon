@@ -49,12 +49,6 @@
             <details>
                 <summary>settings</summary>
                 <div style="line-height: 150%;" class="details-div">
-
-                    <label for="seed">randomization seed:</label>
-                    <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" size="20" style="width: 120px;">
-                    <br>
-                    <span id="previous-seed" style="color:#bbb"></span>
-
                     <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">combat difficulty:</label>
                     <select name="difficulty-select" id="difficulty-select" style="background-color: #fff">
                         <option value="1">easy</option>
@@ -63,11 +57,60 @@
                         <option value="6">why?</option>
                     </select>
                     <br>
+                    <label for="fps-select" title="use this to slow the game down">limit frames per second:</label>
+                    <select name="fps-select" id="fps-select">
+                        <option value="max" selected>no cap</option>
+                        <option value="72">72 fps</option>
+                        <option value="60">60 fps</option>
+                        <option value="45">45 fps</option>
+                        <option value="30">30 fps</option>
+                    </select>
+                    <br>
+                    <label for="seed">randomization seed:</label>
+                    <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" style="width: 120px;">
+                    <br>
+                    <span id="previous-seed" style="color:#bbb"></span>
                     <label for="community-maps" title="">include community maps:</label>
                     <input type="checkbox" id="community-maps" name="community-maps" style="width:17px; height:17px;">
                     <!-- <br>
 					<label for="body-damage" title="allow damage from the ground and large fast moving blocks">collision damage from blocks:</label>
 					<input type="checkbox" id="body-damage" name="body-damage" checked style="width:17px; height:17px;"> -->
+                    <br>
+                    <label for="banned">banned levels:</label>
+                    <input list="ban-suggest" id="banned" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="false" style="width: 182px;" />
+                    <datalist id="ban-suggest">
+                        <option value="testChamber">
+                        <option value="sewers">
+                        <option value="satellite">
+                        <option value="aerie">
+                        <option value="office">
+                        <option value="highrise">
+                        <option value="warehouse">
+                        <option value="skyscrapers">
+                        <option value="rooftops">
+                        <option value="pavilion">
+                        <option value="labs">
+                        <option value="______">
+                        <option value="islands">
+                        <option value="tunnel">
+                        <option value="coliseum">
+                        <option value="dripp">
+                        <option value="perplex">
+                        <option value="n-gon">
+                        <option value="vats">
+                        <option value="basement">
+                        <option value="stronghold">
+                        <option value="crossfire">
+                        <option value="house">
+                        <option value="dripp">
+                        <option value="temple">
+                        <option value="run">
+                    </datalist>
+                    <!-- communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp"], -->
+                    <!-- playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion"], -->
+
+                    <!--                <label for="banned">banned levels:</label>
+                    <input type="text" id="ban-list" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="true" style="width: 183px;"> -->
                     <br>
                     <label for="classic-select" title="play older versions of n-gon">classic n-gon:</label>
                     <select name="classic-select" id="classic-select" onChange="window.location.href=this.value">
@@ -84,15 +127,6 @@
                         <option value="classic/7-15-2020/">n-gon: summer-2020</option>
                         <option value="classic/6-1-2021/">n-gon: spring-2021</option>
                         <option value="" selected>current version</option>
-                    </select>
-                    <br>
-                    <label for="fps-select" title="use this to slow the game down">limit frames per second:</label>
-                    <select name="fps-select" id="fps-select">
-                        <option value="max" selected>no cap</option>
-                        <option value="72">72 fps</option>
-                        <option value="60">60 fps</option>
-                        <option value="45">45 fps</option>
-                        <option value="30">30 fps</option>
                     </select>
                 </div>
             </details>

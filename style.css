@@ -38,7 +38,7 @@ input {
     border: 1px #333 solid;
     border-radius: 4px;
     /* margin: 0.2em; */
-    width: 38px;
+    /* width: 38px; */
 }
 
 a {
@@ -924,6 +924,34 @@ summary {
     }
 }
 
+.color-coupling {
+    /* animation: coupling 1000ms linear infinite alternate; */
+    /* animation: vibrate 500ms linear infinite alternate;
+    display: inline-block; */
+    /* text-shadow: 0px 0px 2px #0cf; */
+    text-shadow: 0px 0px 1.5px #0cf; 
+    /* color: hsl(255, 82%, 59%); */
+    letter-spacing: 1px;
+    font-weight: 100;
+}
+
+/* @keyframes coupling{
+    0%{
+      letter-spacing: 0.5px;
+    }
+    100%{
+      letter-spacing: 1px;
+    }
+  }
+
+@keyframes vibrate{
+    0% {
+        transform: translateY(-0.25px)
+    }
+    100% {
+        transform: translateY(0.25px)
+    }
+} */
 
 .box {
     padding: 3px 8px 3px 8px;
@@ -955,7 +983,6 @@ summary {
 .lore-text {
     animation: textColor 3s linear infinite;
 }
-
 
 @keyframes fieldColorCycle {
     0% {

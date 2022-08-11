@@ -898,6 +898,7 @@ const m = {
     maxEnergy: 1, //can be increased by a tech
     holdingTarget: null,
     timeSkipLastCycle: 0,
+    coupling: 0,
     // these values are set on reset by setHoldDefaults()
     fieldFx: 1,
     fieldJump: 1,
@@ -1517,6 +1518,30 @@ const m = {
         }
     },
     hold() {},
+    couplingDescription() {
+        switch (m.fieldMode) {
+            case 0: //field emitter
+                return `gain the effects of all <strong class='color-f'>fields</strong>`
+            case 1: //standing wave
+                return `<strong>+20</strong> max <strong class='color-f'>energy</strong> per <strong class='color-coupling'>coupling</strong>`
+            case 2: //perfect diamagnetism
+                return `<strong>+10°</strong> <strong>arc</strong> per <strong class='color-coupling'>coupling</strong>`
+            case 3: //negative mass
+                return `<strong>+25%</strong> <strong class='color-defense'>defense</strong> per <strong class='color-coupling'>coupling</strong>`
+            case 4: //assembler
+                return `generate <strong>4</strong> <strong class='color-f'>energy</strong> per second per <strong class='color-coupling'>coupling</strong>`
+            case 5: //plasma
+                return `<strong>+13%</strong> <strong class='color-d'>damage</strong> per <strong class='color-coupling'>coupling</strong>`
+            case 6: //time dilation
+                return `<strong>+20%</strong> <strong><em>fire rate</em></strong> per <strong class='color-coupling'>coupling</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
+            case 7: //cloaking
+                return `remove <strong>+10%</strong> mob <strong>durability</strong> per <strong class='color-coupling'>coupling</strong>`
+            case 8: //pilot wave
+                return `________ per <strong class='color-coupling'>coupling</strong>`
+            case 9: //wormhole
+                return `<strong>+5%</strong> <strong class='color-dup'>duplication</strong> per <strong class='color-coupling'>coupling</strong>`
+        }
+    },
     setField(index) {
         if (isNaN(index)) { //find index by name
             let found = false
@@ -3240,13 +3265,13 @@ const m = {
         {
             name: "wormhole",
             //<strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br>
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+4%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+3%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             drain: 0,
             effect: function() {
                 m.fieldMeterColor = "#bbf" //"#0c5"
                 m.eyeFillColor = m.fieldMeterColor
 
-                m.duplicateChance = 0.04
+                m.duplicateChance = 0.03
                 m.fieldRange = 0
                 powerUps.setDupChance(); //needed after adjusting duplication chance
 

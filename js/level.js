@@ -16,16 +16,16 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(1 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(5 * 4) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
             // powerUps.research.changeRerolls(100000)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
-            // b.guns[0].ammo = 10000
             // m.setField("time dilation") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.guns[0].ammo = 1000000
             // tech.giveTech("sentry");
             // tech.giveTech("MACHO");
             // tech.giveTech("elephant's toothpaste")
@@ -36,10 +36,8 @@ const level = {
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
 
-            // spawn.flutter(1900, -500, 10)
             // spawn.starter(1900, -500, 200)
-            // spawn.historyBoss(1900, -400)
-            // spawn.beetleBoss(1900, -400)
+            // spawn.snakeSpitBoss(1900, -400)
             // for (let i = 0; i < 15; ++i) spawn.starter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
             // level.testing();
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
@@ -239,30 +237,44 @@ const level = {
         }
     },
     populateLevels() { //run a second time if URL is loaded
-        if (document.getElementById("seed").value) {
+        if (document.getElementById("banned").value) { //remove levels from ban list in settings
+            const banList = document.getElementById("banned").value.replace(/,/g, ' ').replace(/\s\s+/g, ' ').replace(/[^\w\s]/g, '') //replace commas with spaces, replace double spaces with single, remove strange symbols
+            const remove = banList.split(" ");
+            console.log('remove these', remove)
+            console.log('community levels before', level.communityLevels)
+            for (let i = 0; i < remove.length; i++) {
+                const index = level.communityLevels.indexOf(remove[i])
+                if (index !== -1) level.communityLevels.splice(index, 1);
+            }
+            console.log('community levels after', level.communityLevels)
+            console.log('Landgreen levels before', level.playableLevels)
+            for (let i = 0; i < remove.length; i++) {
+                if (level.playableLevels.length + level.communityLevels.length * simulation.isCommunityMaps < 10) break //can't remove too many levels
+                const index = level.playableLevels.indexOf(remove[i])
+                if (index !== -1) level.playableLevels.splice(index, 1);
+            }
+            console.log('Landgreen levels after', level.playableLevels)
+        }
+
+        if (document.getElementById("seed").value) { //check for player entered seed in settings
             Math.initialSeed = String(document.getElementById("seed").value)
             Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
         }
+
         if (simulation.isTraining) {
             level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
-        } else {
-            simulation.isHorizontalFlipped = (Math.seededRandom() < 0.5) ? true : false //if true, some maps are flipped horizontally
+        } else { //add remove and shuffle levels for the normal game (not training levels)
             level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
             if (simulation.isCommunityMaps) {
-                // level.levels.push(level.communityLevels)
                 level.levels = level.levels.concat(level.communityLevels)
-                level.levels = shuffle(level.levels); //shuffles order of maps
-                level.levels.splice(0, level.communityLevels.length); //remove some random levels to make up for adding the community levels
                 simulation.isHorizontalFlipped = false;
             } else {
-                level.levels = shuffle(level.levels); //shuffles order of maps
+                simulation.isHorizontalFlipped = (Math.seededRandom() < 0.5) ? true : false //if true, some maps are flipped horizontally
             }
-            // level.levels.splice(Math.floor(level.levels.length * (0.4 + 0.6 * Math.random())), 0, "reservoir"); //add level to the back half of the randomized levels list
+            level.levels = shuffle(level.levels); //shuffles order of maps with seeded random
+            level.levels.length = 9 //remove any extra levels past 9
             level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, "reservoir"); //add level to the back half of the randomized levels list
             level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
-            // level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.2, level.levels.length * 0.5)), 0, "reactor"); //add level to the back half of the randomized levels list
-            // level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.7, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
-            level.levels.splice(0, 2); //remove 2 levels from the start of the array
             if (!build.isExperimentSelection || (build.hasExperimentalMode && !simulation.isCheating)) { //experimental mode is endless, unless you only have an experiment Tech
                 level.levels.unshift("intro"); //add level to the start of the randomized levels list
                 level.levels.push("gauntlet"); //add level to the end of the randomized levels list
@@ -9923,7 +9935,6 @@ const level = {
         powerUps.spawn(3000, -230, "heal");
         // level.difficultyIncrease(60)
     },
-
     temple() {
         simulation.makeTextLog(`<strong>temple</strong> by <span class='color-var'>Scar1337</span>`);
 
@@ -9977,6 +9988,26 @@ const level = {
             Rect.fromBounds = function(min, max) {
                 return new Rect(min.x, min.y, max.x - min.x, max.y - min.y);
             }
+            Rect.prototype.isCollidingWith = function(other) {
+                const tc = {
+                    p1: [this.pos.x, this.pos.y],
+                    p2: [this.pos.x + this.width, this.pos.y + this.height]
+                };
+                const oc = {
+                    p1: [other.pos.x, other.pos.y],
+                    p2: [other.pos.x + other.width, other.pos.y + other.height]
+                };
+
+                // If one rectangle is on left side of other
+                if (tc.p1[0] >= oc.p2[0] || oc.p1[0] >= tc.p2[0])
+                    return false;
+
+                // If one rectangle is above other
+                if (tc.p1[1] >= oc.p2[1] || oc.p1[1] >= tc.p2[1])
+                    return false;
+
+                return true;
+            }
             return Rect;
         })();
 
@@ -9998,7 +10029,7 @@ const level = {
             }
         }
 
-        function secondRoomBoss(x, y, radius = 25, isDark = false) {
+        function secondRoomSuckerBoss(x, y, isDark = false, radius = 25) {
             mobs.spawn(x, y, 12, radius, isDark ? "#000" : "#fff");
             let me = mob[mob.length - 1];
             me.isBoss = true;
@@ -10099,6 +10130,119 @@ const level = {
                 }
             }
         };
+
+        function secondRoomPlacerBoss(x, y, isDark = false, size = 70) {
+            mobs.spawn(x, y, isDark ? 3 : 4, size, isDark ? "#0008" : "#fff8");
+            let me = mob[mob.length - 1];
+            me.isBoss = true;
+            me.isDark = isDark;
+
+            me.stroke = isDark ? "#000" : "#fff";
+            me.seeAtDistance2 = 5e6; // Basically just see at all times, in the context it's given
+            me.accelMag = 0.0001 * simulation.accelScale;
+            me.collisionFilter.mask = cat.player | cat.bullet;
+            me.memory = 1600;
+            me.randomPRNGMult = Math.random() * 500;
+
+            me.attackCycle = 0;
+            me.maxAttackCycle = isDark ? 90 : 240;
+            Matter.Body.setDensity(me, 0.006); // extra dense, normal is 0.001 // makes effective life much larger
+            me.onDeath = function() {
+                powerUps.spawn(this.position.x + 20, this.position.y, "ammo");
+                if (Math.random() > 0.5) powerUps.spawn(this.position.x, this.position.y, "ammo");
+                if (Math.random() > 0.3) powerUps.spawn(this.position.x, this.position.y, "heal", true, null, 30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
+            };
+            me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
+            me.do = function() {
+                // keep it slow, to stop issues from explosion knock backs
+                if (this.speed > 2) {
+                    Matter.Body.setVelocity(this, {
+                        x: this.velocity.x * 0.95,
+                        y: this.velocity.y * 0.95
+                    });
+                }
+                if (!(simulation.cycle % this.seePlayerFreq)) {
+                    if (this.distanceToPlayer2() < this.seeAtDistance2) { // ignore cloak
+                        this.locatePlayer();
+                        if (!this.seePlayer.yes) this.seePlayer.yes = true;
+                    } else if (this.seePlayer.recall) {
+                        this.lostPlayer();
+                    }
+                }
+                this.checkStatus();
+                if (this.seePlayer.recall) {
+                    // accelerate towards the player
+                    const forceMag = this.accelMag * this.mass;
+                    const dx = this.seePlayer.position.x - this.position.x
+                    const dy = this.seePlayer.position.y - this.position.y
+                    const mag = Math.sqrt(dx * dx + dy * dy)
+                    this.force.x += forceMag * dx / mag;
+                    this.force.y += forceMag * dy / mag;
+                    this.attackCycle++;
+                    if (this.attackCycle > this.maxAttackCycle) {
+                        this.attackCycle = 0;
+                        secondRoomObstacle(this.position.x, this.position.y, this.isDark, size);
+                    }
+                }
+            }
+        };
+
+        function secondRoomObstacle(x, y, isDark = false, size = 70) {
+            mobs.spawn(x, y, isDark ? 3 : 4, size, isDark ? "#0004" : "#fff4");
+            let me = mob[mob.length - 1];
+
+            me.stroke = isDark ? "#000b" : "#fffb";
+            me.collisionFilter.mask = isDark ? cat.player | cat.bullet : 0;
+            me.isDropPowerUp = false;
+            me.showHealthBar = false;
+            me.leaveBody = false;
+            me.timeLeft = 1200;
+            me.isObstacle = true;
+            me.damageReduction = isDark ? 0.5 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) : 0;
+            if (!isDark) {
+                me.isBadTarget = true;
+                me.attackCycle = 0;
+                me.maxAttackCycle = 10;
+                me.inertia = Infinity;
+            }
+            me.do = isDark ? function() {
+                Matter.Body.setVelocity(this, {
+                    x: this.velocity.x * 0.95,
+                    y: this.velocity.y * 0.95
+                });
+            } : function() {
+                Matter.Body.setVelocity(this, {
+                    x: this.velocity.x * 0.95,
+                    y: this.velocity.y * 0.95
+                });
+                if (Rect.fromBounds(this.bounds.min, this.bounds.max).isCollidingWith(Rect.fromBounds(player.bounds.min, player.bounds.max))) {
+                    this.attackCycle++;
+                    this.attackCycle = Math.min(this.attackCycle, 10);
+                } else {
+                    this.attackCycle--;
+                    this.attackCycle = Math.max(this.attackCycle, 0);
+                }
+                if (this.attackCycle > 0) {
+                    ctx.beginPath();
+                    const vertices = this.vertices;
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+                    ctx.lineTo(vertices[0].x, vertices[0].y);
+                    if (this.attackCycle >= 10) {
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = "rgb(255, 210, 64)";
+                    }
+                    ctx.fillStyle = `rgba(255, 210, 64, ${this.attackCycle / 15})`;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    if (this.attackCycle >= 10) {
+                        DrawTools.lightning(this.position, m.pos, simulation.cycle);
+                        m.damage(0.003 * simulation.dmgScale);
+                    }
+                }
+                this.timeLimit();
+            }
+        }
 
         function mobGrenade(...args) {
             spawn.grenade(...args);
@@ -10209,12 +10353,12 @@ const level = {
                 }
             }
             me.horizon = function() {
-                if (this.isInvulnerable) return;
+                if (this.isInvulnerable) return this.fill = "#f00";
                 // eventHorizon waves in and out
                 const eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(simulation.cycle * 0.008));
 
                 const charge = this.attackCycle / 90;
-                this.fill = this.isInvulnerable ? "#f00" : `rgb(${charge * 255},${charge * 255},${charge * 255})`;
+                this.fill = `rgb(${charge * 255},${charge * 255},${charge * 255})`;
                 // draw darkness
                 ctx.fillStyle = `rgba(${charge * 225},${20 + charge * 195},${40 + charge * 215},0.6)`;
                 DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.2, 0, 2 * Math.PI);
@@ -11048,7 +11192,7 @@ const level = {
                 if (simulation.cycle % 4 === 0) {
                     let newMobPositions = [];
                     for (const i of mob) {
-                        if (!(i.isMACHO || i.isWIMP)) newMobPositions.push({ x: i.position.x, y: i.position.y });
+                        if (!(i.isMACHO || i.isWIMP || i.isObstacle)) newMobPositions.push({ x: i.position.x, y: i.position.y });
                     }
                     mobPositionsQueue.shift();
                     mobPositionsQueue.push(newMobPositions);
@@ -11135,11 +11279,12 @@ const level = {
             room2() {
                 if (!isInBound(secondRoomBounds)) return;
                 if (templePlayer.room2.spawnInitiatorCycles > Objects.room2Initiator.cap) {
+                    const randomSecondRoomBoss = [secondRoomSuckerBoss, secondRoomPlacerBoss];
                     if (templePlayer.room2.cycles % 720 === 0 && templePlayer.room2.cycles <= 2160) {
                         const isOdd = Math.floor(templePlayer.room2.cycles / 720) & 1;
-                        secondRoomBoss(-600, -9800, 25, isOdd);
-                        secondRoomBoss(600, -9800, 25, isOdd);
-                        secondRoomBoss(0, -9800, 25, !isOdd);
+                        randomSecondRoomBoss[Math.floor(randomSecondRoomBoss.length * Math.random())](-600, -9800, isOdd);
+                        randomSecondRoomBoss[Math.floor(randomSecondRoomBoss.length * Math.random())](600, -9800, isOdd);
+                        randomSecondRoomBoss[Math.floor(randomSecondRoomBoss.length * Math.random())](0, -9800, !isOdd);
                     }
                     templePlayer.room2.cycles++;
                     if (templePlayer.room2.cycles === 2400) {
@@ -11310,6 +11455,7 @@ const level = {
             DrawHandler.room2Top();
         };
     },
+
     // temple() {
     //     simulation.makeTextLog(`<strong>temple</strong> by <span class='color-var'>Scar1337</span>`);
 

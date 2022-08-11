@@ -921,7 +921,7 @@ const powerUps = {
                     if (tech.isExtraBotOption) {
                         const botTech = [] //make an array of bot options
                         for (let i = 0, len = tech.tech.length; i < len; i++) {
-                            if (tech.tech[i].isBotTech && tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed()) botTech.push(i)
+                            if (tech.tech[i].isBotTech && tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isRecentlyShown) botTech.push(i)
                         }
                         if (botTech.length > 0) { //pick random bot tech
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];

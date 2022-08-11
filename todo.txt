@@ -1,19 +1,37 @@
 ******************************************************** NEXT PATCH **************************************************
 
-finalBoss black hole phase:
-  makes 100% more bullets
-  grows and shrinks smoothly near start and end of phase
-  does 20% more damage to player
+new setting: level ban list
+bug fix: removed a command to preventDefault on space key, this might break something else
+new boss added to level - Temple
 
-historyBoss has a "fun" graphical effect
-acetone peroxide has 50 -> 40% less explosion defense
-
-bug fix: timeSkip graphic glitch
-  there is a chance to cause other bugs with timeSkip effects
-
+snake tails have a lower mass and whip around a bit
+auto targeting no longer works for stealth mobs
+  snipers, sneakers, ghosters
+snipers fire more often at high difficulty, but bullets move slower at all difficulties
+hoppers have move gravity, so it feels like they are hopping a bit faster
+ 
 *********************************************************** TODO *****************************************************
+tech: field coupling - +1 field coupling, coupling is a new stat that provides different buffs for each field
+  you can see your coupling in the pause menu
+make field coupling a stat that shows in pause menu and is effected by other tech?
+  names:  fine-structure constant, strongly coupled, Vibronic coupling
+  tech: convert all research into "coupling"
+  tech: +x% field coupling, your field changes randomly every y seconds
+  tech: coupling starts at 200%, but decays when the field is in use, coupling recharges when the field is not in use
+    some fields aren't used much (that's ok?)
 
-screen shake effect - add random numbers to ctx.translate
+buffing your deflecting for 1 second after pressing the field button sounds cool
+  2 second cooldown on the effect to prevent spamming it
+  buff:  giving energy or doing damage makes sense
+    maybe this could be a rework for bremstralung
+
+greatly increase walking speed 
+  not mid air control?
+  for time dilation field
+    make jumping normal
+
+after taking damage explode while invulnerable
+  scale explosion radius with damage
 
 quantum immortality: send you to a new tab after you die with a random load out
   basically everything is the same as it is now, but you switch tabs
@@ -25,17 +43,29 @@ tech: get sent to a new tab that closes in 3 minutes
     count guns, field, tech and give random stuff on new tab
   i-frame instead of tab?
 
-field efficiency - Give each field an extra numerical effect, and add a 'field efficiency' stat that increases it
-  field numbers
-    standing wave, molecular assembler: energy efficiency
-    plasma, metamaterial: damage
-    time dilation: movement, jump, fire rate
-    negative mass: defense
-    diamagnetism: arc length
-    wormhole: (i dislike it but idk of other things) dupe chance
-  tech: +x% field efficiency, your field changes randomly every y seconds
-  tech: starts at 200%, but decays when the field is in use, efficiency recharges when the field is not in use
+reduce the amount of research and nerf anti randomization tech
+  increase possible synergies that go nuts
 
+tech expansion:  field coupling also expands each fields in different ways
+  how to make the description work
+    change description based on your current field?
+  perfect diamagnetism moves forward when you hold down the shield
+    it's great, but maybe annoying?
+    maybe only with crouch?
+  perfect diamagnetism just replace or increase Messier effect
+  time dilation drains 1/2 as much energy when paused
+  grow plasma torch as you hold it down
+  negative mass effects much more space
+    needs more benefit?
+  reduces the cloaking vision effect?
+    needs more benefit?
+
+tech: missiles explode a 2nd time after 1/2 a second (with a slightly different position determined by original velocity)
+
+1st ionisation energy should scale with heath powerup efficiency
+The tech that makes blocks that fall into a wormhole give energy should scale with block size, with the same formula as tokomak
+
+junk suggestion: useless machine - ejects itself and removes itself from the item pool
 
 bug blocks and power ups falling through map
   always foam gun  (4-5 times)
@@ -220,20 +250,6 @@ pause time like invariant for other things...
   throwing blocks
   charging railgun
   charging anything?
-
-tech expansion:  should also make other fields do things
-  how to make the description work
-    change description based on your current field?
-  perfect diamagnetism moves forward when you hold down the shield
-    it's great, but maybe annoying?
-    maybe only with crouch?
-  perfect diamagnetism just replace Messier effect
-  time dilation drains 1/2 as much energy when paused
-  grow plasma torch as you hold it down
-  negative mass effects much more space
-    needs more benefit?
-  reduces the cloaking vision effect?
-    needs more benefit?
 
 guntech fire a bullet that fires nail fragments after 1s in the same direction as the original bullet
   like overwatch roadhog
@@ -480,8 +496,6 @@ auto-gon - auto battler with n-gon mob AI and tech
   similar research and tech system to n-gon
   some mobs can fire player weapons
 
-harpoon grappling hook - basic effect is working, but needs work before it becomes fun
-
 tech: relativistic jets:
   small particles that shot out from front and back poles and end up in a wide variety of spirals
     slow trickle when charging and several more when firing
@@ -493,15 +507,10 @@ adapt the cloaking graphics to make a flashlight cone visual effect
 
 be nice if block throwing had a projected path
 
-JUNK tech: planetesimals game inside n-gon
-https://codepen.io/lilgreenland/pen/jrMvaB?editors=0010
-
 Pilot wave tech
   Energy use is increased, but you can now shape blocks using pressure
   Grouping blocks will merge them into a massive ball
   Size, density is determined by total mass
-
-look into 360 matter wave lag
 
 aoe effect pushes mobs away,  then rapidly pulls them in
   for mines?

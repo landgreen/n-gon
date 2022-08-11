@@ -247,6 +247,8 @@ const build = {
 <br><strong class='color-defense'>defense</strong>: ${(1-m.harmReduction()).toPrecision(3)} &nbsp; &nbsp; difficulty: ${(1/simulation.dmgScale).toPrecision(3)}
 <br><strong><em>fire rate</em></strong>: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
 <br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance()*100).toFixed(0)}%
+<br><strong class='color-coupling'>coupling</strong>: ${(m.coupling).toFixed(2)}
+${m.coupling> 0 ? '<br>'+m.couplingDescription(): ""}
 ${botText}
 <br>
 <br><strong class='color-h'>health</strong>: (${(m.health*100).toFixed(0)} / ${(m.maxHealth*100).toFixed(0)})
@@ -920,7 +922,7 @@ window.addEventListener("keydown", function(event) {
             input.fire = true
             break
         case input.key.field:
-            event.preventDefault();
+            // event.preventDefault();
             input.field = true
             break
         case input.key.nextGun:
@@ -1248,7 +1250,6 @@ if (localstorageCheck()) {
     localSettings = { isAllowed: false }
 }
 
-
 if (localSettings.isAllowed && !localSettings.isEmpty) {
     console.log('restoring previous settings')
 
@@ -1279,10 +1280,18 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         simulation.fpsCapDefault = Number(localSettings.fpsCapDefault)
     }
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
+
+    if (localSettings.banList.length === 0 || localSettings.banList === "undefined") {
+        localSettings.banList = ""
+        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    }
+    document.getElementById("banned").value = localSettings.banList
+
 } else {
     console.log('setting default localSettings')
     const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
     localSettings = {
+        banList: "",
         isAllowed: isAllowed,
         personalSeeds: [],
         isJunkExperiment: false,
@@ -1302,6 +1311,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     simulation.isCommunityMaps = localSettings.isCommunityMaps
     document.getElementById("difficulty-select").value = localSettings.difficultyMode
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
+    document.getElementById("banned").value = localSettings.banList
 }
 document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
 // document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
@@ -1319,6 +1329,11 @@ document.getElementById("fps-select").addEventListener("input", () => {
         simulation.fpsCapDefault = Number(value)
     }
     localSettings.fpsCapDefault = value
+    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+});
+
+document.getElementById("banned").addEventListener("input", () => {
+    localSettings.banList = document.getElementById("banned").value
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 

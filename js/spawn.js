@@ -1577,8 +1577,8 @@ const spawn = {
     hopper(x, y, radius = 30 + Math.ceil(Math.random() * 30)) {
         mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
         let me = mob[mob.length - 1];
-        me.accelMag = 0.04;
-        me.g = 0.0017; //required if using this.gravity
+        me.accelMag = 0.05;
+        me.g = 0.0032; //required if using this.gravity
         me.frictionAir = 0.01;
         me.friction = 1
         me.frictionStatic = 1
@@ -1598,7 +1598,7 @@ const spawn = {
                     const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass;
                     const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
                     this.force.x += forceMag * Math.cos(angle);
-                    this.force.y += forceMag * Math.sin(angle) - (Math.random() * 0.07 + 0.06) * this.mass; //antigravity
+                    this.force.y += forceMag * Math.sin(angle) - (Math.random() * 0.06 + 0.1) * this.mass; //antigravity
                 }
             } else {
                 //randomly hob if not aware of player
@@ -1609,7 +1609,7 @@ const spawn = {
                     const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass * (0.1 + Math.random() * 0.3);
                     const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
                     this.force.x += forceMag * Math.cos(angle);
-                    this.force.y += forceMag * Math.sin(angle) - 0.05 * this.mass; //antigravity
+                    this.force.y += forceMag * Math.sin(angle) - 0.07 * this.mass; //antigravity
                 }
             }
         };
@@ -4782,6 +4782,7 @@ const spawn = {
         me.alpha = 1; //used in drawSneaker
         // me.leaveBody = false;
         me.canTouchPlayer = false; //used in drawSneaker
+        me.isBadTarget = true;
         me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
         me.showHealthBar = false;
         me.memory = 240;
@@ -4801,6 +4802,7 @@ const spawn = {
                     this.healthBar();
                     if (!this.canTouchPlayer) {
                         this.canTouchPlayer = true;
+                        this.isBadTarget = false;
                         this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can touch player
                     }
                 }
@@ -4816,6 +4818,7 @@ const spawn = {
                 ctx.fill();
             } else if (this.canTouchPlayer) { //stealth
                 this.canTouchPlayer = false;
+                this.isBadTarget = true;
                 this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
             }
         };
@@ -4830,6 +4833,7 @@ const spawn = {
         me.stroke = "transparent"; //used for drawGhost
         me.alpha = 1; //used in drawGhost
         me.canTouchPlayer = false; //used in drawGhost
+        me.isBadTarget = true;
         // me.leaveBody = false;
         me.collisionFilter.mask = cat.bullet //| cat.body
         me.showHealthBar = false;
@@ -4857,6 +4861,7 @@ const spawn = {
                     this.healthBar();
                     if (!this.canTouchPlayer) {
                         this.canTouchPlayer = true;
+                        this.isBadTarget = false;
                         this.collisionFilter.mask = cat.player | cat.bullet
                     }
                 }
@@ -4873,6 +4878,7 @@ const spawn = {
                 ctx.fill();
             } else if (this.canTouchPlayer) {
                 this.canTouchPlayer = false;
+                this.isBadTarget = true;
                 this.collisionFilter.mask = cat.bullet; //can't touch player or walls
             }
         };
@@ -5055,7 +5061,7 @@ const spawn = {
         };
         Matter.Body.setDensity(me, 0.00004); //normal is 0.001
         me.timeLeft = 200;
-        me.g = 0.001; //required if using this.gravity 
+        // me.g = 0.001; //required if using this.gravity 
         me.frictionAir = 0;
         me.restitution = 0.8;
         me.leaveBody = false;
@@ -5066,7 +5072,7 @@ const spawn = {
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
         me.do = function() {
-            this.gravity();
+            // this.gravity();
             this.timeLimit();
         };
     },
@@ -5134,10 +5140,11 @@ const spawn = {
         me.frictionStatic = 0;
         me.friction = 0;
         me.canTouchPlayer = false; //used in drawSneaker
+        me.isBadTarget = true;
         me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
 
-        me.memory = 60 //140;
-        me.fireFreq = 0.006 + Math.random() * 0.002;
+        me.memory = 30 //140;
+        me.fireFreq = 0.005 + Math.random() * 0.002 + 0.0005 * simulation.difficulty; //larger = fire more often
         me.noseLength = 0;
         me.fireAngle = 0;
         me.accelMag = 0.0005 * simulation.accelScale;
@@ -5183,8 +5190,8 @@ const spawn = {
                     this.torque -= 0.000004 * this.inertia;
                 } else if (this.noseLength > 1.5 && dot > -0.2 && dot < 0.2) {
                     //fire
-                    spawn.sniperBullet(this.vertices[1].x, this.vertices[1].y, 7 + Math.ceil(this.radius / 15), 4);
-                    const v = 10 + 15 * simulation.accelScale;
+                    spawn.sniperBullet(this.vertices[1].x, this.vertices[1].y, 7 + Math.ceil(this.radius / 15), 5);
+                    const v = 10 + 8 * simulation.accelScale;
                     Matter.Body.setVelocity(mob[mob.length - 1], {
                         x: this.velocity.x + this.fireDir.x * v + Math.random(),
                         y: this.velocity.y + this.fireDir.y * v + Math.random()
@@ -5216,6 +5223,7 @@ const spawn = {
                     this.healthBar();
                     if (!this.canTouchPlayer) {
                         this.canTouchPlayer = true;
+                        this.isBadTarget = false;
                         this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can touch player
                     }
                 }
@@ -5231,11 +5239,12 @@ const spawn = {
                 ctx.fill();
             } else if (this.canTouchPlayer) {
                 this.canTouchPlayer = false;
+                this.isBadTarget = true
                 this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
             }
         };
     },
-    sniperBullet(x, y, radius = 9, sides = 4) { //bullets
+    sniperBullet(x, y, radius = 9, sides = 5) { //bullets
         mobs.spawn(x, y, sides, radius, "rgb(255,0,155)");
         let me = mob[mob.length - 1];
         me.stroke = "transparent";
@@ -5924,11 +5933,12 @@ const spawn = {
         mobs.spawn(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 8, radius, color1); //"rgb(55,170,170)"
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.accelMag = 0.0004 + 0.0002 * Math.sqrt(simulation.accelScale)
+        me.accelMag = 0.0001 + 0.0004 * Math.sqrt(simulation.accelScale)
+        // me.accelMag = 0.0004 + 0.0002 * Math.sqrt(simulation.accelScale)
         me.memory = 250;
         me.laserRange = 500;
         Matter.Body.setDensity(me, 0.0022 + 0.00022 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        me.startingDamageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.startingDamageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.damageReduction = 0
         me.isInvulnerable = true
 
@@ -5952,7 +5962,7 @@ const spawn = {
             this.cycle++
             if (this.seePlayer.recall && ((this.cycle % 10) === 0)) {
                 if (this.canFire) {
-                    if (this.cycle > 100) {
+                    if (this.cycle > 120) {
                         this.cycle = 0
                         this.canFire = false
                         // Matter.Body.setAngularVelocity(this, 0.1)
@@ -5963,7 +5973,7 @@ const spawn = {
                     }
                     spawn.seeker(this.vertices[this.closestVertex1].x, this.vertices[this.closestVertex1].y, 6)
                     Matter.Body.setDensity(mob[mob.length - 1], 0.000001); //normal is 0.001
-                    const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[this.closestVertex1])), -13)
+                    const velocity = Vector.mult(Vector.normalise(Vector.sub(this.vertices[this.closestVertex1], this.position)), 15)
                     Matter.Body.setVelocity(mob[mob.length - 1], {
                         x: this.velocity.x + velocity.x,
                         y: this.velocity.y + velocity.y
@@ -5975,7 +5985,7 @@ const spawn = {
                     //     x: this.velocity.x + velocity2.x,
                     //     y: this.velocity.y + velocity2.y
                     // });
-                } else if (this.cycle > 210) {
+                } else if (this.cycle > 200) {
                     this.cycle = 0
                     this.canFire = true
 
@@ -6011,6 +6021,8 @@ const spawn = {
         mag -= 10
         let previousTailID = 0
 
+        const damping = 1
+        const stiffness = 1
         for (let i = 0; i < nodes; ++i) {
             angle -= 0.15 + i * 0.008
             mag -= (i < 2) ? -15 : 5
@@ -6021,7 +6033,7 @@ const spawn = {
             mob[mob.length - 1].previousTailID = previousTailID
             previousTailID = mob[mob.length - 1].id
         }
-        this.constrain2AdjacentMobs(nodes, Math.random() * 0.06 + 0.01);
+        this.constrain2AdjacentMobs(nodes, stiffness, false, damping);
 
         for (let i = mob.length - 1, len = i - nodes; i > len; i--) { //set alternating colors
             if (i % 2) {
@@ -6034,39 +6046,44 @@ const spawn = {
         consBB[consBB.length] = Constraint.create({
             bodyA: mob[mob.length - nodes],
             bodyB: mob[mob.length - 1 - nodes],
-            stiffness: 0.05
+            stiffness: stiffness,
+            damping: damping
         });
         Composite.add(engine.world, consBB[consBB.length - 1]);
         consBB[consBB.length] = Constraint.create({
             bodyA: mob[mob.length - nodes + 1],
             bodyB: mob[mob.length - 1 - nodes],
-            stiffness: 0.05
+            stiffness: stiffness,
+            damping: damping
         });
         Composite.add(engine.world, consBB[consBB.length - 1]);
         consBB[consBB.length] = Constraint.create({
             bodyA: mob[mob.length - nodes + 2],
             bodyB: mob[mob.length - 1 - nodes],
-            stiffness: 0.05
+            stiffness: stiffness,
+            damping: damping
         });
         Composite.add(engine.world, consBB[consBB.length - 1]);
         // spawn.shield(me, x, y, 1);
     },
     dragonFlyBoss(x, y, radius = 42) { //snake boss with a laser head
-        const nodes = Math.min(8 + Math.ceil(0.5 * simulation.difficulty), 40)
         let angle = Math.PI
         let mag = 300
-
-        const color1 = "#00bfd9" //"#f27"
         mobs.spawn(x + mag * Math.cos(angle), y + mag * Math.sin(angle), 8, radius, "#000"); //"rgb(55,170,170)"
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.accelMag = 0.0009 + 0.0002 * Math.sqrt(simulation.accelScale)
-        me.memory = 250;
-        me.laserRange = 400;
         Matter.Body.setDensity(me, 0.00165 + 0.00011 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.startingDamageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.damageReduction = 0
         me.isInvulnerable = true
+
+        me.accelMag = 0.0001 + 0.0004 * Math.sqrt(simulation.accelScale)
+        me.memory = 250;
+        me.flapRate = 0.4
+        me.flapArc = 0.2 //don't go past 1.57 for normal flaps
+        me.wingLength = 150
+        me.ellipticity = 0.3
+        me.angleOff = 0.4
 
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -6101,15 +6118,10 @@ const spawn = {
             this.wing(a - Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity)
             this.wing(a + Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity)
         };
-        me.flapRate = 0.4
-        me.flapArc = 0.2 //don't go past 1.57 for normal flaps
-        me.wingLength = 150
-        me.ellipticity = 0.3
-        me.angleOff = 0.4
-        //extra space to give head room
         angle -= 0.1
         mag -= 10
         let previousTailID = 0
+        const nodes = Math.min(8 + Math.ceil(0.5 * simulation.difficulty), 40)
         for (let i = 0; i < nodes; ++i) {
             angle -= 0.15 + i * 0.008
             mag -= (i < 2) ? -15 : 5
@@ -6119,7 +6131,9 @@ const spawn = {
             mob[mob.length - 1].previousTailID = previousTailID
             previousTailID = mob[mob.length - 1].id
         }
-        this.constrain2AdjacentMobs(nodes, Math.random() * 0.06 + 0.01);
+        const damping = 1
+        const stiffness = 1
+        this.constrain2AdjacentMobs(nodes, stiffness, false, damping);
         for (let i = mob.length - 1, len = i - nodes; i > len; i--) { //set alternating colors
             mob[i].fill = `hsla(${160+40*Math.random()}, 100%, ${5 + 25*Math.random()*Math.random()}%, 0.9)`
         }
@@ -6127,19 +6141,22 @@ const spawn = {
         consBB[consBB.length] = Constraint.create({
             bodyA: mob[mob.length - nodes],
             bodyB: mob[mob.length - 1 - nodes],
-            stiffness: 0.05
+            stiffness: stiffness,
+            damping: damping
         });
         Composite.add(engine.world, consBB[consBB.length - 1]);
         consBB[consBB.length] = Constraint.create({
             bodyA: mob[mob.length - nodes + 1],
             bodyB: mob[mob.length - 1 - nodes],
-            stiffness: 0.05
+            stiffness: stiffness,
+            damping: damping
         });
         Composite.add(engine.world, consBB[consBB.length - 1]);
         consBB[consBB.length] = Constraint.create({
             bodyA: mob[mob.length - nodes + 2],
             bodyB: mob[mob.length - 1 - nodes],
-            stiffness: 0.05
+            stiffness: stiffness,
+            damping: damping
         });
         Composite.add(engine.world, consBB[consBB.length - 1]);
         // spawn.shield(me, x, y, 1);
@@ -6147,15 +6164,15 @@ const spawn = {
     snakeBody(x, y, radius = 10) {
         mobs.spawn(x, y, 8, radius, "rgba(0,180,180,0.4)");
         let me = mob[mob.length - 1];
-        me.collisionFilter.mask = cat.bullet | cat.player | cat.mob //| cat.body
-        me.damageReduction = 0.23
-        Matter.Body.setDensity(me, 0.005); //normal is 0.001
+        me.collisionFilter.mask = cat.bullet | cat.player //| cat.mob //| cat.body
+        me.damageReduction = 0.015
+        Matter.Body.setDensity(me, 0.0001); //normal is 0.001
 
         // me.accelMag = 0.0007 * simulation.accelScale;
         me.leaveBody = Math.random() < 0.33 ? true : false;
         me.showHealthBar = false;
         me.isDropPowerUp = false;
-        me.frictionAir = 0.015;
+        me.frictionAir = 0;
         me.isSnakeTail = true;
         me.stroke = "transparent"
         me.onDeath = function() {
@@ -6476,13 +6493,14 @@ const spawn = {
             }
         }
     },
-    constrain2AdjacentMobs(nodes, stiffness, loop = false) {
+    constrain2AdjacentMobs(nodes, stiffness, loop = false, damping = 0) {
         //runs through every combination of last 'num' bodies and constrains them
         for (let i = 0; i < nodes - 1; ++i) {
             consBB[consBB.length] = Constraint.create({
                 bodyA: mob[mob.length - i - 1],
                 bodyB: mob[mob.length - i - 2],
-                stiffness: stiffness
+                stiffness: stiffness,
+                damping: damping
             });
             Composite.add(engine.world, consBB[consBB.length - 1]);
         }
@@ -6491,7 +6509,8 @@ const spawn = {
                 consBB[consBB.length] = Constraint.create({
                     bodyA: mob[mob.length - i - 1],
                     bodyB: mob[mob.length - i - 3],
-                    stiffness: stiffness
+                    stiffness: stiffness,
+                    damping: damping
                 });
                 Composite.add(engine.world, consBB[consBB.length - 1]);
             }
@@ -6501,19 +6520,22 @@ const spawn = {
             consBB[consBB.length] = Constraint.create({
                 bodyA: mob[mob.length - 1],
                 bodyB: mob[mob.length - nodes],
-                stiffness: stiffness
+                stiffness: stiffness,
+                damping: damping
             });
             Composite.add(engine.world, consBB[consBB.length - 1]);
             consBB[consBB.length] = Constraint.create({
                 bodyA: mob[mob.length - 2],
                 bodyB: mob[mob.length - nodes],
-                stiffness: stiffness
+                stiffness: stiffness,
+                damping: damping
             });
             Composite.add(engine.world, consBB[consBB.length - 1]);
             consBB[consBB.length] = Constraint.create({
                 bodyA: mob[mob.length - 1],
                 bodyB: mob[mob.length - nodes + 1],
-                stiffness: stiffness
+                stiffness: stiffness,
+                damping: damping
             });
             Composite.add(engine.world, consBB[consBB.length - 1]);
         }

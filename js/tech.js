@@ -306,7 +306,41 @@ const tech = {
             }
         }
     },
-    tech: [{
+    tech: [
+        // {
+        //     name: "field coupling",
+        //     descriptionFunction() {
+        //         return `<strong>+1</strong> <strong class='color-f'>field</strong> <strong class='color-coupling'>coupling</strong> (${m.fieldUpgrades[m.fieldMode].name})<br>${ m.couplingDescription()}`
+        //     },
+        //     // isFieldTech: true,
+        //     maxCount: 9,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return (build.isExperimentSelection || powerUps.research.count > 1)
+        //     },
+        //     requires: "",
+        //     // researchUsed: 0,
+        //     // couplingToResearch: 0.1,
+        //     effect() {
+        //         m.coupling++
+        //         // while (powerUps.research.count > 0) {
+        //         //     powerUps.research.changeRerolls(-1)
+        //         //     this.researchUsed++
+        //         //     m.coupling += this.couplingToResearch
+        //         // }
+        //     },
+        //     remove() {
+        //         m.coupling = 0
+        //         // if (this.count) {
+        //         //     m.coupling -= this.researchUsed * this.couplingToResearch
+        //         //     powerUps.research.changeRerolls(this.researchUsed)
+        //         //     this.researchUsed = 0
+        //         // }
+        //     }
+        // },
+        {
             name: "ordnance",
             description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong><br>spawn a <strong class='color-g'>gun</strong>",
             maxCount: 1,
@@ -644,7 +678,7 @@ const tech = {
             allowed() {
                 return !tech.isEnergyHealth //(tech.crouchAmmoCount || tech.isCrouchRegen) &&
             },
-            requires: "not mass-energy", //inductive coupling, desublimated ammunition, 
+            requires: "not mass-energy",
             effect() {
                 tech.isTurret = true
             },
@@ -2428,7 +2462,7 @@ const tech = {
             }
         },
         {
-            name: "inductive coupling",
+            name: "inductive charging",
             description: "if <strong>crouched</strong> <strong>+600%</strong> passive <strong class='color-f'>energy</strong> generation<br>if not <strong>crouched</strong> <strong class='color-f'>energy</strong> generation is disabled",
             maxCount: 1,
             count: 0,
@@ -2511,7 +2545,7 @@ const tech = {
             allowed() {
                 return !tech.isCrouchRegen
             },
-            requires: "not inductive coupling",
+            requires: "not inductive charging",
             effect() {
                 tech.isDamageAfterKillNoRegen = true;
                 m.regenEnergy = function() {
@@ -5788,21 +5822,11 @@ const tech = {
             requires: "foam",
             effect() {
                 tech.isFoamPressure = true;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "foam") {
-                        b.guns[i].chooseFireMethod()
-                        break
-                    }
-                }
+                b.guns[8].chooseFireMethod()
             },
             remove() {
                 tech.isFoamPressure = false;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "foam") {
-                        b.guns[i].chooseFireMethod()
-                        break
-                    }
-                }
+                b.guns[8].chooseFireMethod()
             }
         },
         {
@@ -6436,7 +6460,7 @@ const tech = {
         //************************************************** 
         //************************************************** field
         //************************************************** tech
-        //************************************************** 
+        //**************************************************
         {
             name: "zero point energy",
             description: `use ${powerUps.orb.research(2)}<br><strong>+100</strong> maximum <strong class='color-f'>energy</strong>`,
@@ -7032,7 +7056,7 @@ const tech = {
         {
             name: "plasma-bot",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">plasma-bot</a>`,
-            description: "remove your <strong>field</strong> to build a <strong class='color-bot'>bot</strong><br>that uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong>",
+            description: "remove your <strong class='color-f'>field</strong> to build a <strong class='color-bot'>bot</strong><br>that uses <strong class='color-f'>energy</strong> to emit <strong class='color-plasma'>plasma</strong>",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
