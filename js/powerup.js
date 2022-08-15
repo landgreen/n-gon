@@ -825,15 +825,20 @@ const powerUps = {
                 if (!tech.isSuperDeterminism) text += `<div class='cancel' onclick='powerUps.endDraft("tech",true)'>${tech.isCancelTech ? "?":"✕"}</div>`
                 text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>tech</h3>`
 
+                //used for junk estimation
+                let junkCount = 0
+                let totalCount = 0
+
                 let options = []; //generate all options
                 optionLengthNoDuplicates = 0
                 for (let i = 0; i < tech.tech.length; i++) {
                     if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isBanished) {
+                        totalCount += tech.tech[i].frequency
+                        if (tech.tech[i].isJunk) junkCount += tech.tech[i].frequency
                         if (tech.tech[i].frequency > 0) optionLengthNoDuplicates++
                         for (let j = 0, len = tech.tech[i].frequency; j < len; j++) options.push(i);
                     }
                 }
-                // console.log(optionLengthNoDuplicates, options.length)
 
                 function removeOption(index) {
                     for (let i = options.length; i > -1; i--) {
@@ -1202,7 +1207,7 @@ const powerUps = {
     randomPowerUpCounter: 0,
     spawnBossPowerUp(x, y) { //boss spawns field and gun tech upgrades
         if (level.levels[level.onLevel] !== "final") {
-            if (m.fieldMode === 0) {
+            if (m.fieldMode === 0 && !m.coupling) {
                 powerUps.spawn(x, y, "field")
             } else {
                 powerUps.randomPowerUpCounter++;

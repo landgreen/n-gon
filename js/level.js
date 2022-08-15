@@ -16,19 +16,19 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(5 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(1 * 4) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
             // powerUps.research.changeRerolls(100000)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
-            // m.setField("time dilation") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
-            // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            m.setField("time dilation") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 1000000
-            // tech.giveTech("sentry");
-            // tech.giveTech("MACHO");
-            // tech.giveTech("elephant's toothpaste")
+            // tech.giveTech("coupling");
+            // tech.giveTech("time crystals");
+            tech.giveTech("retrocausality")
             // for (let i = 0; i < 1; ++i) tech.giveTech("slow light")
             // for (let i = 0; i < 1; ++i) tech.giveTech("free-electron laser")
             // m.damage(0.1);
@@ -37,7 +37,8 @@ const level = {
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "research");
 
             // spawn.starter(1900, -500, 200)
-            // spawn.snakeSpitBoss(1900, -400)
+            // spawn.beetleBoss(1900, -400)
+            // spawn.timeBoss(1900, -400)
             // for (let i = 0; i < 15; ++i) spawn.starter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
             // level.testing();
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
@@ -1134,10 +1135,10 @@ const level = {
                 player.isInPortal = this.portalPair
                 //teleport
                 if (this.portalPair.angle % (Math.PI / 2)) { //if left, right up or down
-                    if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
+                    if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
                     Matter.Body.setPosition(player, this.portalPair.portal.position);
                 } else { //if at some odd angle
-                    if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
+                    if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
                     Matter.Body.setPosition(player, this.portalPair.position);
                 }
                 //rotate velocity
@@ -1325,7 +1326,7 @@ const level = {
                     //collision with player
                     if (this.height > 0 && Matter.Query.region([player], this).length && !(m.isCloak)) {
                         if (m.immuneCycle < m.cycle) {
-                            m.immuneCycle = m.cycle + tech.collisionImmuneCycles;
+                            m.immuneCycle = m.cycle + m.collisionImmuneCycles;
                             m.damage(damage)
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: player.position.x,
@@ -1357,7 +1358,7 @@ const level = {
 
                     if (this.height > 0 && Matter.Query.region([player], this).length) {
                         if (m.immuneCycle < m.cycle) {
-                            const DRAIN = 0.0022 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen
+                            const DRAIN = 0.0032 * (tech.isRadioactiveResistance ? 0.25 : 1)
                             if (m.energy > DRAIN) {
                                 m.energy -= DRAIN
                                 // m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1) * 0.03) //still take 2% damage while you have energy
@@ -10253,7 +10254,7 @@ const level = {
             me.onDeath = function() {
                 //damage player if in range
                 if (distance(player.position, this.position) < pulseRadius && m.immuneCycle < m.cycle) {
-                    m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
                     m.damage(0.02 * simulation.dmgScale);
                 }
                 simulation.drawList.push({ //add dmg to draw queue
@@ -10616,7 +10617,7 @@ const level = {
                     // Trolled
                     const hasCPT = tech.isRewindAvoidDeath;
                     tech.isRewindAvoidDeath = false;
-                    const DRAIN = 0.002 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen;
+                    const DRAIN = 0.002 * (tech.isRadioactiveResistance ? 0.25 : 1) + 0.001;
                     if (m.energy > DRAIN && !tech.isEnergyHealth) {
                         m.energy -= DRAIN;
                     }
@@ -10698,7 +10699,7 @@ const level = {
                     if (this.isHeal) {
                         m.energy += 0.005;
                     } else {
-                        m.energy = Math.max(m.energy - 0.007 - m.fieldRegen, 0);
+                        m.energy = Math.max(m.energy - 0.006, 0);
                         if (m.energy <= 0.01 && m.immuneCycle < m.cycle) m.damage(0.002);
                     }
                 },
@@ -11640,7 +11641,7 @@ const level = {
     //         me.onDeath = function() {
     //             //damage player if in range
     //             if (distance(player.position, this.position) < pulseRadius && m.immuneCycle < m.cycle) {
-    //                 m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
+    //                 m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
     //                 m.damage(0.02 * simulation.dmgScale);
     //             }
     //             simulation.drawList.push({ //add dmg to draw queue

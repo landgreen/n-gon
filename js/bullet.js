@@ -280,10 +280,15 @@ const b = {
     },
     fireCDscale: 1,
     setFireCD() {
-        b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage * m.fieldFireRate
+        b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage
+        if (m.fieldMode === 0) {
+            b.fireCDscale *= 0.8 ** (m.coupling)
+        } else if (m.fieldMode === 6) {
+            b.fireCDscale *= 0.75 * 0.8 ** (m.coupling)
+        }
         if (tech.isFastTime) b.fireCDscale *= 0.5
-        if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.8, b.inventory.length)
-        if (tech.isFireMoveLock) b.fireCDscale *= 0.5
+        if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.82, b.inventory.length)
+        if (tech.isFireMoveLock) b.fireCDscale *= 0.55
     },
     fireAttributes(dir, rotate = true) {
         if (rotate) {
@@ -4876,7 +4881,7 @@ const b = {
                     const DIST = Vector.magnitude(sub);
                     const unit = Vector.normalise(sub)
                     if (DIST < tech.isPlasmaRange * 450 && m.energy > this.drainThreshold) {
-                        m.energy -= 0.00035 + m.fieldRegen //0.004; //normal plasma field is 0.00008 + m.fieldRegen = 0.00108
+                        m.energy -= 0.00135 //0.004; //normal plasma field is 0.00008 + m.fieldRegen = 0.00108
                         // if (m.energy < 0) {
                         //     m.fieldCDcycle = m.cycle + 120;
                         //     m.energy = 0;
@@ -5866,7 +5871,7 @@ const b = {
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();
                     const end = 700 * Math.sqrt(tech.isBulletsLastLonger) / Math.sqrt(tech.waveReflections * 0.5) //should equal about 1060
-                    const damage = 2 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                    const damage = 1.8 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) //damage is lower for large radius mobs, since they feel the waves longer
 
                     for (let i = this.waves.length - 1; i > -1; i--) {
                         //draw wave
@@ -5959,7 +5964,7 @@ const b = {
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();
                     const end = 1100 * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
-                    const damage = 2 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                    const damage = 1.8 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) //damage is lower for large radius mobs, since they feel the waves longer
 
                     for (let i = this.waves.length - 1; i > -1; i--) {
                         const v1 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit1, this.waves[i].radius))
@@ -7024,7 +7029,6 @@ const b = {
                     this.fire = () => {
                         const drain = 0.01 * (tech.isCapacitor ? 10 : 1) / b.fireCDscale
                         if (m.energy > drain) {
-                            // m.energy -= m.fieldRegen
                             if (this.charge < 50 * m.maxEnergy) {
                                 m.energy -= drain
                                 this.charge += drain * 100
@@ -7106,7 +7110,7 @@ const b = {
             //     b.photon({ x: m.pos.x + 23 * Math.cos(m.angle), y: m.pos.y + 23 * Math.sin(m.angle) }, m.angle)
             // },
             fireLaser() {
-                const drain = m.fieldRegen + tech.laserDrain / b.fireCDscale
+                const drain = 0.001 + tech.laserDrain / b.fireCDscale
                 if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
@@ -7124,7 +7128,7 @@ const b = {
             },
             firePulse() {},
             fireSplit() {
-                const drain = m.fieldRegen + tech.laserDrain / b.fireCDscale
+                const drain = 0.001 + tech.laserDrain / b.fireCDscale
                 if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
@@ -7149,7 +7153,7 @@ const b = {
                 }
             },
             fireWideBeam() {
-                const drain = m.fieldRegen + tech.laserDrain / b.fireCDscale
+                const drain = 0.001 + tech.laserDrain / b.fireCDscale
                 if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
@@ -7214,7 +7218,7 @@ const b = {
                 }
             },
             fireHistory() {
-                drain = m.fieldRegen + tech.laserDrain / b.fireCDscale
+                drain = 0.001 + tech.laserDrain / b.fireCDscale
                 if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {

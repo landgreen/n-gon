@@ -42,7 +42,7 @@ function playerOnGroundCheck(event) {
                     //falling damage
                     if (tech.isFallingDamage && m.immuneCycle < m.cycle && momentum > 150) {
                         m.damage(Math.min(Math.sqrt(momentum - 133) * 0.01, 0.25));
-                        if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
+                        if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
                     }
                 } else {
                     m.yOffGoal = m.yOffWhen.stand;
@@ -148,7 +148,7 @@ function collisionChecks(event) {
                         if (tech.isPiezo) m.energy += 20.48;
                         if (tech.isStimulatedEmission) powerUps.ejectTech()
                         if (mob[k].onHit) mob[k].onHit();
-                        if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
+                        if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
                         //extra kick between player and mob              //this section would be better with forces but they don't work...
                         let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
                         Matter.Body.setVelocity(player, {
@@ -162,7 +162,7 @@ function collisionChecks(event) {
 
                         if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].isDropPowerUp && m.energy > 0.34 * m.maxEnergy && mob[k].damageReduction > 0) {
                             m.energy -= 0.33 * Math.max(m.maxEnergy, m.energy) //0.33 * m.energy
-                            if (m.immuneCycle === m.cycle + tech.collisionImmuneCycles) m.immuneCycle = 0; //player doesn't go immune to collision damage
+                            if (m.immuneCycle === m.cycle + m.collisionImmuneCycles) m.immuneCycle = 0; //player doesn't go immune to collision damage
                             mob[k].death();
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: pairs[i].activeContacts[0].vertex.x,
@@ -224,7 +224,7 @@ function collisionChecks(event) {
                                     }
                                 }
 
-                                let dmg = tech.blockDamage * m.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1);
+                                let dmg = tech.blockDamage * m.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1) * ((m.fieldMode === 0 || m.fieldMode === 8) ? 1 + 0.4 * m.coupling : 1);
                                 if (mob[k].isShielded) dmg *= 0.7
 
                                 mob[k].damage(dmg, true);

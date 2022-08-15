@@ -235,7 +235,10 @@ const mobs = {
     //     })
     //   }
     // },
-
+    mobSpawnWithHealth: 1,
+    setMobSpawnHealth() {
+        mobs.mobSpawnWithHealth = 0.87 ** (tech.mobSpawnWithHealth) //+ (m.fieldMode === 0 || m.fieldMode === 7) * m.coupling
+    },
     //**********************************************************************************************
     //**********************************************************************************************
     spawn(xPos, yPos, sides, radius, color) {
@@ -256,7 +259,7 @@ const mobs = {
             onHit: undefined,
             alive: true,
             index: i,
-            health: tech.mobSpawnWithHealth,
+            health: mobs.mobSpawnWithHealth,
             showHealthBar: true,
             accelMag: 0.001 * simulation.accelScale,
             cd: 0, //game cycle when cooldown will be over
@@ -602,7 +605,7 @@ const mobs = {
                 const hitPlayer = Matter.Query.ray([player], this.position, Vector.add(this.position, Vector.mult(perp, radius * 2.05)), minorRadius)
                 if (hitPlayer.length && m.immuneCycle < m.cycle) {
                     m.damage(dmg * simulation.dmgScale);
-                    // m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage
+                    // m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
                 }
             },
             searchSpring() {

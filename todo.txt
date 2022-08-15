@@ -1,29 +1,51 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new setting: level ban list
-bug fix: removed a command to preventDefault on space key, this might break something else
-new boss added to level - Temple
+tech: coupling - +1 coupling, coupling is a new stat that provides different buffs for each field
+  releasing this early for feedback about balance and bugs
 
-snake tails have a lower mass and whip around a bit
-auto targeting no longer works for stealth mobs
-  snipers, sneakers, ghosters
-snipers fire more often at high difficulty, but bullets move slower at all difficulties
-hoppers have move gravity, so it feels like they are hopping a bit faster
- 
+removed tech Pauli exclusion
+  now the perfect diamagnatism coupling effect
+
+snakeBoss tails are closer together
+some bosses have a higher vision memory and response time
+
+phonon gets 10% less ammo and 10% less damage
+meta-analysis gives 2 research per use
+energy drain rework
+  in many situations drain no longer scales with regen
+  this might have some bad side effects, let me know
+
+bug fixes
+  made several tech effects not an arrow function
+  timeSkip graphical glitches might be improved
+
 *********************************************************** TODO *****************************************************
-tech: field coupling - +1 field coupling, coupling is a new stat that provides different buffs for each field
-  you can see your coupling in the pause menu
-make field coupling a stat that shows in pause menu and is effected by other tech?
+
+coupling:
+  field emitter balance?
+
+coupling tech
   names:  fine-structure constant, strongly coupled, Vibronic coupling
   tech: convert all research into "coupling"
   tech: +x% field coupling, your field changes randomly every y seconds
   tech: coupling starts at 200%, but decays when the field is in use, coupling recharges when the field is not in use
     some fields aren't used much (that's ok?)
+  Tech: Cancelling a tech/gun/field gives x coupling
 
 buffing your deflecting for 1 second after pressing the field button sounds cool
   2 second cooldown on the effect to prevent spamming it
   buff:  giving energy or doing damage makes sense
     maybe this could be a rework for bremstralung
+
+rewindBoss:  after hitting 1/5 damage theasholds the boss rewinds back in time to where it was a few seconds ago
+  track it's data like player history
+
+worms can target player, buff their damage
+  can't target player in first few seconds?
+
+draw player transparent or opaque when cloaking field is on
+
+plasma field tech - similar to regression, but for plasma ticks
 
 greatly increase walking speed 
   not mid air control?
@@ -35,6 +57,8 @@ after taking damage explode while invulnerable
 
 quantum immortality: send you to a new tab after you die with a random load out
   basically everything is the same as it is now, but you switch tabs
+
+Tech: Tech/guns/fields can no longer be duplicated. Duplication applies twice
 
 tech: get sent to a new tab that closes in 3 minutes
   in the new tab you play reactor

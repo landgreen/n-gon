@@ -226,6 +226,17 @@ for (let i = 0, len = tech.tech.length; i < len; i++) {
 }
 const build = {
     pauseGrid() {
+
+        //used for junk estimation
+        let junkCount = 0
+        let totalCount = 0
+        for (let i = 0; i < tech.tech.length; i++) {
+            if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isBanished) {
+                totalCount += tech.tech[i].frequency
+                if (tech.tech[i].isJunk) junkCount += tech.tech[i].frequency
+            }
+        }
+        // ${m.coupling> 0 ? '<br>'+m.couplingDescription(): ""}
         //left side
         let botText = ""
         if (tech.nailBotCount) botText += `<br>nail-bots: ${tech.nailBotCount}`
@@ -248,13 +259,14 @@ const build = {
 <br><strong><em>fire rate</em></strong>: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
 <br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance()*100).toFixed(0)}%
 <br><strong class='color-coupling'>coupling</strong>: ${(m.coupling).toFixed(2)}
-${m.coupling> 0 ? '<br>'+m.couplingDescription(): ""}
+
 ${botText}
 <br>
 <br><strong class='color-h'>health</strong>: (${(m.health*100).toFixed(0)} / ${(m.maxHealth*100).toFixed(0)})
-<br><strong class='color-f'>energy</strong>: (${(m.energy*100).toFixed(0)} / ${(m.maxEnergy*100).toFixed(0)})
+<br><strong class='color-f'>energy</strong>: (${(m.energy*100).toFixed(0)} / ${(m.maxEnergy*100).toFixed(0)}) +(${(m.fieldRegen*6000).toFixed(0)}/s)
 <br><strong class='color-g'>gun</strong>: ${b.activeGun === null || b.activeGun === undefined ? "undefined":b.guns[b.activeGun].name} &nbsp; <strong class='color-g'>ammo</strong>: ${b.activeGun === null || b.activeGun === undefined ? "0":b.guns[b.activeGun].ammo}
-<br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}     
+<br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
+<br><strong class='color-j'>JUNK</strong>: ${(junkCount / totalCount * 100).toFixed(1)}%   
 <br>
 <br>seed: ${Math.initialSeed}
 <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${m.cycle} cycles
@@ -972,7 +984,7 @@ window.addEventListener("keydown", function(event) {
             if (m.alive && localSettings.loreCount > 0) {
                 if (simulation.difficultyMode > 4) {
                     simulation.makeTextLog("<em>testing mode disabled for this difficulty</em>");
-                    // break
+                    break
                 }
                 if (simulation.testing) {
                     simulation.testing = false;
@@ -1281,6 +1293,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     }
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
 
+    if (!localSettings.banList) localSettings.banList = ""
     if (localSettings.banList.length === 0 || localSettings.banList === "undefined") {
         localSettings.banList = ""
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
