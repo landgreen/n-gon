@@ -1,23 +1,6 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: coupling - +1 coupling, coupling is a new stat that provides different buffs for each field
-  releasing this early for feedback about balance and bugs
 
-removed tech Pauli exclusion
-  now the perfect diamagnatism coupling effect
-
-snakeBoss tails are closer together
-some bosses have a higher vision memory and response time
-
-phonon gets 10% less ammo and 10% less damage
-meta-analysis gives 2 research per use
-energy drain rework
-  in many situations drain no longer scales with regen
-  this might have some bad side effects, let me know
-
-bug fixes
-  made several tech effects not an arrow function
-  timeSkip graphical glitches might be improved
 
 *********************************************************** TODO *****************************************************
 

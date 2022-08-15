@@ -23,12 +23,12 @@ const level = {
             // powerUps.research.changeRerolls(100000)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
-            m.setField("time dilation") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // m.setField("time dilation") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 1000000
             // tech.giveTech("coupling");
             // tech.giveTech("time crystals");
-            tech.giveTech("retrocausality")
+            // tech.giveTech("retrocausality")
             // for (let i = 0; i < 1; ++i) tech.giveTech("slow light")
             // for (let i = 0; i < 1; ++i) tech.giveTech("free-electron laser")
             // m.damage(0.1);
