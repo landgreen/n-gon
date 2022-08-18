@@ -16,7 +16,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(1 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(3 * 4) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
@@ -26,10 +26,9 @@ const level = {
             // m.setField("time dilation") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 1000000
-            // tech.giveTech("coupling");
             // tech.giveTech("time crystals");
             // tech.giveTech("retrocausality")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("slow light")
+            // for (let i = 0; i < 5; ++i) tech.giveTech("coupling")
             // for (let i = 0; i < 1; ++i) tech.giveTech("free-electron laser")
             // m.damage(0.1);
             // for (let i = 0; i < 1; i++) tech.giveTech("dynamic equilibrium")
@@ -38,7 +37,7 @@ const level = {
 
             // spawn.starter(1900, -500, 200)
             // spawn.beetleBoss(1900, -400)
-            // spawn.timeBoss(1900, -400)
+            // spawn.pulsarBoss(1900, -400)
             // for (let i = 0; i < 15; ++i) spawn.starter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
             // level.testing();
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");

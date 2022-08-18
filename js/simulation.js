@@ -816,7 +816,6 @@ const simulation = {
         m.alive = true;
         m.onGround = false
         m.lastOnGroundCycle = 0
-        m.setMaxHealth()
         m.health = 0;
         m.addHealth(0.25)
         m.drop();
@@ -838,8 +837,8 @@ const simulation = {
         // <br>input.key.field <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>right mouse</span>"]
         // <br><span class='color-var'>m</span>.field.description <span class='color-symbol'>=</span> "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].description}</span>"
         // `, 800);
-
-        m.setField(0)
+        m.coupling = 0
+        m.setField(0) //this calls m.couplingChange(), which sets max health and max energy
         // m.energy = 0;
         //exit testing
         if (simulation.testing) {

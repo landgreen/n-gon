@@ -234,14 +234,14 @@ const tech = {
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.6
-        if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= tech.sneakAttackDmg
+        if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= 4.33 * (1 + 0.33 * m.coupling)
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.harmReduction()
         if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
         if (tech.lastHitDamage && m.lastHit) dmg *= 1 + tech.lastHitDamage * m.lastHit * (2 - m.harmReduction()) // if (!simulation.paused) m.lastHit = 0
         return dmg * tech.slowFire * tech.aimDamage
     },
     duplicationChance() {
-        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication * (1 - 0.016 * (simulation.difficultyMode ** 2)) + (m.fieldMode === 0 || m.fieldMode === 9) * 0.05 * m.coupling)
+        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication * (1 - 0.016 * (simulation.difficultyMode ** 2)) + (m.fieldMode === 0 || m.fieldMode === 9) * 0.04 * m.coupling)
     },
     isScaleMobsWithDuplication: false,
     maxDuplicationEvent() {
@@ -2853,8 +2853,8 @@ const tech = {
             }
         },
         {
-            name: "non-unitary operator",
-            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Unitary_operator' class="link">non-unitary operator</a>`,
+            name: "Hilbert space",
+            // link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Unitary_operator' class="link">non-unitary operator</a>`,
             description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
             maxCount: 1,
             count: 0,
@@ -2886,7 +2886,7 @@ const tech = {
             allowed() {
                 return !tech.isResearchReality && !tech.isCollisionRealitySwitch
             },
-            requires: "not Ψ(t) collapse, non-unitary",
+            requires: "not Ψ(t) collapse, Hilbert space",
             effect() {
                 tech.isSwitchReality = true;
             },
@@ -2905,7 +2905,7 @@ const tech = {
             allowed() {
                 return !tech.isSwitchReality && !tech.isCollisionRealitySwitch && !tech.isJunkResearch
             },
-            requires: "not many-worlds, non-unitary, pseudoscience",
+            requires: "not many-worlds, Hilbert space, pseudoscience",
             bonusResearch: 17,
             effect() {
                 tech.isResearchReality = true;
@@ -3153,9 +3153,9 @@ const tech = {
             isBadRandomOption: true,
             isNonRefundable: true,
             allowed() {
-                return tech.isDeterminism && !tech.isAnsatz
+                return tech.isDeterminism && !tech.isAnsatz && !tech.isJunkResearch && !tech.isBrainstorm
             },
-            requires: "NOT EXPERIMENT MODE, determinism, not ansatz",
+            requires: "determinism, not ansatz, pseudoscience, brainstorming",
             effect() {
                 tech.isSuperDeterminism = true;
                 //if you change the number spawned also change it in Born rule
@@ -3353,6 +3353,107 @@ const tech = {
             }
         },
         {
+            name: "field coupling",
+            descriptionFunction() {
+                return `<strong>+1</strong> <strong class='color-f'>field</strong> <strong class='color-coupling'>coupling</strong> <em>(${m.fieldUpgrades[m.fieldMode].name})</em><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
+            },
+            maxCount: 9,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return (build.isExperimentSelection || powerUps.research.count > 1)
+            },
+            requires: "",
+            effect() {
+                m.coupling++
+                m.couplingChange()
+            },
+            remove() {
+                m.coupling -= this.count
+                m.couplingChange()
+            }
+        },
+        {
+            name: "crystallography",
+            descriptionFunction() {
+                return `use all your ${powerUps.orb.research(1)} to get <strong>+${powerUps.research.count*this.couplingToResearch}</strong> <strong class='color-coupling'>coupling</strong><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
+            },
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return powerUps.research.count > 3
+            },
+            requires: "",
+            researchUsed: 0,
+            couplingToResearch: 0.25,
+            effect() {
+                while (powerUps.research.count > 0) {
+                    powerUps.research.changeRerolls(-1)
+                    this.researchUsed++
+                    m.coupling += this.couplingToResearch
+                }
+                m.couplingChange()
+            },
+            remove() {
+                if (this.count) {
+                    m.coupling -= this.researchUsed * this.couplingToResearch
+                    powerUps.research.changeRerolls(this.researchUsed)
+                    this.researchUsed = 0
+                }
+                m.couplingChange()
+            }
+        },
+        {
+            name: "fine-structure constant",
+            descriptionFunction() {
+                return `+${this.value} <strong class='color-coupling'>coupling</strong>, <span style = 'font-size:85%;'><strong>eject</strong> this <strong class='color-m'>tech</strong> after losing <strong class='color-h'>health</strong></span><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
+            },
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return true
+            },
+            value: 6,
+            requires: "",
+            effect() {
+                tech.isCouplingNoHit = true
+                m.coupling += this.value
+                m.couplingChange()
+            },
+            remove() {
+                if (this.count) {
+                    m.coupling -= this.value
+                    m.couplingChange()
+                }
+                tech.isCouplingNoHit = false
+            }
+        },
+        {
+            name: "residual dipolar coupling",
+            descriptionFunction() {
+                return `clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> yields <strong>+0.5</strong> <strong class='color-coupling'>coupling</strong><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
+            },
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return !tech.isSuperDeterminism
+            },
+            requires: "not superdeterminism",
+            effect() {
+                tech.isCancelCouple = true
+            },
+            remove() {
+                tech.isCancelCouple = false
+            }
+        },
+        {
             name: "options exchange",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Option_(finance)' class="link">options exchange</a>`,
             description: `clicking <strong style = 'font-size:150%;'>×</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong> has a <strong>94%</strong><br>chance to randomize <strong>choices</strong> and not <strong>cancel</strong>`,
@@ -3391,7 +3492,7 @@ const tech = {
         },
         {
             name: "futures exchange",
-            description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>adds <strong>4.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+            description: "clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br><strong>+4.5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -6414,41 +6515,6 @@ const tech = {
         //************************************************** tech
         //**************************************************
         {
-            name: "coupling",
-            descriptionFunction() {
-                return `<strong>+1</strong> <strong class='color-f'>field</strong> <strong class='color-coupling'>coupling</strong> <em>(${m.fieldUpgrades[m.fieldMode].name})</em><br>${ m.couplingDescription()}`
-            },
-            // isFieldTech: true,
-            maxCount: 9,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return (build.isExperimentSelection || powerUps.research.count > 1)
-            },
-            requires: "",
-            // researchUsed: 0,
-            // couplingToResearch: 0.1,
-            effect() {
-                m.coupling++
-                m.couplingChange()
-                // while (powerUps.research.count > 0) {
-                //     powerUps.research.changeRerolls(-1)
-                //     this.researchUsed++
-                //     m.coupling += this.couplingToResearch
-                // }
-            },
-            remove() {
-                m.coupling -= this.count
-                m.couplingChange()
-                // if (this.count) {
-                //     m.coupling -= this.researchUsed * this.couplingToResearch
-                //     powerUps.research.changeRerolls(this.researchUsed)
-                //     this.researchUsed = 0
-                // }
-            }
-        },
-        {
             name: "zero point energy",
             description: `use ${powerUps.orb.research(2)}<br><strong>+100</strong> maximum <strong class='color-f'>energy</strong>`,
             isFieldTech: true,
@@ -7404,25 +7470,25 @@ const tech = {
                 tech.isCloakStun = false;
             }
         },
-        {
-            name: "ambush",
-            description: "metamaterial cloaking field <strong class='color-d'>damage</strong> effect<br>is increased from <span style = 'text-decoration: line-through;'>333%</span> to <strong>555%</strong>",
-            isFieldTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
-            },
-            requires: "metamaterial cloaking",
-            effect() {
-                tech.sneakAttackDmg = 6.55 //555% + 100%
-            },
-            remove() {
-                tech.sneakAttackDmg = 4.33 //333% + 100%
-            }
-        },
+        // {
+        //     name: "ambush",
+        //     description: "metamaterial cloaking field <strong class='color-d'>damage</strong> effect<br>is increased from <span style = 'text-decoration: line-through;'>333%</span> to <strong>555%</strong>",
+        //     isFieldTech: true,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
+        //     },
+        //     requires: "metamaterial cloaking",
+        //     effect() {
+        //         tech.sneakAttackDmg = 6.55 //555% + 100%
+        //     },
+        //     remove() {
+        //         tech.sneakAttackDmg = 4.33 //333% + 100%
+        //     }
+        // },
         {
             name: "dynamical systems",
             description: `use ${powerUps.orb.research(2)}<br><strong>+35%</strong> <strong class='color-d'>damage</strong>`,
@@ -10546,5 +10612,6 @@ const tech = {
     isExtraBotOption: null,
     isLastHitDamage: null,
     isCloakHealLastHit: null,
-    isRicochet: null
+    isRicochet: null,
+    isCancelCouple: null
 }

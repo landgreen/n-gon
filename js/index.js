@@ -229,14 +229,13 @@ const build = {
 
         //used for junk estimation
         let junkCount = 0
-        let totalCount = 0
+        let totalCount = 1 //start at one to avoid NaN issues
         for (let i = 0; i < tech.tech.length; i++) {
             if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isBanished) {
                 totalCount += tech.tech[i].frequency
                 if (tech.tech[i].isJunk) junkCount += tech.tech[i].frequency
             }
         }
-        // ${m.coupling> 0 ? '<br>'+m.couplingDescription(): ""}
         //left side
         let botText = ""
         if (tech.nailBotCount) botText += `<br>nail-bots: ${tech.nailBotCount}`
@@ -259,7 +258,7 @@ const build = {
 <br><strong><em>fire rate</em></strong>: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
 <br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance()*100).toFixed(0)}%
 <br><strong class='color-coupling'>coupling</strong>: ${(m.coupling).toFixed(2)}
-
+${m.coupling> 0 ? '<br>'+m.couplingDescription(true): ""}
 ${botText}
 <br>
 <br><strong class='color-h'>health</strong>: (${(m.health*100).toFixed(0)} / ${(m.maxHealth*100).toFixed(0)})
@@ -962,18 +961,18 @@ window.addEventListener("keydown", function(event) {
 
                     if (tech.isPauseSwitchField || simulation.testing) {
                         document.getElementById("pause-field").addEventListener("click", () => {
-                            const energy = m.energy
+                            const energy = m.energy //save current energy
                             if (m.fieldMode === 4 && simulation.molecularMode < 3) {
                                 simulation.molecularMode++
                                 m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
                             } else {
-                                m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field
+                                m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 0 : m.fieldMode + 1) //cycle to next field
                                 if (m.fieldMode === 4) {
                                     simulation.molecularMode = 0
                                     m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
                                 }
                             }
-                            m.energy = energy
+                            m.energy = energy //return to current energy
                             document.getElementById("pause-field").innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}`
                         });
                     }

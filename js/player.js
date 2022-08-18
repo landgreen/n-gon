@@ -540,7 +540,7 @@ const m = {
         if (tech.isEntanglement && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
         }
-        if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.75 ** m.coupling
+        if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.73 ** m.coupling
         return dmg
     },
     rewind(steps) { // m.rewind(Math.floor(Math.min(599, 137 * m.energy)))
@@ -658,6 +658,11 @@ const m = {
     },
     collisionImmuneCycles: 30,
     damage(dmg) {
+        if (tech.isCouplingNoHit) {
+            for (let i = 0, len = tech.tech.length; i < len; i++) {
+                if (tech.tech[i].name === "fine-structure constant") powerUps.ejectTech(i, true)
+            }
+        }
         if (tech.isRewindAvoidDeath && m.energy > 0.6 && dmg > 0.01) {
             const steps = Math.floor(Math.min(299, 150 * m.energy))
             simulation.makeTextLog(`<span class='color-var'>m</span>.rewind(${steps})`)
@@ -1538,28 +1543,62 @@ const m = {
         }
     },
     hold() {},
-    couplingDescription() {
+    // couplingDescription() {
+    //     switch (m.fieldMode) {
+    //         case 0: //field emitter
+    //             return `gain the effects of <strong>all</strong> other <strong class='color-f'>fields</strong>`
+    //         case 1: //standing wave
+    //             return `<strong>+40</strong> max <strong class='color-f'>energy</strong> per <strong class='color-coupling'>coupling</strong>`
+    //         case 2: //perfect diamagnetism
+    //             return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+3</strong> seconds post collision per <strong class='color-coupling'>coupling</strong></span>`
+    //         case 3: //negative mass
+    //             return `<strong>+27%</strong> <strong class='color-defense'>defense</strong> per <strong class='color-coupling'>coupling</strong>`
+    //         case 4: //assembler
+    //             return `generate <strong>6</strong> <strong class='color-f'>energy</strong> per second per <strong class='color-coupling'>coupling</strong>`
+    //         case 5: //plasma
+    //             return `<strong>+50</strong> max <strong class='color-h'>health</strong> per <strong class='color-coupling'>coupling</strong>`
+    //         case 6: //time dilation
+    //             return `<strong>+25%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong> per <strong class='color-coupling'>coupling</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
+    //         case 7: //cloaking
+    //             return `<strong>+33%</strong> ambush <strong class='color-d'>damage</strong> per <strong class='color-coupling'>coupling</strong>`
+    //         case 8: //pilot wave
+    //             return `<strong>+40%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> per <strong class='color-coupling'>coupling</strong>`
+    //         case 9: //wormhole
+    //             return `<strong>+4%</strong> <strong class='color-dup'>duplication</strong> per <strong class='color-coupling'>coupling</strong>`
+    //     }
+    // },
+    couplingDescription(isScaled = false) {
+        const couple = isScaled ? m.coupling : 1
         switch (m.fieldMode) {
             case 0: //field emitter
-                return `gain the effects of <strong>all</strong> other <strong class='color-f'>fields</strong>`
+                return `gain the effects of <strong>all</strong> applicable <strong class='color-f'>fields</strong>`
+                // return `<strong>+${40*couple}</strong> max <strong class='color-f'>energy</strong>
+                // <br><span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${3*couple}</strong> seconds post collision</span>
+                // <br><strong>+${27*couple}%</strong> <strong class='color-defense'>defense</strong>
+                // <br>generate <strong>${6*couple}</strong> <strong class='color-f'>energy</strong> per second
+                // <br><strong>+${50*couple}</strong> max <strong class='color-h'>health</strong>
+                // <br><strong>+${20*couple}%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>
+                // <br><strong>+${33*couple}%</strong> ambush <strong class='color-d'>damage</strong>
+                // <br><strong>+${40*couple}%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>
+                // <br><strong>+${4*couple}%</strong> <strong class='color-dup'>duplication</strong>`
             case 1: //standing wave
-                return `<strong>+40</strong> max <strong class='color-f'>energy</strong> per <strong class='color-coupling'>coupling</strong>`
+                return `<strong>+${40*couple}</strong> max <strong class='color-f'>energy</strong>`
             case 2: //perfect diamagnetism
-                return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+3</strong> seconds post collision per <strong class='color-coupling'>coupling</strong></span>`
+                return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${3*couple}</strong> seconds post collision</span>`
             case 3: //negative mass
-                return `<strong>+20%</strong> <strong class='color-defense'>defense</strong> per <strong class='color-coupling'>coupling</strong>`
+                return `<strong>+${27*couple}%</strong> <strong class='color-defense'>defense</strong>`
             case 4: //assembler
-                return `generate <strong>6</strong> <strong class='color-f'>energy</strong> per second per <strong class='color-coupling'>coupling</strong>`
+                return `generate <strong>${6*couple}</strong> <strong class='color-f'>energy</strong> per second`
             case 5: //plasma
-                return `<strong>+50</strong> max <strong class='color-h'>health</strong> per <strong class='color-coupling'>coupling</strong>`
+                return `<strong>+${50*couple}</strong> max <strong class='color-h'>health</strong>`
             case 6: //time dilation
-                return `<strong>+20%</strong> <strong><em>fire rate</em></strong> per <strong class='color-coupling'>coupling</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
+                return `<strong>+${25*couple}%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
             case 7: //cloaking
-                return `<strong>+15%</strong> <strong class='color-d'>damage</strong> per <strong class='color-coupling'>coupling</strong>`
+                return `<strong>+${33*couple}%</strong> ambush <strong class='color-d'>damage</strong>`
             case 8: //pilot wave
-                return `<strong>+40%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> per <strong class='color-coupling'>coupling</strong>`
+                return `<strong>+${40*couple}%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>`
             case 9: //wormhole
-                return `<strong>+5%</strong> <strong class='color-dup'>duplication</strong> per <strong class='color-coupling'>coupling</strong>`
+                return `<strong>+${4*couple}%</strong> <strong class='color-dup'>duplication</strong>`
         }
     },
     couplingChange() {
@@ -1568,7 +1607,6 @@ const m = {
         m.setFieldRegen()
         mobs.setMobSpawnHealth();
         powerUps.setDupChance();
-        b.setFireCD();
         m.collisionImmuneCycles = 30 + m.coupling * 180
         // switch (m.fieldMode) {
         //     case 0: //field emitter
@@ -2680,17 +2718,13 @@ const m = {
                     sleep(mob);
                     sleep(body);
                     sleep(bullet);
-
                     simulation.cycle--; //pause all functions that depend on game cycle increasing
                 }
-
                 if (tech.isRewindField) {
                     this.rewindCount = 0
                     m.grabPowerUpRange2 = 300000
                     m.hold = function() {
-
                         m.grabPowerUp();
-
                         // //grab power ups
                         // for (let i = 0, len = powerUp.length; i < len; ++i) {
                         //     if (
@@ -2705,15 +2739,13 @@ const m = {
                         //         break; //because the array order is messed up after splice
                         //     }
                         // }
-
-
                         if (m.isHolding) {
                             m.drawHold(m.holdingTarget);
                             m.holding();
                             m.throwBlock();
                             m.wakeCheck();
                         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
-                            const drain = 0.002
+                            const drain = 0.002 / (1 + 0.25 * m.coupling)
                             if (m.energy > drain) m.energy -= drain
 
                             m.grabPowerUp();
@@ -2790,7 +2822,7 @@ const m = {
                             m.holding();
                             m.throwBlock();
                         } else if (input.field && m.fieldCDcycle < m.cycle) {
-                            const drain = 0.0026
+                            const drain = 0.0026 / (1 + 0.25 * m.coupling)
                             if (m.energy > drain) m.energy -= drain
                             m.grabPowerUp();
                             m.lookForPickUp(); //this drains energy 0.001

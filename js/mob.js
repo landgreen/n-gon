@@ -605,7 +605,6 @@ const mobs = {
                 const hitPlayer = Matter.Query.ray([player], this.position, Vector.add(this.position, Vector.mult(perp, radius * 2.05)), minorRadius)
                 if (hitPlayer.length && m.immuneCycle < m.cycle) {
                     m.damage(dmg * simulation.dmgScale);
-                    // m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
                 }
             },
             searchSpring() {

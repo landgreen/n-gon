@@ -1,27 +1,36 @@
 ******************************************************** NEXT PATCH **************************************************
 
+tech: crystallography - convert all your research into 0.25 coupling per research
+tech: residual dipolar coupling - cancelling field gun or tech gives +0.5 coupling
+tech: fine-structure constant - +6 coupling, eject this tech if you take damage
+coupling for cloaking field now gives +33% ambush damage
+  tech: ambush removed
+coupling for time dilation now gives +25% longer time dilation effect
+  about +2 seconds
+coupling tech isn't well balanced yet, so give me feedback
 
+non-unitary operator renamed to Hilbert space
+
+bug fixes
 
 *********************************************************** TODO *****************************************************
 
-coupling:
-  field emitter balance?
-
 coupling tech
-  names:  fine-structure constant, strongly coupled, Vibronic coupling
+  names: strongly coupled, Vibronic coupling, Residual dipolar coupling, NMR coupling
   tech: convert all research into "coupling"
   tech: +x% field coupling, your field changes randomly every y seconds
   tech: coupling starts at 200%, but decays when the field is in use, coupling recharges when the field is not in use
     some fields aren't used much (that's ok?)
-  Tech: Cancelling a tech/gun/field gives x coupling
 
 buffing your deflecting for 1 second after pressing the field button sounds cool
   2 second cooldown on the effect to prevent spamming it
   buff:  giving energy or doing damage makes sense
     maybe this could be a rework for bremstralung
 
-rewindBoss:  after hitting 1/5 damage theasholds the boss rewinds back in time to where it was a few seconds ago
+rewindBoss:  after hitting 1/5 damage thresholds the boss rewinds back in time to where it was a few seconds ago
   track it's data like player history
+
+make orbitals increase orbital rotation speed after Orbital boss takes damage
 
 worms can target player, buff their damage
   can't target player in first few seconds?
