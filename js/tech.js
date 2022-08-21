@@ -1,6 +1,7 @@
 const tech = {
     totalCount: null,
     setupAllTech() {
+        tech.damage = 1
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             tech.tech[i].count = 0
             tech.tech[i].isLost = false
@@ -90,7 +91,6 @@ const tech = {
                 if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isJunk) countNonJunk += tech.tech[i].frequency
             }
             const num = percent * countNonJunk //scale number added
-            console.log(num)
             for (let i = 0; i < num; i++) tech.tech[options[Math.floor(Math.random() * options.length)]].frequency++ //add random array options to tech pool
             simulation.makeTextLog(`<span class='color-var'>tech</span>.tech.push(${num.toFixed(0)} <span class='color-text'>JUNK</span>)`)
             return num
@@ -206,17 +206,12 @@ const tech = {
     hasExplosiveDamageCheck() {
         return tech.haveGunCheck("missiles") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isBoomBotUpgrade || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb)
     },
+    damage: 1, //used for tech changes to player damage that don't have complex conditions
     damageFromTech() {
-        let dmg = 1 //m.fieldDamage
-        if (m.coupling && (m.fieldMode === 0 || m.fieldMode === 7)) dmg *= 1 + 0.15 * m.coupling
+        let dmg = tech.damage //m.fieldDamage
+        if (m.coupling && (m.fieldMode === 0 || m.fieldMode === 5)) dmg *= 1 + 0.15 * m.coupling
+        if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= 4.33 * (1 + 0.33 * m.coupling)
         if (tech.deathSkipTime) dmg *= 1 + 0.6 * tech.deathSkipTime
-        if (tech.isNoDraftPause) dmg *= 1.34
-        if (tech.isCloakingDamage) dmg *= 1.35
-        if (tech.isTechDamage) dmg *= 1.9
-        if (tech.isMaxEnergyTech) dmg *= 1.5
-        if (tech.isEnergyNoAmmo) dmg *= 1.88
-        if (tech.isEnergyLoss) dmg *= 1.55
-        if (tech.OccamDamage) dmg *= tech.OccamDamage
         if (tech.isTechDebt) dmg *= Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount)
         if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
         if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
@@ -234,14 +229,13 @@ const tech = {
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.6
-        if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= 4.33 * (1 + 0.33 * m.coupling)
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.harmReduction()
         if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
         if (tech.lastHitDamage && m.lastHit) dmg *= 1 + tech.lastHitDamage * m.lastHit * (2 - m.harmReduction()) // if (!simulation.paused) m.lastHit = 0
-        return dmg * tech.slowFire * tech.aimDamage
+        return dmg
     },
     duplicationChance() {
-        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication * (1 - 0.016 * (simulation.difficultyMode ** 2)) + (m.fieldMode === 0 || m.fieldMode === 9) * 0.04 * m.coupling)
+        return Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.045 + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication * (1 - 0.016 * (simulation.difficultyMode ** 2))) // + (m.fieldMode === 0 || m.fieldMode === 9) * 0.03 * m.coupling)
     },
     isScaleMobsWithDuplication: false,
     maxDuplicationEvent() {
@@ -592,10 +586,13 @@ const tech = {
                 return !tech.isAmmoFromHealth
             },
             requires: "not catabolism",
+            damage: 1.88,
             effect() {
+                tech.damage *= this.damage
                 tech.isEnergyNoAmmo = true;
             },
             remove() {
+                if (this.count) tech.damage /= this.damage
                 tech.isEnergyNoAmmo = false;
             }
         },
@@ -815,11 +812,14 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() { return true },
+            damage: 1.2,
             effect() {
+                tech.damage *= this.damage
                 tech.slowFire = 1.2
                 b.setFireCD();
             },
             remove() {
+                if (this.count) tech.damage /= this.damage
                 tech.slowFire = 1;
                 b.setFireCD();
             }
@@ -939,6 +939,22 @@ const tech = {
             },
             remove() {
                 tech.sporesOnDeath = 0;
+            }
+        },
+        {
+            name: "bubble fusion",
+            description: `after destroying a mob's natural <strong>shield</strong><br>spawn <strong>1-2</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                tech.isShieldAmmo = true;
+            },
+            remove() {
+                tech.isShieldAmmo = false;
             }
         },
         {
@@ -2321,11 +2337,14 @@ const tech = {
                 return !tech.isRewindAvoidDeath
             },
             requires: "not CPT",
+            damage: 1.5,
             effect() {
+                tech.damage *= this.damage
                 tech.isMaxEnergyTech = true;
                 m.setMaxEnergy()
             },
             remove() {
+                if (this.count) tech.damage /= this.damage
                 tech.isMaxEnergyTech = false;
                 m.setMaxEnergy()
             }
@@ -2339,10 +2358,13 @@ const tech = {
             frequencyDefault: 1,
             allowed() { return true },
             requires: "",
+            damage: 1.55,
             effect() {
+                tech.damage *= this.damage
                 tech.isEnergyLoss = true;
             },
             remove() {
+                if (this.count) tech.damage /= this.damage
                 tech.isEnergyLoss = false;
             }
         },
@@ -2607,10 +2629,13 @@ const tech = {
             frequencyDefault: 1,
             allowed() { return true },
             requires: "",
+            damage: 1.9,
             effect() {
+                tech.damage *= this.damage
                 tech.isTechDamage = true;
             },
             remove() {
+                if (this.count) tech.damage /= this.damage
                 tech.isTechDamage = false;
             }
         },
@@ -2751,6 +2776,37 @@ const tech = {
             }
         },
         {
+            name: "ergodicity",
+            description: `<strong>+91%</strong> <strong class='color-d'>damage</strong><br>${powerUps.orb.heal()} have <strong>no</strong> effect`,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return !tech.isEnergyHealth && !tech.healthDrain
+            },
+            requires: "not mass-energy, enthalpy",
+            damage: 1.91,
+            effect() {
+                tech.damage *= this.damage
+                tech.isNoHeals = true;
+                powerUps.heal.color = "#abb"
+                for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
+                    if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
+                }
+            },
+            remove() {
+                if (this.count) {
+                    tech.damage /= this.damage
+                    powerUps.heal.color = "#0eb"
+                    for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
+                        if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
+                    }
+                }
+                tech.isNoHeals = false;
+            }
+        },
+        {
             name: "maintenance",
             description: `</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn ${powerUps.orb.heal(13)}`,
             maxCount: 1,
@@ -2854,8 +2910,7 @@ const tech = {
         },
         {
             name: "Hilbert space",
-            // link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Unitary_operator' class="link">non-unitary operator</a>`,
-            description: "reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
+            description: "<strong>+91%</strong> <strong class='color-d'>damage</strong><br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2864,15 +2919,14 @@ const tech = {
                 return !tech.isResearchReality && !tech.isSwitchReality
             },
             requires: "not Ψ(t) collapse, many-worlds",
+            damage: 1.91,
             effect() {
+                tech.damage *= this.damage
                 tech.isCollisionRealitySwitch = true;
-                level.difficultyDecrease(simulation.difficultyMode * 2)
             },
             remove() {
+                if (this.count) tech.damage /= this.damage
                 tech.isCollisionRealitySwitch = false;
-                if (this.count > 0) {
-                    level.difficultyIncrease(simulation.difficultyMode * 2)
-                }
             }
         },
         {
@@ -3022,7 +3076,7 @@ const tech = {
         },
         {
             name: "pseudoscience",
-            description: "<span style = 'font-size:94%;'>when <strong>selecting</strong> a power up, <strong class='color-r'>research</strong> <strong>3</strong> times</span><br>for <strong>free</strong>, but add <strong>0-3%</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
+            description: "<span style = 'font-size:94%;'>when <strong>selecting</strong> a power up, <strong class='color-r'>research</strong> <strong>3</strong> times</span><br>for <strong>free</strong>, but add <strong>1-3%</strong> <strong class='color-j'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3166,68 +3220,6 @@ const tech = {
             }
         },
         {
-            name: "unified field theory",
-            description: `<span style = 'font-size:90%;'><strong>clicking</strong> the <strong class='color-f'>field</strong> box when <strong>paused</strong> cycles your <strong class='color-f'>field</strong><br><strong>triple</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong><strong class='color-m'>tech</strong></span>`,
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return !tech.isSuperDeterminism && !tech.isNoDraftPause
-            },
-            requires: "not superdeterminism, eternalism",
-            effect() {
-                tech.isPauseSwitchField = true;
-                for (let i = 0, len = tech.tech.length; i < len; i++) {
-                    if (tech.tech[i].isFieldTech) tech.tech[i].frequency *= 3
-                }
-            },
-            remove() {
-                tech.isPauseSwitchField = false;
-                if (this.count > 1) {
-                    for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].isFieldTech) tech.tech[i].frequency /= 3
-                    }
-                }
-            }
-        },
-        {
-            name: "paradigm shift",
-            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>16%</strong> chance to fail`,
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return !tech.isSuperDeterminism && !tech.isNoDraftPause
-            },
-            requires: "not superdeterminism, eternalism",
-            effect() {
-                tech.isPauseEjectTech = true;
-            },
-            remove() {
-                tech.isPauseEjectTech = false;
-            }
-        },
-        {
-            name: "eternalism",
-            description: "<strong>+34%</strong> <strong class='color-d'>damage</strong><br><strong>time</strong> can't be <strong>paused</strong> <em>(time can be dilated)</em>",
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return !tech.isPauseSwitchField && !tech.isPauseEjectTech && !tech.isWormHolePause
-            },
-            requires: "not unified field theory, paradigm shift, invariant",
-            effect() {
-                tech.isNoDraftPause = true
-            },
-            remove() {
-                tech.isNoDraftPause = false
-            }
-        },
-        {
             name: "technical debt", // overengineering
             descriptionFunction() {
                 return `<strong>+300%</strong> <strong class='color-d'>damage</strong> <strong>–15%</strong> <strong class='color-d'>damage</strong><br>for each <strong class='color-m'>tech</strong> you have learned <em>(${Math.floor(100*(Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount) ))-100}%)</em>`
@@ -3265,7 +3257,7 @@ const tech = {
         },
         {
             name: "meta-analysis",
-            description: `if you choose a <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> you instead get a<br>random normal <strong class='color-m'>tech</strong> and ${powerUps.orb.research(2)}`,
+            description: `if you choose a <strong class='color-j'>JUNK</strong> <strong class='color-m'>tech</strong> you instead get a<br>random normal <strong class='color-m'>tech</strong> and spawn ${powerUps.orb.research(2)}`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3281,81 +3273,95 @@ const tech = {
         },
         {
             name: "dark patterns",
-            description: "reduce combat <strong>difficulty</strong> by <strong>1 level</strong><br><strong>+31%</strong> <strong class='color-j'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return level.onLevel < 8 && level.onLevel > 0
-            },
-            requires: "on levels 1 through 7",
-            effect() {
-                level.difficultyDecrease(simulation.difficultyMode)
-                // simulation.difficulty<span class='color-symbol'>-=</span>
-                simulation.makeTextLog(`level.difficultyDecrease(simulation.difficultyMode)`)
-                this.refundAmount += tech.addJunkTechToPool(0.31)
-                // for (let i = 0; i < tech.junk.length; i++) tech.tech.push(tech.junk[i])
-            },
-            refundAmount: 0,
-            remove() {
-                if (this.count > 0) {
-                    if (this.refundAmount > 0) tech.removeJunkTechFromPool(this.refundAmount)
-                    level.difficultyIncrease(simulation.difficultyMode)
-                }
-            }
-        },
-        {
-            name: "ergodicity",
-            description: `reduce combat <strong>difficulty</strong> by <strong>2 levels</strong><br>${powerUps.orb.heal()} have <strong>no</strong> effect`,
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return level.onLevel > 1 && !tech.isEnergyHealth && !tech.healthDrain
-            },
-            requires: "past level 1, not mass-energy, enthalpy",
-            effect() {
-                tech.isNoHeals = true;
-                level.difficultyDecrease(simulation.difficultyMode * 2)
-                simulation.makeTextLog(`level.difficultyDecrease(simulation.difficultyMode <span class='color-symbol'>*</span> 2)`)
-                powerUps.heal.color = "#abb"
-                for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
-                    if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
-                }
-            },
-            remove() {
-                if (tech.isNoHeals) {
-                    powerUps.heal.color = "#0eb"
-                    for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
-                        if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
-                    }
-                }
-                tech.isNoHeals = false;
-                if (this.count > 0) level.difficultyIncrease(simulation.difficultyMode * 2)
-            }
-        },
-        {
-            name: "bubble fusion",
-            description: `after destroying a mob's natural <strong>shield</strong><br>spawn <strong>1-2</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`,
+            description: "<strong>+38%</strong> <strong class='color-d'>damage</strong><br><strong>+53%</strong> <strong class='color-j'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
             allowed() { return true },
             requires: "",
+            damage: 1.38,
             effect() {
-                tech.isShieldAmmo = true;
+                tech.damage *= this.damage
+                this.refundAmount += tech.addJunkTechToPool(0.53)
+            },
+            refundAmount: 0,
+            remove() {
+                if (this.count > 0) {
+                    tech.damage /= this.damage
+                    if (this.refundAmount > 0) tech.removeJunkTechFromPool(this.refundAmount)
+                }
+            }
+        },
+        {
+            name: "eternalism",
+            description: "<strong>+34%</strong> <strong class='color-d'>damage</strong><br><strong>time</strong> can't be <strong>paused</strong> <em>(time can be dilated)</em>",
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return !tech.isPauseSwitchField && !tech.isPauseEjectTech && !tech.isWormHolePause
+            },
+            requires: "not unified field theory, paradigm shift, invariant",
+            damage: 1.34,
+            effect() {
+                tech.damage *= this.damage
+                tech.isNoDraftPause = true
             },
             remove() {
-                tech.isShieldAmmo = false;
+                if (this.count) tech.damage /= this.damage
+                tech.isNoDraftPause = false
+            }
+        },
+        {
+            name: "paradigm shift",
+            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>16%</strong> chance to fail`,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return !tech.isSuperDeterminism && !tech.isNoDraftPause
+            },
+            requires: "not superdeterminism, eternalism",
+            effect() {
+                tech.isPauseEjectTech = true;
+            },
+            remove() {
+                tech.isPauseEjectTech = false;
+            }
+        },
+        {
+            name: "unified field theory",
+            description: `<span style = 'font-size:90%;'><strong>clicking</strong> the <strong class='color-f'>field</strong> box when <strong>paused</strong> cycles your <strong class='color-f'>field</strong><br><strong>triple</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong><strong class='color-m'>tech</strong></span>`,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return !tech.isSuperDeterminism && !tech.isNoDraftPause
+            },
+            requires: "not superdeterminism, eternalism",
+            effect() {
+                tech.isPauseSwitchField = true;
+                for (let i = 0, len = tech.tech.length; i < len; i++) {
+                    if (tech.tech[i].isFieldTech) tech.tech[i].frequency *= 3
+                }
+            },
+            remove() {
+                tech.isPauseSwitchField = false;
+                if (this.count > 1) {
+                    for (let i = 0, len = tech.tech.length; i < len; i++) {
+                        if (tech.tech[i].isFieldTech) tech.tech[i].frequency /= 3
+                    }
+                }
             }
         },
         {
             name: "field coupling",
             descriptionFunction() {
-                return `<strong>+1</strong> <strong class='color-f'>field</strong> <strong class='color-coupling'>coupling</strong> <em>(${m.fieldUpgrades[m.fieldMode].name})</em><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
+                return `<strong>+1</strong> <strong class='color-coupling'>coupling</strong> <em>(${m.fieldUpgrades[m.fieldMode].name})</em><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
             },
             maxCount: 9,
             count: 0,
@@ -3375,7 +3381,7 @@ const tech = {
             }
         },
         {
-            name: "crystallography",
+            name: "quintessence",
             descriptionFunction() {
                 return `use all your ${powerUps.orb.research(1)} to get <strong>+${powerUps.research.count*this.couplingToResearch}</strong> <strong class='color-coupling'>coupling</strong><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
             },
@@ -3670,11 +3676,8 @@ const tech = {
         },
         {
             name: "Occam's razor",
-            // descriptionFunction() {
-            //     return `randomly remove <strong>${this.removePercent * 100}%</strong> of your <strong class='color-m'>tech</strong><br>for each removed gain <strong>${this.damagePerRemoved * 100}%</strong> <strong class='color-d'>damage</strong>`
-            // },
             descriptionFunction() {
-                return `randomly remove <strong>half</strong> your <strong class='color-m'>tech</strong><br>for each removed <strong>+${this.damagePerRemoved * 100 }%</strong> <strong class='color-d'>damage</strong> <em>(~${(this.count === 0) ? this.damagePerRemoved * 50 * tech.totalCount : tech.OccamDamage*100}%)</em>`
+                return `randomly remove <strong>half</strong> your <strong class='color-m'>tech</strong><br>for each removed <strong>+${this.damagePerRemoved * 100 }%</strong> <strong class='color-d'>damage</strong> <em>(~${(this.count === 0) ? this.damagePerRemoved * 50 * tech.totalCount : this.damage*100}%)</em>`
             },
             maxCount: 1,
             count: 0,
@@ -3688,6 +3691,7 @@ const tech = {
             requires: "more than 6 tech",
             // removePercent: 0.5,
             damagePerRemoved: 0.5,
+            damage: null,
             effect() {
                 let pool = []
                 for (let i = 0, len = tech.tech.length; i < len; i++) { // spawn new tech power ups
@@ -3696,11 +3700,11 @@ const tech = {
                 pool = shuffle(pool); //shuffles order of maps
                 let removeCount = 0
                 for (let i = 0, len = pool.length * this.damagePerRemoved; i < len; i++) removeCount += tech.removeTech(pool[i])
-                tech.OccamDamage = 1 + this.damagePerRemoved * removeCount
-                // tech.OccamDamage = Math.pow(1.25, removeCount)
+                this.damage = 1 + this.damagePerRemoved * removeCount
+                tech.damage *= this.damage
             },
             remove() {
-                tech.OccamDamage = 0;
+                if (this.count) tech.damage /= this.damage
             }
         },
         {
@@ -4336,7 +4340,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1
+                return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)
             },
             requires: "a freeze effect",
             effect() {
@@ -4355,7 +4359,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1
+                return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)
             },
             requires: "a freeze effect",
             effect() {
@@ -4374,7 +4378,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
+                return (tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
             },
             requires: "a localized freeze effect, no other mob death tech",
             effect() {
@@ -4393,7 +4397,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || tech.blockingIce || tech.iceIXOnDeath || tech.isIceShot
+                return (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3) || tech.iceIXOnDeath || tech.isIceShot
             },
             requires: "ice IX",
             effect() {
@@ -4412,7 +4416,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || tech.blockingIce > 1 || tech.iceIXOnDeath || tech.isIceShot
+                return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3) || tech.iceIXOnDeath || tech.isIceShot
             },
             requires: "a localized freeze effect",
             effect() {
@@ -5012,7 +5016,7 @@ const tech = {
         },
         {
             name: "vacuum bomb",
-            description: "<strong>grenades</strong> fire slower, <strong class='color-e'>explode</strong> bigger<br> and, <strong>suck</strong> everything towards them",
+            description: "<strong>grenades</strong> fire slower, <strong class='color-e'>explode</strong> bigger,<br>and <strong>suck</strong> everything towards them",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6572,9 +6576,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "standing wave" && (tech.blockDmg || tech.blockingIce)
+                return m.fieldUpgrades[m.fieldMode].name === "standing wave"
             },
-            requires: "standing wave, bremsstrahlung, triple point",
+            requires: "standing wave",
             effect() {
                 tech.isStandingWaveExpand = true
                 m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
@@ -6623,28 +6627,28 @@ const tech = {
                 tech.isBlockRadiation = false;
             }
         },
-        {
-            name: "triple point",
-            description: "<strong>deflecting</strong> condenses <strong class='color-s'>ice IX</strong> crystals",
-            isFieldTech: true,
-            maxCount: 9,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "standing wave" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
-            },
-            requires: "standing wave, perfect diamagnetism",
-            effect() {
-                tech.blockingIce++
-            },
-            remove() {
-                tech.blockingIce = 0;
-            }
-        },
+        // {
+        //     name: "triple point",
+        //     description: "<strong>deflecting</strong> condenses <strong class='color-s'>ice IX</strong> crystals",
+        //     isFieldTech: true,
+        //     maxCount: 9,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return m.fieldUpgrades[m.fieldMode].name === "standing wave" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
+        //     },
+        //     requires: "standing wave, perfect diamagnetism",
+        //     effect() {
+        //         tech.blockingIce++
+        //     },
+        //     remove() {
+        //         tech.blockingIce = 0;
+        //     }
+        // },
         {
             name: "flux pinning",
-            description: "after <strong>deflecting</strong> a mob<br>it is <strong>stunned</strong> for upto <strong>4</strong> seconds",
+            description: "after <strong>deflecting</strong> a mob<br>it is <strong>stunned</strong> for up to <strong>4</strong> seconds",
             isFieldTech: true,
             maxCount: 9,
             count: 0,
@@ -7501,7 +7505,9 @@ const tech = {
                 return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && (build.isExperimentSelection || powerUps.research.count > 1)
             },
             requires: "cloaking, pilot wave, or plasma torch",
+            damage: 1.35,
             effect() {
+                tech.damage *= this.damage
                 tech.isCloakingDamage = true
                 for (let i = 0; i < 2; i++) {
                     if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
@@ -7509,7 +7515,10 @@ const tech = {
             },
             remove() {
                 tech.isCloakingDamage = false
-                if (this.count > 0) powerUps.research.changeRerolls(2)
+                if (this.count > 0) {
+                    tech.damage /= this.damage
+                    powerUps.research.changeRerolls(2)
+                }
             }
         },
         {
@@ -7524,11 +7533,14 @@ const tech = {
                 return m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
             },
             requires: "cloaking, molecular assembler, plasma torch, pilot wave",
+            damage: 1.35,
             effect() {
+                tech.damage *= this.damage
                 tech.aimDamage = 1.35
                 b.setFireCD();
             },
             remove() {
+                if (this.count) tech.damage /= this.damage
                 tech.aimDamage = 1
                 b.setFireCD();
             }
@@ -7580,25 +7592,25 @@ const tech = {
                 if (this.count > 0) powerUps.research.changeRerolls(6)
             }
         },
-        {
-            name: "Penrose process",
-            description: "after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br><strong>+50</strong> <strong class='color-f'>energy</strong>",
-            isFieldTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return m.fieldUpgrades[m.fieldMode].name === "wormhole"
-            },
-            requires: "wormhole",
-            effect() {
-                tech.isWormholeEnergy = true
-            },
-            remove() {
-                tech.isWormholeEnergy = false
-            }
-        },
+        // {
+        //     name: "Penrose process",
+        //     description: "after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br><strong>+50</strong> <strong class='color-f'>energy</strong>",
+        //     isFieldTech: true,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return m.fieldUpgrades[m.fieldMode].name === "wormhole"
+        //     },
+        //     requires: "wormhole",
+        //     effect() {
+        //         tech.isWormholeEnergy = true
+        //     },
+        //     remove() {
+        //         tech.isWormholeEnergy = false
+        //     }
+        // },
         {
             name: "transdimensional worms",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Dimension' class="link">transdimensional worms</a>`,
@@ -10419,7 +10431,7 @@ const tech = {
     iceEnergy: null,
     isPerfectBrake: null,
     explosiveRadius: null,
-    isWormholeEnergy: null,
+    // isWormholeEnergy: null,
     isWormholeDamage: null,
     isNailCrit: null,
     isFlechetteExplode: null,
@@ -10497,7 +10509,7 @@ const tech = {
     isDroneRespawn: null,
     deathSpawns: null,
     isMobBlockFling: null,
-    blockingIce: null,
+    // blockingIce: null,
     isPhaseVelocity: null,
     waveBeamSpeed: null,
     wavePacketAmplitude: null,
@@ -10565,7 +10577,7 @@ const tech = {
     isFreeWormHole: null,
     isRewindField: null,
     isCrouchRegen: null,
-    OccamDamage: null,
+    // OccamDamage: null,
     isAxion: null,
     isWormholeMapIgnore: null,
     isLessDamageReduction: null,

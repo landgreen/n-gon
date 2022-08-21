@@ -2009,7 +2009,7 @@ const spawn = {
             this.checkStatus();
             if (this.seePlayer.recall) {
                 //throw large seekers
-                if (!(simulation.cycle % 240)) {
+                if (!(simulation.cycle % 90)) {
                     spawn.seeker(this.position.x, this.position.y, 15 * (0.7 + 0.5 * Math.random()), 7); //give the bullet a rotational velocity as if they were attached to a vertex
                     const who = mob[mob.length - 1]
                     Matter.Body.setDensity(who, 0.00001); //normal is 0.001
@@ -2559,7 +2559,6 @@ const spawn = {
         };
         me.warpIntensity = 0
         me.awake = function() {
-            // this.armor();
             this.checkStatus();
             //health bar needs to be here because the position is being set
             const h = this.radius * 0.3;
@@ -2627,14 +2626,6 @@ const spawn = {
                 ctx.stroke();
             }
 
-            // ctx.beginPath();
-            // ctx.arc(this.position.x, this.position.y, this.laserRange * 0.9, 0, 2 * Math.PI);
-            // ctx.strokeStyle = "rgba(150,0,255,0.5)";
-            // ctx.lineWidth = 1;
-            // ctx.stroke();
-            // ctx.setLineDash([]);
-            // ctx.fillStyle = "rgba(150,0,255,0.03)";
-            // ctx.fill();
             if (!this.isStunned && !this.isSlowed) {
                 if (this.followDelay > this.delayLimit) this.followDelay -= 0.15;
                 let history = m.history[(m.cycle - Math.floor(this.followDelay)) % 600]
@@ -4261,8 +4252,8 @@ const spawn = {
                     this.death();
                     //hit player
                     if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.explodeRange && m.immuneCycle < m.cycle) {
-                        m.damage(0.015 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.25 : 1));
-                        m.energy -= 0.15 * (tech.isRadioactiveResistance ? 0.25 : 1)
+                        m.damage(0.02 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.25 : 1));
+                        m.energy -= 0.2 * (tech.isRadioactiveResistance ? 0.25 : 1)
                         if (m.energy < 0) m.energy = 0
                     }
                     // mob[i].isInvulnerable = false //make mineBoss not invulnerable ?
@@ -5046,11 +5037,52 @@ const spawn = {
             // this.armor();
             this.seePlayerByLookingAt();
             this.checkStatus();
-            this.fire();
-            //gently return to starting location
-            // const sub = Vector.sub(this.homePosition, this.position)
-            // const dist = Vector.magnitude(sub)
-            // if (dist > 50) this.force = Vector.mult(Vector.normalise(sub), this.mass * 0.0002)
+            // this.fire();
+            const setNoseShape = () => {
+                const mag = this.radius + this.radius * this.noseLength;
+                this.vertices[1].x = this.position.x + Math.cos(this.angle) * mag;
+                this.vertices[1].y = this.position.y + Math.sin(this.angle) * mag;
+            };
+            //throw a mob/bullet at player
+            if (this.seePlayer.recall) {
+                //set direction to turn to fire
+                if (!(simulation.cycle % this.seePlayerFreq)) {
+                    this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                    this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 2500; //gives the bullet an arc  //was    / 1600
+                }
+                //rotate towards fireAngle
+                const angle = this.angle + Math.PI / 2;
+                const dot = Vector.dot({
+                    x: Math.cos(angle),
+                    y: Math.sin(angle)
+                }, this.fireDir)
+                // c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
+                const threshold = 0.1;
+                if (dot > threshold) {
+                    this.torque += 0.000004 * this.inertia;
+                } else if (dot < -threshold) {
+                    this.torque -= 0.000004 * this.inertia;
+                } else if (this.noseLength > 1.5 && dot > -0.2 && dot < 0.2) {
+                    //fire
+                    for (let i = 0, len = 2 + 0.07 * simulation.difficulty; i < len; i++) {
+                        spawn.bullet(this.vertices[1].x, this.vertices[1].y, 7 + Math.ceil(this.radius / 25));
+                        const v = 15;
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: this.velocity.x + this.fireDir.x * v + 7 * Math.random(),
+                            y: this.velocity.y + this.fireDir.y * v + 7 * Math.random()
+                        });
+                    }
+                    this.noseLength = 0;
+                    // recoil
+                    this.force.x -= 0.005 * this.fireDir.x * this.mass;
+                    this.force.y -= 0.005 * this.fireDir.y * this.mass;
+                }
+                if (this.noseLength < 1.5) this.noseLength += this.fireFreq;
+                setNoseShape();
+            } else if (this.noseLength > 0.1) {
+                this.noseLength -= this.fireFreq / 2;
+                setNoseShape();
+            }
         };
     },
     bullet(x, y, radius = 9, sides = 0) {
@@ -5059,11 +5091,11 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.stroke = "transparent";
         me.onHit = function() {
-            this.explode(this.mass * 20);
+            this.explode(this.mass * 15);
         };
         Matter.Body.setDensity(me, 0.00004); //normal is 0.001
-        me.timeLeft = 200;
-        // me.g = 0.001; //required if using this.gravity 
+        me.timeLeft = 220;
+        me.g = 0.001; //required if using this.gravity 
         me.frictionAir = 0;
         me.restitution = 0.8;
         me.leaveBody = false;
@@ -5074,7 +5106,7 @@ const spawn = {
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
         me.do = function() {
-            // this.gravity();
+            this.gravity();
             this.timeLimit();
         };
     },
@@ -6026,7 +6058,7 @@ const spawn = {
         for (let i = 0; i < nodes; ++i) {
             angle -= 0.1
             spawn.snakeBody(x + tailRadius * Math.cos(angle), y + tailRadius * Math.sin(angle), i === 0 ? 25 : 20);
-            if (i < 3) mob[mob.length - 1].snakeHeadID = me.id
+            if (i < 4) mob[mob.length - 1].snakeHeadID = me.id
             mob[mob.length - 1].previousTailID = previousTailID
             previousTailID = mob[mob.length - 1].id
         }
@@ -6125,7 +6157,7 @@ const spawn = {
             spawn.snakeBody(x + tailRadius * Math.cos(angle), y + tailRadius * Math.sin(angle), i === 0 ? 25 : 20);
             const who = mob[mob.length - 1]
             who.fill = `hsl(${160+40*Math.random()}, 100%, ${5 + 25*Math.random()*Math.random()}%)`
-            if (i < 3) who.snakeHeadID = me.id
+            if (i < 4) who.snakeHeadID = me.id
             if (i === 0) me.snakeBody1 = who //track this segment, so the difference in position between this segment and the head can be used to angle the wings
             who.previousTailID = previousTailID
             previousTailID = who.id

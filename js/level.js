@@ -23,12 +23,11 @@ const level = {
             // powerUps.research.changeRerolls(100000)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
-            // m.setField("time dilation") //molecular assembler  time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // m.setField("standing wave") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 1000000
-            // tech.giveTech("time crystals");
-            // tech.giveTech("retrocausality")
-            // for (let i = 0; i < 5; ++i) tech.giveTech("coupling")
+            // tech.giveTech("expansion")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("field coupling")
             // for (let i = 0; i < 1; ++i) tech.giveTech("free-electron laser")
             // m.damage(0.1);
             // for (let i = 0; i < 1; i++) tech.giveTech("dynamic equilibrium")
@@ -37,7 +36,7 @@ const level = {
 
             // spawn.starter(1900, -500, 200)
             // spawn.beetleBoss(1900, -400)
-            // spawn.pulsarBoss(1900, -400)
+            // spawn.shooter(1900, -500)
             // for (let i = 0; i < 15; ++i) spawn.starter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
             // level.testing();
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
@@ -145,7 +144,7 @@ const level = {
         simulation.accelScale = 1 //mob acceleration increases each level
         simulation.CDScale = 1 //mob CD time decreases each level
         simulation.dmgScale = Math.max(0.1, 0.34 * simulation.difficulty) //damage done by mobs scales with total levels
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.052) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.05) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
@@ -155,7 +154,7 @@ const level = {
             if (simulation.CDScale > 0.15) simulation.CDScale *= 0.965 //mob CD time decreases each level
         }
         simulation.dmgScale = Math.max(0.1, 0.34 * simulation.difficulty) //damage done by mobs scales with total levels
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.052) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.05) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
         // console.log(`CD = ${simulation.CDScale}`)
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
@@ -167,7 +166,7 @@ const level = {
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
         simulation.dmgScale = Math.max(0.1, 0.34 * simulation.difficulty) //damage done by mobs scales with total levels
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.052)
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.05)
     },
     difficultyText() {
         if (simulation.difficultyMode === 1) {

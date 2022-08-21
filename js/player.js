@@ -344,7 +344,7 @@ const m = {
                     !tech.tech[i].isFromAppliedScience &&
                     tech.tech[i].name !== "many-worlds" &&
                     tech.tech[i].name !== "Ψ(t) collapse" &&
-                    tech.tech[i].name !== "non-unitary operator" &&
+                    tech.tech[i].name !== "Hilbert space" &&
                     tech.tech[i].name !== "-quantum leap-"
                 ) {
                     totalTech += tech.tech[i].count
@@ -519,28 +519,28 @@ const m = {
         let dmg = 1
         dmg *= m.fieldHarmReduction
         // if (!tech.isFlipFlopOn && tech.isFlipFlopHealth) dmg *= 0.5
-        if (tech.isLowHealthDefense) dmg *= 1 - Math.max(0, 1 - m.health) * 0.8
         if (tech.isZeno) dmg *= 0.15
         if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.4
         if (tech.isImmortal) dmg *= 0.66
-        if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.33
+        if (tech.isSlowFPS) dmg *= 0.8
+        if (tech.energyRegen === 0) dmg *= 0.34
         if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
+        if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.73 ** m.coupling
+        if (tech.isLowHealthDefense) dmg *= 1 - Math.max(0, 1 - m.health) * 0.8
+        if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.33
         if (tech.squirrelFx !== 1) dmg *= 1 + (tech.squirrelFx - 1) / 5 //cause more damage
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.15
         if (tech.isSpeedHarm) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
-        if (tech.isSlowFPS) dmg *= 0.8
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.25
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.1
         if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
-        if (tech.energyRegen === 0) dmg *= 0.34
         if (tech.isTurret && m.crouch) dmg *= 0.34;
         if (tech.isEntanglement && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
         }
-        if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.73 ** m.coupling
         return dmg
     },
     rewind(steps) { // m.rewind(Math.floor(Math.min(599, 137 * m.energy)))
@@ -987,6 +987,8 @@ const m = {
         m.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         m.isBodiesAsleep = true;
         m.wakeCheck();
+        m.setMaxEnergy();
+        m.setMaxHealth();
         m.couplingChange()
         m.hole = {
             isOn: false,
@@ -1002,7 +1004,8 @@ const m = {
         }
     },
     setMaxEnergy() {
-        m.maxEnergy = (m.fieldMode === 0 || m.fieldMode === 1) * 0.4 * m.coupling + (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 0.6 * (m.fieldUpgrades[m.fieldMode].name === "standing wave")
+        // (m.fieldMode === 0 || m.fieldMode === 1) * 0.4 * m.coupling +
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 0.6 * (m.fieldUpgrades[m.fieldMode].name === "standing wave")
         // if (tech.isEnergyHealth) m.maxEnergy *= Math.sqrt(m.harmReduction())
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
@@ -1368,8 +1371,13 @@ const m = {
             m.energy -= fieldBlockCost
             if (m.energy < 0) m.energy = 0;
             m.fieldCDcycle = m.cycle + m.fieldBlockCD;
-            if (tech.blockingIce && !who.isInvulnerable) {
-                for (let i = 0; i < fieldBlockCost * 60 * tech.blockingIce; i++) b.iceIX(3, 2 * Math.PI * Math.random(), m.pos)
+            if (!who.isInvulnerable && (m.coupling && m.fieldMode < 3) && bullet.length < 250) { //for standing wave mostly
+                for (let i = 0; i < m.coupling; i++) {
+                    const sub = Vector.mult(Vector.normalise(Vector.sub(who.position, m.pos)), (m.fieldRange * m.harmonicRadius) * (0.4 + 0.3 * Math.random())) //m.harmonicRadius should be 1 unless you are standing wave expansion
+                    const rad = Vector.rotate(sub, 1 * (Math.random() - 0.5))
+                    const angle = Math.atan2(sub.y, sub.x)
+                    b.iceIX(6 + 6 * Math.random(), angle + 3 * (Math.random() - 0.5), Vector.add(m.pos, rad))
+                }
             }
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
@@ -1543,54 +1551,22 @@ const m = {
         }
     },
     hold() {},
-    // couplingDescription() {
-    //     switch (m.fieldMode) {
-    //         case 0: //field emitter
-    //             return `gain the effects of <strong>all</strong> other <strong class='color-f'>fields</strong>`
-    //         case 1: //standing wave
-    //             return `<strong>+40</strong> max <strong class='color-f'>energy</strong> per <strong class='color-coupling'>coupling</strong>`
-    //         case 2: //perfect diamagnetism
-    //             return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+3</strong> seconds post collision per <strong class='color-coupling'>coupling</strong></span>`
-    //         case 3: //negative mass
-    //             return `<strong>+27%</strong> <strong class='color-defense'>defense</strong> per <strong class='color-coupling'>coupling</strong>`
-    //         case 4: //assembler
-    //             return `generate <strong>6</strong> <strong class='color-f'>energy</strong> per second per <strong class='color-coupling'>coupling</strong>`
-    //         case 5: //plasma
-    //             return `<strong>+50</strong> max <strong class='color-h'>health</strong> per <strong class='color-coupling'>coupling</strong>`
-    //         case 6: //time dilation
-    //             return `<strong>+25%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong> per <strong class='color-coupling'>coupling</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
-    //         case 7: //cloaking
-    //             return `<strong>+33%</strong> ambush <strong class='color-d'>damage</strong> per <strong class='color-coupling'>coupling</strong>`
-    //         case 8: //pilot wave
-    //             return `<strong>+40%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong> per <strong class='color-coupling'>coupling</strong>`
-    //         case 9: //wormhole
-    //             return `<strong>+4%</strong> <strong class='color-dup'>duplication</strong> per <strong class='color-coupling'>coupling</strong>`
-    //     }
-    // },
     couplingDescription(isScaled = false) {
         const couple = isScaled ? m.coupling : 1
         switch (m.fieldMode) {
             case 0: //field emitter
-                return `gain the effects of <strong>all</strong> applicable <strong class='color-f'>fields</strong>`
-                // return `<strong>+${40*couple}</strong> max <strong class='color-f'>energy</strong>
-                // <br><span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${3*couple}</strong> seconds post collision</span>
-                // <br><strong>+${27*couple}%</strong> <strong class='color-defense'>defense</strong>
-                // <br>generate <strong>${6*couple}</strong> <strong class='color-f'>energy</strong> per second
-                // <br><strong>+${50*couple}</strong> max <strong class='color-h'>health</strong>
-                // <br><strong>+${20*couple}%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>
-                // <br><strong>+${33*couple}%</strong> ambush <strong class='color-d'>damage</strong>
-                // <br><strong>+${40*couple}%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>
-                // <br><strong>+${4*couple}%</strong> <strong class='color-dup'>duplication</strong>`
+                return `gain the effects of <strong>all</strong> <strong class='color-f'>fields</strong>`
             case 1: //standing wave
-                return `<strong>+${40*couple}</strong> max <strong class='color-f'>energy</strong>`
+                return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${Math.ceil(couple)} <strong class='color-s'>ice IX</strong></span>`
             case 2: //perfect diamagnetism
-                return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${3*couple}</strong> seconds post collision</span>`
+                return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${Math.ceil(couple)} <strong class='color-s'>ice IX</strong></span>`
+                // return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${2*couple}</strong> seconds post collision</span>`
             case 3: //negative mass
                 return `<strong>+${27*couple}%</strong> <strong class='color-defense'>defense</strong>`
             case 4: //assembler
                 return `generate <strong>${6*couple}</strong> <strong class='color-f'>energy</strong> per second`
             case 5: //plasma
-                return `<strong>+${50*couple}</strong> max <strong class='color-h'>health</strong>`
+                return `<strong>+${15*couple}</strong> <strong class='color-d'>damage</strong>`
             case 6: //time dilation
                 return `<strong>+${25*couple}%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
             case 7: //cloaking
@@ -1598,16 +1574,17 @@ const m = {
             case 8: //pilot wave
                 return `<strong>+${40*couple}%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>`
             case 9: //wormhole
-                return `<strong>+${4*couple}%</strong> <strong class='color-dup'>duplication</strong>`
+                return `<span style = 'font-size:89%;'>after eating <strong class='color-block'>blocks</strong> <strong>+${20*couple}</strong> <strong class='color-f'>energy</strong></span>`
         }
     },
     couplingChange() {
-        m.setMaxEnergy();
-        m.setMaxHealth();
+        // m.setMaxEnergy();
+        // m.setMaxHealth();
         m.setFieldRegen()
         mobs.setMobSpawnHealth();
+        if ((m.fieldMode === 0 || m.fieldMode === 9) && !build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.4);
         powerUps.setDupChance();
-        m.collisionImmuneCycles = 30 + m.coupling * 180
+        // m.collisionImmuneCycles = 30 + m.coupling * 120 //2 seconds
         // switch (m.fieldMode) {
         //     case 0: //field emitter
         //         // m.fieldFireRate = 0.8 ** (m.coupling)
@@ -1654,9 +1631,9 @@ const m = {
     },
     fieldUpgrades: [{
             name: "field emitter",
-            //<br><strong class='color-f'>energy</strong> regen disabled if immune to <strong class='color-defense'>harm</strong>
-            description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>100</strong> max <strong class='color-f'>energy</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
-            // description: "use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs,<br><strong>grab</strong> power ups, and <strong>throw</strong> <strong class='color-block'>blocks</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong>/s, when not immune to <strong class='color-defense'>harm</strong>",
+            description: `use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs
+            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
+            <br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
             effect: () => {
                 m.hold = function() {
                     if (m.isHolding) {
@@ -1683,7 +1660,9 @@ const m = {
         {
             name: "standing wave",
             //<strong>deflecting</strong> protects you in every <strong>direction</strong>
-            description: "<strong>3</strong> oscillating <strong>shields</strong> are permanently active<br><strong>+60</strong> max <strong class='color-f'>energy</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //drains <strong class='color-f'>energy</strong>  //<strong>deflecting</strong> has <strong>50%</strong> less <strong>recoil</strong>
+            description: `<strong>3</strong> oscillating <strong>shields</strong> are permanently active
+            <br><strong>+60</strong> max <strong class='color-f'>energy</strong>
+            <br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
             drainCD: 0,
             effect: () => {
                 m.fieldBlockCD = 0;
@@ -1811,10 +1790,11 @@ const m = {
                                 mob[i].locatePlayer();
                                 const unit = Vector.normalise(Vector.sub(m.fieldPosition, mob[i].position))
                                 m.fieldCDcycle = m.cycle + m.fieldBlockCD + (mob[i].isShielded ? 15 : 0);
-                                if (tech.blockingIce) {
-                                    for (let i = 0; i < 2 * tech.blockingIce; i++) {
-                                        const angle = m.fieldAngle + 1.55 * (Math.random() - 0.5)
-                                        b.iceIX(10, angle, Vector.add(m.fieldPosition, { x: m.fieldRange * Math.cos(angle), y: m.fieldRange * Math.sin(angle) }))
+                                if (bullet.length < 250) {
+                                    for (let i = 0; i < m.coupling; i++) {
+                                        const angle = m.fieldAngle + 4 * m.fieldArc * (Math.random() - 0.5)
+                                        const radius = m.fieldRange * (0.6 + 0.3 * Math.random())
+                                        b.iceIX(6 + 6 * Math.random(), angle, Vector.add(m.fieldPosition, { x: radius * Math.cos(angle), y: radius * Math.sin(angle) }))
                                     }
                                 }
                                 if (tech.blockDmg) { //electricity
@@ -3478,7 +3458,7 @@ const m = {
                                                 Matter.Composite.remove(engine.world, body[i]);
                                                 body.splice(i, 1);
                                                 m.fieldRange *= 0.8
-                                                if (tech.isWormholeEnergy) m.energy += 0.5
+                                                if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.2 * m.coupling
                                                 if (tech.isWormholeWorms) { //pandimensional spermia
                                                     b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                                     Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
@@ -3501,7 +3481,9 @@ const m = {
                                             body.splice(i, 1);
                                             m.fieldRange *= 0.8
                                             // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
-                                            if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.5
+                                            // if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.5
+                                            if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.2 * m.coupling
+                                            if (m.fieldMode === 0 || m.fieldMode === 9) m.energy += 0.2 * m.coupling
                                             if (tech.isWormholeWorms) { //pandimensional spermia
                                                 b.worm(Vector.add(m.hole.pos1, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                                 Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), 5));

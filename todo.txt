@@ -1,26 +1,32 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: crystallography - convert all your research into 0.25 coupling per research
-tech: residual dipolar coupling - cancelling field gun or tech gives +0.5 coupling
-tech: fine-structure constant - +6 coupling, eject this tech if you take damage
-coupling for cloaking field now gives +33% ambush damage
-  tech: ambush removed
-coupling for time dilation now gives +25% longer time dilation effect
-  about +2 seconds
-coupling tech isn't well balanced yet, so give me feedback
+coupling
+  crystallography renamed quintessence
+  wormhole -> energy after eating blocks
+    penrose process is removed
+  perfect diamagnatism and standing wave -> ice IX after blocking
+    tech triple point removed
+  plasma torch -> +damage
 
-non-unitary operator renamed to Hilbert space
+killing one of the first 3->4 snake body mobs makes snake bosses vulnerable
+shooterBoss shoots 3-6 smaller bullets
 
 bug fixes
 
 *********************************************************** TODO *****************************************************
 
+coupling
+  negative coupling?
+    
 coupling tech
-  names: strongly coupled, Vibronic coupling, Residual dipolar coupling, NMR coupling
-  tech: convert all research into "coupling"
+  names: strongly coupled, Vibronic coupling, Residual dipolar coupling, NMR coupling, quintessence
   tech: +x% field coupling, your field changes randomly every y seconds
   tech: coupling starts at 200%, but decays when the field is in use, coupling recharges when the field is not in use
     some fields aren't used much (that's ok?)
+
+triple point iceIX needs to spawn in the radius of the field and an arc in the same quadrant as the mob 
+
+tech give laser mines more lasers (3->4? 5?)
 
 buffing your deflecting for 1 second after pressing the field button sounds cool
   2 second cooldown on the effect to prevent spamming it
@@ -43,6 +49,9 @@ greatly increase walking speed
   not mid air control?
   for time dilation field
     make jumping normal
+
+junk tech: charged shot
+immediately fire all of your ammo
 
 after taking damage explode while invulnerable
   scale explosion radius with damage
@@ -903,6 +912,7 @@ possible names for tech
   NP-complete
   lenticular lens:  is an array of lenses, designed so that when viewed from slightly different angles, different parts of the image underneath are shown.
   p-zombie
+  p-hacking JUNK tech
 
 
 plot script:

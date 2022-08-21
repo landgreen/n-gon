@@ -595,7 +595,7 @@ const powerUps = {
                         }
                     }
                     if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
-                        tech.junkResearchNumber = Math.floor(5 * Math.random())
+                        tech.junkResearchNumber = Math.ceil(3 * Math.random())
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"> <span style="position:relative;">`
                         for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                         text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
@@ -734,7 +734,7 @@ const powerUps = {
                         }
                     }
                     if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
-                        tech.junkResearchNumber = Math.floor(5 * Math.random())
+                        tech.junkResearchNumber = Math.ceil(3 * Math.random())
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('field')"><div class="grid-title"> <span style="position:relative;">`
                         for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                         text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
@@ -987,7 +987,7 @@ const powerUps = {
                     }
                     //add in research button or pseudoscience button
                     if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
-                        tech.junkResearchNumber = Math.floor(5 * Math.random())
+                        tech.junkResearchNumber = Math.ceil(3 * Math.random())
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"> <span style="position:relative;">`
                         for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                         text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
