@@ -874,6 +874,7 @@ const m = {
         ctx.restore();
 
         m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+        powerUps.boost.draw()
     },
     drawDefault() {
         ctx.fillStyle = m.fillColor;
@@ -896,6 +897,7 @@ const m = {
         ctx.stroke();
         ctx.restore();
         m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+        powerUps.boost.draw()
     },
     // *********************************************
     // **************** fields *********************
@@ -1373,11 +1375,23 @@ const m = {
             m.fieldCDcycle = m.cycle + m.fieldBlockCD;
             if (!who.isInvulnerable && (m.coupling && m.fieldMode < 3) && bullet.length < 250) { //for standing wave mostly
                 for (let i = 0; i < m.coupling; i++) {
-                    const sub = Vector.mult(Vector.normalise(Vector.sub(who.position, m.pos)), (m.fieldRange * m.harmonicRadius) * (0.4 + 0.3 * Math.random())) //m.harmonicRadius should be 1 unless you are standing wave expansion
-                    const rad = Vector.rotate(sub, 1 * (Math.random() - 0.5))
-                    const angle = Math.atan2(sub.y, sub.x)
-                    b.iceIX(6 + 6 * Math.random(), angle + 3 * (Math.random() - 0.5), Vector.add(m.pos, rad))
+                    if (m.coupling - i > Math.random()) {
+                        const sub = Vector.mult(Vector.normalise(Vector.sub(who.position, m.pos)), (m.fieldRange * m.harmonicRadius) * (0.4 + 0.3 * Math.random())) //m.harmonicRadius should be 1 unless you are standing wave expansion
+                        const rad = Vector.rotate(sub, 1 * (Math.random() - 0.5))
+                        const angle = Math.atan2(sub.y, sub.x)
+                        b.iceIX(6 + 6 * Math.random(), angle + 3 * (Math.random() - 0.5), Vector.add(m.pos, rad))
+                    }
                 }
+
+                // let count = 0
+                // for(let j=0; j<100;j++){
+                //     const len = m.coupling + 0.5 * (Math.random() - 0.5)
+                //     for (let i = 0; i < len; i++) {
+                //         count++
+                //     }
+                // }
+                // console.log(count)
+
             }
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
@@ -1562,7 +1576,7 @@ const m = {
                 return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${Math.ceil(couple)} <strong class='color-s'>ice IX</strong></span>`
                 // return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${2*couple}</strong> seconds post collision</span>`
             case 3: //negative mass
-                return `<strong>+${27*couple}%</strong> <strong class='color-defense'>defense</strong>`
+                return `<strong>+${((1-0.73 ** couple)*100).toFixed(1)}%</strong> <strong class='color-defense'>defense</strong>`
             case 4: //assembler
                 return `generate <strong>${6*couple}</strong> <strong class='color-f'>energy</strong> per second`
             case 5: //plasma
@@ -1582,8 +1596,8 @@ const m = {
         // m.setMaxHealth();
         m.setFieldRegen()
         mobs.setMobSpawnHealth();
-        if ((m.fieldMode === 0 || m.fieldMode === 9) && !build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.4);
         powerUps.setDupChance();
+        if ((m.fieldMode === 0 || m.fieldMode === 9) && !build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.4);
         // m.collisionImmuneCycles = 30 + m.coupling * 120 //2 seconds
         // switch (m.fieldMode) {
         //     case 0: //field emitter
@@ -1757,7 +1771,7 @@ const m = {
                                 m.harmonicRadius = 0.994 * m.harmonicRadius + 0.006
                             }
                         }
-                        m.harmonicShield()
+                        if (!simulation.isTimeSkipping) m.harmonicShield()
                     }
                     m.drawRegenEnergy()
                 }
@@ -1790,11 +1804,13 @@ const m = {
                                 mob[i].locatePlayer();
                                 const unit = Vector.normalise(Vector.sub(m.fieldPosition, mob[i].position))
                                 m.fieldCDcycle = m.cycle + m.fieldBlockCD + (mob[i].isShielded ? 15 : 0);
-                                if (bullet.length < 250) {
+                                if (!mob[i].isInvulnerable && bullet.length < 250) {
                                     for (let i = 0; i < m.coupling; i++) {
-                                        const angle = m.fieldAngle + 4 * m.fieldArc * (Math.random() - 0.5)
-                                        const radius = m.fieldRange * (0.6 + 0.3 * Math.random())
-                                        b.iceIX(6 + 6 * Math.random(), angle, Vector.add(m.fieldPosition, { x: radius * Math.cos(angle), y: radius * Math.sin(angle) }))
+                                        if (m.coupling - i > Math.random()) {
+                                            const angle = m.fieldAngle + 4 * m.fieldArc * (Math.random() - 0.5)
+                                            const radius = m.fieldRange * (0.6 + 0.3 * Math.random())
+                                            b.iceIX(6 + 6 * Math.random(), angle, Vector.add(m.fieldPosition, { x: radius * Math.cos(angle), y: radius * Math.sin(angle) }))
+                                        }
                                     }
                                 }
                                 if (tech.blockDmg) { //electricity

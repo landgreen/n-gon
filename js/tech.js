@@ -209,6 +209,7 @@ const tech = {
     damage: 1, //used for tech changes to player damage that don't have complex conditions
     damageFromTech() {
         let dmg = tech.damage //m.fieldDamage
+        if (powerUps.boost.endCycle > m.cycle) dmg *= 1 + powerUps.boost.damage
         if (m.coupling && (m.fieldMode === 0 || m.fieldMode === 5)) dmg *= 1 + 0.15 * m.coupling
         if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= 4.33 * (1 + 0.33 * m.coupling)
         if (tech.deathSkipTime) dmg *= 1 + 0.6 * tech.deathSkipTime
@@ -526,7 +527,7 @@ const tech = {
             allowed() {
                 return !tech.isEnergyNoAmmo
             },
-            requires: "not exciton",
+            requires: "not non-renewables",
             effect() {
                 tech.isAmmoForGun = true;
             },
@@ -548,7 +549,7 @@ const tech = {
             allowed() {
                 return !tech.isEnergyNoAmmo
             },
-            requires: "not exciton",
+            requires: "not non-renewables",
             effect() {
                 tech.ammoCap = 16;
                 powerUps.ammo.effect()
@@ -567,7 +568,7 @@ const tech = {
             allowed() {
                 return !tech.isEnergyNoAmmo
             },
-            requires: "not exciton",
+            requires: "not non-renewables",
             effect() {
                 tech.isAmmoFromHealth = true;
             },
@@ -576,7 +577,7 @@ const tech = {
             }
         },
         {
-            name: "exciton",
+            name: "non-renewables",
             description: `<strong>+88%</strong> <strong class='color-d'>damage</strong><br>${powerUps.orb.ammo()} can't <strong>spawn</strong>`,
             maxCount: 1,
             count: 0,
@@ -1738,26 +1739,26 @@ const tech = {
                 tech.isBlockPowerUps = false
             }
         },
-        // {
-        //     name: "Pauli exclusion",
-        //     description: `after mob collisions<br>become <strong>invulnerable</strong> for <strong>+3</strong> seconds`,
-        //     maxCount: 9,
-        //     count: 0,
-        //     frequency: 1,
-        //     frequencyDefault: 1,
-        //     allowed() { return true },
-        //     requires: "",
-        //     effect() {
-        //         m.collisionImmuneCycles += 180;
-        //         if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
-        //     },
-        //     remove() {
-        //         m.collisionImmuneCycles = 30;
-        //     }
-        // },
+        {
+            name: "Pauli exclusion",
+            description: `after mob collisions<br>become <strong>invulnerable</strong> for <strong>+3</strong> seconds`,
+            maxCount: 9,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() { return true },
+            requires: "",
+            effect() {
+                m.collisionImmuneCycles += 180;
+                if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
+            },
+            remove() {
+                m.collisionImmuneCycles = 30;
+            }
+        },
         {
             name: "spin–statistics theorem",
-            description: `every <strong>7</strong> seconds<br>become <strong>invulnerable</strong> for <strong>+1.75</strong> seconds`,
+            description: `every <strong>7</strong> seconds<br>become <strong>invulnerable</strong> for <strong>+1.8</strong> seconds`,
             maxCount: 3,
             count: 0,
             frequency: 1,
@@ -1767,7 +1768,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                tech.cyclicImmunity += 105;
+                tech.cyclicImmunity += 108;
             },
             remove() {
                 tech.cyclicImmunity = 0;
@@ -2226,7 +2227,7 @@ const tech = {
             name: "1st ionization energy",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ionization_energy' class="link">1st ionization energy</a>`,
             description: `after you collect ${powerUps.orb.heal()}<br><strong>+10</strong> maximum <strong class='color-f'>energy</strong>`,
-            description: `convert ${powerUps.orb.heal()} into <div class="heal-circle" style = "background-color: #0ae;"></div><br><div class="heal-circle" style = "background-color: #0ae;"></div> give <strong>+10</strong> maximum <strong class='color-f'>energy</strong>`,
+            description: `convert ${powerUps.orb.heal()} into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+10</strong> maximum <strong class='color-f'>energy</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 2,
@@ -2237,7 +2238,7 @@ const tech = {
             requires: "mass-energy equivalence",
             effect() {
                 tech.healGiveMaxEnergy = true; //tech.healMaxEnergyBonus given from heal power up
-                powerUps.heal.color = "#0ae"
+                powerUps.heal.color = "#ff0" //"#0ae"
                 for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
                     if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
                 }
@@ -3294,6 +3295,26 @@ const tech = {
             }
         },
         {
+            name: "exciton",
+            descriptionFunction() {
+                return `<span style = 'font-size:94%;'>after mobs <strong>die</strong> they have a <strong>17%</strong> chance to<br>spawn ${powerUps.orb.boost(1)} that give <strong>+${powerUps.boost.damage*100}%</strong> <strong class='color-d'>damage</strong> for <strong>${(powerUps.boost.duration/60).toFixed(0)}</strong> seconds</span>`
+            },
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                tech.isBoostPowerUps = true
+            },
+            remove() {
+                tech.isBoostPowerUps = false
+            }
+        },
+        {
             name: "eternalism",
             description: "<strong>+34%</strong> <strong class='color-d'>damage</strong><br><strong>time</strong> can't be <strong>paused</strong> <em>(time can be dilated)</em>",
             maxCount: 1,
@@ -3316,7 +3337,7 @@ const tech = {
         },
         {
             name: "paradigm shift",
-            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>16%</strong> chance to fail`,
+            description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>16%</strong> chance to remove without <strong>ejecting</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3372,7 +3393,8 @@ const tech = {
             },
             requires: "",
             effect() {
-                m.coupling++
+                simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> 1`);
+                m.coupling += 1
                 m.couplingChange()
             },
             remove() {
@@ -3383,12 +3405,12 @@ const tech = {
         {
             name: "quintessence",
             descriptionFunction() {
-                return `use all your ${powerUps.orb.research(1)} to get <strong>+${powerUps.research.count*this.couplingToResearch}</strong> <strong class='color-coupling'>coupling</strong><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
+                return `use all your ${powerUps.orb.research(1)} to get <strong>+${this.count ? this.researchUsed*this.couplingToResearch:powerUps.research.count*this.couplingToResearch}</strong> <strong class='color-coupling'>coupling</strong><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
             },
             maxCount: 1,
             count: 0,
             frequency: 1,
-            frequencyDefault: 1,
+            frequencyDefault: 100,
             allowed() {
                 return powerUps.research.count > 3
             },
@@ -3399,6 +3421,7 @@ const tech = {
                 while (powerUps.research.count > 0) {
                     powerUps.research.changeRerolls(-1)
                     this.researchUsed++
+                    simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> ${(this.couplingToResearch).toFixed(2)}`);
                     m.coupling += this.couplingToResearch
                 }
                 m.couplingChange()
@@ -3410,6 +3433,26 @@ const tech = {
                     this.researchUsed = 0
                 }
                 m.couplingChange()
+            }
+        },
+        {
+            name: "virtual particles",
+            descriptionFunction() {
+                return `after mobs <strong>die</strong> they have a <strong>17%</strong> chance to<br>spawn ${powerUps.orb.coupling(1)} that give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong>`
+            },
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return true
+            },
+            requires: "",
+            effect() {
+                tech.isCouplingPowerUps = true //about 20-30 mobs per level so at 16% and 0.1 coupling that's about 25 * 0.16 * 0.1 = 0.4 coupling per level with out duplication
+            },
+            remove() {
+                tech.isCouplingPowerUps = false
             }
         },
         {
@@ -3428,6 +3471,7 @@ const tech = {
             requires: "",
             effect() {
                 tech.isCouplingNoHit = true
+                simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> ${(this.value).toFixed(1)}`);
                 m.coupling += this.value
                 m.couplingChange()
             },
@@ -3462,7 +3506,7 @@ const tech = {
         {
             name: "options exchange",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Option_(finance)' class="link">options exchange</a>`,
-            description: `clicking <strong style = 'font-size:150%;'>×</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong> has a <strong>94%</strong><br>chance to randomize <strong>choices</strong> and not <strong>cancel</strong>`,
+            description: `clicking <strong style = 'font-size:150%;'>×</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong> has a <strong>90%</strong><br>chance to randomize <strong>choices</strong> and not <strong>cancel</strong>`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -5849,7 +5893,7 @@ const tech = {
             allowed() {
                 return tech.haveGunCheck("foam") && !tech.isEnergyNoAmmo
             },
-            requires: "foam, not exciton",
+            requires: "foam, not non-renewables",
             ammoLost: 0,
             effect() {
                 b.guns[8].ammoPack = b.guns[8].ammoPack * 12;
@@ -6195,6 +6239,27 @@ const tech = {
             },
             remove() {
                 tech.isStuckOn = false
+            }
+        },
+        {
+            name: "quasiparticles",
+            descriptionFunction() {
+                return `replace all ${powerUps.orb.ammo(1)} spawns with ${powerUps.orb.boost(1)} which give<br><strong>+${powerUps.boost.damage*100}%</strong> <strong class='color-d'>damage</strong> for <strong>${(powerUps.boost.duration/60).toFixed(0)}</strong> seconds`
+            },
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("laser")
+            },
+            requires: "laser, not pulse",
+            effect() {
+                tech.isBoostReplaceAmmo = true
+            },
+            remove() {
+                tech.isBoostReplaceAmmo = false
             }
         },
         {
@@ -7325,7 +7390,7 @@ const tech = {
         },
         {
             name: "time crystals",
-            description: "<strong>+300%</strong> passive <strong class='color-f'>energy</strong> generation",
+            description: "<strong>+200%</strong> passive <strong class='color-f'>energy</strong> generation",
             isFieldTech: true,
             maxCount: 1,
             count: 0,
@@ -7567,7 +7632,7 @@ const tech = {
             }
         },
         {
-            name: "virtual particles",
+            name: "vacuum fluctuation",
             description: `use ${powerUps.orb.research(6)}to exploit your <strong class='color-f'>field</strong> for a<br><strong>+11%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
             isFieldTech: true,
             maxCount: 1,
@@ -10625,5 +10690,8 @@ const tech = {
     isLastHitDamage: null,
     isCloakHealLastHit: null,
     isRicochet: null,
-    isCancelCouple: null
+    isCancelCouple: null,
+    isCouplingPowerUps: null,
+    isBoostPowerUps: null,
+    isBoostReplaceAmmo: null
 }

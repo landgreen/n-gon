@@ -1,30 +1,33 @@
 ******************************************************** NEXT PATCH **************************************************
 
-coupling
-  crystallography renamed quintessence
-  wormhole -> energy after eating blocks
-    penrose process is removed
-  perfect diamagnatism and standing wave -> ice IX after blocking
-    tech triple point removed
-  plasma torch -> +damage
+tech: virtual particles - mobs have a chance to spawn coupling power ups
+  old tech virtual particles renamed vacuum fluctuation
 
-killing one of the first 3->4 snake body mobs makes snake bosses vulnerable
-shooterBoss shoots 3-6 smaller bullets
+tech: exciton - mobs have a chance to spawn a boost
+  boosts are a power up that increases your damage for 10 seconds
+  old tech exciton renamed non-renewables
+laser tech: quasiparticles - replace all ammo with boosts
 
+added +20px to grid elements to prevent text spillover
 bug fixes
+
 
 *********************************************************** TODO *****************************************************
 
 coupling
+  pause menu +defense on coupling description goes above 100%
+  put coupling description as 4th line on field description
+    raw text no function call
+    no need for coupling description in power ups, pause
   negative coupling?
-    
+    wouldn't work for iceIX
 coupling tech
-  names: strongly coupled, Vibronic coupling, Residual dipolar coupling, NMR coupling, quintessence
+  names: strongly coupled, Vibronic coupling, NMR coupling
   tech: +x% field coupling, your field changes randomly every y seconds
   tech: coupling starts at 200%, but decays when the field is in use, coupling recharges when the field is not in use
     some fields aren't used much (that's ok?)
 
-triple point iceIX needs to spawn in the radius of the field and an arc in the same quadrant as the mob 
+tech: increase the effect of boosts, but shorten the duration?
 
 tech give laser mines more lasers (3->4? 5?)
 
@@ -40,8 +43,6 @@ make orbitals increase orbital rotation speed after Orbital boss takes damage
 
 worms can target player, buff their damage
   can't target player in first few seconds?
-
-draw player transparent or opaque when cloaking field is on
 
 plasma field tech - similar to regression, but for plasma ticks
 
@@ -87,7 +88,6 @@ tech expansion:  field coupling also expands each fields in different ways
 
 tech: missiles explode a 2nd time after 1/2 a second (with a slightly different position determined by original velocity)
 
-1st ionisation energy should scale with heath powerup efficiency
 The tech that makes blocks that fall into a wormhole give energy should scale with block size, with the same formula as tokomak
 
 junk suggestion: useless machine - ejects itself and removes itself from the item pool

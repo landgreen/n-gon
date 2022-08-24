@@ -193,7 +193,7 @@ summary {
     border-radius: 8px;
     z-index: 12;
     background-color: #444;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     grid-auto-rows: minmax(auto, auto);
     font-size: 1.3em;
     /* box-shadow: 0px 0px 40px 20px rgba(255, 255, 255, 0.25); */
@@ -236,7 +236,7 @@ summary {
     margin: 0px;
 
     display: none;
-    grid-template-columns: 325px;
+    grid-template-columns: 345px;
     /* grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); */
     grid-auto-rows: minmax(auto, auto);
     grid-gap: 0px;
@@ -278,7 +278,7 @@ summary {
     background-color: var(--build-bg-color);
 
     display: none;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     grid-auto-flow: row;
     grid-auto-rows: minmax(auto, auto);
     grid-gap: 0px;
@@ -800,7 +800,7 @@ summary {
     background-color: #467;
     border: 0.5px #fff solid;
     opacity: 0.95;
-    margin-bottom: -2px;
+    margin-bottom: -1.5px;
 }
 
 .heal-circle {
@@ -812,6 +812,26 @@ summary {
     border: 0.5px #fff solid;
     opacity: 0.85;
     margin-bottom: -3px;
+}
+
+.coupling-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: #0ae;
+    border: 0.5px #fff solid;
+    margin-bottom: -0.5px;
+}
+.boost-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: #f03;
+    border: 0.5px #fff solid;
+    opacity: 0.9;
+    margin-bottom: -0.5px;
 }
 
 .circle-grid-shadow {
@@ -929,6 +949,7 @@ summary {
     /* animation: vibrate 500ms linear infinite alternate;
     display: inline-block; */
     /* text-shadow: 0px 0px 2px #0cf; */
+    /* text-shadow: 0px 0px 1.5px #0cf;  */
     text-shadow: 0px 0px 1.5px #0cf; 
     /* color: hsl(255, 82%, 59%); */
     letter-spacing: 1px;

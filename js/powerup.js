@@ -114,7 +114,37 @@ const powerUps = {
         },
         tech(num = 1) {
             return `<div class="tech-circle"></div>`
-        }
+        },
+        coupling(num = 1) {
+            switch (num) {
+                case 1:
+                    return `<div class="coupling-circle"></div>`
+            }
+            let text = '<span style="position:relative;">'
+            for (let i = 0; i < num; i++) {
+                text += `<div class="coupling-circle" style="position:absolute; top:1.5px; left:${i*8}px;"></div>`
+            }
+            text += '</span> &nbsp; &nbsp; '
+            for (let i = 0; i < num; i++) {
+                text += '&nbsp; '
+            }
+            return text
+        },
+        boost(num = 1) {
+            switch (num) {
+                case 1:
+                    return `<div class="boost-circle"></div>`
+            }
+            let text = '<span style="position:relative;">'
+            for (let i = 0; i < num; i++) {
+                text += `<div class="boost-circle" style="position:absolute; top:1.5px; left:${i*8}px;"></div>`
+            }
+            text += '</span> &nbsp; &nbsp; '
+            for (let i = 0; i < num; i++) {
+                text += '&nbsp; '
+            }
+            return text
+        },
     },
     totalPowerUps: 0, //used for tech that count power ups at the end of a level
     do() {},
@@ -303,7 +333,7 @@ const powerUps = {
     },
     endDraft(type, isCanceled = false) { //type should be a gun, tech, or field
         if (isCanceled) {
-            if (tech.isCancelTech && Math.random() < 0.94) {
+            if (tech.isCancelTech && Math.random() < 0.9) {
                 // powerUps.research.use('tech')
                 powerUps[type].effect();
                 return
@@ -326,6 +356,7 @@ const powerUps = {
                 }
             }
             if (tech.isCancelCouple) {
+                simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> 0.5`);
                 m.coupling += 0.5
                 m.couplingChange()
             }
@@ -363,6 +394,42 @@ const powerUps = {
         build.unPauseGrid()
         if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 30 cycles
         if (m.holdingTarget) m.drop();
+    },
+    coupling: {
+        name: "coupling",
+        color: "#0ae", //"#0cf",
+        size() {
+            return 13;
+        },
+        effect() {
+            simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> 0.1`);
+            m.coupling += 0.1
+            m.couplingChange()
+        },
+    },
+    boost: {
+        name: "boost",
+        color: "#f55", //"#0cf",
+        size() {
+            return 11;
+        },
+        endCycle: 0,
+        duration: 600,
+        damage: 1.5,
+        effect() {
+            powerUps.boost.endCycle = m.cycle + Math.floor(Math.max(0, powerUps.boost.endCycle - m.cycle) * 0.6) + powerUps.boost.duration //duration+seconds plus 2/3 of current time left
+        },
+        draw() {
+            // console.log(this.endCycle)
+            if (powerUps.boost.endCycle > m.cycle) {
+                ctx.strokeStyle = "rgba(255,0,0,0.8)" //m.fieldMeterColor; //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
+                ctx.beginPath();
+                const arc = (powerUps.boost.endCycle - m.cycle) / powerUps.boost.duration
+                ctx.arc(m.pos.x, m.pos.y, 28, m.angle - Math.PI * arc, m.angle + Math.PI * arc); //- Math.PI / 2
+                ctx.lineWidth = 4
+                ctx.stroke();
+            }
+        }
     },
     research: {
         count: 0,
@@ -1203,6 +1270,12 @@ const powerUps = {
             powerUps.spawn(x, y, "field");
             return;
         }
+        if (tech.isCouplingPowerUps && Math.random() < 0.17) {
+            powerUps.spawn(x, y, "coupling");
+        }
+        if (tech.isBoostPowerUps && Math.random() < 0.17) {
+            powerUps.spawn(x, y, "boost");
+        }
         // if (Math.random() < 0.01) {
         //   powerUps.spawn(x, y, "research");
         //   return;
@@ -1389,6 +1462,7 @@ const powerUps = {
             !(tech.isEnergyNoAmmo && target === 'ammo') &&
             (!simulation.isNoPowerUps)
         ) {
+            if (tech.isBoostReplaceAmmo && target === 'ammo') target = 'boost'
             powerUps.directSpawn(x, y, target, moving, mode, size)
             if (Math.random() < tech.duplicationChance()) {
                 powerUps.directSpawn(x, y, target, moving, mode, size)
