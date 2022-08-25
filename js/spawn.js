@@ -3345,7 +3345,7 @@ const spawn = {
             this.checkStatus();
         };
     },
-    pulsarBoss(x, y, radius = 90, isNonCollide = false) {
+    pulsarBoss(x, y, radius = 90, isNonCollide = false, spawnOrbitals = true) {
         mobs.spawn(x, y, 3, radius, "#a0f");
         let me = mob[mob.length - 1];
         if (isNonCollide) me.collisionFilter.mask = cat.bullet | cat.player
@@ -3377,7 +3377,8 @@ const spawn = {
         me.isBoss = true;
 
         spawn.shield(me, x, y, 1);
-        spawn.spawnOrbitals(me, radius + 200 + 300 * Math.random(), 1)
+        if (spawnOrbitals)
+            spawn.spawnOrbitals(me, radius + 200 + 300 * Math.random(), 1)
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
