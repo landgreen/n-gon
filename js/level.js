@@ -7864,23 +7864,23 @@ const level = {
 
         //Boss Spawning
         if (simulation.difficulty > 10) {
-            spawn.pulsarBoss(3600, -400);
+            spawn.pulsarBoss(3600, -400, false, false);
             powerUps.chooseRandomPowerUp(4006, 400);
             powerUps.chooseRandomPowerUp(4407, 400);
             powerUps.spawnStartingPowerUps(4400, 400);
             if (simulation.difficulty > 30) {
                 powerUps.chooseRandomPowerUp(4002, 400);
                 powerUps.chooseRandomPowerUp(4004, 400);
-                spawn.pulsarBoss(4200, 1000);
+                spawn.pulsarBoss(4200, 1000, false, false);
                 if (simulation.difficulty > 60) {
                     powerUps.chooseRandomPowerUp(4409, 400);
-                    spawn.pulsarBoss(5800, -1200);
+                    spawn.pulsarBoss(5800, -1200, false, false);
                     if (simulation.difficulty > 80) {
-                        spawn.pulsarBoss(-400, -200);
+                        spawn.pulsarBoss(-400, -200, false, false);
                         if (simulation.difficulty > 100) {
-                            spawn.pulsarBoss(3600, -400);
+                            spawn.pulsarBoss(3600, -400, false, false);
                             if (simulation.difficulty > 120) {
-                                spawn.pulsarBoss(-400, -200);
+                                spawn.pulsarBoss(-400, -200, false, false);
                             }
                         }
                     }
