@@ -5,8 +5,8 @@ const spawn = {
     randomBossList: [
         "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
         "powerUpBoss", "powerUpBossBaby", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss",
-        "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss", "shieldingBoss", "timeSkipBoss",
-        "dragonFlyBoss", "beetleBoss"
+        "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss", "shieldingBoss",
+        "timeSkipBoss", "dragonFlyBoss", "beetleBoss"
     ],
     bossTypeSpawnOrder: [], //preset list of boss names calculated at the start of a run by the randomSeed
     bossTypeSpawnIndex: 0, //increases as the boss type cycles
@@ -142,7 +142,7 @@ const spawn = {
             const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
             spawn[pick](x, y);
         }
-        if (tech.isMoreMobs || (tech.isDuplicateBoss && Math.random() < tech.duplicationChance())) {
+        if (tech.isDuplicateBoss && Math.random() < tech.duplicationChance()) {
             const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
             spawn[pick](x, y);
         }
@@ -158,7 +158,7 @@ const spawn = {
                 spawn[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
             }
         }
-        if (tech.isMoreMobs || (tech.isDuplicateBoss && Math.random() < tech.duplicationChance())) {
+        if (tech.isDuplicateBoss && Math.random() < tech.duplicationChance()) {
             for (let i = 0; i < num; ++i) {
                 const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                 spawn[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
@@ -296,7 +296,7 @@ const spawn = {
         me.showHealthBar = false;
         me.collisionFilter.category = 0;
         me.collisionFilter.mask = 0; //cat.player //| cat.body
-        me.chaseSpeed = 1 + 2 * Math.random()
+        me.chaseSpeed = 1.2 + 2 * Math.random()
 
         me.awake = function() {
             //chase player
@@ -4104,8 +4104,8 @@ const spawn = {
                 if (this.phaseCycle > -1) {
                     Matter.Body.rotate(this, 0.02)
                     for (let i = 0, len = this.vertices.length; i < len; i++) { //fire a bullet from each vertex
-                        spawn.sniperBullet(this.vertices[i].x, this.vertices[i].y, 6, 4);
-                        const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[i])), -17)
+                        spawn.sniperBullet(this.vertices[i].x, this.vertices[i].y, 5, 4);
+                        const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[i])), -15)
                         Matter.Body.setVelocity(mob[mob.length - 1], {
                             x: velocity.x,
                             y: velocity.y
@@ -5013,13 +5013,13 @@ const spawn = {
         }, 2000); //add in a delay in case the level gets flipped left right
 
         me.isBoss = true;
-        Matter.Body.setDensity(me, 0.01 + 0.0003 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.01 + 0.0004 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
         me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         me.isVerticesChange = true
         me.memory = 240;
-        me.fireFreq = 0.025;
+        me.fireFreq = 0.009 + 0.0004 * Math.min(40, simulation.difficulty); //bigger number means more shots per second
         me.noseLength = 0;
         me.fireAngle = 0;
         me.accelMag = 0.005 * simulation.accelScale;
@@ -5066,16 +5066,14 @@ const spawn = {
                     //fire
                     for (let i = 0, len = 2 + 0.07 * simulation.difficulty; i < len; i++) {
                         spawn.bullet(this.vertices[1].x, this.vertices[1].y, 7 + Math.ceil(this.radius / 25));
-                        const v = 15;
-                        Matter.Body.setVelocity(mob[mob.length - 1], {
-                            x: this.velocity.x + this.fireDir.x * v + 7 * Math.random(),
-                            y: this.velocity.y + this.fireDir.y * v + 7 * Math.random()
-                        });
+                        const spread = Vector.rotate({
+                            x: Math.sqrt(len) + 4,
+                            y: 0
+                        }, 2 * Math.PI * Math.random())
+                        const dir = Vector.add(Vector.mult(this.fireDir, 15), spread)
+                        Matter.Body.setVelocity(mob[mob.length - 1], dir);
                     }
                     this.noseLength = 0;
-                    // recoil
-                    this.force.x -= 0.005 * this.fireDir.x * this.mass;
-                    this.force.y -= 0.005 * this.fireDir.y * this.mass;
                 }
                 if (this.noseLength < 1.5) this.noseLength += this.fireFreq;
                 setNoseShape();
@@ -5421,6 +5419,163 @@ const spawn = {
             }
         };
     },
+    // blowSuckBoss(x, y, radius = 80) {
+    //     mobs.spawn(x, y, 10, radius, "transparent");
+    //     let me = mob[mob.length - 1];
+    //     me.isBoss = true;
+    //     Matter.Body.setDensity(me, 0.0022 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    //     me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+
+    //     me.fireFreq = Math.floor(60 * simulation.CDScale)
+    //     me.seePlayerFreq = 15
+    //     me.seeAtDistance2 = 300000;
+    //     me.accelMag = 0.0003 * simulation.accelScale;
+    //     if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
+    //     // Matter.Body.setDensity(me, 0.001); //normal is 0.001 //makes effective life much lower
+    //     me.stroke = "transparent"; //used for drawGhost
+    //     me.alpha = 1; //used in drawGhost
+    //     me.canTouchPlayer = false; //used in drawGhost
+    //     me.isBadTarget = true;
+    //     // me.leaveBody = false;
+    //     me.collisionFilter.mask = cat.bullet //| cat.body
+    //     me.showHealthBar = false;
+    //     me.memory = 480;
+    //     me.onDeath = function() {
+    //         powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+    //     };
+    //     me.onDamage = function() {};
+    //     me.suck = function() {
+    //         for (let i = 0; i < mob.length; i++) {
+    //             if (mob[i].isBlowSuckBullet) {
+    //                 const unit = Vector.normalise(Vector.sub(this.position, mob[i].position))
+    //                 const mag = Vector.mult(unit, 0.0008 * mob[i].mass)
+    //                 mob[i].force.x += mag.x
+    //                 mob[i].force.y += mag.y
+    //             }
+    //         }
+    //     }
+    //     me.do = function() {
+    //         //cap max speed
+    //         if (this.speed > 8) {
+    //             Matter.Body.setVelocity(this, {
+    //                 x: this.velocity.x * 0.8,
+    //                 y: this.velocity.y * 0.8
+    //             });
+    //         }
+    //         this.seePlayerCheckByDistance();
+    //         this.checkStatus();
+    //         this.attraction();
+    //         this.search();
+    //         //draw
+    //         if (this.distanceToPlayer2() < this.seeAtDistance2) {
+    //             if (this.alpha < 1) this.alpha += 0.005 * simulation.CDScale; //near player go solid
+    //         } else {
+    //             if (this.alpha > 0) this.alpha -= 0.05; ///away from player, hide
+    //         }
+    //         if (this.alpha > 0) {
+    //             if (this.alpha > 0.8 && this.seePlayer.recall) {
+    //                 this.healthBar();
+    //                 if (!this.canTouchPlayer) {
+    //                     this.canTouchPlayer = true;
+    //                     this.isBadTarget = false;
+    //                     this.collisionFilter.mask = cat.player | cat.bullet
+    //                 }
+    //             }
+    //             //draw body
+    //             ctx.beginPath();
+    //             const vertices = this.vertices;
+    //             ctx.moveTo(vertices[0].x, vertices[0].y);
+    //             for (let j = 1, len = vertices.length; j < len; ++j) {
+    //                 ctx.lineTo(vertices[j].x, vertices[j].y);
+    //             }
+    //             ctx.lineTo(vertices[0].x, vertices[0].y);
+    //             ctx.lineWidth = 1;
+    //             ctx.fillStyle = `rgba(255,255,255,${this.alpha * this.alpha})`;
+    //             ctx.fill();
+
+
+    //             this.suck();
+    //             if (this.seePlayer.recall && !(simulation.cycle % this.fireFreq)) {
+    //                 this.suckCount = 0;
+    //                 Matter.Body.setAngularVelocity(this, 0.11)
+    //                 //fire a bullet from each vertex
+    //                 for (let i = 0, len = this.vertices.length; i < len; i++) {
+    //                     spawn.bounceBullet(this.vertices[i].x, this.vertices[i].y, 8)
+    //                     //give the bullet a rotational velocity as if they were attached to a vertex
+    //                     const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -16)
+    //                     const who = mob[mob.length - 1]
+    //                     who.isBlowSuckBullet = true
+    //                     Matter.Body.setVelocity(who, {
+    //                         x: this.velocity.x + velocity.x,
+    //                         y: this.velocity.y + velocity.y
+    //                     });
+    //                 }
+    //             }
+
+
+    //         } else if (this.canTouchPlayer) {
+    //             this.canTouchPlayer = false;
+    //             this.isBadTarget = true;
+    //             this.collisionFilter.mask = cat.bullet; //can't touch player or walls
+    //         }
+    //     };
+    // },
+    // blowSuckBoss(x, y, radius = 80, isSpawnBossPowerUp = true) {
+    //     mobs.spawn(x, y, 10, radius, "transparent"); //rgb(60,60,85)
+    //     let me = mob[mob.length - 1];
+    //     me.isBoss = true;
+    //     Matter.Body.setDensity(me, 0.0022 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+    //     me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+
+    //     me.accelMag = 0.0001 * simulation.accelScale;
+    //     me.fireFreq = Math.floor(180 * simulation.CDScale)
+    //     me.frictionStatic = 0;
+    //     me.friction = 0;
+    //     me.frictionAir = 0.005;
+    //     me.memory = 420;
+    //     me.repulsionRange = 1000000; //squared
+    //     // spawn.shield(me, x, y, 1);
+    //     // spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
+
+    //     me.onDeath = function() {
+    //         if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+    //     };
+    //     me.onDamage = function() {};
+    //     me.suck = function() {
+    //         for (let i = 0; i < mob.length; i++) {
+    //             if (mob[i].isBlowSuckBullet) {
+    //                 const unit = Vector.normalise(Vector.sub(this.position, mob[i].position))
+    //                 const mag = Vector.mult(unit, 0.0008 * mob[i].mass)
+    //                 mob[i].force.x += mag.x
+    //                 mob[i].force.y += mag.y
+    //             }
+    //         }
+    //     }
+    //     me.do = function() {
+    //         this.seePlayerCheck();
+    //         this.checkStatus();
+    //         this.attraction();
+    //         // this.repulsion();
+    //         this.suck();
+
+    //         if (this.seePlayer.recall && !(simulation.cycle % this.fireFreq)) {
+    //             this.suckCount = 0;
+    //             Matter.Body.setAngularVelocity(this, 0.11)
+    //             //fire a bullet from each vertex
+    //             for (let i = 0, len = this.vertices.length; i < len; i++) {
+    //                 spawn.bounceBullet(this.vertices[i].x, this.vertices[i].y, 8)
+    //                 //give the bullet a rotational velocity as if they were attached to a vertex
+    //                 const velocity = Vector.mult(Vector.perp(Vector.normalise(Vector.sub(this.position, this.vertices[i]))), -16)
+    //                 const who = mob[mob.length - 1]
+    //                 who.isBlowSuckBullet = true
+    //                 Matter.Body.setVelocity(who, {
+    //                     x: this.velocity.x + velocity.x,
+    //                     y: this.velocity.y + velocity.y
+    //                 });
+    //             }
+    //         }
+    //     };
+    // },
     grenadierBoss(x, y, radius = 95) {
         mobs.spawn(x, y, 6, radius, "rgb(0,235,255)");
         let me = mob[mob.length - 1];
@@ -6192,7 +6347,7 @@ const spawn = {
         mobs.spawn(x, y, 8, radius, "rgba(0,180,180,0.4)");
         let me = mob[mob.length - 1];
         me.collisionFilter.mask = cat.bullet | cat.player //| cat.mob //| cat.body
-        me.damageReduction = 0.021
+        me.damageReduction = 0.024
         Matter.Body.setDensity(me, 0.0001); //normal is 0.001
 
         // me.accelMag = 0.0007 * simulation.accelScale;

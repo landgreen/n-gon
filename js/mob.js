@@ -899,7 +899,7 @@ const mobs = {
                 //accelerate towards the searchTarget
                 if (!this.seePlayer.recall) {
                     const newTarget = function(that) {
-                        if (Math.random() < 0.0005) {
+                        if (Math.random() < 0.0007) {
                             that.searchTarget = player.position; //chance to target player
                         } else {
                             //target random body
@@ -1244,18 +1244,6 @@ const mobs = {
                                 tech.extraMaxHealth -= amount //decrease max health
                                 m.setMaxHealth();
                             }
-                        }
-                    }
-                    if (tech.removeMaxHealthOnKill) {
-                        const amount = 0.002
-                        if (tech.isEnergyHealth) {
-                            if (m.maxEnergy > amount) {
-                                tech.healMaxEnergyBonus -= amount
-                                m.setMaxEnergy();
-                            }
-                        } else if (m.maxHealth > amount) {
-                            tech.extraMaxHealth -= amount //decrease max health
-                            m.setMaxHealth();
                         }
                     }
                     if (tech.cloakDuplication && !this.isBoss) {

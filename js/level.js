@@ -16,7 +16,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(3 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(10 * 4) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
@@ -24,9 +24,11 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.setField("metamaterial cloaking") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
-            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 1000000
-            // tech.giveTech("1st ionization energy")
+            // tech.giveTech("rivet gun")
+            // tech.isFoamShot = true
+            // tech.isIncendiary = true
             // for (let i = 0; i < 1; ++i) tech.giveTech("field coupling")
             // for (let i = 0; i < 1; ++i) tech.giveTech("free-electron laser")
             // m.damage(0.1);
@@ -36,10 +38,10 @@ const level = {
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
 
             // spawn.starter(1900, -500, 200)
-            // spawn.beetleBoss(1900, -400)
-            // spawn.shooter(1900, -500)
-            // for (let i = 0; i < 15; ++i) spawn.starter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
+            // spawn.ghoster(2538, -1950)
+            // for (let i = 0; i < 15; ++i) spawn.shooter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
             // level.testing();
+            // spawn.blowSuckBoss(1900, -500)
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
 
@@ -114,7 +116,6 @@ const level = {
             spawn.WIMP()
             for (let j = 0, len = 5; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         }
-        for (let i = 0; i < tech.wimpExperiment; i++) spawn.WIMP()
         // if (tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
         if ((tech.isRelay || tech.isFlipFlop) && !tech.isFlipFlopOn) {
             tech.isFlipFlopOn = true
@@ -2809,6 +2810,17 @@ const level = {
         spawn.mapRect(5300, -275, 50, 175);
         spawn.mapRect(5050, -100, 50, 150);
         spawn.mapRect(4850, -275, 50, 175);
+        spawn.mapRect(-950, -3250, 850, 1750);
+        //roof
+        spawn.mapRect(-175, -2975, 300, 1425);
+        spawn.mapRect(75, -2650, 325, 1150);
+        spawn.mapRect(375, -2225, 250, 650);
+        spawn.mapRect(4075, -2125, 700, 800);
+        spawn.mapRect(4450, -2950, 675, 1550);
+        spawn.mapRect(4875, -3625, 725, 2225);
+        spawn.mapRect(5525, -4350, 1725, 2925);
+        spawn.mapRect(7200, -5125, 300, 3900);
+
 
         //???
         // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
@@ -10926,9 +10938,6 @@ const level = {
                     simulation.fallHeight = -1000;
                     simulation.setZoom(1800);
                     templePlayer.startAnim = -1;
-                    for (let i = 0; i < tech.wimpCount + tech.wimpExperiment; i++) {
-                        addWIMP();
-                    }
                     templePlayer.drawExit = false;
                 }
             },

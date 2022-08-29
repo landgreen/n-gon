@@ -1571,24 +1571,24 @@ const m = {
             case 0: //field emitter
                 return `gain the effects of <strong>all</strong> <strong class='color-f'>fields</strong>`
             case 1: //standing wave
-                return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${Math.ceil(couple)} <strong class='color-s'>ice IX</strong></span>`
+                return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
             case 2: //perfect diamagnetism
-                return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${Math.ceil(couple)} <strong class='color-s'>ice IX</strong></span>`
+                return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
                 // return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${2*couple}</strong> seconds post collision</span>`
             case 3: //negative mass
                 return `<strong>+${((1-0.73 ** couple)*100).toFixed(1)}%</strong> <strong class='color-defense'>defense</strong>`
             case 4: //assembler
-                return `generate <strong>${6*couple}</strong> <strong class='color-f'>energy</strong> per second`
+                return `generate <strong>${(6*couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong> per second`
             case 5: //plasma
-                return `<strong>+${15*couple}</strong> <strong class='color-d'>damage</strong>`
+                return `<strong>+${(15*couple).toFixed(0)}%</strong> <strong class='color-d'>damage</strong>`
             case 6: //time dilation
-                return `<strong>+${25*couple}%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
+                return `<strong>+${(25*couple).toFixed(0)}%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
             case 7: //cloaking
-                return `<strong>+${33*couple}%</strong> ambush <strong class='color-d'>damage</strong>`
+                return `<strong>+${(33*couple).toFixed(0)}%</strong> ambush <strong class='color-d'>damage</strong>`
             case 8: //pilot wave
-                return `<strong>+${40*couple}%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>`
+                return `<strong>+${(40*couple).toFixed(0)}%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>`
             case 9: //wormhole
-                return `<span style = 'font-size:89%;'>after eating <strong class='color-block'>blocks</strong> <strong>+${20*couple}</strong> <strong class='color-f'>energy</strong></span>`
+                return `<span style = 'font-size:89%;'>after eating <strong class='color-block'>blocks</strong> <strong>+${(20*couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong></span>`
         }
     },
     couplingChange() {

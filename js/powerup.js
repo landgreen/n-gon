@@ -333,7 +333,7 @@ const powerUps = {
     },
     endDraft(type, isCanceled = false) { //type should be a gun, tech, or field
         if (isCanceled) {
-            if (tech.isCancelTech && Math.random() < 0.9) {
+            if (tech.isCancelTech && Math.random() < 0.88) {
                 // powerUps.research.use('tech')
                 powerUps[type].effect();
                 return
@@ -414,8 +414,8 @@ const powerUps = {
             return 11;
         },
         endCycle: 0,
-        duration: 600,
-        damage: 1.5,
+        duration: null, //set by "tech: band gap"
+        damage: null, //set by "tech: band gap"
         effect() {
             powerUps.boost.endCycle = m.cycle + Math.floor(Math.max(0, powerUps.boost.endCycle - m.cycle) * 0.6) + powerUps.boost.duration //duration+seconds plus 2/3 of current time left
         },
@@ -912,7 +912,7 @@ const powerUps = {
                 }
 
                 function removeOption(index) {
-                    for (let i = options.length; i > -1; i--) {
+                    for (let i = options.length - 1; i > -1; i--) {
                         if (index === options[i]) {
                             options.splice(i, 1) //remove all copies of that option form the options array (some tech are in the options array multiple times because of frequency)
                             optionLengthNoDuplicates--
@@ -1272,9 +1272,11 @@ const powerUps = {
         }
         if (tech.isCouplingPowerUps && Math.random() < 0.17) {
             powerUps.spawn(x, y, "coupling");
+            return;
         }
-        if (tech.isBoostPowerUps && Math.random() < 0.17) {
+        if (tech.isBoostPowerUps && Math.random() < 0.18) {
             powerUps.spawn(x, y, "boost");
+            return;
         }
         // if (Math.random() < 0.01) {
         //   powerUps.spawn(x, y, "research");

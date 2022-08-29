@@ -1458,21 +1458,22 @@ const simulation = {
                 const y = round(simulation.constructMouseDownPosition.y)
                 const dx = Math.max(25, round(simulation.mouseInGame.x) - x)
                 const dy = Math.max(25, round(simulation.mouseInGame.y) - y)
-
-                if (e.button === 2) {
+                console.log(e.button)
+                if (e.button === 1) {
                     if (level.isProcedural) {
-                        simulation.outputMapString(`spawn.randomMob(x+${x}, y+${y}, 0);`);
+                        simulation.outputMapString(`spawn.randomMob(x+${x}, y+${y}, 0);\n`);
                     } else {
-                        simulation.outputMapString(`spawn.randomMob(${x}, ${y}, 0);`);
+                        simulation.outputMapString(`spawn.randomMob(${x}, ${y}, 0);\n`);
                     }
                 } else if (e.button === 4) {
                     simulation.outputMapString(`${Math.floor(simulation.constructMouseDownPosition.x)}, ${Math.floor(simulation.constructMouseDownPosition.y)}`);
                 } else if (simulation.mouseInGame.x > simulation.constructMouseDownPosition.x && simulation.mouseInGame.y > simulation.constructMouseDownPosition.y) { //make sure that the width and height are positive
-                    if (e.button === 1) { //add map
+
+                    if (e.button === 0) { //add map
                         if (level.isProcedural) {
-                            simulation.outputMapString(`spawn.mapRect(x+${x}, y+${y}, ${dx}, ${dy});`);
+                            simulation.outputMapString(`spawn.mapRect(x+${x}, y+${y}, ${dx}, ${dy});\n`);
                         } else {
-                            simulation.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});`);
+                            simulation.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});\n`);
 
                         }
                         //see map in world
@@ -1484,11 +1485,11 @@ const simulation = {
                         Composite.add(engine.world, map[len]); //add to world
                         simulation.draw.setPaths() //update map graphics
 
-                    } else if (e.button === 3) { //add body
+                    } else if (e.button === 2) { //add body
                         if (level.isProcedural) {
-                            simulation.outputMapString(`spawn.bodyRect(x+${x}, y+${y}, ${dx}, ${dy});`);
+                            simulation.outputMapString(`spawn.bodyRect(x+${x}, y+${y}, ${dx}, ${dy});\n`);
                         } else {
-                            simulation.outputMapString(`spawn.bodyRect(${x}, ${y}, ${dx}, ${dy});`);
+                            simulation.outputMapString(`spawn.bodyRect(${x}, ${y}, ${dx}, ${dy});\n`);
                         }
 
                         //see map in world
@@ -1513,6 +1514,7 @@ const simulation = {
             }
         });
 
+        //undo last element added after you press z
         document.body.addEventListener("keydown", (e) => { // e.keyCode   z=90  m=77 b=66  shift = 16  c = 67
             if (simulation.testing && e.keyCode === 90 && simulation.constructMapString.length) {
                 if (simulation.constructMapString[simulation.constructMapString.length - 1][6] === 'm') { //remove map from current level

@@ -1,21 +1,41 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: virtual particles - mobs have a chance to spawn coupling power ups
-  old tech virtual particles renamed vacuum fluctuation
+some shotgun ammo tech upgrades will continue to fire some original recipe shotgun bullets
+  rivets, fleas, worms, iceIX
+tech: band gap - boosts give more damage but it lasts for 1 less second
 
-tech: exciton - mobs have a chance to spawn a boost
-  boosts are a power up that increases your damage for 10 seconds
-  old tech exciton renamed non-renewables
-laser tech: quasiparticles - replace all ammo with boosts
+WIMPs are 10% faster
+controlled explosion renamed shaped charge
 
-added +20px to grid elements to prevent text spillover
 bug fixes
+  construction mode works better with my buttons
+  to unlock run this and press T to enter testing mode
+  simulation.enableConstructMode() //used to build maps in testing mode
 
+removed -experiment- tech because it's function was reproduced by "tech - tinker"
 
 *********************************************************** TODO *****************************************************
 
+complete blowSuckBoss...  or don't
+
+tech: laser reflections increase damage
+
+JUNK tech different effects based on night or day
+  use system time
+
+buffing your deflecting for 1 second after pressing the field button
+  2 second cooldown on the effect to prevent spamming it
+  buff:  giving energy or doing damage makes sense
+    maybe this could be a rework for bremstralung
+
+replace field descriptions with a function call so they can have dynamic text
+  add in dynamic coupling text as a 4th line
+
+Boss that shoots out a ring of bullets, then after a few seconds it gravitates the bullets back
+
+JUNK: Placebo: double the power up spawn rate but make half of them do nothing
+
 coupling
-  pause menu +defense on coupling description goes above 100%
   put coupling description as 4th line on field description
     raw text no function call
     no need for coupling description in power ups, pause
@@ -27,14 +47,7 @@ coupling tech
   tech: coupling starts at 200%, but decays when the field is in use, coupling recharges when the field is not in use
     some fields aren't used much (that's ok?)
 
-tech: increase the effect of boosts, but shorten the duration?
-
 tech give laser mines more lasers (3->4? 5?)
-
-buffing your deflecting for 1 second after pressing the field button sounds cool
-  2 second cooldown on the effect to prevent spamming it
-  buff:  giving energy or doing damage makes sense
-    maybe this could be a rework for bremstralung
 
 rewindBoss:  after hitting 1/5 damage thresholds the boss rewinds back in time to where it was a few seconds ago
   track it's data like player history
@@ -913,6 +926,8 @@ possible names for tech
   lenticular lens:  is an array of lenses, designed so that when viewed from slightly different angles, different parts of the image underneath are shown.
   p-zombie
   p-hacking JUNK tech
+  https://en.wikipedia.org/wiki/High-entropy_alloys
+  https://en.wikipedia.org/wiki/Refractory_metals
 
 
 plot script:
