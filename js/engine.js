@@ -119,11 +119,25 @@ function collisionChecks(event) {
                                 if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>OFF</strong>`
                                 m.eyeFillColor = 'transparent'
                                 m.damage(dmg);
+                                if (tech.isFlipFlopCoupling) {
+                                    m.couplingChange(-5)
+                                    for (let i = 0; i < mob.length; i++) {
+                                        if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
+                                    }
+                                    spawn.WIMP()
+                                    mob[mob.length - 1].isDecoupling = true //so you can find it to remove
+                                }
                             } else {
                                 tech.isFlipFlopOn = true //immune to damage this hit, lose immunity for next hit
                                 if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>ON</strong>`
                                 m.eyeFillColor = m.fieldMeterColor //'#0cf'
                                 if (!tech.isFlipFlopHarm) m.damage(dmg);
+                                if (tech.isFlipFlopCoupling) {
+                                    m.couplingChange(5)
+                                    for (let i = 0; i < mob.length; i++) {
+                                        if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
+                                    }
+                                }
                             }
                             if (tech.isFlipFlopHealth) {
                                 m.setMaxHealth();
@@ -146,6 +160,7 @@ function collisionChecks(event) {
                             simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
                         }
                         if (tech.isPiezo) m.energy += 20.48;
+                        if (tech.isCouplingNoHit) m.couplingChange(-0.5)
                         if (tech.isStimulatedEmission) powerUps.ejectTech()
                         if (mob[k].onHit) mob[k].onHit();
                         if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles

@@ -57,7 +57,7 @@ const tech = {
         }
         if (tech.tech[index].count === 0) return 0
         const totalRemoved = tech.tech[index].count
-        simulation.makeTextLog(`<span class='color-var'>tech</span>.removeTech("<span class='color-text'>${tech.tech[index].name}</span>")`)
+        simulation.makeTextLog(`<span class='color-var'>tech</span>.removeTech("<span class='color-text'>${tech.tech[index].name}</span>")`, 360)
         tech.tech[index].remove();
         tech.tech[index].count = 0;
         tech.totalCount -= totalRemoved
@@ -295,9 +295,7 @@ const tech = {
             isNonRefundable: true,
             // isExperimentHide: true,
             isBadRandomOption: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 powerUps.spawn(m.pos.x, m.pos.y, "gun");
@@ -367,7 +365,7 @@ const tech = {
                         const index = Math.floor(Math.random() * gunTechPool.length)
                         tech.giveTech(gunTechPool[index]) // choose from the gun pool
                         tech.tech[gunTechPool[index]].isFromAppliedScience = true //makes it not remove properly under paradigm shift
-                        simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[gunTechPool[index]].name}</span>")`)
+                        simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[gunTechPool[index]].name}</span>")`, 360)
                     }
                 }
                 simulation.boldActiveGunHUD();
@@ -381,9 +379,7 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 tech.isDamageForGuns = true;
@@ -399,9 +395,7 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 tech.isFireRateForGuns = true;
@@ -605,9 +599,7 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 tech.crouchAmmoCount = true
@@ -870,9 +862,7 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 tech.isBulletsLastLonger += 0.3
@@ -989,9 +979,7 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 tech.deathSkipTime++
@@ -1008,9 +996,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return !tech.isEnergyHealth
+                return !tech.isEnergyHealth && !tech.isRewindField
             },
-            requires: "not mass-energy",
+            requires: "not mass-energy, retrocausality",
             effect() {
                 tech.isNoFireDefense = true
             },
@@ -1026,9 +1014,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return true
+                return !tech.isRewindField
             },
-            requires: "",
+            requires: "not retrocausality",
             effect() {
                 tech.isNoFireDamage = true
             },
@@ -1856,14 +1844,30 @@ const tech = {
             requires: "not relay switch",
             effect() {
                 tech.isFlipFlop = true //do you have this tech?
-                tech.isFlipFlopOn = true //what is the state of flip-Flop?
+                if (!tech.isFlipFlopOn) {
+                    tech.isFlipFlopOn = true //what is the state of flip-Flop?
+                    if (tech.isFlipFlopCoupling) {
+                        m.couplingChange(5)
+                        for (let i = 0; i < mob.length; i++) {
+                            if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
+                        }
+                    }
+                }
                 if (!m.isShipMode) {
                     m.draw = m.drawFlipFlop
                 }
             },
             remove() {
                 tech.isFlipFlop = false
-                tech.isFlipFlopOn = false
+                if (tech.isFlipFlopOn) {
+                    tech.isFlipFlopOn = false //what is the state of flip-Flop?
+                    if (tech.isFlipFlopCoupling) {
+                        m.couplingChange(5)
+                        for (let i = 0; i < mob.length; i++) {
+                            if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
+                        }
+                    }
+                }
                 m.eyeFillColor = 'transparent'
             }
         },
@@ -1922,6 +1926,47 @@ const tech = {
             }
         },
         {
+            name: "decoupling",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Decoupling_(cosmology)' class="link">decoupling</a>`,
+            descriptionFunction() {
+                //<span style = 'font-size:80%;'>(${ m.couplingDescription(this.bonus)})</span>
+                return `if <strong class='color-flop'>ON</strong> <strong>+5</strong> <strong class='color-coupling'>coupling</strong><br>if <strong class='color-flop'>OFF</strong> a dangerous particle slowly <strong>chases</strong> you`
+            },
+            maxCount: 1,
+            count: 0,
+            frequency: 4,
+            frequencyDefault: 4,
+            bonus: 5, //coupling given
+            allowed() {
+                return tech.isFlipFlop || tech.isRelay
+            },
+            requires: "ON/OFF tech",
+            effect() {
+                tech.isFlipFlopCoupling = true;
+                if (tech.isFlipFlopOn) {
+                    m.couplingChange(this.bonus)
+                } else {
+                    for (let i = 0; i < mob.length; i++) {
+                        if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
+                    }
+                    spawn.WIMP()
+                    mob[mob.length - 1].isDecoupling = true //so you can find it to remove
+                }
+            },
+            remove() {
+                tech.isFlipFlopCoupling = false;
+                if (tech.isFlipFlop || tech.isRelay) {
+                    if (tech.isFlipFlopOn) {
+                        m.couplingChange(-this.bonus)
+                    } else {
+                        for (let i = 0; i < mob.length; i++) {
+                            if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
+                        }
+                    }
+                }
+            }
+        },
+        {
             name: "relay switch",
             description: `toggle <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after picking up a <strong>power up</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
             nameInfo: "<span id = 'tech-switch'></span>",
@@ -1948,14 +1993,30 @@ const tech = {
             requires: "not flip-flop",
             effect() {
                 tech.isRelay = true //do you have this tech?
-                tech.isFlipFlopOn = true //what is the state of flip-Flop?
+                if (!tech.isFlipFlopOn) {
+                    tech.isFlipFlopOn = true //what is the state of flip-Flop?
+                    if (tech.isFlipFlopCoupling) {
+                        m.couplingChange(5)
+                        for (let i = 0; i < mob.length; i++) {
+                            if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
+                        }
+                    }
+                }
                 if (!m.isShipMode) {
                     m.draw = m.drawFlipFlop
                 }
             },
             remove() {
                 tech.isRelay = false
-                tech.isFlipFlopOn = false
+                if (tech.isFlipFlopOn) {
+                    tech.isFlipFlopOn = false //what is the state of flip-Flop?
+                    if (tech.isFlipFlopCoupling) {
+                        m.couplingChange(-5)
+                        for (let i = 0; i < mob.length; i++) {
+                            if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
+                        }
+                    }
+                }
                 m.eyeFillColor = 'transparent'
             }
         },
@@ -2081,9 +2142,7 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 tech.isDroneOnDamage = true;
@@ -2376,9 +2435,7 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 tech.isLowEnergyDamage = true;
@@ -3304,9 +3361,7 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 tech.isBoostPowerUps = true
@@ -3406,7 +3461,7 @@ const tech = {
         {
             name: "field coupling",
             descriptionFunction() {
-                return `<strong>+1</strong> <strong class='color-coupling'>coupling</strong> <em>(${m.fieldUpgrades[m.fieldMode].name})</em><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
+                return `spawn ${powerUps.orb.coupling(10)}<br>that each give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong><br>${ m.couplingDescription(1)} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
             },
             maxCount: 9,
             count: 0,
@@ -3417,19 +3472,27 @@ const tech = {
             },
             requires: "",
             effect() {
-                simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> 1`);
-                m.coupling += 1
-                m.couplingChange()
+                powerUps.spawnDelay("coupling", 10)
             },
             remove() {
-                m.coupling -= this.count
-                m.couplingChange()
+                if (this.count) {
+                    m.couplingChange(-this.count)
+                }
             }
         },
         {
             name: "quintessence",
             descriptionFunction() {
-                return `use all your ${powerUps.orb.research(1)} to get <strong>+${this.count ? this.researchUsed*this.couplingToResearch:powerUps.research.count*this.couplingToResearch}</strong> <strong class='color-coupling'>coupling</strong><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
+                let converted = powerUps.research.count * this.couplingToResearch
+                if (this.count) converted = this.researchUsed * this.couplingToResearch
+
+                let orbText
+                if (converted > 20) {
+                    orbText = `${converted} ${powerUps.orb.coupling()}`
+                } else {
+                    orbText = powerUps.orb.coupling(converted)
+                }
+                return `use all your ${powerUps.orb.research(1)} to spawn <strong>${orbText}<br></strong>that each give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong><br>${ m.couplingDescription(1)} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
             },
             maxCount: 1,
             count: 0,
@@ -3442,35 +3505,32 @@ const tech = {
             researchUsed: 0,
             couplingToResearch: 0.25,
             effect() {
+                let count = 0
                 while (powerUps.research.count > 0) {
                     powerUps.research.changeRerolls(-1)
+                    count += 10
                     this.researchUsed++
-                    simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> ${(this.couplingToResearch).toFixed(2)}`);
-                    m.coupling += this.couplingToResearch
                 }
-                m.couplingChange()
+                powerUps.spawnDelay("coupling", count)
             },
             remove() {
                 if (this.count) {
-                    m.coupling -= this.researchUsed * this.couplingToResearch
+                    m.couplingChange(-this.researchUsed * this.couplingToResearch)
                     powerUps.research.changeRerolls(this.researchUsed)
                     this.researchUsed = 0
                 }
-                m.couplingChange()
             }
         },
         {
             name: "virtual particles",
             descriptionFunction() {
-                return `after mobs <strong>die</strong> they have a <strong>17%</strong> chance to<br>spawn ${powerUps.orb.coupling(1)} that give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong>`
+                return `after mobs <strong>die</strong> they have a <strong>17%</strong> chance to<br>spawn ${powerUps.orb.coupling(1)} that each give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong><br>${ m.couplingDescription(1)} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
             },
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 tech.isCouplingPowerUps = true //about 20-30 mobs per level so at 16% and 0.1 coupling that's about 25 * 0.16 * 0.1 = 0.4 coupling per level with out duplication
@@ -3482,38 +3542,35 @@ const tech = {
         {
             name: "fine-structure constant",
             descriptionFunction() {
-                return `+${this.value} <strong class='color-coupling'>coupling</strong>, <span style = 'font-size:85%;'><strong>eject</strong> this <strong class='color-m'>tech</strong> after losing <strong class='color-h'>health</strong></span><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
+                return `spawn ${this.value} ${powerUps.orb.coupling(1)} that each give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong>
+                <br><strong>-0.5</strong> <strong class='color-coupling'>coupling</strong> after mob <strong>collisions</strong> 
+                <br>${m.couplingDescription(1)} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
             },
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 100,
-            allowed() {
-                return true
-            },
-            value: 6,
+            isNonRefundable: true,
+            allowed: () => true,
+            value: 60,
             requires: "",
             effect() {
                 tech.isCouplingNoHit = true
-                simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> ${(this.value).toFixed(1)}`);
-                m.coupling += this.value
-                m.couplingChange()
-                this.maxCount = 0
+                powerUps.spawnDelay("coupling", this.value)
             },
             remove() {
-                if (this.count) {
-                    m.coupling -= this.value
-                    m.couplingChange()
-                } else {
-                    this.maxCount = 1
-                }
+                // if (this.count) {
+                //     m.couplingChange(-this.value)
+                // } else {
+                //     this.maxCount = 1 //reset only take this once per game
+                // }
                 tech.isCouplingNoHit = false
             }
         },
         {
             name: "residual dipolar coupling",
             descriptionFunction() {
-                return `clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> yields <strong>+0.5</strong> <strong class='color-coupling'>coupling</strong><br>${ m.couplingDescription()} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
+                return `clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns ${powerUps.orb.coupling(5)}that each give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong><br>${ m.couplingDescription(1)} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}`
             },
             maxCount: 1,
             count: 0,
@@ -3528,6 +3585,24 @@ const tech = {
             },
             remove() {
                 tech.isCancelCouple = false
+            }
+        },
+        {
+            name: "commodities exchange",
+            description: `clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>5-10</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`,
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return !tech.isSuperDeterminism
+            },
+            requires: "not superdeterminism",
+            effect() {
+                tech.isCancelRerolls = true
+            },
+            remove() {
+                tech.isCancelRerolls = false
             }
         },
         {
@@ -3547,24 +3622,6 @@ const tech = {
             },
             remove() {
                 tech.isCancelTech = false
-            }
-        },
-        {
-            name: "commodities exchange",
-            description: `clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>5-10</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`,
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return !tech.isSuperDeterminism
-            },
-            requires: "not superdeterminism",
-            effect() {
-                tech.isCancelRerolls = true
-            },
-            remove() {
-                tech.isCancelRerolls = false
             }
         },
         {
@@ -3797,7 +3854,7 @@ const tech = {
                     if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) have.push(i)
                 }
                 const choose = have[Math.floor(Math.random() * have.length)]
-                simulation.makeTextLog(`<span class='color-var'>tech</span>.removeTech("<span class='color-text'>${tech.tech[choose].name}</span>")`)
+                simulation.makeTextLog(`<span class='color-var'>tech</span>.removeTech("<span class='color-text'>${tech.tech[choose].name}</span>")`, 360)
                 for (let i = 0; i < tech.tech[choose].count; i++) {
                     powerUps.spawn(m.pos.x, m.pos.y, "gun");
                 }
@@ -6217,9 +6274,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("laser") || (tech.haveGunCheck("harpoon") && !tech.isRailGun)
+                return tech.haveGunCheck("laser") || (tech.haveGunCheck("harpoon") && !tech.isRailGun) && !tech.isEnergyNoAmmo
             },
-            requires: "harpoon, laser, not railgun",
+            requires: "harpoon, laser, not railgun, non-renewables",
             effect() {
                 tech.isBoostReplaceAmmo = true
                 for (let i = powerUp.length - 1; i > -1; i--) {
@@ -6272,7 +6329,7 @@ const tech = {
                     //pick one option
                     if (options.length) {
                         const index = options[Math.floor(Math.random() * options.length)]
-                        simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>") <em>//optical amplifier</em>`);
+                        simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>") <em>//optical amplifier</em>`, 360);
                         tech.giveTech(index)
                         techGiven++
                     }
@@ -7647,7 +7704,7 @@ const tech = {
         },
         {
             name: "WIMPs",
-            description: `at the end of each <strong>level</strong> spawn ${powerUps.orb.research(5)}<br> and a <strong class='color-defense'>harmful</strong> particle that slowly <strong>chases</strong> you`,
+            description: `at the end of each <strong>level</strong> spawn ${powerUps.orb.research(5)}<br> and a dangerous particle that slowly <strong>chases</strong> you`,
             isFieldTech: true,
             maxCount: 9,
             count: 0,
@@ -8042,6 +8099,41 @@ const tech = {
         //     remove() {}
         // },
         {
+            name: "boost",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            allowed() {
+                return !build.isExperimentSelection
+            },
+            requires: "NOT EXPERIMENT MODE",
+            effect() {
+                powerUps.spawnDelay("boost", this.spawnCount)
+            },
+            remove() {},
+            id: 0,
+            text: "",
+            delay: 100,
+            spawnCount: 0,
+            descriptionFunction() {
+                let count = 9999 * Math.random()
+                const loop = () => {
+                    if ((simulation.isChoosing) && m.alive && !build.isExperimentSelection) { //&& (!simulation.isChoosing || this.count === 0) //simulation.paused ||
+                        count += 4.5
+                        const waves = 2 * Math.sin(count * 0.0133) + Math.sin(count * 0.013) + 0.5 * Math.sin(count * 0.031) + 0.33 * Math.sin(count * 0.03)
+                        this.spawnCount = Math.floor(100 * Math.abs(waves))
+                        this.text = `spawn <strong style = "font-family: 'Courier New', monospace;">${this.spawnCount.toLocaleString(undefined, {minimumIntegerDigits:3})}</strong> ${powerUps.orb.boost(1)}<br>that give <strong>+${(powerUps.boost.damage*100).toFixed(0)}%</strong> <strong class='color-d'>damage</strong> for <strong>${(powerUps.boost.duration/60).toFixed(0)}</strong> seconds</span>`
+                        if (document.getElementById(`boost-JUNK-id${this.id}`)) document.getElementById(`boost-JUNK-id${this.id}`).innerHTML = this.text
+                        setTimeout(() => { loop() }, this.delay);
+                    }
+                }
+                setTimeout(() => { loop() }, this.delay);
+                this.id++
+                return `<span id = "boost-JUNK-id${this.id}">${this.text}</span>`
+            },
+        },
+        {
             name: "return",
             description: "return to the introduction level<br>reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>",
             maxCount: 1,
@@ -8049,9 +8141,7 @@ const tech = {
             frequency: 0,
             isJunk: true,
             isNonRefundable: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 level.difficultyDecrease(simulation.difficultyMode * 2)
@@ -8068,9 +8158,7 @@ const tech = {
             frequency: 0,
             isJunk: true,
             isNonRefundable: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 setInterval(() => {
@@ -8094,9 +8182,7 @@ const tech = {
             frequency: 0,
             isJunk: true,
             isNonRefundable: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 setInterval(() => {
@@ -8136,9 +8222,7 @@ const tech = {
             frequency: 0,
             isJunk: true,
             isNonRefundable: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "field");
@@ -8215,9 +8299,7 @@ const tech = {
             frequency: 0,
             isJunk: true,
             isNonRefundable: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 tech.giveRandomJUNK()
@@ -8253,9 +8335,7 @@ const tech = {
             frequencyDefault: 0,
             isJunk: true,
             isNonRefundable: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 powerUps.spawn(m.pos.x, m.pos.y, "tech");
@@ -8289,9 +8369,7 @@ const tech = {
             frequencyDefault: 0,
             isJunk: true,
             isNonRefundable: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 for (let i = 0, len = mob.length; i < len; i++) {
@@ -8317,9 +8395,7 @@ const tech = {
             frequency: 0,
             frequencyDefault: 0,
             isJunk: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
 
@@ -8336,9 +8412,7 @@ const tech = {
             frequency: 0,
             frequencyDefault: 0,
             isJunk: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 tech.isBrainstorm = true
@@ -9982,9 +10056,7 @@ const tech = {
             count: 0,
             frequency: 0,
             isJunk: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {},
             remove() {},
@@ -10046,9 +10118,7 @@ const tech = {
             count: 0,
             frequency: 0,
             isJunk: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {},
             remove() {},
@@ -10191,9 +10261,7 @@ const tech = {
             frequency: 0,
             isJunk: true,
             isNonRefundable: true,
-            allowed() {
-                return true
-            },
+            allowed: () => true,
             requires: "",
             effect() {
                 localSettings.personalSeeds.push(Math.initialSeed)
@@ -10672,5 +10740,6 @@ const tech = {
     isCancelCouple: null,
     isCouplingPowerUps: null,
     isBoostPowerUps: null,
-    isBoostReplaceAmmo: null
+    isBoostReplaceAmmo: null,
+    isFlipFlopCoupling: null
 }

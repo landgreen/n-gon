@@ -10,7 +10,7 @@ const level = {
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     //see level.populateLevels:   (intro, ... , reservoir, reactor, ... , gauntlet, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion"],
-    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp"],
+    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
@@ -23,26 +23,27 @@ const level = {
             // powerUps.research.changeRerolls(100000)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
-            // m.setField("metamaterial cloaking") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
-            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // m.setField("time dilation") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 1000000
-            // tech.giveTech("rivet gun")
-            // tech.isFoamShot = true
-            // tech.isIncendiary = true
-            // for (let i = 0; i < 1; ++i) tech.giveTech("field coupling")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("free-electron laser")
+            // tech.giveTech("fine-structure constant")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("relay switch")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("decoupling")
             // m.damage(0.1);
-            // for (let i = 0; i < 1; i++) tech.giveTech("dynamic equilibrium")
+            // tech.giveTech("lens")
+            // for (let i = 0; i < 9; i++) tech.giveTech("compound lens")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
 
             // spawn.starter(1900, -500, 200)
-            // spawn.ghoster(2538, -1950)
+            // spawn.beetleBoss(2538, -1950)
             // for (let i = 0; i < 15; ++i) spawn.shooter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
+            // tech.addJunkTechToPool(2)
+            // tech.tech[321].frequency = 100
             // level.testing();
             // spawn.blowSuckBoss(1900, -500)
-            // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
+            // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
@@ -114,6 +115,7 @@ const level = {
         if (tech.isMACHO) spawn.MACHO()
         for (let i = 0; i < tech.wimpCount; i++) {
             spawn.WIMP()
+            mob[mob.length - 1].isDecoupling = true //so you can find it to remove
             for (let j = 0, len = 5; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         }
         // if (tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
@@ -121,6 +123,12 @@ const level = {
             tech.isFlipFlopOn = true
             if (tech.isFlipFlopHealth) m.setMaxHealth()
             if (tech.isRelayEnergy) m.setMaxEnergy()
+            if (tech.isFlipFlopCoupling) {
+                m.couplingChange(5)
+                for (let i = 0; i < mob.length; i++) {
+                    if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
+                }
+            }
             m.eyeFillColor = m.fieldMeterColor
             simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
         }
@@ -11464,1407 +11472,6 @@ const level = {
             DrawHandler.room2Top();
         };
     },
-
-    // temple() {
-    //     simulation.makeTextLog(`<strong>temple</strong> by <span class='color-var'>Scar1337</span>`);
-
-    //     const V = Vector;
-    //     const Equation = (function() {
-    //         function Equation(a, b, c) {
-    //             this.a = a;
-    //             this.b = b;
-    //             this.c = c;
-    //         }
-    //         Equation.prototype.getXfromY = function(y) {
-    //             return (-this.b * y - this.c) / this.a;
-    //         }
-    //         Equation.prototype.getYfromX = function(x) {
-    //             return (-this.a * x - this.c) / this.b;
-    //         }
-    //         Equation.fromPoints = function(v1, v2) {
-    //             if (v1.x === v2.x) return new Equation(1, 0, -v1.x);
-    //             if (v1.y === v2.y) return new Equation(0, 1, -v1.y);
-    //             const d = (v2.y - v1.y) / (v2.x - v1.x);
-    //             return new Equation(-d, 1, d * v1.x - v1.y);
-    //         };
-    //         return Equation;
-    //     })();
-    //     const Rect = (function() {
-    //         function Rect(x, y, w, h) {
-    //             this.pos = { x, y };
-    //             this.width = w;
-    //             this.height = h;
-    //         }
-    //         Rect.prototype.has = function({ x, y }) {
-    //             return x >= this.pos.x && x <= this.pos.x + this.width &&
-    //                 y >= this.pos.y && y <= this.pos.y + this.height;
-    //         }
-    //         Rect.prototype.hasLine = function(eq) {
-    //             const leftInter = eq.getYfromX(this.pos.x);
-    //             const rightInter = eq.getYfromX(this.pos.x + this.width);
-    //             const topInter = eq.getXfromY(this.pos.y);
-    //             return (leftInter >= this.pos.y && leftInter <= this.pos.y + this.height) ||
-    //                 (rightInter >= this.pos.y && rightInter <= this.pos.y + this.height) ||
-    //                 (topInter >= this.pos.x && topInter <= this.pos.x + this.width);
-    //         }
-    //         Rect.prototype.addToMap = function() {
-    //             spawn.mapRect(this.pos.x, this.pos.y, this.width, this.height);
-    //         }
-    //         Object.defineProperty(Rect.prototype, "midPos", {
-    //             get() {
-    //                 return V.add(this.pos, { x: this.width / 2, y: this.height / 2 });
-    //             }
-    //         });
-    //         Rect.fromBounds = function(min, max) {
-    //             return new Rect(min.x, min.y, max.x - min.x, max.y - min.y);
-    //         }
-    //         return Rect;
-    //     })();
-
-    //     function isInBound(bound) {
-    //         return bound.has(player.bounds.min) || bound.has(player.bounds.max);
-    //     }
-
-    //     function addWIMP(x, y) {
-    //         spawn.WIMP(x, y);
-    //         const me = mob[mob.length - 1];
-    //         me.isWIMP = true;
-    //     }
-
-    //     function relocateWIMPs(x, y) {
-    //         for (const i of mob) {
-    //             if (i.isWIMP) {
-    //                 setPos(i, { x: x + 300 * (Math.random() - 0.5), y: y + 300 * (Math.random() - 0.5) });
-    //             }
-    //         }
-    //     }
-
-    //     function secondRoomBoss(x, y, radius = 25, isDark = false) {
-    //         mobs.spawn(x, y, 12, radius, isDark ? "#000" : "#fff");
-    //         let me = mob[mob.length - 1];
-    //         me.isBoss = true;
-    //         me.isDark = isDark;
-
-    //         me.stroke = "transparent";
-    //         me.eventHorizon = 500; // How family friendly content much do I have to reduce this
-    //         me.seeAtDistance2 = 5e6; // Basically just see at all times, in the context it's given
-    //         me.accelMag = 0.00003 * simulation.accelScale;
-    //         me.collisionFilter.mask = cat.player | cat.bullet;
-    //         me.memory = 1600;
-    //         me.randomPRNGMult = Math.random() * 500;
-
-    //         me.attackCycle = 0;
-    //         me.lastAttackCycle = 0;
-    //         Matter.Body.setDensity(me, 0.012); // extra dense, normal is 0.001 // makes effective life much larger
-    //         me.onDeath = function() {
-    //             // applying forces to player doesn't seem to work inside this method, not sure why
-    //             powerUps.spawn(this.position.x + 20, this.position.y, "ammo");
-    //             if (Math.random() > 0.5) powerUps.spawn(this.position.x, this.position.y, "ammo");
-    //             if (Math.random() > 0.3) powerUps.spawn(this.position.x, this.position.y, "heal", true, null, 30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
-    //         };
-    //         me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
-    //         me.do = function() {
-    //             // keep it slow, to stop issues from explosion knock backs
-    //             if (this.speed > 1) {
-    //                 Matter.Body.setVelocity(this, {
-    //                     x: this.velocity.x * 0.95,
-    //                     y: this.velocity.y * 0.95
-    //                 });
-    //             }
-    //             if (!(simulation.cycle % this.seePlayerFreq)) {
-    //                 if (this.distanceToPlayer2() < this.seeAtDistance2) { // ignore cloak for black holes
-    //                     this.locatePlayer();
-    //                     if (!this.seePlayer.yes) this.seePlayer.yes = true;
-    //                 } else if (this.seePlayer.recall) {
-    //                     this.lostPlayer();
-    //                 }
-    //             }
-    //             this.checkStatus();
-    //             if (this.seePlayer.recall) {
-    //                 // accelerate towards the player
-    //                 const forceMag = this.accelMag * this.mass;
-    //                 const dx = this.seePlayer.position.x - this.position.x
-    //                 const dy = this.seePlayer.position.y - this.position.y
-    //                 const mag = Math.sqrt(dx * dx + dy * dy)
-    //                 this.force.x += forceMag * dx / mag;
-    //                 this.force.y += forceMag * dy / mag;
-
-    //                 // eventHorizon waves in and out
-    //                 const eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(simulation.cycle * 0.008));
-
-    //                 // draw darkness
-    //                 ctx.fillStyle = this.isDark ? "rgba(0,20,40,0.6)" : "rgba(225,215,255,0.6)";
-    //                 DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.2, 0, 2 * Math.PI);
-    //                 ctx.fillStyle = this.isDark ? "rgba(0,20,40,0.4)" : "rgba(225,215,255,0.4)";
-    //                 DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.4, 0, 2 * Math.PI);
-    //                 ctx.fillStyle = this.isDark ? "rgba(0,20,40,0.3)" : "rgba(225,215,255,0.3)";
-    //                 DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.6, 0, 2 * Math.PI);
-    //                 ctx.fillStyle = this.isDark ? "rgba(0,20,40,0.2)" : "rgba(225,215,255,0.2)";
-    //                 DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.8, 0, 2 * Math.PI);
-    //                 ctx.fillStyle = this.isDark ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.05)";
-    //                 DrawTools.arc(this.position.x, this.position.y, eventHorizon, 0, 2 * Math.PI);
-    //                 // when player is inside event horizon
-    //                 if (distance(this.position, player.position) < eventHorizon) {
-    //                     if (this.isDark) {
-    //                         // Standard black hole stuff
-    //                         if (m.immuneCycle < m.cycle) {
-    //                             if (m.energy > 0) m.energy -= 0.003;
-    //                             if (m.energy < 0.1) m.damage(0.00015 * simulation.dmgScale);
-    //                         }
-    //                         const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-    //                         player.force.x -= 0.0005 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
-    //                         player.force.y -= 0.0005 * Math.sin(angle) * player.mass;
-    //                         // draw line to player
-    //                         ctx.lineWidth = Math.min(60, this.radius * 2);
-    //                         ctx.strokeStyle = "rgba(0,0,0,0.5)";
-    //                         DrawTools.line([this.position, m.pos]);
-    //                         ctx.fillStyle = "rgba(0,0,0,0.3)";
-    //                         DrawTools.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
-    //                     } else {
-    //                         // Lightning attacks
-    //                         this.attackCycle++;
-    //                         if (this.attackCycle >= 30) {
-    //                             this.attackCycle = 0;
-    //                             this.lastAttackCycle = simulation.cycle;
-    //                             Matter.Body.setVelocity(player, V.add(player.velocity, { x: 0, y: -10 }));
-    //                             if (m.immuneCycle < m.cycle) {
-    //                                 if (m.energy > 0) m.energy -= 0.03;
-    //                                 m.damage(0.005 * simulation.dmgScale);
-    //                             }
-    //                         }
-    //                         DrawTools.lightning(this.position, m.pos, this.lastAttackCycle, this.randomPRNGMult);
-    //                         ctx.fillStyle = `rgba(255,240,127,${0.12 * Math.max(15 - simulation.cycle + this.lastAttackCycle, 0)})`;
-    //                         DrawTools.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     };
-
-    //     function mobGrenade(...args) {
-    //         spawn.grenade(...args);
-    //         const pulseRadius = args[3] || Math.min(550, 250 + simulation.difficulty * 3)
-    //         let me = mob[mob.length - 1];
-    //         me.fill = "#ace";
-    //         me.onDeath = function() {
-    //             //damage player if in range
-    //             if (distance(player.position, this.position) < pulseRadius && m.immuneCycle < m.cycle) {
-    //                 m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
-    //                 m.damage(0.02 * simulation.dmgScale);
-    //             }
-    //             simulation.drawList.push({ //add dmg to draw queue
-    //                 x: this.position.x,
-    //                 y: this.position.y,
-    //                 radius: pulseRadius,
-    //                 color: "rgba(170,204,238,0.3)",
-    //                 time: simulation.drawTime
-    //             });
-    //         };
-    //         me.do = function() {
-    //             this.timeLimit();
-    //             ctx.beginPath(); //draw explosion outline
-    //             ctx.arc(this.position.x, this.position.y, pulseRadius * (1.01 - this.timeLeft / this.lifeSpan), 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
-    //             ctx.fillStyle = "rgba(170,204,238,0.1)";
-    //             ctx.fill();
-    //         };
-    //     }
-    //     // Todo: nerf ThirdRoomBoss a bit?
-    //     function thirdRoomBoss(x, y) {
-    //         mobs.spawn(x, y, 6, 60, "#000");
-    //         let me = mob[mob.length - 1];
-    //         // Fix in place
-    //         me.constraint = Constraint.create({
-    //             pointA: {
-    //                 x: me.position.x,
-    //                 y: me.position.y
-    //             },
-    //             bodyB: me,
-    //             stiffness: 1,
-    //             damping: 1
-    //         });
-    //         Composite.add(engine.world, me.constraint);
-    //         me.isBoss = true;
-
-    //         me.stroke = "transparent";
-    //         me.eventHorizon = 950;
-    //         me.collisionFilter.mask = cat.player | cat.bullet | cat.body;
-
-    //         me.memory = Infinity;
-    //         me.attackCycle = 0;
-    //         me.lastAttackCycle = 0;
-    //         me.spawnCycle = 0;
-    //         Matter.Body.setDensity(me, 0.08); //extra dense //normal is 0.001 //makes effective life much larger
-    //         me.onDeath = function() {
-    //             for (let j = 0; j < 8; j++) { //in case some mobs leave things after they die
-    //                 for (let i = 0, len = mob.length; i < len; ++i) {
-    //                     if (mob[i] !== this) {
-    //                         if (mob[i].isInvulnerable) { //disable invulnerability
-    //                             mob[i].isInvulnerable = false
-    //                             mob[i].damageReduction = 1
-    //                         }
-    //                         mob[i].damage(Infinity, true);
-    //                     }
-    //                 }
-    //             }
-    //             // You earned it: One more tech
-    //             powerUps.spawn(this.position.x, this.position.y, "tech");
-    //             powerUps.spawnBossPowerUp(this.position.x, this.position.y);
-    //             templePlayer.room3ToEndAnim = 1;
-    //         };
-    //         me.nextHealthThreshold = 0.75;
-    //         me.trapCycle = 0;
-    //         me.onDamage = function() {
-    //             if (this.health < this.nextHealthThreshold) {
-    //                 this.health = this.nextHealthThreshold - 0.01
-    //                 this.nextHealthThreshold = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
-    //                 this.trapCycle = 1;
-    //                 this.isInvulnerable = true;
-    //                 this.damageReduction = 0;
-    //             }
-    //         };
-    //         me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
-    //         me.rings = [{
-    //             colour: "#65f",
-    //             radius: 300,
-    //             id: 0
-    //         }, {
-    //             colour: "#0f0",
-    //             radius: 400,
-    //             id: 1
-    //         }, {
-    //             colour: "#f00",
-    //             radius: 500,
-    //             id: 2
-    //         }];
-    //         me.ring = function() {
-    //             const rings = this.isInvulnerable ? [] : this.rings;
-    //             ctx.lineWidth = 10;
-    //             for (const ring of rings) {
-    //                 const radius = ring.radius * (1 + 0.3 * Math.sin(simulation.cycle / 60 * (ring.id + 2)));
-    //                 if (Math.abs(distance(player.position, this.position) - radius) < 60 && m.immuneCycle < simulation.cycle) {
-    //                     m.damage(0.4 / radius);
-    //                 }
-    //                 ctx.strokeStyle = ring.colour;
-    //                 DrawTools.arcOut(this.position.x, this.position.y, radius, 0, Math.PI * 2);
-    //             }
-    //         }
-    //         me.horizon = function() {
-    //             // eventHorizon waves in and out
-    //             const eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(simulation.cycle * 0.008));
-
-    //             const charge = this.attackCycle / 90;
-    //             this.fill = this.isInvulnerable ? "#f00" : `rgb(${charge * 255},${charge * 255},${charge * 255})`;
-    //             // draw darkness
-    //             ctx.fillStyle = `rgba(${charge * 225},${20 + charge * 195},${40 + charge * 215},0.6)`;
-    //             DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.2, 0, 2 * Math.PI);
-    //             ctx.fillStyle = `rgba(${charge * 225},${20 + charge * 195},${40 + charge * 215},0.4)`;
-    //             DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.4, 0, 2 * Math.PI);
-    //             ctx.fillStyle = `rgba(${charge * 225},${20 + charge * 195},${40 + charge * 215},0.3)`;
-    //             DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.6, 0, 2 * Math.PI);
-    //             ctx.fillStyle = `rgba(${charge * 225},${20 + charge * 195},${40 + charge * 215},0.2)`;
-    //             DrawTools.arc(this.position.x, this.position.y, eventHorizon * 0.8, 0, 2 * Math.PI);
-    //             ctx.fillStyle = `rgba(${charge * 255},${charge * 255},${charge * 255},0.05)`;
-    //             DrawTools.arc(this.position.x, this.position.y, eventHorizon, 0, 2 * Math.PI);
-
-    //             // when player is inside event horizon
-    //             if (V.magnitude(V.sub(this.position, player.position)) < eventHorizon) {
-    //                 // Standard black hole stuff
-    //                 if (m.immuneCycle < m.cycle) {
-    //                     if (m.energy > 0) m.energy -= 0.004;
-    //                     if (m.energy < 0.1) m.damage(0.0002 * simulation.dmgScale);
-    //                 }
-    //                 const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
-    //                 player.force.x -= 0.001 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
-    //                 player.force.y -= 0.001 * Math.sin(angle) * player.mass;
-    //                 // draw line to player
-    //                 ctx.lineWidth = Math.min(60, this.radius * 2);
-    //                 ctx.strokeStyle = "rgba(0,0,0,0.5)";
-    //                 DrawTools.line([this.position, m.pos]);
-    //                 ctx.fillStyle = "rgba(0,0,0,0.3)";
-    //                 DrawTools.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
-    //                 // Lightning attacks
-    //                 this.attackCycle++;
-    //                 if (this.attackCycle >= 90) {
-    //                     this.attackCycle = 0;
-    //                     this.lastAttackCycle = simulation.cycle;
-    //                     Matter.Body.setVelocity(player, V.add(player.velocity, { x: 0, y: -20 }));
-    //                     if (m.immuneCycle < m.cycle) {
-    //                         m.damage(0.015 * simulation.dmgScale);
-    //                     }
-    //                 }
-    //                 const lightningCycle = simulation.cycle * 2 / 3 + this.lastAttackCycle / 3;
-    //                 DrawTools.lightning(this.position, m.pos, lightningCycle, 1, 12);
-    //                 DrawTools.lightning(this.position, m.pos, lightningCycle, 2, 12);
-    //                 ctx.fillStyle = `rgba(255,240,127,${0.12 * Math.max(15 - simulation.cycle + this.lastAttackCycle, 0)})`;
-    //                 DrawTools.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
-    //             }
-    //         }
-    //         me.periodicSpawns = function() {
-    //             if (this.isInvulnerable) return;
-    //             this.spawnCycle++;
-    //             // Spawn annoying purple thing(s) that chases the player
-    //             if (!(this.spawnCycle % 180)) {
-    //                 spawn.seeker(this.position.x, this.position.y, 15 * (0.7 + 0.5 * Math.random()), 7);
-    //                 spawn.seeker(this.position.x, this.position.y, 4 * (0.7 + 0.5 * Math.random()), 7);
-    //                 spawn.seeker(this.position.x, this.position.y, 4 * (0.7 + 0.5 * Math.random()), 7);
-    //             }
-    //             // Spawn the annoying pink (now blue) exploder that doesn't chase the player
-    //             if (!(this.spawnCycle % 300)) {
-    //                 for (let i = 0; i < 3; i++) {
-    //                     mobGrenade(1100 + 700 * i, -13030, undefined, Math.min(700, 300 + simulation.difficulty * 4), 10);
-    //                     setVel(mob[mob.length - 1], { x: 0, y: -10 });
-    //                     mobGrenade(1100 + 700 * i, -14370, undefined, Math.min(700, 300 + simulation.difficulty * 4), 10);
-    //                     setVel(mob[mob.length - 1], { x: 0, y: 10 });
-    //                 }
-    //             }
-    //             // Spawn a bunch of mobs
-    //             if (!(this.spawnCycle % 600)) {
-    //                 // This is just ripped off of spawn.nodeGroup because I don't want the shield
-    //                 const nodes = 3;
-    //                 const radius = Math.ceil(Math.random() * 10) + 18;
-    //                 const sideLength = Math.ceil(Math.random() * 100) + 70;
-    //                 const stiffness = Math.random() * 0.03 + 0.005;
-    //                 spawn.allowShields = false; //don't want shields on individual group mobs
-    //                 const angle = 2 * Math.PI / nodes
-    //                 for (let i = 0; i < nodes; ++i) {
-    //                     spawn.focuser(x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius);
-    //                 }
-    //                 spawn.constrainAllMobCombos(nodes, stiffness);
-    //                 spawn.allowShields = true;
-    //             }
-    //         }
-    //         me.invulnerableTrap = function() {
-    //             if (this.trapCycle < 1) return;
-    //             this.trapCycle++;
-    //             // 24 is just an arbitrarily large number
-    //             const spawnCycles = Math.min(24, Math.max(6, 4 + Math.floor(simulation.difficulty / 3)));
-    //             // I have no idea how to balance at all, please help me
-    //             const spawnDelay = Math.floor(5 + 10 / (1 + Math.sqrt(simulation.difficulty) / 5));
-    //             if (this.trapCycle >= 90) {
-    //                 const cycle = this.trapCycle - 90;
-    //                 if (!(cycle % spawnDelay)) {
-    //                     const radius = Math.min(500, 200 + simulation.difficulty * 3);
-    //                     mobGrenade(600, -13050, 30, radius);
-    //                     Matter.Body.setVelocity(mob[mob.length - 1], { x: 35, y: 0 });
-    //                     mobGrenade(3000, -13050, 30, radius);
-    //                     Matter.Body.setVelocity(mob[mob.length - 1], { x: -35, y: 0 });
-    //                     mobGrenade(600, -14350, 30, radius);
-    //                     Matter.Body.setVelocity(mob[mob.length - 1], { x: 35, y: 0 });
-    //                     mobGrenade(3000, -14350, 30, radius);
-    //                     Matter.Body.setVelocity(mob[mob.length - 1], { x: -35, y: 0 });
-    //                     if (Math.floor(cycle / spawnDelay) >= spawnCycles - 1) {
-    //                         this.trapCycle = 0;
-    //                         this.isInvulnerable = false;
-    //                         this.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
-    //                     }
-    //                 }
-    //             }
-    //             ctx.font = "100px Arial";
-    //             ctx.fillStyle = "#f00";
-    //             ctx.shadowBlur = 10;
-    //             ctx.shadowColor = "#f00";
-    //             ctx.textAlign = "center";
-    //             ctx.textBaseLine = "middle";
-    //             ctx.fillText("!", 900, -13050);
-    //             ctx.fillText("!", 900, -14350);
-    //             ctx.fillText("!", 1800, -13050);
-    //             ctx.fillText("!", 1800, -14350);
-    //             ctx.fillText("!", 2700, -13050);
-    //             ctx.fillText("!", 2700, -14350);
-    //             ctx.shadowBlur = 0;
-    //         }
-    //         me.do = function() {
-    //             this.checkStatus();
-    //             this.horizon();
-    //             this.ring();
-    //             this.periodicSpawns();
-    //             this.invulnerableTrap();
-    //         }
-    //     };
-    //     let oldNextLevel = level.nextLevel;
-    //     const oldFallHeight = simulation.fallHeight;
-    //     level.nextLevel = () => {
-    //         color.map = "#444";
-    //         m.death = m.oldDeath;
-    //         canvas.style.filter = "";
-    //         level.nextLevel = oldNextLevel;
-    //         simulation.fallHeight = oldFallHeight;
-    //         oldNextLevel();
-    //     }
-    //     let bounds = [];
-    //     let mobPositionsQueue = Array.from(Array(10), () => []);
-    //     m.oldDeath = m.death;
-    //     m.death = function() {
-    //         if (!tech.isImmortal) {
-    //             requestAnimationFrame(() => color.map = "#444");
-    //             m.death = m.oldDeath;
-    //             canvas.style.filter = "";
-    //             level.nextLevel = oldNextLevel;
-    //             simulation.fallHeight = oldFallHeight;
-    //         }
-    //         m.oldDeath();
-    //     }
-    //     let name = "⥟ᘊ5⪊Ыᳪៗⱕ␥ዘᑧ⍗";
-    //     addPartToMap = (len = map.length - 1) => {
-    //         map[len].collisionFilter.category = cat.map;
-    //         map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
-    //         Matter.Body.setStatic(map[len], true); // make static
-    //         Composite.add(engine.world, map[len]);
-    //     }
-    //     level.setPosToSpawn(50, -50); // normal spawn
-    //     // Make the level exit really far away so WIMP powerups don't show up at all
-    //     level.exit.x = 1e6;
-    //     level.exit.y = -1e6;
-    //     Promise.resolve().then(() => {
-    //         // Clear all WIMPS and their research
-    //         for (let i = 0; i < mob.length; i++) {
-    //             while (mob[i] && !mob[i].isMACHO) {
-    //                 mob[i].replace(i);
-    //             }
-    //         }
-    //         for (let i = 0; i < powerUp.length; i++) {
-    //             while (powerUp[i] && powerUp[i].name === "research") {
-    //                 Matter.Composite.remove(engine.world, powerUp[i]);
-    //                 powerUp.splice(i, 1);
-    //             }
-    //         }
-    //         level.exit.x = 1500;
-    //         level.exit.y = -30;
-    //     });
-    //     spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-    //     spawn.mapRect(1500, -10, 100, 20);
-    //     level.defaultZoom = 1800
-    //     simulation.setZoom(1200);
-    //     document.body.style.backgroundColor = "#daa69f";
-    //     color.map = "#600";
-
-    //     function box(x, y, w, h, s) {
-    //         spawn.mapRect(x, y, w, s);
-    //         spawn.mapRect(x, y, s, h);
-    //         spawn.mapRect(x + w - s, y, s, h);
-    //         spawn.mapRect(x, y + h - s, w, s);
-    //     }
-
-    //     function diamond(x, y, s) {
-    //         spawn.mapVertex(x, y, `0 -${s}  -${s} 0  0 ${s}  ${s} 0`);
-    //     }
-
-    //     // Fake level
-    //     bounds.push(new Rect(-200, -500, 2000, 600));
-    //     box(-200, -500, 2000, 600, 100);
-
-    //     // Actual level, Room 1
-    //     const firstRoomBounds = new Rect(-200, -4000, 5000, 2100);
-    //     bounds.push(firstRoomBounds);
-
-    //     box(-200, -4000, 5000, 2100, 100);
-    //     spawn.mapRect(-200, -2500, 1300, 100);
-    //     spawn.mapRect(3500, -2500, 1300, 100);
-    //     spawn.mapRect(-200, -4000, 1000, 1600);
-    //     spawn.mapRect(3800, -4000, 1000, 1600);
-    //     // Enter and Exit platforms
-    //     spawn.mapRect(0, -2010, 100, 20);
-    //     spawn.mapRect(4500, -2010, 100, 20);
-
-    //     // Altar of Room 1
-    //     spawn.mapRect(2100, -2200, 100, 300);
-    //     spawn.mapRect(2400, -2200, 100, 300);
-    //     spawn.mapRect(2070, -2200, 460, 20);
-
-    //     spawn.debris(1700, -2100, 300, 10);
-    //     spawn.debris(2500, -2100, 300, 10);
-
-    //     // Actual level, Room 2
-    //     const secondRoomBounds = new Rect(-1500, -10500, 3000, 3600);
-    //     bounds.push(secondRoomBounds);
-
-    //     box(-1500, -10500, 3000, 3600, 100);
-    //     spawn.mapRect(-2000, -8500, 1600, 1600);
-    //     spawn.mapRect(400, -8500, 1600, 1600);
-    //     // Enter and Exit platforms
-    //     spawn.mapRect(-50, -7010, 100, 20);
-    //     spawn.mapRect(-50, -10010, 100, 20);
-
-    //     // Hazard traversing
-    //     spawn.mapRect(-300, -7320, 800, 20);
-    //     spawn.mapRect(175, -7600, 325, 20);
-    //     spawn.mapRect(200, -7775, 300, 20);
-    //     spawn.mapRect(-500, -7600, 325, 20);
-    //     spawn.mapRect(-500, -7775, 300, 20);
-    //     spawn.mapRect(-500, -7950, 800, 20);
-    //     spawn.mapRect(-300, -8100, 800, 20);
-    //     spawn.mapRect(-500, -8250, 800, 20);
-    //     for (let i = 0; i < 2; i++) spawn.mapRect(-250, -8400 + 150 * i, 500, 60);
-    //     const room2SlimePit = level.hazard(-400, -8410, 800, 1090);
-    //     room2SlimePit.logic = function() {
-    //         if (this.height > 0 && Matter.Query.region([player], this).length) {
-    //             if (m.immuneCycle < m.cycle) {
-    //                 // Trolled
-    //                 const hasCPT = tech.isRewindAvoidDeath;
-    //                 tech.isRewindAvoidDeath = false;
-    //                 const DRAIN = 0.002 * (tech.isRadioactiveResistance ? 0.25 : 1) + m.fieldRegen;
-    //                 if (m.energy > DRAIN && !tech.isEnergyHealth) {
-    //                     m.energy -= DRAIN;
-    //                 }
-    //                 m.damage(0.00015 * (tech.isRadioactiveResistance ? 0.25 : 1));
-    //                 if (tech.isEnergyHealth) {
-    //                     const previousEnergy = m.energy;
-    //                     m.regenEnergy();
-    //                     const energyRegenerated = m.energy - previousEnergy;
-    //                     if (energyRegenerated > 0) {
-    //                         m.energy = previousEnergy;
-    //                         m.damage(energyRegenerated);
-    //                     }
-    //                 }
-    //                 tech.isRewindAvoidDeath = hasCPT;
-    //             }
-    //             player.force.y -= 0.3 * player.mass * simulation.g;
-    //             setVel(player, Vector.sub(player.velocity, { x: 0, y: player.velocity.y * 0.02 }));
-    //         }
-    //         // Float power ups
-    //         powerUpCollide = Matter.Query.region(powerUp, this)
-    //         for (let i = 0, len = powerUpCollide.length; i < len; i++) {
-    //             const diameter = 2 * powerUpCollide[i].size
-    //             const buoyancy = 1 - 0.2 * Math.max(0, Math.min(diameter, this.min.y - powerUpCollide[i].position.y + powerUpCollide[i].size)) / diameter
-    //             powerUpCollide[i].force.y -= buoyancy * 1.14 * powerUpCollide[i].mass * simulation.g;
-    //             setVel(powerUpCollide[i], { x: powerUpCollide[i].velocity.x, y: 0.96 * powerUpCollide[i].velocity.y });
-    //         }
-    //     }
-    //     room2SlimePit.draw = function() {
-    //         if (this.isOn) {
-    //             ctx.fillStyle = "hsla(160, 100%, 35%, 0.75)";
-    //             ctx.fillRect(this.min.x, this.min.y, this.width, this.height);
-    //         }
-    //     }
-    //     // Room 2 spawning bounds
-    //     const secondRoomSpawnBounds = new Rect(-1500, -10500, 3000, 2000);
-    //     spawn.mapRect(-700, -8700, 150, 20);
-    //     spawn.mapRect(550, -8700, 150, 20);
-    //     spawn.mapRect(-400, -8900, 800, 20);
-    //     diamond(-600, -9800, 30);
-    //     diamond(0, -9800, 30);
-    //     diamond(600, -9800, 30);
-
-    //     spawn.mapRect(-1000, -10000, 2000, 30);
-
-    //     // Actual level, Room 3 (Final Boss?)
-    //     const thirdRoomBounds = new Rect(-200, -14500, 4000, 1600);
-    //     bounds.push(thirdRoomBounds);
-    //     box(-200, -14500, 4000, 1600, 100);
-    //     spawn.mapRect(-200, -14500, 800, 1100);
-    //     spawn.mapRect(3000, -14500, 800, 1100);
-    //     // Enter and Exit platforms
-    //     spawn.mapRect(0, -13110, 100, 20);
-    //     spawn.mapRect(-200, -13100, 800, 200);
-    //     spawn.mapRect(3500, -13110, 100, 20);
-    //     spawn.mapRect(3000, -13100, 800, 200);
-    //     for (let i = 0; i < 3; i++) spawn.bodyRect(500, -13400 + i * 100, 100, 100);
-
-    //     for (let i = 0; i < 3; i++) {
-    //         diamond(1100 + 700 * i, -13000, 30, 30);
-    //         diamond(1100 + 700 * i, -14400, 30, 30);
-    //     }
-
-    //     const Objects = {
-    //         altar: {
-    //             get isHeal() {
-    //                 return simulation.cycle % 600 >= 300;
-    //             },
-    //             pos: {
-    //                 x: 2300,
-    //                 y: -2200
-    //             },
-    //             get isActive() {
-    //                 const roughPlayerCentre = V.add(m.pos, { x: 0, y: 40 });
-    //                 return distance(roughPlayerCentre, this.pos) < 240 &&
-    //                     (Math.abs(angle(roughPlayerCentre, this.pos) - Math.PI / 2) < 1);
-    //             },
-    //             logic() {
-    //                 if (!this.isActive) return;
-    //                 if (this.isHeal) {
-    //                     m.energy += 0.005;
-    //                 } else {
-    //                     m.energy = Math.max(m.energy - 0.007 - m.fieldRegen, 0);
-    //                     if (m.energy <= 0.01 && m.immuneCycle < m.cycle) m.damage(0.002);
-    //                 }
-    //             },
-    //             drawTop() {
-    //                 if (!isInBound(firstRoomBounds)) return;
-    //                 const colour = this.isHeal ? m.fieldMeterColor : "#f00";
-    //                 DrawTools.flame([2300, -2200, 26, 4, colour], 7);
-    //                 ctx.fillStyle = colour;
-    //                 ctx.fillRect(2200, -2200, 200, 200);
-    //             },
-    //             drawBottom() {
-    //                 ctx.fillStyle = this.isHeal ? "#fff5" : "#0005";
-    //                 for (const radius of [230, 180, 130, 80, 30]) {
-    //                     DrawTools.arc(2300, -2200, radius, 0, Math.PI, true);
-    //                 }
-    //             }
-    //         },
-    //         room2Initiator: {
-    //             pos: {
-    //                 x: 0,
-    //                 y: -9050
-    //             },
-    //             get distance() {
-    //                 return distance(player.position, this.pos);
-    //             },
-    //             range: 120,
-    //             rings: [{
-    //                 colour: [102, 85, 255],
-    //                 radius: 200
-    //             }, {
-    //                 colour: [0, 255, 0],
-    //                 radius: 300
-    //             }, {
-    //                 colour: [255, 0, 0],
-    //                 radius: 400
-    //             }],
-    //             get ringNumber() {
-    //                 return this.rings.length;
-    //             },
-    //             get cap() {
-    //                 return (this.ringNumber + 1) * 90 + 240;
-    //             },
-    //             get capped() {
-    //                 return templePlayer.room2.spawnInitiatorCycles > this.cap;
-    //             },
-    //             logic() {
-    //                 if (this.distance < this.range) {
-    //                     templePlayer.room2.spawnInitiatorCycles++;
-    //                 }
-    //             },
-    //             draw() {
-    //                 Promise.resolve().then(() => {
-    //                     const cycle = templePlayer.room2.spawnInitiatorCycles;
-    //                     if (!this.capped && this.distance < 400) {
-    //                         ctx.fillStyle = `rgba(0, 0, 0, ${Math.min(1, (400 - this.distance) / (400 - this.range)) * 0.9})`;
-    //                         ctx.fillRect(0, 0, canvas.width, canvas.height);
-    //                     }
-    //                     ctx.save();
-    //                     simulation.camera();
-    //                     if (this.distance < this.range && !this.capped) {
-    //                         DrawTools.lightning(V.sub(this.pos, { x: 300, y: 300 }), V.add(this.pos, { x: 300, y: 300 }), simulation.cycle - 5);
-    //                         DrawTools.lightning(V.add(this.pos, { x: -300, y: 300 }), V.add(this.pos, { x: 300, y: -300 }), simulation.cycle - 5);
-    //                     }
-    //                     if (!this.capped && cycle >= this.cap - 200) {
-    //                         const multCoeff = (cycle - this.cap + 200) * 0.4
-    //                         ctx.translate((Math.random() - 0.5) * multCoeff, (Math.random() - 0.5) * multCoeff);
-    //                     }
-    //                     ctx.shadowBlur = 20;
-    //                     ctx.lineWidth = 12;
-    //                     ctx.strokeStyle = (templePlayer.room2.cycles % 60 < 30) ? "#fff" : "#000";
-    //                     ctx.shadowColor = (templePlayer.room2.cycles % 60 < 30) ? "#fff" : "#000";
-    //                     DrawTools.arcOut(this.pos.x, this.pos.y, 100, 0, Math.PI * 2);
-    //                     if (templePlayer.room2.cycles <= 100) {
-    //                         for (let i = 0; i < this.ringNumber; i++) {
-    //                             if (cycle < i * 90 + 90) break;
-    //                             const ring = this.rings[i];
-    //                             ctx.shadowColor = `rgb(${ring.colour.join(",")})`;
-    //                             const opacity = this.capped ? 1 - 0.01 * templePlayer.room2.cycles : (cycle / 180 - i / 2 - 0.5);
-    //                             ctx.strokeStyle = `rgba(${ring.colour.join(",")}, ${Math.min(opacity, 1)})`;
-    //                             const radius = (this.capped ? 1 + 0.07 * templePlayer.room2.cycles : Math.sin(Math.min(cycle - i * 90 - 90, 45) / 90 * Math.PI)) * ring.radius;
-    //                             DrawTools.arcOut(this.pos.x, this.pos.y, radius, 0, Math.PI * 2);
-    //                         }
-    //                     }
-    //                     ctx.restore();
-    //                 });
-    //             }
-    //         },
-    //         room2Lightning: {
-    //             one: [{ x: -1400, y: -10400 }, { x: 1400, y: -8500 }],
-    //             two: [{ x: -1400, y: -8500 }, { x: 1400, y: -10400 }],
-    //             get isHeal() {
-    //                 return simulation.cycle % 360 < 180;
-    //             },
-    //             get oneEq() {
-    //                 return Equation.fromPoints(this.one[0], this.one[1]);
-    //             },
-    //             get twoEq() {
-    //                 return Equation.fromPoints(this.two[0], this.two[1]);
-    //             },
-    //             logic() {
-    //                 if (!isInBound(secondRoomSpawnBounds) || !templePlayer.room2.cycles) return;
-
-    //                 const playerbounds = Rect.fromBounds(player.bounds.min, player.bounds.max);
-    //                 if (playerbounds.hasLine(this.oneEq) || playerbounds.hasLine(this.twoEq)) {
-    //                     if (this.isHeal) {
-    //                         m.energy += 0.003;
-    //                     } else if (m.immuneCycle < m.cycle) {
-    //                         m.energy -= 0.003;
-    //                     }
-    //                 }
-    //             },
-    //             draw() {
-    //                 if (!isInBound(secondRoomBounds) || !templePlayer.room2.cycles) return;
-
-    //                 const colour = this.isHeal ? undefined : [0, 0, 0];
-    //                 DrawTools.lightning(...this.one, Math.floor(simulation.cycle / 15) * 15, 1, 9, colour);
-    //                 DrawTools.lightning(...this.two, Math.floor(simulation.cycle / 15) * 15, 2, 9, colour);
-    //             }
-    //         },
-    //         room2GeneratedPath: {
-    //             rects: (function() {
-    //                 const rects = [];
-    //                 for (let i = 0; i < 4; i++) {
-    //                     rects.push(new Rect(-1405 + (i & 1) * 200, -9700 + i * 300, 205, 30));
-    //                     rects.push(new Rect(1200 - (i & 1) * 200, -9700 + i * 300, 205, 30));
-    //                 }
-    //                 return rects;
-    //             })(),
-    //             logic() {
-    //                 if (templePlayer.room2.readyPathCycle && simulation.cycle - templePlayer.room2.readyPathCycle === 180) {
-    //                     for (const r of this.rects) {
-    //                         r.addToMap();
-    //                         addPartToMap();
-    //                         simulation.draw.setPaths();
-    //                     }
-    //                 }
-    //             },
-    //             draw() {
-    //                 if (templePlayer.room2.readyPathCycle && simulation.cycle - templePlayer.room2.readyPathCycle < 180) {
-    //                     ctx.fillStyle = "#fe79";
-    //                     for (const r of this.rects) {
-    //                         ctx.fillRect(r.pos.x, r.pos.y, r.width, r.height);
-    //                     }
-    //                 } else if (simulation.cycle - templePlayer.room2.readyPathCycle < 195) {
-    //                     for (const r of this.rects) {
-    //                         DrawTools.lightning(Objects.room2Initiator.pos, r.midPos, templePlayer.room2.readyPathCycle + 180);
-    //                     }
-    //                 }
-    //             }
-    //         },
-    //         room3Rotors: {
-    //             rotor1: (function() {
-    //                 const rotor = level.spinner(900, -13700, 200, 30);
-    //                 rotor.rotate = function() {
-    //                     Matter.Body.setAngularVelocity(this.bodyB, (this.bodyB.angularVelocity + 0.01) * 0.9)
-    //                 }
-    //                 return rotor;
-    //             })(),
-    //             rotor2: (function() {
-    //                 const rotor = level.spinner(2700, -13700, 200, 30);
-    //                 rotor.rotate = function() {
-    //                     Matter.Body.setAngularVelocity(this.bodyB, (this.bodyB.angularVelocity - 0.01) * 0.9)
-    //                 }
-    //                 return rotor;
-    //             })(),
-    //             logic() {
-    //                 this.rotor1.rotate();
-    //                 this.rotor2.rotate();
-    //             }
-    //         },
-    //         room3SlimePits: {
-    //             pit1: level.hazard(-100, -13400, 0, 0, 0.004),
-    //             pit2: level.hazard(3700, -13400, 0, 0, 0.004),
-    //             logic() {
-    //                 if (templePlayer.room2ToRoom3Anim >= 1320 && templePlayer.room2ToRoom3Anim <= 1570) {
-    //                     this.pit1.height = this.pit2.height = 300;
-    //                     this.pit1.max.y = this.pit2.max.y = -13100;
-    //                     this.pit1.width = this.pit2.width = templePlayer.room2ToRoom3Anim * 2 - 2640;
-    //                     this.pit1.max.x = this.pit1.min.x + this.pit1.width;
-    //                     this.pit2.min.x = this.pit2.max.x - this.pit2.width;
-    //                 }
-    //                 if (templePlayer.room3ToEndAnim) {
-    //                     this.pit1.height = this.pit1.width = 0;
-    //                     this.pit2.height = this.pit2.width = 0;
-    //                 }
-    //             },
-    //             draw() {
-    //                 this.pit1.query();
-    //                 this.pit2.query();
-    //             }
-    //         }
-    //     };
-    //     let templePlayer = {
-    //         room1: {
-    //             cycles: 300
-    //         },
-    //         room2: {
-    //             spawnInitiatorCycles: 0,
-    //             cycles: 0,
-    //             readyPathCycle: 0
-    //         },
-    //         stage: 1,
-    //         startAnim: 0,
-    //         room1ToRoom2Anim: 0,
-    //         room2ToRoom3Anim: 0,
-    //         room3ToEndAnim: 0,
-    //         initialTrapY: 0,
-    //         clearedCycle: 0,
-    //         drawExit: true
-    //     };
-
-    //     const RoomTransitionHandler = {
-    //         room0() {
-    //             if (templePlayer.startAnim <= 0) return;
-    //             templePlayer.startAnim++;
-    //             if (templePlayer.startAnim == 120) {
-    //                 makeLore("Not so fast.");
-    //             }
-    //             if (templePlayer.startAnim < 360) {
-    //                 trapPlayer(1000, templePlayer.initialTrapY);
-    //             } else {
-    //                 level.exit.x = 4500;
-    //                 level.exit.y = -2030;
-    //                 relocateTo(50, -2050);
-    //                 simulation.fallHeight = -1000;
-    //                 simulation.setZoom(1800);
-    //                 templePlayer.startAnim = -1;
-    //                 for (let i = 0; i < tech.wimpCount + tech.wimpExperiment; i++) {
-    //                     addWIMP();
-    //                 }
-    //                 templePlayer.drawExit = false;
-    //             }
-    //         },
-    //         room1() {
-    //             if (templePlayer.room1ToRoom2Anim <= 0) return;
-    //             if (templePlayer.room1ToRoom2Anim === 1) {
-    //                 level.exit.x = -50;
-    //                 level.exit.y = -10030;
-    //                 makeLore("Pathetic.");
-    //             }
-    //             if (templePlayer.room1ToRoom2Anim === 241) {
-    //                 makeLore("You will never succeed.");
-    //             }
-    //             if (templePlayer.room1ToRoom2Anim >= 480 && templePlayer.room1ToRoom2Anim <= 960) {
-    //                 const factor = 200 - 200 * Math.cos((templePlayer.room1ToRoom2Anim / 120) * Math.PI);
-    //                 ctx.translate(factor, factor);
-    //                 Promise.resolve().then(() => {
-    //                     ctx.save();
-    //                     ctx.globalCompositeOperation = "color-burn";
-    //                     ctx.fillStyle = DrawTools.randomColours;
-    //                     DrawTools.updateRandomColours(5);
-    //                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    //                     ctx.restore();
-    //                 });
-    //             }
-    //             if (templePlayer.room1ToRoom2Anim === 960) {
-    //                 makeLore("You are trying too hard.");
-    //                 relocateTo(0, -7050);
-    //                 simulation.fallHeight = -6000;
-    //                 templePlayer.stage = 2;
-    //             }
-    //             if (templePlayer.room1ToRoom2Anim === 1200) {
-    //                 makeLore("I have mastered the understandings of the universe.");
-    //             }
-    //             if (templePlayer.room1ToRoom2Anim === 1260) {
-    //                 // Congrats, you discovered the actual words by looking at the source code. Are you happy now?
-    //                 const x = (
-    //                     ["a speck of dust", "an insignificant hindrance", "a tiny obstacle"]
-    //                 )[Math.floor(Math.random() * 3)].split("");
-    //                 for (let i = 0; i < x.length / 1.6; i++) {
-    //                     const randomIndex = Math.floor(Math.random() * x.length);
-    //                     if (x[randomIndex] !== " ") {
-    //                         x[randomIndex] = String.fromCharCode(Math.floor(Math.random() * 50) + 192);
-    //                     }
-    //                 };
-    //                 makeLore(`You are no more than ${x.join("")} to me.</h3></h2>`);
-    //                 relocateWIMPs(0, -10030);
-    //             }
-    //             templePlayer.room1ToRoom2Anim++;
-    //         },
-    //         room2() {
-    //             if (templePlayer.room2ToRoom3Anim <= 0) return;
-    //             if (templePlayer.room2ToRoom3Anim === 1) {
-    //                 level.exit.x = 3500;
-    //                 level.exit.y = -13130;
-    //                 makeLore("Do not try me.");
-    //             }
-    //             if (templePlayer.room2ToRoom3Anim === 240) {
-    //                 makeLore("I have absolute power over you.");
-    //                 canvas.style.filter = "hue-rotate(90deg)";
-    //             }
-    //             if (templePlayer.room2ToRoom3Anim === 480) {
-    //                 makeLore("You will not succeed...");
-    //                 canvas.style.filter = "invert(0.2)";
-    //             }
-    //             if (templePlayer.room2ToRoom3Anim === 600) {
-    //                 makeLore("<h6 style='display: inline-block'>succeed...</h6>");
-    //                 canvas.style.filter = "invert(0.4)";
-    //             }
-    //             if (templePlayer.room2ToRoom3Anim > 660 && templePlayer.room2ToRoom3Anim <= 840) {
-    //                 canvas.style.filter = `sepia(${(templePlayer.room2ToRoom3Anim - 660) / 180}) invert(${0.5 + (templePlayer.room2ToRoom3Anim - 660) / 360})`;
-    //             }
-    //             if (templePlayer.room2ToRoom3Anim === 960) {
-    //                 makeLore("Do not interfere with me.");
-    //                 templePlayer.stage = 3;
-    //                 relocateTo(50, -13150);
-    //                 simulation.fallHeight = -10000;
-    //                 simulation.zoomTransition(1800);
-    //                 templePlayer.startAnim = -1;
-    //                 // Might be a bit harsh to the player if the WIMPs are involved in the third level
-    //                 for (let i = 0; i < mob.length; i++) {
-    //                     while (mob[i] && !mob[i].isWIMP) {
-    //                         mob[i].replace(i);
-    //                     }
-    //                 }
-    //             }
-    //             if (templePlayer.room2ToRoom3Anim > 960 && templePlayer.room2ToRoom3Anim <= 1140) {
-    //                 canvas.style.filter = `sepia(${(1140 - templePlayer.room2ToRoom3Anim) / 180}) invert(${(1140 - templePlayer.room2ToRoom3Anim) / 180})`;
-    //             }
-    //             templePlayer.room2ToRoom3Anim++;
-    //         },
-    //         room3() {
-    //             if (templePlayer.room3ToEndAnim <= 0) return;
-    //             if (templePlayer.room3ToEndAnim === 1) {
-    //                 makeLore("No.");
-    //             }
-    //             if (templePlayer.room3ToEndAnim === 120) {
-    //                 makeLore("This cannot be.");
-    //             }
-    //             if (templePlayer.room3ToEndAnim === 240) {
-    //                 makeLore("Has my power failed me?");
-    //             }
-    //             if (templePlayer.room3ToEndAnim === 360) {
-    //                 makeLore("Was it worth it, destroying this place?");
-    //             }
-    //             if (templePlayer.room3ToEndAnim === 600) {
-    //                 makeLore("No one is greater than me.");
-    //             }
-    //             const text = "noone-";
-    //             for (let i = 0; i < 12; i++) {
-    //                 if (templePlayer.room3ToEndAnim === 720 + i * 20) {
-    //                     name = name.slice(0, -1);
-    //                     simulation.makeTextLog(`<span style="font-size: 1em"><span style="color: #f00">${name}:</span> &nbsp; ${text[i % 6]}</span>`);
-    //                     canvas.style.filter = `brightness(${1 - i / 22})`;
-    //                 }
-    //             }
-    //             if (templePlayer.room3ToEndAnim === 1060) {
-    //                 templePlayer.drawExit = true;
-    //                 for (let i = 0; i < 5 * tech.wimpCount; i++) {
-    //                     powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false);
-    //                 }
-    //                 canvas.style.filter = "";
-    //             }
-    //             templePlayer.room3ToEndAnim++;
-    //         },
-    //         end() {
-    //             if (!templePlayer.clearedCycle) return;
-    //             Promise.resolve().then(() => {
-    //                 ctx.save();
-    //                 ctx.setTransform(1, 0, 0, 1, 0, 0);
-    //                 ctx.fillStyle = `rgba(0, 0, 0, ${(simulation.cycle - templePlayer.clearedCycle) / 300})`;
-    //                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-    //                 ctx.restore();
-    //             });
-    //             if (simulation.cycle - templePlayer.clearedCycle > 420) level.nextLevel();
-    //         }
-    //     };
-    //     const LogicHandler = {
-    //         bounds() {
-    //             let isInBounds = false;
-    //             for (const b of bounds) {
-    //                 if (isInBound(b)) {
-    //                     isInBounds = true;
-    //                     break;
-    //                 }
-    //             }
-    //             if (!isInBounds) {
-    //                 m.damage(0.1 * simulation.difficultyMode);
-    //                 trapPlayer(level.enter.x, level.enter.y);
-    //                 simulation.makeTextLog("<span style='color: #f00'>" + name + "</span>: &nbsp; You thought I could let you get away with that?");
-    //             }
-    //         },
-    //         room0() {
-    //             // Block the player from entering the first seemingly innocuous exit
-    //             if ((m.pos.x > 1000) && templePlayer.startAnim === 0) {
-    //                 spawn.mapRect(1200, -500, 100, 600);
-    //                 templePlayer.initialTrapY = Math.min(player.position.y, -75);
-    //                 trapPlayer(1000, templePlayer.initialTrapY);
-
-    //                 addPartToMap();
-    //                 simulation.draw.setPaths();
-    //                 templePlayer.startAnim = 1;
-    //             }
-    //         },
-    //         room1() {
-    //             WaveHandler.room1();
-    //             Objects.altar.logic();
-    //         },
-    //         room2() {
-    //             room2SlimePit.logic();
-    //             Objects.room2Initiator.logic();
-    //             Objects.room2Lightning.logic();
-    //             Objects.room2GeneratedPath.logic();
-    //             WaveHandler.room2();
-    //         },
-    //         room3() {
-    //             Objects.room3Rotors.logic();
-    //             Objects.room3SlimePits.logic();
-    //             WaveHandler.room3();
-    //         },
-    //         exit() {
-    //             if (!templePlayer.drawExit) return;
-    //             if (player.position.x > level.exit.x &&
-    //                 player.position.x < level.exit.x + 100 &&
-    //                 player.position.y > level.exit.y - 150 &&
-    //                 player.position.y < level.exit.y - 40 &&
-    //                 player.velocity.y < 0.1 &&
-    //                 level.exitCount + (input.down ? 8 : 2) > 100) {
-    //                 if (templePlayer.stage === 1) {
-    //                     templePlayer.drawExit = false;
-    //                     templePlayer.room1ToRoom2Anim = 1;
-    //                 } else if (templePlayer.stage === 2) {
-    //                     templePlayer.drawExit = false;
-    //                     templePlayer.room2ToRoom3Anim = 1;
-    //                 } else {
-    //                     level.exitCount = 99 - (input.down ? 8 : 2);
-    //                     if (!templePlayer.clearedCycle) templePlayer.clearedCycle = simulation.cycle;
-    //                 }
-    //             }
-    //         }
-    //     };
-    //     const DrawHandler = {
-    //         // Bottom layer
-    //         base() {
-    //             // Draw base red background
-    //             ctx.save();
-    //             ctx.setTransform(1, 0, 0, 1, 0, 0);
-    //             ctx.fillStyle = color.map;
-    //             ctx.fillRect(0, 0, canvas.width, canvas.height);
-    //             ctx.restore();
-
-    //             // Draw the normal bg on the bounds
-    //             ctx.fillStyle = "#eab6af";
-    //             for (const b of bounds) {
-    //                 if (isInBound(b)) ctx.fillRect(b.pos.x + 2, b.pos.y + 2, b.width - 4, b.height - 4);
-    //             }
-    //         },
-    //         entrance() {
-    //             ctx.beginPath();
-    //             ctx.moveTo(level.enter.x, level.enter.y + 30);
-    //             ctx.lineTo(level.enter.x, level.enter.y - 80);
-    //             ctx.bezierCurveTo(level.enter.x, level.enter.y - 170, level.enter.x + 100, level.enter.y - 170, level.enter.x + 100, level.enter.y - 80);
-    //             ctx.lineTo(level.enter.x + 100, level.enter.y + 30);
-    //             ctx.lineTo(level.enter.x, level.enter.y + 30);
-    //             ctx.fillStyle = "#fca";
-    //             ctx.fill();
-    //         },
-    //         room1() {
-    //             if (!isInBound(firstRoomBounds)) return;
-
-    //             // Draw Cross
-    //             ctx.fillStyle = "#fed";
-    //             ctx.fillRect(2200, -3300, 200, 800);
-    //             ctx.fillRect(2000, -3100, 600, 200);
-
-    //             // Final boss-like spawn fire thing. Was it necessary? No!
-    //             const spawnFlameAngle = Math.min(Math.min(templePlayer.room1.cycles, 2520) % 600, 120) * Math.PI / 30 + Math.PI / 2;
-    //             DrawTools.flame([2300, -3000, 26, 4, "#f60", spawnFlameAngle], 7);
-
-    //             Objects.altar.drawBottom();
-    //         },
-    //         room2() {
-    //             if (!isInBound(secondRoomBounds)) return;
-
-    //             if (templePlayer.room2.cycles) {
-    //                 ctx.fillStyle = "#0006";
-    //                 ctx.fillRect(secondRoomBounds.pos.x + 2, secondRoomBounds.pos.y + 2, secondRoomBounds.width - 4, secondRoomBounds.height - 4);
-    //             }
-    //             room2SlimePit.draw();
-    //         },
-    //         room3() {
-    //             if (!isInBound(thirdRoomBounds)) return;
-    //             ctx.fillStyle = "#0006";
-    //             ctx.fillRect(thirdRoomBounds.pos.x + 2, thirdRoomBounds.pos.y + 2, thirdRoomBounds.width - 4, thirdRoomBounds.height - 4);
-    //             Objects.room3SlimePits.draw();
-    //         },
-    //         // Top layer
-    //         mobTrails() {
-    //             if (simulation.cycle % 4 === 0) {
-    //                 let newMobPositions = [];
-    //                 for (const i of mob) {
-    //                     if (!(i.isMACHO || i.isWIMP)) newMobPositions.push({ x: i.position.x, y: i.position.y });
-    //                 }
-    //                 mobPositionsQueue.shift();
-    //                 mobPositionsQueue.push(newMobPositions);
-    //             }
-    //             // Draw "holy" trails for mobs for no particular reason at all
-    //             ctx.strokeStyle = "#bae";
-    //             ctx.lineWidth = 3;
-    //             for (let i = 0; i < 10; i++) {
-    //                 const p = mobPositionsQueue[i];
-    //                 for (const m of p) {
-    //                     DrawTools.holy(m.x, m.y, i / 2 + 10);
-    //                 }
-    //             }
-    //             ctx.shadowBlur = 0;
-    //         },
-    //         waveTimer() {
-    //             const roomConditions = [
-    //                 isInBound(firstRoomBounds) && templePlayer.room1.cycles < 2400,
-    //                 isInBound(secondRoomBounds) && templePlayer.room2.cycles > 0 && templePlayer.room2.cycles < 2160,
-    //                 isInBound(thirdRoomBounds) && templePlayer.room2ToRoom3Anim < 1320
-    //             ];
-    //             Promise.resolve(roomConditions).then(roomConditions => {
-    //                 // First Room
-    //                 if (roomConditions[0]) {
-    //                     ctx.save();
-    //                     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    //                     ctx.fillStyle = "#0004";
-    //                     ctx.fillRect(canvas.width2 - 288, 50, 576, 20);
-    //                     ctx.fillStyle = "#0cf";
-    //                     ctx.fillRect(canvas.width2 - 288, 50, 0.8 * (600 - templePlayer.room1.cycles % 600), 20);
-    //                     ctx.restore();
-    //                 }
-    //                 // Second Room
-    //                 if (roomConditions[1]) {
-    //                     ctx.save();
-    //                     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    //                     ctx.fillStyle = "#0004";
-    //                     ctx.fillRect(canvas.width2 - 288, 50, 576, 20);
-    //                     ctx.fillStyle = (Math.ceil(templePlayer.room2.cycles / 720) & 1) ? "#000" : "#e1d7ff";
-    //                     ctx.fillRect(canvas.width2 - 288, 50, 0.8 * (720 - templePlayer.room2.cycles % 720), 20);
-    //                     ctx.restore();
-    //                 }
-    //                 // Third Room
-    //                 if (roomConditions[2]) {
-    //                     ctx.save();
-    //                     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    //                     ctx.fillStyle = "#0004";
-    //                     ctx.fillRect(canvas.width2 - 288, 50, 576, 20);
-    //                     ctx.fillStyle = "#000";
-    //                     ctx.fillRect(canvas.width2 - 288, 50, 1.6 * (1320 - templePlayer.room2ToRoom3Anim), 20);
-    //                     ctx.restore();
-    //                 }
-    //             });
-    //         },
-    //         room2Top() {
-    //             if (!isInBound(secondRoomBounds)) return;
-    //             Objects.room2Lightning.draw();
-    //             Objects.room2GeneratedPath.draw();
-    //             Objects.room2Initiator.draw();
-    //         }
-    //     };
-    //     const WaveHandler = {
-    //         room1() {
-    //             if (!isInBound(firstRoomBounds)) return;
-    //             if (templePlayer.room1.cycles === 0) powerUps.spawnStartingPowerUps(0, -2050);
-    //             templePlayer.room1.cycles++;
-    //             if (templePlayer.room1.cycles === 2400) {
-    //                 spawn.secondaryBossChance(2300, -2800);
-    //                 powerUps.addResearchToLevel();
-    //             }
-    //             if (templePlayer.room1.cycles % 600 === 0 && templePlayer.room1.cycles <= 2400) {
-    //                 const spawnAmt = Math.min(3 + Math.pow(simulation.difficulty / 1.7, 0.6), 10) + Math.floor(templePlayer.room1.cycles / 720);
-    //                 for (let i = 0; i < spawnAmt; i++) {
-    //                     if (Math.random() < 0.5 + 0.07 * simulation.difficulty) {
-    //                         spawn.randomMob(800 + Math.random() * 3e3, -2400 - Math.random() * 600, Infinity);
-    //                     }
-    //                 }
-    //                 spawn.randomMob(800 + Math.random() * 3e3, -2400 - Math.random() * 600, Infinity);
-    //             }
-    //             if (templePlayer.room1.cycles === 2520) {
-    //                 templePlayer.drawExit = true;
-    //             }
-    //         },
-    //         room2() {
-    //             if (!isInBound(secondRoomBounds)) return;
-    //             if (templePlayer.room2.spawnInitiatorCycles > Objects.room2Initiator.cap) {
-    //                 if (templePlayer.room2.cycles % 720 === 0 && templePlayer.room2.cycles <= 2160) {
-    //                     const isOdd = Math.floor(templePlayer.room2.cycles / 720) & 1;
-    //                     secondRoomBoss(-600, -9800, 25, isOdd);
-    //                     secondRoomBoss(600, -9800, 25, isOdd);
-    //                     secondRoomBoss(0, -9800, 25, !isOdd);
-    //                 }
-    //                 templePlayer.room2.cycles++;
-    //                 if (templePlayer.room2.cycles === 2400) {
-    //                     templePlayer.drawExit = true;
-    //                     templePlayer.room2.readyPathCycle = simulation.cycle;
-    //                 }
-    //             }
-    //         },
-    //         room3() {
-    //             if (templePlayer.room2ToRoom3Anim === 1320) {
-    //                 thirdRoomBoss(1800, -13700);
-    //                 for (let i = 0; i < 3; i++) {
-    //                     powerUps.spawn(m.spawnPos.x, m.spawnPos.y, "heal");
-    //                 }
-    //             }
-    //         }
-    //     };
-    //     const DrawTools = {
-    //         get randomColours() {
-    //             return `rgb(${this._randomColours.join(",")})`
-    //         },
-    //         _randomColours: [Math.random() * 255, Math.random() * 255, Math.random() * 255],
-    //         updateRandomColours(x = 0.8) {
-    //             for (let i = 0; i < this._randomColours.length; i++) {
-    //                 this._randomColours[i] = Math.max(Math.min(this._randomColours[i] + (this.randFact() * x * 2) - x, 255), 0);
-    //             }
-    //         },
-    //         randFact() {
-    //             return Math.random() * 0.8 + Math.sin(Date.now() / 300) * 0.2;
-    //         },
-
-    //         line(vecs) {
-    //             ctx.beginPath();
-    //             ctx.moveTo(vecs[0].x, vecs[0].y);
-    //             for (const v of vecs.slice(1)) ctx.lineTo(v.x, v.y);
-    //             ctx.stroke();
-    //         },
-    //         arc(...x) {
-    //             ctx.beginPath();
-    //             ctx.arc(...x);
-    //             ctx.fill();
-    //         },
-    //         arcOut(...x) {
-    //             ctx.beginPath();
-    //             ctx.arc(...x);
-    //             ctx.stroke();
-    //         },
-    //         flame(props, repeat) {
-    //             for (let i = 0; i < repeat; i++) this.singleFlame(...props);
-    //         },
-    //         singleFlame(x, y, size = 10, repeat = 3, color = "#f00", angle = Math.PI / 2) {
-    //             ctx.strokeStyle = color;
-    //             ctx.lineWidth = 3;
-    //             const path = [{ x, y }];
-    //             for (let i = 0; i < repeat; i++) {
-    //                 const randAng = (Math.random() - 0.5) * 2 + angle;
-    //                 const randLen = 2 * size + Math.random() * size;
-
-    //                 x += Math.cos(randAng) * randLen;
-    //                 y -= Math.sin(randAng) * randLen;
-    //                 path.push({ x, y })
-    //             }
-    //             DrawTools.line(path);
-    //         },
-    //         lightning(from, to, cycle, randomPRNGMult = 1, width = 8, color = [255, 240, 127]) {
-    //             const diff = simulation.cycle - cycle;
-    //             if (diff >= 15) return;
-    //             ctx.strokeStyle = `rgba(${color.join(",")},${(1 - diff / 15) * 255})`;
-    //             ctx.lineWidth = width * (1 - diff / 15);
-    //             ctx.shadowColor = `rgb(${color.join(",")})`;
-    //             ctx.shadowBlur = 20;
-    //             const path = [{ x: from.x, y: from.y }];
-    //             let vector = { x: from.x, y: from.y };
-    //             let distanceLeft = V.magnitude(V.sub(from, to));
-    //             const d = distanceLeft > 800 ? distanceLeft / 40 : 20;
-    //             const normalised = V.normalise(V.sub(to, from));
-    //             while (1) {
-    //                 const randOffset = rotateVector({ y: RNG(Math.floor(cycle * randomPRNGMult + distanceLeft)) * 2 * d - d, x: 0 }, normalised);
-    //                 const randLen = RNG(Math.floor(cycle * (randomPRNGMult + 1) + distanceLeft)) * d + d;
-    //                 distanceLeft -= randLen;
-    //                 if (distanceLeft <= 0) {
-    //                     path.push({ x: to.x, y: to.y });
-    //                     break;
-    //                 }
-    //                 vector = V.add(vector, V.mult(normalised, randLen));
-    //                 path.push({ x: vector.x + randOffset.x, y: vector.y + randOffset.y });
-    //             }
-    //             DrawTools.line(path);
-    //             ctx.shadowBlur = 0;
-    //         },
-    //         holy(x, y, size = 12) {
-    //             this.line([{ x, y: y - size }, { x: x - size, y },
-    //                 { x, y: y + size }, { x: x + size, y }, { x, y: y - size }
-    //             ]);
-    //         }
-    //     };
-
-    //     function RNG(x) {
-    //         x += Math.seed;
-    //         let start = Math.pow(x % 97, 4.3) * 232344573;
-    //         const a = 15485863;
-    //         const b = 521791;
-    //         start = (start * a) % b;
-    //         for (let i = 0; i < (x * x) % 90 + 90; i++) {
-    //             start = (start * a) % b;
-    //         }
-    //         return start / b;
-    //     }
-
-    //     function rotateVector(v, ang) {
-    //         const c = typeof ang === "number" ? { x: Math.cos(ang), y: Math.sin(ang) } : V.normalise(ang);
-    //         return { x: v.x * c.x - v.y * c.y, y: v.y * c.x + v.x * c.y };
-    //     }
-
-    //     function trapPlayer(x, y) {
-    //         setPosAndFreeze(player, { x, y });
-    //         const bLen = bullet.length;
-    //         for (let i = 0; i < bLen; i++) {
-    //             if (bullet[i].botType) setPosAndFreeze(bullet[i], V.add(player.position, { x: 100 * (RNG(i) - 0.5), y: 100 * (RNG(i + bLen) - 0.5) }));
-    //         }
-    //     }
-
-    //     function relocateTo(x, y) {
-    //         level.setPosToSpawn(x, y);
-    //         trapPlayer(x, y);
-    //         for (let i = 0; i < mob.length; i++) {
-    //             if (mob[i].isMACHO) {
-    //                 setPos(mob[i], { x, y });
-    //                 break;
-    //             }
-    //         }
-    //         m.resetHistory();
-    //     }
-    //     const distance = (a, b) => V.magnitude(V.sub(a, b));
-    //     const angle = (a, b) => Math.atan2(b.y - a.y, a.x - b.x);
-    //     const setPos = (a, b) => Matter.Body.setPosition(a, b);
-    //     const setVel = (a, b) => Matter.Body.setVelocity(a, b);
-    //     const freeze = a => setVel(a, { x: 0, y: 0 });
-    //     const setPosAndFreeze = (a, b) => {
-    //         setPos(a, b);
-    //         freeze(a);
-    //     };
-    //     const makeLore = x => simulation.makeTextLog(`<h2 style='color: #f00; display: inline-block'>${name}:</h2> &nbsp; <h3 style='display: inline-block'>${x}</h3>`);
-    //     // TODO: Remove this before merging
-    //     window.TempleHelper = {
-    //         skipInitial() {
-    //             templePlayer.startAnim = 360;
-    //         },
-    //         skipWaves() {
-    //             this.skipInitial();
-    //             templePlayer.room1.cycles = 2500;
-    //         },
-    //         skipToRoom2() {
-    //             this.skipInitial();
-    //             templePlayer.room1ToRoom2Anim = 1;
-    //         },
-    //         skipBossWaves() {
-    //             this.skipToRoom2();
-    //             templePlayer.room2.spawnInitiatorCycles = Objects.room2Initiator.cap;
-    //             templePlayer.room2.cycles = 2200;
-    //             setTimeout(() => trapPlayer(0, -9100), 500);
-    //         },
-    //         skipToRoom3() {
-    //             this.skipToRoom2();
-    //             requestAnimationFrame(() => templePlayer.room2ToRoom3Anim = 1);
-    //         },
-    //         spawnSecondRoomBoss(x, y) {
-    //             secondRoomBoss(x, y);
-    //         }
-    //     };
-    //     level.custom = () => {
-    //         // All the logic gets handled here. How nice!
-    //         for (const i in LogicHandler) {
-    //             LogicHandler[i]();
-    //         }
-
-    //         // Animations and lore for things that seem like exits
-    //         for (const i in RoomTransitionHandler) {
-    //             RoomTransitionHandler[i]();
-    //         }
-
-    //         // Bottom layer graphics
-    //         DrawHandler.base();
-    //         DrawHandler.room1();
-    //         DrawHandler.room2();
-    //         DrawHandler.room3();
-    //         DrawHandler.entrance();
-    //         if (templePlayer.drawExit) level.exit.drawAndCheck();
-    //     };
-    //     level.customTopLayer = () => {
-    //         // Top layer graphics
-    //         DrawHandler.mobTrails();
-    //         Objects.altar.drawTop();
-    //         DrawHandler.waveTimer();
-    //         DrawHandler.room2Top();
-    //     };
-    // },
     dripp() {
         simulation.makeTextLog(`<strong>dripp</strong> by <span class='color-var'>M. B.</span>`);
 
@@ -13055,6 +11662,1127 @@ const level = {
         spawn.secondaryBossChance(4700, -1500)
 
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
+    },
+    biohazard() {
+        // MAP BY INOOBBOI AND THESHWARMA
+        simulation.makeTextLog(`<strong>dripp</strong> by <span class='color-var'>INOOBBOI</span> and <span class='color-var'>THESHWARMA</span>`);
+
+        // set here for the cutscene later
+        level.setPosToSpawn(-2800, -150)
+
+        // set up cutscenes
+        simulation.cutscene = (locations, speed, stay, xPos = m.pos.x, yPos = m.pos.y) => {
+            // locations: an array of location vectors, reversed for the pop ahead
+            locations.reverse()
+            // speed: the speed of the cutscene transition (0 to 1)
+            // stay: how much to stay in the destination (ticks)
+            // xPos & yPos: the initial location, also used as the current location
+
+            // start by disabling the default camera draw. Don't worry, it's backed up
+            const camera = simulation.camera
+            // create a new camera function
+            simulation.camera = () => {
+                ctx.save()
+                ctx.translate(canvas.width2, canvas.height2) //center
+                ctx.scale(simulation.zoom, simulation.zoom)
+                const xScaled = canvas.width2 - xPos
+                const yScaled = canvas.height2 - yPos
+                ctx.translate(-canvas.width2 + xScaled, -canvas.height2 + yScaled) //translate
+            }
+
+            // and set a restoring function
+            const restore = () => (simulation.camera = camera)
+
+            // then choose the next destination. There should be always at least one destination,
+            // if there isn't there's no point checking, the game should and will crash
+            let dest = locations.pop()
+            // animate the camera
+            const lerp = (first, second, percent) => first * (1 - percent) + second * percent
+            const speedDelta = speed / 5
+            // wait timer
+            let wait = 0
+            // polls the animation, should be called every tick
+            const poll = () => {
+                // update position
+                xPos = lerp(xPos, dest.x, speedDelta)
+                yPos = lerp(yPos, dest.y, speedDelta)
+                // if position is close enough, wait and go to the next position
+                const TOO_CLOSE = 100
+                if (Math.abs(dest.x - xPos) < TOO_CLOSE && Math.abs(dest.y - yPos) < TOO_CLOSE) {
+                    // wait for a bit
+                    if (++wait > stay) {
+                        // if there is another target, reset the wait timer and go there
+                        // otherwise end the cutscene
+                        wait = 0
+                        if (!(dest = locations.pop())) {
+                            // no more locations! End
+                            restore()
+                            return true
+                        }
+                    }
+                }
+                // early return if the player skips by fielding
+                if (input.field) {
+                    restore()
+                    return true
+                }
+                return false
+            }
+            return poll
+        }
+
+        const boost1 = level.boost(-1400, -100, 900)
+        const boost2 = level.boost(500, -900, 2500)
+        const boost3 = level.boost(4200, -100, 900)
+        const boost4 = level.boost(2200, -900, 2500)
+
+        const toggle = level.toggle(1340, -600, false, true)
+
+        let bossInit = false
+
+        const cutscenePoll = simulation.cutscene([{ x: 230, y: -2700 }, { x: 3500, y: -1400 }, { x: 1450, y: -1150 }, m.pos], 0.1, 10)
+        let hasEnded = false
+
+        // ** PROPS ** 
+        // create some drips
+        const rndInRange = (min, max) => Math.random() * (max - min) + min
+
+        const amount = Math.round(5 + 20 * Math.random())
+        const drips = []
+        for (let i = 0; i < amount; i++) {
+            const locX = rndInRange(-2000, 4800)
+            drips.push(level.drip(locX, -3100, 1500, 200 + Math.random() * 500))
+        }
+
+        // a barrel of radioactive waste, which can drop ammo and heals
+        const barrelMob = (x, y, dirVector) => {
+            const MAX_WIDTH = 150
+            const personalWidth = MAX_WIDTH / 2
+            mobs.spawn(x, y, 4, personalWidth, 'rgb(232, 191, 40)')
+            const me = mob[mob.length - 1]
+            // steal some vertices
+            const betterVertices = Matter.Bodies.rectangle(x, y, personalWidth, personalWidth * 1.7).vertices
+            me.vertices = betterVertices
+            me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.mob | cat.bullet
+            me.g = simulation.g
+            me.leaveBody = me.isDropPowerUp = false
+            me.do = function() {
+                this.gravity()
+                // apply shock damage when touching the map, if it's fast
+                if (this.speed > 5) {
+                    const collision = Matter.Query.collides(this, map)
+                    if (collision.length > 0) {
+                        // on collision reduce health
+                        this.health = this.health - this.speed / 250
+                        // die when it's too low, doesn't register for some reason
+                    }
+                }
+                // becomes more radioactive as it gets damaged!
+                this.fill = `rgb(${232 * this.health}, 191, 40)`
+            }
+
+            me.onDeath = function() {
+                const END = Math.floor(input.down ? 10 : 7)
+                const totalBullets = 10
+                const angleStep = (input.down ? 0.4 : 1.3) / totalBullets
+                let dir = m.angle - (angleStep * totalBullets) / 2
+                for (let i = 0; i < totalBullets; i++) {
+                    //5 -> 7
+                    dir += angleStep
+                    const me = bullet.length
+                    bullet[me] = Bodies.rectangle(
+                        this.position.x + 50 * Math.cos(this.angle),
+                        this.position.y + 50 * Math.sin(this.angle),
+                        17,
+                        4,
+                        b.fireAttributes(dir)
+                    )
+                    const end = END + Math.random() * 4
+                    bullet[me].endCycle = 2 * end + simulation.cycle
+                    const speed = (25 * end) / END
+                    const dirOff = dir + (Math.random() - 0.5) * 3
+                    Matter.Body.setVelocity(bullet[me], {
+                        x: speed * Math.cos(dirOff),
+                        y: speed * Math.sin(dirOff)
+                    })
+                    bullet[me].onEnd = function() {
+                        b.explosion(
+                            this.position,
+                            150 + (Math.random() - 0.5) * 40
+                        ) //makes bullet do explosive damage at end
+                    }
+                    bullet[me].beforeDmg = function() {
+                        this.endCycle = 0 //bullet ends cycle after hitting a mob and triggers explosion
+                    }
+                    bullet[me].do = function() {}
+                    Composite.add(engine.world, bullet[me]) //add bullet to world
+                }
+                // barrels drop a ton of ammo and some heals, scales up with difficulty because I have mercy
+                const amount = ~~(5 * Math.random() * simulation.difficulty / 10)
+                for (let i = 0; i < amount; i++) {
+                    powerUps.spawn(this.position.x, this.position.y, 'ammo', true)
+                    if (Math.random() > 0.7) {
+                        powerUps.spawn(this.position.x, this.position.y, 'heal', true)
+                    }
+                }
+            }
+            Matter.Body.rotate(me, Math.random() * Math.PI)
+            Matter.Body.setVelocity(me, dirVector)
+        }
+
+        // creates a platform with shadow
+        const platformShadow = (x, y, width, height, shadowList) => {
+            // faster than making manual shadows... Why not just calculate them semi-realsitically?
+            // the shadows are calculated on the object creation, so if you add map blocks it won't update.
+            // shadowList is an array of shadows that'll be rendered. When the platform shadow is ready,
+            // it is added to the list.
+            // some helper functions first
+            const perpCollision = point => {
+                // takes a point, and finds a collision with the map downwards
+                // the end of the ray, 3000 units down
+                const lowerPoint = Vector.add(point, { x: 0, y: 3000 })
+                // the destination point. If a collision was not found, then it defaults to some
+                // arbiterary point 3000 units down.
+                let dest = lowerPoint
+                for (const mapBody of map) {
+                    const check = simulation.checkLineIntersection(point, lowerPoint, mapBody.vertices[0], mapBody.vertices[1])
+                    // a collision was found
+                    if (check.onLine1 && check.onLine2) {
+                        dest = { x: check.x, y: check.y }
+                        break
+                    }
+                }
+                return dest
+            }
+            const boundsToRectangle = (firstBound, secondBound) => {
+                // takes two bounds and returns an (x, y, width, height) rectangle. The first one
+                // must be the top left, and the second one must be the bottom right
+                // sub to find the width and height
+                const width = Math.abs(firstBound.x - secondBound.x)
+                const height = Math.abs(firstBound.y - secondBound.y)
+                // compile to an object
+                return { x: firstBound.x, y: firstBound.y, width, height }
+            }
+            // create the actual platform
+            spawn.mapRect(x, y, width, height)
+            const me = map[map.length - 1]
+            // the bottom vertices are the third and fourth ones
+            const first = me.vertices[3]
+            const second = me.vertices[2]
+            // cast shadows to find the last shadow location.
+            // iterate over all map objects, and check for collisions between a perpendicular ray
+            // cast from the vertex down to the map object's top panel
+            // const firstDown = perpCollision(first) // not needed in a rectangle settings
+            const secondDown = perpCollision(second)
+            // possible TODO: make it multirect for efficiency
+            // create a single rectangle and return
+            shadowList.push(boundsToRectangle(first, secondDown))
+        }
+
+        // cages with mobs, One of them holds the boss pre mutation
+        const cage = (x, y, maxChainLength, drawList, mobType = null, isTheBoss = false) => {
+            // the drawList is an array that the drawing function is added to
+            // if the cage containing the boss it has a 50% chance to just not spawn. Spices things a bit
+            if (!isTheBoss && Math.random() > 0.5) {
+                return
+            }
+            if (!mobType) {
+                // if mob type is null, then it picks a random mob
+                mobType = spawn.fullPickList[~~(Math.random() * spawn.fullPickList.length)]
+            }
+            // create the chain length, must take into account the radius of the mob.
+            // therefore, it'll create a pseudo mob of that type, take it radius and instantly kill it
+            const chainLength = maxChainLength / 5 + maxChainLength * Math.random()
+
+            // spawn and insantly kill a mob of the same type to get the radius.
+            // this is used to prevent spawning the mob too short, it's a horrible
+            // solution but it works
+            spawn[mobType](0, 0)
+            mob[mob.length - 1].leaveBody = mob[mob.length - 1].isDropPowerUp = false
+            const radius = mob[mob.length - 1].radius
+            mob[mob.length - 1].alive = false
+            // spawn the mob. Disable shields first
+            spawn.allowShields = false
+            spawn[mobType](x, y + chainLength + radius * 2)
+            const trappedMob = mob[mob.length - 1]
+            // destroy its mind so it won't attack
+            trappedMob.do = () => {}
+            // spawn the cage
+            mobs.spawn(x, y + chainLength + radius * 2, 4, trappedMob.radius + 50, 'rgba(150, 255, 150, 0.3)')
+            const cage = mob[mob.length - 1]
+            cage.g = simulation.g
+            cage.do = function() {
+                this.gravity()
+            }
+            // label it
+            cage.label = 'Cage'
+            // a special orb when hit
+            let damageTick = 0
+            cage.onDamage = (dmg) => {
+                // add some damage ticks, if the trapped mob is still alive.
+                // activating the boss by this method is almost impossible, since you need 10x damage
+                if (trappedMob.alive) damageTick += ~~(isTheBoss ? 5 * dmg : 50 * dmg)
+            }
+            // collision filter
+            trappedMob.collisionFilter.mask = cage.collisionFilter.mask = cat.player | cat.map | cat.bullet
+            // constrain together
+            spawn.constrain2AdjacentMobs(2, 0.05, false)
+            // move them to be together
+            trappedMob.position = Vector.clone(cage.position) // make sure you clone... Otherwise........
+            // invincibility, make homing bullets not hit these, remove health bar
+            trappedMob.health = cage.health = Infinity
+            trappedMob.isBadTarget = cage.isBadTarget = true
+            trappedMob.showHealthBar = cage.showHealthBar = false
+            trappedMob.leaveBody = trappedMob.isDropPowerUp = cage.leaveBody = trappedMob.isDropPowerUp = false
+            // cross all edges of the cage with the rope, and see where it collides. Attach the rope there
+            const verts = cage.vertices
+            // the crossing location, doesn't stay null
+            let cross = null
+            for (let i = 0; i < verts.length; i++) {
+                // iterate over all vertices to form lines
+                const v1 = verts[i]
+                const v2 = verts[(i + 1) % verts.length]
+                const result = simulation.checkLineIntersection(cage.position, { x, y }, v1, v2)
+                if (result.onLine1 && result.onLine2) {
+                    // both lines cross!
+                    cross = result
+                    break
+                }
+            }
+
+            if (!cross) {
+                // for some odd reason, sometimes it never finds a collision. I have no idea why
+                // just default to the center then
+                console.error("Couldn't find a cross... Origin: ", { x, y }, " center: ", cage.position, ' vertices: ', cage.vertices)
+                cross = cage.position
+            }
+            // create the rope
+            const rope = Constraint.create({
+                pointA: {
+                    x,
+                    y
+                },
+                // offset the point be in the attachment point
+                pointB: Vector.sub(cross, cage.position),
+                bodyB: cage,
+                // the longer the rope, the looser it is
+                stiffness: Math.max(0.0005 - chainLength / 10000000, 0.00000001),
+                length: chainLength
+            })
+            Matter.Composite.add(engine.world, rope)
+            // create and return a function for drawing the rope
+            const draw = () => {
+                // draw a little recantagle at the base
+                ctx.fillStyle = color.map
+                ctx.fillRect(x - 20, y - 5, 40, 25)
+                // if the cage was destroyed... Do nothing beyond
+                if (!cage.alive) {
+                    return
+                }
+                // draw the rope
+                ctx.beginPath()
+                ctx.moveTo(x, y)
+                // line to the crossing point
+                // ctx.lineTo(cons[i].bodyB.position.x, cons[i].bodyB.position.y);
+                ctx.lineTo(cage.position.x + rope.pointB.x, cage.position.y + rope.pointB.y);
+                ctx.lineWidth = 7
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)'
+                ctx.stroke()
+                // now draw a mystic hit orb if touched
+                if (damageTick) damageTick-- // reduce the ticks
+                ctx.beginPath()
+                ctx.arc(cage.position.x, cage.position.y, cage.radius + 30, 0, Math.PI * 2)
+                ctx.lineWidth = 10
+                ctx.fillStyle = `rgba(255, 0, 0, ${Math.min(1, damageTick / 2000)})`
+                ctx.strokeStyle = `rgba(255, 100, 0, ${Math.min(1, damageTick / 1000)})`
+                ctx.setLineDash([125 * Math.random(), 125 * Math.random()])
+                ctx.stroke()
+                ctx.setLineDash([])
+                ctx.fill()
+                // if it's the boss, draw sucking arcs
+                if (isTheBoss && bossInit) {
+                    for (const entity of mob) {
+                        // suck the health of all mobs
+                        // I hate string manipulation in control flow but heh
+                        if (entity.alive) {
+                            ctx.beginPath()
+                            ctx.moveTo(entity.position.x, entity.position.y)
+                            ctx.lineTo(trappedMob.position.x, trappedMob.position.y)
+                            ctx.lineWidth = 10
+                            ctx.strokeStyle = 'rgba(38, 0, 255, 0.67)'
+                            ctx.stroke()
+                            // damage the mob
+                            entity.damage(1)
+                            // damage itself bonus
+                            cage.damage(1)
+                        }
+                    }
+                    cage.damage(5)
+                }
+
+                // ok if it's too much, explode
+                if (damageTick > 2000) {
+                    b.explosion(cage.position, cage.radius * 10)
+                    // die a silent death
+                    trappedMob.alive = cage.alive = false
+                    damageTick = 0
+                    if (isTheBoss) {
+                        // become the real boss
+                        geneticBoss(trappedMob.position.x, trappedMob.position.y)
+                    }
+                }
+            }
+            // restore the shields
+            spawn.allowShields = true
+            // add the drawing function
+            drawList.push(draw)
+        }
+
+        // platform shadows
+        const shadows = []
+        // cages
+        const cages = []
+
+        level.custom = () => {
+            level.exit.drawAndCheck() //draws the exit
+            level.enter.draw() //draws the entrance
+
+            player.force.y -= player.mass * simulation.g * 0.25 //this gets rid of some gravity on player
+
+            // if the cutscene is yet to end, continue polling
+            if (!hasEnded) {
+                hasEnded = cutscenePoll()
+            }
+
+            for (const drip of drips) drip.draw()
+            // throw some barrels after the boss spawns
+            if (Math.random() > 0.999 && bossInit && !hasEnded) {
+                const spawnLocs = [-1415, -30, 1345, 2815, 4285]
+                // const randVec = Vector.mult({ x: Math.cos(randAngle), y: Math.sin(randAngle) }, Math.random() * 15)
+                barrelMob(spawnLocs[~~(spawnLocs.length * Math.random())], -4200, { x: 0, y: 0 })
+            }
+
+            // platform shadow
+            ctx.beginPath()
+            for (const shadow of shadows) {
+                ctx.rect(shadow.x, shadow.y, shadow.width, shadow.height)
+            }
+            ctx.fillStyle = 'rgba(0,10,30,0.1)'
+            ctx.fill()
+
+            // player pressed lever
+            if (toggle.isOn && !bossInit) {
+                bossInit = true
+            }
+            // draw the cage
+        } //for dynamic stuff that updates while playing that is one Z layer below the player
+
+        level.customTopLayer = () => {
+            boost1.query()
+            boost2.query()
+            boost3.query()
+            boost4.query()
+            toggle.query()
+
+            // shadow holes
+            ctx.fillStyle = 'rgba(68, 68, 68,0.95)'
+            ctx.fillRect(-1450 - 10, -4350, 150 + 20, 1250)
+            ctx.fillRect(-50 - 10, -4350, 150 + 20, 1250)
+            ctx.fillRect(1325 - 10, -4350, 150 + 20, 1250)
+            ctx.fillRect(2800 - 10, -4350, 150 + 20, 1250)
+            ctx.fillRect(4275 - 10, -4350, 150 + 20, 1250)
+
+            for (const drawCage of cages) {
+                drawCage()
+            }
+        } //for dynamic stuff that updates while playing that is one Z layer above the player
+
+        const anotherBoss = (x, y) => {
+            if (tech.isDuplicateBoss && Math.random() < tech.duplicationChance()) {
+                tech.isScaleMobsWithDuplication = true
+                spawn.historyBoss(x, y)
+                tech.isScaleMobsWithDuplication = false
+            } else if (tech.isResearchBoss) {
+                if (powerUps.research.count > 3) {
+                    powerUps.research.changeRerolls(-4)
+                    simulation.makeTextLog(
+                        `<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 4<br>${powerUps.research.count}`
+                    )
+                } else {
+                    tech.addJunkTechToPool(0.49)
+                }
+                spawn.historyBoss(x, y)
+            }
+        }
+
+        //GENETICBOSS
+        function drawEnergyBar(mob) {
+            if (mob.seePlayer.recall && mob.energy > 0) {
+                const h = mob.radius * 0.3
+                const w = mob.radius * 2
+                const x = mob.position.x - w / 2
+                const y = mob.position.y - w * 0.9
+                ctx.fillStyle = 'rgba(100, 100, 100, 0.3)'
+                ctx.fillRect(x, y, w, h)
+                ctx.fillStyle = '#0cf'
+                ctx.fillRect(x, y, w * mob.energy, h)
+            }
+        }
+
+        function generateGenome() {
+            // creates a random genome and returns it
+            const genome = {
+                density: Math.random() * 0.001,
+                size: 15 + Math.random() * 15,
+                speed: Math.random() * 0.1,
+                // color and vertex properties are "trash" genes as they don't really contribute to the orb
+                color: [Math.random() * 255, Math.random() * 255, Math.random() * 255, 50 + Math.random() * 205],
+                vertexCount: Math.floor(Math.random() * 5) + 3,
+                // TODO fix possible concaving
+                vertexOffset: null // placeholder
+            }
+            // initialized here as it depends on vertexCount. I could use `new function()` but nah.
+            genome.vertexOffset = Array(genome.vertexCount)
+                .fill()
+                .map(() => ({ x: Math.random() - 0.5, y: Math.random() - 0.5 }))
+            return genome
+        }
+
+        function mutateGenome(genome) {
+            // takes an existing genome and applies tiny changes
+            const randomInRange = (min, max) => Math.random() * (max - min) + min
+            const tinyChange = x => randomInRange(-x, x)
+
+            const vertexMutator = x => ({ x: x.x + tinyChange(0.5), y: x.y + tinyChange(0.5) })
+            // mutates a genome and returns the mutated version.
+            const newGenome = {
+                density: genome.density + tinyChange(0.0005),
+                size: genome.size + tinyChange(5),
+                speed: genome.speed + tinyChange(0.05),
+                color: genome.color.map(x => (x + tinyChange(10)) % 255), // wrap around
+                vertexCount: Math.max(genome.vertexCount + Math.round(tinyChange(1)), 3),
+                vertexOffset: genome.vertexOffset.map(vertexMutator)
+            }
+            if (genome.vertexOffset.length < newGenome.vertexCount) {
+                const vo = newGenome.vertexOffset
+                vo.push(vertexMutator(vo[~~(vo.length * Math.random())]))
+            } else if (genome.vertexOffset.length > newGenome.vertexCount) {
+                newGenome.vertexOffset.pop()
+            }
+
+            return newGenome
+        }
+
+        function calculateGenomeCost(genome) {
+            // calculates the cost of a genome and returns it. The cost is used to
+            // determine how "costly" the genome is to make, and after the orb's life ends it
+            // is used together with the orb success score to determine the fittest orb.
+            const score = (1 / (genome.density * genome.size * genome.speed)) * 0.000001
+            return score
+        }
+        // distance functions
+        const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2
+        const dist = (a, b) => Math.sqrt(dist2(a, b))
+
+        // ** MAP SPECIFIC MOBS **
+        function energyTransferBall(origin, target, boss, charge) {
+            // transports energy to the boss
+            // when the boss is hit by it, how much of the energy stored the boss actually recives
+            const ENERGY_TRANSFER_RATE = 80 /*%*/
+            // add 1 to the active ball list
+            boss.activeBalls++
+            const color = `rgba(${150 + 105 * charge}, 81, 50, 0.6)`
+            mobs.spawn(origin.x, origin.y, 12, 20 + 20 * charge, color)
+            const me = mob[mob.length - 1]
+            me.end = function() {
+                simulation.drawList.push({
+                    // some nice graphics
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: this.radius,
+                    color: '#f3571d',
+                    time: ~~(Math.random() * 20 + 10)
+                })
+                // on death spawn and explode a bomb
+                if (Math.random() > 0.95) {
+                    spawn.bomb(this.position.x, this.position.y, this.radius, this.vertices.length)
+                    mob[mob.length - 1].death()
+                }
+                // remove 1 from the active ball list
+                boss.activeBalls--
+                this.death()
+            }
+            me.collisionFilter.mask = cat.player | cat.map
+            // me.onHit = this.end
+            me.life = 0
+            me.isDropPowerUp = false
+            me.leaveBody = false
+            me.do = function() {
+                // die on collision with the map
+                if (Matter.Query.collides(this, map).length > 0) {
+                    this.end()
+                }
+                // die if too much time passes. Stronger bullets explode earlier
+                if (++this.life > 200 - charge * 100) {
+                    this.end()
+                }
+                // if the orb collides with the boss, die but give energy to the boss
+                if (Matter.Query.collides(this, [boss]).length > 0) {
+                    boss.energy = Math.min(charge * (ENERGY_TRANSFER_RATE / 100) + boss.energy, 1)
+                    // also make the boss fire once regardless of energy
+                    boss.spawnOrbs()
+                    this.end()
+                }
+                const movement = Vector.normalise(Vector.sub(target, origin))
+                Matter.Body.setVelocity(this, {
+                    x: this.velocity.x + movement.x,
+                    y: this.velocity.y + movement.y
+                })
+                // nice graphics
+                simulation.drawList.push({
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: this.radius,
+                    color: '#e81e1e',
+                    time: 3
+                })
+                simulation.drawList.push({
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: this.radius,
+                    color: '#e87f1e',
+                    time: 6
+                })
+                simulation.drawList.push({
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: this.radius,
+                    color: '#e8e41e',
+                    time: 9
+                })
+            }
+            me.onDamage = me.end
+        }
+
+        function energyBeacon(x, y, parentBoss) {
+            // an unmoving beacon that charges the genetic boss with energy either stolen
+            // from the player or generated. That energy is used to create stronger mobs.
+            mobs.spawn(x, y, 3, 50, '') // default color, changed an instant later
+            const me = mob[mob.length - 1]
+            me.laserRange = 500
+            me.leaveBody = false
+            me.isDropPowerUp = false
+            // custom variables
+            // max energy is 1
+            me.energy = 0
+            me.seed = simulation.cycle // seed to make sure this mob is unique render wise
+            me.chargeTicks = 0 // used to time charging the boss
+            me.bossPos = null // the position that the mob remembers when charging
+            me.density = me.density * 2
+            Matter.Body.setDensity(me, 0.0022 * 3 + 0.0002 * Math.sqrt(simulation.difficulty)) //extra dense
+            me.do = function() {
+                // if the boss is dead, die
+                if (!parentBoss.alive) {
+                    this.death()
+                }
+                // slowly rotate
+                Matter.Body.setAngularVelocity(this, 0.01)
+                this.fill = `rgba(${this.energy * 255}, 29, 136, 0.80)`
+                this.seePlayerCheck()
+                // steal energy from player
+                // this.harmZone() // regular harmZone
+                // custom effects on top of that
+                if (this.distanceToPlayer() < this.laserRange) {
+                    if (m.immuneCycle < m.cycle) {
+                        // suck extra energy from the player if it's in range
+                        if (m.energy > 0.1 && this.energy < 1 - 0.012) {
+                            m.energy -= 0.012
+                            this.energy += 0.012
+                        }
+                        // special "sucking" graphics
+                        ctx.beginPath()
+                        ctx.moveTo(this.position.x, this.position.y)
+                        ctx.lineTo(m.pos.x, m.pos.y)
+                        ctx.lineWidth = 3 + Math.abs(Math.sin((simulation.cycle + this.seed) / 100)) * 2
+                        ctx.strokeStyle = `rgb(${(
+							Math.abs(Math.sin((simulation.cycle + this.seed + 100) / 100)) * 255
+						).toFixed(3)}, 204, 255)`
+                        ctx.setLineDash([125 * Math.random(), 125 * Math.random()])
+                        ctx.stroke()
+                        ctx.setLineDash([])
+                    }
+                }
+                // if the mob's energy is at least 50% full, try to send that energy to the boss.
+                // don't send that energy yet if more than 5 other transfer balls are active
+                if (this.energy > 0.5 && parentBoss.energy < 1 && parentBoss.activeBalls <= 5 && this.chargeTicks === 0) {
+                    const seesBoss = Matter.Query.ray(map, this.position, parentBoss.position).length === 0
+                    if (seesBoss) {
+                        this.chargeTicks = 100
+                        this.bossPos = Vector.clone(parentBoss.position)
+                    }
+                }
+                if (this.chargeTicks > 0) {
+                    if (--this.chargeTicks === 0) {
+                        // spawn the orb
+                        const location = Vector.add(
+                            Vector.mult(Vector.normalise(Vector.sub(this.bossPos, this.position)), this.radius * 3),
+                            this.position
+                        )
+                        energyTransferBall(location, this.bossPos, parentBoss, this.energy)
+                        this.energy = 0
+                    }
+                    // create a beam and aim it at the bossPos
+                    ctx.beginPath()
+                    ctx.moveTo(this.position.x, this.position.y)
+                    ctx.lineTo(this.bossPos.x, this.bossPos.y)
+                    ctx.lineWidth = 10 + Math.abs(Math.sin((simulation.cycle + this.seed) / 100)) * 5
+                    ctx.strokeStyle = `rgb(${(
+						Math.abs(Math.sin((simulation.cycle + this.seed + 100) / 100)) * 255
+					).toFixed(3)}, 204, 255)`
+                    ctx.setLineDash([125 * Math.random(), 125 * Math.random()])
+                    ctx.stroke()
+                    ctx.setLineDash([])
+                }
+                // generate (0.15 * difficulty / 4)% energy per tick
+                if (this.energy < 1) this.energy += 0.0015 * (simulation.difficulty / 4)
+                // draw energy bar
+                drawEnergyBar(this)
+            }
+            me.onDeath = function() {
+                // remove itself from the list
+                const beacons = parentBoss.energyBeacons
+                beacons.splice(beacons.indexOf(this), 1)
+                // explode with the strength of its energy!
+                this.alive = false // to prevent retriggering infinitly
+                b.explosion(this.position, this.energy * this.radius * 15)
+                // when it dies, it reduces some of the boss' energy
+                parentBoss.energy -= 0.025
+                // and stuns it
+                mobs.statusStun(parentBoss, 70 + ~~(100 / simulation.difficulty))
+            }
+        }
+
+        function geneticSeeker(x, y, genome, parentBoss) {
+            // special bullets that get score based on their performance.
+            mobs.spawn(x, y, genome.vertexCount, genome.size, '#' + genome.color.map(it => (~~it).toString(16)).join(''))
+            const me = mob[mob.length - 1]
+            // apply genome
+            Matter.Body.setDensity(me, genome.density)
+            me.accelMag = genome.speed
+            // apply vertex offset
+            for (let i = 0; i < me.vertices.length; i++) {
+                const vertex = me.vertices[i]
+                const offset = genome.vertexOffset[i]
+                if (!offset) console.log(genome, me)
+                vertex.x += offset.x
+                vertex.y += offset.y
+            }
+
+            me.stroke = 'transparent'
+            Matter.Body.setDensity(me, 0.00001) //normal is 0.001
+            // increased if the orb done things that are deemed successful
+            me.score = 30
+            me.timeLeft = 9001 / 9
+            me.accelMag = 0.00017 * simulation.accelScale //* (0.8 + 0.4 * Math.random())
+            me.frictionAir = 0.01
+            me.restitution = 0.5
+            me.leaveBody = false
+            me.isDropPowerUp = false
+            me.isBadTarget = true
+            me.isMobBullet = true
+            me.showHealthBar = false
+            me.collisionFilter.category = cat.mobBullet
+            me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet
+            me.do = function() {
+                this.alwaysSeePlayer()
+                this.attraction()
+                this.timeLimit()
+
+                if (Matter.Query.collides(this, map).length > 0) {
+                    // colliding with the map gives a score reduction, 0.5 per tick
+                    this.score -= 0.5
+                }
+                // default score is slowly reduced every tick to give mobs that reached the player faster a benefit
+                this.score -= 0.05
+                if (this.score < 0) {
+                    this.alive = false // no point continuing if this orb is that bad! Silent death
+                }
+                // give a bonus if some projectile is nearby or the mouse position is close (like laser pointing)
+                // if a mob survives this for long, then it gets a score benefit.
+                const bulletCloseToOrb = bullet.some(it => dist2(this.position, it.position) < 10000 /* 100 ^ 2 */ )
+                // player shoots and aims close
+                const mouseCloseToOrb = dist2(this.position, simulation.mouseInGame) < 10000 && input.fire
+                if (bulletCloseToOrb || mouseCloseToOrb) {
+                    this.score += 1
+                }
+                // die if too far from the boss... It would be incredibly difficult to dodge otherwise
+                if (dist2(this.position, parentBoss.position) > 2000 * 2000) {
+                    this.alive = false
+                }
+                // DEBUG score printer
+                // ctx.font = '48px sans-serif'
+                // ctx.fillStyle = 'rgba(252, 0, 143, 1)'
+                // ctx.fillText(~~this.score, this.position.x - this.radius, this.position.y - this.radius)
+            }
+            me.onHit = function() {
+                // hitting the player gives a 50 points score bonus
+                this.score += 50
+                this.score += this.mass * 2 // bigger mass = bigger damage, add that too
+                // a marker for later
+                this.hitPlayer = true
+                this.explode(this.mass)
+            }
+            me.onDeath = function() {
+                if (!this.hitPlayer) {
+                    // if it didn't hit the player, give it a score based on its distance
+                    this.score += 10000 / this.distanceToPlayer()
+                }
+                // 3% chance to drop ammo
+                if (Math.random() > 0.97) {
+                    powerUps.spawn(this.position.x, this.position.y, 'ammo', true)
+                }
+                parentBoss.deadOrbs.push({ genome: genome, score: this.score })
+            }
+        }
+
+        function geneticBoss(x, y, radius = 130, spawnBossPowerUp = true) {
+            // a modified orb shooting boss that evolves its orbs.
+            // the way this boss works is different from the regular orb shooting boss,
+            // because the orbs have evolving properties via a "machine learning" scoring algorithm.
+            const MAX_BEACONS = Math.round(3 + Math.random() * simulation.difficulty / 3)
+            mobs.spawn(x, y, 8, radius, 'rgb(83, 32, 58)')
+            let me = mob[mob.length - 1]
+            me.isBoss = true
+
+            me.accelMag = 0.0001 * simulation.accelScale
+            me.fireFreq = Math.floor((330 * simulation.CDScale) / simulation.difficulty)
+            me.frictionStatic = 0
+            me.friction = 0
+            me.frictionAir = 0.02
+            me.memory = (420 / 69) * 42 // 🧌
+            me.repulsionRange = 1000000
+            me.energyBeacons = []
+            me.activeBalls = 0
+            // starts by random, or by the stored genomes if they exist
+            const init = () => ({ genome: generateGenome(), score: 0 })
+            me.fittestOrbs = (localStorage && localStorage.genome) ? JSON.parse(localStorage.genome) : [init(), init(), init()] // best genomes so far. Size of three
+            // when an orb died it's moved here. When a new spawn cycle starts, their scores get calculated
+            // and they get put in the fittest orbs array, if they are better than the old ones.
+            me.deadOrbs = []
+            me.energy = 1
+            // this boss has no orbitals, because it's not meant to ever attack on its own
+            me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+            // has a shield and sustains that shield
+            spawn.shield(me, x, y, Infinity)
+            me.fireFreq = 30
+            me.ionizeFreq = 20
+            me.ionized = []
+            me.laserRange = radius * 4
+
+            Matter.Body.setDensity(me, 0.0022 * 4 + 0.0002 * Math.sqrt(simulation.difficulty)) //extra dense //normal is 0.001 //makes effective life much larger
+            me.onDeath = function() {
+                if (spawnBossPowerUp) {
+                    powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+                    const amount = ~~(5 * Math.random() * simulation.difficulty / 10) * 2
+                    for (let i = 0; i < amount; i++) {
+                        powerUps.spawn(this.position.x, this.position.y, 'ammo', true)
+                        if (Math.random() > 0.7) {
+                            powerUps.spawn(this.position.x, this.position.y, 'heal', true)
+                        }
+                    }
+                }
+                // keep the best genome and use it next fight...
+                if (localStorage) {
+                    localStorage.setItem("genome", JSON.stringify(this.fittestOrbs))
+                }
+
+                // stop spawning barrels
+                bossInit = false
+            }
+            me.onDamage = function() {}
+            me.spawnBeacon = function() {
+                // the vertex to spawn the beacon from
+                const vert = this.vertices[~~(Math.random() * this.vertices.length)]
+                // the position should be a little to the side to prevent crashing into the boss
+                // TODO check for collisions with the wall
+                const spawnPos = Vector.add(vert, Vector.mult(Vector.normalise(Vector.sub(this.position, vert)), -60))
+                // some velocity
+                const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, vert)), -5)
+                energyBeacon(spawnPos.x, spawnPos.y, this) // spawn the beacon, a bit ahead
+                const beacon = mob[mob.length - 1]
+                this.energyBeacons.push(beacon)
+                Matter.Body.setVelocity(beacon, {
+                    x: this.velocity.x + velocity.x,
+                    y: this.velocity.y + velocity.y
+                })
+            }
+            me.spawnOrbs = function() {
+                Matter.Body.setAngularVelocity(this, 0.11)
+                // sort the vertices by the distance to the player
+                const sorted = [...this.vertices].sort(dist2)
+                // spawn the bullets based on how close they are to the player.
+                // the way it works is it picks the fittest three orbs and clones them.
+                // but start by taking old mobs and checking if they are better than the new ones
+                let next
+                while ((next = this.deadOrbs.pop())) {
+                    // material costs are calculated as a contra to the score
+                    const cost = calculateGenomeCost(next.genome) * 500 // normalize via multiplication
+                    const totalScore = next.score - cost
+                    // try to insert itself into the best orbs, if it can
+                    for (let i = 0; i < this.fittestOrbs.length; i++) {
+                        const fitEntry = this.fittestOrbs[i]
+                        if (fitEntry.score < totalScore) {
+                            this.fittestOrbs[i] = next
+                            break
+                        }
+                    }
+                }
+                // finally sort them using their score
+                this.fittestOrbs.sort((a, b) => a.score - b.score)
+                // only take the genome, the score doesn't matter here
+                const bestOrbs = this.fittestOrbs.map(it => it.genome)
+                for (let vertex of sorted) {
+                    // pick a random fit orb and try to spawn it. If the cost is too high, it'll attempt
+                    // to generate a new random orb instead. If that orb is too expensive too, just ignore this vertex.
+                    // the evolution part comes here, as the genome is mutated first.
+                    let randGenome = mutateGenome(bestOrbs[~~(Math.random() * bestOrbs.length)])
+                    const cost = calculateGenomeCost(randGenome) * 2
+                    if (this.energy - cost < 0) {
+                        // okay this orb is too expensive for the boss to spawn,
+                        // make a new orb from scratch
+                        randGenome = generateGenome()
+                        const secondCost = calculateGenomeCost(randGenome)
+                        if (this.energy - secondCost < 0) {
+                            // that was too expensive too, heh
+                            continue
+                        }
+                    } else {
+                        // alright the boss can afford that
+                        this.energy -= Math.abs(cost) // TODO: Fix this, why the heck can it even be negative??
+                    }
+
+                    geneticSeeker(vertex.x, vertex.y, randGenome, this)
+                    // give the bullet a rotational velocity as if they were attached to a vertex
+                    const velocity = Vector.mult(
+                        Vector.perp(Vector.normalise(Vector.sub(this.position, vertex))),
+                        -10
+                    )
+                    Matter.Body.setVelocity(mob[mob.length - 1], {
+                        x: this.velocity.x + velocity.x,
+                        y: this.velocity.y + velocity.y
+                    })
+                }
+            }
+            me.do = function() {
+                this.seePlayerCheck()
+                this.checkStatus()
+                this.attraction()
+                this.repulsion()
+                // draw laser arcs if it sees the player
+                this.harmZone()
+                // 
+                const regularChance = Math.random() > 0.99
+                const biggerChance = Math.random() > 0.95 && this.energy > 0.25
+                // start by making sure there is always at least one beacon
+                if (this.energyBeacons.length === 0) {
+                    this.spawnBeacon()
+                }
+                // then, spawn some energy beacons if there are less than the maximum.
+                // small chance if there's no energy, bigger chance if there is at least 10% (which is drained)
+                if ((this.energyBeacons.length < MAX_BEACONS && biggerChance) || regularChance) {
+                    if (biggerChance) {
+                        // if the spawn was a selection of bigger chance, reduce 10% energy
+                        this.energy -= 0.10
+                    }
+                    this.spawnBeacon()
+                }
+                // then, spawn genetic seekers
+                if (this.seePlayer.recall && !(simulation.cycle % this.fireFreq)) {
+                    // fire a bullet from each vertex if there's enough energy
+                    if (this.energy > 0.15) {
+                        this.spawnOrbs()
+                    }
+                }
+
+                if (this.energy > 1) {
+                    // clean excess energy
+                    this.energy -= 0.003
+                } else {
+                    // or slowly generate energy
+                    this.energy += 0.001
+                }
+                // the boss will ionize every bullet in its radius, but that will cause its energy to deplete
+                if (!(simulation.cycle % this.ionizeFreq)) {
+                    for (let i = 0; i < bullet.length; i++) {
+                        const it = bullet[i]
+                        // if it's not a bot and it's close
+                        if (!it.botType && dist(this.position, it.position) < this.laserRange) {
+                            // add it to the ionized list
+                            this.ionized.push({ target: it, ticks: 0 })
+                        }
+                    }
+                }
+
+                for (let i = 0; i < this.ionized.length; i++) {
+                    const entry = this.ionized[i]
+
+                    // skip if there's not enough energy
+                    if (this.energy <= 0) break
+
+                    // terminate if it's no longer in the radius
+                    if (dist(this.position, entry.target.position) > this.laserRange) {
+                        this.ionized.splice(i, 1)
+                        continue
+                    }
+                    // terminate after some ticks
+                    if (++entry.ticks === 10) {
+                        entry.target.endCycle = 0
+                        // draw nice popping graphics
+                        simulation.drawList.push({
+                            x: entry.target.position.x,
+                            y: entry.target.position.y,
+                            radius: 5,
+                            color: '#f24',
+                            time: ~~(Math.random() * 20 + 10)
+                        })
+                        // and remove
+                        this.ionized.splice(i, 1)
+                        continue
+                    }
+                    // draw line
+                    ctx.beginPath()
+                    ctx.moveTo(this.position.x, this.position.y)
+                    ctx.lineTo(entry.target.position.x, entry.target.position.y)
+                    ctx.lineWidth = 7
+                    ctx.strokeStyle = `rgb(${60 - entry.ticks * 2}, 50, 50)`
+                    ctx.stroke()
+                    // reduce energy, as it's hard to ionize
+                    this.energy -= entry.target.mass / 25
+                }
+
+                // if it has energy, shield itself and drain energy
+                if (!this.isShielded && this.energy > 0.5) {
+                    spawn.shield(this, this.position.x, this.position.y, Infinity)
+                    this.energy -= 0.25
+                }
+                drawEnergyBar(this)
+                // change fill color
+                this.fill = `rgb(${((Math.sin(simulation.cycle / 100) + 1) / 2) * 100}, 32, 58)`
+            }
+            // start by spawning several beacons to gain initial energy
+            const amount = Math.ceil(2 + Math.random() * simulation.difficulty / 5)
+            for (let i = 0; i < amount; i++)
+                me.spawnBeacon()
+        }
+
+        // LEVEL SETUP
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20) //don't change this
+
+        level.exit.x = 5700 //you exit at x
+        level.exit.y = -130 //you exit at y
+        spawn.mapRect(5800, -110, -100, 10)
+
+        level.defaultZoom = 2000 //how far out you want the image to be zoomed at (lower = zoom in, higher = zoom out)
+        simulation.zoomTransition(level.defaultZoom) //makes the level transition to have the zoom at the start of a level
+        document.body.style.backgroundColor = 'hsl(138, 3%, 74%)' //sets background color
+
+        //LEVEL STRUCTURE
+        spawn.mapRect(-3100, -100, 9200, 100)
+        spawn.mapRect(-3100, -600, 100, 500)
+        spawn.mapRect(-3100, -600, 1100, 100)
+        spawn.mapRect(-2100, -3100, 100, 2700)
+        spawn.mapRect(4800, -3100, 100, 2600)
+        spawn.mapRect(4800, -600, 1300, 100)
+        spawn.mapRect(6000, -600, 100, 600)
+
+        spawn.mapRect(400, -200, 2000, 100)
+        spawn.mapRect(600, -300, 1600, 100)
+        spawn.mapRect(800, -400, 1200, 100)
+        spawn.mapRect(1000, -500, 800, 100)
+        spawn.mapRect(1200, -600, 400, 100)
+        // roof
+        spawn.mapRect(-2100, -4350, 650, 1250)
+        spawn.mapRect(-1300, -4350, 1250, 1250)
+        spawn.mapRect(100, -4350, 1225, 1250)
+        spawn.mapRect(1475, -4350, 1325, 1250)
+        spawn.mapRect(2950, -4350, 1325, 1250)
+        spawn.mapRect(4425, -4350, 475, 1250)
+
+        // arc
+        // spawn.mapVertex(1400, -892, '700, -800, 700, -900, 1000, -1000, 1800, -1000, 2100, -900, 2100, -800')
+
+
+        //PLATFORMS
+        platformShadow(-1200, -500, 300, 100, shadows)
+        platformShadow(-400, -700, 300, 100, shadows)
+        platformShadow(400, -900, 300, 100, shadows)
+        platformShadow(-2000, -800, 300, 100, shadows)
+        platformShadow(-1000, -1000, 300, 100, shadows)
+        platformShadow(-400, -1300, 300, 100, shadows)
+        platformShadow(-1600, -1300, 300, 100, shadows)
+        platformShadow(-1300, -1600, 300, 100, shadows)
+        platformShadow(-2000, -1700, 300, 100, shadows)
+        platformShadow(-700, -1800, 300, 100, shadows)
+        platformShadow(-1500, -2100, 300, 100, shadows)
+        platformShadow(-600, -2200, 300, 100, shadows)
+        platformShadow(-2000, -2500, 300, 100, shadows)
+        platformShadow(-1100, -2400, 300, 100, shadows)
+        platformShadow(-500, -2700, 300, 100, shadows)
+        platformShadow(100, -2400, 300, 100, shadows)
+        platformShadow(700, -2700, 300, 100, shadows)
+
+        platformShadow(3700, -500, 300, 100, shadows)
+        platformShadow(2900, -700, 300, 100, shadows)
+        platformShadow(2100, -900, 300, 100, shadows)
+        platformShadow(4500, -800, 300, 100, shadows)
+        platformShadow(3500, -1000, 300, 100, shadows)
+        platformShadow(4100, -1300, 300, 100, shadows)
+        platformShadow(2900, -1300, 300, 100, shadows)
+        platformShadow(3800, -1600, 300, 100, shadows)
+        platformShadow(4500, -1700, 300, 100, shadows)
+        platformShadow(3200, -1800, 300, 100, shadows)
+        platformShadow(4000, -2100, 300, 100, shadows)
+        platformShadow(3100, -2200, 300, 100, shadows)
+        platformShadow(4500, -2500, 300, 100, shadows)
+        platformShadow(3600, -2400, 300, 100, shadows)
+        platformShadow(3000, -2700, 300, 100, shadows)
+        platformShadow(2400, -2400, 300, 100, shadows)
+        platformShadow(1800, -2700, 300, 100, shadows)
+
+        // cages
+        cage(-1492, -1200, 100, cages)
+        cage(-875, -2300, 300, cages)
+        cage(-1600, -3100, 1000, cages)
+        cage(225, -2300, 1000, cages)
+        cage(-750, -3100, 700, cages)
+        cage(-625, -1700, 1200, cages)
+        cage(2200, -3100, 500, cages)
+        cage(3275, -1700, 500, cages)
+        cage(3650, -900, 300, cages)
+        cage(2500, -2300, 300, cages)
+        cage(3625, -2300, 300, cages)
+        cage(3875, -1500, 300, cages)
+        cage(4025, -3100, 300, cages)
+
+        // boss cage
+        platformShadow(1275, -2150, 250, 100, shadows)
+        cage(1400, -2050, 500, cages, 'starter', true)
+        map[map.length] = Bodies.trapezoid(1400, -2193, 250, 100, 0.5)
+
+        //DEBRIS
+        //idk just put the debris wherever you want
+        spawn.debris(-550, -225, 100)
+        spawn.debris(-1150, -1725, 75)
+        spawn.debris(-275, -1400, 50)
+        spawn.debris(2850, -2075, 150)
+        spawn.debris(4250, -2250, 150)
+
+        //BOSS
+        // geneticBoss(1400, -3800)
+        anotherBoss(0, 0) //will only spawn historyBoss if there is an additional boss
+
+        //POWERUPS
+
     },
 
     // ********************************************************************************************************

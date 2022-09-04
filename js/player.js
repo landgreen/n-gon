@@ -317,6 +317,7 @@ const m = {
     },
     alive: false,
     switchWorlds() {
+        powerUps.boost.endCycle = 0
         const totalGuns = b.inventory.length
         //track ammo/ ammoPack count
         let ammoCount = 0
@@ -506,7 +507,7 @@ const m = {
     },
     baseHealth: 1,
     setMaxHealth() {
-        m.maxHealth = m.baseHealth + tech.extraMaxHealth + tech.isFallingDamage + 4 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth + (m.fieldMode === 0 || m.fieldMode === 5) * 0.5 * m.coupling
+        m.maxHealth = m.baseHealth + tech.extraMaxHealth + tech.isFallingDamage + 4 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth //+ (m.fieldMode === 0 || m.fieldMode === 5) * 0.5 * m.coupling
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
@@ -658,11 +659,11 @@ const m = {
     },
     collisionImmuneCycles: 30,
     damage(dmg) {
-        if (tech.isCouplingNoHit) {
-            for (let i = 0, len = tech.tech.length; i < len; i++) {
-                if (tech.tech[i].name === "fine-structure constant") powerUps.ejectTech(i, true)
-            }
-        }
+        // if (tech.isCouplingNoHit) {
+        //     for (let i = 0, len = tech.tech.length; i < len; i++) {
+        //         if (tech.tech[i].name === "fine-structure constant") powerUps.ejectTech(i, true)
+        //     }
+        // }
         if (tech.isRewindAvoidDeath && m.energy > 0.6 && dmg > 0.01) {
             const steps = Math.floor(Math.min(299, 150 * m.energy))
             simulation.makeTextLog(`<span class='color-var'>m</span>.rewind(${steps})`)
@@ -1565,11 +1566,10 @@ const m = {
         }
     },
     hold() {},
-    couplingDescription(isScaled = false) {
-        const couple = isScaled ? m.coupling : 1
+    couplingDescription(couple = m.coupling) {
         switch (m.fieldMode) {
             case 0: //field emitter
-                return `gain the effects of <strong>all</strong> <strong class='color-f'>fields</strong>`
+                return `gain the <strong class='color-coupling'>coupling</strong> effects of <strong>all</strong> <strong class='color-f'>fields</strong>`
             case 1: //standing wave
                 return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
             case 2: //perfect diamagnetism
@@ -1591,12 +1591,16 @@ const m = {
                 return `<span style = 'font-size:89%;'>after eating <strong class='color-block'>blocks</strong> <strong>+${(20*couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong></span>`
         }
     },
-    couplingChange() {
+    couplingChange(change = 0) {
+        if (change > 0) simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> ${change}`, 60);
+        m.coupling += change
+        if (m.coupling < 0) m.coupling = 0 //can't go negative
         // m.setMaxEnergy();
         // m.setMaxHealth();
         m.setFieldRegen()
         mobs.setMobSpawnHealth();
         powerUps.setDupChance();
+
         if ((m.fieldMode === 0 || m.fieldMode === 9) && !build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.4);
         // m.collisionImmuneCycles = 30 + m.coupling * 120 //2 seconds
         // switch (m.fieldMode) {
@@ -2681,7 +2685,6 @@ const m = {
         },
         {
             name: "time dilation",
-            // description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 1px;'>stop time</strong><br>while time is stopped you can <strong>move</strong> and <strong>fire</strong><br>and <strong>collisions</strong> do <strong>50%</strong> less <strong class='color-defense'>harm</strong>",
             description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>+25%</strong> movement, jumping, and <strong><em>fire rate</em></strong><br>generate <strong>18</strong> <strong class='color-f'>energy</strong> per second",
             set() {
                 // m.fieldMeterColor = "#0fc"
@@ -2720,6 +2723,7 @@ const m = {
                     this.rewindCount = 0
                     m.grabPowerUpRange2 = 300000
                     m.hold = function() {
+                        console.log(m.fieldCDcycle)
                         m.grabPowerUp();
                         // //grab power ups
                         // for (let i = 0, len = powerUp.length; i < len; ++i) {

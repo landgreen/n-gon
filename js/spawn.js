@@ -340,7 +340,7 @@ const spawn = {
                 }
                 setTimeout(() => {
                     this.do = this.awake;
-                }, 500 + 2000 * Math.random());
+                }, 1000 * Math.random());
             }
             this.checkStatus();
         };
@@ -2710,7 +2710,6 @@ const spawn = {
     flutter(x, y, radius = 20 + 6 * Math.random()) {
         mobs.spawn(x, y, 7, radius, '#16576b');
         let me = mob[mob.length - 1];
-        me.isBoss = true;
         Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
         // me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
 

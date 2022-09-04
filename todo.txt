@@ -1,20 +1,30 @@
 ******************************************************** NEXT PATCH **************************************************
 
-some shotgun ammo tech upgrades will continue to fire some original recipe shotgun bullets
-  rivets, fleas, worms, iceIX
-tech: band gap - boosts give more damage but it lasts for 1 less second
+new level biohazard by INOOBBOI AND THESHWARMA
+  enable community maps in settings
 
-WIMPs are 10% faster
-controlled explosion renamed shaped charge
+some coupling tech spawns power ups instead of directly giving coupling
+fine-structure constant gives 60 coupling power ups, lose 0.5 coupling after mob collision
+tech: decoupling: when ON: +5.00 coupling  OFF: spawn a WIMP
+  (probably adds coupling drift bugs)
+  
+JUNK tech - boost - spawn a large number of boost power ups
 
-bug fixes
-  construction mode works better with my buttons
-  to unlock run this and press T to enter testing mode
-  simulation.enableConstructMode() //used to build maps in testing mode
-
-removed -experiment- tech because it's function was reproduced by "tech - tinker"
+several bug fixes
+  mob - flutter is no longer treated as a boss
 
 *********************************************************** TODO *****************************************************
+
+look for other tech that would benefit from a 3rd line of description text
+
+tech for lens - you can only fire through the lens
+  and some buff?  damage or energy?
+
+add link to russian physics notes
+
+suggestion: if you have both laser-mines and lens, each laser-mine is given its own lens revolving around it
+
+hopMom fight make platforming with hop bullets harder?
 
 complete blowSuckBoss...  or don't
 
