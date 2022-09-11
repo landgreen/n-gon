@@ -16,7 +16,7 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(10 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(24 * 4) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
@@ -24,23 +24,24 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.setField("time dilation") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
-            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 matter wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.guns[0].ammo = 1000000
-            // tech.giveTech("fine-structure constant")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("relay switch")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("decoupling")
             // m.damage(0.1);
-            // tech.giveTech("lens")
-            // for (let i = 0; i < 9; i++) tech.giveTech("compound lens")
+            // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.guns[3].ammo = 1000000
+
+            // tech.giveTech("phonon")
+            // for (let i = 0; i < 4; ++i) tech.giveTech("bound state")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("isotropic")
+            // tech.giveTech("sympathetic resonance")
+            // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
 
-            // spawn.starter(1900, -500, 200)
+            // spawn.starter(1900, -500)
             // spawn.beetleBoss(2538, -1950)
-            // for (let i = 0; i < 15; ++i) spawn.shooter(1900 + 300 * Math.random(), -500 + 300 * Math.random())
+            // for (let i = 0; i < 33; ++i) spawn.shooter(1000 + 5000 * Math.random(), -500 + 300 * Math.random())
             // tech.addJunkTechToPool(2)
-            // tech.tech[321].frequency = 100
+            // tech.tech[322].frequency = 100
             // level.testing();
             // spawn.blowSuckBoss(1900, -500)
             // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
@@ -11665,7 +11666,7 @@ const level = {
     },
     biohazard() {
         // MAP BY INOOBBOI AND THESHWARMA
-        simulation.makeTextLog(`<strong>dripp</strong> by <span class='color-var'>INOOBBOI</span> and <span class='color-var'>THESHWARMA</span>`);
+        simulation.makeTextLog(`<strong>biohazard</strong> by <span class='color-var'>INOOBBOI</span> and <span class='color-var'>THESHWARMA</span>`);
 
         // set here for the cutscene later
         level.setPosToSpawn(-2800, -150)
@@ -13674,7 +13675,7 @@ const level = {
         spawn.mapRect(1550, 12, 50, 25);
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
-    matterWave() { //fire matter wave through the map to kill mosb
+    matterWave() { //fire wave through the map to kill mosb
         level.difficultyIncrease(1) //difficulty on training mode resets to zero with each new level
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -13686,17 +13687,17 @@ const level = {
         simulation.zoomTransition(level.defaultZoom, 1)
         document.body.style.backgroundColor = level.trainingBackgroundColor
         b.removeAllGuns();
-        b.giveGuns("matter wave")
+        b.giveGuns("wave")
         // b.guns[b.activeGun].ammo = 0
         // simulation.updateGunHUD();
         const door = level.door(1612.5, -175, 25, 190, 185, 3)
         let instruction = 0
-        level.trainingText(`use <strong class='color-g'>matter wave</strong> to clear the room of mobs`)
+        level.trainingText(`use <strong class='color-g'>wave</strong> to clear the room of mobs`)
 
         level.custom = () => {
             if (instruction === 0 && mob.length === 0) {
                 instruction++
-                level.trainingText(`<s>use <strong class='color-g'>matter wave</strong> to clear the room of mobs</s>`)
+                level.trainingText(`<s>use <strong class='color-g'>wave</strong> to clear the room of mobs</s>`)
             }
             //spawn ammo if you run out
             let isAmmo = false

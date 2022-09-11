@@ -226,7 +226,6 @@ for (let i = 0, len = tech.tech.length; i < len; i++) {
 }
 const build = {
     pauseGrid() {
-
         //used for junk estimation
         let junkCount = 0
         let totalCount = 1 //start at one to avoid NaN issues
@@ -255,7 +254,7 @@ const build = {
         text += `
 <br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(3)} &nbsp; &nbsp; difficulty: ${((m.dmgScale)).toPrecision(3)}
 <br><strong class='color-defense'>defense</strong>: ${(1-m.harmReduction()).toPrecision(3)} &nbsp; &nbsp; difficulty: ${(1/simulation.dmgScale).toPrecision(3)}
-${b.fireCDscale < 1 ?  `<br><strong><em>fire rate</em></strong>: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%`: ""}
+<br><strong><em>fire rate</em></strong>: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
 ${tech.duplicationChance() ?  `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance()*100).toFixed(0)}%`: ""}
 ${m.coupling ? `<br><strong class='color-coupling'>coupling</strong>: ${(m.coupling).toFixed(2)} &nbsp; <span style = 'font-size:90%;'>`+m.couplingDescription()+"</span>": ""}
 ${botText}
@@ -431,7 +430,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         //update tech text //disable not allowed tech
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             const techID = document.getElementById("tech-" + i)
-            if (!tech.tech[i].isExperimentHide && !tech.tech[i].isNonRefundable && (!tech.tech[i].isJunk || localSettings.isJunkExperiment)) {
+            if ((!tech.tech[i].isJunk || localSettings.isJunkExperiment)) { //!tech.tech[i].isNonRefundable && //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  does removing this cause problems????
                 if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
                     const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                     // <div class="circle-grid-small research" style="position:absolute; top:13px; left:30px;opacity:0.85;"></div>
@@ -529,7 +528,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             text += `<div id = "gun-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div> ${b.guns[i].description}</div>`
         }
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isJunk || localSettings.isJunkExperiment)) { //&& (!tech.tech[i].isNonRefundable)) {
+            if (!tech.tech[i].isJunk || localSettings.isJunkExperiment) {
                 if (tech.tech[i].allowed() && (!tech.tech[i].isNonRefundable || localSettings.isJunkExperiment)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
                     if (tech.tech[i].isJunk) {
                         text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].link}</div> ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
@@ -595,7 +594,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         count = 0;
         for (let i = 0; i < tech.tech.length; i++) {
             for (let j = 0; j < tech.tech[i].count; j++) {
-                if (!tech.tech[i].isLore && !tech.tech[i].isJunk && !tech.tech[i].isNonRefundable && !tech.tech[i].isExperimentHide) {
+                if (!tech.tech[i].isLore && !tech.tech[i].isJunk && !tech.tech[i].isNonRefundable) {
                     url += `&tech${count}=${encodeURIComponent(tech.tech[i].name.trim())}`
                     count++
                 }

@@ -237,7 +237,7 @@ const mobs = {
     // },
     mobSpawnWithHealth: 1,
     setMobSpawnHealth() {
-        mobs.mobSpawnWithHealth = 0.87 ** (tech.mobSpawnWithHealth) //+ (m.fieldMode === 0 || m.fieldMode === 7) * m.coupling
+        mobs.mobSpawnWithHealth = 0.88 ** (tech.mobSpawnWithHealth) //+ (m.fieldMode === 0 || m.fieldMode === 7) * m.coupling
     },
     //**********************************************************************************************
     //**********************************************************************************************

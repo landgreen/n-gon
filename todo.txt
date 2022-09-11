@@ -1,28 +1,43 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new level biohazard by INOOBBOI AND THESHWARMA
-  enable community maps in settings
+matter wave renamed wave
+  tech: frequency - wave has unlimited ammo, but -50% wave firerate
+  tech: sympathetic resonance - when phonon waves hit a mob they make a new resonance wave
+    effect cooldown grows +5s with each chained resonance
+  uncertainty principle works with phonon wave
+  phase velocity works with all other wave tech, 40->35% damage
+  boundstate reduces wave range by 25->15%
 
-some coupling tech spawns power ups instead of directly giving coupling
-fine-structure constant gives 60 coupling power ups, lose 0.5 coupling after mob collision
-tech: decoupling: when ON: +5.00 coupling  OFF: spawn a WIMP
-  (probably adds coupling drift bugs)
-  
-JUNK tech - boost - spawn a large number of boost power ups
+non-renewables 88% -> 67% damage
+improved fine-structure constant graphic for when you lose coupling
+laser mobs pulse a laser 50% of the time for 2x damage
 
-several bug fixes
-  mob - flutter is no longer treated as a boss
+a bunch of bug fixes
+caliber does a bit more damage at 1 stack, but does less damage at 3+ stacks
+  it grew mass and damage at an exponential rate before
+  now it's closer to the +30% damage description
 
 *********************************************************** TODO *****************************************************
+
+bug blocks and power ups falling through map
+  always foam gun  (4-5 times)
+    might be about tech pressure vessel
+  happens rarely, doesn't repeat
+    only occurs for 3 people so far
+  normally after level 6
+  occurred once on the first level,  didn't fire gun and was able to walk through a body
+
+Tech:when relay switch/flip flop is on, turn ammo powerups into boosts, when relay swicth/flip flop is off, ammo powerups remain ammo powerups
+  or toggle other power ups
+    health/ammo
+    
+JUNK: what the golf?
+  trying to throw a block throws you instead
 
 look for other tech that would benefit from a 3rd line of description text
 
 tech for lens - you can only fire through the lens
   and some buff?  damage or energy?
-
-add link to russian physics notes
-
-suggestion: if you have both laser-mines and lens, each laser-mine is given its own lens revolving around it
 
 hopMom fight make platforming with hop bullets harder?
 
@@ -115,11 +130,7 @@ The tech that makes blocks that fall into a wormhole give energy should scale wi
 
 junk suggestion: useless machine - ejects itself and removes itself from the item pool
 
-bug blocks and power ups falling through map
-  always foam gun  (4-5 times)
-    might be about tech pressure vessel
-  happens rarely, doesn't repeat
-  normally after level 6
+
 
 seed isn't working right from shared URL
 
@@ -938,6 +949,7 @@ possible names for tech
   p-hacking JUNK tech
   https://en.wikipedia.org/wiki/High-entropy_alloys
   https://en.wikipedia.org/wiki/Refractory_metals
+  https://en.wikipedia.org/wiki/Upper-atmospheric_lightning#Elves
 
 
 plot script:

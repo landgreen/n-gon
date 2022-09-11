@@ -1582,7 +1582,7 @@ const m = {
             case 5: //plasma
                 return `<strong>+${(15*couple).toFixed(0)}%</strong> <strong class='color-d'>damage</strong>`
             case 6: //time dilation
-                return `<strong>+${(25*couple).toFixed(0)}%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
+                return `<strong>+${(30*couple).toFixed(0)}%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
             case 7: //cloaking
                 return `<strong>+${(33*couple).toFixed(0)}%</strong> ambush <strong class='color-d'>damage</strong>`
             case 8: //pilot wave
@@ -2685,14 +2685,14 @@ const m = {
         },
         {
             name: "time dilation",
-            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>+25%</strong> movement, jumping, and <strong><em>fire rate</em></strong><br>generate <strong>18</strong> <strong class='color-f'>energy</strong> per second",
+            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>+25%</strong> movement and <strong><em>fire rate</em></strong><br>generate <strong>18</strong> <strong class='color-f'>energy</strong> per second",
             set() {
                 // m.fieldMeterColor = "#0fc"
                 // m.fieldMeterColor = "#ff0"
                 m.fieldMeterColor = "#3fe"
                 m.eyeFillColor = m.fieldMeterColor
-                m.fieldFx = 1.2
-                m.fieldJump = 1.09
+                m.fieldFx = 1.3
+                // m.fieldJump = 1.09
                 m.setMovement();
 
                 const timeStop = () => {
@@ -2745,7 +2745,7 @@ const m = {
                             m.throwBlock();
                             m.wakeCheck();
                         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
-                            const drain = 0.002 / (1 + 0.25 * m.coupling)
+                            const drain = 0.002 / (1 + 0.3 * m.coupling)
                             if (m.energy > drain) m.energy -= drain
 
                             m.grabPowerUp();
@@ -2822,7 +2822,7 @@ const m = {
                             m.holding();
                             m.throwBlock();
                         } else if (input.field && m.fieldCDcycle < m.cycle) {
-                            const drain = 0.0026 / (1 + 0.25 * m.coupling)
+                            const drain = 0.0026 / (1 + 0.3 * m.coupling)
                             if (m.energy > drain) m.energy -= drain
                             m.grabPowerUp();
                             m.lookForPickUp(); //this drains energy 0.001
