@@ -539,7 +539,7 @@ const m = {
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.isTurret && m.crouch) dmg *= 0.34;
-        if (tech.isEntanglement && b.inventory[0] === b.activeGun) {
+        if (tech.isFirstOrder && b.inventory[0] === b.activeGun) {
             for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
         }
         return dmg
@@ -1358,8 +1358,8 @@ const m = {
                 ) {
                     powerUps.onPickUp(powerUp[i]);
                     Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
-                        x: player.velocity.x + powerUp[i].velocity.x / player.mass * 5,
-                        y: player.velocity.y + powerUp[i].velocity.y / player.mass * 5
+                        x: player.velocity.x + powerUp[i].velocity.x / player.mass * 4 * powerUp[i].mass,
+                        y: player.velocity.y + powerUp[i].velocity.y / player.mass * 4 * powerUp[i].mass
                     });
                     powerUp[i].effect();
                     Matter.Composite.remove(engine.world, powerUp[i]);
@@ -1592,7 +1592,7 @@ const m = {
         }
     },
     couplingChange(change = 0) {
-        if (change > 0) simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> ${change}`, 60);
+        if (change > 0 && level.onLevel !== -1) simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> ${change}`, 60); //level.onLevel !== -1  means not on lore level
         m.coupling += change
         if (m.coupling < 0) m.coupling = 0 //can't go negative
         // m.setMaxEnergy();

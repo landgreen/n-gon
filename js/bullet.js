@@ -5910,7 +5910,7 @@ const b = {
                                         mob[j].damage(damage / Math.sqrt(mob[j].radius));
                                     }
                                     if (tech.isPhononWave && this.phononWaveCD < m.cycle) {
-                                        this.phononWaveCD = m.cycle + 10 * (1 + this.waves[i].resonanceCount)
+                                        this.phononWaveCD = m.cycle + 8 * (1 + this.waves[i].resonanceCount)
                                         this.waves.push({
                                             position: mob[j].position,
                                             radius: 25,
@@ -5949,7 +5949,7 @@ const b = {
                         }
                         this.waves[i].radius += 0.9 * tech.waveBeamSpeed * this.waves[i].expanding //expand / move
                         // if (this.waves[i].radius > end) this.waves.splice(i, 1) //end
-                        if (this.waves[i].radius > end - 50 * this.waves[i].resonanceCount) { //* Math.pow(0.9, this.waves[i].resonanceCount)
+                        if (this.waves[i].radius > end - 30 * this.waves[i].resonanceCount) { //* Math.pow(0.9, this.waves[i].resonanceCount)
                             this.waves[i].expanding = -1
                             this.waves[i].reflection--
                             if (this.waves[i].reflection < 1) this.waves.splice(i, 1) //end
@@ -6007,10 +6007,10 @@ const b = {
 
                                 // if (tech.isPhononWave && (!who.alive || this.waves.length < 30 + 30 * Math.random()) && m.fireCDcycle < m.cycle) { //
                                 if (tech.isPhononWave && this.phononWaveCD < m.cycle) {
-                                    this.phononWaveCD = m.cycle + 10 * (1 + this.waves[i].resonanceCount)
+                                    this.phononWaveCD = m.cycle + 8 * (1 + this.waves[i].resonanceCount)
                                     const halfArc = 0.27 //6.28 is a full circle, but these arcs needs to stay small because we are using small angle linear approximation, for collisions
                                     let closestMob, dist
-                                    let range = end - 50 * this.waves[i].resonanceCount
+                                    let range = end - 30 * this.waves[i].resonanceCount
                                     for (let i = 0, len = mob.length; i < len; i++) {
                                         if (who !== mob[i] && !mob[i].isBadTarget && !mob[i].isInvulnerable) {
                                             dist = Vector.magnitude(Vector.sub(who.position, mob[i].position));
@@ -6066,7 +6066,7 @@ const b = {
                         // ctx.stroke(); //draw vibes
 
                         this.waves[i].radius += tech.waveBeamSpeed * 1.8 * this.waves[i].expanding //expand / move
-                        if (this.waves[i].radius > end - 50 * this.waves[i].resonanceCount) {
+                        if (this.waves[i].radius > end - 30 * this.waves[i].resonanceCount) {
                             this.waves[i].expanding = -1
                             this.waves[i].reflection--
                             if (this.waves[i].reflection < 1) this.waves.splice(i, 1) //end

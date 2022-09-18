@@ -16,23 +16,23 @@ const level = {
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //used to build maps in testing mode
-            // level.difficultyIncrease(24 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(12 * 4) //30 is near max on hard  //60 is near max on why
             // simulation.isHorizontalFlipped = true
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
             // powerUps.research.changeRerolls(100000)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
-            // m.setField("time dilation") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // m.setField("negative mass") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
             // m.damage(0.1);
-            // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[3].ammo = 1000000
 
             // tech.giveTech("phonon")
             // for (let i = 0; i < 4; ++i) tech.giveTech("bound state")
             // for (let i = 0; i < 1; ++i) tech.giveTech("isotropic")
             // tech.giveTech("sympathetic resonance")
-            // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
+            // for (let i = 0; i < 9; i++) tech.giveTech("replication")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
@@ -43,24 +43,27 @@ const level = {
             // tech.addJunkTechToPool(2)
             // tech.tech[322].frequency = 100
             // level.testing();
-            // spawn.blowSuckBoss(1900, -500)
+            // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
 
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
-            // powerUps.research.changeRerolls(3000)
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
+
+            //lore testing
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
             // lore.techCount = 3
             // simulation.isCheating = false //true;
-            // localSettings.loreCount = 0; //this sets what conversation is heard
-            // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            localSettings.loreCount = 6; //this sets what conversation is heard
+            if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
+            // localSettings.isHuman = true
+            // tech.isNoDraftPause = false //disable pause
+            // for (let i = 0; i < 13; i++) level.nextLevel(); //jump to final boss
+
             // lore.unlockTesting();
             // tech.giveTech("tinker"); //show junk tech in experiment mode
-
-            // simulation.rumble()
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.pickList = ["focuser", "focuser"]
@@ -1347,10 +1350,10 @@ const level = {
                         }
                     }
                     //collision with mobs
-                    if (!(simulation.cycle % 5) && !m.isBodiesAsleep) {
-                        query = Matter.Query.region(mob, this)
-                        for (let i = 0; i < query.length; i++) query[i].damage(5 * damage)
-                    }
+                    // if (!(simulation.cycle % 5) && !m.isBodiesAsleep) {
+                    //     query = Matter.Query.region(mob, this)
+                    //     for (let i = 0; i < query.length; i++) query[i].damage(5 * damage)
+                    // }
 
                     // for (let i = 0, len = mob.length; i < len; i++) {
                     //     if (  !mob[i].isBoss) {
@@ -2654,7 +2657,9 @@ const level = {
         // level.onLevel--
         // console.log(level.onLevel, level.levels)
         //start a conversation based on the number of conversations seen
-        if (localSettings.loreCount < lore.conversation.length && !simulation.isCheating) {
+        if (localSettings.loreCount > lore.conversation.length - 1) localSettings.loreCount = lore.conversation.length - 1; //repeat final conversation if they are at the final chapter
+        if (!simulation.isCheating) {
+            tech.isNoDraftPause = true //disable pause
             lore.testSpeechAPI() //see if speech is working
             lore.chapter = localSettings.loreCount //set the chapter to listen to to be the lore level (you can't use the lore level because it changes during conversations)
             lore.sentence = 0 //what part of the conversation to start on
@@ -2749,7 +2754,7 @@ const level = {
         simulation.zoomTransition(level.defaultZoom)
         // document.body.style.backgroundColor = "#aaa";
         document.body.style.backgroundColor = "#ddd";
-        color.map = "#808f8f"
+        color.map = "#586363" //808f8f"
 
         spawn.mapRect(-3000, 800, 5000, 1200); //bottom
         spawn.mapRect(-2000, -2000, 5000, 1200); //ceiling
@@ -2942,20 +2947,24 @@ const level = {
                             for (let i = 0; i < 9; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1700, "ammo")
                             for (let i = 0; i < 3; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1700, "heal");
                             const scale = Math.pow(simulation.difficulty, 0.7) //hard around 30, why around 54
-                            if (Math.random() < 0.07 && simulation.difficulty > 35) {
-                                for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
-                                for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false);
-                                for (let i = 0, len = scale * 0.15 / 6; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false)
-                                for (let i = 0, len = scale * 0.26 / 6; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false);
+                            if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
+                                for (let i = 0; i < 250; i++) spawn.starter(-2700 + 2400 * Math.random(), -1300 - 500 * Math.random())
                             } else {
-                                if (Math.random() < 0.25) {
-                                    for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
-                                } else if (Math.random() < 0.33) {
-                                    for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
-                                } else if (Math.random() < 0.5) {
-                                    for (let i = 0, len = scale * 0.15; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+                                if (Math.random() < 0.07 && simulation.difficulty > 35) {
+                                    for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
+                                    for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false);
+                                    for (let i = 0, len = scale * 0.15 / 6; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false)
+                                    for (let i = 0, len = scale * 0.26 / 6; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false);
                                 } else {
-                                    for (let i = 0, len = scale * 0.26; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+                                    if (Math.random() < 0.25) {
+                                        for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                                    } else if (Math.random() < 0.33) {
+                                        for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                                    } else if (Math.random() < 0.5) {
+                                        for (let i = 0, len = scale * 0.15; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+                                    } else {
+                                        for (let i = 0, len = scale * 0.26; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+                                    }
                                 }
                             }
                             spawn.secondaryBossChance(-2300, -800)
@@ -3022,20 +3031,24 @@ const level = {
                             for (let i = 0; i < 9; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo")
                             for (let i = 0; i < 3; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "heal");
                             const scale = Math.pow(simulation.difficulty, 0.7) //hard around 30, why around 54
-                            if (Math.random() < 0.07 && simulation.difficulty > 35) {
-                                for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.timeBoss(1487 + 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
-                                for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
-                                for (let i = 0, len = scale * 0.15 / 6; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false)
-                                for (let i = 0, len = scale * 0.26 / 6; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false);
+                            if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
+                                for (let i = 0; i < 250; i++) spawn.starter(300 + 2400 * Math.random(), -1300 - 500 * Math.random())
                             } else {
-                                if (Math.random() < 0.25) {
-                                    for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.timeBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
-                                } else if (Math.random() < 0.33) {
-                                    for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
-                                } else if (Math.random() < 0.5) {
-                                    for (let i = 0, len = scale * 0.15; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+                                if (Math.random() < 0.07 && simulation.difficulty > 35) {
+                                    for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.timeBoss(1487 + 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
+                                    for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
+                                    for (let i = 0, len = scale * 0.15 / 6; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false)
+                                    for (let i = 0, len = scale * 0.26 / 6; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false);
                                 } else {
-                                    for (let i = 0, len = scale * 0.26; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+                                    if (Math.random() < 0.25) {
+                                        for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.timeBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                                    } else if (Math.random() < 0.33) {
+                                        for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                                    } else if (Math.random() < 0.5) {
+                                        for (let i = 0, len = scale * 0.15; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+                                    } else {
+                                        for (let i = 0, len = scale * 0.26; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+                                    }
                                 }
                             }
                             spawn.secondaryBossChance(2200, -800)
@@ -3138,15 +3151,18 @@ const level = {
         spawn.mapRect(-250, -200, 1000, 300); // shelf
         spawn.mapRect(-250, -1700, 1000, 1250); // shelf roof
         spawn.blockDoor(710, -210);
-
-        spawn.finalBoss(3000, -750)
-
         spawn.mapRect(5400, -1700, 400, 1150); //right wall
         spawn.mapRect(5400, -300, 400, 400); //right wall
         spawn.mapRect(5700, -3300, 1800, 5100); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         spawn.mapRect(5425, -650, 375, 450); //blocking exit
         // spawn.secondaryBossChance(4800, -500) //no bonus bosses on final level
+
+        if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) { //pacifist run
+            for (let i = 0; i < 250; i++) spawn.starter(1000 + 4000 * Math.random(), -1500 * Math.random())
+        } else {
+            spawn.finalBoss(3000, -750)
+        }
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -3161,6 +3177,19 @@ const level = {
                 ctx.fillStyle = "rgba(0,255,255,0.1)"
                 ctx.fillRect(-5400 - 300, -550, 300, 350)
             };
+        }
+        if (mobs.mobDeaths < level.levelsCleared && localSettings.loreCount > 5 && !simulation.isCheating) {
+            //open door for pacifist run on final lore chapter
+            if (simulation.isHorizontalFlipped) {
+                level.exit.x = -5500 - 100;
+            } else {
+                level.exit.x = 5500;
+            }
+            level.exit.y = -330;
+            Matter.Composite.remove(engine.world, map[map.length - 1]);
+            map.splice(map.length - 1, 1);
+            simulation.draw.setPaths(); //redraw map draw path
+            level.levels.push("null")
         }
     },
     gauntlet() {
@@ -3195,26 +3224,45 @@ const level = {
         spawn.mapRect(-250, -1200, 1000, 250); // shelf roof
         powerUps.spawnStartingPowerUps(600, -800);
         spawn.blockDoor(710, -710);
-        spawn[spawn.pickList[0]](1500, -200, 150 + Math.random() * 30);
         spawn.mapRect(2500, -1200, 200, 750); //right wall
         spawn.blockDoor(2585, -210)
         spawn.mapRect(2500, -200, 200, 300); //right wall
 
-        spawn.nodeGroup(3500, -200, spawn.allowedGroupList[Math.floor(Math.random() * spawn.allowedGroupList.length)]);
         spawn.mapRect(4500, -1200, 200, 750); //right wall
         spawn.blockDoor(4585, -210)
         spawn.mapRect(4500, -200, 200, 300); //right wall
 
-        spawn.lineGroup(5000, -200, spawn.allowedGroupList[Math.floor(Math.random() * spawn.allowedGroupList.length)]);
         spawn.mapRect(6400, -1200, 400, 750); //right wall
         spawn.mapRect(6400, -200, 400, 300); //right wall
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
-        for (let i = 0; i < 3; ++i) {
-            if (simulation.difficulty * Math.random() > 15 * i) spawn.randomGroup(2000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
-            if (simulation.difficulty * Math.random() > 10 * i) spawn.randomGroup(3500 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
-            if (simulation.difficulty * Math.random() > 7 * i) spawn.randomGroup(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
+
+
+        if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) { //pacifist run
+            // spawn.setSpawnList();
+            spawn.pickList.splice(0, 1);
+            spawn.pickList.push('starter');
+            spawn.pickList.splice(0, 1);
+            spawn.pickList.push('starter');
+            spawn.starter(1500, -200, 150 + Math.random() * 30);
+            spawn.nodeGroup(3500, -200, 'starter');
+            spawn.lineGroup(5000, -200, 'starter');
+            for (let i = 0; i < 3; ++i) {
+                if (simulation.difficulty * Math.random() > 15 * i) spawn.nodeGroup(2000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), 'starter');
+                if (simulation.difficulty * Math.random() > 10 * i) spawn.lineGroup(3500 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), 'starter');
+                if (simulation.difficulty * Math.random() > 7 * i) spawn.nodeGroup(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), 'starter');
+            }
+        } else {
+            spawn[spawn.pickList[0]](1500, -200, 150 + Math.random() * 30);
+            spawn.nodeGroup(3500, -200, spawn.allowedGroupList[Math.floor(Math.random() * spawn.allowedGroupList.length)]);
+            spawn.lineGroup(5000, -200, spawn.allowedGroupList[Math.floor(Math.random() * spawn.allowedGroupList.length)]);
+            for (let i = 0; i < 3; ++i) {
+                if (simulation.difficulty * Math.random() > 15 * i) spawn.randomGroup(2000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
+                if (simulation.difficulty * Math.random() > 10 * i) spawn.randomGroup(3500 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
+                if (simulation.difficulty * Math.random() > 7 * i) spawn.randomGroup(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
+            }
         }
+
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
         spawn.secondaryBossChance(4125, -350)
 
@@ -3240,11 +3288,14 @@ const level = {
             //power ups don't spawn in experiment mode, so they don't get removed at the start of experiment mode
             function cycle() {
                 if (simulation.cycle > 10) {
-                    // powerUps.spawn(2500, -50, "research", false);
-                    powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070, "research", false);
+                    if (localSettings.loreCount === 6) {
+                        powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2170, "field", false);
+                    } else {
+                        powerUps.spawnStartingPowerUps(2095 + 15 * (Math.random() - 0.5), -2070 - 125);
+                    }
                     powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 25, "heal", false);
                     powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 75, "heal", false);
-                    powerUps.spawnStartingPowerUps(2095 + 15 * (Math.random() - 0.5), -2070 - 125);
+                    powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070, "research", false);
                 } else {
                     requestAnimationFrame(cycle);
                 }

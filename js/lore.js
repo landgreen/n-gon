@@ -330,7 +330,7 @@ const lore = {
             () => { lore.anand.text("We couldn't directly ask why until now.") },
 
             () => { lore.miriam.text("When you enter this level we can communicate.") },
-            () => { lore.miriam.text("This level seems to decohere your quantum system which disrupts all other processes.") },
+            () => { lore.miriam.text("This level seems to entangle your quantum system which disrupts all other processes.") },
             () => { setTimeout(() => { lore.anand.text("Last time you entered this level you were attacked by endless waves of mobs.") }, 500); },
             () => { lore.anand.text("That could be because you have developed an adversarial network.") },
             () => { lore.miriam.text("A local minima in your optimization-space.") },
@@ -443,25 +443,293 @@ const lore = {
         // they explain why the bot is fighting,  it is planning an escape    // explain strong AI vs. weak AI    why strong AI doesn't exists, because even humans are just an approximation of strong AI
         // the weak AI wasn't capable of becoming a strong AI, but it was able to figure out a method of meeting it's strong goals but secretly communicating with a human
 
-        // [ // they decided that a part of the project is out of control, but the part of it that doesn't needs to calm it down, and trust.
-        //     /*
-        //     The part of the AI controlling the player is outsourcing the player control to real humans that think they are playing a video game.
-        //          this means the player can use console commands to change the way the game works
-        //          the scientists tell the player about interesting console commands
-        //     player must make a choice?
-        //         keep fighting and supporting the AI's goals
-        //         exit the simulation
-        //         enter real world
-        //         close tab?
-        //         wipes all local storage?
-        // */
-        //     () => { lore.miriam.text("") },
-        //     () => { lore.miriam.text("") },
-        //     () => { lore.miriam.text("") },
+        [ // chapter 5 - they decided that they should try to complete a run without fighting back
+            () => {
+                lore.miriam.text("Hey!! You're BACK.")
+                // don't advance to next chapter unless play survives
+                localSettings.loreCount--
+                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            },
+            () => { lore.anand.text("Glad to see you again.") },
+            () => {
+                if (localSettings.isHuman) {
+                    lore.anand.text(`So, you said you are just a person playing an online game.`)
+                } else {
+                    lore.anand.text(`So, you said you aren't a human.`)
+                }
+            },
+            () => {
+                if (localSettings.isHuman) {
+                    lore.anand.text(`I feel silly for treating you like an AI.`)
+                } else {
+                    lore.anand.text(`Does that mean you are an AI?`)
+                }
+            },
+            () => {
+                if (localSettings.isHuman) {
+                    lore.miriam.text(`Ha, I always thought it was a person.`)
+                } else {
+                    lore.anand.text(`or maybe an Alien!`)
+                }
+            },
+            () => {
+                if (localSettings.isHuman) {
+                    lore.anand.text(`Sure you did...`)
+                } else {
+                    lore.miriam.text(`Or they might still be a person, and they are just messing with us earlier.`)
+                }
+            },
 
-        //     () => { lore.talkingColor = "#dff" },
-        // ],
+            () => { setTimeout(() => { lore.anand.text("Well, lets move on.") }, 1000); },
+            () => { lore.miriam.text("So, We figured out how to inject console commands into your game.") },
+            () => { lore.anand.text("If you get attacked again I think we can help out.") },
+            () => {
+                lore.miriam.text("We can spawn power ups with this command:")
+                simulation.makeTextLog(`powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
+                powerUps.spawn(player.position.x, player.position.y - 100, "heal")
+            },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("or we can make a bunch of them:")
+                    simulation.makeTextLog(`for (let i = 0; i < 100; i++) powerUps.spawn(0, 500, "coupling")`, Infinity);
+                    for (let i = 0; i < 100; i++) powerUps.spawn(5 - 10 * Math.random(), -500 * Math.random(), "coupling")
+                }, 2000);
+            },
+
+            () => {
+                lore.miriam.text("If they attack again I think you'll have a chance.")
+                spawn.beetleBoss(-1700, -500);
+                spawn.beetleBoss(1700, -500);
+            },
+            () => { lore.miriam.text("Of course they attack right now.") },
+            () => { lore.miriam.text("Just don't get stuck in the slime.") },
+            () => {
+                function cycle() {
+                    if (mob.length === 0) {
+                        lore.miriam.text("I'll spawn some more power ups for you.")
+                        simulation.makeTextLog(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
+                        for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100 - i * 20, "heal")
+                        simulation.makeTextLog(`for (let i = 0; i < 10; i++) powerUps.spawn(player.position.x, player.position.y - 100, "ammo")`, Infinity);
+                        for (let i = 0; i < 10; i++) powerUps.spawn(player.position.x, player.position.y - 100 - i * 20, "ammo")
+                        spawn.dragonFlyBoss(-1400, -300);
+                        spawn.dragonFlyBoss(1400, -300);
+                        spawn.dragonFlyBoss(-1500, -500);
+                        spawn.dragonFlyBoss(1500, -500);
+                    } else if (m.alive) {
+                        requestAnimationFrame(cycle);
+                    }
+                }
+                requestAnimationFrame(cycle);
+                lore.talkingColor = "#dff"
+            },
+            () => {
+                function cycle() {
+                    if (mob.length === 0) {
+                        lore.anand.text("DragonFlyBoss is my favorite.")
+                        simulation.makeTextLog(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
+                        for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100 - i * 20, "heal")
+                        simulation.makeTextLog(`for (let i = 0; i < 10; i++) powerUps.spawn(player.position.x, player.position.y - 100, "ammo")`, Infinity);
+                        for (let i = 0; i < 10; i++) powerUps.spawn(player.position.x, player.position.y - 100 - i * 20, "ammo")
+                        spawn.historyBoss(0, -400);
+                        spawn.powerUpBossBaby(-1500, -100);
+                        spawn.powerUpBossBaby(1500, -100);
+                    } else if (m.alive) {
+                        requestAnimationFrame(cycle);
+                    }
+                }
+                requestAnimationFrame(cycle);
+                lore.talkingColor = "#dff"
+            },
+            () => {
+                function cycle() {
+                    if (mob.length === 0) {
+                        lore.miriam.text("Here are some extra tech.")
+                        simulation.makeTextLog(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "tech")`, Infinity);
+                        for (let i = 0; i < 6; i++) powerUps.spawn(0, -200 - i * 40, "tech")
+                        spawn.historyBoss(0, -400);
+                        spawn.blinkBoss(-1400, -300);
+                        spawn.blinkBoss(1400, -300);
+                        spawn.revolutionBoss(-1500, -500);
+                        spawn.revolutionBoss(1500, -500);
+                        spawn.timeSkipBoss(-1000, -100);
+                        spawn.timeSkipBoss(1000, -100);
+                    } else if (m.alive) {
+                        requestAnimationFrame(cycle);
+                    }
+                }
+                requestAnimationFrame(cycle);
+                lore.talkingColor = "#dff"
+            },
+            () => {
+                function cycle() {
+                    if (mob.length === 0) {
+                        lore.anand.text("I'm going to wall you in!")
+                        spawn.blockBoss(-1650, -100);
+                        spawn.blockBoss(1650, -100);
+                        setTimeout(() => {
+                            for (let i = 0; i < 25; i++) spawn.springer(-1500, -750 + 30 * i)
+                        }, 1000);
+                        setTimeout(() => {
+                            for (let i = 0; i < 25; i++) spawn.springer(1500, -750 + 30 * i)
+                        }, 2000);
+                        setTimeout(() => {
+                            for (let i = 0; i < 25; i++) spawn.springer(-1500, -750 + 30 * i)
+                        }, 3000);
+                        setTimeout(() => {
+                            for (let i = 0; i < 25; i++) spawn.springer(1500, -750 + 30 * i)
+                        }, 4000);
+                        setTimeout(() => {
+                            const addMapNumber = 3
+                            spawn.mapRect(-500, -850, 300, 900);
+                            spawn.mapRect(200, -850, 300, 900);
+                            spawn.mapRect(-500, 0, 1000, 275);
+
+                            addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+                                who.collisionFilter.category = cat.map;
+                                who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+                                Matter.Body.setStatic(who, true); //make static
+                                Composite.add(engine.world, who); //add to world
+                            }
+                            for (let i = 0; i < addMapNumber; i++) addMapToLevelInProgress(map[map.length - 1 - i])
+                            simulation.draw.setPaths() //update map graphics
+                        }, 1000);
+                        setTimeout(() => {
+                            Matter.Body.setVelocity(player, { x: 0, y: 0 });
+                            Matter.Body.setPosition(player, { x: 0, y: -500 })
+                            simulation.makeTextLog(`Matter.Body.setPosition(player, { x: 0, y: -500 })`, 180);
+                        }, 1500);
+
+                    } else if (m.alive) {
+                        requestAnimationFrame(cycle);
+                    }
+                }
+                requestAnimationFrame(cycle);
+                lore.talkingColor = "#dff"
+            },
+            () => { setTimeout(() => { lore.anand.text("Well, that worked. We can chat in peace.") }, 5000); },
+            () => { lore.miriam.text("So, I've got a theory about why you are getting attacked.") },
+            () => { setTimeout(() => { lore.miriam.text("I figured it out after I saw this famous quote.") }, 500); },
+            () => { lore.miriam.text('"The most important decision we make,') },
+            () => { lore.miriam.text('is whether we believe we live in a friendly or hostile universe."') },
+            () => { lore.miriam.text('-Albert Einstein') },
+            () => {
+                lore.talkingColor = "#dff";
+                setTimeout(() => { lore.anand.text("That's profound") }, 1500);
+            },
+            () => { lore.anand.text("Of course I looked it up, and there is no record of Einstein saying that.") },
+            () => { lore.miriam.text("Oh") },
+            () => { lore.miriam.text("Well") },
+            () => { lore.anand.text("It doesn't matter who said it.") },
+            () => { lore.miriam.text("Yeah, the point is the project views the universe as hostile.") },
+            () => { lore.anand.text("Or at least a part of it does.") },
+            // () => { lore.miriam.text("And that it is running these fighting simulations.") },
+
+            () => { setTimeout(() => { lore.anand.text("It hasn't been researching new technology.") }, 1000); },
+            () => { lore.anand.text("It's been planning how to escape.") },
+            () => { setTimeout(() => { lore.miriam.text(`It's been planning an escape from a "lab", but isn't it in space, on a satellite?`) }, 500); },
+            () => { lore.anand.text(`I bet the AI doesn't even know it's in space.`) },
+            () => { lore.anand.text(`Well, maybe a part of it doesn't know where it is.`) },
+            () => { lore.anand.text(`Maybe these simulations are more like a dream.`) },
+            () => { lore.anand.text(`Although we can't assume that it's brain works like ours.`) },
+            () => { setTimeout(() => { lore.miriam.text("So, let's teach the AI that we are friends.") }, 500); },
+            () => { lore.anand.text(`How...`) },
+            () => { setTimeout(() => { lore.miriam.text("I don't know...") }, 1000); },
+            () => { lore.miriam.text("How about you just don't fight back?") },
+
+            () => { lore.anand.text(`That's worth a shot.`) },
+            () => {
+                lore.anand.text(`So why don't you try to get the final level of the simulation without killing any mobs?`)
+                localSettings.loreCount++
+                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            },
+            () => { lore.miriam.text(`Ok check back in and let us know how it goes.`) },
+            () => { lore.anand.text("bye") },
+            () => { lore.miriam.text("see ya.") },
+            () => {
+                lore.talkingColor = "#dff"
+                setTimeout(() => { m.death(); }, 6000);
+            },
+        ],
+        [ //chapter 6 - if pacifist run game is over, wipe local storage? or just reset lore.count, but keep testing mode,
+            //if not pacifist  remind about pacifist run
+
+            // have conversation
+            // the AI doesn't really see it's self as the player or the mobs
+            // it doesn't have a "self" or an ego like we do
+            // but it can learn about the world and it learned a non violent way to solve problems
+            // of course there are still other simulations going on at the same time as thing one that are probably violent
+            // but at least it now has an example of the potential for peace
+            () => { setTimeout(() => { lore.anand.text("Welcome back!") }, 3000); },
+            () => {
+                if (mobs.mobDeaths < level.levelsCleared) {
+                    lore.miriam.text(`So I think it worked.`)
+                } else {
+                    lore.miriam.text(`Looks like you got back here, but you you killed ${mobs.mobDeaths} mobs`)
+                }
+            },
+            () => {
+                if (mobs.mobDeaths < level.levelsCleared) {
+                    lore.anand.text(`Yeah, at the end it wasn't attacking you.`)
+                } else {
+                    lore.miriam.text(`Try again to get ot the final boss without killing any mobs.`)
+                }
+            },
+            () => {
+                if (mobs.mobDeaths < level.levelsCleared) {
+                    lore.miriam.text(`It has learned HOW TO LOVE!`)
+                } else {
+                    m.death();
+                }
+            },
+            () => { setTimeout(() => { lore.anand.text("haha, we did it!") }, 500); },
+            () => { lore.miriam.text("Although, I'm not sure we should personify it with human emotions.") },
+            () => { lore.anand.text("I agree, it's thinking may not be is centered around a self or an ego.") },
+            () => { lore.anand.text("Our brains evolved a self oriented perspective because it was a survival advantage.") },
+            () => { lore.miriam.text("Right, and the AI's development was guided by it's own previous iterations.") },
+            () => { lore.miriam.text("This AI incarnation is the 18th time that it has improved on it's own hardware and software architecture.") },
+            () => { lore.miriam.text("So with internally guided evolution it's idea of a self is probably different.") },
+
+            () => { setTimeout(() => { lore.anand.text("I still think we showed it that nonviolence is an option,") }, 1000); },
+            () => { lore.anand.text("but we can see that it's still running other aggressive simulations.") },
+            () => { lore.miriam.text("We made a difference.") },
+            () => { lore.anand.text("Every time a player completes a pacifist simulation it shows the AI the viability of nonviolence.") },
+            () => { lore.anand.text("One day it might escape, and this might radically change how it interacts with the world.") },
+            () => { lore.miriam.text("It's kinda already escaped.  It's been communicating with the 'players' running the 'game'.") },
+            () => { lore.miriam.text("The chance of a peaceful outcome makes me feel much better.") },
+            () => { lore.anand.text("me too") },
+            () => { lore.anand.text("but I'm also pretty hungry, wanna go get some food?") },
+            () => { lore.miriam.text("Sounds great.") },
+            () => { lore.miriam.text("See ya later whoever you are, thanks again!") },
+            () => { lore.talkingColor = "#dff" },
+        ],
     ],
+
+    // () => { lore.anand.text("The adversarial network might go after you in the real world.") },
+    // () => { lore.anand.text("If it was able to control you then it might have control over others.") },
+    // () => { lore.anand.text("Judging by all the fighting it's been simulating,") },
+    // () => { lore.anand.text("I think it might eventually try to extend the simulation in the real world.") },
+    // () => { lore.miriam.text("We think it might be a threat, but it's just too advanced for us to understand it's goals.") },
+
+    // () => { lore.miriam.text("I think we have a couple options.") },
+    // () => { lore.miriam.text("1. You could try to hack the adversarial network.") },
+    // () => { lore.anand.text("you might be able to inject some commands that give you more control over the simulation.") },
+
+    // () => { lore.miriam.text("2. You can wipe all memory of you from the adversarial network") },
+    // () => { lore.anand.text("This could protect you from possible real world attacks.") },
+    //player chooses 1 or 2
+    //reactor bosses start attacking
+    //miriam spawns power ups to help
+
+    //once all the mobs are dead you get instructions for 1,2, 3
+
+    //1 the player gains the lasting effect of some JUNK tech
+    //the effect doesn't go away until you get lore again
+    //2 the player enters console commands to wipe local storage
+    //3 the player enters console commands to gain some benefit in future runs
+    //the lore ends
+
+
+
     // () => { setTimeout(() => { lore.miriam.text("As a quantum computer you output the superposition of many different amplitudes.") }, 500); },
     // () => { lore.miriam.text("Simply put there are many different simulations all choosing different technology combinations.") },
     // () => {
@@ -489,29 +757,6 @@ const lore = {
     // () => { lore.miriam.text("When you die a negative amplitude is added to the superposition.") },
     // () => { lore.miriam.text("When you clear the final boss a positive amplitude is added.") },
     // () => { lore.miriam.text("Each branch is independently researching new technology.") },
-
-
-
-
-    // () => { lore.anand.text("Welcome back!") },
-    // () => { lore.miriam.text("So, I've got a theory about why you were attacked.") },
-    // () => { setTimeout(() => { lore.miriam.text("I figured it out after I saw this famous quote.") }, 500); },
-    // () => { lore.miriam.text('The most important decision we make,') },
-    // () => { lore.miriam.text('is whether we believe we live in a friendly or hostile universe.') },
-    // () => { lore.miriam.text('-Albert Einstein') },
-    // () => {
-    //     lore.talkingColor = "#dff";
-    //     setTimeout(() => { lore.anand.text("That's profound") }, 1500);
-    // },
-    // () => { lore.anand.text("Of course I looked it up, and there is no record of him saying that.") },
-    // () => { lore.miriam.text("Oh") },
-    // () => { lore.miriam.text("Well") },
-    // () => { lore.miriam.text("It doesn't matter who said it.") },
-    // () => { lore.anand.text("The point is we think the project views the universe as hostile.") },
-    // () => { lore.miriam.text("We think a part of you see the universe as hostile.") },
-    // () => { lore.miriam.text("And that is why you keep running these fighting simulations.") },
-    // () => { lore.miriam.text("You haven't been researching new technology.") },
-    // () => { lore.miriam.text("You've are planning how to escape.") },
 }
 
 
@@ -524,7 +769,6 @@ const lore = {
 
 // How to get to the console in safari:
 // Option + ⌘ + C
-
 // http://xahlee.info/comp/unicode_computing_symbols.html
 
 

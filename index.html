@@ -66,17 +66,17 @@
                         <option value="30">30 fps</option>
                     </select>
                     <br>
-                    <label for="seed">randomization seed:</label>
+                    <label for="seed" title="the randoms seed determines level order, tech choices, and mob types">randomization seed:</label>
                     <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" style="width: 120px;">
                     <br>
                     <span id="previous-seed" style="color:#bbb"></span>
-                    <label for="community-maps" title="">include community maps:</label>
+                    <label for="community-maps" title="add about 12 player made levels the random n-gon level pool">include community maps:</label>
                     <input type="checkbox" id="community-maps" name="community-maps" style="width:17px; height:17px;">
                     <!-- <br>
 					<label for="body-damage" title="allow damage from the ground and large fast moving blocks">collision damage from blocks:</label>
 					<input type="checkbox" id="body-damage" name="body-damage" checked style="width:17px; height:17px;"> -->
                     <br>
-                    <label for="banned">banned levels:</label>
+                    <label for="banned" title="type banned levels with a space between them.  Example:  run temple biohazard">banned levels:</label>
                     <input list="ban-suggest" id="banned" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="false" style="width: 182px;" />
                     <datalist id="ban-suggest">
                         <option value="testChamber">

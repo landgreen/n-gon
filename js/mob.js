@@ -235,6 +235,7 @@ const mobs = {
     //     })
     //   }
     // },
+    deathCount: 0,
     mobSpawnWithHealth: 1,
     setMobSpawnHealth() {
         mobs.mobSpawnWithHealth = 0.88 ** (tech.mobSpawnWithHealth) //+ (m.fieldMode === 0 || m.fieldMode === 7) * m.coupling
@@ -720,10 +721,40 @@ const mobs = {
                         vertexCollision(this.position, look, map);
                         vertexCollision(this.position, look, body);
                         if (best.dist2 != Infinity) {
-                            this.springTarget.x = best.x;
-                            this.springTarget.y = best.y;
-                            this.cons.length = 100 + 1.5 * this.radius;
-                            this.cons2.length = 100 + 1.5 * this.radius;
+                            if (Math.random() > 0.5) {
+                                this.springTarget.x = best.x;
+                                this.springTarget.y = best.y;
+                                this.cons.length = 100 + 1.5 * this.radius;
+                                this.cons2.length = 100 + 1.5 * this.radius;
+                            } else {
+                                this.springTarget2.x = best.x;
+                                this.springTarget2.y = best.y;
+                                this.cons.length = 100 + 1.5 * this.radius;
+                                this.cons2.length = 100 + 1.5 * this.radius;
+                            }
+
+
+
+                            // if (!(simulation.cycle % (this.seePlayerFreq * 2))) {
+                            //     const unit = Vector.normalise(Vector.sub(this.seePlayer.position, this.position))
+                            //     const goal = Vector.add(this.position, Vector.mult(unit, stepRange))
+                            //     this.springTarget.x = goal.x;
+                            //     this.springTarget.y = goal.y;
+                            //     // this.springTarget.x = this.seePlayer.position.x;
+                            //     // this.springTarget.y = this.seePlayer.position.y;
+                            //     this.cons.length = -200;
+                            //     this.cons2.length = 100 + 1.5 * this.radius;
+                            // } else if (!(simulation.cycle % this.seePlayerFreq)) {
+                            //     const unit = Vector.normalise(Vector.sub(this.seePlayer.position, this.position))
+                            //     const goal = Vector.add(this.position, Vector.mult(unit, stepRange))
+                            //     this.springTarget2.x = goal.x;
+                            //     this.springTarget2.y = goal.y;
+                            //     // this.springTarget2.x = this.seePlayer.position.x;
+                            //     // this.springTarget2.y = this.seePlayer.position.y;
+                            //     this.cons.length = 100 + 1.5 * this.radius;
+                            //     this.cons2.length = -200;
+                            // }
+
                         }
                     }
                 }
@@ -1197,6 +1228,8 @@ const mobs = {
                     if (tech.isEnergyLoss) m.energy *= 0.75;
                     powerUps.spawnRandomPowerUp(this.position.x, this.position.y);
                     m.lastKillCycle = m.cycle; //tracks the last time a kill was made, mostly used in simulation.checks()
+                    mobs.mobDeaths++
+
                     if (Math.random() < tech.sporesOnDeath) {
                         if (tech.isSporeFlea) {
                             const len = Math.min(25, Math.floor(2 + this.mass * (0.5 + 0.5 * Math.random()))) / 2

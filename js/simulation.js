@@ -360,13 +360,13 @@ const simulation = {
             if (document.getElementById(b.activeGun)) document.getElementById(b.activeGun).style.opacity = "1";
         }
 
-        if (tech.isEntanglement && document.getElementById("tech-entanglement")) {
+        if (tech.isFirstOrder && document.getElementById("tech-first-derivative")) {
             if (b.inventory[0] === b.activeGun) {
                 let lessDamage = 1
                 for (let i = 0, len = b.inventory.length; i < len; i++) lessDamage *= 0.87 // 1 - 0.13
-                document.getElementById("tech-entanglement").innerHTML = " " + ((1 - lessDamage) * 100).toFixed(0) + "%"
+                document.getElementById("tech-first-derivative").innerHTML = " " + ((1 - lessDamage) * 100).toFixed(0) + "%"
             } else {
-                document.getElementById("tech-entanglement").innerHTML = " 0%"
+                document.getElementById("tech-first-derivative").innerHTML = " 0%"
             }
         }
     },
@@ -791,6 +791,7 @@ const simulation = {
         simulation.isAutoZoom = true;
         simulation.makeGunHUD();
         simulation.lastLogTime = 0;
+        mobs.mobDeaths = 0
 
         level.onLevel = 0;
         level.levelsCleared = 0;
@@ -1093,7 +1094,10 @@ const simulation = {
     checks() {
         if (!(m.cycle % 60)) { //once a second
             //energy overfill 
-            if (m.energy > m.maxEnergy) m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
+            if (m.energy > m.maxEnergy) {
+                m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
+                if (m.energy > 1000000) m.energy = 1000000
+            }
             if (tech.isFlipFlopEnergy && m.immuneCycle < m.cycle) {
                 if (tech.isFlipFlopOn) {
                     if (m.immuneCycle < m.cycle) m.energy += 0.2;

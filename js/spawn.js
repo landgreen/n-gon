@@ -400,6 +400,7 @@ const spawn = {
                     Matter.Composite.remove(engine.world, map[map.length - 1]);
                     map.splice(map.length - 1, 1);
                     simulation.draw.setPaths(); //redraw map draw path
+                    // level.levels.push("null")
                 }
 
                 //add lore level as next level if player took lore tech earlier in the game
@@ -816,7 +817,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         // console.log(`mass=${me.mass}, radius = ${radius}`)
         me.accelMag = 0.0002
-        me.repulsionRange = 200000 + radius * radius; //squared
+        me.repulsionRange = 400000 + radius * radius; //squared
         // me.memory = 120;
         me.seeAtDistance2 = 2000000 //1400 vision range
         Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
@@ -2851,7 +2852,7 @@ const spawn = {
             let i = 0
             let spawnFlutters = () => {
                 if (i < len) {
-                    if (!(simulation.cycle % delay) && !simulation.paused && !simulation.isChoosing) {
+                    if (!(simulation.cycle % delay) && !simulation.paused && !simulation.isChoosing && m.alive) {
                         // const phase = i / len * 2 * Math.PI
                         // const where = Vector.add(this.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
                         const unit = Vector.normalise(Vector.sub(player.position, this.position))
@@ -4914,9 +4915,9 @@ const spawn = {
         mobs.spawn(x, y, 7, radius, "transparent");
         let me = mob[mob.length - 1];
         me.seeAtDistance2 = 300000;
-        me.accelMag = 0.00013 * simulation.accelScale;
+        me.accelMag = 0.00015 * simulation.accelScale;
         if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
-        // Matter.Body.setDensity(me, 0.001); //normal is 0.001 //makes effective life much lower
+        Matter.Body.setDensity(me, 0.0015); //normal is 0.001 //makes effective life much lower
         me.stroke = "transparent"; //used for drawGhost
         me.alpha = 1; //used in drawGhost
         me.canTouchPlayer = false; //used in drawGhost
@@ -4927,7 +4928,7 @@ const spawn = {
         me.memory = 480;
         me.do = function() {
             //cap max speed
-            if (this.speed > 5) {
+            if (this.speed > 7) {
                 Matter.Body.setVelocity(this, {
                     x: this.velocity.x * 0.8,
                     y: this.velocity.y * 0.8
@@ -4939,7 +4940,7 @@ const spawn = {
             this.search();
             //draw
             if (this.distanceToPlayer2() < this.seeAtDistance2) {
-                if (this.alpha < 1) this.alpha += 0.005 * simulation.CDScale; //near player go solid
+                if (this.alpha < 1) this.alpha += 0.01 * simulation.CDScale; //near player go solid
             } else {
                 if (this.alpha > 0) this.alpha -= 0.05; ///away from player, hide
             }
@@ -6498,6 +6499,34 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             this.removeCons(); //remove constraint
+            //spawn seekers
+            // for (let i = 0, len = 100; i < len; i++) {
+            //     const unit = Vector.rotate({ x: 10 + i, y: 0 }, Math.random() * 6.28)
+            //     const where = Vector.add(this.position, unit)
+            //     spawn.seeker(where.x, where.y); //(x, y, radius = 8, sides = 6)
+            // }
+            const delay = 4
+            let i = 0
+            const len = 3 * simulation.difficulty
+            let spawnFlutters = () => {
+                if (i < len) {
+                    if (!(simulation.cycle % delay) && !simulation.paused && !simulation.isChoosing && m.alive) {
+                        const unit = Vector.rotate({ x: radius * Math.random(), y: 0 }, Math.random() * 6.28)
+                        const where = Vector.add(this.position, unit)
+                        spawn.seeker(where.x, where.y); //(x, y, radius = 8, sides = 6)
+                        i++
+                    }
+                    requestAnimationFrame(spawnFlutters);
+                }
+            }
+            requestAnimationFrame(spawnFlutters);
+            simulation.drawList.push({ //add dmg to draw queue
+                x: this.position.x,
+                y: this.position.y,
+                radius: radius * 0.9,
+                color: "rgba(255,0,255,0.2)",
+                time: len * (delay - 1)
+            });
         };
         me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {

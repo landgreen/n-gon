@@ -268,7 +268,8 @@ ${junkCount ?  `<br><strong class='color-j'>JUNK</strong>: ${(junkCount / totalC
 <br>
 <br>seed: ${Math.initialSeed}
 <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${m.cycle} cycles
-<br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
+<br>mobs: ${mob.length} &nbsp; deaths: ${mobs.mobDeaths}
+<br>blocks: ${body.length} &nbsp; bullets: ${bullet.length} &nbsp; power ups: ${powerUp.length} 
 <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
 <br>mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}   
 ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
