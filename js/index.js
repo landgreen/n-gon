@@ -1289,6 +1289,12 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     }
     document.getElementById("banned").value = localSettings.banList
 
+    if (!localSettings.isLoreDoesNotNeedReset) {
+        localSettings.isLoreDoesNotNeedReset = true
+        localSettings.loreCount = 0; //this sets what conversation is heard
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    }
+
 } else {
     console.log('setting default localSettings')
     const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
@@ -1304,8 +1310,9 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         isTrainingNotAttempted: true,
         levelsClearedLastGame: 0,
         loreCount: 0,
+        isLoreDoesNotNeedReset: false,
         isHuman: false,
-        key: undefined
+        key: undefined,
     };
     input.setDefault()
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage

@@ -3,11 +3,11 @@ const lore = {
     techGoal: 7,
     setTechGoal() {
         if (simulation.difficultyMode === 1) {
-            this.techGoal = 14
+            this.techGoal = 8
         } else if (simulation.difficultyMode === 2) {
-            this.techGoal = 7
+            this.techGoal = 5
         } else if (simulation.difficultyMode === 4) {
-            this.techGoal = 3
+            this.techGoal = 2
         } else if (simulation.difficultyMode === 6) {
             this.techGoal = 1
         }
@@ -641,6 +641,7 @@ const lore = {
                 lore.anand.text(`So why don't you try to get the final level of the simulation without killing any mobs?`)
                 localSettings.loreCount++
                 if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                console.log(localSettings.loreCount)
             },
             () => { lore.miriam.text(`Ok check back in and let us know how it goes.`) },
             () => { lore.anand.text("bye") },
@@ -663,14 +664,14 @@ const lore = {
             () => {
                 if (mobs.mobDeaths < level.levelsCleared) {
                     lore.miriam.text(`So I think it worked.`)
-                } else {
+                } else if (!simulation.isCheating) {
                     lore.miriam.text(`Looks like you got back here, but you you killed ${mobs.mobDeaths} mobs`)
                 }
             },
             () => {
                 if (mobs.mobDeaths < level.levelsCleared) {
                     lore.anand.text(`Yeah, at the end it wasn't attacking you.`)
-                } else {
+                } else if (!simulation.isCheating) {
                     lore.miriam.text(`Try again to get ot the final boss without killing any mobs.`)
                 }
             },

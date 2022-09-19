@@ -1,14 +1,6 @@
 ******************************************************** NEXT PATCH **************************************************
 
 
-ghoster mobs are faster
-teatherBoss spawns some seekerBullets on death
-added 2 more lore chapters
-  7 total
-
-bug fixes
-  updated requirements text
-
 *********************************************************** TODO *****************************************************
 
 

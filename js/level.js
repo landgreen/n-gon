@@ -52,10 +52,11 @@ const level = {
 
             //lore testing
             // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
-            // lore.techCount = 3
+            // lore.techCount = 2
             // simulation.isCheating = false //true;
-            localSettings.loreCount = 6; //this sets what conversation is heard
-            if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            // level.levelsCleared = 10
+            // localSettings.loreCount = 7; //this sets what conversation is heard
+            // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
             // localSettings.isHuman = true
@@ -3288,7 +3289,7 @@ const level = {
             //power ups don't spawn in experiment mode, so they don't get removed at the start of experiment mode
             function cycle() {
                 if (simulation.cycle > 10) {
-                    if (localSettings.loreCount === 6) {
+                    if (localSettings.loreCount === 7) {
                         powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2170, "field", false);
                     } else {
                         powerUps.spawnStartingPowerUps(2095 + 15 * (Math.random() - 0.5), -2070 - 125);
