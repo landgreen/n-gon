@@ -1,11 +1,7 @@
 ******************************************************** NEXT PATCH **************************************************
 
-IceIX is faster, but doesn't last as long
-  effective range and damage should be about the same
 
-slow fall while perfect diamagnetism is active
 
-bug fixes
 
 *********************************************************** TODO *****************************************************
 

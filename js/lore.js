@@ -664,10 +664,12 @@ const lore = {
             () => {
                 if (mobs.mobDeaths < level.levelsCleared) {
                     lore.miriam.text(`So I think it worked.`)
-                    localSettings.loreCount++
-                    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                    // localSettings.loreCount++
+                    // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                 } else if (!simulation.isCheating) {
                     lore.miriam.text(`Looks like you got back here, but you killed ${mobs.mobDeaths} mobs`)
+                    localSettings.loreCount--
+                    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                 }
             },
             () => {
