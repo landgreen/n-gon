@@ -23,12 +23,14 @@ const level = {
             // powerUps.research.changeRerolls(100000)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
-            // m.setField("negative mass") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // m.couplingChange(5)
+            // m.setField("molecular assembler") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.guns[3].ammo = 1000000
+            // b.guns[0].ammo = 1000000
 
-            // tech.giveTech("phonon")
+            // tech.giveTech("Meissner effect")
             // for (let i = 0; i < 4; ++i) tech.giveTech("bound state")
             // for (let i = 0; i < 1; ++i) tech.giveTech("isotropic")
             // tech.giveTech("sympathetic resonance")
@@ -37,12 +39,12 @@ const level = {
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
 
+            // level.testing();
             // spawn.starter(1900, -500)
             // spawn.beetleBoss(2538, -1950)
-            // for (let i = 0; i < 33; ++i) spawn.shooter(1000 + 5000 * Math.random(), -500 + 300 * Math.random())
+            // for (let i = 0; i < 33; ++i) spawn.starter(1000 + 5000 * Math.random(), -500 + 300 * Math.random())
             // tech.addJunkTechToPool(2)
             // tech.tech[322].frequency = 100
-            // level.testing();
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
@@ -51,11 +53,12 @@ const level = {
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
 
             //lore testing
-            // for (let i = 0; i < 3; i++) tech.giveTech("undefined")
+            // for (let i = 0; i < 5; i++) tech.giveTech("undefined")
             // lore.techCount = 2
             // simulation.isCheating = false //true;
             // level.levelsCleared = 10
-            // localSettings.loreCount = 7; //this sets what conversation is heard
+            // mobs.mobDeaths = 200
+            // localSettings.loreCount = 6; //this sets what conversation is heard
             // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
@@ -2658,8 +2661,8 @@ const level = {
         // level.onLevel--
         // console.log(level.onLevel, level.levels)
         //start a conversation based on the number of conversations seen
-        if (localSettings.loreCount > lore.conversation.length - 1) localSettings.loreCount = lore.conversation.length - 1; //repeat final conversation if they are at the final chapter
-        if (!simulation.isCheating) {
+        if (localSettings.loreCount > lore.conversation.length - 1) localSettings.loreCount = lore.conversation.length - 1; //repeat final conversation if lore count is too high
+        if (!simulation.isCheating && localSettings.loreCount < lore.conversation.length) {
             tech.isNoDraftPause = true //disable pause
             lore.testSpeechAPI() //see if speech is working
             lore.chapter = localSettings.loreCount //set the chapter to listen to to be the lore level (you can't use the lore level because it changes during conversations)
@@ -3289,7 +3292,7 @@ const level = {
             //power ups don't spawn in experiment mode, so they don't get removed at the start of experiment mode
             function cycle() {
                 if (simulation.cycle > 10) {
-                    if (localSettings.loreCount === 7) {
+                    if (localSettings.loreCount === 6) {
                         powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2170, "field", false);
                     } else {
                         powerUps.spawnStartingPowerUps(2095 + 15 * (Math.random() - 0.5), -2070 - 125);

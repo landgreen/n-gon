@@ -2937,18 +2937,19 @@ const b = {
     },
     iceIX(speed = 0, dir = m.angle + Math.PI * 2 * Math.random(), where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }) {
         const me = bullet.length;
-        const THRUST = 0.0009
+        const THRUST = 0.0018
         const RADIUS = 18
-        const SCALE = 1 - 0.08 / tech.isBulletsLastLonger
+        const SCALE = 1 - 0.12 / tech.isBulletsLastLonger
         bullet[me] = Bodies.polygon(where.x, where.y, 3, RADIUS, {
             angle: dir - Math.PI,
-            inertia: Infinity,
+            // inertia: Infinity,
+            spin: 0.00004 * (0.1 + Math.random()) * (Math.round(Math.random()) ? 1 : -1),
             friction: 0,
-            frictionAir: 0.023,
+            frictionAir: 0.02,
             restitution: 0.9,
             dmg: 1.3, //damage done in addition to the damage from momentum
             lookFrequency: 14 + Math.floor(8 * Math.random()),
-            endCycle: simulation.cycle + 100 * tech.isBulletsLastLonger + Math.floor(25 * Math.random()),
+            endCycle: simulation.cycle + 65 * tech.isBulletsLastLonger + Math.floor(25 * Math.random()),
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -2989,10 +2990,11 @@ const b = {
                     }
                 }
                 if (this.lockedOn) { //accelerate towards mobs
-                    this.force = Vector.mult(Vector.normalise(Vector.sub(this.position, this.lockedOn.position)), -this.mass * THRUST)
+                    this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * THRUST)
                 } else {
                     this.force = Vector.mult(Vector.normalise(this.velocity), this.mass * THRUST)
                 }
+                this.torque += this.inertia * this.spin
             }
         })
 
@@ -3002,6 +3004,8 @@ const b = {
             x: speed * Math.cos(dir),
             y: speed * Math.sin(dir)
         });
+        Matter.Body.setAngularVelocity(bullet[me], 3000 * bullet[me].spin);
+
         // Matter.Body.setVelocity(bullet[me], {
         //   x: m.Vx / 2 + speed * Math.cos(dir),
         //   y: m.Vy / 2 + speed * Math.sin(dir)

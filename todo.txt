@@ -1,37 +1,29 @@
 ******************************************************** NEXT PATCH **************************************************
 
+IceIX is faster, but doesn't last as long
+  effective range and damage should be about the same
+
+slow fall while perfect diamagnetism is active
+
+bug fixes
 
 *********************************************************** TODO *****************************************************
 
+bug? i'm pretty sure the quest is given at 6 but the field spawns at 7
 
-complete the final lore chapters
-  track mob kills with simulation.killCount
-  if killCount is below 3-4 on entering gauntlet fill with starters
-  if killCount is below 3-4 on finalBoss fill with starters
-    if lorecount is on final chapter open door
 
-      have conversation
-        the AI doesn't really see it's self as the player or the mobs
-        it doesn't have a "self" or an ego like we do
-        but it can learn about the world and it learned a non violent way to solve problems
-        of course there are still other simulations going on at the same time as thing one that are probably violent
-        but at least it now has an example of the potential for peace
-    if Pacifist run is too hard, spawn a field at the start instead of a gun (because lore says they can spawn things)
-
-reduce gravity while field is active (as if the field is a parachute/glider)
-  reduce gravity when velocity.y > 2 and field is active
-  make standard no tech needed
-  all fields?
-    perfect diamagnetism, molecular assembler, field emitter
-    standing wave effect is always on?
+deflecting coupling effect should be not fun
+  make ice IX more fun
+    faster speed, shorter duration
+  trade bremstralung for iceIX?
 
 make duplication less effective on why difficulty
   scale the numbers in the tech
 
-deflecting coupling effect should be not fun
-  trade bremstralung for iceIX
-
 tech - buff MACHO range, effect, move speed?
+
+tech - iceIX freeze effect lasts much longer, spawn 10 coupling
+  for perfect diamagnatism
 
 PWA?
   https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps

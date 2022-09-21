@@ -1572,7 +1572,7 @@ const tech = {
             frequencyDefault: 1,
             isBotTech: true,
             allowed() {
-                return b.totalBots() > 1 || build.isExperimentSelection
+                return b.totalBots() > 1
             },
             requires: "at least 2 bots",
             effect() {

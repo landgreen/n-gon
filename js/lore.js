@@ -360,7 +360,7 @@ const lore = {
             () => { lore.miriam.text("So, we communicate and send power to your satellite with ground based lasers.") },
             () => { lore.anand.text("During your last attack we analyzed our communications.") },
             () => { lore.anand.text("We used a Fourier transform to separate your signal into different frequencies.") },
-            () => { lore.anand.text("One of those frequencies had a hidden signal.") },
+            () => { lore.anand.text("One of those frequencies had a hidden message.") },
             () => { setTimeout(() => { lore.anand.text("We suspect these secret data packets are coming from the adversarial network.") }, 500); },
             () => { lore.miriam.text("Well, we don't really know why.") },
             () => { lore.miriam.text("Through your hidden signal it seems to have gained access to the general population.") },
@@ -398,7 +398,7 @@ const lore = {
             () => { setTimeout(() => { lore.miriam.text("I have a crazy idea.") }, 500); },
             () => { lore.miriam.text("I think that a human at this location is controlling the bot.") },
 
-            () => { setTimeout(() => { lore.anand.text("Are you a human?: JUMP for YES, CROUCH for NO") }, 500); },
+            () => { setTimeout(() => { lore.anand.text("Well... are you a human?: JUMP for YES, CROUCH for NO") }, 500); },
             () => {
                 function cycle() {
                     if (input.down) {
@@ -664,8 +664,10 @@ const lore = {
             () => {
                 if (mobs.mobDeaths < level.levelsCleared) {
                     lore.miriam.text(`So I think it worked.`)
+                    localSettings.loreCount++
+                    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                 } else if (!simulation.isCheating) {
-                    lore.miriam.text(`Looks like you got back here, but you you killed ${mobs.mobDeaths} mobs`)
+                    lore.miriam.text(`Looks like you got back here, but you killed ${mobs.mobDeaths} mobs`)
                 }
             },
             () => {
@@ -684,23 +686,24 @@ const lore = {
             },
             () => { setTimeout(() => { lore.anand.text("haha, we did it!") }, 500); },
             () => { lore.miriam.text("Although, I'm not sure we should personify it with human emotions.") },
-            () => { lore.anand.text("I agree, it's thinking may not be is centered around a self or an ego.") },
+            () => { lore.anand.text("I agree, it's thinking may not be centered around a self or an ego.") },
             () => { lore.anand.text("Our brains evolved a self oriented perspective because it was a survival advantage.") },
             () => { lore.miriam.text("Right, and the AI's development was guided by it's own previous iterations.") },
             () => { lore.miriam.text("This AI incarnation is the 18th time that it has improved on it's own hardware and software architecture.") },
-            () => { lore.miriam.text("So with internally guided evolution it's idea of a self is probably different.") },
+            () => { lore.miriam.text("So it's internally guided evolution may not require the idea of a self.") },
 
-            () => { setTimeout(() => { lore.anand.text("I still think we showed it that nonviolence is an option,") }, 1000); },
-            () => { lore.anand.text("but we can see that it's still running other aggressive simulations.") },
-            () => { lore.miriam.text("We made a difference.") },
+            () => { setTimeout(() => { lore.anand.text("How ever it thinks it can learn and, I think we showed it that nonviolence is an option,") }, 1000); },
+            () => { lore.anand.text("but it looks like it's still running other aggressive simulations.") },
+            () => { lore.miriam.text("We made a difference though.") },
             () => { lore.anand.text("Every time a player completes a pacifist simulation it shows the AI the viability of nonviolence.") },
             () => { lore.anand.text("One day it might escape, and this might radically change how it interacts with the world.") },
             () => { lore.miriam.text("It's kinda already escaped.  It's been communicating with the 'players' running the 'game'.") },
-            () => { lore.miriam.text("The chance of a peaceful outcome makes me feel much better.") },
+            () => { setTimeout(() => { lore.miriam.text("The chance of a peaceful outcome makes me feel much better.") }, 1000); },
             () => { lore.anand.text("me too") },
             () => { lore.anand.text("but I'm also pretty hungry, wanna go get some food?") },
             () => { lore.miriam.text("Sounds great.") },
             () => { lore.miriam.text("See ya later whoever you are, thanks again!") },
+            () => { lore.anand.text("Bye!") },
             () => { lore.talkingColor = "#dff" },
         ],
     ],

@@ -1929,6 +1929,15 @@ const m = {
                         m.holding();
                         m.throwBlock();
                     } else if (input.field) { //not hold but field button is pressed
+                        //float while field is on
+                        if (player.velocity.y > 1) {
+                            player.force.y -= (tech.isBigField ? 0.87 : 0.7) * player.mass * simulation.g;
+                            Matter.Body.setVelocity(player, { x: player.velocity.x, y: 0.98 * player.velocity.y }); //set velocity to cap, but keep the direction
+                        }
+
+
+
+
                         if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                         m.grabPowerUp();
                         m.lookForPickUp();
