@@ -1,25 +1,47 @@
 ******************************************************** NEXT PATCH **************************************************
 
+mass-energy is compatible with more tech
+  defense works with mass-energy, but is exponentially reduced (~10%)
+  damage taken scales with difficulty based heal reduction 
+    1.3x dmg level 5 hard,  2x dmg level 13 why
 
+ergodicity: 91->66% damage,  no heals -> 1/2 size heals
+negative feedback 0.5% -> 1% damage per missing health
+negative entropy spawn heals for 33% missing health not 33 flat missing health
+  this means it caps at 3 health per level
+tech - iceIX freeze effect lasts 2 seconds longer, spawn 10 coupling
+  perfect diamagnetism, standing wave
 
+research is less common
+path integral comes with 5% JUNK
+there are fewer starting power ups on why difficulty
+
+bug fixes:
+  fixed the text overflow issue on small screens
+  decoherence: if you get a tech that is banished it stops being banished
+  you can now have negative research
 
 *********************************************************** TODO *****************************************************
 
-bug? i'm pretty sure the quest is given at 6 but the field spawns at 7
+make movement more valuable on the finalBoss
+
+JUNK tech description that changes similar to cards in inscription
+  that changes based on mouse position
+  can you tell if mouse is over card?
+
+tech that encourages gun swapping
+  a field tech: molecular assembler, pilot wave, negative mass?
+  something similar to applied science, but also spawn a gun?
+  a bonus for each time a mob dies with a different active gun each level
+    +damage on that level
+    ammo, heals, research?
 
 
-deflecting coupling effect should be not fun
-  make ice IX more fun
-    faster speed, shorter duration
-  trade bremstralung for iceIX?
-
-make duplication less effective on why difficulty
-  scale the numbers in the tech
+tech that gives permanent buff when ejected
+  buff: coupling, damage?
+  how to tell if it is ejected in the remove code?
 
 tech - buff MACHO range, effect, move speed?
-
-tech - iceIX freeze effect lasts much longer, spawn 10 coupling
-  for perfect diamagnatism
 
 PWA?
   https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps

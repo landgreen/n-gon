@@ -31,6 +31,7 @@ const powerUps = {
             time: 16
         });
     },
+    healGiveMaxEnergy: false, //for tech 1st ionization energy
     orb: {
         research(num = 1) {
             switch (num) {
@@ -98,19 +99,35 @@ const powerUps = {
             return text
         },
         heal(num = 1) {
-            switch (num) {
-                case 1:
-                    return `<div class="heal-circle"></div>`
+            if (powerUps.healGiveMaxEnergy) {
+                switch (num) {
+                    case 1:
+                        return `<div class="heal-circle-energy"></div>`
+                }
+                let text = '<span style="position:relative;">'
+                for (let i = 0; i < num; i++) {
+                    text += `<div class="heal-circle-energy" style="position:absolute; top:1px; left:${i*10}px;"></div>`
+                }
+                text += '</span> &nbsp; &nbsp; '
+                for (let i = 0; i < num; i++) {
+                    text += '&nbsp; '
+                }
+                return text
+            } else {
+                switch (num) {
+                    case 1:
+                        return `<div class="heal-circle"></div>`
+                }
+                let text = '<span style="position:relative;">'
+                for (let i = 0; i < num; i++) {
+                    text += `<div class="heal-circle" style="position:absolute; top:1px; left:${i*10}px;"></div>`
+                }
+                text += '</span> &nbsp; &nbsp; '
+                for (let i = 0; i < num; i++) {
+                    text += '&nbsp; '
+                }
+                return text
             }
-            let text = '<span style="position:relative;">'
-            for (let i = 0; i < num; i++) {
-                text += `<div class="heal-circle" style="position:absolute; top:1px; left:${i*10}px;"></div>`
-            }
-            text += '</span> &nbsp; &nbsp; '
-            for (let i = 0; i < num; i++) {
-                text += '&nbsp; '
-            }
-            return text
         },
         tech(num = 1) {
             return `<div class="tech-circle"></div>`
@@ -122,11 +139,11 @@ const powerUps = {
             }
             let text = '<span style="position:relative;">'
             for (let i = 0; i < num; i++) {
-                text += `<div class="coupling-circle" style="position:absolute; top:1.5px; left:${i*8}px;"></div>`
+                text += `<div class="coupling-circle" style="position:absolute; top:1.5px; left:${i*6}px;"></div>`
             }
-            text += '</span> &nbsp; &nbsp; '
+            text += '</span> &nbsp; &nbsp;'
             for (let i = 0; i < num; i++) {
-                text += '&nbsp; '
+                text += '&thinsp; '
             }
             return text
         },
@@ -452,9 +469,8 @@ const powerUps = {
         changeRerolls(amount) {
             if (amount !== 0) {
                 powerUps.research.count += amount
-                if (powerUps.research.count < 0) {
-                    powerUps.research.count = 0
-                }
+                // if (powerUps.research.count < 0) powerUps.research.count = 0
+
                 // else {
                 //     simulation.makeTextLog(`powerUps.research.count <span class='color-symbol'>+=</span> ${amount}`) // <br>${powerUps.research.count}
                 // }
@@ -520,11 +536,11 @@ const powerUps = {
         name: "heal",
         color: "#0eb",
         size() {
-            return Math.sqrt(0.1 + 0.25) * 40 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * (tech.isFlipFlopOn && tech.isFlipFlopHealth ? Math.sqrt(2) : 1); //(simulation.healScale ** 0.25)  gives a smaller radius as heal scale goes down
+            return Math.sqrt(0.1 + 0.25) * 40 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)) * (tech.isFlipFlopOn && tech.isFlipFlopHealth ? Math.sqrt(2) : 1); //(simulation.healScale ** 0.25)  gives a smaller radius as heal scale goes down
         },
         effect() {
-            if (!tech.isEnergyHealth && m.alive && !tech.isNoHeals) {
-                const heal = (this.size / 40 / (simulation.healScale ** 0.25)) ** 2 //simulation.healScale is undone here because heal scale is already properly affected on m.addHealth()
+            if (!tech.isEnergyHealth && m.alive) {
+                let heal = (this.size / 40 / (simulation.healScale ** 0.25)) ** 2 //simulation.healScale is undone here because heal scale is already properly affected on m.addHealth()
                 // console.log("size = " + this.size, "heal = " + heal)
                 if (heal > 0) {
                     const overHeal = m.health + heal * simulation.healScale - m.maxHealth //used with tech.isOverHeal
@@ -547,8 +563,8 @@ const powerUps = {
                     }
                 }
             }
-            if (tech.healGiveMaxEnergy) {
-                tech.healMaxEnergyBonus += 0.08 * tech.largerHeals
+            if (powerUps.healGiveMaxEnergy) {
+                tech.healMaxEnergyBonus += 0.08 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)
                 m.setMaxEnergy();
             }
         },
@@ -670,7 +686,7 @@ const powerUps = {
                         }
                     }
                     if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
-                        tech.junkResearchNumber = Math.ceil(3 * Math.random())
+                        tech.junkResearchNumber = Math.ceil(4 * Math.random())
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('gun')"><div class="grid-title"> <span style="position:relative;">`
                         for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                         text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
@@ -809,7 +825,7 @@ const powerUps = {
                         }
                     }
                     if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
-                        tech.junkResearchNumber = Math.ceil(3 * Math.random())
+                        tech.junkResearchNumber = Math.ceil(4 * Math.random())
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('field')"><div class="grid-title"> <span style="position:relative;">`
                         for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                         text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
@@ -1062,11 +1078,11 @@ const powerUps = {
                     }
                     //add in research button or pseudoscience button
                     if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
-                        tech.junkResearchNumber = Math.ceil(3 * Math.random())
+                        tech.junkResearchNumber = Math.ceil(4 * Math.random())
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"> <span style="position:relative;">`
                         for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
                         text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div>`
-                    } else if (powerUps.research.count) {
+                    } else if (powerUps.research.count > 0) {
                         text += `<div class="choose-grid-module" onclick="powerUps.research.use('tech')"><div class="grid-title"> <span style="position:relative;">`
                         for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.3)*i}px;opacity:0.8; border: 1px #fff solid;"></div>`
                         // text += `</span>&nbsp; <span class='research-select'>research</span></div></div>`
@@ -1094,7 +1110,7 @@ const powerUps = {
     },
     onPickUp(who) {
         powerUps.research.currentRerollCount = 0
-        if (tech.isTechDamage && who.name === "tech") m.damage(0.12 + 0.12 * tech.isEnergyHealth)
+        if (tech.isTechDamage && who.name === "tech") m.damage(0.1)
         if (tech.isMassEnergy) m.energy += 2;
         if (tech.isMineDrop && bullet.length < 150 && Math.random() < 0.6) {
             if (tech.isLaserMine && input.down) {
@@ -1205,7 +1221,7 @@ const powerUps = {
         }
     },
     addResearchToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level one randomly placed research
-        if (mob.length && Math.random() < 0.8) { // 80% chance
+        if (mob.length && Math.random() < 0.5 - 0.3 && simulation.difficultyMode < 5) { //lower chance on why difficulty
             const index = Math.floor(Math.random() * mob.length)
             powerUps.spawn(mob[index].position.x, mob[index].position.y, "research");
         }
@@ -1263,7 +1279,7 @@ const powerUps = {
                 } else {
                     return false
                 }
-            } else if (tech.tech[choose].count) {
+            } else if (tech.tech[choose].count && tech.tech[choose].isNonRefundable) {
                 // simulation.makeTextLog(`<div class='circle tech'></div> &nbsp; <strong>${tech.tech[choose].name}</strong> was ejected`, 600) //message about what tech was lost
                 simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
 
@@ -1285,7 +1301,7 @@ const powerUps = {
     },
     pauseEjectTech(index) {
         if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isNonRefundable) {
-            if (Math.random() < 0.16 || tech.tech[index].isFromAppliedScience || (tech.tech[index].bonusResearch !== undefined && tech.tech[index].bonusResearch > powerUps.research.count)) {
+            if (Math.random() < 0.2 || tech.tech[index].isFromAppliedScience || (tech.tech[index].bonusResearch !== undefined && tech.tech[index].bonusResearch > powerUps.research.count)) {
                 tech.removeTech(index)
                 // powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
             } else {

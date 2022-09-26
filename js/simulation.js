@@ -1157,8 +1157,13 @@ const simulation = {
 
             if (!(m.cycle % 420)) { //once every 7 seconds
                 if (tech.isZeno) {
-                    m.health *= 0.95 //remove 5%
-                    m.displayHealth();
+                    if (tech.isEnergyHealth) {
+                        m.energy *= 0.95
+                    } else {
+                        m.health *= 0.95 //remove 5%
+                        m.displayHealth();
+                    }
+
                 }
                 if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
 

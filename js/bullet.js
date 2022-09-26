@@ -2961,7 +2961,7 @@ const b = {
                 if (tech.iceEnergy && !who.shield && !who.isShielded && who.isDropPowerUp && who.alive && m.immuneCycle < m.cycle) {
                     setTimeout(() => { if (!who.alive) m.energy += tech.iceEnergy * 0.8 }, 10);
                 }
-                mobs.statusSlow(who, 180)
+                mobs.statusSlow(who, tech.iceIXFreezeTime)
                 this.endCycle = simulation.cycle
                 // if (tech.isHeavyWater) mobs.statusDoT(who, 0.15, 300)
             },

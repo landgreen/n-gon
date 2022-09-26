@@ -659,11 +659,6 @@ const m = {
     },
     collisionImmuneCycles: 30,
     damage(dmg) {
-        // if (tech.isCouplingNoHit) {
-        //     for (let i = 0, len = tech.tech.length; i < len; i++) {
-        //         if (tech.tech[i].name === "fine-structure constant") powerUps.ejectTech(i, true)
-        //     }
-        // }
         if (tech.isRewindAvoidDeath && m.energy > 0.6 && dmg > 0.01) {
             const steps = Math.floor(Math.min(299, 150 * m.energy))
             simulation.makeTextLog(`<span class='color-var'>m</span>.rewind(${steps})`)
@@ -677,9 +672,9 @@ const m = {
                 if (Math.random() < 0.5) b.drone({ x: m.pos.x + 30 * Math.cos(m.angle) + 100 * (Math.random() - 0.5), y: m.pos.y + 30 * Math.sin(m.angle) + 100 * (Math.random() - 0.5) }) //spawn drone
             }
         }
-
         if (tech.isEnergyHealth) {
-            m.energy -= dmg
+            dmg *= Math.pow(m.harmReduction(), 0.1) //defense has less effect
+            m.energy -= 0.9 * dmg / Math.sqrt(simulation.healScale) //scale damage with heal reduction difficulty
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
                     tech.isDeathAvoidedThisLevel = true
@@ -738,7 +733,6 @@ const m = {
             document.getElementById("dmg").style.transition = "opacity 0s";
             document.getElementById("dmg").style.opacity = 0.1 + Math.min(0.6, dmg * 4);
         }
-
         if (dmg > 0.03) {
             m.lastHit = dmg;
             if (dmg > 0.06 / m.holdingMassScale) m.drop(); //drop block if holding  // m.holdingMassScale = 0.5 for most fields
@@ -1594,7 +1588,19 @@ const m = {
     couplingChange(change = 0) {
         if (change > 0 && level.onLevel !== -1) simulation.makeTextLog(`m.coupling <span class='color-symbol'>+=</span> ${change}`, 60); //level.onLevel !== -1  means not on lore level
         m.coupling += change
-        if (m.coupling < 0) m.coupling = 0 //can't go negative
+        if (m.coupling < 0) {
+            //look for coupling power ups on this level and remove them to prevent exploiting tech ejections
+            for (let i = powerUp.length - 1; i > -1; i--) {
+                if (powerUp[i].name === "coupling") {
+                    Matter.Composite.remove(engine.world, powerUp[i]);
+                    powerUp.splice(i, 1);
+                    m.coupling += 0.1
+                    if (!(m.coupling < 0)) break
+                }
+            }
+
+            m.coupling = 0 //can't go negative
+        }
         // m.setMaxEnergy();
         // m.setMaxHealth();
         m.setFieldRegen()
@@ -2922,8 +2928,11 @@ const m = {
                     //not shooting (or using field) enable cloak
                     if (m.energy < 0.05 && m.fireCDcycle < m.cycle && !input.fire) m.fireCDcycle = m.cycle
                     if (m.fireCDcycle + 30 < m.cycle && !input.fire) { //automatically cloak if not firing
-                        if (!m.isCloak) {
+                        const drain = 0.1
+                        if (!m.isCloak && m.energy > drain) {
+                            m.energy -= drain
                             m.isCloak = true //enter cloak
+
 
                             // m.color = {
                             //     hue: 0,

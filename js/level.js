@@ -24,17 +24,17 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
-            // m.setField("perfect diamagnetism") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
+            // m.setField("metamaterial cloaking") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 1000000
 
-            // tech.giveTech("Meissner effect")
-            // for (let i = 0; i < 4; ++i) tech.giveTech("bound state")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("isotropic")
-            // tech.giveTech("sympathetic resonance")
-            // for (let i = 0; i < 9; i++) tech.giveTech("replication")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("mass-energy equivalence")
+            // tech.giveTech("Zeno's paradox")
+            // tech.giveTech("homeostasis")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("1st ionization energy")
+            // for (let i = 0; i < 1; i++) tech.giveTech("negative feedback")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
@@ -42,14 +42,14 @@ const level = {
             // level.testing();
             // spawn.starter(1900, -500)
             // spawn.beetleBoss(2538, -1950)
-            // for (let i = 0; i < 33; ++i) spawn.starter(1000 + 5000 * Math.random(), -500 + 300 * Math.random())
-            // tech.addJunkTechToPool(2)
+            // for (let i = 0; i < 33; ++i) spawn.sniper(1000 + 5000 * Math.random(), -500 + 300 * Math.random())
+            // tech.addJunkTechToPool(0.5)
             // tech.tech[322].frequency = 100
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
-            // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
-            // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
 
+            // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
+            // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
 
             //lore testing
@@ -58,7 +58,7 @@ const level = {
             // simulation.isCheating = false //true;
             // level.levelsCleared = 10
             // mobs.mobDeaths = 200
-            // localSettings.loreCount = 6 //this sets what conversation is heard
+            // localSettings.loreCount = 7 //this sets what conversation is heard
             // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
@@ -117,14 +117,23 @@ const level = {
             powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
         }
         if (tech.isHealLowHealth) {
-            const len = Math.ceil((m.maxHealth - m.health) / 0.29)
+            // if (tech.isEnergyHealth) {
+            //     var len = Math.ceil((m.maxEnergy - m.energy) / 0.33)
+            // } else {
+            //     var len = Math.ceil((m.maxHealth - m.health) / 0.33)
+            // }
+            if (tech.isEnergyHealth) {
+                var len = 3 * (1 - m.energy / m.maxEnergy) //as a percent
+            } else {
+                var len = 3 * (1 - m.health / m.maxHealth) //as a percent
+            }
             for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "heal", false);
         }
         if (tech.isMACHO) spawn.MACHO()
         for (let i = 0; i < tech.wimpCount; i++) {
             spawn.WIMP()
             mob[mob.length - 1].isDecoupling = true //so you can find it to remove
-            for (let j = 0, len = 5; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
+            for (let j = 0, len = 4; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         }
         // if (tech.isFlipFlopLevelReset && !tech.isFlipFlopOn) {
         if ((tech.isRelay || tech.isFlipFlop) && !tech.isFlipFlopOn) {
@@ -1320,7 +1329,7 @@ const level = {
         }
     },
     isHazardRise: false,
-    hazard(x, y, width, height, damage = 0.003) {
+    hazard(x, y, width, height, damage = 0.002) {
         return {
             min: {
                 x: x,
@@ -1374,7 +1383,7 @@ const level = {
 
                     if (this.height > 0 && Matter.Query.region([player], this).length) {
                         if (m.immuneCycle < m.cycle) {
-                            const DRAIN = 0.0032 * (tech.isRadioactiveResistance ? 0.25 : 1)
+                            const DRAIN = 0.004 * (tech.isRadioactiveResistance ? 0.25 : 1)
                             if (m.energy > DRAIN) {
                                 m.energy -= DRAIN
                                 // m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1) * 0.03) //still take 2% damage while you have energy
@@ -3297,9 +3306,11 @@ const level = {
                     } else {
                         powerUps.spawnStartingPowerUps(2095 + 15 * (Math.random() - 0.5), -2070 - 125);
                     }
-                    powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 25, "heal", false);
-                    powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 75, "heal", false);
-                    powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070, "research", false);
+                    if (simulation.difficultyMode < 5) {
+                        powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 25, "heal", false);
+                        powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070 - 75, "heal", false);
+                        powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2070, "research", false); //not on why difficulty
+                    }
                 } else {
                     requestAnimationFrame(cycle);
                 }
@@ -8895,7 +8906,7 @@ const level = {
             buttonThird.query();
             buttonThird.draw();
             if (!buttonThird.isUp && !hasSecretButton2) {
-                for (var i = 0; i < 4; i++) powerUps.spawn(1614, -3700, "research");
+                for (var i = 0; i < 1; i++) powerUps.spawn(1614, -3700, "research");
                 hasSecretButton2 = true;
             }
             if (!buttonSec.isUp) {

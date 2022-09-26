@@ -666,8 +666,8 @@ const spawn = {
             //when player is inside event horizon
             if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.eventHorizon) {
                 if (m.immuneCycle < m.cycle) {
-                    if (m.energy > 0) m.energy -= 0.015
-                    if (m.energy < 0.05 && m.immuneCycle < m.cycle) m.damage(0.0005 * simulation.dmgScale);
+                    if (m.energy > 0) m.energy -= 0.02
+                    if (m.energy < 0.05 && m.immuneCycle < m.cycle) m.damage(0.0004 * simulation.dmgScale);
                 }
                 const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                 player.force.x -= 0.0017 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
@@ -1317,8 +1317,10 @@ const spawn = {
         me.onHit = function() { //run this function on hitting player
             if (powerUps.ejectTech()) {
                 powerUps.ejectGraphic("150, 138, 255");
-                powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo");
-                powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research");
+                // powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo");
+                // powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research");
+                this.accelMag *= 1.4
+                Matter.Body.setDensity(this, this.density * 1.4); //normal is 0.001
             }
         };
         me.onDeath = function() {
@@ -1397,8 +1399,10 @@ const spawn = {
         me.onHit = function() { //run this function on hitting player
             if (powerUps.ejectTech()) {
                 powerUps.ejectGraphic("150, 138, 255");
-                powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo");
-                powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research");
+                // powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo");
+                // powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research");
+                this.accelMag *= 1.4
+                Matter.Body.setDensity(this, this.density * 1.4); //normal is 0.001
             }
         };
         me.onDeath = function() {
@@ -1874,8 +1878,8 @@ const spawn = {
             //when player is inside event horizon
             if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
                 if (m.immuneCycle < m.cycle) {
-                    if (m.energy > 0) m.energy -= 0.004
-                    if (m.energy < 0.1) m.damage(0.00015 * simulation.dmgScale);
+                    if (m.energy > 0) m.energy -= 0.005
+                    if (m.energy < 0.1) m.damage(0.0001 * simulation.dmgScale);
                 }
                 const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                 player.force.x -= 0.00125 * player.mass * Math.cos(angle) * (m.onGround ? 1.8 : 1);
@@ -2056,8 +2060,8 @@ const spawn = {
                 //when player is inside event horizon
                 if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
                     if (m.immuneCycle < m.cycle) {
-                        if (m.energy > 0) m.energy -= 0.006
-                        if (m.energy < 0.1) m.damage(0.0002 * simulation.dmgScale);
+                        if (m.energy > 0) m.energy -= 0.008
+                        if (m.energy < 0.1) m.damage(0.00015 * simulation.dmgScale);
                     }
                     const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                     player.force.x -= 0.0013 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
@@ -3284,9 +3288,9 @@ const spawn = {
         mobs.spawn(x, y, 5, 50, "rgb(0,235,255)"); //"rgb(221,102,119)"
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, Math.PI * 0.1);
-        Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
-        me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.03 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
 
         me.frictionStatic = 0;
         me.friction = 0;
@@ -3300,7 +3304,7 @@ const spawn = {
             me.grenadeDelay = 100
         }
         me.pulseRadius = 1.5 * Math.min(550, 200 + simulation.difficulty * 2)
-        me.delay = 30 + 35 * simulation.CDScale;
+        me.delay = 35 + 35 * simulation.CDScale;
         me.nextBlinkCycle = me.delay;
         spawn.shield(me, x, y, 1);
         me.onDamage = function() {
@@ -6029,7 +6033,7 @@ const spawn = {
             this.cycle++
             if (this.seePlayer.recall && ((this.cycle % 15) === 0)) {
                 if (this.canFire) {
-                    if (this.cycle > 120) {
+                    if (this.cycle > 100) {
                         this.cycle = 0
                         this.canFire = false
                         // Matter.Body.setAngularVelocity(this, 0.1)

@@ -253,7 +253,7 @@ const build = {
 </svg><br>`
         text += `
 <br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(3)} &nbsp; &nbsp; difficulty: ${((m.dmgScale)).toPrecision(3)}
-<br><strong class='color-defense'>defense</strong>: ${(1-m.harmReduction()).toPrecision(3)} &nbsp; &nbsp; difficulty: ${(1/simulation.dmgScale).toPrecision(3)}
+<br><strong class='color-defense'>defense</strong>: ${tech.isEnergyHealth  ? (1-Math.pow(m.harmReduction(), 0.1)).toPrecision(3) : (1-m.harmReduction()).toPrecision(3) } &nbsp; &nbsp; difficulty: ${(1/simulation.dmgScale).toPrecision(3)}
 <br><strong><em>fire rate</em></strong>: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
 ${tech.duplicationChance() ?  `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance()*100).toFixed(0)}%`: ""}
 ${m.coupling ? `<br><strong class='color-coupling'>coupling</strong>: ${(m.coupling).toFixed(2)} &nbsp; <span style = 'font-size:90%;'>`+m.couplingDescription()+"</span>": ""}
