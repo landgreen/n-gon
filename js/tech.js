@@ -233,7 +233,7 @@ const tech = {
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.harmReduction()
         if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
         if (tech.lastHitDamage && m.lastHit) dmg *= 1 + tech.lastHitDamage * m.lastHit * (2 - m.harmReduction()) // if (!simulation.paused) m.lastHit = 0
-        if (tech.isLowHealthDmg) dmg *= 1 + Math.max(0, 1 - (tech.isEnergyHealth ? m.energy : m.health))
+        if (tech.isLowHealthDmg) dmg *= 1 + 0.7 * Math.max(0, 1 - (tech.isEnergyHealth ? m.energy : m.health))
         return dmg
     },
     duplicationChance() {
@@ -483,7 +483,7 @@ const tech = {
         {
             name: "supply chain",
             junk: 0.05,
-            descriptionFunction() { return `for each <strong class='color-g'>gun</strong> in your inventory<br>double your current <strong class='color-ammo'>ammo</strong>` },
+            descriptionFunction() { return `for each <strong class='color-g'>gun</strong> in your inventory<br>double its <strong class='color-ammo'>ammo</strong>` },
             maxCount: 9,
             count: 0,
             frequency: 1,
@@ -2627,7 +2627,7 @@ const tech = {
         {
             name: "negative feedback",
             descriptionFunction() {
-                return `for each ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>": "<strong class='color-h'>health</strong>"} below <strong>100</strong><br><strong>+0.7%</strong> <strong class='color-d'>damage</strong> <em>(${(100*Math.max(0, 1 - (tech.isEnergyHealth ? m.energy : m.health))).toFixed(0)}%)</em>`
+                return `for each ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>": "<strong class='color-h'>health</strong>"} below <strong>100</strong><br><strong>+0.7%</strong> <strong class='color-d'>damage</strong> <em>(${(70*Math.max(0, 1 - (tech.isEnergyHealth ? m.energy : m.health))).toFixed(0)}%)</em>`
             },
             maxCount: 1,
             count: 0,
@@ -3509,7 +3509,7 @@ const tech = {
             couplingToResearch: 0.25,
             effect() {
                 let count = 0
-                while (powerUps.research.count > 0) {
+                while (powerUps.research.count > 0 && powerUps.research.count !== Infinity) {
                     powerUps.research.changeRerolls(-1)
                     count += 2.5
                     this.researchUsed++

@@ -776,6 +776,7 @@ const simulation = {
         powerUps.totalPowerUps = 0;
         powerUps.research.count = 0;
         powerUps.boost.endCycle = 0
+        powerUps.isFieldSpawned = false
         m.setFillColors();
         // m.maxHealth = 1
         // m.maxEnergy = 1

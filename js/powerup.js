@@ -650,7 +650,7 @@ const powerUps = {
                 for (let i = 0; i < b.guns.length; i++) {
                     if (!b.guns[i].have) options.push(i);
                 }
-                let totalChoices = Math.min(options.length, tech.isDeterminism ? 1 : 3 + tech.extraChoices)
+                let totalChoices = Math.min(options.length, tech.isDeterminism ? 1 : 2 + tech.extraChoices)
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
                 function removeOption(index) {
                     for (let i = 0; i < options.length; i++) {
@@ -787,7 +787,7 @@ const powerUps = {
                 for (let i = 1; i < m.fieldUpgrades.length; i++) { //skip field emitter
                     if (i !== m.fieldMode) options.push(i);
                 }
-                let totalChoices = Math.min(options.length, tech.isDeterminism ? 1 : 3 + tech.extraChoices)
+                let totalChoices = Math.min(options.length, tech.isDeterminism ? 1 : 2 + tech.extraChoices)
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
 
                 function removeOption(index) {
@@ -953,7 +953,10 @@ const powerUps = {
                     totalChoices = optionLengthNoDuplicates
                     if (tech.isBanish) { //when you run out of options eject banish
                         for (let i = 0, len = tech.tech.length; i < len; i++) {
-                            if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i, true)
+                            if (tech.tech[i].name === "decoherence") {
+                                // console.log(i)
+                                powerUps.ejectTech(i, true)
+                            }
                         }
                         simulation.makeTextLog(`decoherence <span class='color-var'>tech</span> ejected`)
                         simulation.makeTextLog(`options reset`)
@@ -1099,7 +1102,7 @@ const powerUps = {
         let cycle = () => {
             if (count > 0) {
                 requestAnimationFrame(cycle);
-                if (!simulation.paused && !simulation.isChoosing) { //&& !(simulation.cycle % 2)
+                if (!simulation.paused && !simulation.isChoosing && m.alive) { //&& !(simulation.cycle % 2)
                     count--
                     const where = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }
                     powerUps.spawn(where.x, where.y, type);
@@ -1182,9 +1185,13 @@ const powerUps = {
         // }
     },
     randomPowerUpCounter: 0,
+    isFieldSpawned: false, //makes it so a field spawns once but not more times
     spawnBossPowerUp(x, y) { //boss spawns field and gun tech upgrades
         if (level.levels[level.onLevel] !== "final") {
-            if (m.fieldMode === 0 && !m.coupling) {
+            // if (level.levelsCleared === 1) powerUps.spawn(x, y, "field")
+            // if (m.fieldMode === 0 && !m.coupling) {
+            if (!powerUps.isFieldSpawned) {
+                powerUps.isFieldSpawned = true
                 powerUps.spawn(x, y, "field")
             } else {
                 powerUps.randomPowerUpCounter++;
@@ -1227,7 +1234,7 @@ const powerUps = {
         }
     },
     spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
-        if (level.levelsCleared < 4) { //runs 4 times on all difficulty levels
+        if (level.levelsCleared < 4) { //runs on first 4 levels on all difficulties
             if (level.levelsCleared > 1) powerUps.spawn(x, y, "tech")
             if (b.inventory.length === 0) {
                 powerUps.spawn(x, y, "gun", false); //first gun
@@ -1242,23 +1249,24 @@ const powerUps = {
             } else {
                 for (let i = 0; i < 4; i++) powerUps.spawnRandomPowerUp(x, y);
             }
-        } else {
+        } else { //after the first 4 levels just spawn a random power up
             for (let i = 0; i < 3; i++) powerUps.spawnRandomPowerUp(x, y);
         }
     },
     ejectTech(choose = 'random', isOverride = false) {
         if (!simulation.isChoosing || isOverride) {
+            // console.log(tech.tech[choose].name, tech.tech[choose].count, tech.tech[choose].isNonRefundable)
             //find which tech you have
             if (choose === 'random') {
                 const have = []
                 for (let i = 0; i < tech.tech.length; i++) {
                     if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) have.push(i)
                 }
-                if (have.length === 0) {
-                    for (let i = 0; i < tech.tech.length; i++) {
-                        if (tech.tech[i].count > 0) have.push(i)
-                    }
-                }
+                // if (have.length === 0) {
+                //     for (let i = 0; i < tech.tech.length; i++) {
+                //         if (tech.tech[i].count > 0) have.push(i)
+                //     }
+                // }
 
                 if (have.length) {
                     choose = have[Math.floor(Math.random() * have.length)]
@@ -1279,7 +1287,7 @@ const powerUps = {
                 } else {
                     return false
                 }
-            } else if (tech.tech[choose].count && tech.tech[choose].isNonRefundable) {
+            } else if (tech.tech[choose].count && !tech.tech[choose].isNonRefundable) {
                 // simulation.makeTextLog(`<div class='circle tech'></div> &nbsp; <strong>${tech.tech[choose].name}</strong> was ejected`, 600) //message about what tech was lost
                 simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
 

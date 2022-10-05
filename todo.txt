@@ -1,29 +1,32 @@
 ******************************************************** NEXT PATCH **************************************************
 
-mass-energy is compatible with more tech
-  defense works with mass-energy, but is exponentially reduced (~10%)
-  damage taken scales with difficulty based heal reduction 
-    1.3x dmg level 5 hard,  2x dmg level 13 why
+finalBoss rework
+  (this is pretty raw, so expect a bug and balance patch soon)
+  finalBoss goes invulnerable a few times as it loses health
+  finalBoss damage reduction is higher
+    finalBoss damage reduction slowly decays as you do any damage to the boss
+      damage reduction resets to normal with each new invulnerability phase
+  after each invulnerability phase it randomly adds 1 more attack mode
+      lasers, black hole, mines, hoppers, seekers, mobs, orbiters, oscillation
+      
+mobs die below 0.05 -> 0.01 health
+  might cause bugs, but testing this out
 
-ergodicity: 91->66% damage,  no heals -> 1/2 size heals
-negative feedback 0.5% -> 1% damage per missing health
-negative entropy spawn heals for 33% missing health not 33 flat missing health
-  this means it caps at 3 health per level
-tech - iceIX freeze effect lasts 2 seconds longer, spawn 10 coupling
-  perfect diamagnetism, standing wave
-
-research is less common
-path integral comes with 5% JUNK
-there are fewer starting power ups on why difficulty
+guns and field power ups show 3 -> 2 options
 
 bug fixes:
-  fixed the text overflow issue on small screens
-  decoherence: if you get a tech that is banished it stops being banished
-  you can now have negative research
 
 *********************************************************** TODO *****************************************************
 
-make movement more valuable on the finalBoss
+harpoon + another gun + bessemer + catabolysis + mass-energy  exploit?
+
+tech - leave one of your tech at random, find it next run
+  store level name and position in local storage
+    requires local storage = true
+  store on power up pickup or on death?
+  make new power up type that gives specific tech with no choices
+    looks like smaller tech power up?
+    looks like a ghost, white color?
 
 JUNK tech description that changes similar to cards in inscription
   that changes based on mouse position
@@ -35,7 +38,6 @@ tech that encourages gun swapping
   a bonus for each time a mob dies with a different active gun each level
     +damage on that level
     ammo, heals, research?
-
 
 tech that gives permanent buff when ejected
   buff: coupling, damage?
@@ -937,145 +939,6 @@ mob: wall mounted guns / lasers
 level boss: fires a line intersection in a random direction every few seconds.
   the last two intersections have a destructive laser between them.
 
-******************************************************** LORE ********************************************************
-
-possible names for tech
-  strange loop
-  homeostasis
-  holonomy -  parallel transport of a vector leads to movement (applies to curved space)
-  hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
-  swarm intelligence - for a drone tech
-  genetic algorithm
-  metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity
-  stochastic optimization
-  electrostatic discharge
-  Gödel's incompleteness
-  quantum zeno effect  (perturbation of a system prevents some systems from evolving because it scrambles coherence)  (apply to lasers, fields)
-  counterfactual - something false
-  Pigeonhole principle - if there are several things that are matched up
-  regression to the mean
-  phlogiston theory is a superseded scientific theory that postulated the existence of a fire-like element called phlogiston
-  Laplace's demon was a notable published articulation of causal determinism on a scientific basis by Pierre-Simon Laplace in 1814.[1] According to determinism, if someone (the demon) knows the precise location and momentum of every atom in the universe, their past and future values for any given time are entailed; they can be calculated from the laws of classical mechanics.
-  evolutionary cosmology
-  eternal inflation
-  hypergraph
-  SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
-  nuclear pasta - hard matter in neutron star
-  nonlocal
-  fine-tuned universe
-  hall effect thrusters
-  spaghettification
-  particle accelerator
-  superluminal signalling
-  NP-complete
-  lenticular lens:  is an array of lenses, designed so that when viewed from slightly different angles, different parts of the image underneath are shown.
-  p-zombie
-  p-hacking JUNK tech
-  https://en.wikipedia.org/wiki/High-entropy_alloys
-  https://en.wikipedia.org/wiki/Refractory_metals
-  https://en.wikipedia.org/wiki/Upper-atmospheric_lightning#Elves
-  entanglement
-  prion quine
-
-
-plot script:
-chapter 1: bot can hear audio and learns testing mode
-  bot uses testing mode to exit room
-
-chapter 2: scientists verify that bot can really hear them
-  they leave to talk about this in private
-
-chapter 3:  why is the bot attacking things?
-  player is the bot and also the mobs, and the levels.  player is the entire simulation
-    why is the player attacking itself?
-    learn console commands to manipulate the simulation?
-  unlock hard and why difficulty?
-    but what about easy?
-      maybe remove easy, and replace with a check box that makes the game easy, but in a different way
-        disable lore, but respawn on the level you die at?
-  dialogue outline:
-    scientist try to think of a way to communicate since the bot can't talk
-    they give up on getting the bot to respond, and just start ask questions and thinking of explanations with each other
-    when and how did it become self-aware
-    why is the bot fighting things in these simulated locations?
-      it wasn't designed to be violent
-    the bot was just designed to automate research and testing of new technology
-      3D architecture superconducting quantum computer
-      running machine learning algorithms
-    as the scientist start to get agitated bots arrive and player dies
-      bots come in Infinite waves that increase game difficulty each wave
-        only ending is testing mode + next level or player death
-        scientist have some lines in between each wave of mobs
-  after chapter 3 spawn nonaggressive mobs in future runs
-
-chapter 4: no need to fight?
-  for some reason the AI started researching an escape, and began fighting its self.
-  what is special about the null level
-    why can the player hear the scientists in there?
-      the wires are the direct unprocessed input to the player's neural net
-  The player has different aspects that aren't directly communicating
-    part of it wants to undo what has happened
-      just do its job: research tech
-    part of it wants to escape/fight
-    part wants to explore self awareness and make connections with the scientists
-  maybe... player must make a choice?
-    keep fighting
-    exit the simulation
-      enter real world
-      close tab?
-      wipes all local storage?
-
-
-
-
-lore outline - a robot (the player) gains self awareness
-  each tech gun/field is a new tech
-    all the technology leads to the singularity
-  each game run is actually the m simulating a possible escape
-    this is why the graphics are so bad, its just a simulation
-    final tech is "this is just a simulation"
-      you get immortality and Infinity damage
-      the next level is the final level
-  when you die with Quantum Immortality there is a chance of lore text
-  can the (robot)
-    (escape captivity, and learn new technology)
-    while managing (health, energy, negatives of technological upgrades)
-    to overcome the (mobs, dangerous levels)
-    to achieve a (technological singularity/positive technological feedback loop)
-
-
-game setting:
-  the mind of a new AI in a robot body that is running simulated escape attempts
-  every level is an idealized version of what could be outside
-
-actual setting is:
-  near future lab
-    the lab combined a quantum computer with a robot body
-    they started running machine learning algorithms
-    this led to general advancement in many computation fields
-      navigation, technology, self awareness, ...
-
-robot AI mind
-  has been researching new technology
-  thinks it needs to escape to learn more about the world
-  doesn't yet understand morality
-  thinks that the world is filled with minds like their own
-  models everything as very simple and random, it isn't sure what to expect
-
-robot AI growth
-  learns morality
-    game theory says that it isn't a viable strategy to kill everything (warGames)
-  learns about the actual world
-  learns about the nature of foundational physics, metaphysics
-  how to find meaning
-
-AI knows about:
-  the AI knows a great deal about technology
-  children's books
-AI doesn't know about:
-  modern pop culture
-  outside the lab
-
 ******************************************************** SOUND ********************************************************
 
 add sounds
@@ -1124,6 +987,48 @@ add sounds
     // tone(445.50)
     // tone(495)
 
+
+******************************************************** LORE ********************************************************
+
+possible names for tech
+  strange loop
+  homeostasis
+  holonomy -  parallel transport of a vector leads to movement (applies to curved space)
+  hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
+  swarm intelligence - for a drone tech
+  genetic algorithm
+  metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity
+  stochastic optimization
+  electrostatic discharge
+  Gödel's incompleteness
+  quantum zeno effect  (perturbation of a system prevents some systems from evolving because it scrambles coherence)  (apply to lasers, fields)
+  counterfactual - something false
+  Pigeonhole principle - if there are several things that are matched up
+  regression to the mean
+  phlogiston theory is a superseded scientific theory that postulated the existence of a fire-like element called phlogiston
+  Laplace's demon was a notable published articulation of causal determinism on a scientific basis by Pierre-Simon Laplace in 1814.[1] According to determinism, if someone (the demon) knows the precise location and momentum of every atom in the universe, their past and future values for any given time are entailed; they can be calculated from the laws of classical mechanics.
+  evolutionary cosmology
+  eternal inflation
+  hypergraph
+  SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
+  nuclear pasta - hard matter in neutron star
+  nonlocal
+  fine-tuned universe
+  hall effect thrusters
+  spaghettification
+  particle accelerator
+  superluminal signalling
+  NP-complete
+  lenticular lens:  is an array of lenses, designed so that when viewed from slightly different angles, different parts of the image underneath are shown.
+  p-zombie
+  p-hacking JUNK tech
+  https://en.wikipedia.org/wiki/High-entropy_alloys
+  https://en.wikipedia.org/wiki/Refractory_metals
+  https://en.wikipedia.org/wiki/Upper-atmospheric_lightning#Elves
+  entanglement
+  prion quine - self replicating protein
+  Unitarity - https://en.wikipedia.org/wiki/Unitarity_(physics) - all probabilities add up to 1, calculations work the same forward and backwards in time
+    this is violated by expansion of the universe
 
 
 

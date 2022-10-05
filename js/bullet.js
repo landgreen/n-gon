@@ -3931,6 +3931,10 @@ const b = {
         if (!mob.shield && Vector.dot(Vector.normalise(Vector.sub(mob.position, bullet.position)), Vector.normalise(bullet.velocity)) > 0.99 - 4 / mob.radius) {
             let cycle = () => { //makes this run after damage
                 if (mob.health < 0.5 && mob.damageReduction > 0 && mob.alive) {
+                    // mob.death();
+                    // mob.damage(this.health * Math.sqrt(this.mass) / this.damageReduction);
+                    mob.damage(Infinity);
+
                     const color = 'rgb(255,255,255)'
                     simulation.drawList.push({
                         x: mob.position.x,
@@ -3953,7 +3957,6 @@ const b = {
                         color: color, //"rgb(0,0,0)",
                         time: 20
                     });
-                    mob.death();
                 }
             }
             requestAnimationFrame(cycle);
@@ -5328,7 +5331,6 @@ const b = {
                             b.explosion(this.position, 300 + 40 * Math.random()); //makes bullet do explosive damage at end
                         }
                     } else if (tech.isCritKill) b.crit(who, this)
-
                     if (tech.isNailRadiation) mobs.statusDoT(who, 7 * (tech.isFastRadiation ? 0.7 : 0.24), tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
                     if (this.speed > 4 && tech.fragments) {
                         b.targetedNail(this.position, 1.25 * tech.fragments * tech.bulletSize)
@@ -6595,7 +6597,6 @@ const b = {
                     ctx.fill();
 
                     if (this.isDischarge && m.cycle % 2) {
-                        this.charge -= 0.75
                         const spread = (input.down ? 0.04 : 0.5) * (Math.random() - 0.5)
                         const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
                         const SPEED = (input.down ? 1.2 : 1) * 10 - radius * 0.4 + Math.min(5, Math.sqrt(this.charge));
@@ -6609,6 +6610,7 @@ const b = {
                             y: m.pos.y + 30 * Math.sin(m.angle)
                         }
                         b.foam(position, Vector.rotate(velocity, spread), radius)
+                        this.charge -= 0.75
                         m.fireCDcycle = m.cycle + 2; //disable firing and adding more charge until empty
                     } else if (!input.fire) {
                         this.isDischarge = true;

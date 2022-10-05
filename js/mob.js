@@ -62,6 +62,8 @@ const mobs = {
             if (!whom.shield && !whom.isShielded && whom.alive) {
                 if (tech.isIceMaxHealthLoss && whom.health > 0.65 && whom.damageReduction > 0) whom.health = 0.66
                 if (tech.isIceKill && whom.health < 0.34 && whom.damageReduction > 0 && whom.alive) {
+                    // whom.death();
+                    whom.damage(Infinity);
                     simulation.drawList.push({
                         x: whom.position.x,
                         y: whom.position.y,
@@ -83,7 +85,6 @@ const mobs = {
                         color: "rgb(0,100,255)",
                         time: 16
                     });
-                    whom.death();
                 }
                 if (whom.isBoss) cycles = Math.floor(cycles * 0.25)
                 let i = whom.status.length
@@ -1136,20 +1137,22 @@ const mobs = {
             },
             damage(dmg, isBypassShield = false) {
                 if ((!this.isShielded || isBypassShield) && this.alive) {
-                    dmg *= tech.damageFromTech()
-                    //mobs specific damage changes
-                    if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 33% dmg at max range of 3000
-                    dmg *= this.damageReduction
-                    //energy and heal drain should be calculated after damage boosts
-                    if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon
-                    if (tech.healthDrain && dmg !== Infinity && this.isDropPowerUp && Math.random() < tech.healthDrain * Math.min(this.health, dmg)) {
-                        powerUps.spawn(m.pos.x + 20 * (Math.random() - 0.5), m.pos.y + 20 * (Math.random() - 0.5), "heal");
+                    if (dmg !== Infinity) {
+                        dmg *= tech.damageFromTech()
+                        //mobs specific damage changes
+                        if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 33% dmg at max range of 3000
+                        dmg *= this.damageReduction
+                        //energy and heal drain should be calculated after damage boosts
+                        if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon
+                        if (tech.healthDrain && dmg !== Infinity && this.isDropPowerUp && Math.random() < tech.healthDrain * Math.min(this.health, dmg)) {
+                            powerUps.spawn(m.pos.x + 20 * (Math.random() - 0.5), m.pos.y + 20 * (Math.random() - 0.5), "heal");
+                        }
+                        dmg /= Math.sqrt(this.mass)
                     }
-                    dmg /= Math.sqrt(this.mass)
                     this.health -= dmg
                     //this.fill = this.color + this.health + ')';
                     this.onDamage(dmg); //custom damage effects
-                    if ((this.health < 0.05 || isNaN(this.health)) && this.alive) this.death();
+                    if ((this.health < 0.01 || isNaN(this.health)) && this.alive) this.death();
                 }
             },
             onDamage() {

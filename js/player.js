@@ -2929,7 +2929,7 @@ const m = {
                     if (m.energy < 0.05 && m.fireCDcycle < m.cycle && !input.fire) m.fireCDcycle = m.cycle
                     if (m.fireCDcycle + 30 < m.cycle && !input.fire) { //automatically cloak if not firing
                         const drain = 0.1
-                        if (!m.isCloak && m.energy > drain) {
+                        if (!m.isCloak && m.energy > drain + 0.05) {
                             m.energy -= drain
                             m.isCloak = true //enter cloak
 
@@ -2945,28 +2945,18 @@ const m = {
                             m.enterCloakCycle = m.cycle
                             if (tech.isCloakHealLastHit && m.lastHit > 0) {
                                 const heal = Math.min(0.75 * m.lastHit, m.energy)
-                                m.energy -= heal
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: m.pos.x,
-                                    y: m.pos.y,
-                                    radius: Math.sqrt(heal) * 200,
-                                    color: "rgba(0,255,200,0.6)",
-                                    time: 16
-                                });
-                                m.addHealth(heal); //heal from last hit
-                                // if (tech.isEnergyHealth) {
-                                //     simulation.drawList.push({ //add dmg to draw queue
-                                //         x: m.pos.x,
-                                //         y: m.pos.y,
-                                //         radius: Math.sqrt(heal) * 200,
-                                //         color: "#0ad", //simulation.mobDmgColor
-                                //         time: 16
-                                //     });
-                                //     m.energy += heal
-                                // } else {
-                                // }
-                                m.lastHit = 0
-                                // simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(heal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+                                if (m.energy > heal) {
+                                    m.energy -= heal
+                                    m.addHealth(heal); //heal from last hit
+                                    m.lastHit = 0
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: m.pos.x,
+                                        y: m.pos.y,
+                                        radius: Math.sqrt(heal) * 200,
+                                        color: "rgba(0,255,200,0.6)",
+                                        time: 16
+                                    });
+                                }
                             }
                             if (tech.isIntangible) {
                                 for (let i = 0; i < bullet.length; i++) {
