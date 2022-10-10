@@ -1,24 +1,42 @@
 ******************************************************** NEXT PATCH **************************************************
 
-finalBoss rework
-  (this is pretty raw, so expect a bug and balance patch soon)
-  finalBoss goes invulnerable a few times as it loses health
-  finalBoss damage reduction is higher
-    finalBoss damage reduction slowly decays as you do any damage to the boss
-      damage reduction resets to normal with each new invulnerability phase
-  after each invulnerability phase it randomly adds 1 more attack mode
-      lasers, black hole, mines, hoppers, seekers, mobs, orbiters, oscillation
-      
-mobs die below 0.05 -> 0.01 health
-  might cause bugs, but testing this out
+finalBoss has a new phase: "boulders"
+  each phase has been rebalanced
+  boss health is a bit higher
+  mob mines are white now
 
-guns and field power ups show 3 -> 2 options
+pilot wave gets +1 choice for gun,field,tech
 
 bug fixes:
 
 *********************************************************** TODO *****************************************************
 
-harpoon + another gun + bessemer + catabolysis + mass-energy  exploit?
+finalBoss
+  add synergies between modes:
+    black hole can pull in bullets
+    laser can hurt bullets? maybe bad idea
+  old mode changes
+    mine color needs to be move vibrant
+    hoppers can hop out of the slime and the door on the sides
+  new modes:
+    rotating quadrant immunity shield, can't take damage from that quadrant
+      maybe also attack player near that quadrant
+    falling object warps to ceiling after hitting floor
+      doesn't end, player needs to kill it
+      slowly grows?
+    slow effect zones
+      random placement or place over player or both!
+      draw white dot and an outline of area of effect
+        expanding circle stroke, freeze effect triggers when stroke circle hits fill circle
+      after 1-2 seconds freeze player if in the zone
+        also freeze mobs
+    effect that makes player have to be close to boss
+    hook that tries to yank the player into hitting finalBoss
+      does damage
+      pulls player into center
+        counter with wormhole, negative mass
+      player targeted unless cloaking
+
 
 tech - leave one of your tech at random, find it next run
   store level name and position in local storage

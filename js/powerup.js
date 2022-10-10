@@ -650,7 +650,7 @@ const powerUps = {
                 for (let i = 0; i < b.guns.length; i++) {
                     if (!b.guns[i].have) options.push(i);
                 }
-                let totalChoices = Math.min(options.length, tech.isDeterminism ? 1 : 2 + tech.extraChoices)
+                let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2) + tech.extraChoices + (m.fieldUpgrades[m.fieldMode].name === "pilot wave"))
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
                 function removeOption(index) {
                     for (let i = 0; i < options.length; i++) {
@@ -787,7 +787,7 @@ const powerUps = {
                 for (let i = 1; i < m.fieldUpgrades.length; i++) { //skip field emitter
                     if (i !== m.fieldMode) options.push(i);
                 }
-                let totalChoices = Math.min(options.length, tech.isDeterminism ? 1 : 2 + tech.extraChoices)
+                let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2) + tech.extraChoices + (m.fieldUpgrades[m.fieldMode].name === "pilot wave"))
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
 
                 function removeOption(index) {
@@ -946,7 +946,7 @@ const powerUps = {
                 }
 
                 //set total choices
-                let totalChoices = tech.isDeterminism ? 1 : 3 + tech.extraChoices
+                let totalChoices = (tech.isDeterminism ? 1 : 3) + tech.extraChoices + (m.fieldUpgrades[m.fieldMode].name === "pilot wave")
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
                 if (optionLengthNoDuplicates < totalChoices + 1) { //if not enough options for all the choices
                     // console.log('if not enough options for all the choices')

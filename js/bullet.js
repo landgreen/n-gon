@@ -97,10 +97,10 @@ const b = {
         simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-g'>ammo</span><span class='color-symbol'>:</span> 0`);
         m.fireCDcycle = m.cycle + 30; //fire cooldown       
         if (tech.isAmmoFromHealth) {
-            const amount = 0.01
+            const amount = 0.02
             if (tech.isEnergyHealth) {
-                if (m.maxEnergy > amount) {
-                    tech.healMaxEnergyBonus -= amount
+                if (m.maxEnergy > amount * 2) {
+                    tech.healMaxEnergyBonus -= amount * 2
                     m.setMaxEnergy();
                     for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "ammo");
                 }

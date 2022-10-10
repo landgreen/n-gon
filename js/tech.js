@@ -554,7 +554,7 @@ const tech = {
         },
         {
             name: "catabolism",
-            descriptionFunction() { return `if you fire while <strong>out</strong> of <strong class='color-ammo'>ammo</strong><br>spawn ${powerUps.orb.ammo(4)} and <strong>–1</strong> maximum ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"}` },
+            descriptionFunction() { return `if you fire while <strong>out</strong> of <strong class='color-ammo'>ammo</strong><br>spawn ${powerUps.orb.ammo(4)} and ${tech.isEnergyHealth ? "<strong>–4</strong> maximum <strong class='color-f'>energy</strong>" : "<strong>–2</strong> maximum <strong class='color-h'>health</strong>"}` },
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2412,7 +2412,7 @@ const tech = {
         },
         {
             name: "exothermic process",
-            description: "<strong>+50%</strong> <strong class='color-d'>damage</strong><br>after mobs <strong>die</strong> <strong>–25%</strong> <strong class='color-f'>energy</strong>",
+            description: "<strong>+50%</strong> <strong class='color-d'>damage</strong><br>after mobs <strong>die</strong> <strong>–20%</strong> <strong class='color-f'>energy</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3437,7 +3437,7 @@ const tech = {
         },
         {
             name: "unified field theory",
-            description: `<span style = 'font-size:90%;'><strong>clicking</strong> the <strong class='color-f'>field</strong> box when <strong>paused</strong> cycles your <strong class='color-f'>field</strong><br><strong>triple</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong><strong class='color-m'>tech</strong></span>`,
+            description: `<span style = 'font-size:90%;'><strong>clicking</strong> the <strong class='color-f'>field</strong> box when <strong>paused</strong> cycles your <strong class='color-f'>field</strong><br><strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong><strong class='color-m'>tech</strong></span>`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3449,14 +3449,14 @@ const tech = {
             effect() {
                 tech.isPauseSwitchField = true;
                 for (let i = 0, len = tech.tech.length; i < len; i++) {
-                    if (tech.tech[i].isFieldTech) tech.tech[i].frequency *= 3
+                    if (tech.tech[i].isFieldTech) tech.tech[i].frequency *= 2
                 }
             },
             remove() {
                 tech.isPauseSwitchField = false;
                 if (this.count > 1) {
                     for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        if (tech.tech[i].isFieldTech) tech.tech[i].frequency /= 3
+                        if (tech.tech[i].isFieldTech) tech.tech[i].frequency /= 2
                     }
                 }
             }
@@ -8548,7 +8548,8 @@ const tech = {
             allowed() { return true },
             requires: "",
             effect() {
-                level.levels.splice(level.onLevel, 0, level.levels[level.onLevel]);
+                const index = Math.min(level.levels.length - 1, level.onLevel)
+                level.levels.splice(index, 0, level.levels[index]);
             },
             remove() {}
         },

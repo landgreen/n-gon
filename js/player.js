@@ -2715,7 +2715,7 @@ const m = {
                     //draw field everywhere
                     ctx.globalCompositeOperation = "saturation"
                     ctx.fillStyle = "#ccc";
-                    ctx.fillRect(-100000, -100000, 200000, 200000)
+                    ctx.fillRect(-50000, -50000, 100000, 100000)
                     ctx.globalCompositeOperation = "source-over"
                     //stop time
                     m.isBodiesAsleep = true;
@@ -3173,7 +3173,8 @@ const m = {
             name: "pilot wave",
             //<br><strong class='color-block'>blocks</strong> can't <strong>collide</strong> with <strong>intangible</strong> mobs
             //field <strong>radius</strong> decreases out of <strong>line of sight</strong>
-            description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong>unlock</strong> <strong class='color-m'>tech</strong> from other <strong class='color-f'>fields</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
+            //<strong>unlock</strong> <strong class='color-m'>tech</strong> from other <strong class='color-f'>fields</strong>
+            description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+1</strong> <strong>choice</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
             effect: () => {
                 m.fieldMeterColor = "#333"
                 m.eyeFillColor = m.fieldMeterColor
