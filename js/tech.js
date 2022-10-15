@@ -288,7 +288,7 @@ const tech = {
     },
     tech: [{
             name: "ordnance",
-            description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong><br>spawn a <strong class='color-g'>gun</strong>",
+            description: "</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong><br>spawn a <strong class='color-g'>gun</strong> and <strong>+5%</strong> <strong class='color-j'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -299,12 +299,18 @@ const tech = {
             requires: "",
             effect() {
                 powerUps.spawn(m.pos.x, m.pos.y, "gun");
-                // this.count--
                 for (let i = 0, len = tech.tech.length; i < len; i++) {
                     if (tech.tech[i].isGunTech) tech.tech[i].frequency *= 2
                 }
+                this.refundAmount += tech.addJunkTechToPool(0.05)
             },
-            remove() {}
+            refundAmount: 0,
+            remove() {
+                if (this.count > 0 && this.refundAmount > 0) {
+                    tech.removeJunkTechFromPool(this.refundAmount)
+                    this.refundAmount = 0
+                }
+            }
         },
         {
             name: "ad hoc",
@@ -4956,8 +4962,8 @@ const tech = {
             isRemoveGun: true,
             maxCount: 1,
             count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
+            frequency: 1,
+            frequencyDefault: 1,
             isBot: true,
             isBotTech: true,
             allowed() {
@@ -4984,8 +4990,8 @@ const tech = {
             isGunTech: true,
             maxCount: 1,
             count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
+            frequency: 1,
+            frequencyDefault: 1,
             allowed() {
                 return !tech.isImmuneExplosion && tech.explosiveRadius === 1 && !tech.isSmallExplosion && !tech.isBlockExplode && !tech.fragments && (tech.haveGunCheck("missiles") || tech.missileBotCount || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.isBoomBotUpgrade || tech.isTokamak)
             },
@@ -6305,8 +6311,8 @@ const tech = {
             isGunTech: true,
             maxCount: 1,
             count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
+            frequency: 1,
+            frequencyDefault: 1,
             allowed() {
                 return ((tech.haveGunCheck("wave") && tech.infiniteWaveAmmo !== 1) || tech.haveGunCheck("laser") || (tech.haveGunCheck("harpoon") && !tech.isRailGun)) && !tech.isEnergyNoAmmo
             },
@@ -6479,8 +6485,8 @@ const tech = {
             isGunTech: true,
             maxCount: 3,
             count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
+            frequency: 1,
+            frequencyDefault: 1,
             allowed() {
                 return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.isLaserBotUpgrade) && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
             },
@@ -6498,8 +6504,8 @@ const tech = {
             isGunTech: true,
             maxCount: 9,
             count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
+            frequency: 1,
+            frequencyDefault: 1,
             allowed() {
                 return tech.haveGunCheck("laser") && !tech.isWideLaser && !tech.isPulseAim && !tech.historyLaser
             },
@@ -6522,8 +6528,8 @@ const tech = {
             isGunTech: true,
             maxCount: 1,
             count: 0,
-            frequency: 3,
-            frequencyDefault: 3,
+            frequency: 2,
+            frequencyDefault: 2,
             allowed() {
                 return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.beamSplitter && !tech.isPulseLaser && !tech.historyLaser
             },
@@ -6592,7 +6598,7 @@ const tech = {
         },
         {
             name: "infrared diode",
-            description: "<strong>+50%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency<br><em>infrared light is outside visual perception</em>",
+            description: "<strong>+60%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency<br><em>infrared light is outside visual perception</em>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6603,7 +6609,7 @@ const tech = {
             },
             requires: "laser, not free-electron, pulse",
             effect() {
-                tech.laserDrain *= 0.5; //100%-50%
+                tech.laserDrain *= 0.4; //100%-50%
                 tech.laserColor = "transparent" //"rgb(255,0,20,0.02)"
                 // tech.laserColorAlpha = "rgba(255,0,20,0.05)"
             },
@@ -6615,7 +6621,7 @@ const tech = {
         },
         {
             name: "dye laser",
-            description: "<strong>+20%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency<br><strong>+20%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong>+25%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency<br><strong>+25%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6626,8 +6632,8 @@ const tech = {
             },
             requires: "laser, not pulse, infrared diode",
             effect() {
-                tech.laserDrain *= 0.8
-                tech.laserDamage *= 1 + 0.2
+                tech.laserDrain *= 0.75
+                tech.laserDamage *= 1.25
                 tech.laserColor = "rgb(0, 11, 255)"
                 tech.laserColorAlpha = "rgba(0, 11, 255,0.5)"
             },
@@ -6640,7 +6646,7 @@ const tech = {
         },
         {
             name: "free-electron laser",
-            description: "<strong>–250%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency<br><strong>+190%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
+            description: "<strong>–250%</strong> <strong class='color-laser'>laser</strong> <strong class='color-f'>energy</strong> efficiency<br><strong>+200%</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6652,7 +6658,7 @@ const tech = {
             requires: "laser, not pulse, infrared diode",
             effect() {
                 tech.laserDrain *= 1 + 2.5 //250% more drain
-                tech.laserDamage *= 1 + 1.9 //190% more damage
+                tech.laserDamage *= 1 + 2 //190% more damage
                 tech.laserColor = "#83f"
                 tech.laserColorAlpha = "rgba(136, 51, 255,0.5)"
             },
@@ -8171,6 +8177,18 @@ const tech = {
                 this.id++
                 return `<span id = "boost-JUNK-id${this.id}">${this.text}</span>`
             },
+        },
+        {
+            name: "placebo",
+            description: "<strong>+777%</strong> <strong class='color-d'>damage</strong><br><strong>+777%</strong> <strong class='color-defense'>defense</strong><br>",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            allowed: () => true,
+            requires: "",
+            effect() {},
+            remove() {}
         },
         {
             name: "return",

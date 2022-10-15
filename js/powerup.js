@@ -331,7 +331,7 @@ const powerUps = {
                 // }
                 // requestAnimationFrame(cycle);
 
-                document.getElementById("choose-grid").style.opacity = "0.9"
+                document.getElementById("choose-grid").style.opacity = "0.92"
             } else {
                 simulation.paused = true;
                 document.getElementById("choose-grid").style.opacity = "1"
@@ -343,8 +343,8 @@ const powerUps = {
                 ctx.fillStyle = `rgba(221,221,221,0.6)`;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             });
-            document.getElementById("pause-grid-right").style.opacity = "0.3"
-            document.getElementById("pause-grid-left").style.opacity = "0.3"
+            document.getElementById("pause-grid-right").style.opacity = "0.7"
+            document.getElementById("pause-grid-left").style.opacity = "0.7"
         }
         build.pauseGrid()
     },

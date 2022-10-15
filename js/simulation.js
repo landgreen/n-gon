@@ -954,7 +954,7 @@ const simulation = {
             let respawnDrones = () => {
                 if (droneCount > 0) {
                     requestAnimationFrame(respawnDrones);
-                    if (!simulation.paused && !simulation.isChoosing) {
+                    if (!simulation.paused && !simulation.isChoosing && m.alive) {
                         const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
                         droneCount--
                         if (tech.isDroneRadioactive) {

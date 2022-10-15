@@ -367,7 +367,7 @@ const spawn = {
         me.cycle = 1;
 
         Matter.Body.setDensity(me, 0.2); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.12
+        me.damageReduction = 0.14
         me.startingDamageReduction = me.damageReduction
         me.nextHealthThreshold = 0.999
         me.invulnerableCount = 0

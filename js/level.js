@@ -28,19 +28,20 @@ const level = {
             // m.setField("standing wave") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave
             // simulation.molecularMode = 2
             // m.damage(0.1);
-            // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 10000
 
-            // for (let i = 0; i < 1; ++i) tech.giveTech("needle gun")
-            // tech.giveTech("pressure vessel")
-            // tech.giveTech("quintessence")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("freezer burn")
-            // for (let i = 0; i < 1; i++) tech.giveTech("reaction inhibitor")
+            // tech.giveTech("lens")
+            // for (let i = 0; i < 9; ++i) tech.giveTech("compound lens")
+            // tech.giveTech("dye laser")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("iridescence")
+            // for (let i = 0; i < 1; i++) tech.giveTech("slow light")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
 
-            // level.final();
+            // level.testing();
+            // spawn.starter(1900, -500, 200)
             // spawn.starter(1900, -500)
             // spawn.timeBoss(2538, -950)
             // for (let i = 0; i < 33; ++i) spawn.sniper(1000 + 5000 * Math.random(), -500 + 300 * Math.random())
@@ -1088,7 +1089,7 @@ const level = {
                 if (!m.isBodiesAsleep) {
                     if (this.isClosing) {
                         if (this.position.y < y) { //try to close
-                            if (
+                            if ( //if clear of stuff
                                 Matter.Query.collides(this, [player]).length === 0 &&
                                 Matter.Query.collides(this, body).length < 2 &&
                                 Matter.Query.collides(this, mob).length === 0
@@ -1100,6 +1101,25 @@ const level = {
                                 Matter.Body.setPosition(this, position)
                             }
                         }
+                        // else {
+                        //     const blocks = Matter.Query.collides(this, body)
+                        //     console.log(blocks.length)
+                        //     for (let i = 0; i < blocks.length; i++) {
+                        //         // console.log(blocks[i])
+                        //         if (blocks[i].bodyA) {
+                        //             if (touching[i].bodyB !== m.holdingTarget) {
+                        //                 for (let j = 0, len = body.length; j < len; j++) {
+                        //                     if (body[j] === touching[i].bodyB) {
+                        //                         body.splice(j, 1);
+                        //                         len--
+                        //                         Matter.Composite.remove(engine.world, touching[i].bodyB);
+                        //                         break;
+                        //                     }
+                        //                 }
+                        //             }
+                        //         }
+                        //     }
+                        // }
                     } else {
                         if (this.position.y > y - distance) { //try to open 
                             const position = {
@@ -2955,6 +2975,12 @@ const level = {
                         if (!doorOut.isClosed() || !doorIn.isClosed()) {
                             doorIn.isClosing = true
                             doorOut.isClosing = true
+                            //block caught in a door
+                            if (Matter.Query.collides(doorOut, body).length > 1 || Matter.Query.collides(doorIn, body).length > 1) {
+                                button.isUp = true
+                                doorIn.isClosing = false
+                                doorOut.isClosing = false
+                            }
                         } else {
                             isSpawnedBoss = true
                             isDoorsLocked = true
@@ -3039,6 +3065,12 @@ const level = {
                         if (!doorOut.isClosed() || !doorIn.isClosed()) {
                             doorIn.isClosing = true
                             doorOut.isClosing = true
+                            //block caught in a door
+                            if (Matter.Query.collides(doorOut, body).length > 1 || Matter.Query.collides(doorIn, body).length > 1) {
+                                button.isUp = true
+                                doorIn.isClosing = false
+                                doorOut.isClosing = false
+                            }
                         } else {
                             isSpawnedBoss = true
                             isDoorsLocked = true

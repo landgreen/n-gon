@@ -2251,23 +2251,8 @@ const b = {
     }, dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1) {
         const reflectivity = 1 - 1 / (reflections * 3)
         let damage = m.dmgScale * dmg
-        let best = {
-            x: 1,
-            y: 1,
-            dist2: Infinity,
-            who: null,
-            v1: 1,
-            v2: 1
-        };
-        const path = [{
-                x: where.x,
-                y: where.y
-            },
-            {
-                x: whereEnd.x,
-                y: whereEnd.y
-            }
-        ];
+        let best = { x: 1, y: 1, dist2: Infinity, who: null, v1: 1, v2: 1 };
+        const path = [{ x: where.x, y: where.y }, { x: whereEnd.x, y: whereEnd.y }];
         const vertexCollision = function(v1, v1End, domain) {
             for (let i = 0; i < domain.length; ++i) {
                 let vertices = domain[i].vertices;
@@ -2310,14 +2295,7 @@ const b = {
         };
 
         const checkForCollisions = function() {
-            best = {
-                x: 1,
-                y: 1,
-                dist2: Infinity,
-                who: null,
-                v1: 1,
-                v2: 1
-            };
+            best = { x: 1, y: 1, dist2: Infinity, who: null, v1: 1, v2: 1 };
             vertexCollision(path[path.length - 2], path[path.length - 1], mob);
             vertexCollision(path[path.length - 2], path[path.length - 1], map);
             vertexCollision(path[path.length - 2], path[path.length - 1], body);
@@ -2328,7 +2306,7 @@ const b = {
                 if (best.who.damageReduction) {
                     if ( //iridescence
                         tech.laserCrit && !best.who.shield &&
-                        Vector.dot(Vector.normalise(Vector.sub(best.who.position, path[path.length - 1])), Vector.normalise(Vector.sub(path[path.length - 1], path[path.length - 2]))) > 0.997 - 0.6 / best.who.radius
+                        Vector.dot(Vector.normalise(Vector.sub(best.who.position, path[path.length - 1])), Vector.normalise(Vector.sub(path[path.length - 1], path[path.length - 2]))) > 0.999 - 0.5 / best.who.radius
                     ) {
                         damage *= 1 + tech.laserCrit
                         simulation.drawList.push({ //add dmg to draw queue
@@ -2374,10 +2352,7 @@ const b = {
         let lastBestOdd
         let lastBestEven = best.who //used in hack below
         if (best.dist2 !== Infinity) { //if hitting something
-            path[path.length - 1] = {
-                x: best.x,
-                y: best.y
-            };
+            path[path.length - 1] = { x: best.x, y: best.y };
             laserHitMob();
             for (let i = 0; i < reflections; i++) {
                 reflection();
@@ -2385,10 +2360,7 @@ const b = {
                 if (best.dist2 !== Infinity) { //if hitting something
                     lastReflection = best
 
-                    path[path.length - 1] = {
-                        x: best.x,
-                        y: best.y
-                    };
+                    path[path.length - 1] = { x: best.x, y: best.y };
                     damage *= reflectivity
                     laserHitMob();
                     //I'm not clear on how this works, but it gets rid of a bug where the laser reflects inside a block, often vertically.
@@ -2409,6 +2381,31 @@ const b = {
                 ctx.moveTo(path[i - 1].x, path[i - 1].y);
                 ctx.lineTo(path[i].x, path[i].y);
             }
+        } else if (tech.isLaserLens && b.guns[11].lensDamage !== 1) {
+            ctx.strokeStyle = tech.laserColor;
+            ctx.lineWidth = 2
+            ctx.lineDashOffset = 900 * Math.random()
+            ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
+            for (let i = 1, len = path.length; i < len; ++i) {
+                ctx.beginPath();
+                ctx.moveTo(path[i - 1].x, path[i - 1].y);
+                ctx.lineTo(path[i].x, path[i].y);
+                ctx.stroke();
+                ctx.globalAlpha *= reflectivity; //reflections are less intense
+            }
+            ctx.setLineDash([]);
+            // ctx.globalAlpha = 1;
+
+            //glow
+            ctx.lineWidth = 9 + 2 * b.guns[11].lensDamageOn
+            ctx.globalAlpha = 0.13
+            ctx.beginPath();
+            for (let i = 1, len = path.length; i < len; ++i) {
+                ctx.moveTo(path[i - 1].x, path[i - 1].y);
+                ctx.lineTo(path[i].x, path[i].y);
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1;
         } else {
             ctx.strokeStyle = tech.laserColor;
             ctx.lineWidth = 2
@@ -3356,20 +3353,8 @@ const b = {
             deathCycles: 110 + RADIUS * 5,
             isImproved: false,
             radioRadius: 0,
-            maxRadioRadius: 300 + Math.floor(100 * Math.random()),
-            beforeDmg() {
-                // const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20) //move away from target after hitting
-                // Matter.Body.setVelocity(this, {
-                //     x: unit.x,
-                //     y: unit.y
-                // });
-                // this.lockedOn = null
-
-                // if (this.endCycle > simulation.cycle + this.deathCycles) {
-                // this.endCycle -= 60
-                // if (simulation.cycle + this.deathCycles > this.endCycle) this.endCycle = simulation.cycle + this.deathCycles
-                // }
-            },
+            maxRadioRadius: 270 + Math.floor(90 * Math.random()),
+            beforeDmg() {},
             onEnd() {
                 if (tech.isDroneRespawn && b.inventory.length) {
                     const who = b.guns[b.activeGun]
@@ -3387,12 +3372,12 @@ const b = {
                 this.radioRadius = this.radioRadius * 0.993 + 0.007 * this.maxRadioRadius //smooth radius towards max
                 //aoe damage to player
                 if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.radioRadius) {
-                    const DRAIN = tech.isRadioactiveResistance ? 0.002 * 0.25 : 0.002
+                    const DRAIN = tech.isRadioactiveResistance ? 0.001 : 0.004
                     if (m.energy > DRAIN) {
                         if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                     } else {
                         m.energy = 0;
-                        if (simulation.dmgScale) m.damage((tech.isRadioactiveResistance ? 0.00015 * 0.25 : 0.00015) * tech.radioactiveDamage) //0.00015
+                        if (simulation.dmgScale) m.damage((tech.isRadioactiveResistance ? 0.00005 : 0.0002) * tech.radioactiveDamage) //0.00015
                     }
                 }
                 //aoe damage to mobs
@@ -3928,7 +3913,8 @@ const b = {
         }
     },
     crit(mob, bullet) {
-        if (!mob.shield && Vector.dot(Vector.normalise(Vector.sub(mob.position, bullet.position)), Vector.normalise(bullet.velocity)) > 0.99 - 4 / mob.radius) {
+        if (!mob.shield && Vector.dot(Vector.normalise(Vector.sub(mob.position, bullet.position)), Vector.normalise(bullet.velocity)) > 0.999 - 1 / mob.radius) {
+            if (mob.isFinalBoss && !(Vector.dot(Vector.normalise(Vector.sub(mob.position, bullet.position)), Vector.normalise(bullet.velocity)) > 0.999999)) return
             let cycle = () => { //makes this run after damage
                 if (mob.health < 0.5 && mob.damageReduction > 0 && mob.alive) {
                     // mob.death();
@@ -4693,45 +4679,155 @@ const b = {
                 //hit target with laser
                 if (this.lockedOn && this.lockedOn.alive && m.energy > this.drainThreshold) {
                     m.energy -= this.drain
-                    b.laser(this.vertices[0], this.lockedOn.position, m.dmgScale * this.laserDamage * tech.laserDamage, tech.laserReflections, false, 0.4) //tech.laserDamage = 0.16
-                    // laser(where = {
-                    //     x: m.pos.x + 20 * Math.cos(m.angle),
-                    //     y: m.pos.y + 20 * Math.sin(m.angle)
-                    // }, whereEnd = {
-                    //     x: where.x + 3000 * Math.cos(m.angle),
-                    //     y: where.y + 3000 * Math.sin(m.angle)
-                    // }, dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1) {
+                    this.laser();
+                    // b.laser(this.vertices[0], this.lockedOn.position, m.dmgScale * this.laserDamage * tech.laserDamage, tech.laserReflections, false, 0.4) //tech.laserDamage = 0.16
                 }
+            },
+            laser() {
+                const push = 0.4
+                const reflectivity = 1 - 1 / (tech.laserReflections * 3)
+                let damage = m.dmgScale * this.laserDamage * tech.laserDamage
+                let best = { x: 1, y: 1, dist2: Infinity, who: null, v1: 1, v2: 1 };
+                const path = [{ x: this.vertices[0].x, y: this.vertices[0].y }, { x: this.lockedOn.position.x, y: this.lockedOn.position.y }];
+
+                const vertexCollision = function(v1, v1End, domain) {
+                    for (let i = 0; i < domain.length; ++i) {
+                        let vertices = domain[i].vertices;
+                        const len = vertices.length - 1;
+                        for (let j = 0; j < len; j++) {
+                            results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                            if (results.onLine1 && results.onLine2) {
+                                const dx = v1.x - results.x;
+                                const dy = v1.y - results.y;
+                                const dist2 = dx * dx + dy * dy;
+                                if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                                    best = {
+                                        x: results.x,
+                                        y: results.y,
+                                        dist2: dist2,
+                                        who: domain[i],
+                                        v1: vertices[j],
+                                        v2: vertices[j + 1]
+                                    };
+                                }
+                            }
+                        }
+                        results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                        if (results.onLine1 && results.onLine2) {
+                            const dx = v1.x - results.x;
+                            const dy = v1.y - results.y;
+                            const dist2 = dx * dx + dy * dy;
+                            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                                best = {
+                                    x: results.x,
+                                    y: results.y,
+                                    dist2: dist2,
+                                    who: domain[i],
+                                    v1: vertices[0],
+                                    v2: vertices[len]
+                                };
+                            }
+                        }
+                    }
+                };
+
+                const checkForCollisions = function() {
+                    best = { x: 1, y: 1, dist2: Infinity, who: null, v1: 1, v2: 1 };
+                    vertexCollision(path[path.length - 2], path[path.length - 1], mob);
+                    vertexCollision(path[path.length - 2], path[path.length - 1], map);
+                    vertexCollision(path[path.length - 2], path[path.length - 1], body);
+                };
+                const laserHitMob = function() {
+                    if (best.who.alive) {
+                        best.who.locatePlayer();
+                        if (best.who.damageReduction) {
+                            if ( //iridescence
+                                tech.laserCrit && !best.who.shield &&
+                                Vector.dot(Vector.normalise(Vector.sub(best.who.position, path[path.length - 1])), Vector.normalise(Vector.sub(path[path.length - 1], path[path.length - 2]))) > 0.999 - 0.5 / best.who.radius
+                            ) {
+                                damage *= 1 + tech.laserCrit
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: path[path.length - 1].x,
+                                    y: path[path.length - 1].y,
+                                    radius: Math.sqrt(2500 * damage * best.who.damageReduction) + 5,
+                                    color: `hsla(${60 + 283*Math.random()},100%,70%,0.5)`, // random hue, but not red
+                                    time: 16
+                                });
+                            } else {
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: path[path.length - 1].x,
+                                    y: path[path.length - 1].y,
+                                    radius: Math.sqrt(2000 * damage * best.who.damageReduction) + 2,
+                                    color: tech.laserColorAlpha,
+                                    time: simulation.drawTime
+                                });
+                            }
+                            best.who.damage(damage);
+                        }
+                        if (tech.isLaserPush) { //push mobs away
+                            const index = path.length - 1
+                            Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.97, y: best.who.velocity.y * 0.97 });
+                            const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.003 * push * Math.min(6, best.who.mass))
+                            Matter.Body.applyForce(best.who, path[index], force)
+                        }
+                    } else if (tech.isLaserPush && best.who.classType === "body") {
+                        const index = path.length - 1
+                        Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.97, y: best.who.velocity.y * 0.97 });
+                        const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.003 * push * Math.min(6, best.who.mass))
+                        Matter.Body.applyForce(best.who, path[index], force)
+                    }
+                };
+                const reflection = function() { // https://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+                    const n = Vector.perp(Vector.normalise(Vector.sub(best.v1, best.v2)));
+                    const d = Vector.sub(path[path.length - 1], path[path.length - 2]);
+                    const nn = Vector.mult(n, 2 * Vector.dot(d, n));
+                    const r = Vector.normalise(Vector.sub(d, nn));
+                    path[path.length] = Vector.add(Vector.mult(r, 3000), path[path.length - 1]);
+                };
+
+                checkForCollisions();
+                let lastBestOdd
+                let lastBestEven = best.who //used in hack below
+                if (best.dist2 !== Infinity) { //if hitting something
+                    path[path.length - 1] = { x: best.x, y: best.y };
+                    laserHitMob();
+                    for (let i = 0; i < tech.laserReflections; i++) {
+                        reflection();
+                        checkForCollisions();
+                        if (best.dist2 !== Infinity) { //if hitting something
+                            lastReflection = best
+                            path[path.length - 1] = { x: best.x, y: best.y };
+                            damage *= reflectivity
+                            laserHitMob();
+                            //I'm not clear on how this works, but it gets rid of a bug where the laser reflects inside a block, often vertically.
+                            //I think it checks to see if the laser is reflecting off a different part of the same block, if it is "inside" a block
+                            if (i % 2) {
+                                if (lastBestOdd === best.who) break
+                            } else {
+                                lastBestOdd = best.who
+                                if (lastBestEven === best.who) break
+                            }
+                        } else {
+                            break
+                        }
+                    }
+                }
+                ctx.strokeStyle = tech.laserColor;
+                ctx.lineWidth = 2
+                ctx.lineDashOffset = 900 * Math.random()
+                ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
+                for (let i = 1, len = path.length; i < len; ++i) {
+                    ctx.beginPath();
+                    ctx.moveTo(path[i - 1].x, path[i - 1].y);
+                    ctx.lineTo(path[i].x, path[i].y);
+                    ctx.stroke();
+                    ctx.globalAlpha *= reflectivity; //reflections are less intense
+                }
+                ctx.setLineDash([]);
+                ctx.globalAlpha = 1;
             }
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
-
-        //laser mobs that fire with the player
-        // if (true) {
-        //     bullet[me].do = function() {
-        //         if (!(simulation.cycle % this.lookFrequency)) {
-        //             if (Math.random() < 0.15) {
-        //                 const range = 170 + 3 * b.totalBots()
-        //                 this.offPlayer = {
-        //                     x: range * (Math.random() - 0.5),
-        //                     y: range * (Math.random() - 0.5) - 20,
-        //                 }
-        //             }
-        //         }
-        //         const playerPos = Vector.add(Vector.add(this.offPlayer, m.pos), Vector.mult(player.velocity, 20)) //also include an offset unique to this bot to keep many bots spread out
-        //         const farAway = Math.max(0, (Vector.magnitude(Vector.sub(this.position, playerPos))) / this.playerRange) //linear bounding well 
-        //         const mag = Math.min(farAway, 4) * this.mass * this.acceleration
-        //         this.force = Vector.mult(Vector.normalise(Vector.sub(playerPos, this.position)), mag)
-        //         //manual friction to not lose rotational velocity
-        //         Matter.Body.setVelocity(this, { x: this.velocity.x * 0.95, y: this.velocity.y * 0.95 });
-        //         //hit target with laser
-        //         if (input.fire && m.energy > this.drain) {
-        //             m.energy -= this.drain
-        //             const unit = Vector.sub(simulation.mouseInGame, this.vertices[0])
-        //             b.laser(this.vertices[0], Vector.mult(unit, 1000), m.dmgScale * this.laserDamage * tech.laserDamage, tech.laserReflections, false, 0.4) //tech.laserDamage = 0.16
-        //         }
-        //     }
-        // }
     },
     boomBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.boomBot()`);
@@ -7255,6 +7351,11 @@ const b = {
                         }
                     }
                     ctx.stroke();
+                    if (tech.isLaserLens && b.guns[11].lensDamage !== 1) {
+                        ctx.lineWidth = 20 + 3 * b.guns[11].lensDamageOn
+                        ctx.globalAlpha = 0.3
+                        ctx.stroke();
+                    }
                     ctx.globalAlpha = 1;
                 }
             },
@@ -7265,8 +7366,8 @@ const b = {
                 } else {
                     m.fireCDcycle = m.cycle
                     m.energy -= drain
-                    const dmg = 0.37 * tech.laserDamage / b.fireCDscale * this.lensDamage //  3.5 * 0.55 = 200% more damage
-                    const spacing = Math.ceil(5 - 0.4 * tech.historyLaser)
+                    const dmg = 0.5 * tech.laserDamage / b.fireCDscale * this.lensDamage //  3.5 * 0.55 = 200% more damage
+                    const spacing = Math.ceil(10 - 0.4 * tech.historyLaser)
                     ctx.beginPath();
                     b.laser({
                         x: m.pos.x + 20 * Math.cos(m.angle),
@@ -7275,7 +7376,7 @@ const b = {
                         x: m.pos.x + 3000 * Math.cos(m.angle),
                         y: m.pos.y + 3000 * Math.sin(m.angle)
                     }, dmg, 0, true, 0.2);
-                    for (let i = 1, len = 5 + tech.historyLaser * 5; i < len; i++) {
+                    for (let i = 1, len = 3 + tech.historyLaser * 3; i < len; i++) {
                         const history = m.history[(m.cycle - i * spacing) % 600]
                         const off = history.yOff - 24.2859
                         b.laser({
@@ -7289,6 +7390,13 @@ const b = {
                     ctx.strokeStyle = tech.laserColor;
                     ctx.lineWidth = 1
                     ctx.stroke();
+                    if (tech.isLaserLens && b.guns[11].lensDamage !== 1) {
+                        ctx.strokeStyle = tech.laserColor;
+                        ctx.lineWidth = 10 + 2 * b.guns[11].lensDamageOn
+                        ctx.globalAlpha = 0.2
+                        ctx.stroke(); //glow
+                        ctx.globalAlpha = 1;
+                    }
                 }
             },
         },

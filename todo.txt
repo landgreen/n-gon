@@ -1,15 +1,28 @@
 ******************************************************** NEXT PATCH **************************************************
 
-finalBoss has a new phase: "boulders"
-  each phase has been rebalanced
-  boss health is a bit higher
-  mob mines are white now
+finalBoss has a bit less health
 
-pilot wave gets +1 choice for gun,field,tech
+laser lens has a glow effect
+slow light has 11->7 unique beams
+  slow light has 38% more damage per beam
+infrared diode 50->60% energy efficiency
+dye laser 20->25% energy efficiency
+          20->25% laser damage
+free-electron laser 190->200% laser damage
+crit angle is smaller for iridescence and stress concentration on large mobs
+ordnance has +5% JUNK
+CPT uses 25% less energy and leaves you with about 10-20 energy
 
-bug fixes:
+JUNK tech: placebo -  +777% damage +777% defense
+
+bug fixes
+    
+
 
 *********************************************************** TODO *****************************************************
+    
+laserMines need a copy of laser-bot method
+  this is a very rare bug, so not a priority
 
 finalBoss
   add synergies between modes:
@@ -1047,8 +1060,7 @@ possible names for tech
   prion quine - self replicating protein
   Unitarity - https://en.wikipedia.org/wiki/Unitarity_(physics) - all probabilities add up to 1, calculations work the same forward and backwards in time
     this is violated by expansion of the universe
-
-
+  https://en.wikipedia.org/wiki/Cosmic_censorship_hypothesis - black holes can't leak
 
 
 
