@@ -301,12 +301,6 @@ const powerUps = {
         powerUps.endDraft(type);
     },
     showDraft() {
-        // document.getElementById("choose-grid").style.gridTemplateColumns = "repeat(2, minmax(370px, 1fr))"
-        // document.getElementById("choose-background").style.display = "inline"
-        // document.getElementById("choose-background").style.visibility = "visible"
-        // document.getElementById("choose-background").style.opacity = "0.8"
-        // document.getElementById("choose-grid").style.display = "grid"
-
         //disable clicking for 1/2 a second to prevent mistake clicks
         document.getElementById("choose-grid").style.pointerEvents = "none";
         document.body.style.cursor = "none";
@@ -314,29 +308,17 @@ const powerUps = {
             if (!tech.isNoDraftPause) document.body.style.cursor = "auto";
             document.getElementById("choose-grid").style.pointerEvents = "auto";
             document.getElementById("choose-grid").style.transitionDuration = "0s";
-        }, 500);
-
-        // if (tech.extraChoices) {
-        //     document.body.style.overflowY = "scroll";
-        //     document.body.style.overflowX = "hidden";
-        // }
+        }, 400);
         simulation.isChoosing = true; //stops p from un pausing on key down
 
         if (!simulation.paused) {
             if (tech.isNoDraftPause) {
-
-                // const cycle = () => {
-                //     m.fireCDcycle = m.cycle + 1; //fire cooldown
-                //     if (simulation.isChoosing && m.alive) requestAnimationFrame(cycle)
-                // }
-                // requestAnimationFrame(cycle);
-
                 document.getElementById("choose-grid").style.opacity = "0.92"
             } else {
                 simulation.paused = true;
                 document.getElementById("choose-grid").style.opacity = "1"
             }
-            document.getElementById("choose-grid").style.transitionDuration = "0.25s";
+            document.getElementById("choose-grid").style.transitionDuration = "0.25s"; //how long is the fade in on
             document.getElementById("choose-grid").style.visibility = "visible"
 
             requestAnimationFrame(() => {
@@ -363,11 +345,13 @@ const powerUps = {
             }
             if (tech.isCancelRerolls) {
                 for (let i = 0, len = 5 + 5 * Math.random(); i < len; i++) {
-                    let spawnType = ((m.health < 0.25 && !tech.isEnergyHealth) || tech.isEnergyNoAmmo) ? "heal" : "ammo"
-                    if (Math.random() < 0.36) {
-                        spawnType = "heal"
-                    } else if (Math.random() < 0.4 && !tech.isSuperDeterminism) {
+                    let spawnType
+                    if (Math.random() < 0.4 && !tech.isEnergyNoAmmo) {
+                        spawnType = "ammo"
+                    } else if (Math.random() < 0.33 && !tech.isSuperDeterminism) {
                         spawnType = "research"
+                    } else {
+                        spawnType = "heal"
                     }
                     powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), spawnType, false);
                 }
@@ -1093,7 +1077,69 @@ const powerUps = {
                     }
                     document.getElementById("choose-grid").innerHTML = text
                     powerUps.showDraft();
+
+                    //fade in all circles
+                    // requestAnimationFrame(() => {
+                    //     var elements = document.getElementsByClassName('circle-grid');
+                    //     for (var i in elements) {
+                    //         if (elements.hasOwnProperty(i)) {
+                    //             elements[i].style.opacity = '1';
+                    //         }
+                    //     }
+                    // });
                 }
+            }
+        },
+    },
+    technology: {
+        name: "technology",
+        color: "#fff", //"hsl(248,100%,65%)",
+        size() {
+            return 35;
+        },
+        mode: "", //name of tech given
+        effect() {
+            if (m.alive) {
+                let text = ""
+                text += `<div class='cancel' onclick='powerUps.endDraft("tech")'>✕</div>`
+                text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>technology</h3>`
+                for (let i = 0; i < this.mode.length; i++) {
+                    let choose = null
+                    for (let j = 0; j < tech.tech.length; j++) { //convert name into index
+                        if (this.mode[i] === tech.tech[j].name) {
+                            choose = j
+                            break
+                        }
+                    }
+                    const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
+                    if (choose === null || tech.tech[choose].count + 1 > tech.tech[choose].maxCount || !tech.tech[choose].allowed()) {
+                        text += `<div class="choose-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[choose].name}</div><span style = "color: red;">incompatible</span></div>`
+                    } else {
+                        if (tech.tech[choose].isFieldTech) {
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title">
+                            <span style="position:relative;">
+                            <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                            <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
+                            </span>
+                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() :tech.tech[choose].description}</div></div>`
+                        } else if (tech.tech[choose].isGunTech) {
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title">
+                            <span style="position:relative;">
+                            <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
+                            <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
+                            </span>
+                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() :tech.tech[choose].description}</div></div>`
+                        } else if (tech.tech[choose].isLore) {
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                        } else if (tech.tech[choose].isJunk) {
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                        } else {
+                            text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                        }
+                    }
+                }
+                document.getElementById("choose-grid").innerHTML = text
+                powerUps.showDraft();
             }
         },
     },

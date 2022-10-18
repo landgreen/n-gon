@@ -359,16 +359,6 @@ const simulation = {
             // document.getElementById(b.activeGun).style.fontSize = "30px";
             if (document.getElementById(b.activeGun)) document.getElementById(b.activeGun).style.opacity = "1";
         }
-
-        if (tech.isFirstOrder && document.getElementById("tech-first-derivative")) {
-            if (b.inventory[0] === b.activeGun) {
-                let lessDamage = 1
-                for (let i = 0, len = b.inventory.length; i < len; i++) lessDamage *= 0.87 // 1 - 0.13
-                document.getElementById("tech-first-derivative").innerHTML = " " + ((1 - lessDamage) * 100).toFixed(0) + "%"
-            } else {
-                document.getElementById("tech-first-derivative").innerHTML = " 0%"
-            }
-        }
     },
     updateGunHUD() {
         for (let i = 0, len = b.inventory.length; i < len; ++i) {

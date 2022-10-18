@@ -782,6 +782,8 @@ summary {
     border-radius: 50%;
     display: inline-block;
     margin-bottom: -7px;
+    /* opacity: 0; */
+    /* transition: opacity 0.5s ease-in; */
 }
 
 .research-circle {

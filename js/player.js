@@ -457,7 +457,8 @@ const m = {
                 simulation.makeTextLog("simulation.amplitude <span class='color-symbol'>=</span> null");
                 tech.isImmortal = false //disable future immortality
             }, 6 * swapPeriod);
-        } else if (m.alive) { //normal death code here
+        } else if (m.alive) { //normal death code here            
+            m.storeTech()
             m.alive = false;
             simulation.paused = true;
             m.health = 0;
@@ -470,6 +471,28 @@ const m = {
                 Engine.clear(engine);
                 simulation.splashReturn();
             }, 5000);
+        }
+    },
+    storeTech() { //store a copy of your tech,  it will show up at your location next run
+        if (tech.totalCount > 0 && localSettings.isAllowed) {
+            const have = []
+            for (let i = 0; i < tech.tech.length; i++) {
+                if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) have.push(tech.tech[i].name)
+            }
+            if (have.length) {
+                localSettings.axiom = {
+                    techNames: have,
+                    position: { x: m.pos.x, y: m.pos.y },
+                    levelName: level.levels[level.onLevel],
+                    isHorizontalFlipped: simulation.isHorizontalFlipped
+                }
+                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                // for (let i = 0; i < 6; i++) simulation.drawList.push({ x: m.pos.x, y: m.pos.y, radius: 40, color: `hsla(250,100%,62%,0.05)`, time: i * 120 }); //draw graphics to show that tech is stored
+                // simulation.makeTextLog(`<span class='color-var'>tech</span> <strong>${localSettings.axiom.techName}</strong> is stored at (${m.pos.x.toFixed(0)}, ${m.pos.y.toFixed(0)}) on ${level.levels[level.onLevel]}`, 360);
+            }
+            // else {
+            // simulation.makeTextLog(`no valid <span class='color-var'>tech</span> for <strong>axiom</strong>`, 360);
+            // }
         }
     },
     health: 0,
@@ -539,9 +562,7 @@ const m = {
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.isTurret && m.crouch) dmg *= 0.34;
-        if (tech.isFirstOrder && b.inventory[0] === b.activeGun) {
-            for (let i = 0, len = b.inventory.length; i < len; i++) dmg *= 0.87 // 1 - 0.15
-        }
+        if (tech.isFirstDer && b.inventory[0] === b.activeGun) dmg *= 0.85 ** b.inventory.length
         return dmg
     },
     rewind(steps) { // m.rewind(Math.floor(Math.min(599, 137 * m.energy)))
@@ -595,7 +616,7 @@ const m = {
         // simulation.updateGunHUD();
         // simulation.boldActiveGunHUD();
 
-        // move bots to player
+        // move bots to player's new position
         for (let i = 0; i < bullet.length; i++) {
             if (bullet[i].botType) {
                 Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
@@ -642,7 +663,7 @@ const m = {
         simulation.fpsInterval = 1000 / simulation.fpsCap;
         m.defaultFPSCycle = m.cycle
         if (tech.isRewindBot) {
-            const len = steps * 0.07 * tech.isRewindBot
+            const len = steps * 0.05 * tech.isRewindBot
             const botStep = Math.floor(steps / len)
             for (let i = 0; i < len; i++) {
                 const where = m.history[Math.abs(m.cycle - i * botStep) % 600].position //spread out spawn locations along past history
@@ -650,13 +671,13 @@ const m = {
                     x: where.x + 20 * (Math.random() - 0.5),
                     y: where.y + 20 * (Math.random() - 0.5)
                 }, false, false)
-                bullet[bullet.length - 1].endCycle = simulation.cycle + 480 + Math.floor(120 * Math.random()) //8-10 seconds
+                bullet[bullet.length - 1].endCycle = simulation.cycle + 440 + Math.floor(120 * Math.random()) //8-10 seconds
             }
         }
     },
     collisionImmuneCycles: 30,
     damage(dmg) {
-        if (tech.isRewindAvoidDeath && m.energy > 0.6 && dmg > 0.01) {
+        if (tech.isRewindAvoidDeath && (m.energy + 0.05) > Math.min(1, m.maxEnergy) && dmg > 0.01) {
             const steps = Math.floor(Math.min(299, 150 * m.energy))
             simulation.makeTextLog(`<span class='color-var'>m</span>.rewind(${steps})`)
             m.rewind(steps)

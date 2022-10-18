@@ -1358,6 +1358,7 @@ document.getElementById("difficulty-select").addEventListener("input", () => {
     lore.setTechGoal()
     localSettings.difficultyMode = simulation.difficultyMode
     localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
+    localSettings.axiom = undefined //after changing difficulty, reset stored tech
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 

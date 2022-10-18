@@ -1,26 +1,25 @@
 ******************************************************** NEXT PATCH **************************************************
 
-finalBoss has a bit less health
+when you die store a copy of all your tech
+  they will show up at your location in the future as a power up
+  this is probably buggy
 
-laser lens has a glow effect
-slow light has 11->7 unique beams
-  slow light has 38% more damage per beam
-infrared diode 50->60% energy efficiency
-dye laser 20->25% energy efficiency
-          20->25% laser damage
-free-electron laser 190->200% laser damage
-crit angle is smaller for iridescence and stress concentration on large mobs
-ordnance has +5% JUNK
-CPT uses 25% less energy and leaves you with about 10-20 energy
+CPT triggers at above 100 energy instead of above 68 energy
+causality bots makes a few less bots
 
-JUNK tech: placebo -  +777% damage +777% defense
-
-bug fixes
-    
+several tech with dynamic effects show the value of the effect in their description
 
 
 *********************************************************** TODO *****************************************************
-    
+
+tech increase max energy and energy to 5000, but you can no longer regen energy through any process
+
+it would be nice if there was incentive to go slow when choosing tech so n-gon is more relaxing
+  add some css based visual effects for opening up a tech,gun,field
+  
+
+make a new coupling effect for perfect diamagnetism or standing wave
+
 laserMines need a copy of laser-bot method
   this is a very rare bug, so not a priority
 
@@ -50,15 +49,6 @@ finalBoss
         counter with wormhole, negative mass
       player targeted unless cloaking
 
-
-tech - leave one of your tech at random, find it next run
-  store level name and position in local storage
-    requires local storage = true
-  store on power up pickup or on death?
-  make new power up type that gives specific tech with no choices
-    looks like smaller tech power up?
-    looks like a ghost, white color?
-
 JUNK tech description that changes similar to cards in inscription
   that changes based on mouse position
   can you tell if mouse is over card?
@@ -70,11 +60,8 @@ tech that encourages gun swapping
     +damage on that level
     ammo, heals, research?
 
-tech that gives permanent buff when ejected
-  buff: coupling, damage?
-  how to tell if it is ejected in the remove code?
-
 tech - buff MACHO range, effect, move speed?
+while you are inside MACHO it will damage mobs?
 
 PWA?
   https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps

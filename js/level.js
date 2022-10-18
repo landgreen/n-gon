@@ -18,24 +18,24 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // tech.giveTech("performance")
-            // level.difficultyIncrease(13 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(2 * 4) //30 is near max on hard  //60 is near max on why
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(500)
+            // powerUps.research.changeRerolls(50)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
             // m.setField("standing wave") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave
             // simulation.molecularMode = 2
             // m.damage(0.1);
-            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 10000
 
-            // tech.giveTech("lens")
-            // for (let i = 0; i < 9; ++i) tech.giveTech("compound lens")
+            // tech.giveTech("ice crystal nucleation")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("compound lens")
             // tech.giveTech("dye laser")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("iridescence")
-            // for (let i = 0; i < 1; i++) tech.giveTech("slow light")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("CPT symmetry")
+            // for (let i = 0; i < 5; i++) tech.giveTech("laser-bot")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
@@ -44,14 +44,15 @@ const level = {
             // spawn.starter(1900, -500, 200)
             // spawn.starter(1900, -500)
             // spawn.timeBoss(2538, -950)
-            // for (let i = 0; i < 33; ++i) spawn.sniper(1000 + 5000 * Math.random(), -500 + 300 * Math.random())
+            // for (let i = 0; i < 5; ++i) spawn.sniper(1000 + 5000 * Math.random(), -500 + 300 * Math.random())
             // tech.addJunkTechToPool(0.5)
             // tech.tech[322].frequency = 100
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
             // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
-            // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
+            // powerUps.spawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "technology", false, ["lens", "nail-bot"]);
+            // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
 
             //lore testing
@@ -153,9 +154,15 @@ const level = {
         }
         if (tech.isSpawnExitTech) {
             for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false) //exit
-            // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "tech", false); //start
         }
         if (m.plasmaBall) m.plasmaBall.reset()
+        if (localSettings.axiom && localSettings.axiom.levelName === level.levels[level.onLevel]) {
+            console.log('hi')
+            const flip = localSettings.axiom.isHorizontalFlipped === simulation.isHorizontalFlipped ? 1 : -1
+            powerUps.spawn(flip * localSettings.axiom.position.x, localSettings.axiom.position.y, "technology", false, localSettings.axiom.techNames);
+            localSettings.axiom = undefined
+            if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        }
     },
     trainingText(say) {
         simulation.lastLogTime = 0; //clear previous messages
