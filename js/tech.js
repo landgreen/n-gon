@@ -3808,47 +3808,7 @@ const tech = {
             },
             remove() {}
         },
-        // {
-        //     name: "axiom",
-        //     descriptionFunction() {
-        //         if (localSettings.axiom) {
-        //             return `your <strong class='color-m'>tech</strong> are saved at (${localSettings.axiom.position.x.toFixed(0)}, ${localSettings.axiom.position.y.toFixed(0)}) on ${localSettings.axiom.levelName}`
-        //         } else {
-        //             return "save a <strong>copy</strong> of your current <strong class='color-m'>tech</strong><br>choose 1 when you <strong>return</strong> to this location"
-        //         }
-        //     },
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 1,
-        //     frequencyDefault: 1,
-        //     isNonRefundable: true,
-        //     allowed() {
-        //         return !build.isExperimentSelection && tech.totalCount > 0 && localSettings.isAllowed && !localSettings.axiom // && level.onLevel > 0// && !simulation.isCheating
-        //     },
-        //     requires: "1+ tech, local storage, not cheating, not already stored",
-        //     effect() {
-        //         const have = []
-        //         for (let i = 0; i < tech.tech.length; i++) {
-        //             if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) have.push(tech.tech[i].name)
-        //         }
-        //         if (have.length) {
-        //             localSettings.axiom = {
-        //                 techNames: have,
-        //                 position: { x: m.pos.x, y: m.pos.y },
-        //                 levelName: level.levels[level.onLevel],
-        //                 isHorizontalFlipped: simulation.isHorizontalFlipped
-        //             }
-        //             if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-        //             simulation.makeTextLog(`<span class='color-var'>tech</span> <strong>${localSettings.axiom.techName}</strong> is stored at (${m.pos.x.toFixed(0)}, ${m.pos.y.toFixed(0)}) on ${level.levels[level.onLevel]}`, 360);
-        //             for (let i = 0; i < 6; i++) simulation.drawList.push({ x: m.pos.x, y: m.pos.y, radius: 40, color: `hsla(250,100%,62%,0.05)`, time: i * 120 }); //draw graphics to show that tech is stored
-        //         } else {
-        //             simulation.makeTextLog(`no valid <span class='color-var'>tech</span> for <strong>axiom</strong>`, 360);
-        //         }
-        //     },
-        //     remove() {
 
-        //     }
-        // },
         {
             name: "Occam's razor",
             descriptionFunction() {

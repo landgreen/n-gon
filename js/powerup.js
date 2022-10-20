@@ -1091,29 +1091,28 @@ const powerUps = {
             }
         },
     },
-    technology: {
-        name: "technology",
+    entanglement: {
+        name: "entanglement",
         color: "#fff", //"hsl(248,100%,65%)",
-        size() {
-            return 35;
-        },
-        mode: "", //name of tech given
+        size() { return 40 },
         effect() {
-            if (m.alive) {
+            if (m.alive && localSettings.entanglement) {
                 let text = ""
                 text += `<div class='cancel' onclick='powerUps.endDraft("tech")'>✕</div>`
-                text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>technology</h3>`
-                for (let i = 0; i < this.mode.length; i++) {
-                    let choose = null
-                    for (let j = 0; j < tech.tech.length; j++) { //convert name into index
-                        if (this.mode[i] === tech.tech[j].name) {
-                            choose = j
-                            break
-                        }
-                    }
+                text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>entanglement</h3>`
+                if (localSettings.entanglement.fieldIndex) {
+                    const field = localSettings.entanglement.fieldIndex //add field
+                    text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${field})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[field].name}</div> ${m.fieldUpgrades[field].description}</div>`
+                }
+                for (let i = 0; i < localSettings.entanglement.gunIndexes.length; i++) { //add guns
+                    const gun = localSettings.entanglement.gunIndexes[i]
+                    text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${gun})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[gun].name}</div> ${b.guns[gun].description}</div>`
+                }
+                for (let i = 0; i < localSettings.entanglement.techIndexes.length; i++) { //add tech
+                    let choose = localSettings.entanglement.techIndexes[i]
                     const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
                     if (choose === null || tech.tech[choose].count + 1 > tech.tech[choose].maxCount || !tech.tech[choose].allowed()) {
-                        text += `<div class="choose-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[choose].name}</div><span style = "color: red;">incompatible</span></div>`
+                        text += `<div class="choose-grid-module" style = "background-color: #efeff5; border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding-top: 6px; padding-bottom: 6px;"><div class="grid-title">${tech.tech[choose].name} <span style = "color: #aaa;font-weight: normal;font-size:80%;">- incompatible</span></div></div>`
                     } else {
                         if (tech.tech[choose].isFieldTech) {
                             text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title">
@@ -1140,6 +1139,9 @@ const powerUps = {
                 }
                 document.getElementById("choose-grid").innerHTML = text
                 powerUps.showDraft();
+
+                localSettings.entanglement = undefined
+                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             }
         },
     },

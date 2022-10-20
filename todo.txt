@@ -1,13 +1,10 @@
 ******************************************************** NEXT PATCH **************************************************
 
-when you die store a copy of all your tech
-  they will show up at your location in the future as a power up
-  this is probably buggy
+entanglement - your death leaves a power up for next run
+  renamed entanglement
+  also stores your gun and field
+  improved graphics for incompatible tech
 
-CPT triggers at above 100 energy instead of above 68 energy
-causality bots makes a few less bots
-
-several tech with dynamic effects show the value of the effect in their description
 
 
 *********************************************************** TODO *****************************************************
@@ -16,7 +13,10 @@ tech increase max energy and energy to 5000, but you can no longer regen energy 
 
 it would be nice if there was incentive to go slow when choosing tech so n-gon is more relaxing
   add some css based visual effects for opening up a tech,gun,field
-  
+
+make freeze and __  not cause death at health health, but just 600% extra damage for that bullet 
+
+new mob attibute - phosphorescence - mobs fire lasers for a few seconds after being hit with lasers
 
 make a new coupling effect for perfect diamagnetism or standing wave
 

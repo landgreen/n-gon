@@ -760,6 +760,10 @@ const simulation = {
         b.setFireMethod()
         b.setFireCD();
         // simulation.updateTechHUD();
+        for (let i = 0; i < b.guns.length; i++) b.guns[i].isRecentlyShown = false //reset recently shown back to zero
+        for (let i = 0; i < m.fieldUpgrades.length; i++) m.fieldUpgrades[i].isRecentlyShown = false //reset recently shown back to zero
+        for (let i = 0; i < tech.tech.length; i++) tech.tech[i].isRecentlyShown = false //reset recently shown back to zero
+
         powerUps.tech.choiceLog = [];
         powerUps.gun.choiceLog = [];
         powerUps.field.choiceLog = [];

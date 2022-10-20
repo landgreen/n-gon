@@ -25,13 +25,14 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
-            // m.setField("standing wave") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave
+            // m.setField("time dilation") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave
             // simulation.molecularMode = 2
             // m.damage(0.1);
-            // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("missiles") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 10000
 
-            // tech.giveTech("ice crystal nucleation")
+            // tech.giveTech("arsenal")
             // for (let i = 0; i < 1; ++i) tech.giveTech("compound lens")
             // tech.giveTech("dye laser")
             // for (let i = 0; i < 1; ++i) tech.giveTech("CPT symmetry")
@@ -51,7 +52,6 @@ const level = {
             // for (let i = 0; i < 40; ++i) tech.giveTech()
             // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
-            // powerUps.spawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "technology", false, ["lens", "nail-bot"]);
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
 
@@ -71,6 +71,10 @@ const level = {
 
             // lore.unlockTesting();
             // tech.giveTech("tinker"); //show junk tech in experiment mode
+            // simulation.isCheating = false
+            // m.storeTech()
+            // powerUps.spawn(m.pos.x, m.pos.y, "entanglement", false);
+
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.pickList = ["focuser", "focuser"]
@@ -156,12 +160,9 @@ const level = {
             for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false) //exit
         }
         if (m.plasmaBall) m.plasmaBall.reset()
-        if (localSettings.axiom && localSettings.axiom.levelName === level.levels[level.onLevel]) {
-            console.log('hi')
-            const flip = localSettings.axiom.isHorizontalFlipped === simulation.isHorizontalFlipped ? 1 : -1
-            powerUps.spawn(flip * localSettings.axiom.position.x, localSettings.axiom.position.y, "technology", false, localSettings.axiom.techNames);
-            localSettings.axiom = undefined
-            if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        if (localSettings.entanglement && localSettings.entanglement.levelName === level.levels[level.onLevel]) {
+            const flip = localSettings.entanglement.isHorizontalFlipped === simulation.isHorizontalFlipped ? 1 : -1
+            powerUps.spawn(flip * localSettings.entanglement.position.x, localSettings.entanglement.position.y, "entanglement", false);
         }
     },
     trainingText(say) {

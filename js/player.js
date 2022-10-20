@@ -474,25 +474,24 @@ const m = {
         }
     },
     storeTech() { //store a copy of your tech,  it will show up at your location next run
-        if (tech.totalCount > 0 && localSettings.isAllowed) {
-            const have = []
+        if (localSettings.isAllowed && !simulation.isCheating) {
+            const gunList = [] //store gun names
+            for (i = 0, len = b.inventory.length; i < len; i++) gunList.push(b.inventory[i])
+            const techList = [] //store tech names
             for (let i = 0; i < tech.tech.length; i++) {
-                if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) have.push(tech.tech[i].name)
+                if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) techList.push(i)
             }
-            if (have.length) {
-                localSettings.axiom = {
-                    techNames: have,
+            if (techList.length) {
+                localSettings.entanglement = {
+                    fieldIndex: m.fieldMode,
+                    gunIndexes: gunList,
+                    techIndexes: techList,
                     position: { x: m.pos.x, y: m.pos.y },
                     levelName: level.levels[level.onLevel],
                     isHorizontalFlipped: simulation.isHorizontalFlipped
                 }
                 if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-                // for (let i = 0; i < 6; i++) simulation.drawList.push({ x: m.pos.x, y: m.pos.y, radius: 40, color: `hsla(250,100%,62%,0.05)`, time: i * 120 }); //draw graphics to show that tech is stored
-                // simulation.makeTextLog(`<span class='color-var'>tech</span> <strong>${localSettings.axiom.techName}</strong> is stored at (${m.pos.x.toFixed(0)}, ${m.pos.y.toFixed(0)}) on ${level.levels[level.onLevel]}`, 360);
             }
-            // else {
-            // simulation.makeTextLog(`no valid <span class='color-var'>tech</span> for <strong>axiom</strong>`, 360);
-            // }
         }
     },
     health: 0,
