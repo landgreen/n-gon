@@ -557,6 +557,11 @@ summary {
     color: hsl(218, 100%, 58%);
 }
 
+.highlight {
+    border-radius: 6px;
+    background-color: #ff0;
+    padding: 3px;
+}
 /* colors for pause, selection and experiment */
 
 /* #text-log {

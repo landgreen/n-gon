@@ -531,6 +531,15 @@ const simulation = {
         simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
         simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
     },
+    cameraNoLook() {
+        ctx.save();
+        ctx.translate(canvas.width2, canvas.height2); //center
+        // ctx.scale(simulation.zoom / simulation.edgeZoomOutSmooth, simulation.zoom / simulation.edgeZoomOutSmooth); //zoom in once centered
+        ctx.translate(-canvas.width2 + m.transX, -canvas.height2 + m.transY); //translate
+        //calculate in game mouse position by undoing the zoom and translations
+        simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
+        simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
+    },
     restoreCamera() {
         ctx.restore();
     },

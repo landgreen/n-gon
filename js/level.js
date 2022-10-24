@@ -28,18 +28,19 @@ const level = {
             // m.setField("time dilation") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave
             // simulation.molecularMode = 2
             // m.damage(0.1);
-            // b.giveGuns("missiles") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.guns[0].ammo = 10000
-
-            // tech.giveTech("arsenal")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("compound lens")
+            // b.guns[9].ammo = 10000
+            // tech.giveTech("ship")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("junk DNA")
             // tech.giveTech("dye laser")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("CPT symmetry")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("grappling hook")
             // for (let i = 0; i < 5; i++) tech.giveTech("laser-bot")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
+
+            // canvas.requestPointerLock()
 
             // level.testing();
             // spawn.starter(1900, -500, 200)
@@ -94,6 +95,14 @@ const level = {
         m.resetHistory();
         spawn.quantumEraserCheck(); //remove mobs from tech: quantum eraser
 
+        //used for generalist and pigeonhole principle
+        tech.buffedGun++
+        if (tech.buffedGun > b.inventory.length - 1) tech.buffedGun = 0;
+        if (tech.isGunCycle) {
+            b.inventoryGun = tech.buffedGun;
+            simulation.switchGun();
+        }
+
         if (tech.isForeverDrones) {
             if (tech.isDroneRadioactive) {
                 for (let i = 0; i < tech.isForeverDrones * 0.25; i++) {
@@ -110,11 +119,6 @@ const level = {
         if (tech.isExtraMaxEnergy) {
             tech.healMaxEnergyBonus += 0.1 * powerUps.totalPowerUps //Math.min(0.02 * powerUps.totalPowerUps, 0.51)
             m.setMaxEnergy();
-        }
-        if (tech.isGunCycle) {
-            b.inventoryGun++;
-            if (b.inventoryGun > b.inventory.length - 1) b.inventoryGun = 0;
-            simulation.switchGun();
         }
         if (tech.isSwitchReality && powerUps.research.count > 0) {
             powerUps.research.changeRerolls(-1);
@@ -162,7 +166,7 @@ const level = {
         if (m.plasmaBall) m.plasmaBall.reset()
         if (localSettings.entanglement && localSettings.entanglement.levelName === level.levels[level.onLevel]) {
             const flip = localSettings.entanglement.isHorizontalFlipped === simulation.isHorizontalFlipped ? 1 : -1
-            powerUps.spawn(flip * localSettings.entanglement.position.x, localSettings.entanglement.position.y, "entanglement", false);
+            powerUps.directSpawn(flip * localSettings.entanglement.position.x, localSettings.entanglement.position.y, "entanglement", false);
         }
     },
     trainingText(say) {

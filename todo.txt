@@ -1,24 +1,61 @@
 ******************************************************** NEXT PATCH **************************************************
 
-entanglement - your death leaves a power up for next run
-  renamed entanglement
-  also stores your gun and field
-  improved graphics for incompatible tech
 
+tech: junk DNA - +53% spore/worm/flea damage per JUNK tech you have, +50% JUNK added to tech pool
+tech: pigeonhole principle - +31% damage for each gun you have, while a chosen gun is active
+  chosen gun cycles each level
+  syncs well with generalist
+
+heuristics 30->25% fire rate, and now spawns a gun
+arsenal gives 13->22% damage per gun, but no longer counts your current gun
+active cooling gives 18->28% fire rate per gun, but no longer counts your current gun
+supply chain adds 4% JUNK
+dead reckoning 36->50% damage
+alternator harpoon 60->80% energy cost reduction
+quickly releasing the fire button retracts harpoon early
+
+JUNK tech - circular symmetry - ship gets 200% damage, ship only faces forward but you can rotate the universe
+
+several bug fixes
+  coupling for molecular assembler 5->8 energy per second
+    but also fixed a bug where coupling was giving 10x regen 
 
 
 *********************************************************** TODO *****************************************************
+
+lock mouse to the window until you press escape
+  https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
+  canvas.requestPointerLock()
+    exitPointerLock
+  toggle off and on when:
+    you die and start a game
+    when choosing?
+  If this doesn't work it could at least be a fun JUNK tech
+
+run canvas direct pixel editing while game is paused
+  just update once every second?
+  if it uses too much processing have a setting to toggle it off
+  this might help get players to spend more time relaxing on the power up selection
+    increase the click delay?
+
+try again - line of sight  https://ncase.me/sight-and-light/
+
+for tech power ups no tech options are displayed until you research once
+  or display only JUNK until you research once
+  increase the number of options after each research
 
 tech increase max energy and energy to 5000, but you can no longer regen energy through any process
 
 it would be nice if there was incentive to go slow when choosing tech so n-gon is more relaxing
   add some css based visual effects for opening up a tech,gun,field
 
-make freeze and __  not cause death at health health, but just 600% extra damage for that bullet 
+make freeze and __  not cause death at 50% health, but just 600% extra damage for that bullet 
 
-new mob attibute - phosphorescence - mobs fire lasers for a few seconds after being hit with lasers
+new mob status effect - phosphorescence - mobs fire lasers for a few seconds after being hit with lasers
 
 make a new coupling effect for perfect diamagnetism or standing wave
+
+make a faster smaller version of cell boss that also has map collisions
 
 laserMines need a copy of laser-bot method
   this is a very rare bug, so not a priority
@@ -52,13 +89,6 @@ finalBoss
 JUNK tech description that changes similar to cards in inscription
   that changes based on mouse position
   can you tell if mouse is over card?
-
-tech that encourages gun swapping
-  a field tech: molecular assembler, pilot wave, negative mass?
-  something similar to applied science, but also spawn a gun?
-  a bonus for each time a mob dies with a different active gun each level
-    +damage on that level
-    ammo, heals, research?
 
 tech - buff MACHO range, effect, move speed?
 while you are inside MACHO it will damage mobs?
@@ -1021,7 +1051,6 @@ possible names for tech
   Gödel's incompleteness
   quantum zeno effect  (perturbation of a system prevents some systems from evolving because it scrambles coherence)  (apply to lasers, fields)
   counterfactual - something false
-  Pigeonhole principle - if there are several things that are matched up
   regression to the mean
   phlogiston theory is a superseded scientific theory that postulated the existence of a fire-like element called phlogiston
   Laplace's demon was a notable published articulation of causal determinism on a scientific basis by Pierre-Simon Laplace in 1814.[1] According to determinism, if someone (the demon) knows the precise location and momentum of every atom in the universe, their past and future values for any given time are entailed; they can be calculated from the laws of classical mechanics.
@@ -1043,7 +1072,6 @@ possible names for tech
   https://en.wikipedia.org/wiki/High-entropy_alloys
   https://en.wikipedia.org/wiki/Refractory_metals
   https://en.wikipedia.org/wiki/Upper-atmospheric_lightning#Elves
-  entanglement
   prion quine - self replicating protein
   Unitarity - https://en.wikipedia.org/wiki/Unitarity_(physics) - all probabilities add up to 1, calculations work the same forward and backwards in time
     this is violated by expansion of the universe

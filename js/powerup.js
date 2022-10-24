@@ -332,7 +332,7 @@ const powerUps = {
     },
     endDraft(type, isCanceled = false) { //type should be a gun, tech, or field
         if (isCanceled) {
-            if (tech.isCancelTech && Math.random() < 0.88) {
+            if (tech.isCancelTech && Math.random() < 0.85) {
                 // powerUps.research.use('tech')
                 powerUps[type].effect();
                 return
@@ -356,7 +356,7 @@ const powerUps = {
                     powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), spawnType, false);
                 }
             }
-            if (tech.isCancelCouple) powerUps.coupling.spawnDelay(5)
+            if (tech.isCancelCouple) powerUps.spawnDelay("coupling", 5)
             // if (tech.isCancelTech && Math.random() < 0.3) {
             //     powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "tech", false);
             //     simulation.makeTextLog(`<strong>options exchange</strong>: returns 1 <strong class='color-m'>tech</strong>`)
@@ -401,20 +401,20 @@ const powerUps = {
         effect() {
             m.couplingChange(0.1)
         },
-        spawnDelay(num) {
-            let count = num
-            let respawnDrones = () => {
-                if (count > 0) {
-                    requestAnimationFrame(respawnDrones);
-                    if (!simulation.paused && !simulation.isChoosing) { //&& !(simulation.cycle % 2)
-                        count--
-                        const where = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }
-                        powerUps.spawn(where.x, where.y, "coupling");
-                    }
-                }
-            }
-            requestAnimationFrame(respawnDrones);
-        }
+        // spawnDelay(num) {
+        //     let count = num
+        //     let respawnDrones = () => {
+        //         if (count > 0) {
+        //             requestAnimationFrame(respawnDrones);
+        //             if (!simulation.paused && !simulation.isChoosing) { //&& !(simulation.cycle % 2)
+        //                 count--
+        //                 const where = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }
+        //                 powerUps.spawn(where.x, where.y, "coupling");
+        //             }
+        //         }
+        //     }
+        //     requestAnimationFrame(respawnDrones);
+        // }
     },
     boost: {
         name: "boost",
@@ -1149,8 +1149,8 @@ const powerUps = {
         let count = num
         let cycle = () => {
             if (count > 0) {
-                requestAnimationFrame(cycle);
-                if (!simulation.paused && !simulation.isChoosing && m.alive) { //&& !(simulation.cycle % 2)
+                if (m.alive) requestAnimationFrame(cycle);
+                if (!simulation.paused && !simulation.isChoosing) { //&& !(simulation.cycle % 2)
                     count--
                     const where = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }
                     powerUps.spawn(where.x, where.y, type);

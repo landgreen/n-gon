@@ -362,6 +362,7 @@ const m = {
         tech.cancelCount = 0;
         tech.extraMaxHealth = 0;
         tech.totalCount = 0;
+        tech.countJunkTech();
         const randomBotCount = b.totalBots()
         b.zeroBotCount()
         //remove all bullets, respawn bots
@@ -1066,7 +1067,8 @@ const m = {
         } else {
             m.fieldRegen = 0.001 //6 energy per second
         }
-        if (m.fieldMode === 0 || m.fieldMode === 4) m.fieldRegen += 0.008333 * m.coupling
+        if (m.fieldMode === 0 || m.fieldMode === 4) m.fieldRegen += 0.00133 * m.coupling //return `generate <strong>${(6*couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong> per second`
+
         if (tech.isTimeCrystals) {
             m.fieldRegen *= 3
         } else if (tech.isGroundState) {
@@ -1589,7 +1591,7 @@ const m = {
             case 3: //negative mass
                 return `<strong>+${((1-0.73 ** couple)*100).toFixed(1)}%</strong> <strong class='color-defense'>defense</strong>`
             case 4: //assembler
-                return `generate <strong>${(5*couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong> per second`
+                return `generate <strong>${(8*couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong> per second`
             case 5: //plasma
                 return `<strong>+${(15*couple).toFixed(0)}%</strong> <strong class='color-d'>damage</strong>`
             case 6: //time dilation

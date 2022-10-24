@@ -1,4 +1,5 @@
-// redblobgames.com/articles/visibility
+//   https://ncase.me/sight-and-light/
+//   redblobgames.com/articles/visibility
 //   https://github.com/Silverwolf90/2d-visibility/tree/master/src
 //   could apply to explosions, neutron bomb, player LOS
 
