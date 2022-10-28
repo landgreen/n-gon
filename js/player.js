@@ -1072,7 +1072,7 @@ const m = {
         if (tech.isTimeCrystals) {
             m.fieldRegen *= 3
         } else if (tech.isGroundState) {
-            m.fieldRegen *= 0.5
+            m.fieldRegen *= 0.6
         }
     },
     regenEnergy: function() { //used in drawRegenEnergy  // rewritten by some tech

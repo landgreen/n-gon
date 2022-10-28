@@ -225,7 +225,68 @@ for (let i = 0, len = tech.tech.length; i < len; i++) {
     if (!tech.tech[i].link) tech.tech[i].link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(tech.tech[i].name).replace(/'/g, '%27')}&title=Special:Search' class="link">${tech.tech[i].name}</a>`
 }
 const build = {
+    pixelDraw() {
+        let count = 0
+        let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let data = imgData.data;
+
+        function loop() {
+            count++
+            if (!(count % 2)) {
+                for (let y = 0; y < canvas.height; ++y) {
+                    for (let x = 0; x < canvas.width; x += 1) {
+                        const index = (y * canvas.width + x) * 4;
+                        // let mag = 0;
+                        //   for (let j = 0, len = who.length; j < len; j++) {
+                        //     const dx = who[j].position.x - x;
+                        //     const dy = who[j].position.y - y;
+                        //     mag -= who[j].charge / (Math.sqrt(dx * dx + dy * dy) + 1);
+                        //   }
+
+                        //get dark
+                        // data[index + 0] *= 0.96
+                        // data[index + 1] *= 0.96
+                        // data[index + 2] *= 0.96
+                        // data[index + 3] -= 1; // alpha
+
+                        //invert
+                        data[index + 0] = 255 - data[index + 0] // red
+                        data[index + 1] = 255 - data[index + 1] // green
+                        data[index + 2] = 255 - data[index + 2] // blue
+                    }
+                }
+
+
+                // fade alpha for all pixels
+                // for (let i = 0; i < data.length; i += 4) {
+                //     if (data[i + 3] > 0) {
+                //         data[i + 3]--;
+                //     }
+                // }
+
+                //add random speckles
+                // for (let i = 0, len = Math.floor(data.length / 15000); i < len; ++i) {
+                //     const index = Math.floor((Math.random() * data.length) / 4) * 4;
+                //     data[index + 0] = 255; // red
+                //     data[index + 1] = 255; // green
+                //     data[index + 2] = 255; // blue
+                //     data[index + 3] = Math.floor(Math.random() * Math.random() * 155); // alpha
+                // }
+
+                // ctx.putImageData(imgData, 0, 1); //pixels fall because of the 1 in third parameter
+                ctx.putImageData(imgData, 0, 0);
+            }
+            if (simulation.paused && m.alive) requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
+    },
     pauseGrid() {
+        // build.pixelDraw();
+
+
+
+
+
         //used for junk estimation
         let junkCount = 0
         let totalCount = 1 //start at one to avoid NaN issues
@@ -812,6 +873,7 @@ const input = {
                 event.code === input.key.left ||
                 event.code === input.key.right ||
                 event.code === input.key.pause ||
+                // event.code === "Escape" ||
                 event.code === input.key.nextGun ||
                 event.code === input.key.previousGun ||
                 event.code === input.key.testing
@@ -901,6 +963,7 @@ window.addEventListener("keyup", function(event) {
 });
 
 window.addEventListener("keydown", function(event) {
+    console.log(event.code)
     switch (event.code) {
         case input.key.right:
         case "ArrowRight":
@@ -932,6 +995,7 @@ window.addEventListener("keydown", function(event) {
         case input.key.previousGun:
             simulation.previousGun();
             break
+            // case "Escape":
         case input.key.pause:
             if (!simulation.isChoosing && input.isPauseKeyReady && m.alive) {
                 input.isPauseKeyReady = false

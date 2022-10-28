@@ -5050,7 +5050,7 @@ const b = {
                                 y: best.y
                             };
                             if (best.who.alive) {
-                                const dmg = 0.65 * m.dmgScale; //********** SCALE DAMAGE HERE *********************
+                                const dmg = 0.75 * m.dmgScale; //********** SCALE DAMAGE HERE *********************
                                 best.who.damage(dmg);
                                 best.who.locatePlayer();
                                 //push mobs away

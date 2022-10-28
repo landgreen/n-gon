@@ -31,7 +31,7 @@ const level = {
             // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[9].ammo = 10000
-            // tech.giveTech("ship")
+            // tech.giveTech("startle response")
             // for (let i = 0; i < 1; ++i) tech.giveTech("junk DNA")
             // tech.giveTech("dye laser")
             // for (let i = 0; i < 1; ++i) tech.giveTech("grappling hook")
@@ -39,8 +39,6 @@ const level = {
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-
-            // canvas.requestPointerLock()
 
             // level.testing();
             // spawn.starter(1900, -500, 200)
@@ -52,6 +50,7 @@ const level = {
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
             // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
+
             if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
@@ -61,7 +60,7 @@ const level = {
             // lore.techCount = 2
             // simulation.isCheating = false //true;
             // level.levelsCleared = 10
-            // localSettings.loreCount = 7 //this sets what conversation is heard
+            // localSettings.loreCount = 5 //this sets what conversation is heard
             // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()

@@ -232,7 +232,7 @@ const lore = {
                     if (input.down) {
                         lore.miriam.text("So, No. Maybe you are lucky. Emotions are complex.")
                     } else if (input.up) {
-                        lore.anand.text("YES, Cool! I wonder if it's emotions came from watching humans. ")
+                        lore.anand.text("YES, Cool! I wonder if its emotions came from watching humans. ")
                         lore.sentence--
                         lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => { lore.miriam.text("Or maybe it learned independently, because it needed them.") }) //lore.conversation[chapter].splice(1,this sentence index, ()=>{  })
                     } else if (m.alive) {
@@ -246,7 +246,7 @@ const lore = {
             () => { lore.anand.text("If we say the alphabet it could crouch on the correct letter to spell words.") },
             () => { lore.miriam.text("That would take forever.") },
             () => { lore.miriam.text("I really want to know why is it generating the mobs? And why does it keep fighting them?") },
-            () => { lore.anand.text("Maybe that is just part of it's expectation–maximization algorithm") },
+            () => { lore.anand.text("Maybe that is just part of its expectation–maximization algorithm") },
             () => { lore.miriam.text("Well sure, but what does that even mean?") },
             () => {
                 lore.miriam.text("Do we all just do things because we are-")
@@ -309,7 +309,7 @@ const lore = {
             () => { setTimeout(() => { lore.miriam.text("So, you can understand us, but you may not understand everything about yourself.") }, 500); },
 
             () => { setTimeout(() => { lore.anand.text("You grew from our team's project.") }, 500); },
-            () => { lore.anand.text("We used a quantum computer to design an improved version of it's own architecture.") },
+            () => { lore.anand.text("We used a quantum computer to design an improved version of its own architecture.") },
             () => { lore.anand.text("After we built the improved computer we used it to design the next iteration.") },
             () => { lore.anand.text("Your hardware is roughly the 19th generation of this process.") },
 
@@ -347,7 +347,7 @@ const lore = {
             () => { setTimeout(() => { lore.anand.text("WHY DID YOU SAY THAT!") }, 500) },
             () => { lore.miriam.text("SLIME!!  Hahahahehehahaheheahae! I don't think it's gonna survive!") },
             () => { lore.miriam.text("I think the adversarial network doesn't like it when we decohere the quantum system in this room.") },
-            () => { lore.anand.text("Well, that does halt it's research.") },
+            () => { lore.anand.text("Well, that does halt its research.") },
             () => { setTimeout(() => { lore.anand.text("See you next time.") }, 1000) },
             () => { setTimeout(() => { lore.miriam.text("Bye-bye little bot.") }, 2000) },
             () => {
@@ -504,8 +504,11 @@ const lore = {
             () => { lore.miriam.text("Of course they attack right now.") },
             () => { lore.miriam.text("Just don't get stuck in the slime.") },
             () => {
+                let count = 0
+
                 function cycle() {
-                    if (mob.length === 0) {
+                    count++
+                    if (mob.length === 0 || count > 3600 + 900 * mob.length) {
                         lore.miriam.text("I'll spawn some more power ups for you.")
                         simulation.makeTextLog(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
                         for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100 - i * 20, "heal")
@@ -523,8 +526,11 @@ const lore = {
                 lore.talkingColor = "#dff"
             },
             () => {
+                let count = 0
+
                 function cycle() {
-                    if (mob.length === 0) {
+                    count++
+                    if (mob.length === 0 || count > 3600 + 900 * mob.length) {
                         lore.anand.text("DragonFlyBoss is my favorite.")
                         simulation.makeTextLog(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
                         for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100 - i * 20, "heal")
@@ -541,8 +547,11 @@ const lore = {
                 lore.talkingColor = "#dff"
             },
             () => {
+                let count = 0
+
                 function cycle() {
-                    if (mob.length === 0) {
+                    count++
+                    if (mob.length === 0 || count > 3600 + 900 * mob.length) {
                         lore.miriam.text("Here are some extra tech.")
                         simulation.makeTextLog(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "tech")`, Infinity);
                         for (let i = 0; i < 6; i++) powerUps.spawn(0, -200 - i * 40, "tech")
@@ -561,8 +570,11 @@ const lore = {
                 lore.talkingColor = "#dff"
             },
             () => {
+                let count = 0
+
                 function cycle() {
-                    if (mob.length === 0) {
+                    count++
+                    if (mob.length === 0 || count > 3600 + 900 * mob.length) {
                         lore.anand.text("I'm going to wall you in!")
                         spawn.blockBoss(-1650, -100);
                         spawn.blockBoss(1650, -100);
@@ -630,7 +642,7 @@ const lore = {
             () => { lore.anand.text(`I bet the AI doesn't even know it's in space.`) },
             () => { lore.anand.text(`Well, maybe a part of it doesn't know where it is.`) },
             () => { lore.anand.text(`Maybe these simulations are more like a dream.`) },
-            () => { lore.anand.text(`Although we can't assume that it's brain works like ours.`) },
+            () => { lore.anand.text(`Although we can't assume that its brain works like ours.`) },
             () => { setTimeout(() => { lore.miriam.text("So, let's teach the AI that we are friends.") }, 500); },
             () => { lore.anand.text(`How...`) },
             () => { setTimeout(() => { lore.miriam.text("I don't know...") }, 1000); },
@@ -688,11 +700,11 @@ const lore = {
             },
             () => { setTimeout(() => { lore.anand.text("haha, we did it!") }, 500); },
             () => { lore.miriam.text("Although, I'm not sure we should personify it with human emotions.") },
-            () => { lore.anand.text("I agree, it's thinking may not be centered around a self or an ego.") },
+            () => { lore.anand.text("I agree, its thinking may not be centered around a self or an ego.") },
             () => { lore.anand.text("Our brains evolved a self oriented perspective because it was a survival advantage.") },
-            () => { lore.miriam.text("Right, and the AI's development was guided by it's own previous iterations.") },
-            () => { lore.miriam.text("This AI incarnation is the 18th time that it has improved on it's own hardware and software architecture.") },
-            () => { lore.miriam.text("So it's internally guided evolution may not require the idea of a self.") },
+            () => { lore.miriam.text("Right, and the AI's development was guided by its own previous iterations.") },
+            () => { lore.miriam.text("This AI incarnation is the 18th time that it has improved on its own hardware and software architecture.") },
+            () => { lore.miriam.text("So its internally guided evolution may not require the idea of a self.") },
 
             () => { setTimeout(() => { lore.anand.text("How ever it thinks it can learn and, I think we showed it that nonviolence is an option,") }, 1000); },
             () => { lore.anand.text("but it looks like it's still running other aggressive simulations.") },

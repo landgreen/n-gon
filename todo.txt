@@ -1,36 +1,18 @@
 ******************************************************** NEXT PATCH **************************************************
 
+plasma-bot does 15% more damage, but costs 2 research
+fault tolerance 4->5 forever drones, but costs 2 research
+surfactant 2->3 foam bots, but costs 2 research
+missile-bot costs 1 research
+shaped charge 4->3 research cost
+renormalization 40->44% chance to refund research
+exciton 18->16% chance to spawn
+ground state 50->40% reduced energy regen
+Bayesian statistics 3.8->3% damage per research, and spawns 3 research
 
-tech: junk DNA - +53% spore/worm/flea damage per JUNK tech you have, +50% JUNK added to tech pool
-tech: pigeonhole principle - +31% damage for each gun you have, while a chosen gun is active
-  chosen gun cycles each level
-  syncs well with generalist
-
-heuristics 30->25% fire rate, and now spawns a gun
-arsenal gives 13->22% damage per gun, but no longer counts your current gun
-active cooling gives 18->28% fire rate per gun, but no longer counts your current gun
-supply chain adds 4% JUNK
-dead reckoning 36->50% damage
-alternator harpoon 60->80% energy cost reduction
-quickly releasing the fire button retracts harpoon early
-
-JUNK tech - circular symmetry - ship gets 200% damage, ship only faces forward but you can rotate the universe
-
-several bug fixes
-  coupling for molecular assembler 5->8 energy per second
-    but also fixed a bug where coupling was giving 10x regen 
-
+JUNK tech: startle response - if mobs are near boost damage, and lock mouse until you press escape
 
 *********************************************************** TODO *****************************************************
-
-lock mouse to the window until you press escape
-  https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
-  canvas.requestPointerLock()
-    exitPointerLock
-  toggle off and on when:
-    you die and start a game
-    when choosing?
-  If this doesn't work it could at least be a fun JUNK tech
 
 run canvas direct pixel editing while game is paused
   just update once every second?
@@ -43,6 +25,14 @@ try again - line of sight  https://ncase.me/sight-and-light/
 for tech power ups no tech options are displayed until you research once
   or display only JUNK until you research once
   increase the number of options after each research
+
+Tech: Grandfather Paradox - After rewinding, +300 damage during rewinded time
+  maybe instead of +damage spawn a copy of player that shoots at things?
+    how...  there is no way to reproduce firing
+  Requires: CPT symmetry, retrocausality
+  CPT adjacent tech is actually a bit too strong right now, maybe nerf a bit after testing
+
+When receiving damage, in addition to becoming invulnerable to attacks, also become intangible for the set period of time
 
 tech increase max energy and energy to 5000, but you can no longer regen energy through any process
 
