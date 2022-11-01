@@ -963,7 +963,7 @@ window.addEventListener("keyup", function(event) {
 });
 
 window.addEventListener("keydown", function(event) {
-    console.log(event.code)
+    // console.log(event.code)
     switch (event.code) {
         case input.key.right:
         case "ArrowRight":

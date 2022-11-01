@@ -297,7 +297,7 @@ const spawn = {
         me.showHealthBar = false;
         me.collisionFilter.category = 0;
         me.collisionFilter.mask = 0; //cat.player //| cat.body
-        me.chaseSpeed = 1.2 + 2 * Math.random()
+        me.chaseSpeed = 1.2 + 2.3 * Math.random()
 
         me.awake = function() {
             //chase player
@@ -394,6 +394,9 @@ const spawn = {
                     this.pushAway();
                     this.mode[this.totalModes].enter() //enter new mode
                     this.totalModes++
+                    //spawn 6 mobs
+                    me.mobType = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]; //fire a bullet from each vertex
+                    for (let i = 0; i < 6; i++) me.spawnMobs(i)
                 }
                 ctx.beginPath(); //draw invulnerable
                 let vertices = this.vertices;
@@ -408,12 +411,21 @@ const spawn = {
             }
         }
         me.damageReductionDecay = function() { //slowly make the boss take more damage over time  //damageReduction resets with each invulnerability phase
-            if (!(me.cycle % 60) && this.lastDamageCycle + 240 > this.cycle) this.damageReduction *= 1.015 //only decay once a second   //only decay if the player has done damage in the last 4 seconds
+            if (!(me.cycle % 60) && this.lastDamageCycle + 240 > this.cycle) this.damageReduction *= 1.017 //only decay once a second   //only decay if the player has done damage in the last 4 seconds
+        }
+        me.mobType = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]
+        me.spawnMobs = function(index = 0) {
+            const vertex = me.vertices[index]
+            const unit = Vector.normalise(Vector.sub(me.position, vertex))
+            const where = Vector.add(vertex, Vector.mult(unit, -30))
+            spawn[me.mobType](where.x + 50 * (Math.random() - 0.5), where.y + 50 * (Math.random() - 0.5));
+            const velocity = Vector.mult(Vector.perp(unit), -10) //give the mob a rotational velocity as if they were attached to a vertex
+            Matter.Body.setVelocity(mob[mob.length - 1], { x: me.velocity.x + velocity.x, y: me.velocity.y + velocity.y });
         }
         me.maxMobs = 400
         me.mode = [{
                 name: "boulders",
-                spawnRate: 120 - 6 * simulation.difficultyMode,
+                spawnRate: 170 - 6 * simulation.difficultyMode,
                 do() {
                     if (!(me.cycle % this.spawnRate) && mob.length < me.maxMobs) {
                         me.boulder(me.position.x, me.position.y + 250)
@@ -423,19 +435,20 @@ const spawn = {
                 exit() {},
             }, {
                 name: "mobs",
-                whoSpawn: spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)],
-                spawnRate: 240 - 20 * simulation.difficultyMode,
+                // whoSpawn: spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)],
+                spawnRate: 280 - 20 * simulation.difficultyMode,
                 do() {
                     if (!(me.cycle % this.spawnRate) && mob.length < me.maxMobs) {
                         me.torque += 0.000015 * me.inertia; //spin
                         const index = Math.floor((me.cycle % (this.spawnRate * 6)) / this.spawnRate) //int from 0 to 5
-                        if (index === 0) this.whoSpawn = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]; //fire a bullet from each vertex
-                        const vertex = me.vertices[index]
-                        const unit = Vector.normalise(Vector.sub(me.position, vertex))
-                        const where = Vector.add(vertex, Vector.mult(unit, -30))
-                        spawn[this.whoSpawn](where.x + 50 * (Math.random() - 0.5), where.y + 50 * (Math.random() - 0.5));
-                        const velocity = Vector.mult(Vector.perp(unit), -18) //give the mob a rotational velocity as if they were attached to a vertex
-                        Matter.Body.setVelocity(mob[mob.length - 1], { x: me.velocity.x + velocity.x, y: me.velocity.y + velocity.y });
+                        if (index === 0) me.mobType = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]; //fire a bullet from each vertex
+                        me.spawnMobs(index)
+                        // const vertex = me.vertices[index]
+                        // const unit = Vector.normalise(Vector.sub(me.position, vertex))
+                        // const where = Vector.add(vertex, Vector.mult(unit, -30))
+                        // spawn[me.mobType](where.x + 50 * (Math.random() - 0.5), where.y + 50 * (Math.random() - 0.5));
+                        // const velocity = Vector.mult(Vector.perp(unit), -18) //give the mob a rotational velocity as if they were attached to a vertex
+                        // Matter.Body.setVelocity(mob[mob.length - 1], { x: me.velocity.x + velocity.x, y: me.velocity.y + velocity.y });
                     }
                 },
                 enter() {},
@@ -443,7 +456,7 @@ const spawn = {
             },
             {
                 name: "hoppers",
-                spawnRate: 420 - 16 * simulation.difficultyMode,
+                spawnRate: 480 - 16 * simulation.difficultyMode,
                 do() {
                     if (!(me.cycle % this.spawnRate) && mob.length < me.maxMobs) {
                         me.torque += 0.00002 * me.inertia; //spin
@@ -457,6 +470,10 @@ const spawn = {
                                 y: me.velocity.y + velocity.y
                             });
                         }
+                        let where = { x: 600 - Math.random() * 100, y: -225 }
+                        if (simulation.isHorizontalFlipped) where.x = -600 + Math.random() * 100
+                        spawn.hopBullet(where.x, where.y, 13 + Math.ceil(Math.random() * 8)); //hopBullet(x, y, radius = 10 + Math.ceil(Math.random() * 8))
+                        Matter.Body.setDensity(mob[mob.length - 1], 0.002); //normal is 0.001
                     }
                 },
                 enter() {},
@@ -464,7 +481,7 @@ const spawn = {
             },
             {
                 name: "seekers",
-                spawnRate: 60 - 3 * simulation.difficultyMode,
+                spawnRate: 100 - 3 * simulation.difficultyMode,
                 do() {
                     if (!(me.cycle % this.spawnRate) && mob.length < me.maxMobs) { //spawn seeker
                         const index = Math.floor((me.cycle % 360) / 60)
@@ -482,7 +499,7 @@ const spawn = {
             {
                 name: "mines",
                 bombCycle: 0,
-                bombInterval: 34 - 2 * simulation.difficultyMode,
+                bombInterval: 55 - 2 * simulation.difficultyMode,
                 do() {
                     const yOff = 120
                     this.bombCycle++
@@ -544,7 +561,7 @@ const spawn = {
             },
             {
                 name: "orbiters",
-                spawnRate: 30 - 2 * simulation.difficultyMode,
+                spawnRate: 42 - 2 * simulation.difficultyMode,
                 do() {
                     if (!(me.cycle % this.spawnRate) && mob.length < me.maxMobs) {
                         const speed = (0.01 + 0.0005 * simulation.difficultyMode) * ((Math.random() < 0.5) ? 0.85 : -1.15)
@@ -602,7 +619,7 @@ const spawn = {
             {
                 name: "black hole",
                 eventHorizon: 0,
-                eventHorizonRadius: 2200,
+                eventHorizonRadius: 2100,
                 eventHorizonCycle: 0,
                 do() {
                     this.eventHorizonCycle++
@@ -690,10 +707,10 @@ const spawn = {
                 for (let i = 0; i < this.totalModes; i++) this.mode[i].do()
             }
             // this.cycle++;
-            // this.mode[0].do()
+            // this.mode[4].do()
             // this.mode[7].do()
         };
-        me.spawnRate = 4800 - 30 * simulation.difficultyMode * simulation.difficultyMode
+        me.spawnRate = 5800 - 30 * simulation.difficultyMode * simulation.difficultyMode
         me.spawnBoss = function() { //if the fight lasts too long start spawning bosses
             if (!(me.cycle % this.spawnRate) && this.health < 1) {
                 this.spawnRate = Math.max(300, this.spawnRate - 10 * simulation.difficultyMode * simulation.difficultyMode) //reduce the timer each time a boss spawns
@@ -816,7 +833,7 @@ const spawn = {
                 }
             };
         }
-        me.lasers = function(where, angle, dmg = 0.13 * simulation.dmgScale) {
+        me.lasers = function(where, angle, dmg = 0.1 * simulation.dmgScale) {
             const vertexCollision = function(v1, v1End, domain) {
                 for (let i = 0; i < domain.length; ++i) {
                     let vertices = domain[i].vertices;
@@ -1752,7 +1769,7 @@ const spawn = {
         me.seeAtDistance2 = 1400000;
         me.cellMassMax = 70
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body | cat.map
-        Matter.Body.setDensity(me, 0.0002 + 0.00001 * simulation.difficulty) // normal density is 0.001
+        Matter.Body.setDensity(me, 0.0001 + 0.00002 * simulation.difficulty) // normal density is 0.001
         me.damageReduction = 0.17 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1); //me.damageReductionGoal
 
         const k = 642 //k=r^2/m
@@ -2542,13 +2559,13 @@ const spawn = {
         mobs.spawn(x, y, 6, radius, "transparent");
         let me = mob[mob.length - 1];
         me.stroke = "transparent"; //used for drawSneaker
-        me.eventHorizon = radius * 23; //required for blackhole
+        me.eventHorizon = radius * 27; //required for blackhole
         me.seeAtDistance2 = (me.eventHorizon + 400) * (me.eventHorizon + 400); //vision limit is event horizon
-        me.accelMag = 0.0001 * simulation.accelScale;
+        me.accelMag = 0.00012 * simulation.accelScale;
         me.frictionAir = 0.025;
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         me.memory = Infinity;
-        Matter.Body.setDensity(me, 0.008); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
         me.do = function() {
             //keep it slow, to stop issues from explosion knock backs
             if (this.speed > 5) {
@@ -2675,11 +2692,11 @@ const spawn = {
         me.stroke = "transparent"; //used for drawSneaker
         me.eventHorizon = 1100; //required for black hole
         me.seeAtDistance2 = (me.eventHorizon + 1200) * (me.eventHorizon + 1200); //vision limit is event horizon
-        me.accelMag = 0.00003 * simulation.accelScale;
+        me.accelMag = 0.00004 * simulation.accelScale;
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         // me.frictionAir = 0.005;
         me.memory = 1600;
-        Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.04); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function() {
             //applying forces to player doesn't seem to work inside this method, not sure why
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)

@@ -342,12 +342,6 @@ const mobs = {
                     this.seePlayer.position.y = player.position.y;
                 }
             },
-            // alwaysSeePlayerIfRemember() {
-            //     if (!m.isCloak && this.seePlayer.recall) {
-            //         this.seePlayer.position.x = player.position.x;
-            //         this.seePlayer.position.y = player.position.y;
-            //     }
-            // },
             seePlayerByHistory(depth = 30) { //depth max 60?  limit of history
                 if (!(simulation.cycle % this.seePlayerFreq)) {
                     if (Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 && !m.isCloak) {
@@ -1255,12 +1249,12 @@ const mobs = {
                     }
                     if (tech.isBotSpawnerReset) {
                         for (let i = 0, len = bullet.length; i < len; i++) {
-                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 840 //14 seconds
+                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 780 //13 seconds
                         }
                     }
                     if (Math.random() < tech.botSpawner) {
                         b.randomBot(this.position, false)
-                        bullet[bullet.length - 1].endCycle = simulation.cycle + 840 //14 seconds
+                        bullet[bullet.length - 1].endCycle = simulation.cycle + 780 //13 seconds
                         this.leaveBody = false; // no body since it turned into the bot
                     }
                     if (tech.isAddRemoveMaxHealth) {

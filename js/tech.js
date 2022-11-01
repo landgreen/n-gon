@@ -430,16 +430,11 @@ const tech = {
         {
             name: "pigeonhole principle",
             descriptionFunction() {
-                var info = ""
+                let info = ""
                 if (this.count > 0 && Number.isInteger(tech.buffedGun) && b.inventory.length) {
-                    var gun = b.guns[b.inventory[tech.buffedGun]].name
-                    var info = `<br>this level: <strong>+${(31 * Math.max(0, b.inventory.length)).toFixed(0)}%</strong> <strong class='color-d'>damage</strong> for <strong class="highlight">${gun}</strong>`
+                    let gun = b.guns[b.inventory[tech.buffedGun]].name
+                    info = `<br>this level: <strong>+${(31 * Math.max(0, b.inventory.length)).toFixed(0)}%</strong> <strong class='color-d'>damage</strong> for <strong class="highlight">${gun}</strong>`
                 }
-
-                // return `
-                // a <strong class='color-g'>gun</strong> is <strong>chosen</strong> to be improved each <strong>level</strong>
-                // <br><strong>+${(31*b.inventory.length).toFixed(0)}%</strong> <strong class='color-d'>damage</strong> for ${gun}
-                // <br><strong class='color-d'>damage</strong> scales by 31% per unequipped <strong class='color-g'>gun</strong>`
                 return `
                 a new <strong class='color-g'>gun</strong> is <strong>chosen</strong> to be improved each <strong>level</strong>
                 <br><strong>+31%</strong> <strong class='color-d'>damage</strong> per <strong class='color-g'>gun</strong> for the <strong>chosen</strong> <strong class='color-g'>gun</strong>${info}`
@@ -574,7 +569,7 @@ const tech = {
         {
             name: "cache",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Cache_(computing)' class="link">cache</a>`,
-            description: `${powerUps.orb.ammo()} give <strong>1600%</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
+            description: `${powerUps.orb.ammo()} give <strong>1500%</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
             // ammo powerups always max out your gun,
             // but the maximum ammo ti limited
             // description: `${powerUps.orb.ammo()} give <strong>13x</strong> more <strong class='color-ammo'>ammo</strong>, but<br>you can't <strong>store</strong> any more <strong class='color-ammo'>ammo</strong> than that`,
@@ -587,7 +582,7 @@ const tech = {
             },
             requires: "not non-renewables",
             effect() {
-                tech.ammoCap = 16;
+                tech.ammoCap = 15;
                 powerUps.ammo.effect()
             },
             remove() {
@@ -1049,7 +1044,7 @@ const tech = {
         },
         {
             name: "anticorrelation",
-            description: "<strong>+100%</strong> <strong class='color-d'>damage</strong><br>after not using your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> for <strong>2</strong> seconds",
+            description: "if your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> are unused for <strong>2</strong> seconds<br><strong>+100%</strong> <strong class='color-d'>damage</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -1068,7 +1063,7 @@ const tech = {
         {
             name: "scrap bots",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Scrap' class="link">scrap bots</a>`,
-            description: "after mobs <strong>die</strong> you have a <strong>+33%</strong> chance<br>to build scrap <strong class='color-bot'>bots</strong> that operate for <strong>14</strong> seconds",
+            description: "after mobs <strong>die</strong> you have a <strong>+33%</strong> chance<br>to build scrap <strong class='color-bot'>bots</strong> that operate for <strong>13</strong> seconds",
             maxCount: 3,
             count: 0,
             frequency: 1,
@@ -1088,7 +1083,7 @@ const tech = {
         {
             name: "scrap refit",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Scrap' class="link">scrap refit</a>`,
-            description: "after mobs <strong>die</strong><br>reset scrap <strong class='color-bot'>bots</strong> to <strong>14</strong> seconds of operation",
+            description: "after mobs <strong>die</strong><br>reset scrap <strong class='color-bot'>bots</strong> to <strong>13</strong> seconds of operation",
             maxCount: 1,
             count: 0,
             frequency: 3,
@@ -3036,7 +3031,7 @@ const tech = {
         {
             name: "many-worlds",
             // description: "each <strong>level</strong> is an <strong class='alt'>alternate reality</strong>, where you<br>find a <strong class='color-m'>tech</strong> at the start of each level",
-            description: `on each new <strong>level</strong> use ${powerUps.orb.research(1)} to enter an<br><strong class='alt'>alternate reality</strong> and spawn a <strong class='color-m'>tech</strong> power up`,
+            description: `on each new <strong>level</strong> enter an<br><strong class='alt'>alternate reality</strong> and spawn a <strong class='color-m'>tech</strong> power up`,
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -3243,7 +3238,8 @@ const tech = {
         },
         {
             name: "emergence",
-            description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+2</strong> <strong>choices</strong><br><strong>+3%</strong> <strong class='color-j'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
+            description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+1</strong> <strong>choice</strong><br><strong>+8%</strong> <strong class='color-d'>damage</strong>",
+            // description: "<strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+2</strong> <strong>choices</strong><br><strong>+3%</strong> <strong class='color-j'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
             maxCount: 9,
             count: 0,
             frequency: 1,
@@ -3252,16 +3248,18 @@ const tech = {
                 return !tech.isDeterminism
             },
             requires: "not determinism",
+            damage: 1.08,
             effect() {
-                tech.extraChoices += 2;
-                this.refundAmount += tech.addJunkTechToPool(0.03)
+                tech.extraChoices += 1;
+                tech.damage *= this.damage
+                // this.refundAmount += tech.addJunkTechToPool(0.03)
             },
             refundAmount: 0,
             remove() {
                 tech.extraChoices = 0;
-                if (this.count > 0 && this.refundAmount > 0) {
-                    tech.removeJunkTechFromPool(this.refundAmount)
-                    this.refundAmount = 0
+                if (this.count > 0) {
+                    tech.damage /= this.damage
+                    // if (this.refundAmount > 0) tech.removeJunkTechFromPool(this.refundAmount)
                 }
             }
         },
@@ -4825,7 +4823,7 @@ const tech = {
             },
             remove() {
                 tech.infiniteWaveAmmo = 1
-                if (this.count > 1 && b.guns[3].savedAmmo !== undefined) {
+                if (this.count > 0 && b.guns[3].savedAmmo !== undefined) {
                     b.guns[3].ammo = b.guns[3].savedAmmo
                     simulation.updateGunHUD();
                 }
@@ -6189,8 +6187,30 @@ const tech = {
             }
         },
         {
+            name: "Bitter electromagnet",
+            descriptionFunction() { return `<strong>railgun</strong> charges <strong>+33%</strong> slower<br><strong>+100%</strong> <strong>harpoon</strong> density and <strong class='color-d'>damage</strong>` },
+            isGunTech: true,
+            maxCount: 3,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("harpoon") && tech.isRailGun
+            },
+            requires: "harpoon, railgun",
+            effect() {
+                tech.railChargeRate *= 1.06
+                tech.harpoonDensity += 0.0065
+            },
+            remove() {
+                tech.railChargeRate = 0.97;
+                tech.harpoonDensity = 0.0065
+            }
+        },
+        {
             name: "railgun",
-            description: `<strong>+50%</strong> <strong>harpoon</strong> density, but they don't <strong>retract</strong><br><strong>+900%</strong> harpoon <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
+            description: `<strong>harpoons</strong> can't <strong>retract</strong>, hold fire to charge<br><strong>+50%</strong> <strong>harpoon</strong> density and <strong class='color-d'>damage</strong>`,
+            // description: `<strong>+900%</strong> <strong>harpoon</strong> <strong class='color-ammo'>ammo</strong>, but it can't <strong>retract</strong><br><strong>+50%</strong> <strong>harpoon</strong> density and <strong class='color-d'>damage</strong>`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6414,7 +6434,6 @@ const tech = {
             },
             remove() {
                 tech.isHarpoonPowerUp = false
-                tech.harpoonDensity = 0.004
             }
         },
         {
@@ -8261,15 +8280,46 @@ const tech = {
             remove() {}
         },
         {
+            name: "random",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Special:Random' class="link">random</a>`,
+            delay: 333,
+            descriptionFunction() {
+                const delay = 333
+                const loop = () => {
+                    if ((simulation.isChoosing) && m.alive && !build.isExperimentSelection) {
+                        const dmg = Math.floor(33 * Math.random()) * 0.01
+                        this.text = `<strong style = "font-family: 'Courier New', monospace;">+${(dmg*100).toFixed(0).padStart(2, '0')}%</strong> <strong class='color-d'>damage</strong>`
+                        this.damage = 1 + dmg
+                        if (document.getElementById(`damage-JUNK-id${this.id}`)) document.getElementById(`damage-JUNK-id${this.id}`).innerHTML = this.text
+                        setTimeout(() => { loop() }, delay);
+                    }
+                }
+                setTimeout(() => { loop() }, delay);
+                this.id++
+                return `<span id = "damage-JUNK-id${this.id}">${this.text}</span>`
+            },
+            maxCount: 3,
+            count: 0,
+            frequency: 1,
+            isJunk: true,
+            allowed() { return !build.isExperimentSelection },
+            requires: "NOT EXPERIMENT MODE",
+            damage: 0,
+            effect() {
+                tech.damage *= this.damage
+            },
+            remove() {
+                if (this.count > 0) tech.damage /= this.damage
+            }
+        },
+        {
             name: "boost",
             maxCount: 1,
             count: 0,
             frequency: 0,
             isJunk: true,
             isNonRefundable: true,
-            allowed() {
-                return !build.isExperimentSelection
-            },
+            allowed() { return !build.isExperimentSelection },
             requires: "NOT EXPERIMENT MODE",
             effect() {
                 powerUps.spawnDelay("boost", this.spawnCount)
@@ -8306,7 +8356,7 @@ const tech = {
             allowed: () => true,
             requires: "",
             effect() {
-                if (Math.random() < 0.1) tech.damage *= 7.77
+                if (Math.random() < 0.1) tech.damage *= 8.77
             },
             remove() {}
         },
@@ -10066,7 +10116,7 @@ const tech = {
             allowed() { return m.isShipMode },
             requires: "",
             effect() {
-                tech.damage *= 2
+                tech.damage *= 3
 
                 m.look = () => {
                     // const scale = 0;
@@ -10984,4 +11034,5 @@ const tech = {
     isJunkDNA: null,
     buffedGun: 0,
     isGunChoice: null,
+    railChargeRate: null,
 }

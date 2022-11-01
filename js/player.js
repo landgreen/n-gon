@@ -2385,11 +2385,15 @@ const m = {
                             if (this.circleRadius < this.radiusLimit) this.reset()
                         },
                         reset() {
+                            // console.log(this.circleRadius)
                             const scale = 1 / m.plasmaBall.circleRadius
                             Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+                            // console.log(this.circleRadius)
+                            // this.circleRadius = 0
                             this.alpha = 0.7
                             this.isOn = false
                             this.isPopping = false
+                            // this.isAttached = true;
                         },
                         do() {
                             if (this.isOn) {

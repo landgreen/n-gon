@@ -1688,7 +1688,7 @@ const b = {
         });
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
-    harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true) {
+    harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
         const me = bullet.length;
         const returnRadius = 100 * Math.sqrt(harpoonSize)
         bullet[me] = Bodies.fromVertices(where.x, where.y, [{ x: -40 * harpoonSize, y: 2 * harpoonSize, index: 0, isInternal: false }, { x: -40 * harpoonSize, y: -2 * harpoonSize, index: 1, isInternal: false }, { x: 50 * harpoonSize, y: -3 * harpoonSize, index: 3, isInternal: false }, { x: 30 * harpoonSize, y: 2 * harpoonSize, index: 4, isInternal: false }], {
@@ -1696,7 +1696,7 @@ const b = {
             angle: angle,
             friction: 1,
             frictionAir: 0.4,
-            thrustMag: 0.1,
+            // thrustMag: 0.1,
             drain: tech.isRailEnergy ? 0.001 : 0.006,
             turnRate: isReturn ? 0.1 : 0.03, //0.015
             drawStringControlMagnitude: 3000 + 5000 * Math.random(),
@@ -1808,7 +1808,7 @@ const b = {
                     if (m.energy < 0.05) {
                         m.fireCDcycle = m.cycle + 120; //fire cooldown
                     } else if (m.cycle + 25 * b.fireCDscale < m.fireCDcycle) {
-                        m.fireCDcycle = m.cycle + 35 * b.fireCDscale //lower cd to 25 if it is above 25
+                        m.fireCDcycle = m.cycle + 25 * b.fireCDscale //lower cd to 25 if it is above 25
                     }
                     //recoil on catching
                     const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (input.down ? 0.0001 : 0.0002))
@@ -1828,7 +1828,7 @@ const b = {
                     if (m.energy > this.drain) m.energy -= this.drain
                     const sub = Vector.sub(this.position, m.pos)
                     const rangeScale = 1 + 0.000001 * Vector.magnitude(sub) * Vector.magnitude(sub) //return faster when far from player
-                    const returnForce = Vector.mult(Vector.normalise(sub), rangeScale * this.thrustMag * this.mass)
+                    const returnForce = Vector.mult(Vector.normalise(sub), rangeScale * thrust * this.mass)
                     this.force.x -= returnForce.x
                     this.force.y -= returnForce.y
                     this.grabPowerUp()
@@ -1850,7 +1850,7 @@ const b = {
                                 Matter.Body.setPosition(powerUp[i], this.vertices[2])
                                 powerUp[i].collisionFilter.category = 0
                                 powerUp[i].collisionFilter.mask = 0
-                                this.thrustMag *= 0.6
+                                thrust *= 0.6
                                 this.endCycle += 0.5 //it pulls back slower, so this prevents it from ending early
                                 break //just pull 1 power up if possible
                             }
@@ -1887,16 +1887,16 @@ const b = {
                             Matter.Body.rotate(this, -this.turnRate);
                         }
                     }
-                    this.force.x += this.thrustMag * this.mass * Math.cos(this.angle);
-                    this.force.y += this.thrustMag * this.mass * Math.sin(this.angle);
+                    this.force.x += thrust * this.mass * Math.cos(this.angle);
+                    this.force.y += thrust * this.mass * Math.sin(this.angle);
                 }
                 this.draw()
             },
         });
         if (!isReturn && !target) {
             Matter.Body.setVelocity(bullet[me], {
-                x: m.Vx / 2 + 60 * Math.cos(bullet[me].angle),
-                y: m.Vy / 2 + 60 * Math.sin(bullet[me].angle)
+                x: m.Vx / 2 + 600 * thrust * Math.cos(bullet[me].angle),
+                y: m.Vy / 2 + 600 * thrust * Math.sin(bullet[me].angle)
             });
             bullet[me].frictionAir = 0.002
             bullet[me].do = function() {
@@ -6790,7 +6790,7 @@ const b = {
                     }
                     //fire
                     if ((!input.fire && this.charge > 0.6)) {
-                        tech.harpoonDensity = 0.0065 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
+                        // tech.harpoonDensity = 0.0065 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
                         const where = {
                             x: m.pos.x + 30 * Math.cos(m.angle),
                             y: m.pos.y + 30 * Math.sin(m.angle)
@@ -6800,25 +6800,27 @@ const b = {
                             target: null
                         }
                         //push away blocks and mobs
-                        const range = 1200 * this.charge
+                        const range = 600 + 500 * this.charge
                         for (let i = 0, len = mob.length; i < len; ++i) { //push away mobs when firing
-                            const SUB = Vector.sub(mob[i].position, m.pos)
-                            const DISTANCE = Vector.magnitude(SUB)
-                            if (DISTANCE < range + mob[i].radius) {
-                                const DEPTH = 100 + Math.min(range - DISTANCE + mob[i].radius, 1500)
-                                const FORCE = Vector.mult(Vector.normalise(SUB), 0.0015 * Math.sqrt(DEPTH) * mob[i].mass)
-                                mob[i].force.x += FORCE.x;
-                                mob[i].force.y += FORCE.y;
+                            if (!mob[i].isUnblockable) {
+                                const SUB = Vector.sub(mob[i].position, m.pos)
+                                const DISTANCE = Vector.magnitude(SUB)
+                                if (DISTANCE < range + mob[i].radius) {
+                                    const DEPTH = 100 + Math.min(range - DISTANCE + mob[i].radius, 1500)
+                                    const FORCE = Vector.mult(Vector.normalise(SUB), 0.0015 * Math.sqrt(DEPTH) * mob[i].mass)
+                                    mob[i].force.x += FORCE.x;
+                                    mob[i].force.y += FORCE.y;
 
-                                let dmg = m.dmgScale * (mob[i].isDropPowerUp ? 0.1 : 0.4)
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: mob[i].position.x,
-                                    y: mob[i].position.y,
-                                    radius: Math.log(dmg + 1.1) * 40 * mob[i].damageReduction + 3,
-                                    color: 'rgba(100, 0, 200, 0.2)',
-                                    time: 15
-                                });
-                                mob[i].damage(dmg);
+                                    let dmg = m.dmgScale * (mob[i].isDropPowerUp ? 350 : 1100) * tech.harpoonDensity * this.charge
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: mob[i].position.x,
+                                        y: mob[i].position.y,
+                                        radius: Math.log(dmg + 1.1) * 40 * mob[i].damageReduction + 3,
+                                        color: 'rgba(100, 0, 200, 0.4)',
+                                        time: 15
+                                    });
+                                    mob[i].damage(dmg);
+                                }
                             }
                         }
                         for (let i = 0, len = body.length; i < len; ++i) { //push away blocks when firing
@@ -6841,13 +6843,26 @@ const b = {
                                 powerUp[i].force.y += FORCE.y - powerUp[i].mass * simulation.g * 1.5; //kick up a bit to give them some arc
                             }
                         }
+                        //draw little dots near the edge of range
+                        for (let i = 0, len = 10 + 25 * this.charge; i < len; i++) {
+                            const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
+                            const where = Vector.add(m.pos, Vector.mult(unit, range * (0.6 + 0.3 * Math.random())))
+                            simulation.drawList.push({
+                                x: where.x,
+                                y: where.y,
+                                radius: 5 + 12 * Math.random(),
+                                color: "rgba(100, 0, 200, 0.1)",
+                                time: Math.floor(5 + 35 * Math.random())
+                            });
+                        }
 
                         const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), input.down ? 0.03 : 0.06)
                         player.force.x -= recoil.x
                         player.force.y -= recoil.y
-                        tech.harpoonDensity = 0.0065 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
+                        // tech.harpoonDensity = 0.0065 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
 
                         const harpoonSize = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
+                        const thrust = 0.15 * (this.charge)
                         if (tech.extraHarpoons) {
                             let targetCount = 0
                             const SPREAD = 0.06 + 0.05 * (!input.down)
@@ -6861,7 +6876,7 @@ const b = {
                                     if (dot > 0.95 - Math.min(dist * 0.00015, 0.3)) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
                                         // if (this.ammo > -1) {
                                         //     this.ammo--
-                                        b.harpoon(where, input.down ? null : mob[i], angle, harpoonSize, false) //Vector.angle(Vector.sub(where, mob[i].position), { x: 0, y: 0 })
+                                        b.harpoon(where, input.down ? null : mob[i], angle, harpoonSize, false, 35, false, thrust) //harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
                                         angle += SPREAD
                                         targetCount++
                                         if (targetCount > tech.extraHarpoons) break
@@ -6873,14 +6888,10 @@ const b = {
                             if (targetCount < tech.extraHarpoons + 1) {
                                 const num = tech.extraHarpoons + 1 - targetCount
                                 for (let i = 0; i < num; i++) {
-                                    // if (this.ammo > -1) {
-                                    //     this.ammo--
-                                    b.harpoon(where, null, angle, harpoonSize, false)
+                                    b.harpoon(where, null, angle, harpoonSize, false, 35, false, thrust)
                                     angle += SPREAD
-                                    // }
                                 }
                             }
-                            // this.ammo++ //make up for the ammo used up in fire()
                             simulation.updateGunHUD();
                         } else {
                             //look for closest mob in player's LoS
@@ -6895,7 +6906,7 @@ const b = {
                                     }
                                 }
                             }
-                            b.harpoon(where, input.down ? null : closest.target, m.angle, harpoonSize, false)
+                            b.harpoon(where, closest.target, m.angle, harpoonSize, false, 35, false, thrust)
                         }
 
                         this.charge = 0;
@@ -6909,13 +6920,18 @@ const b = {
                             player.force.y = 0
                         }
                         m.fireCDcycle = m.cycle + 10 //can't fire until mouse is released
-                        const previousCharge = this.charge
-                        //small b.fireCDscale = faster shots, b.fireCDscale=1 = normal shot,  big b.fireCDscale = slower chot
-                        let smoothRate = tech.isCapacitor ? 0.85 : Math.min(0.998, 0.985 * (0.98 + 0.02 * b.fireCDscale))
-                        if (input.down) smoothRate *= 0.995
+                        // const previousCharge = this.charge
 
-                        this.charge = this.charge * smoothRate + 1 - smoothRate
+                        //small b.fireCDscale = faster shots, b.fireCDscale=1 = normal shot,  big b.fireCDscale = slower chot
+                        // let smoothRate = tech.isCapacitor ? 0.85 : Math.min(0.998, 0.985 * (0.98 + 0.02 * b.fireCDscale))
+                        const rate = Math.sqrt(b.fireCDscale) * tech.railChargeRate * (tech.isCapacitor ? 0.6 : 1) * (input.down ? 0.8 : 1)
+                        let smoothRate = Math.min(0.998, 0.94 + 0.05 * rate)
+
+
+                        this.charge = 1 - smoothRate + this.charge * smoothRate
                         if (m.energy > DRAIN) m.energy -= DRAIN
+
+                        // console.log((this.charge).toFixed(2))
                         // m.energy += (this.charge - previousCharge) * ((tech.isRailEnergy ? 0.5 : -0.3)) //energy drain is proportional to charge gained, but doesn't stop normal m.fieldRegen
 
                         //draw magnetic field
@@ -6936,9 +6952,11 @@ const b = {
                                 X, Y)
                         }
                         ctx.fillStyle = `rgba(50,0,100,0.05)`;
+                        const magSize = 8 * this.charge * tech.railChargeRate ** 3
+                        const arcSize = 6 * this.charge * tech.railChargeRate ** 3
                         for (let i = 3; i < 7; i++) {
-                            const MAG = 8 * i * i * this.charge * (0.93 + 0.07 * Math.random())
-                            const ARC = 6 * i * i * this.charge * (0.93 + 0.07 * Math.random())
+                            const MAG = magSize * i * i * (0.93 + 0.07 * Math.random())
+                            const ARC = arcSize * i * i * (0.93 + 0.07 * Math.random())
                             ctx.beginPath();
                             magField(MAG, ARC)
                             magField(MAG, -ARC)
@@ -6990,13 +7008,13 @@ const b = {
                 }
                 //look for closest mob in player's LoS
                 const harpoonSize = (tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1) //* (input.down ? 0.7 : 1)
-                const totalCycles = 5 * (tech.isFilament ? 1 + 0.012 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
+                const totalCycles = 6 * (tech.isFilament ? 1 + 0.012 * Math.min(110, this.ammo) : 1) * Math.sqrt(harpoonSize)
 
                 if (tech.extraHarpoons && !input.down) { //multiple harpoons
                     const SPREAD = 0.1
                     let angle = m.angle - SPREAD * tech.extraHarpoons / 2;
                     const dir = { x: Math.cos(angle), y: Math.sin(angle) }; //make a vector for the player's direction of length 1; used in dot product
-                    const range = 450 * (tech.isFilament ? 1 + 0.006 * Math.min(110, this.ammo) : 1)
+                    const range = 450 * (tech.isFilament ? 1 + 0.012 * Math.min(110, this.ammo) : 1)
                     let targetCount = 0
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
@@ -7036,9 +7054,8 @@ const b = {
                     }
                     this.ammo++ //make up for the ammo used up in fire()
                     simulation.updateGunHUD();
-                    m.fireCDcycle = m.cycle + 90 // cool down
-                } else {
-                    //single harpoon
+                    m.fireCDcycle = m.cycle + 90 // cool down is set when harpoon bullet returns to player
+                } else { //input.down makes a single harpoon with longer range
                     const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) }; //make a vector for the player's direction of length 1; used in dot product
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
@@ -7055,7 +7072,7 @@ const b = {
                     } else {
                         b.harpoon(where, closest.target, m.angle, harpoonSize, true, totalCycles)
                     }
-                    m.fireCDcycle = m.cycle + 45 // cool down
+                    m.fireCDcycle = m.cycle + 45 // cool down is set when harpoon bullet returns to player
                     tech.harpoonDensity = 0.004 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
                 }
                 const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), input.down ? 0.015 : 0.035)

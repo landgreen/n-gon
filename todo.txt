@@ -1,20 +1,93 @@
 ******************************************************** NEXT PATCH **************************************************
+harpoon
+  default fire rate is 10% higher
+  default harpoon range 15% higher
+railgun
+  tech: Bitter electromagnet - 33% slower charge time for railgun, 100% more density and damage
+    area effect damage is increased 20%, scales with bitter electromagnet and total charge
+  charging longer increases harpoon velocity/damage by up to 30%
+  contributions to charge time are more uniform between:
+    crouching, fire rate, Bitter electromagnet, and capacitor bank  
+  auto aims no longer disabled on crouch
 
-plasma-bot does 15% more damage, but costs 2 research
-fault tolerance 4->5 forever drones, but costs 2 research
-surfactant 2->3 foam bots, but costs 2 research
-missile-bot costs 1 research
-shaped charge 4->3 research cost
-renormalization 40->44% chance to refund research
-exciton 18->16% chance to spawn
-ground state 50->40% reduced energy regen
-Bayesian statistics 3.8->3% damage per research, and spawns 3 research
+emergence 2->1 extra choice, and +8% damage, and no added JUNK anymore
+cache 16->15x ammo
+many-worlds 1->0 research to enter an alternate reality on each new level
 
-JUNK tech: startle response - if mobs are near boost damage, and lock mouse until you press escape
+finalBoss
+  health decays a bit faster
+  spawns 6 mobs at each health threshold
+  spawns from the different modes are reduced
+  boss laser damage is 25% reduced
+  hoppers spawn from the slime tunnel
+
+JUNKtech: random - gives random +damage
+
+bug fixes
 
 *********************************************************** TODO *****************************************************
 
+tech: zombie - sporangium infect mobs, making them fight for you
+  infected mobs get a status debuff.  when they die they return as zombie mob type
+    zombie mobs run code similar to drones
+      they inherit color, sides, radius from host
+
+
+tech: sporangium that grow little trees
+  the trees have an area of effect damage for about 6-10 seconds
+  maybe something similar to radioactive drones, but maybe a few smaller shapes
+
+new bot type that makes phonon waves
+  name: phono-bot?
+  each bot has to generate it themselves, can't run code in gun.do
+  synergy with 2 resonance tech
+    not isotropic?  I think no
+  synergy with bound? phase velocity, amplitude, propagation
+
+harpoon tech that makes auto aim work much better
+
+tech - super balls gain 20 seconds of time and are reset to original launch speed after hitting a mob
+
+railgun
+  magnetic pinch: harpoon does damage to nearby mobs
+    draw charge graphic on harpoon
+    use same code as the damage when fire effect
+
+hookBoss fires a hook that pulls player towards it
+  hook does a bit of damage
+  player targeted unless cloaking
+  also add effect to finalBoss
+
+
+finalBoss
+  add synergies between modes:
+  new modes:
+    rotating quadrant immunity shield, can't take damage from that quadrant
+      maybe also attack player near that quadrant
+      but how to tell the angle of incoming damage
+        maybe a physics body like the shield but it only covers 1/3 of mob?
+    falling object warps to ceiling after hitting floor
+      doesn't end, player needs to kill it
+      slowly grows?
+    slow effect zones
+      random placement or place over player or both!
+      draw white dot and an outline of area of effect
+        expanding circle stroke, freeze effect triggers when stroke circle hits fill circle
+      after 1-2 seconds freeze player if in the zone
+        also freeze mobs
+    effect that makes player have to be close to boss
+    hook that tries to yank the player into hitting finalBoss
+      does damage
+      pulls player into center
+        counter with wormhole, negative mass
+      player targeted unless cloaking
+
+
+mob status effect - emit - mobs fire lasers for a few seconds 
+  tech: phosphorescence - mobs emit after being hit with laser beams
+
 run canvas direct pixel editing while game is paused
+  (I tried it an it really hits performance hard)
   just update once every second?
   if it uses too much processing have a setting to toggle it off
   this might help get players to spend more time relaxing on the power up selection
@@ -41,40 +114,12 @@ it would be nice if there was incentive to go slow when choosing tech so n-gon i
 
 make freeze and __  not cause death at 50% health, but just 600% extra damage for that bullet 
 
-new mob status effect - phosphorescence - mobs fire lasers for a few seconds after being hit with lasers
-
 make a new coupling effect for perfect diamagnetism or standing wave
 
 make a faster smaller version of cell boss that also has map collisions
 
 laserMines need a copy of laser-bot method
   this is a very rare bug, so not a priority
-
-finalBoss
-  add synergies between modes:
-    black hole can pull in bullets
-    laser can hurt bullets? maybe bad idea
-  old mode changes
-    mine color needs to be move vibrant
-    hoppers can hop out of the slime and the door on the sides
-  new modes:
-    rotating quadrant immunity shield, can't take damage from that quadrant
-      maybe also attack player near that quadrant
-    falling object warps to ceiling after hitting floor
-      doesn't end, player needs to kill it
-      slowly grows?
-    slow effect zones
-      random placement or place over player or both!
-      draw white dot and an outline of area of effect
-        expanding circle stroke, freeze effect triggers when stroke circle hits fill circle
-      after 1-2 seconds freeze player if in the zone
-        also freeze mobs
-    effect that makes player have to be close to boss
-    hook that tries to yank the player into hitting finalBoss
-      does damage
-      pulls player into center
-        counter with wormhole, negative mass
-      player targeted unless cloaking
 
 JUNK tech description that changes similar to cards in inscription
   that changes based on mouse position
@@ -1059,8 +1104,8 @@ possible names for tech
   lenticular lens:  is an array of lenses, designed so that when viewed from slightly different angles, different parts of the image underneath are shown.
   p-zombie
   p-hacking JUNK tech
-  https://en.wikipedia.org/wiki/High-entropy_alloys
-  https://en.wikipedia.org/wiki/Refractory_metals
+  https://en.wikipedia.org/wiki/High-entropy_alloys  high yield strength and low ductility, high temp resistance
+  https://en.wikipedia.org/wiki/Refractory_metals  hard, high temp resistance
   https://en.wikipedia.org/wiki/Upper-atmospheric_lightning#Elves
   prion quine - self replicating protein
   Unitarity - https://en.wikipedia.org/wiki/Unitarity_(physics) - all probabilities add up to 1, calculations work the same forward and backwards in time

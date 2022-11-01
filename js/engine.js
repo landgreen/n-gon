@@ -154,7 +154,7 @@ function collisionChecks(event) {
                             m.damage(dmg); //normal damage
                         }
 
-                        if (tech.isCollisionRealitySwitch) {
+                        if (tech.isCollisionRealitySwitch && m.alive) {
                             m.switchWorlds()
                             simulation.trails()
                             simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);

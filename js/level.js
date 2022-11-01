@@ -18,30 +18,31 @@ const level = {
             // simulation.enableConstructMode() //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // tech.giveTech("performance")
-            // level.difficultyIncrease(2 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(15 * 4) //30 is near max on hard  //60 is near max on why
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(50)
+            // powerUps.research.changeRerolls(1000)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
-            // m.setField("time dilation") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave
+            // m.setField("plasma torch") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave   plasma torch
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.guns[9].ammo = 10000
-            // tech.giveTech("startle response")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("junk DNA")
+            // b.guns[0].ammo = 10000
+            // tech.giveTech("plasma ball")
             // tech.giveTech("dye laser")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("grappling hook")
-            // for (let i = 0; i < 5; i++) tech.giveTech("laser-bot")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("railgun")
+            // for (let i = 0; i < 3; ++i) tech.giveTech("Bitter electromagnet")
+            // for (let i = 0; i < 1; i++) tech.giveTech("capacitor bank")
+            // for (let i = 0; i < 9; i++) tech.giveTech("heuristics")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
 
             // level.testing();
-            // spawn.starter(1900, -500, 200)
+            // spawn.shooter(1900, -500, 200)
             // spawn.starter(1900, -500)
             // spawn.timeBoss(2538, -950)
             // for (let i = 0; i < 5; ++i) spawn.sniper(1000 + 5000 * Math.random(), -500 + 300 * Math.random())
@@ -66,7 +67,7 @@ const level = {
             // level.null()
             // localSettings.isHuman = true
             // tech.isNoDraftPause = false //disable pause
-            // mobs.mobDeaths = 200
+            // mobs.mobDeaths = 200 //to prevent pacifist mode
             // for (let i = 0; i < 13; i++) level.nextLevel(); //jump to final boss
 
             // lore.unlockTesting();
@@ -101,6 +102,11 @@ const level = {
             b.inventoryGun = tech.buffedGun;
             simulation.switchGun();
         }
+        if (tech.isGunChoice && Number.isInteger(tech.buffedGun) && b.inventory.length) {
+            var gun = b.guns[b.inventory[tech.buffedGun]].name
+            simulation.makeTextLog(`pigeonhole principle: <strong>+${(31 * Math.max(0, b.inventory.length)).toFixed(0)}%</strong> <strong class='color-d'>damage</strong> for <strong class="highlight">${gun}</strong>`, 600);
+        }
+
 
         if (tech.isForeverDrones) {
             if (tech.isDroneRadioactive) {
@@ -119,8 +125,7 @@ const level = {
             tech.healMaxEnergyBonus += 0.1 * powerUps.totalPowerUps //Math.min(0.02 * powerUps.totalPowerUps, 0.51)
             m.setMaxEnergy();
         }
-        if (tech.isSwitchReality && powerUps.research.count > 0) {
-            powerUps.research.changeRerolls(-1);
+        if (tech.isSwitchReality) {
             simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             m.switchWorlds()
             simulation.trails()
@@ -162,7 +167,8 @@ const level = {
         if (tech.isSpawnExitTech) {
             for (let i = 0; i < 2; i++) powerUps.spawn(level.exit.x + 10 * (Math.random() - 0.5), level.exit.y - 100 + 10 * (Math.random() - 0.5), "tech", false) //exit
         }
-        if (m.plasmaBall) m.plasmaBall.reset()
+        // if (m.plasmaBall) m.plasmaBall.reset()
+        if (m.plasmaBall) m.plasmaBall.fire()
         if (localSettings.entanglement && localSettings.entanglement.levelName === level.levels[level.onLevel]) {
             const flip = localSettings.entanglement.isHorizontalFlipped === simulation.isHorizontalFlipped ? 1 : -1
             powerUps.directSpawn(flip * localSettings.entanglement.position.x, localSettings.entanglement.position.y, "entanglement", false);
