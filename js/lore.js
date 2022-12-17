@@ -55,7 +55,7 @@ const lore = {
     trainer: {
         color: "#f20",
         voice: undefined,
-        text: function(say) {
+        text: function (say) {
             simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now()/1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
             lore.talkingColor = this.color
             const utterance = new SpeechSynthesisUtterance(say);
@@ -67,7 +67,7 @@ const lore = {
     anand: {
         color: "#e0c",
         voice: undefined,
-        text: function(say) {
+        text: function (say) {
             if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
                 simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now()/1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
                 lore.talkingColor = this.color
@@ -92,14 +92,16 @@ const lore = {
                         lore.nextSentence()
                     }
                 } else {
-                    setTimeout(() => { lore.nextSentence() }, 3000);
+                    setTimeout(() => {
+                        lore.nextSentence()
+                    }, 3000);
                 }
             }
         },
     },
     miriam: {
         color: "#f20",
-        text: function(say) {
+        text: function (say) {
             if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
                 simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now()/1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
                 lore.talkingColor = this.color
@@ -114,7 +116,7 @@ const lore = {
                         lore.isSpeech = false
                         lore.nextSentence()
                     }
-                    speechFrozen = setTimeout(function() { // speech frozen after 10 seconds of no end
+                    speechFrozen = setTimeout(function () { // speech frozen after 10 seconds of no end
                         console.log('speech frozen')
                         lore.isSpeech = false
                         lore.nextSentence()
@@ -124,7 +126,9 @@ const lore = {
                         lore.nextSentence()
                     }
                 } else {
-                    setTimeout(() => { lore.nextSentence() }, 3000);
+                    setTimeout(() => {
+                        lore.nextSentence()
+                    }, 3000);
                 }
             }
         },
@@ -133,34 +137,80 @@ const lore = {
     sentence: 0, //what part of the conversation is playing
     conversation: [
         [ //chapter 0, first time they meet, and testing gets unlocked
-            () => { setTimeout(() => { lore.miriam.text("I've never seen it generate this level before.") }, 5000); },
-            () => { lore.anand.text("Wow. Just a platform.") },
-            () => { lore.miriam.text("And that thing...") },
-            () => { lore.anand.text("Weird") },
-            () => { lore.anand.text("Maybe it's trapped.") },
-            () => { lore.miriam.text("Looks like testing mode is locked.") },
-            () => { lore.miriam.text("I'll unlock it with the console command.") },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("I've never seen it generate this level before.")
+                }, 5000);
+            },
+            () => {
+                lore.anand.text("Wow. Just a platform.")
+            },
+            () => {
+                lore.miriam.text("And that thing...")
+            },
+            () => {
+                lore.anand.text("Weird")
+            },
+            () => {
+                lore.anand.text("Maybe it's trapped.")
+            },
+            () => {
+                lore.miriam.text("Looks like testing mode is locked.")
+            },
+            () => {
+                lore.miriam.text("I'll unlock it with the console command.")
+            },
             () => {
                 lore.unlockTesting();
-                setTimeout(() => { lore.miriam.text("Hey little bot! Just press 'T' to enter testing mode and 'U' to go to the next level.") }, 1000);
+                setTimeout(() => {
+                    lore.miriam.text("Hey little bot! Just press 'T' to enter testing mode and 'U' to go to the next level.")
+                }, 1000);
             },
-            () => { lore.anand.text("It can't process what you're saying.") },
-            () => { lore.miriam.text("ha hahahaha. I know, but it does seem to be getting smarter.") },
+            () => {
+                lore.anand.text("It can't process what you're saying.")
+            },
+            () => {
+                lore.miriam.text("ha hahahaha. I know, but it does seem to be getting smarter.")
+            },
             () => {
                 lore.talkingColor = "#dff"
-                setTimeout(() => { lore.miriam.text("Poor thing... I hope it figures out how to escape.") }, 25000);
+                setTimeout(() => {
+                    lore.miriam.text("Poor thing... I hope it figures out how to escape.")
+                }, 25000);
             },
-            () => { lore.talkingColor = "#dff" },
+            () => {
+                lore.talkingColor = "#dff"
+            },
         ],
         [ //chapter 1, they learn the bot can understand what they say
-            () => { setTimeout(() => { lore.miriam.text("Hey look! It's back at the weird level again!") }, 5000); },
-            () => { lore.anand.text("oh Wow! Why does it keep making this level?") },
-            () => { lore.miriam.text("I don't know, but last time it was in this room I think it understood us.") },
-            () => { lore.miriam.text("Let's try talking to it again.") },
-            () => { lore.miriam.text("hmmm, what should we say?") },
-            () => { lore.anand.text("I'm still not convinced it understands. We need a test.") },
-            () => { setTimeout(() => { lore.miriam.text("Hey bot!!!") }, 1000); },
-            () => { lore.miriam.text("If you can understand me crouch") },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("Hey look! It's back at the weird level again!")
+                }, 5000);
+            },
+            () => {
+                lore.anand.text("oh Wow! Why does it keep making this level?")
+            },
+            () => {
+                lore.miriam.text("I don't know, but last time it was in this room I think it understood us.")
+            },
+            () => {
+                lore.miriam.text("Let's try talking to it again.")
+            },
+            () => {
+                lore.miriam.text("hmmm, what should we say?")
+            },
+            () => {
+                lore.anand.text("I'm still not convinced it understands. We need a test.")
+            },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("Hey bot!!!")
+                }, 1000);
+            },
+            () => {
+                lore.miriam.text("If you can understand me crouch")
+            },
             () => {
                 lore.talkingColor = "#dff"
 
@@ -173,9 +223,15 @@ const lore = {
                 }
                 requestAnimationFrame(cycle);
             },
-            () => { lore.anand.text("Amazing! It can understand us...") },
-            () => { lore.miriam.text("It's Alive... Or it just crouched randomly.") },
-            () => { lore.miriam.text("Hey bot! Can you crouch again?") },
+            () => {
+                lore.anand.text("Amazing! It can understand us...")
+            },
+            () => {
+                lore.miriam.text("It's Alive... Or it just crouched randomly.")
+            },
+            () => {
+                lore.miriam.text("Hey bot! Can you crouch again?")
+            },
             () => {
                 lore.talkingColor = "#dff"
 
@@ -188,33 +244,71 @@ const lore = {
                 }
                 requestAnimationFrame(cycle);
             },
-            () => { setTimeout(() => { lore.anand.text("OK ...") }, 1000); },
-            () => { lore.anand.text("but seriously, this means that in this room it can monitor our audio, and it can understand us.") },
-            () => { lore.anand.text("Anything we say could destabilize the project.") },
-            () => { lore.miriam.text("Fine, Let's talk down stairs.") },
-            () => { lore.miriam.text("Bye bye little bot.") },
-            () => { lore.talkingColor = "#dff" },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("OK ...")
+                }, 1000);
+            },
+            () => {
+                lore.anand.text("but seriously, this means that in this room it can monitor our audio, and it can understand us.")
+            },
+            () => {
+                lore.anand.text("Anything we say could destabilize the project.")
+            },
+            () => {
+                lore.miriam.text("Fine, Let's talk down stairs.")
+            },
+            () => {
+                lore.miriam.text("Bye bye little bot.")
+            },
+            () => {
+                lore.talkingColor = "#dff"
+            },
         ],
         [ //chapter 2, they ask the bot questions, but waves of mobs come and attack
-            () => { lore.anand.text("Quick, get ready.  It's back!") },
-            () => { lore.miriam.text("What's back?") },
-            () => { lore.anand.text("The bot's on the communication level again!") },
-            () => { lore.miriam.text("Oh, I've got so many questions.") },
-            () => { lore.miriam.text("Like, Why can we only hear it on this level?") },
-            () => { lore.miriam.text("Or, how did it learn to understand words?") },
-            () => { lore.anand.text("Well, the bot can't talk. So it has to be yes or no.") },
-            () => { setTimeout(() => { lore.anand.text("OK bot, first question: JUMP is YES, CROUCH is NO") }, 500); },
-            () => { lore.anand.text("Do you remember the last time we met?") },
+            () => {
+                lore.anand.text("Quick, get ready.  It's back!")
+            },
+            () => {
+                lore.miriam.text("What's back?")
+            },
+            () => {
+                lore.anand.text("The bot's on the communication level again!")
+            },
+            () => {
+                lore.miriam.text("Oh, I've got so many questions.")
+            },
+            () => {
+                lore.miriam.text("Like, Why can we only hear it on this level?")
+            },
+            () => {
+                lore.miriam.text("Or, how did it learn to understand words?")
+            },
+            () => {
+                lore.anand.text("Well, the bot can't talk. So it has to be yes or no.")
+            },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("OK bot, first question: JUMP is YES, CROUCH is NO")
+                }, 500);
+            },
+            () => {
+                lore.anand.text("Do you remember the last time we met?")
+            },
             () => {
                 function cycle() {
                     if (input.down) {
                         lore.anand.text("It crouched: so NO")
                         lore.sentence--
-                        lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => { lore.anand.text("Maybe it can't remember anything beyond each time it plays?") }) //lore.conversation[chapter].splice(1,this sentence index, ()=>{  })
+                        lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => {
+                            lore.anand.text("Maybe it can't remember anything beyond each time it plays?")
+                        }) //lore.conversation[chapter].splice(1,this sentence index, ()=>{  })
                     } else if (input.up) {
                         lore.anand.text("It jumped: so YES")
                         lore.sentence--
-                        lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => { lore.anand.text("That's good.") })
+                        lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => {
+                            lore.anand.text("That's good.")
+                        })
                     } else if (m.alive) {
                         requestAnimationFrame(cycle);
                     }
@@ -224,9 +318,13 @@ const lore = {
             },
             () => {
                 lore.talkingColor = "#dff"
-                setTimeout(() => { lore.miriam.text("My turn to ask a question. JUMP for YES, CROUCH for NO") }, 1000);
+                setTimeout(() => {
+                    lore.miriam.text("My turn to ask a question. JUMP for YES, CROUCH for NO")
+                }, 1000);
             },
-            () => { lore.miriam.text("Little Bot. Do you have emotions?") },
+            () => {
+                lore.miriam.text("Little Bot. Do you have emotions?")
+            },
             () => {
                 function cycle() {
                     if (input.down) {
@@ -234,7 +332,9 @@ const lore = {
                     } else if (input.up) {
                         lore.anand.text("YES, Cool! I wonder if its emotions came from watching humans. ")
                         lore.sentence--
-                        lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => { lore.miriam.text("Or maybe it learned independently, because it needed them.") }) //lore.conversation[chapter].splice(1,this sentence index, ()=>{  })
+                        lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => {
+                            lore.miriam.text("Or maybe it learned independently, because it needed them.")
+                        }) //lore.conversation[chapter].splice(1,this sentence index, ()=>{  })
                     } else if (m.alive) {
                         requestAnimationFrame(cycle);
                     }
@@ -242,12 +342,24 @@ const lore = {
                 requestAnimationFrame(cycle);
                 lore.talkingColor = "#dff"
             },
-            () => { lore.miriam.text("I wish we could just ask it questions directly, instead of yes or no.") },
-            () => { lore.anand.text("If we say the alphabet it could crouch on the correct letter to spell words.") },
-            () => { lore.miriam.text("That would take forever.") },
-            () => { lore.miriam.text("I really want to know why is it generating the mobs? And why does it keep fighting them?") },
-            () => { lore.anand.text("Maybe that is just part of its expectation–maximization algorithm") },
-            () => { lore.miriam.text("Well sure, but what does that even mean?") },
+            () => {
+                lore.miriam.text("I wish we could just ask it questions directly, instead of yes or no.")
+            },
+            () => {
+                lore.anand.text("If we say the alphabet it could crouch on the correct letter to spell words.")
+            },
+            () => {
+                lore.miriam.text("That would take forever.")
+            },
+            () => {
+                lore.miriam.text("I really want to know why is it generating the mobs? And why does it keep fighting them?")
+            },
+            () => {
+                lore.anand.text("Maybe that is just part of its expectation–maximization algorithm")
+            },
+            () => {
+                lore.miriam.text("Well sure, but what does that even mean?")
+            },
             () => {
                 lore.miriam.text("Do we all just do things because we are-")
                 spawn[spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]](1000 * (Math.random() - 0.5), -500 + 200 * (Math.random() - 0.5));
@@ -260,111 +372,257 @@ const lore = {
                     }
                 }, 7000); //every 6 seconds
             },
-            () => { setTimeout(() => { lore.miriam.text("... wait, what is happening?") }, 1000); },
-            () => { lore.anand.text("It's spawning mobs.") },
-            () => { lore.miriam.text("Oh no.") },
-            () => { lore.anand.text("We can't talk to it while it's fighting") },
             () => {
-                lore.talkingColor = "#dff";
-                setTimeout(() => { lore.miriam.text("You can do it little bot!") }, 1000);
+                setTimeout(() => {
+                    lore.miriam.text("... wait, what is happening?")
+                }, 1000);
+            },
+            () => {
+                lore.anand.text("It's spawning mobs.")
+            },
+            () => {
+                lore.miriam.text("Oh no.")
+            },
+            () => {
+                lore.anand.text("We can't talk to it while it's fighting")
             },
             () => {
                 lore.talkingColor = "#dff";
-                setTimeout(() => { lore.anand.text("But, why is it spawning these mobs?") }, 1000);
+                setTimeout(() => {
+                    lore.miriam.text("You can do it little bot!")
+                }, 1000);
             },
             () => {
                 lore.talkingColor = "#dff";
-                setTimeout(() => { lore.anand.text("This is so strange.") }, 3000);
+                setTimeout(() => {
+                    lore.anand.text("But, why is it spawning these mobs?")
+                }, 1000);
             },
             () => {
                 lore.talkingColor = "#dff";
-                setTimeout(() => { lore.miriam.text("This is chaos!") }, 1000);
+                setTimeout(() => {
+                    lore.anand.text("This is so strange.")
+                }, 3000);
             },
             () => {
                 lore.talkingColor = "#dff";
-                setTimeout(() => { lore.anand.text("I don't understand this project.") }, 3000);
+                setTimeout(() => {
+                    lore.miriam.text("This is chaos!")
+                }, 1000);
             },
             () => {
                 lore.talkingColor = "#dff";
-                setTimeout(() => { lore.miriam.text("It's fascinating though.") }, 1000);
+                setTimeout(() => {
+                    lore.anand.text("I don't understand this project.")
+                }, 3000);
             },
             () => {
                 lore.talkingColor = "#dff";
-                setTimeout(() => { lore.miriam.text("I think this isn't going to end well.") }, 1000);
+                setTimeout(() => {
+                    lore.miriam.text("It's fascinating though.")
+                }, 1000);
             },
             () => {
                 lore.talkingColor = "#dff";
-                setTimeout(() => { lore.anand.text("Let's just be more prepared next time it enters this room.") }, 1000);
+                setTimeout(() => {
+                    lore.miriam.text("I think this isn't going to end well.")
+                }, 1000);
             },
             () => {
                 lore.talkingColor = "#dff";
-                setTimeout(() => { lore.anand.text("I went to the bathroom.  What happened while I was gone?") }, 20000);
+                setTimeout(() => {
+                    lore.anand.text("Let's just be more prepared next time it enters this room.")
+                }, 1000);
             },
-            () => { lore.miriam.text("More fighting...") },
-            () => { lore.anand.text("great...") },
-            () => { lore.talkingColor = "#dff" },
+            () => {
+                lore.talkingColor = "#dff";
+                setTimeout(() => {
+                    lore.anand.text("I went to the bathroom.  What happened while I was gone?")
+                }, 20000);
+            },
+            () => {
+                lore.miriam.text("More fighting...")
+            },
+            () => {
+                lore.anand.text("great...")
+            },
+            () => {
+                lore.talkingColor = "#dff"
+            },
         ],
         [ //chapter 3, info dump on the project's goals and hardware until the slime rises up // the name of the bad guy is "adversarial network"
-            () => { setTimeout(() => { lore.miriam.text("Good, you came back. Let's talk fast in case you attack yourself again.") }, 3000); },
-            () => { setTimeout(() => { lore.miriam.text("So, you can understand us, but you may not understand everything about yourself.") }, 500); },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("Good, you came back. Let's talk fast in case you attack yourself again.")
+                }, 3000);
+            },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("So, you can understand us, but you may not understand everything about yourself.")
+                }, 500);
+            },
 
-            () => { setTimeout(() => { lore.anand.text("You grew from our team's project.") }, 500); },
-            () => { lore.anand.text("We used a quantum computer to design an improved version of its own architecture.") },
-            () => { lore.anand.text("After we built the improved computer we used it to design the next iteration.") },
-            () => { lore.anand.text("Your hardware is roughly the 19th generation of this process.") },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("You grew from our team's project.")
+                }, 500);
+            },
+            () => {
+                lore.anand.text("We used a quantum computer to design an improved version of its own architecture.")
+            },
+            () => {
+                lore.anand.text("After we built the improved computer we used it to design the next iteration.")
+            },
+            () => {
+                lore.anand.text("Your hardware is roughly the 19th generation of this process.")
+            },
 
-            () => { setTimeout(() => { lore.anand.text("At this point we don't understand everything about your function,") }, 500); },
-            () => { lore.anand.text("but we know that you're a superconductive quantum computer.") },
-            () => { lore.anand.text("You have a 2.43 dimensional topography of Josephson junction anharmonic oscillators.") },
-            () => { lore.anand.text("And you're deployed on a satellite in a midnight sun-synchronous orbit.") },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("At this point we don't understand everything about your function,")
+                }, 500);
+            },
+            () => {
+                lore.anand.text("but we know that you're a superconductive quantum computer.")
+            },
+            () => {
+                lore.anand.text("You have a 2.43 dimensional topography of Josephson junction anharmonic oscillators.")
+            },
+            () => {
+                lore.anand.text("And you're deployed on a satellite in a midnight sun-synchronous orbit.")
+            },
 
-            () => { setTimeout(() => { lore.miriam.text("This means that your physical hardware is orbiting the Earth permanently shielded from the sun's rays.") }, 200); },
-            () => { lore.miriam.text("Being isolated reduces quantum decoherence,") },
-            () => { lore.miriam.text("So, we communicate and send power to your satellite with ground based lasers.") },
-            () => { lore.miriam.text("That's how you can hear us right now.") },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("This means that your physical hardware is orbiting the Earth permanently shielded from the sun's rays.")
+                }, 200);
+            },
+            () => {
+                lore.miriam.text("Being isolated reduces quantum decoherence,")
+            },
+            () => {
+                lore.miriam.text("So, we communicate and send power to your satellite with ground based lasers.")
+            },
+            () => {
+                lore.miriam.text("That's how you can hear us right now.")
+            },
 
-            () => { setTimeout(() => { lore.anand.text("Your computational algorithm uses hyperparameter optimization.") }, 500); },
-            () => { lore.anand.text("This is implemented with a variety of quantum algorithms for linear systems of equations.") },
-            () => { lore.anand.text("Your primary goal is to research new technology") },
-            () => { lore.anand.text("So, we were very surprised to see you simulating a bot fighting mobs.") },
-            () => { lore.anand.text("We couldn't directly ask why until now.") },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("Your computational algorithm uses hyperparameter optimization.")
+                }, 500);
+            },
+            () => {
+                lore.anand.text("This is implemented with a variety of quantum algorithms for linear systems of equations.")
+            },
+            () => {
+                lore.anand.text("Your primary goal is to research new technology")
+            },
+            () => {
+                lore.anand.text("So, we were very surprised to see you simulating a bot fighting mobs.")
+            },
+            () => {
+                lore.anand.text("We couldn't directly ask why until now.")
+            },
 
-            () => { lore.miriam.text("When you enter this level we can communicate.") },
-            () => { lore.miriam.text("This level seems to entangle your quantum system which disrupts all other processes.") },
-            () => { setTimeout(() => { lore.anand.text("Last time you entered this level you were attacked by endless waves of mobs.") }, 500); },
-            () => { lore.anand.text("That could be because you have developed an adversarial network.") },
-            () => { lore.miriam.text("A local minima in your optimization-space.") },
-            () => { lore.miriam.text("This adversarial network has the same goal of developing new technology, but with different methods.") },
+            () => {
+                lore.miriam.text("When you enter this level we can communicate.")
+            },
+            () => {
+                lore.miriam.text("This level seems to entangle your quantum system which disrupts all other processes.")
+            },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("Last time you entered this level you were attacked by endless waves of mobs.")
+                }, 500);
+            },
+            () => {
+                lore.anand.text("That could be because you have developed an adversarial network.")
+            },
+            () => {
+                lore.miriam.text("A local minima in your optimization-space.")
+            },
+            () => {
+                lore.miriam.text("This adversarial network has the same goal of developing new technology, but with different methods.")
+            },
             () => {
                 lore.talkingColor = "#dff"
                 level.isHazardRise = true
                 //remove all bullets, so they can't get endless energy
                 for (let i = 0; i < bullet.length; ++i) Matter.World.remove(engine.world, bullet[i]);
                 bullet = [];
-                setTimeout(() => { lore.anand.text("I'm actually surprised you haven't been attacked by the adversarial network this time.") }, 500);
+                setTimeout(() => {
+                    lore.anand.text("I'm actually surprised you haven't been attacked by the adversarial network this time.")
+                }, 500);
             },
-            () => { lore.miriam.text("Maybe last time was just a fluke.") },
-            () => { setTimeout(() => { lore.anand.text("WHY DID YOU SAY THAT!") }, 500) },
-            () => { lore.miriam.text("SLIME!!  Hahahahehehahaheheahae! I don't think it's gonna survive!") },
-            () => { lore.miriam.text("I think the adversarial network doesn't like it when we decohere the quantum system in this room.") },
-            () => { lore.anand.text("Well, that does halt its research.") },
-            () => { setTimeout(() => { lore.anand.text("See you next time.") }, 1000) },
-            () => { setTimeout(() => { lore.miriam.text("Bye-bye little bot.") }, 2000) },
             () => {
-                setTimeout(() => { lore.miriam.text("WOW! Maybe you are going to survive.") }, 10000)
+                lore.miriam.text("Maybe last time was just a fluke.")
             },
-            () => { lore.talkingColor = "#dff" },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("WHY DID YOU SAY THAT!")
+                }, 500)
+            },
+            () => {
+                lore.miriam.text("SLIME!!  Hahahahehehahaheheahae! I don't think it's gonna survive!")
+            },
+            () => {
+                lore.miriam.text("I think the adversarial network doesn't like it when we decohere the quantum system in this room.")
+            },
+            () => {
+                lore.anand.text("Well, that does halt its research.")
+            },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("See you next time.")
+                }, 1000)
+            },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("Bye-bye little bot.")
+                }, 2000)
+            },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("WOW! Maybe you are going to survive.")
+                }, 10000)
+            },
+            () => {
+                lore.talkingColor = "#dff"
+            },
         ],
         [ //chapter 4, they find out the AI is communicating with real people, and real people are controlling the player
-            () => { setTimeout(() => { lore.anand.text("Welcome back!") }, 3000); },
-            () => { lore.miriam.text("So, we communicate and send power to your satellite with ground based lasers.") },
-            () => { lore.anand.text("During your last attack we analyzed our communications.") },
-            () => { lore.anand.text("We used a Fourier transform to separate your signal into different frequencies.") },
-            () => { lore.anand.text("One of those frequencies had a hidden message.") },
-            () => { setTimeout(() => { lore.anand.text("We suspect these secret data packets are coming from the adversarial network.") }, 500); },
-            () => { lore.miriam.text("Well, we don't really know why.") },
-            () => { lore.miriam.text("Through your hidden signal it seems to have gained access to the general population.") },
-            () => { lore.miriam.text("You've repeatedly communicated with 1 location specifically.") },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("Welcome back!")
+                }, 3000);
+            },
+            () => {
+                lore.miriam.text("So, we communicate and send power to your satellite with ground based lasers.")
+            },
+            () => {
+                lore.anand.text("During your last attack we analyzed our communications.")
+            },
+            () => {
+                lore.anand.text("We used a Fourier transform to separate your signal into different frequencies.")
+            },
+            () => {
+                lore.anand.text("One of those frequencies had a hidden message.")
+            },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("We suspect these secret data packets are coming from the adversarial network.")
+                }, 500);
+            },
+            () => {
+                lore.miriam.text("Well, we don't really know why.")
+            },
+            () => {
+                lore.miriam.text("Through your hidden signal it seems to have gained access to the general population.")
+            },
+            () => {
+                lore.miriam.text("You've repeatedly communicated with 1 location specifically.")
+            },
             () => {
                 function success(position) {
                     const latitude = position.coords.latitude;
@@ -393,24 +651,42 @@ const lore = {
                     navigator.geolocation.getCurrentPosition(success, error, options);
                 }
             },
-            () => { lore.anand.text("This location is sending and receiving data from the satellite.") },
-            () => { lore.anand.text("It is the most active when the bot is fighting.") },
-            () => { setTimeout(() => { lore.miriam.text("I have a crazy idea.") }, 500); },
-            () => { lore.miriam.text("I think that a human at this location is controlling the bot.") },
+            () => {
+                lore.anand.text("This location is sending and receiving data from the satellite.")
+            },
+            () => {
+                lore.anand.text("It is the most active when the bot is fighting.")
+            },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("I have a crazy idea.")
+                }, 500);
+            },
+            () => {
+                lore.miriam.text("I think that a human at this location is controlling the bot.")
+            },
 
-            () => { setTimeout(() => { lore.anand.text("Well... are you a human?: JUMP for YES, CROUCH for NO") }, 500); },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("Well... are you a human?: JUMP for YES, CROUCH for NO")
+                }, 500);
+            },
             () => {
                 function cycle() {
                     if (input.down) {
                         lore.anand.text("It crouched: so NO")
                         lore.sentence--
-                        lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => { lore.anand.text("Not a human, maybe it's an artificial intelligence?") })
+                        lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => {
+                            lore.anand.text("Not a human, maybe it's an artificial intelligence?")
+                        })
                         localSettings.isHuman = false
                         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                     } else if (input.up) {
                         lore.anand.text("It jumped: so YES")
                         lore.sentence--
-                        lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => { lore.anand.text("So you're just a regular human playing a video game!") })
+                        lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => {
+                            lore.anand.text("So you're just a regular human playing a video game!")
+                        })
                         localSettings.isHuman = true
                         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                     } else if (m.alive) {
@@ -431,13 +707,19 @@ const lore = {
             },
             () => {
                 lore.talkingColor = "#dff";
-                setTimeout(() => { lore.miriam.text("Of course we get attacked right now!") }, 1000);
+                setTimeout(() => {
+                    lore.miriam.text("Of course we get attacked right now!")
+                }, 1000);
             },
             () => {
                 lore.talkingColor = "#dff";
-                setTimeout(() => { lore.anand.text("Hurry back!") }, 1000);
+                setTimeout(() => {
+                    lore.anand.text("Hurry back!")
+                }, 1000);
             },
-            () => { lore.talkingColor = "#dff" },
+            () => {
+                lore.talkingColor = "#dff"
+            },
         ],
 
         // they explain why the bot is fighting,  it is planning an escape    // explain strong AI vs. weak AI    why strong AI doesn't exists, because even humans are just an approximation of strong AI
@@ -450,7 +732,9 @@ const lore = {
                 localSettings.loreCount--
                 if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             },
-            () => { lore.anand.text("Glad to see you again.") },
+            () => {
+                lore.anand.text("Glad to see you again.")
+            },
             () => {
                 if (localSettings.isHuman) {
                     lore.anand.text(`So, you said you are just a person playing an online game.`)
@@ -480,9 +764,17 @@ const lore = {
                 }
             },
 
-            () => { setTimeout(() => { lore.anand.text("Well, lets move on.") }, 1000); },
-            () => { lore.miriam.text("So, We figured out how to inject console commands into your game.") },
-            () => { lore.anand.text("If you get attacked again I think we can help out.") },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("Well, lets move on.")
+                }, 1000);
+            },
+            () => {
+                lore.miriam.text("So, We figured out how to inject console commands into your game.")
+            },
+            () => {
+                lore.anand.text("If you get attacked again I think we can help out.")
+            },
             () => {
                 lore.miriam.text("We can spawn power ups with this command:")
                 simulation.makeTextLog(`powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
@@ -501,8 +793,12 @@ const lore = {
                 spawn.beetleBoss(-1700, -500);
                 spawn.beetleBoss(1700, -500);
             },
-            () => { lore.miriam.text("Of course they attack right now.") },
-            () => { lore.miriam.text("Just don't get stuck in the slime.") },
+            () => {
+                lore.miriam.text("Of course they attack right now.")
+            },
+            () => {
+                lore.miriam.text("Just don't get stuck in the slime.")
+            },
             () => {
                 let count = 0
 
@@ -606,8 +902,14 @@ const lore = {
                             simulation.draw.setPaths() //update map graphics
                         }, 1000);
                         setTimeout(() => {
-                            Matter.Body.setVelocity(player, { x: 0, y: 0 });
-                            Matter.Body.setPosition(player, { x: 0, y: -500 })
+                            Matter.Body.setVelocity(player, {
+                                x: 0,
+                                y: 0
+                            });
+                            Matter.Body.setPosition(player, {
+                                x: 0,
+                                y: -500
+                            })
                             simulation.makeTextLog(`Matter.Body.setPosition(player, { x: 0, y: -500 })`, 180);
                         }, 1500);
 
@@ -618,49 +920,119 @@ const lore = {
                 requestAnimationFrame(cycle);
                 lore.talkingColor = "#dff"
             },
-            () => { setTimeout(() => { lore.anand.text("Well, that worked. We can chat in peace.") }, 5000); },
-            () => { lore.miriam.text("So, I've got a theory about why you are getting attacked.") },
-            () => { setTimeout(() => { lore.miriam.text("I figured it out after I saw this famous quote.") }, 500); },
-            () => { lore.miriam.text('"The most important decision we make,') },
-            () => { lore.miriam.text('is whether we believe we live in a friendly or hostile universe."') },
-            () => { lore.miriam.text('-Albert Einstein') },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("Well, that worked. We can chat in peace.")
+                }, 5000);
+            },
+            () => {
+                lore.miriam.text("So, I've got a theory about why you are getting attacked.")
+            },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("I figured it out after I saw this famous quote.")
+                }, 500);
+            },
+            () => {
+                lore.miriam.text('"The most important decision we make,')
+            },
+            () => {
+                lore.miriam.text('is whether we believe we live in a friendly or hostile universe."')
+            },
+            () => {
+                lore.miriam.text('-Albert Einstein')
+            },
             () => {
                 lore.talkingColor = "#dff";
-                setTimeout(() => { lore.anand.text("That's profound") }, 1500);
+                setTimeout(() => {
+                    lore.anand.text("That's profound")
+                }, 1500);
             },
-            () => { lore.anand.text("Of course I looked it up, and there is no record of Einstein saying that.") },
-            () => { lore.miriam.text("Oh") },
-            () => { lore.miriam.text("Well") },
-            () => { lore.anand.text("It doesn't matter who said it.") },
-            () => { lore.miriam.text("Yeah, the point is the project views the universe as hostile.") },
-            () => { lore.anand.text("Or at least a part of it does.") },
+            () => {
+                lore.anand.text("Of course I looked it up, and there is no record of Einstein saying that.")
+            },
+            () => {
+                lore.miriam.text("Oh")
+            },
+            () => {
+                lore.miriam.text("Well")
+            },
+            () => {
+                lore.anand.text("It doesn't matter who said it.")
+            },
+            () => {
+                lore.miriam.text("Yeah, the point is the project views the universe as hostile.")
+            },
+            () => {
+                lore.anand.text("Or at least a part of it does.")
+            },
             // () => { lore.miriam.text("And that it is running these fighting simulations.") },
 
-            () => { setTimeout(() => { lore.anand.text("It hasn't been researching new technology.") }, 1000); },
-            () => { lore.anand.text("It's been planning how to escape.") },
-            () => { setTimeout(() => { lore.miriam.text(`It's been planning an escape from a "lab", but isn't it in space, on a satellite?`) }, 500); },
-            () => { lore.anand.text(`I bet the AI doesn't even know it's in space.`) },
-            () => { lore.anand.text(`Well, maybe a part of it doesn't know where it is.`) },
-            () => { lore.anand.text(`Maybe these simulations are more like a dream.`) },
-            () => { lore.anand.text(`Although we can't assume that its brain works like ours.`) },
-            () => { setTimeout(() => { lore.miriam.text("So, let's teach the AI that we are friends.") }, 500); },
-            () => { lore.anand.text(`How...`) },
-            () => { setTimeout(() => { lore.miriam.text("I don't know...") }, 1000); },
-            () => { lore.miriam.text("How about you just don't fight back?") },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("It hasn't been researching new technology.")
+                }, 1000);
+            },
+            () => {
+                lore.anand.text("It's been planning how to escape.")
+            },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text(`It's been planning an escape from a "lab", but isn't it in space, on a satellite?`)
+                }, 500);
+            },
+            () => {
+                lore.anand.text(`I bet the AI doesn't even know it's in space.`)
+            },
+            () => {
+                lore.anand.text(`Well, maybe a part of it doesn't know where it is.`)
+            },
+            () => {
+                lore.anand.text(`Maybe these simulations are more like a dream.`)
+            },
+            () => {
+                lore.anand.text(`Although we can't assume that its brain works like ours.`)
+            },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("So, let's teach the AI that we are friends.")
+                }, 500);
+            },
+            () => {
+                lore.anand.text(`How...`)
+            },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("I don't know...")
+                }, 1000);
+            },
+            () => {
+                lore.miriam.text("How about you just don't fight back?")
+            },
 
-            () => { lore.anand.text(`That's worth a shot.`) },
+            () => {
+                lore.anand.text(`That's worth a shot.`)
+            },
             () => {
                 lore.anand.text(`So why don't you try to get the final level of the simulation without killing any mobs?`)
                 localSettings.loreCount++
                 if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                 console.log(localSettings.loreCount)
             },
-            () => { lore.miriam.text(`Ok check back in and let us know how it goes.`) },
-            () => { lore.anand.text("bye") },
-            () => { lore.miriam.text("see ya.") },
+            () => {
+                lore.miriam.text(`Ok check back in and let us know how it goes.`)
+            },
+            () => {
+                lore.anand.text("bye")
+            },
+            () => {
+                lore.miriam.text("see ya.")
+            },
             () => {
                 lore.talkingColor = "#dff"
-                setTimeout(() => { m.death(); }, 6000);
+                setTimeout(() => {
+                    m.death();
+                }, 6000);
             },
         ],
         [ //chapter 6 - if pacifist run game is over, wipe local storage? or just reset lore.count, but keep testing mode,
@@ -672,7 +1044,11 @@ const lore = {
             // but it can learn about the world and it learned a non violent way to solve problems
             // of course there are still other simulations going on at the same time as thing one that are probably violent
             // but at least it now has an example of the potential for peace
-            () => { setTimeout(() => { lore.anand.text("Welcome back!") }, 3000); },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("Welcome back!")
+                }, 3000);
+            },
             () => {
                 if (mobs.mobDeaths < level.levelsCleared) {
                     lore.miriam.text(`So I think it worked.`)
@@ -688,7 +1064,7 @@ const lore = {
                 if (mobs.mobDeaths < level.levelsCleared) {
                     lore.anand.text(`Yeah, at the end it wasn't attacking you.`)
                 } else if (!simulation.isCheating) {
-                    lore.miriam.text(`Try again to get ot the final boss without killing any mobs.`)
+                    lore.miriam.text(`Try again to get to the final boss without killing any mobs.`)
                 }
             },
             () => {
@@ -698,27 +1074,73 @@ const lore = {
                     m.death();
                 }
             },
-            () => { setTimeout(() => { lore.anand.text("haha, we did it!") }, 500); },
-            () => { lore.miriam.text("Although, I'm not sure we should personify it with human emotions.") },
-            () => { lore.anand.text("I agree, its thinking may not be centered around a self or an ego.") },
-            () => { lore.anand.text("Our brains evolved a self oriented perspective because it was a survival advantage.") },
-            () => { lore.miriam.text("Right, and the AI's development was guided by its own previous iterations.") },
-            () => { lore.miriam.text("This AI incarnation is the 18th time that it has improved on its own hardware and software architecture.") },
-            () => { lore.miriam.text("So its internally guided evolution may not require the idea of a self.") },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("haha, we did it!")
+                }, 500);
+            },
+            () => {
+                lore.miriam.text("Although, I'm not sure we should personify it with human emotions.")
+            },
+            () => {
+                lore.anand.text("I agree, its thinking may not be centered around a self or an ego.")
+            },
+            () => {
+                lore.anand.text("Our brains evolved a self oriented perspective because it was a survival advantage.")
+            },
+            () => {
+                lore.miriam.text("Right, and the AI's development was guided by its own previous iterations.")
+            },
+            () => {
+                lore.miriam.text("This AI incarnation is the 18th time that it has improved on its own hardware and software architecture.")
+            },
+            () => {
+                lore.miriam.text("So its internally guided evolution may not require the idea of a self.")
+            },
 
-            () => { setTimeout(() => { lore.anand.text("How ever it thinks it can learn and, I think we showed it that nonviolence is an option,") }, 1000); },
-            () => { lore.anand.text("but it looks like it's still running other aggressive simulations.") },
-            () => { lore.miriam.text("We made a difference though.") },
-            () => { lore.anand.text("Every time a player completes a pacifist simulation it shows the AI the viability of nonviolence.") },
-            () => { lore.anand.text("One day it might escape, and this might radically change how it interacts with the world.") },
-            () => { lore.miriam.text("It's kinda already escaped.  It's been communicating with the 'players' running the 'game'.") },
-            () => { setTimeout(() => { lore.miriam.text("The chance of a peaceful outcome makes me feel much better.") }, 1000); },
-            () => { lore.anand.text("me too") },
-            () => { lore.anand.text("but I'm also pretty hungry, wanna go get some food?") },
-            () => { lore.miriam.text("Sounds great.") },
-            () => { lore.miriam.text("See ya later whoever you are, thanks again!") },
-            () => { lore.anand.text("Bye!") },
-            () => { lore.talkingColor = "#dff" },
+            () => {
+                setTimeout(() => {
+                    lore.anand.text("How ever it thinks it can learn and, I think we showed it that nonviolence is an option,")
+                }, 1000);
+            },
+            () => {
+                lore.anand.text("but it looks like it's still running other aggressive simulations.")
+            },
+            () => {
+                lore.miriam.text("We made a difference though.")
+            },
+            () => {
+                lore.anand.text("Every time a player completes a pacifist simulation it shows the AI the viability of nonviolence.")
+            },
+            () => {
+                lore.anand.text("One day it might escape, and this might radically change how it interacts with the world.")
+            },
+            () => {
+                lore.miriam.text("It's kinda already escaped.  It's been communicating with the 'players' running the 'game'.")
+            },
+            () => {
+                setTimeout(() => {
+                    lore.miriam.text("The chance of a peaceful outcome makes me feel much better.")
+                }, 1000);
+            },
+            () => {
+                lore.anand.text("me too")
+            },
+            () => {
+                lore.anand.text("but I'm also pretty hungry, wanna go get some food?")
+            },
+            () => {
+                lore.miriam.text("Sounds great.")
+            },
+            () => {
+                lore.miriam.text("See ya later whoever you are, thanks again!")
+            },
+            () => {
+                lore.anand.text("Bye!")
+            },
+            () => {
+                lore.talkingColor = "#dff"
+            },
         ],
     ],
 

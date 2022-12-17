@@ -190,7 +190,6 @@ const simulation = {
     healScale: 1,
     accelScale: null, //set in levels.setDifficulty
     CDScale: null, //set in levels.setDifficulty
-    isNoPowerUps: false,
     molecularMode: Math.floor(4 * Math.random()), //0 spores, 1 missile, 2 ice IX, 3 drones //randomize molecular assembler field type
     // dropFPS(cap = 40, time = 15) {
     //   simulation.fpsCap = cap
@@ -547,16 +546,16 @@ const simulation = {
         const swapPeriod = 150
         const len = 30
         for (let i = 0; i < len; i++) {
-            setTimeout(function() {
-                simulation.wipe = function() { //set wipe to have trails
+            setTimeout(function () {
+                simulation.wipe = function () { //set wipe to have trails
                     ctx.fillStyle = `rgba(221,221,221,${i*i*0.0005 +0.0025})`;
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                 }
             }, (i) * swapPeriod);
         }
 
-        setTimeout(function() {
-            simulation.wipe = function() { //set wipe to normal
+        setTimeout(function () {
+            simulation.wipe = function () { //set wipe to normal
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
         }, len * swapPeriod);
@@ -617,7 +616,7 @@ const simulation = {
 
         simulation.clearTimeouts();
         simulation.onTitlePage = true;
-        document.getElementById("splash").onclick = function() {
+        document.getElementById("splash").onclick = function () {
             simulation.startGame();
         };
         // document.getElementById("choose-grid").style.display = "none"
@@ -699,10 +698,8 @@ const simulation = {
         }
         if (isTrainingRun) {
             simulation.isTraining = true
-            simulation.isNoPowerUps = true
         } else {
             simulation.isTraining = false
-            simulation.isNoPowerUps = false;
         }
         simulation.onTitlePage = false;
         // document.getElementById("choose-grid").style.display = "none"
@@ -785,11 +782,13 @@ const simulation = {
         // m.maxEnergy = 1
         // m.energy = 1
         input.isPauseKeyReady = true
-        simulation.wipe = function() { //set wipe to normal
+        simulation.wipe = function () { //set wipe to normal
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
         m.hole.isOn = false
         simulation.paused = false;
+        // simulation.cycle = 0
+        // m.cycle = 0
         engine.timing.timeScale = 1;
         simulation.fpsCap = simulation.fpsCapDefault;
         simulation.isAutoZoom = true;
@@ -864,7 +863,7 @@ const simulation = {
         requestAnimationFrame(cycle); //starts game loop
     },
     clearTimeouts() {
-        let id = window.setTimeout(function() {}, 0);
+        let id = window.setTimeout(function () {}, 0);
         while (id--) {
             window.clearTimeout(id); // will do nothing if no timeout with id is present
         }
@@ -899,7 +898,7 @@ const simulation = {
             if (tech.isMutualism && !tech.isEnergyHealth) {
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].isMutualismActive) {
-                        m.health += 0.005 + 0.005 * (bullet[i].isSpore || bullet[i].isFlea)
+                        m.health += 0.01 + 0.01 * (bullet[i].isSpore || bullet[i].isFlea)
                         if (m.health > m.maxHealth) m.health = m.maxHealth;
                         m.displayHealth();
                     }
@@ -958,12 +957,21 @@ const simulation = {
                 if (droneCount > 0) {
                     requestAnimationFrame(respawnDrones);
                     if (!simulation.paused && !simulation.isChoosing && m.alive) {
-                        const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
+                        const where = {
+                            x: level.enter.x + 50,
+                            y: level.enter.y - 60
+                        }
                         droneCount--
                         if (tech.isDroneRadioactive) {
-                            b.droneRadioactive({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 100 * (Math.random() - 0.5) }, 0)
+                            b.droneRadioactive({
+                                x: where.x + 100 * (Math.random() - 0.5),
+                                y: where.y + 100 * (Math.random() - 0.5)
+                            }, 0)
                         } else {
-                            b.drone({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 120 * (Math.random() - 0.5) }, 0)
+                            b.drone({
+                                x: where.x + 100 * (Math.random() - 0.5),
+                                y: where.y + 120 * (Math.random() - 0.5)
+                            }, 0)
                             if (tech.isDroneGrab && deliveryCount > 0) {
                                 const who = bullet[bullet.length - 1]
                                 who.isImproved = true;
@@ -985,8 +993,14 @@ const simulation = {
                     requestAnimationFrame(respawnSpores);
                     if (!simulation.paused && !simulation.isChoosing) {
                         sporeCount--
-                        const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
-                        b.spore({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 120 * (Math.random() - 0.5) })
+                        const where = {
+                            x: level.enter.x + 50,
+                            y: level.enter.y - 60
+                        }
+                        b.spore({
+                            x: where.x + 100 * (Math.random() - 0.5),
+                            y: where.y + 120 * (Math.random() - 0.5)
+                        })
                     }
                 }
             }
@@ -998,8 +1012,14 @@ const simulation = {
                     requestAnimationFrame(respawnWorms);
                     if (!simulation.paused && !simulation.isChoosing) {
                         wormCount--
-                        const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
-                        b.worm({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 120 * (Math.random() - 0.5) })
+                        const where = {
+                            x: level.enter.x + 50,
+                            y: level.enter.y - 60
+                        }
+                        b.worm({
+                            x: where.x + 100 * (Math.random() - 0.5),
+                            y: where.y + 120 * (Math.random() - 0.5)
+                        })
                     }
                 }
             }
@@ -1011,10 +1031,19 @@ const simulation = {
                     requestAnimationFrame(respawnFleas);
                     if (!simulation.paused && !simulation.isChoosing) {
                         fleaCount--
-                        const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
+                        const where = {
+                            x: level.enter.x + 50,
+                            y: level.enter.y - 60
+                        }
                         const speed = 6 + 3 * Math.random()
                         const angle = 2 * Math.PI * Math.random()
-                        b.flea({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 120 * (Math.random() - 0.5) }, { x: speed * Math.cos(angle), y: speed * Math.sin(angle) })
+                        b.flea({
+                            x: where.x + 100 * (Math.random() - 0.5),
+                            y: where.y + 120 * (Math.random() - 0.5)
+                        }, {
+                            x: speed * Math.cos(angle),
+                            y: speed * Math.sin(angle)
+                        })
                     }
                 }
             }
@@ -1171,7 +1200,7 @@ const simulation = {
                 }
                 if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
 
-                fallCheck = function(who, save = false) {
+                fallCheck = function (who, save = false) {
                     let i = who.length;
                     while (i--) {
                         if (who[i].position.y > simulation.fallHeight) {
@@ -1555,7 +1584,12 @@ const simulation = {
             outHTML += "<div>" + simulation.constructMapString[i] + "</div>"
         }
         console.log(out)
-        navigator.clipboard.writeText(out).then(function() { /* clipboard successfully set */ }, function() { /* clipboard write failed */ console.log('copy failed') });
+        navigator.clipboard.writeText(out).then(function () {
+            /* clipboard successfully set */
+        }, function () {
+            /* clipboard write failed */
+            console.log('copy failed')
+        });
         document.getElementById("construct").innerHTML = outHTML
     },
     // copyToClipBoard(value) {

@@ -1192,6 +1192,26 @@ const mobs = {
                 this.alive = false; //triggers mob removal in mob[i].replace(i)
 
                 if (this.isDropPowerUp) {
+                    // if (true) { //spawn zombie on death
+                    //     // console.log(this)
+                    //     this.leaveBody = false;
+
+                    //     let count = 45 //delay spawn cycles
+                    //     let cycle = () => {
+                    //         if (count > 0) {
+                    //             if (m.alive) requestAnimationFrame(cycle);
+                    //             if (!simulation.paused && !simulation.isChoosing) {
+                    //                 count--
+                    //             }
+                    //         } else {
+                    //             spawn.zombie(this.position.x, this.position.y, this.radius, this.vertices.length, this.fill) // zombie(x, y, radius, sides, color)
+                    //         }
+                    //     }
+                    //     requestAnimationFrame(cycle);
+                    // }
+
+
+
                     if (tech.iceIXOnDeath && this.isSlowed) {
                         for (let i = 0, len = 2 * Math.sqrt(Math.min(this.mass, 25)) * tech.iceIXOnDeath; i < len; i++) b.iceIX(3, Math.random() * 2 * Math.PI, this.position)
                     }

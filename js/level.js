@@ -15,46 +15,53 @@ const level = {
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
-            // simulation.enableConstructMode() //used to build maps in testing mode
+            // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // tech.giveTech("performance")
-            // level.difficultyIncrease(15 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(30 * 4) //30 is near max on hard  //60 is near max on why
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(1000)
+            // powerUps.research.changeRerolls(5)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
-            // m.setField("plasma torch") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave   plasma torch
+            // m.setField("time dilation") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave   plasma torch
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 10000
-            // tech.giveTech("plasma ball")
-            // tech.giveTech("dye laser")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("railgun")
-            // for (let i = 0; i < 3; ++i) tech.giveTech("Bitter electromagnet")
-            // for (let i = 0; i < 1; i++) tech.giveTech("capacitor bank")
-            // for (let i = 0; i < 9; i++) tech.giveTech("heuristics")
+            // tech.giveTech("alternator")
+            // tech.giveTech("posture")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Sleipnir")
+            // tech.isFoamBall = true
+            // for (let i = 0; i < 1; ++i) tech.giveTech("emergence")
+            // for (let i = 0; i < 2; i++) tech.giveTech("unified field theory")
+            // for (let i = 0; i < 9; i++) tech.giveTech("replication")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-
             // level.testing();
             // spawn.shooter(1900, -500, 200)
             // spawn.starter(1900, -500)
-            // spawn.timeBoss(2538, -950)
-            // for (let i = 0; i < 5; ++i) spawn.sniper(1000 + 5000 * Math.random(), -500 + 300 * Math.random())
-            // tech.addJunkTechToPool(0.5)
+            // spawn.hopper(2538, -950)
+            // for (let i = 0; i < 2; ++i) spawn.starter(1000 + 1000 * Math.random(), -500 + 300 * Math.random())
+            // tech.addJunkTechToPool(2)
             // tech.tech[322].frequency = 100
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
             // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
 
-            if (simulation.isTraining) { level.walk(); } else { level.intro(); } //normal starting level ************************************************
+            //normal starting level ************************************************
+            if (simulation.isTraining) {
+                level.walk()
+            } else {
+                level.intro()
+            }
+
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
-            // for (let i = 0; i < 30; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
+            // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "gun");
+            // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
 
             //lore testing
             // for (let i = 0; i < 5; i++) tech.giveTech("undefined")
@@ -69,13 +76,11 @@ const level = {
             // tech.isNoDraftPause = false //disable pause
             // mobs.mobDeaths = 200 //to prevent pacifist mode
             // for (let i = 0; i < 13; i++) level.nextLevel(); //jump to final boss
-
             // lore.unlockTesting();
             // tech.giveTech("tinker"); //show junk tech in experiment mode
             // simulation.isCheating = false
             // m.storeTech()
             // powerUps.spawn(m.pos.x, m.pos.y, "entanglement", false);
-
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.pickList = ["focuser", "focuser"]
@@ -111,12 +116,18 @@ const level = {
         if (tech.isForeverDrones) {
             if (tech.isDroneRadioactive) {
                 for (let i = 0; i < tech.isForeverDrones * 0.25; i++) {
-                    b.droneRadioactive({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
+                    b.droneRadioactive({
+                        x: m.pos.x + 30 * (Math.random() - 0.5),
+                        y: m.pos.y + 30 * (Math.random() - 0.5)
+                    }, 5)
                     bullet[bullet.length - 1].endCycle = Infinity
                 }
             } else {
                 for (let i = 0; i < tech.isForeverDrones; i++) {
-                    b.drone({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
+                    b.drone({
+                        x: m.pos.x + 30 * (Math.random() - 0.5),
+                        y: m.pos.y + 30 * (Math.random() - 0.5)
+                    }, 5)
                     bullet[bullet.length - 1].endCycle = Infinity
                 }
             }
@@ -189,17 +200,17 @@ const level = {
         m.dmgScale = 1; //damage done by player decreases each level
         simulation.accelScale = 1 //mob acceleration increases each level
         simulation.CDScale = 1 //mob CD time decreases each level
-        simulation.dmgScale = Math.max(0.1, 0.34 * simulation.difficulty) //damage done by mobs scales with total levels
+        simulation.dmgScale = Math.max(0.1, 0.32 * simulation.difficulty) //damage done by mobs scales with total levels
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.05) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
             m.dmgScale *= 0.922; //damage done by player decreases each level
-            if (simulation.accelScale < 6) simulation.accelScale *= 1.025 //mob acceleration increases each level
-            if (simulation.CDScale > 0.15) simulation.CDScale *= 0.965 //mob CD time decreases each level
+            if (simulation.accelScale < 6) simulation.accelScale *= 1.024 //mob acceleration increases each level
+            if (simulation.CDScale > 0.15) simulation.CDScale *= 0.964 //mob CD time decreases each level
         }
-        simulation.dmgScale = Math.max(0.1, 0.34 * simulation.difficulty) //damage done by mobs scales with total levels
+        simulation.dmgScale = Math.max(0.1, 0.32 * simulation.difficulty) //damage done by mobs scales with total levels
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.05) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
         // console.log(`CD = ${simulation.CDScale}`)
     },
@@ -207,11 +218,11 @@ const level = {
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
             m.dmgScale /= 0.922; //damage done by player decreases each level
-            if (simulation.accelScale > 1) simulation.accelScale /= 1.025 //mob acceleration increases each level
-            if (simulation.CDScale < 1) simulation.CDScale /= 0.965 //mob CD time decreases each level
+            if (simulation.accelScale > 1) simulation.accelScale /= 1.024 //mob acceleration increases each level
+            if (simulation.CDScale < 1) simulation.CDScale /= 0.964 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = Math.max(0.1, 0.34 * simulation.difficulty) //damage done by mobs scales with total levels
+        simulation.dmgScale = Math.max(0.1, 0.32 * simulation.difficulty) //damage done by mobs scales with total levels
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.05)
     },
     difficultyText() {
@@ -256,10 +267,12 @@ const level = {
                     document.getElementById("health-bg").style.display = "none"
                     document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
                     document.getElementById("fade-out").style.opacity = 1; //slowly fades out
-                    setTimeout(function() {
+                    setTimeout(function () {
                         simulation.paused = true;
                         level.disableExit = false;
-                        engine.world.bodies.forEach((body) => { Matter.Composite.remove(engine.world, body) })
+                        engine.world.bodies.forEach((body) => {
+                            Matter.Composite.remove(engine.world, body)
+                        })
                         Engine.clear(engine);
                         simulation.splashReturn();
                     }, 6000);
@@ -335,7 +348,10 @@ const level = {
     flipHorizontal() {
         const flipX = (who) => {
             for (let i = 0, len = who.length; i < len; i++) {
-                Matter.Body.setPosition(who[i], { x: -who[i].position.x, y: who[i].position.y })
+                Matter.Body.setPosition(who[i], {
+                    x: -who[i].position.x,
+                    y: who[i].position.y
+                })
             }
         }
         flipX(map)
@@ -382,7 +398,10 @@ const level = {
         Matter.Body.setPosition(player, m.spawnPos);
         Matter.Body.setVelocity(player, m.spawnVel);
         //makes perfect diamagnetism tech: Lenz's law show up in the right spot at the start of a level
-        m.fieldPosition = { x: m.pos.x, y: m.pos.y }
+        m.fieldPosition = {
+            x: m.pos.x,
+            y: m.pos.y
+        }
         m.fieldAngle = m.angle
     },
     enter: {
@@ -534,8 +553,11 @@ const level = {
             damping: 1
         });
         Composite.add(engine.world, constraint);
-        who.center = { x: who.position.x, y: who.position.y }
-        who.rotate = function() {
+        who.center = {
+            x: who.position.x,
+            y: who.position.y
+        }
+        who.rotate = function () {
             if (!m.isBodiesAsleep) {
                 Matter.Body.applyForce(this, {
                     x: this.position.x + 100,
@@ -627,7 +649,10 @@ const level = {
         });
         return who
     },
-    elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }, isAtTop = false) {
+    elevator(x, y, width, height, maxHeight, force = 0.003, friction = {
+        up: 0.01,
+        down: 0.2
+    }, isAtTop = false) {
         x += width / 2
         y += height / 2
         maxHeight += height / 2
@@ -753,7 +778,10 @@ const level = {
                         this.constraint.stiffness = 0
                         this.constraint.damping = 0 //0.3
                         this.frictionAir = 0
-                        Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                        Matter.Body.setVelocity(this, {
+                            x: 0,
+                            y: 0
+                        });
                         //show graphically  being ready?
 
                     }
@@ -765,13 +793,19 @@ const level = {
                             this.isReady = true
                         }
                     } else {
-                        if (Vector.magnitudeSquared(Vector.sub(this.position, { x: x, y: y })) < distance * distance) {
+                        if (Vector.magnitudeSquared(Vector.sub(this.position, {
+                                x: x,
+                                y: y
+                            })) < distance * distance) {
                             this.force.y -= force * this.mass
                         } else {
                             this.constraint.damping = 1
                             this.frictionAir = 1
                             this.isResetting = true
-                            Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                            Matter.Body.setVelocity(this, {
+                                x: 0,
+                                y: 0
+                            });
                         }
                     }
                 }
@@ -977,10 +1011,33 @@ const level = {
             }
         }
     },
-    vanish(x, y, width, height, isVertical = false, hide = { x: 0, y: 150 }) {
+    vanish(x, y, width, height, isVertical = false, hide = {
+        x: 0,
+        y: 150
+    }) {
         x = x + width / 2
         y = y + height / 2
-        const vertices = [{ x: x, y: y, index: 0, isInternal: false }, { x: x + width, y: y, index: 1, isInternal: false }, { x: x + width, y: y + height, index: 4, isInternal: false }, { x: x, y: y + height, index: 3, isInternal: false }]
+        const vertices = [{
+            x: x,
+            y: y,
+            index: 0,
+            isInternal: false
+        }, {
+            x: x + width,
+            y: y,
+            index: 1,
+            isInternal: false
+        }, {
+            x: x + width,
+            y: y + height,
+            index: 4,
+            isInternal: false
+        }, {
+            x: x,
+            y: y + height,
+            index: 3,
+            isInternal: false
+        }]
         const block = body[body.length] = Bodies.fromVertices(x, y, vertices, {
             // const block = body[body.length] = Bodies.rectangle(x, y, width, height, {
             collisionFilter: {
@@ -999,9 +1056,49 @@ const level = {
             returnCount: 0,
             shrinkVertices(size) {
                 if (isVertical) {
-                    return [{ x: x, y: y * size, index: 0, isInternal: false }, { x: x + width, y: y * size, index: 1, isInternal: false }, { x: x + width, y: (y + height) * size, index: 4, isInternal: false }, { x: x, y: (y + height) * size, index: 3, isInternal: false }]
+                    return [{
+                        x: x,
+                        y: y * size,
+                        index: 0,
+                        isInternal: false
+                    }, {
+                        x: x + width,
+                        y: y * size,
+                        index: 1,
+                        isInternal: false
+                    }, {
+                        x: x + width,
+                        y: (y + height) * size,
+                        index: 4,
+                        isInternal: false
+                    }, {
+                        x: x,
+                        y: (y + height) * size,
+                        index: 3,
+                        isInternal: false
+                    }]
                 } else {
-                    return [{ x: x * size, y: y, index: 0, isInternal: false }, { x: (x + width) * size, y: y, index: 1, isInternal: false }, { x: (x + width) * size, y: y + height, index: 4, isInternal: false }, { x: x * size, y: y + height, index: 3, isInternal: false }]
+                    return [{
+                        x: x * size,
+                        y: y,
+                        index: 0,
+                        isInternal: false
+                    }, {
+                        x: (x + width) * size,
+                        y: y,
+                        index: 1,
+                        isInternal: false
+                    }, {
+                        x: (x + width) * size,
+                        y: y + height,
+                        index: 4,
+                        isInternal: false
+                    }, {
+                        x: x * size,
+                        y: y + height,
+                        index: 3,
+                        isInternal: false
+                    }]
                 }
             },
             query() {
@@ -1028,7 +1125,10 @@ const level = {
                     if (!m.isBodiesAsleep) {
                         this.returnCount--
                         if (this.returnCount < 1) {
-                            Matter.Body.setPosition(this, { x: x, y: y })
+                            Matter.Body.setPosition(this, {
+                                x: x,
+                                y: y
+                            })
                             if (Matter.Query.collides(this, [player]).length) { //|| (Matter.Query.collides(this, body).length)) {
                                 Matter.Body.setPosition(this, hide)
                                 this.returnCount = 15
@@ -1179,7 +1279,7 @@ const level = {
             y: 0
         }, angleB)
 
-        draw = function() {
+        draw = function () {
             ctx.beginPath(); //portal
             let v = this.vertices;
             ctx.moveTo(v[0].x, v[0].y);
@@ -1189,7 +1289,7 @@ const level = {
             ctx.fillStyle = this.color
             ctx.fill();
         }
-        query = function(isRemoveBlocks = false) {
+        query = function (isRemoveBlocks = false) {
             if (Matter.Query.collides(this, [player]).length === 0) { //not touching player
                 if (player.isInPortal === this) player.isInPortal = null
             } else if (player.isInPortal !== this) { //touching player
@@ -1546,7 +1646,10 @@ const level = {
         let isDoorLeft, isDoorRight, x, y
         doCustom = []
         doCustomTopLayer = []
-        offset = { x: 0, y: 0 }
+        offset = {
+            x: 0,
+            y: 0
+        }
         const mobSpawnChance = 0 // Math.random() < chance + 0.07 * simulation.difficulty
         enterOptions = [
             (x = offset.x, y = offset.y) => { //lasers
@@ -1770,7 +1873,10 @@ const level = {
                                 button.isReadyToFire = true
                             } else if (button.isReadyToFire && !button.isUp) {
                                 button.isReadyToFire = false
-                                b.pulse(90, Math.PI, { x: x + 2000 - 560, y: y - 150 })
+                                b.pulse(90, Math.PI, {
+                                    x: x + 2000 - 560,
+                                    y: y - 150
+                                })
                             }
                         }
                     )
@@ -1801,7 +1907,10 @@ const level = {
                                 button.isReadyToFire = true
                             } else if (button.isReadyToFire && !button.isUp) {
                                 button.isReadyToFire = false
-                                b.pulse(90, 0, { x: x + 560, y: y - 150 })
+                                b.pulse(90, 0, {
+                                    x: x + 560,
+                                    y: y - 150
+                                })
                             }
                         }
                     )
@@ -1834,7 +1943,7 @@ const level = {
                                 button.isReadyToFire = true
                             } else if (button.isReadyToFire && !button.isUp) {
                                 button.isReadyToFire = false
-                                fireBlock = function(xPos, yPos) {
+                                fireBlock = function (xPos, yPos) {
                                     const index = body.length
                                     spawn.bodyRect(xPos, yPos, 35 + 50 * Math.random(), 35 + 50 * Math.random());
                                     const bodyBullet = body[body.length - 1]
@@ -1845,6 +1954,7 @@ const level = {
                                     body[index].collisionFilter.category = cat.body;
                                     body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
                                     body[index].classType = "body";
+                                    body[index].isAboutToBeRemoved = true;
                                     Composite.add(engine.world, body[index]); //add to world
                                     setTimeout(() => { //remove block
                                         for (let i = 0; i < body.length; i++) {
@@ -1890,7 +2000,7 @@ const level = {
                                 button.isReadyToFire = true
                             } else if (button.isReadyToFire && !button.isUp) {
                                 button.isReadyToFire = false
-                                fireBlock = function(xPos, yPos) {
+                                fireBlock = function (xPos, yPos) {
                                     const index = body.length
                                     spawn.bodyRect(xPos, yPos, 35 + 50 * Math.random(), 35 + 50 * Math.random());
                                     const bodyBullet = body[body.length - 1]
@@ -2092,7 +2202,10 @@ const level = {
                     powerUps.directSpawn(x + 998, y - 333, "tech", false);
                 }
                 const powerUp1 = powerUp[powerUp.length - 1]
-                powerUp1.holdPosition = { x: powerUp1.position.x, y: powerUp1.position.y }
+                powerUp1.holdPosition = {
+                    x: powerUp1.position.x,
+                    y: powerUp1.position.y
+                }
                 let isSpawnedMobs = false
                 doCustom.push(
                     () => {
@@ -2759,7 +2872,10 @@ const level = {
 
             // level.enter.draw();
         };
-        let sway = { x: 0, y: 0 }
+        let sway = {
+            x: 0,
+            y: 0
+        }
         let phase = -Math.PI / 2
         level.customTopLayer = () => {
             ctx.fillStyle = "rgba(0,0,0,0.1)";
@@ -2893,7 +3009,7 @@ const level = {
 
         // spawn.starter(1900, -500, 200) //big boy
         // for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
-        // spawn.slashBoss(1900, -500)
+        spawn.suckerBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)
         // spawn.laserTargetingBoss(1700, -500)
         // spawn.powerUpBoss(1900, -500)
@@ -3175,6 +3291,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     final() {
+        // color.map = "rgba(0,0,0,0.8)"
         const slime = level.hazard(simulation.isHorizontalFlipped ? 150 - 860 : -150, -360, 880, 259) //x, y, width, height, damage = 0.002) {
         slime.height -= slime.maxHeight - 150 //start slime at zero
         slime.min.y += slime.maxHeight
@@ -3349,11 +3466,14 @@ const level = {
         }
     },
     intro() {
+        // console.log(level.levelsCleared)
         if (level.levelsCleared === 0) { //if this is the 1st level of the game
             //wait to spawn power ups until unpaused
             //power ups don't spawn in experiment mode, so they don't get removed at the start of experiment mode
+            const goal = simulation.cycle + 10
+
             function cycle() {
-                if (simulation.cycle > 10) {
+                if (simulation.cycle > goal) {
                     if (localSettings.loreCount === 6) {
                         powerUps.spawn(2095 + 15 * (Math.random() - 0.5), -2170, "field", false);
                     } else {
@@ -3570,6 +3690,8 @@ const level = {
             ctx.fillRect(2030, 0, 150, 1800);
         };
 
+
+
         level.setPosToSpawn(460, -100); //normal spawn
         // level.enter.x = -1000000; //hide enter graphic for first level by moving to the far left
         level.exit.x = 2800;
@@ -3727,8 +3849,14 @@ const level = {
         slime.height -= slime.maxHeight - 60 //start slime at zero
         slime.min.y += slime.maxHeight
         slime.max.y = slime.min.y + slime.height
-        const elevator1 = level.elevator(-1625, -90, 310, 800, -2000, 0.0025, { up: 0.1, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
-        const elevator2 = level.elevator(1175, -3050, 200, 250, -4475, 0.0025, { up: 0.12, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+        const elevator1 = level.elevator(-1625, -90, 310, 800, -2000, 0.0025, {
+            up: 0.1,
+            down: 0.2
+        }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+        const elevator2 = level.elevator(1175, -3050, 200, 250, -4475, 0.0025, {
+            up: 0.12,
+            down: 0.2
+        }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
         let waterFallWidth = 0
         let waterFallX = 0
         let waterFallSmoothX = 0
@@ -5518,7 +5646,10 @@ const level = {
         }
     },
     highrise() {
-        const elevator1 = level.elevator(-790, -190, 180, 25, -1150, 0.0025, { up: 0.01, down: 0.2 }, true) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+        const elevator1 = level.elevator(-790, -190, 180, 25, -1150, 0.0025, {
+            up: 0.01,
+            down: 0.2
+        }, true) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
         elevator1.addConstraint();
         // const button1 = level.button(-500, -200)
         const toggle1 = level.toggle(-300, -200) //(x,y,isOn,isLockOn = true/false)
@@ -6249,7 +6380,10 @@ const level = {
         spawn.randomGroup(4150, -1000, 0.6);
         if (simulation.difficulty > 1) {
             if (Math.random() < 0.5) {
-                spawn.tetherBoss(2850, -80, { x: 2500, y: -500 })
+                spawn.tetherBoss(2850, -80, {
+                    x: 2500,
+                    y: -500
+                })
                 //chance to spawn a ring of exploding mobs around this boss
                 if (simulation.difficulty > 6) spawn.nodeGroup(2850, -80, "spawns", 8, 20, 105);
             } else {
@@ -6689,7 +6823,10 @@ const level = {
             if (simulation.difficulty > 1) {
                 if (Math.random() < 0.2) {
                     // tether ball
-                    spawn.tetherBoss(7000, -3300, { x: 7300, y: -3300 })
+                    spawn.tetherBoss(7000, -3300, {
+                        x: 7300,
+                        y: -3300
+                    })
                     if (simulation.difficulty > 4) spawn.nodeGroup(7000, -3300, "spawns", 8, 20, 105);
                 } else {
                     spawn.randomLevelBoss(6100, -3600, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "pulsarBoss"]);
@@ -6699,7 +6836,10 @@ const level = {
             if (simulation.difficulty > 1) {
                 if (Math.random() < 0.2) {
                     // tether ball
-                    spawn.tetherBoss(2300, -1300, { x: 2300, y: -1750 })
+                    spawn.tetherBoss(2300, -1300, {
+                        x: 2300,
+                        y: -1750
+                    })
                     if (simulation.difficulty > 4) spawn.nodeGroup(2350, -1300, "spawns", 8, 20, 105);
                 } else {
                     spawn.randomLevelBoss(2300, -1400, ["shooterBoss", "launcherBoss", "laserTargetingBoss", "spiderBoss", "laserBoss", "dragonFlyBoss", "pulsarBoss"]);
@@ -6758,7 +6898,10 @@ const level = {
         spawn.mapRect(3075, 1075, 375, 150); //Plafond salle trésor
         spawn.mapRect(3300, 1075, 1500, 1800); //Mur droite salle trésor
         // tether ball
-        spawn.tetherBoss(2330, 1850, { x: 2330, y: 1425 })
+        spawn.tetherBoss(2330, 1850, {
+            x: 2330,
+            y: 1425
+        })
         spawn.secondaryBossChance(2330, 1850)
         //chance to spawn a ring of exploding mobs around this boss
         if (simulation.difficulty > 1) spawn.nodeGroup(2330, 1850, "spawns", 8, 20, 105);
@@ -7293,11 +7436,11 @@ const level = {
         body[body.length] = part4;
         body[body.length] = part5;
         body[body.length] = part6;
-        setTimeout(function() {
+        setTimeout(function () {
             chair.collisionFilter.category = cat.body;
             chair.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
         }, 1000);
-        setTimeout(function() {
+        setTimeout(function () {
             chair2.collisionFilter.category = cat.body;
             chair2.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
         }, 1000);
@@ -7352,7 +7495,7 @@ const level = {
         body[body.length] = rightUpperLeg
         body[body.length] = rightLowerArm
         body[body.length] = rightUpperArm
-        setTimeout(function() {
+        setTimeout(function () {
             person.collisionFilter.category = cat.body;
             person.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
         }, 1000);
@@ -7547,7 +7690,10 @@ const level = {
         if (simulation.difficulty > 3) {
             spawn.secondaryBossChance(3380, -1775)
             if (Math.random() < 0.16) {
-                spawn.tetherBoss(3380, -1775, { x: 3775, y: -1775 })
+                spawn.tetherBoss(3380, -1775, {
+                    x: 3775,
+                    y: -1775
+                })
                 if (simulation.difficulty > 4) spawn.nodeGroup(3380, -1775, "spawns", 8, 20, 105); //chance to spawn a ring of exploding mobs around this boss
             } else {
                 spawn.randomLevelBoss(3100, -1850, ["shooterBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "dragonFlyBoss", "laserBoss"]);
@@ -8814,7 +8960,7 @@ const level = {
                 body[body.length] = part1;
                 body[body.length] = part2;
                 body[body.length] = part3;
-                setTimeout(function() {
+                setTimeout(function () {
                     compoundParts.collisionFilter.category = cat.body;
                     compoundParts.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
                 }, 1000);
@@ -10079,19 +10225,19 @@ const level = {
         simulation.makeTextLog(`<strong>temple</strong> by <span class='color-var'>Scar1337</span>`);
 
         const V = Vector;
-        const Equation = (function() {
+        const Equation = (function () {
             function Equation(a, b, c) {
                 this.a = a;
                 this.b = b;
                 this.c = c;
             }
-            Equation.prototype.getXfromY = function(y) {
+            Equation.prototype.getXfromY = function (y) {
                 return (-this.b * y - this.c) / this.a;
             }
-            Equation.prototype.getYfromX = function(x) {
+            Equation.prototype.getYfromX = function (x) {
                 return (-this.a * x - this.c) / this.b;
             }
-            Equation.fromPoints = function(v1, v2) {
+            Equation.fromPoints = function (v1, v2) {
                 if (v1.x === v2.x) return new Equation(1, 0, -v1.x);
                 if (v1.y === v2.y) return new Equation(0, 1, -v1.y);
                 const d = (v2.y - v1.y) / (v2.x - v1.x);
@@ -10099,17 +10245,23 @@ const level = {
             };
             return Equation;
         })();
-        const Rect = (function() {
+        const Rect = (function () {
             function Rect(x, y, w, h) {
-                this.pos = { x, y };
+                this.pos = {
+                    x,
+                    y
+                };
                 this.width = w;
                 this.height = h;
             }
-            Rect.prototype.has = function({ x, y }) {
+            Rect.prototype.has = function ({
+                x,
+                y
+            }) {
                 return x >= this.pos.x && x <= this.pos.x + this.width &&
                     y >= this.pos.y && y <= this.pos.y + this.height;
             }
-            Rect.prototype.hasLine = function(eq) {
+            Rect.prototype.hasLine = function (eq) {
                 const leftInter = eq.getYfromX(this.pos.x);
                 const rightInter = eq.getYfromX(this.pos.x + this.width);
                 const topInter = eq.getXfromY(this.pos.y);
@@ -10117,18 +10269,21 @@ const level = {
                     (rightInter >= this.pos.y && rightInter <= this.pos.y + this.height) ||
                     (topInter >= this.pos.x && topInter <= this.pos.x + this.width);
             }
-            Rect.prototype.addToMap = function() {
+            Rect.prototype.addToMap = function () {
                 spawn.mapRect(this.pos.x, this.pos.y, this.width, this.height);
             }
             Object.defineProperty(Rect.prototype, "midPos", {
                 get() {
-                    return V.add(this.pos, { x: this.width / 2, y: this.height / 2 });
+                    return V.add(this.pos, {
+                        x: this.width / 2,
+                        y: this.height / 2
+                    });
                 }
             });
-            Rect.fromBounds = function(min, max) {
+            Rect.fromBounds = function (min, max) {
                 return new Rect(min.x, min.y, max.x - min.x, max.y - min.y);
             }
-            Rect.prototype.isCollidingWith = function(other) {
+            Rect.prototype.isCollidingWith = function (other) {
                 const tc = {
                     p1: [this.pos.x, this.pos.y],
                     p2: [this.pos.x + this.width, this.pos.y + this.height]
@@ -10164,7 +10319,10 @@ const level = {
         function relocateWIMPs(x, y) {
             for (const i of mob) {
                 if (i.isWIMP) {
-                    setPos(i, { x: x + 300 * (Math.random() - 0.5), y: y + 300 * (Math.random() - 0.5) });
+                    setPos(i, {
+                        x: x + 300 * (Math.random() - 0.5),
+                        y: y + 300 * (Math.random() - 0.5)
+                    });
                 }
             }
         }
@@ -10186,14 +10344,14 @@ const level = {
             me.attackCycle = 0;
             me.lastAttackCycle = 0;
             Matter.Body.setDensity(me, 0.012); // extra dense, normal is 0.001 // makes effective life much larger
-            me.onDeath = function() {
+            me.onDeath = function () {
                 // applying forces to player doesn't seem to work inside this method, not sure why
                 powerUps.spawn(this.position.x + 20, this.position.y, "ammo");
                 if (Math.random() > 0.5) powerUps.spawn(this.position.x, this.position.y, "ammo");
                 if (Math.random() > 0.3) powerUps.spawn(this.position.x, this.position.y, "heal", true, null, 30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
             };
             me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
-            me.do = function() {
+            me.do = function () {
                 // keep it slow, to stop issues from explosion knock backs
                 if (this.speed > 1) {
                     Matter.Body.setVelocity(this, {
@@ -10256,7 +10414,10 @@ const level = {
                             if (this.attackCycle >= 30) {
                                 this.attackCycle = 0;
                                 this.lastAttackCycle = simulation.cycle;
-                                Matter.Body.setVelocity(player, V.add(player.velocity, { x: 0, y: -10 }));
+                                Matter.Body.setVelocity(player, V.add(player.velocity, {
+                                    x: 0,
+                                    y: -10
+                                }));
                                 if (m.immuneCycle < m.cycle) {
                                     if (m.energy > 0) m.energy -= 0.03;
                                     m.damage(0.005 * simulation.dmgScale);
@@ -10287,13 +10448,13 @@ const level = {
             me.attackCycle = 0;
             me.maxAttackCycle = isDark ? 90 : 240;
             Matter.Body.setDensity(me, 0.006); // extra dense, normal is 0.001 // makes effective life much larger
-            me.onDeath = function() {
+            me.onDeath = function () {
                 powerUps.spawn(this.position.x + 20, this.position.y, "ammo");
                 if (Math.random() > 0.5) powerUps.spawn(this.position.x, this.position.y, "ammo");
                 if (Math.random() > 0.3) powerUps.spawn(this.position.x, this.position.y, "heal", true, null, 30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
             };
             me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
-            me.do = function() {
+            me.do = function () {
                 // keep it slow, to stop issues from explosion knock backs
                 if (this.speed > 2) {
                     Matter.Body.setVelocity(this, {
@@ -10345,12 +10506,12 @@ const level = {
                 me.maxAttackCycle = 10;
                 me.inertia = Infinity;
             }
-            me.do = isDark ? function() {
+            me.do = isDark ? function () {
                 Matter.Body.setVelocity(this, {
                     x: this.velocity.x * 0.95,
                     y: this.velocity.y * 0.95
                 });
-            } : function() {
+            } : function () {
                 Matter.Body.setVelocity(this, {
                     x: this.velocity.x * 0.95,
                     y: this.velocity.y * 0.95
@@ -10390,7 +10551,7 @@ const level = {
             let me = mob[mob.length - 1];
             me.fill = "#ace";
             me.damageReduction = 0;
-            me.onDeath = function() {
+            me.onDeath = function () {
                 //damage player if in range
                 if (distance(player.position, this.position) < pulseRadius && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
@@ -10404,7 +10565,7 @@ const level = {
                     time: simulation.drawTime
                 });
             };
-            me.do = function() {
+            me.do = function () {
                 this.timeLimit();
                 ctx.beginPath(); //draw explosion outline
                 ctx.arc(this.position.x, this.position.y, pulseRadius * (1.01 - this.timeLeft / this.lifeSpan), 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
@@ -10438,7 +10599,7 @@ const level = {
             me.lastAttackCycle = 0;
             me.spawnCycle = 0;
             Matter.Body.setDensity(me, 0.08); //extra dense //normal is 0.001 //makes effective life much larger
-            me.onDeath = function() {
+            me.onDeath = function () {
                 for (let j = 0; j < 8; j++) { //in case some mobs leave things after they die
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i] !== this) {
@@ -10457,7 +10618,7 @@ const level = {
             };
             me.nextHealthThreshold = 0.75;
             me.trapCycle = 0;
-            me.onDamage = function() {
+            me.onDamage = function () {
                 if (this.health < this.nextHealthThreshold) {
                     this.health = this.nextHealthThreshold - 0.01
                     this.nextHealthThreshold = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
@@ -10480,7 +10641,7 @@ const level = {
                 radius: 500,
                 id: 2
             }];
-            me.ring = function() {
+            me.ring = function () {
                 if (this.isInvulnerable) return;
                 ctx.lineWidth = 10;
                 for (const ring of this.rings) {
@@ -10492,7 +10653,7 @@ const level = {
                     DrawTools.arcOut(this.position.x, this.position.y, radius, 0, Math.PI * 2);
                 }
             }
-            me.horizon = function() {
+            me.horizon = function () {
                 if (this.isInvulnerable) return this.fill = "#f00";
                 // eventHorizon waves in and out
                 const eventHorizon = this.eventHorizon * (1 + 0.2 * Math.sin(simulation.cycle * 0.008));
@@ -10532,7 +10693,10 @@ const level = {
                     if (this.attackCycle >= 90) {
                         this.attackCycle = 0;
                         this.lastAttackCycle = simulation.cycle;
-                        Matter.Body.setVelocity(player, V.add(player.velocity, { x: 0, y: -20 }));
+                        Matter.Body.setVelocity(player, V.add(player.velocity, {
+                            x: 0,
+                            y: -20
+                        }));
                         if (m.immuneCycle < m.cycle) {
                             m.damage(0.012 * simulation.dmgScale);
                         }
@@ -10544,7 +10708,7 @@ const level = {
                     DrawTools.arc(m.pos.x, m.pos.y, 40, 0, 2 * Math.PI);
                 }
             }
-            me.periodicSpawns = function() {
+            me.periodicSpawns = function () {
                 if (this.isInvulnerable) return;
                 this.spawnCycle++;
                 // Spawn annoying purple thing(s) that chases the player
@@ -10557,9 +10721,15 @@ const level = {
                 if (!(this.spawnCycle % 300)) {
                     for (let i = 0; i < 3; i++) {
                         mobGrenade(1100 + 700 * i, -13030, undefined, Math.min(700, 300 + simulation.difficulty * 4), 10);
-                        setVel(mob[mob.length - 1], { x: 0, y: -10 });
+                        setVel(mob[mob.length - 1], {
+                            x: 0,
+                            y: -10
+                        });
                         mobGrenade(1100 + 700 * i, -14370, undefined, Math.min(700, 300 + simulation.difficulty * 4), 10);
-                        setVel(mob[mob.length - 1], { x: 0, y: 10 });
+                        setVel(mob[mob.length - 1], {
+                            x: 0,
+                            y: 10
+                        });
                     }
                 }
                 // Spawn a bunch of mobs
@@ -10578,7 +10748,7 @@ const level = {
                     spawn.allowShields = true;
                 }
             }
-            me.invulnerableTrap = function() {
+            me.invulnerableTrap = function () {
                 if (this.trapCycle < 1) return;
                 this.trapCycle++;
                 // 24 is just an arbitrarily large number
@@ -10590,13 +10760,25 @@ const level = {
                     if (!(cycle % spawnDelay)) {
                         const radius = Math.min(500, 200 + simulation.difficulty * 3);
                         mobGrenade(600, -13050, 30, radius);
-                        Matter.Body.setVelocity(mob[mob.length - 1], { x: 35, y: 0 });
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: 35,
+                            y: 0
+                        });
                         mobGrenade(3000, -13050, 30, radius);
-                        Matter.Body.setVelocity(mob[mob.length - 1], { x: -35, y: 0 });
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: -35,
+                            y: 0
+                        });
                         mobGrenade(600, -14350, 30, radius);
-                        Matter.Body.setVelocity(mob[mob.length - 1], { x: 35, y: 0 });
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: 35,
+                            y: 0
+                        });
                         mobGrenade(3000, -14350, 30, radius);
-                        Matter.Body.setVelocity(mob[mob.length - 1], { x: -35, y: 0 });
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: -35,
+                            y: 0
+                        });
                         if (Math.floor(cycle / spawnDelay) >= spawnCycles - 1) {
                             this.trapCycle = 0;
                             this.isInvulnerable = false;
@@ -10618,7 +10800,7 @@ const level = {
                 ctx.fillText("!", 2700, -14350);
                 ctx.shadowBlur = 0;
             }
-            me.do = function() {
+            me.do = function () {
                 this.checkStatus();
                 this.horizon();
                 this.ring();
@@ -10639,7 +10821,7 @@ const level = {
         let bounds = [];
         let mobPositionsQueue = Array.from(Array(10), () => []);
         m.oldDeath = m.death;
-        m.death = function() {
+        m.death = function () {
             if (!tech.isImmortal) {
                 requestAnimationFrame(() => color.map = "#444");
                 m.death = m.oldDeath;
@@ -10750,7 +10932,7 @@ const level = {
         spawn.mapRect(-500, -8250, 800, 20);
         for (let i = 0; i < 2; i++) spawn.mapRect(-250, -8400 + 150 * i, 500, 60);
         const room2SlimePit = level.hazard(-400, -8410, 800, 1090);
-        room2SlimePit.logic = function() {
+        room2SlimePit.logic = function () {
             if (this.height > 0 && Matter.Query.region([player], this).length) {
                 if (m.immuneCycle < m.cycle) {
                     // Trolled
@@ -10773,7 +10955,10 @@ const level = {
                     tech.isRewindAvoidDeath = hasCPT;
                 }
                 player.force.y -= 0.3 * player.mass * simulation.g;
-                setVel(player, Vector.sub(player.velocity, { x: 0, y: player.velocity.y * 0.02 }));
+                setVel(player, Vector.sub(player.velocity, {
+                    x: 0,
+                    y: player.velocity.y * 0.02
+                }));
             }
             // Float power ups
             powerUpCollide = Matter.Query.region(powerUp, this)
@@ -10781,10 +10966,13 @@ const level = {
                 const diameter = 2 * powerUpCollide[i].size
                 const buoyancy = 1 - 0.2 * Math.max(0, Math.min(diameter, this.min.y - powerUpCollide[i].position.y + powerUpCollide[i].size)) / diameter
                 powerUpCollide[i].force.y -= buoyancy * 1.14 * powerUpCollide[i].mass * simulation.g;
-                setVel(powerUpCollide[i], { x: powerUpCollide[i].velocity.x, y: 0.96 * powerUpCollide[i].velocity.y });
+                setVel(powerUpCollide[i], {
+                    x: powerUpCollide[i].velocity.x,
+                    y: 0.96 * powerUpCollide[i].velocity.y
+                });
             }
         }
-        room2SlimePit.draw = function() {
+        room2SlimePit.draw = function () {
             if (this.isOn) {
                 ctx.fillStyle = "hsla(160, 100%, 35%, 0.75)";
                 ctx.fillRect(this.min.x, this.min.y, this.width, this.height);
@@ -10829,7 +11017,10 @@ const level = {
                     y: -2200
                 },
                 get isActive() {
-                    const roughPlayerCentre = V.add(m.pos, { x: 0, y: 40 });
+                    const roughPlayerCentre = V.add(m.pos, {
+                        x: 0,
+                        y: 40
+                    });
                     return distance(roughPlayerCentre, this.pos) < 240 &&
                         (Math.abs(angle(roughPlayerCentre, this.pos) - Math.PI / 2) < 1);
                 },
@@ -10899,8 +11090,20 @@ const level = {
                         ctx.save();
                         simulation.camera();
                         if (this.distance < this.range && !this.capped) {
-                            DrawTools.lightning(V.sub(this.pos, { x: 300, y: 300 }), V.add(this.pos, { x: 300, y: 300 }), simulation.cycle - 5);
-                            DrawTools.lightning(V.add(this.pos, { x: -300, y: 300 }), V.add(this.pos, { x: 300, y: -300 }), simulation.cycle - 5);
+                            DrawTools.lightning(V.sub(this.pos, {
+                                x: 300,
+                                y: 300
+                            }), V.add(this.pos, {
+                                x: 300,
+                                y: 300
+                            }), simulation.cycle - 5);
+                            DrawTools.lightning(V.add(this.pos, {
+                                x: -300,
+                                y: 300
+                            }), V.add(this.pos, {
+                                x: 300,
+                                y: -300
+                            }), simulation.cycle - 5);
                         }
                         if (!this.capped && cycle >= this.cap - 200) {
                             const multCoeff = (cycle - this.cap + 200) * 0.4
@@ -10927,8 +11130,20 @@ const level = {
                 }
             },
             room2Lightning: {
-                one: [{ x: -1400, y: -10400 }, { x: 1400, y: -8500 }],
-                two: [{ x: -1400, y: -8500 }, { x: 1400, y: -10400 }],
+                one: [{
+                    x: -1400,
+                    y: -10400
+                }, {
+                    x: 1400,
+                    y: -8500
+                }],
+                two: [{
+                    x: -1400,
+                    y: -8500
+                }, {
+                    x: 1400,
+                    y: -10400
+                }],
                 get isHeal() {
                     return simulation.cycle % 360 < 180;
                 },
@@ -10959,7 +11174,7 @@ const level = {
                 }
             },
             room2GeneratedPath: {
-                rects: (function() {
+                rects: (function () {
                     const rects = [];
                     for (let i = 0; i < 4; i++) {
                         rects.push(new Rect(-1405 + (i & 1) * 200, -9700 + i * 300, 205, 30));
@@ -10990,16 +11205,16 @@ const level = {
                 }
             },
             room3Rotors: {
-                rotor1: (function() {
+                rotor1: (function () {
                     const rotor = level.spinner(900, -13700, 200, 30);
-                    rotor.rotate = function() {
+                    rotor.rotate = function () {
                         Matter.Body.setAngularVelocity(this.bodyB, (this.bodyB.angularVelocity + 0.01) * 0.9)
                     }
                     return rotor;
                 })(),
-                rotor2: (function() {
+                rotor2: (function () {
                     const rotor = level.spinner(2700, -13700, 200, 30);
-                    rotor.rotate = function() {
+                    rotor.rotate = function () {
                         Matter.Body.setAngularVelocity(this.bodyB, (this.bodyB.angularVelocity - 0.01) * 0.9)
                     }
                     return rotor;
@@ -11329,7 +11544,10 @@ const level = {
                 if (simulation.cycle % 4 === 0) {
                     let newMobPositions = [];
                     for (const i of mob) {
-                        if (!(i.isMACHO || i.isWIMP || i.isObstacle)) newMobPositions.push({ x: i.position.x, y: i.position.y });
+                        if (!(i.isMACHO || i.isWIMP || i.isObstacle)) newMobPositions.push({
+                            x: i.position.x,
+                            y: i.position.y
+                        });
                     }
                     mobPositionsQueue.shift();
                     mobPositionsQueue.push(newMobPositions);
@@ -11475,14 +11693,20 @@ const level = {
             singleFlame(x, y, size = 10, repeat = 3, color = "#f00", angle = Math.PI / 2) {
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 3;
-                const path = [{ x, y }];
+                const path = [{
+                    x,
+                    y
+                }];
                 for (let i = 0; i < repeat; i++) {
                     const randAng = (Math.random() - 0.5) * 2 + angle;
                     const randLen = 2 * size + Math.random() * size;
 
                     x += Math.cos(randAng) * randLen;
                     y -= Math.sin(randAng) * randLen;
-                    path.push({ x, y })
+                    path.push({
+                        x,
+                        y
+                    })
                 }
                 DrawTools.line(path);
             },
@@ -11493,28 +11717,58 @@ const level = {
                 ctx.lineWidth = width * (1 - diff / 15);
                 ctx.shadowColor = `rgb(${color.join(",")})`;
                 ctx.shadowBlur = 20;
-                const path = [{ x: from.x, y: from.y }];
-                let vector = { x: from.x, y: from.y };
+                const path = [{
+                    x: from.x,
+                    y: from.y
+                }];
+                let vector = {
+                    x: from.x,
+                    y: from.y
+                };
                 let distanceLeft = V.magnitude(V.sub(from, to));
                 const d = distanceLeft > 800 ? distanceLeft / 40 : 20;
                 const normalised = V.normalise(V.sub(to, from));
                 while (1) {
-                    const randOffset = rotateVector({ y: RNG(Math.floor(cycle * randomPRNGMult + distanceLeft)) * 2 * d - d, x: 0 }, normalised);
+                    const randOffset = rotateVector({
+                        y: RNG(Math.floor(cycle * randomPRNGMult + distanceLeft)) * 2 * d - d,
+                        x: 0
+                    }, normalised);
                     const randLen = RNG(Math.floor(cycle * (randomPRNGMult + 1) + distanceLeft)) * d + d;
                     distanceLeft -= randLen;
                     if (distanceLeft <= 0) {
-                        path.push({ x: to.x, y: to.y });
+                        path.push({
+                            x: to.x,
+                            y: to.y
+                        });
                         break;
                     }
                     vector = V.add(vector, V.mult(normalised, randLen));
-                    path.push({ x: vector.x + randOffset.x, y: vector.y + randOffset.y });
+                    path.push({
+                        x: vector.x + randOffset.x,
+                        y: vector.y + randOffset.y
+                    });
                 }
                 DrawTools.line(path);
                 ctx.shadowBlur = 0;
             },
             holy(x, y, size = 12) {
-                this.line([{ x, y: y - size }, { x: x - size, y },
-                    { x, y: y + size }, { x: x + size, y }, { x, y: y - size }
+                this.line([{
+                        x,
+                        y: y - size
+                    }, {
+                        x: x - size,
+                        y
+                    },
+                    {
+                        x,
+                        y: y + size
+                    }, {
+                        x: x + size,
+                        y
+                    }, {
+                        x,
+                        y: y - size
+                    }
                 ]);
             }
         };
@@ -11532,15 +11786,27 @@ const level = {
         }
 
         function rotateVector(v, ang) {
-            const c = typeof ang === "number" ? { x: Math.cos(ang), y: Math.sin(ang) } : V.normalise(ang);
-            return { x: v.x * c.x - v.y * c.y, y: v.y * c.x + v.x * c.y };
+            const c = typeof ang === "number" ? {
+                x: Math.cos(ang),
+                y: Math.sin(ang)
+            } : V.normalise(ang);
+            return {
+                x: v.x * c.x - v.y * c.y,
+                y: v.y * c.x + v.x * c.y
+            };
         }
 
         function trapPlayer(x, y) {
-            setPosAndFreeze(player, { x, y });
+            setPosAndFreeze(player, {
+                x,
+                y
+            });
             const bLen = bullet.length;
             for (let i = 0; i < bLen; i++) {
-                if (bullet[i].botType) setPosAndFreeze(bullet[i], V.add(player.position, { x: 100 * (RNG(i) - 0.5), y: 100 * (RNG(i + bLen) - 0.5) }));
+                if (bullet[i].botType) setPosAndFreeze(bullet[i], V.add(player.position, {
+                    x: 100 * (RNG(i) - 0.5),
+                    y: 100 * (RNG(i + bLen) - 0.5)
+                }));
             }
         }
 
@@ -11549,7 +11815,10 @@ const level = {
             trapPlayer(x, y);
             for (let i = 0; i < mob.length; i++) {
                 if (mob[i].isMACHO) {
-                    setPos(mob[i], { x, y });
+                    setPos(mob[i], {
+                        x,
+                        y
+                    });
                     break;
                 }
             }
@@ -11559,7 +11828,10 @@ const level = {
         const angle = (a, b) => Math.atan2(b.y - a.y, a.x - b.x);
         const setPos = (a, b) => Matter.Body.setPosition(a, b);
         const setVel = (a, b) => Matter.Body.setVelocity(a, b);
-        const freeze = a => setVel(a, { x: 0, y: 0 });
+        const freeze = a => setVel(a, {
+            x: 0,
+            y: 0
+        });
         const setPosAndFreeze = (a, b) => {
             setPos(a, b);
             freeze(a);
@@ -11607,7 +11879,10 @@ const level = {
         const door2 = level.door(3131, -898, 40, 520, 522)
         const buttonDoor2 = level.button(2495, -270)
         const toggle = level.toggle(1463, -708, true)
-        const elevator = level.elevator(4310, -150, 200, 50, -1443, 0.0025, { up: 0.1, down: 0.2 })
+        const elevator = level.elevator(4310, -150, 200, 50, -1443, 0.0025, {
+            up: 0.1,
+            down: 0.2
+        })
         const portal = level.portal({ //main portals
             x: 2117,
             y: -1560
@@ -11860,7 +12135,16 @@ const level = {
 
         let bossInit = false
 
-        const cutscenePoll = simulation.cutscene([{ x: 230, y: -2700 }, { x: 3500, y: -1400 }, { x: 1450, y: -1150 }, m.pos], 0.1, 10)
+        const cutscenePoll = simulation.cutscene([{
+            x: 230,
+            y: -2700
+        }, {
+            x: 3500,
+            y: -1400
+        }, {
+            x: 1450,
+            y: -1150
+        }, m.pos], 0.1, 10)
         let hasEnded = false
 
         // ** PROPS ** 
@@ -11886,7 +12170,7 @@ const level = {
             me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.mob | cat.bullet
             me.g = simulation.g
             me.leaveBody = me.isDropPowerUp = false
-            me.do = function() {
+            me.do = function () {
                 this.gravity()
                 // apply shock damage when touching the map, if it's fast
                 if (this.speed > 5) {
@@ -11901,7 +12185,7 @@ const level = {
                 this.fill = `rgb(${232 * this.health}, 191, 40)`
             }
 
-            me.onDeath = function() {
+            me.onDeath = function () {
                 const END = Math.floor(input.down ? 10 : 7)
                 const totalBullets = 10
                 const angleStep = (input.down ? 0.4 : 1.3) / totalBullets
@@ -11925,16 +12209,16 @@ const level = {
                         x: speed * Math.cos(dirOff),
                         y: speed * Math.sin(dirOff)
                     })
-                    bullet[me].onEnd = function() {
+                    bullet[me].onEnd = function () {
                         b.explosion(
                             this.position,
                             150 + (Math.random() - 0.5) * 40
                         ) //makes bullet do explosive damage at end
                     }
-                    bullet[me].beforeDmg = function() {
+                    bullet[me].beforeDmg = function () {
                         this.endCycle = 0 //bullet ends cycle after hitting a mob and triggers explosion
                     }
-                    bullet[me].do = function() {}
+                    bullet[me].do = function () {}
                     Composite.add(engine.world, bullet[me]) //add bullet to world
                 }
                 // barrels drop a ton of ammo and some heals, scales up with difficulty because I have mercy
@@ -11960,7 +12244,10 @@ const level = {
             const perpCollision = point => {
                 // takes a point, and finds a collision with the map downwards
                 // the end of the ray, 3000 units down
-                const lowerPoint = Vector.add(point, { x: 0, y: 3000 })
+                const lowerPoint = Vector.add(point, {
+                    x: 0,
+                    y: 3000
+                })
                 // the destination point. If a collision was not found, then it defaults to some
                 // arbiterary point 3000 units down.
                 let dest = lowerPoint
@@ -11968,7 +12255,10 @@ const level = {
                     const check = simulation.checkLineIntersection(point, lowerPoint, mapBody.vertices[0], mapBody.vertices[1])
                     // a collision was found
                     if (check.onLine1 && check.onLine2) {
-                        dest = { x: check.x, y: check.y }
+                        dest = {
+                            x: check.x,
+                            y: check.y
+                        }
                         break
                     }
                 }
@@ -11981,7 +12271,12 @@ const level = {
                 const width = Math.abs(firstBound.x - secondBound.x)
                 const height = Math.abs(firstBound.y - secondBound.y)
                 // compile to an object
-                return { x: firstBound.x, y: firstBound.y, width, height }
+                return {
+                    x: firstBound.x,
+                    y: firstBound.y,
+                    width,
+                    height
+                }
             }
             // create the actual platform
             spawn.mapRect(x, y, width, height)
@@ -12031,7 +12326,7 @@ const level = {
             mobs.spawn(x, y + chainLength + radius * 2, 4, trappedMob.radius + 50, 'rgba(150, 255, 150, 0.3)')
             const cage = mob[mob.length - 1]
             cage.g = simulation.g
-            cage.do = function() {
+            cage.do = function () {
                 this.gravity()
             }
             // label it
@@ -12062,7 +12357,10 @@ const level = {
                 // iterate over all vertices to form lines
                 const v1 = verts[i]
                 const v2 = verts[(i + 1) % verts.length]
-                const result = simulation.checkLineIntersection(cage.position, { x, y }, v1, v2)
+                const result = simulation.checkLineIntersection(cage.position, {
+                    x,
+                    y
+                }, v1, v2)
                 if (result.onLine1 && result.onLine2) {
                     // both lines cross!
                     cross = result
@@ -12073,7 +12371,10 @@ const level = {
             if (!cross) {
                 // for some odd reason, sometimes it never finds a collision. I have no idea why
                 // just default to the center then
-                console.error("Couldn't find a cross... Origin: ", { x, y }, " center: ", cage.position, ' vertices: ', cage.vertices)
+                console.error("Couldn't find a cross... Origin: ", {
+                    x,
+                    y
+                }, " center: ", cage.position, ' vertices: ', cage.vertices)
                 cross = cage.position
             }
             // create the rope
@@ -12179,7 +12480,10 @@ const level = {
             if (Math.random() > 0.999 && bossInit && !hasEnded) {
                 const spawnLocs = [-1415, -30, 1345, 2815, 4285]
                 // const randVec = Vector.mult({ x: Math.cos(randAngle), y: Math.sin(randAngle) }, Math.random() * 15)
-                barrelMob(spawnLocs[~~(spawnLocs.length * Math.random())], -4200, { x: 0, y: 0 })
+                barrelMob(spawnLocs[~~(spawnLocs.length * Math.random())], -4200, {
+                    x: 0,
+                    y: 0
+                })
             }
 
             // platform shadow
@@ -12264,7 +12568,10 @@ const level = {
             // initialized here as it depends on vertexCount. I could use `new function()` but nah.
             genome.vertexOffset = Array(genome.vertexCount)
                 .fill()
-                .map(() => ({ x: Math.random() - 0.5, y: Math.random() - 0.5 }))
+                .map(() => ({
+                    x: Math.random() - 0.5,
+                    y: Math.random() - 0.5
+                }))
             return genome
         }
 
@@ -12273,7 +12580,10 @@ const level = {
             const randomInRange = (min, max) => Math.random() * (max - min) + min
             const tinyChange = x => randomInRange(-x, x)
 
-            const vertexMutator = x => ({ x: x.x + tinyChange(0.5), y: x.y + tinyChange(0.5) })
+            const vertexMutator = x => ({
+                x: x.x + tinyChange(0.5),
+                y: x.y + tinyChange(0.5)
+            })
             // mutates a genome and returns the mutated version.
             const newGenome = {
                 density: genome.density + tinyChange(0.0005),
@@ -12314,7 +12624,7 @@ const level = {
             const color = `rgba(${150 + 105 * charge}, 81, 50, 0.6)`
             mobs.spawn(origin.x, origin.y, 12, 20 + 20 * charge, color)
             const me = mob[mob.length - 1]
-            me.end = function() {
+            me.end = function () {
                 simulation.drawList.push({
                     // some nice graphics
                     x: this.position.x,
@@ -12337,7 +12647,7 @@ const level = {
             me.life = 0
             me.isDropPowerUp = false
             me.leaveBody = false
-            me.do = function() {
+            me.do = function () {
                 // die on collision with the map
                 if (Matter.Query.collides(this, map).length > 0) {
                     this.end()
@@ -12400,7 +12710,7 @@ const level = {
             me.bossPos = null // the position that the mob remembers when charging
             me.density = me.density * 2
             Matter.Body.setDensity(me, 0.0022 * 3 + 0.0002 * Math.sqrt(simulation.difficulty)) //extra dense
-            me.do = function() {
+            me.do = function () {
                 // if the boss is dead, die
                 if (!parentBoss.alive) {
                     this.death()
@@ -12468,7 +12778,7 @@ const level = {
                 // draw energy bar
                 drawEnergyBar(this)
             }
-            me.onDeath = function() {
+            me.onDeath = function () {
                 // remove itself from the list
                 const beacons = parentBoss.energyBeacons
                 beacons.splice(beacons.indexOf(this), 1)
@@ -12513,7 +12823,7 @@ const level = {
             me.showHealthBar = false
             me.collisionFilter.category = cat.mobBullet
             me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet
-            me.do = function() {
+            me.do = function () {
                 this.alwaysSeePlayer()
                 this.attraction()
                 this.timeLimit()
@@ -12544,7 +12854,7 @@ const level = {
                 // ctx.fillStyle = 'rgba(252, 0, 143, 1)'
                 // ctx.fillText(~~this.score, this.position.x - this.radius, this.position.y - this.radius)
             }
-            me.onHit = function() {
+            me.onHit = function () {
                 // hitting the player gives a 50 points score bonus
                 this.score += 50
                 this.score += this.mass * 2 // bigger mass = bigger damage, add that too
@@ -12552,7 +12862,7 @@ const level = {
                 this.hitPlayer = true
                 this.explode(this.mass)
             }
-            me.onDeath = function() {
+            me.onDeath = function () {
                 if (!this.hitPlayer) {
                     // if it didn't hit the player, give it a score based on its distance
                     this.score += 10000 / this.distanceToPlayer()
@@ -12561,7 +12871,10 @@ const level = {
                 if (Math.random() > 0.97) {
                     powerUps.spawn(this.position.x, this.position.y, 'ammo', true)
                 }
-                parentBoss.deadOrbs.push({ genome: genome, score: this.score })
+                parentBoss.deadOrbs.push({
+                    genome: genome,
+                    score: this.score
+                })
             }
         }
 
@@ -12584,7 +12897,10 @@ const level = {
             me.energyBeacons = []
             me.activeBalls = 0
             // starts by random, or by the stored genomes if they exist
-            const init = () => ({ genome: generateGenome(), score: 0 })
+            const init = () => ({
+                genome: generateGenome(),
+                score: 0
+            })
             me.fittestOrbs = (localStorage && localStorage.genome) ? JSON.parse(localStorage.genome) : [init(), init(), init()] // best genomes so far. Size of three
             // when an orb died it's moved here. When a new spawn cycle starts, their scores get calculated
             // and they get put in the fittest orbs array, if they are better than the old ones.
@@ -12600,7 +12916,7 @@ const level = {
             me.laserRange = radius * 4
 
             Matter.Body.setDensity(me, 0.0022 * 4 + 0.0002 * Math.sqrt(simulation.difficulty)) //extra dense //normal is 0.001 //makes effective life much larger
-            me.onDeath = function() {
+            me.onDeath = function () {
                 if (spawnBossPowerUp) {
                     powerUps.spawnBossPowerUp(this.position.x, this.position.y)
                     const amount = ~~(5 * Math.random() * simulation.difficulty / 10) * 2
@@ -12619,8 +12935,8 @@ const level = {
                 // stop spawning barrels
                 bossInit = false
             }
-            me.onDamage = function() {}
-            me.spawnBeacon = function() {
+            me.onDamage = function () {}
+            me.spawnBeacon = function () {
                 // the vertex to spawn the beacon from
                 const vert = this.vertices[~~(Math.random() * this.vertices.length)]
                 // the position should be a little to the side to prevent crashing into the boss
@@ -12636,7 +12952,7 @@ const level = {
                     y: this.velocity.y + velocity.y
                 })
             }
-            me.spawnOrbs = function() {
+            me.spawnOrbs = function () {
                 Matter.Body.setAngularVelocity(this, 0.11)
                 // sort the vertices by the distance to the player
                 const sorted = [...this.vertices].sort(dist2)
@@ -12693,7 +13009,7 @@ const level = {
                     })
                 }
             }
-            me.do = function() {
+            me.do = function () {
                 this.seePlayerCheck()
                 this.checkStatus()
                 this.attraction()
@@ -12738,7 +13054,10 @@ const level = {
                         // if it's not a bot and it's close
                         if (!it.botType && dist(this.position, it.position) < this.laserRange) {
                             // add it to the ionized list
-                            this.ionized.push({ target: it, ticks: 0 })
+                            this.ionized.push({
+                                target: it,
+                                ticks: 0
+                            })
                         }
                     }
                 }
@@ -13424,13 +13743,19 @@ const level = {
             //teleport to start if hit
             if (m.immuneCycle > m.cycle) {
                 m.energy = m.maxEnergy
-                Matter.Body.setPosition(player, { x: 60, y: -50 })
+                Matter.Body.setPosition(player, {
+                    x: 60,
+                    y: -50
+                })
             }
             //spawn bullets
             if (!(simulation.cycle % 5)) {
                 spawn.sniperBullet(660 + 580 * Math.random(), -2000, 10, 4);
                 const who = mob[mob.length - 1]
-                Matter.Body.setVelocity(who, { x: 0, y: 8 });
+                Matter.Body.setVelocity(who, {
+                    x: 0,
+                    y: 8
+                });
                 who.timeLeft = 300
             }
             //exit room
@@ -13466,7 +13791,10 @@ const level = {
         for (let i = 0; i < 32; i++) {
             spawn.sniperBullet(660 + 580 * Math.random(), -2000 + 40 * i, 10, 4);
             const who = mob[mob.length - 1]
-            Matter.Body.setVelocity(who, { x: 0, y: 8 });
+            Matter.Body.setVelocity(who, {
+                x: 0,
+                y: 8
+            });
             who.timeLeft = 300
         }
     },
@@ -13605,7 +13933,10 @@ const level = {
         }
         for (let i = 0; i < 2; i++) {
             spawn.spinner(1300 + i, -3000 - 200 * i, 25 + 5 * i)
-            Matter.Body.setVelocity(mob[mob.length - 1], { x: 0, y: 62 });
+            Matter.Body.setVelocity(mob[mob.length - 1], {
+                x: 0,
+                y: 62
+            });
         }
 
         spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
@@ -14076,7 +14407,10 @@ const level = {
                 if (button.isReady) {
                     button.isReady = false
                     spawn.exploder(335, -1700)
-                    Matter.Body.setVelocity(mob[mob.length - 1], { x: 0, y: 20 });
+                    Matter.Body.setVelocity(mob[mob.length - 1], {
+                        x: 0,
+                        y: 20
+                    });
                     ctx.fillStyle = "rgba(255,0,0,0.9)"
                     ctx.fillRect(550, -2800, 200, 1800)
                 }
@@ -14117,7 +14451,10 @@ const level = {
         b.removeAllGuns();
         b.giveGuns("grenades")
 
-        const elevator1 = level.elevator(550, -100, 180, 25, -840, 0.003, { up: 0.05, down: 0.2 }) // x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
+        const elevator1 = level.elevator(550, -100, 180, 25, -840, 0.003, {
+            up: 0.05,
+            down: 0.2
+        }) // x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
         elevator1.addConstraint();
         const toggle1 = level.toggle(275, 0) //(x,y,isOn,isLockOn = true/false)
 

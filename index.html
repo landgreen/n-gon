@@ -69,9 +69,13 @@
                     <label for="seed" title="the randoms seed determines level order, tech choices, and mob types">randomization seed:</label>
                     <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" style="width: 120px;">
                     <br>
+                    <label for="hide-images" title="hide images for fields, guns, and tech">hide images:</label>
+                    <input onclick="build.showImages('settings')" type="checkbox" id="hide-images" name="hide-images" style="width:17px; height:17px;">
+                    <br>
                     <span id="previous-seed" style="color:#bbb"></span>
                     <label for="community-maps" title="add about 12 player made levels the random n-gon level pool">include community maps:</label>
                     <input type="checkbox" id="community-maps" name="community-maps" style="width:17px; height:17px;">
+
                     <!-- <br>
 					<label for="body-damage" title="allow damage from the ground and large fast moving blocks">collision damage from blocks:</label>
 					<input type="checkbox" id="body-damage" name="body-damage" checked style="width:17px; height:17px;"> -->
@@ -126,6 +130,7 @@
                         <option value="classic/9-8-2019/">n-gon: fall-2019</option>
                         <option value="classic/7-15-2020/">n-gon: summer-2020</option>
                         <option value="classic/6-1-2021/">n-gon: spring-2021</option>
+                        <option value="classic/11-1-2022/">n-gon: fall-2022</option>
                         <option value="" selected>current version</option>
                     </select>
                 </div>
@@ -228,7 +233,7 @@
                             </g>
                         </svg>
                     </a>
-                    <a href="https://github.com/landgreen/n-gon">Github</a> hosts n-gon's 2.5MB source code.<br>It's written in JavaScript, CSS, and HTML and uses the matter.js 2-D physics library.
+                    <a href="https://github.com/landgreen/n-gon">Github</a> hosts n-gon's source code.<br>It's written in JavaScript, CSS, and HTML and uses the matter.js 2-D physics library. Images are generated mostly through midJourney.
                 </div>
             </details>
         </div>

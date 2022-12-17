@@ -411,7 +411,7 @@ const spawn = {
             }
         }
         me.damageReductionDecay = function() { //slowly make the boss take more damage over time  //damageReduction resets with each invulnerability phase
-            if (!(me.cycle % 60) && this.lastDamageCycle + 240 > this.cycle) this.damageReduction *= 1.017 //only decay once a second   //only decay if the player has done damage in the last 4 seconds
+            if (!(me.cycle % 60) && this.lastDamageCycle + 240 > this.cycle) this.damageReduction *= 1.02 //only decay once a second   //only decay if the player has done damage in the last 4 seconds
         }
         me.mobType = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]
         me.spawnMobs = function(index = 0) {
@@ -976,6 +976,7 @@ const spawn = {
                                 // build.shareURL(false)
                                 setTimeout(function() {
                                     if (!simulation.onTitlePage) {
+                                        m.alive = false
                                         simulation.paused = true;
                                         // simulation.clearMap();
                                         // Matter.Composite.clear(composite, keepStatic, [deep = false])
@@ -1533,6 +1534,101 @@ const spawn = {
     //         }
     //     };
     // },
+    zombie(x, y, radius, sides, color) { //mob that attacks other mobs
+        mobs.spawn(x, y, sides, radius, color);
+        let me = mob[mob.length - 1];
+        me.isZombie = true
+        me.isDropPowerUp = false;
+        me.showHealthBar = false;
+        me.stroke = "#83a"
+        me.accelMag = 0.0015
+        me.frictionAir = 0.01
+        // me.repulsionRange = 400000 + radius * radius; //squared
+        // me.memory = 120;
+        me.seeAtDistance2 = 1000000 //1000 vision range
+        // Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
+        me.do = function() {
+            this.zombieHealthBar();
+            this.lookForMobTargets();
+            this.attack();
+            this.checkStatus();
+        };
+        me.mobSearchIndex = 0;
+        me.target = null
+        me.lookForMobTargets = function() {
+            if (this.target && !this.target.alive) this.target = null
+            if (this.target === null && !(simulation.cycle % 10) && mob.length > 1) { //if you have no target
+                this.mobSearchIndex++ //look for a different mob index every time
+                if (this.mobSearchIndex > mob.length - 1) this.mobSearchIndex = 0
+                if (
+                    !mob[this.mobSearchIndex].isZombie &&
+                    (Vector.magnitudeSquared(Vector.sub(this.position, mob[this.mobSearchIndex].position)) < this.seeAtDistance2 || Matter.Query.ray(map, this.position, mob[this.mobSearchIndex].position).length === 0)
+                ) {
+                    this.target = mob[this.mobSearchIndex]
+                }
+            }
+        }
+        me.zombieHealthBar = function() {
+            this.damage(0.001); //decay
+
+            const h = this.radius * 0.3;
+            const w = this.radius * 2;
+            const x = this.position.x - w / 2;
+            const y = this.position.y - w * 0.7;
+            ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+            ctx.fillRect(x, y, w, h);
+            ctx.fillStyle = "rgba(136, 51, 170,0.7)";
+            ctx.fillRect(x, y, w * this.health, h);
+        }
+        me.hitCD = 0
+        me.attack = function() { //hit non zombie mobs
+            if (this.hitCD < simulation.cycle) {
+                if (this.target) {
+                    this.force = Vector.mult(Vector.normalise(Vector.sub(this.target.position, this.position)), this.accelMag * this.mass)
+                    if (this.speed > 6) { // speed cap instead of friction to give more agility
+                        Matter.Body.setVelocity(this, {
+                            x: this.velocity.x * 0.97,
+                            y: this.velocity.y * 0.97
+                        });
+                    }
+                }
+
+                const hit = (who) => {
+                    if (!who.isZombie && who.damageReduction) {
+                        this.hitCD = simulation.cycle + 15
+                        //knock back  away from recently hit mob
+                        const force = Vector.mult(Vector.normalise(Vector.sub(who.position, this.position)), 0.03 * this.mass)
+                        this.force.x -= force.x;
+                        this.force.y -= force.y;
+
+                        this.target = null //look for a new target
+
+
+
+                        const dmg = 0.3 * m.dmgScale
+                        who.damage(dmg);
+                        simulation.drawList.push({
+                            x: this.position.x,
+                            y: this.position.y,
+                            radius: Math.log(dmg + 1.1) * 40 * who.damageReduction + 3,
+                            color: simulation.playerDmgColor,
+                            time: simulation.drawTime
+                        });
+                    }
+                }
+                const collide = Matter.Query.collides(this, mob) //damage mob targets if nearby
+                if (collide.length > 1) { //don't count self collide
+                    for (let i = 0, len = collide.length; i < len; i++) {
+                        hit(collide[i].bodyA)
+                        hit(collide[i].bodyB)
+                    }
+                }
+            }
+        }
+        // me.onDamage = function(dmg) {
+        // }
+
+    },
     starter(x, y, radius = Math.floor(15 + 20 * Math.random())) { //easy mob for on level 1
         mobs.spawn(x, y, 8, radius, "#9ccdc6");
         let me = mob[mob.length - 1];
@@ -6674,7 +6770,7 @@ const spawn = {
             this.seePlayerByHistory(60);
             this.attraction();
             this.checkStatus();
-            this.eventHorizon = 900 + 200 * Math.sin(simulation.cycle * 0.005)
+            this.eventHorizon = 950 + 250 * Math.sin(simulation.cycle * 0.005)
             if (!simulation.isTimeSkipping) {
                 if (Vector.magnitude(Vector.sub(this.position, m.pos)) < this.eventHorizon) {
                     this.attraction();
