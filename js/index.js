@@ -14,7 +14,7 @@ Math.hash = s => {
 
 document.getElementById("seed").placeholder = Math.initialSeed = String(Math.floor(Date.now() % 100000))
 Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
-Math.seededRandom = function (min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined
+Math.seededRandom = function(min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined
     Math.seed = (Math.seed * 9301 + 49297) % 233280;
     return min + Math.seed / 233280 * (max - min);
 }
@@ -100,7 +100,7 @@ const color = { //light
 //difficulty is 0 easy, 1 normal, 2 hard, 4 why
 function getUrlVars() {
     let vars = {};
-    window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, k, v) {
+    window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, k, v) {
         vars[k] = v;
     });
     return vars;
@@ -202,7 +202,7 @@ const ctx = canvas.getContext("2d");
 document.body.style.backgroundColor = "#fff";
 
 //disable pop up menu on right click
-document.oncontextmenu = function () {
+document.oncontextmenu = function() {
     return false;
 }
 
@@ -412,7 +412,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                 // } else {
                 //     text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})" ${style}><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 // }
-                const style = localSettings.isHideImages ? `style="height:auto;"` : `style = "background-image: url('img/${tech.tech[i].name}.webp');"`
+                const style = (localSettings.isHideImages || tech.tech[i].isJunk) ? `style="height:auto;"` : `style = "background-image: url('img/${tech.tech[i].name}.webp');"`
                 const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                 if (tech.tech[i].isNonRefundable) {
                     text += `<div class="pause-grid-module" id ="${i}-pause-tech"  style = "border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding-top: 6px; padding-bottom: 6px;"><div class="grid-title">${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
@@ -542,10 +542,10 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                 }, 50);
             }
         }
-        //update tech text //disable not allowed tech
+        //update tech text
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             const techID = document.getElementById("tech-" + i)
-            if ((!tech.tech[i].isJunk || localSettings.isJunkExperiment)) { //!tech.tech[i].isNonRefundable && //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  does removing this cause problems????
+            if ((!tech.tech[i].isJunk || localSettings.isJunkExperiment) && !tech.tech[i].isLore) {
                 if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
                     if (tech.tech[i].isFieldTech) {
                         techID.classList.remove('experiment-grid-hide');
@@ -559,28 +559,20 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                     } else {
                         techID.innerHTML = build.techText(i)
                     }
-
                     //deselect selected tech options if you don't have the tech any more // for example: when bot techs are converted after a bot upgrade tech is taken
                     if (tech.tech[i].count === 0 && techID.classList.contains("build-tech-selected")) techID.classList.remove("build-tech-selected");
-
                     if (techID.classList.contains("experiment-grid-disabled")) {
                         techID.classList.remove("experiment-grid-disabled");
                         techID.setAttribute("onClick", `javascript: build.choosePowerUp(${i},'tech')`);
                     }
-                    // } else if (tech.tech[i].isGunTech || tech.tech[i].isFieldTech) {
-                    //     techID.classList.add('experiment-grid-hide');
-                } else { //disabled color
-                    // techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
-                    // techID.innerHTML = `<div class="grid-title"> ${tech.tech[i].name}</div><span style="color:#666;">requires: ${tech.tech[i].requires}</span></div>`
+                } else { //disabled color for disabled tech
                     techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
-                    // console.log(techID)
                     if (!techID.classList.contains("experiment-grid-disabled")) {
                         techID.classList.add("experiment-grid-disabled");
                         techID.onclick = null
                     }
                     if (tech.tech[i].count > 0) tech.removeTech(i)
                     if (techID.classList.contains("build-tech-selected")) techID.classList.remove("build-tech-selected");
-
                     if (tech.tech[i].isFieldTech) {
                         techID.innerHTML = build.fieldTechText(i)
                     } else if (tech.tech[i].isGunTech) {
@@ -652,9 +644,8 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             // text += `<div id = "gun-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div> ${b.guns[i].description}</div>`
         }
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (!tech.tech[i].isJunk || localSettings.isJunkExperiment) {
-                const style = localSettings.isHideImages ? hideStyle : `style="background-image: url('img/${tech.tech[i].name}.webp');"`
-
+            if ((!tech.tech[i].isJunk || localSettings.isJunkExperiment) && !tech.tech[i].isLore) {
+                const style = (localSettings.isHideImages || tech.tech[i].isJunk) ? hideStyle : `style="background-image: url('img/${tech.tech[i].name}.webp');"`
                 if (tech.tech[i].allowed() && (!tech.tech[i].isNonRefundable || localSettings.isJunkExperiment)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
                     text += `<div id="tech-${i}" class="experiment-grid-module card-background" onclick="build.choosePowerUp(${i},'tech')" ${style}>`
                 } else { //disabled
@@ -749,17 +740,17 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         }
         console.log('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         console.log(url)
-        navigator.clipboard.writeText(url).then(function () {
+        navigator.clipboard.writeText(url).then(function() {
             /* clipboard successfully set */
             if (isCustom) {
-                setTimeout(function () {
+                setTimeout(function() {
                     alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
                 }, 300);
             }
-        }, function () {
+        }, function() {
             /* clipboard write failed */
             if (isCustom) {
-                setTimeout(function () {
+                setTimeout(function() {
                     alert('copy failed')
                 }, 300);
             }
@@ -984,14 +975,14 @@ document.getElementById("control-table").addEventListener('click', (event) => {
         window.addEventListener("keydown", input.setKeys);
     }
 });
-document.getElementById("control-details").addEventListener("toggle", function () {
+document.getElementById("control-details").addEventListener("toggle", function() {
     input.controlTextUpdate()
     input.endKeySensing();
 })
 
 document.getElementById("control-reset").addEventListener('click', input.setDefault);
 
-window.addEventListener("keyup", function (event) {
+window.addEventListener("keyup", function(event) {
     switch (event.code) {
         case input.key.right:
         case "ArrowRight":
@@ -1018,7 +1009,7 @@ window.addEventListener("keyup", function (event) {
     }
 });
 
-window.addEventListener("keydown", function (event) {
+window.addEventListener("keydown", function(event) {
     // console.log(event.code)
     switch (event.code) {
         case input.key.right:
@@ -1055,7 +1046,7 @@ window.addEventListener("keydown", function (event) {
         case input.key.pause:
             if (!simulation.isChoosing && input.isPauseKeyReady && m.alive) {
                 input.isPauseKeyReady = false
-                setTimeout(function () {
+                setTimeout(function() {
                     input.isPauseKeyReady = true
                 }, 300);
                 if (simulation.paused) {
@@ -1499,10 +1490,10 @@ document.getElementById("difficulty-select").addEventListener("input", () => {
 });
 
 
-document.getElementById("updates").addEventListener("toggle", function () {
+document.getElementById("updates").addEventListener("toggle", function() {
     function loadJSON(path, success, error) { //generic function to get JSON
         var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function () {
+        xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     if (success)
@@ -1521,7 +1512,7 @@ document.getElementById("updates").addEventListener("toggle", function () {
 
     ///  https://api.github.com/repos/landgreen/n-gon/stats/commit_activity
     loadJSON('https://api.github.com/repos/landgreen/n-gon/commits',
-        function (data) {
+        function(data) {
             // console.log(data)
             for (let i = 0, len = 20; i < len; i++) {
                 text += "<strong>" + data[i].commit.author.date.substr(0, 10) + "</strong> - "; //+ "<br>"
@@ -1530,7 +1521,7 @@ document.getElementById("updates").addEventListener("toggle", function () {
             }
             document.getElementById("updates-div").innerHTML = text.replace(/\n/g, "<br />")
         },
-        function (xhr) {
+        function(xhr) {
             console.error(xhr);
         }
     );

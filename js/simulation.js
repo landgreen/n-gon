@@ -546,16 +546,16 @@ const simulation = {
         const swapPeriod = 150
         const len = 30
         for (let i = 0; i < len; i++) {
-            setTimeout(function () {
-                simulation.wipe = function () { //set wipe to have trails
+            setTimeout(function() {
+                simulation.wipe = function() { //set wipe to have trails
                     ctx.fillStyle = `rgba(221,221,221,${i*i*0.0005 +0.0025})`;
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                 }
             }, (i) * swapPeriod);
         }
 
-        setTimeout(function () {
-            simulation.wipe = function () { //set wipe to normal
+        setTimeout(function() {
+            simulation.wipe = function() { //set wipe to normal
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
         }, len * swapPeriod);
@@ -616,14 +616,11 @@ const simulation = {
 
         simulation.clearTimeouts();
         simulation.onTitlePage = true;
-        document.getElementById("splash").onclick = function () {
+        document.getElementById("splash").onclick = function() {
             simulation.startGame();
         };
-        // document.getElementById("choose-grid").style.display = "none"
         document.getElementById("choose-grid").style.visibility = "hidden"
         document.getElementById("choose-grid").style.opacity = "0"
-        document.getElementById("choose-background").style.visibility = "hidden"
-        document.getElementById("choose-background").style.opacity = "0"
         document.getElementById("info").style.display = "inline";
         document.getElementById("info").style.opacity = "0";
         document.getElementById("experiment-button").style.display = "inline"
@@ -782,7 +779,7 @@ const simulation = {
         // m.maxEnergy = 1
         // m.energy = 1
         input.isPauseKeyReady = true
-        simulation.wipe = function () { //set wipe to normal
+        simulation.wipe = function() { //set wipe to normal
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
         m.hole.isOn = false
@@ -863,7 +860,7 @@ const simulation = {
         requestAnimationFrame(cycle); //starts game loop
     },
     clearTimeouts() {
-        let id = window.setTimeout(function () {}, 0);
+        let id = window.setTimeout(function() {}, 0);
         while (id--) {
             window.clearTimeout(id); // will do nothing if no timeout with id is present
         }
@@ -1200,7 +1197,7 @@ const simulation = {
                 }
                 if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
 
-                fallCheck = function (who, save = false) {
+                fallCheck = function(who, save = false) {
                     let i = who.length;
                     while (i--) {
                         if (who[i].position.y > simulation.fallHeight) {
@@ -1584,9 +1581,9 @@ const simulation = {
             outHTML += "<div>" + simulation.constructMapString[i] + "</div>"
         }
         console.log(out)
-        navigator.clipboard.writeText(out).then(function () {
+        navigator.clipboard.writeText(out).then(function() {
             /* clipboard successfully set */
-        }, function () {
+        }, function() {
             /* clipboard write failed */
             console.log('copy failed')
         });

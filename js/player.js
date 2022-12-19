@@ -423,7 +423,7 @@ const m = {
             m.health = 1;
             // m.addHealth(1)
 
-            simulation.wipe = function () { //set wipe to have trails
+            simulation.wipe = function() { //set wipe to have trails
                 ctx.fillStyle = "rgba(255,255,255,0)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
@@ -433,8 +433,8 @@ const m = {
             m.switchWorlds()
             const swapPeriod = 1000
             for (let i = 0, len = 5; i < len; i++) {
-                setTimeout(function () {
-                    simulation.wipe = function () { //set wipe to have trails
+                setTimeout(function() {
+                    simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
@@ -444,14 +444,14 @@ const m = {
                     simulation.isTextLogOpen = true;
                     simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> 0.${len - i - 1}`, swapPeriod);
                     simulation.isTextLogOpen = false;
-                    simulation.wipe = function () { //set wipe to have trails
+                    simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = `rgba(255,255,255,${(i + 1) * (i + 1) * 0.006})`;
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
                 }, (i + 1) * swapPeriod);
             }
-            setTimeout(function () {
-                simulation.wipe = function () { //set wipe to normal
+            setTimeout(function() {
+                simulation.wipe = function() { //set wipe to normal
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
                 simulation.isTextLogOpen = true;
@@ -467,7 +467,7 @@ const m = {
             document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
             document.getElementById("fade-out").style.opacity = 0.9; //slowly fade to 90% white on top of canvas
             // build.shareURL(false)
-            setTimeout(function () {
+            setTimeout(function() {
                 Composite.clear(engine.world);
                 Engine.clear(engine);
                 simulation.splashReturn();
@@ -642,7 +642,7 @@ const m = {
         if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
 
         let isDrawPlayer = true
-        const shortPause = function () {
+        const shortPause = function() {
             if (m.defaultFPSCycle < m.cycle) { //back to default values
                 simulation.fpsCap = simulation.fpsCapDefault
                 simulation.fpsInterval = 1000 / simulation.fpsCap;
@@ -716,13 +716,13 @@ const m = {
                     for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     m.energy = m.maxEnergy
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
-                    simulation.wipe = function () { //set wipe to have trails
+                    simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
-                    setTimeout(function () {
+                    setTimeout(function() {
                         tech.maxDuplicationEvent()
-                        simulation.wipe = function () { //set wipe to normal
+                        simulation.wipe = function() { //set wipe to normal
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
                     }, 3000);
@@ -745,13 +745,13 @@ const m = {
                     <br>${powerUps.research.count}`)
                     for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
-                    simulation.wipe = function () { //set wipe to have trails
+                    simulation.wipe = function() { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
-                    setTimeout(function () {
+                    setTimeout(function() {
                         tech.maxDuplicationEvent()
-                        simulation.wipe = function () { //set wipe to normal
+                        simulation.wipe = function() { //set wipe to normal
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
                     }, 3000);
@@ -771,7 +771,7 @@ const m = {
             if (dmg > 0.06 / m.holdingMassScale) m.drop(); //drop block if holding  // m.holdingMassScale = 0.5 for most fields
             if (m.isCloak) m.fireCDcycle = m.cycle //forced exit cloak
         }
-        const normalFPS = function () {
+        const normalFPS = function() {
             if (m.defaultFPSCycle < m.cycle) { //back to default values
                 simulation.fpsCap = simulation.fpsCapDefault
                 simulation.fpsInterval = 1000 / simulation.fpsCap;
@@ -1058,7 +1058,7 @@ const m = {
             ctx.fillRect(xOff, yOff, range * m.energy, 10);
         }
     },
-    drawRegenEnergyCloaking: function () {
+    drawRegenEnergyCloaking: function() {
         if (m.energy < m.maxEnergy) { // replaces m.drawRegenEnergy() with custom code
             m.regenEnergy();
             const xOff = m.pos.x - m.radius * m.maxEnergy
@@ -1090,11 +1090,11 @@ const m = {
             m.fieldRegen *= 0.6
         }
     },
-    regenEnergy: function () { //used in drawRegenEnergy  // rewritten by some tech
+    regenEnergy: function() { //used in drawRegenEnergy  // rewritten by some tech
         if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
         if (m.energy < 0) m.energy = 0
     },
-    regenEnergyDefault: function () {
+    regenEnergyDefault: function() {
         if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
         if (m.energy < 0) m.energy = 0
     },
@@ -1279,7 +1279,7 @@ const m = {
                         m.holdingTarget.friction = m.holdingTarget.frictionStatic = m.holdingTarget.frictionAir = 0.001
                     }
                     //check every second to see if player is away from thrown body, and make solid
-                    const solid = function (that) {
+                    const solid = function(that) {
                         const dx = that.position.x - player.position.x;
                         const dy = that.position.y - player.position.y;
                         if (that.speed < 3 && dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
@@ -1311,7 +1311,7 @@ const m = {
                     m.definePlayerMass() //return to normal player mass
 
                     if (tech.isAddBlockMass) {
-                        const expand = function (that, massLimit) {
+                        const expand = function(that, massLimit) {
                             if (that.mass < massLimit) {
                                 const scale = 1.05;
                                 Matter.Body.scale(that, scale, scale);
@@ -1698,7 +1698,7 @@ const m = {
             description: `use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs
             <br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`, //            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
             effect: () => {
-                m.hold = function () {
+                m.hold = function() {
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
                         m.holding();
@@ -1796,7 +1796,7 @@ const m = {
                 } else {
                     m.harmonicShield = m.harmonicAtomic
                 }
-                m.hold = function () {
+                m.hold = function() {
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
                         m.holding();
@@ -1976,7 +1976,7 @@ const m = {
                         }
                     }
                 }
-                m.hold = function () {
+                m.hold = function() {
                     const wave = Math.sin(m.cycle * 0.022);
                     m.fieldRange = 180 + 12 * wave + 100 * tech.isBigField
                     m.fieldArc = 0.35 + 0.045 * wave + 0.065 * tech.isBigField //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
@@ -1987,8 +1987,12 @@ const m = {
                         m.throwBlock();
                     } else if (input.field) { //not hold but field button is pressed
                         //float while field is on
+                        // console.log(m.angle, Math.abs(m.angle + Math.PI / 2))
+
+                        //
+                        const angleReduction = 0.1 + (Math.PI / 2 - Math.min(Math.PI / 2, Math.abs(m.angle + Math.PI / 2)))
                         if (player.velocity.y > 1) {
-                            player.force.y -= (tech.isBigField ? 0.87 : 0.7) * player.mass * simulation.g;
+                            player.force.y -= angleReduction * (tech.isBigField ? 0.87 : 0.7) * player.mass * simulation.g;
                             Matter.Body.setVelocity(player, {
                                 x: player.velocity.x,
                                 y: 0.98 * player.velocity.y
@@ -2084,7 +2088,7 @@ const m = {
                 m.fieldHarmReduction = 0.45; //55% reduction
                 m.fieldDrawRadius = 0;
 
-                m.hold = function () {
+                m.hold = function() {
                     m.airSpeedLimit = 125 //5 * player.mass * player.mass
                     m.FxAir = 0.016
                     if (m.isHolding) {
@@ -2234,7 +2238,7 @@ const m = {
             effect: () => {
                 m.fieldMeterColor = "#ff0"
                 m.eyeFillColor = m.fieldMeterColor
-                m.hold = function () {
+                m.hold = function() {
                     if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 300 && (m.cycle % 2)) {
                         if (simulation.molecularMode === 0) {
                             if (tech.isSporeFlea) {
@@ -2621,7 +2625,7 @@ const m = {
 
                     Composite.add(engine.world, m.plasmaBall);
                     // m.plasmaBall.startingVertices = m.plasmaBall.vertices.slice();
-                    m.hold = function () {
+                    m.hold = function() {
                         if (m.isHolding) {
                             m.drawHold(m.holdingTarget);
                             m.holding();
@@ -2712,7 +2716,7 @@ const m = {
                         m.plasmaBall.do()
                     }
                 } else if (tech.isExtruder) {
-                    m.hold = function () {
+                    m.hold = function() {
                         b.isExtruderOn = false
                         if (m.isHolding) {
                             m.drawHold(m.holdingTarget);
@@ -2754,7 +2758,7 @@ const m = {
                         ctx.stroke();
                     }
                 } else {
-                    m.hold = function () {
+                    m.hold = function() {
                         if (m.isHolding) {
                             m.drawHold(m.holdingTarget);
                             m.holding();
@@ -2818,7 +2822,7 @@ const m = {
                 if (tech.isRewindField) {
                     this.rewindCount = 0
                     m.grabPowerUpRange2 = 300000
-                    m.hold = function () {
+                    m.hold = function() {
                         // console.log(m.fieldCDcycle)
                         m.grabPowerUp();
                         // //grab power ups
@@ -2914,7 +2918,7 @@ const m = {
                 } else {
                     m.fieldFire = true;
                     m.isBodiesAsleep = false;
-                    m.hold = function () {
+                    m.hold = function() {
                         if (m.isHolding) {
                             m.wakeCheck();
                             m.drawHold(m.holdingTarget);
@@ -2981,7 +2985,7 @@ const m = {
                 m.isSneakAttack = true;
                 m.sneakAttackCycle = 0;
                 m.enterCloakCycle = 0;
-                m.drawCloak = function () {
+                m.drawCloak = function() {
                     m.fieldPhase += 0.007
                     const wiggle = 0.15 * Math.sin(m.fieldPhase * 0.5)
                     ctx.beginPath();
@@ -2995,7 +2999,7 @@ const m = {
                     ctx.globalCompositeOperation = "source-over";
                     ctx.clip();
                 }
-                m.hold = function () {
+                m.hold = function() {
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
                         m.holding();
@@ -3275,7 +3279,7 @@ const m = {
                 m.fieldOn = false;
                 m.fieldRadius = 0;
                 m.drop();
-                m.hold = function () {
+                m.hold = function() {
                     if (input.field) {
                         if (m.fieldCDcycle < m.cycle) {
                             const scale = 25
@@ -3459,7 +3463,7 @@ const m = {
             //<strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br>
             description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+3%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
             drain: 0,
-            effect: function () {
+            effect: function() {
                 m.fieldMeterColor = "#bbf" //"#0c5"
                 m.eyeFillColor = m.fieldMeterColor
 
@@ -3467,7 +3471,7 @@ const m = {
                 m.fieldRange = 0
                 powerUps.setDupChance(); //needed after adjusting duplication chance
 
-                m.hold = function () {
+                m.hold = function() {
                     // m.hole = {  //this is reset with each new field, but I'm leaving it here for reference
                     //   isOn: false,
                     //   isReady: true,

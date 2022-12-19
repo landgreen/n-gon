@@ -1854,7 +1854,7 @@ const tech = {
             description: `toggle <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after a <strong>collision</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
             nameInfo: "<span id = 'tech-flip-flop'></span>",
             addNameInfo() {
-                setTimeout(function () {
+                setTimeout(function() {
                     if (document.getElementById("tech-flip-flop")) {
                         if (tech.isFlipFlopOn) {
                             document.getElementById("tech-flip-flop").innerHTML = ` = <strong>ON</strong>`
@@ -2005,7 +2005,7 @@ const tech = {
             description: `toggle <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after picking up a <strong>power up</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
             nameInfo: "<span id = 'tech-switch'></span>",
             addNameInfo() {
-                setTimeout(function () {
+                setTimeout(function() {
                     if (document.getElementById("tech-switch")) {
                         if (tech.isFlipFlopOn) {
                             document.getElementById("tech-switch").innerHTML = ` = <strong>ON</strong>`
@@ -2408,42 +2408,6 @@ const tech = {
                 }
             }
         },
-        // {
-        //     name: "weak interaction",
-        //     description: "for each unused <strong>power up</strong> at the end of a <strong>level</strong><br><strong>+10</strong> maximum <strong class='color-f'>energy</strong>", // <em>(up to 51 health per level)</em>",
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 1,
-        //     frequencyDefault: 1,
-        //     allowed() {
-        //         return !tech.isDroneGrab
-        //     },
-        //     requires: "not delivery drone",
-        //     effect() {
-        //         tech.isExtraMaxEnergy = true; //tracked by  tech.extraMaxHealth
-        //     },
-        //     remove() {
-        //         tech.isExtraMaxEnergy = false;
-        //     }
-        // },
-        // {
-        //     name: "electroweak interaction",
-        //     description: "unused <strong>power ups</strong> at the end of a <strong>level</strong><br>are still activated <em>(selections are random)</em>",
-        //     maxCount: 1,
-        //     count: 0,
-        //     frequency: 2,
-        //     frequencyDefault: 2,
-        //     allowed() {
-        //         return tech.isExtraMaxEnergy
-        //     },
-        //     requires: "weak interaction",
-        //     effect() {
-        //         tech.isEndLevelPowerUp = true;
-        //     },
-        //     remove() {
-        //         tech.isEndLevelPowerUp = false;
-        //     }
-        // },
         {
             name: "electronegativity",
             descriptionFunction() {
@@ -2609,7 +2573,7 @@ const tech = {
             requires: "not parasitism",
             effect() {
                 tech.isCrouchRegen = true; //only used to check for requirements
-                m.regenEnergy = function () {
+                m.regenEnergy = function() {
                     if (m.immuneCycle < m.cycle && m.crouch) m.energy += 7 * m.fieldRegen;
                     if (m.energy < 0) m.energy = 0
                 }
@@ -2650,7 +2614,7 @@ const tech = {
             requires: "not inductive charging",
             effect() {
                 tech.isDamageAfterKillNoRegen = true;
-                m.regenEnergy = function () {
+                m.regenEnergy = function() {
                     if (m.immuneCycle < m.cycle && (m.lastKillCycle + 300 < m.cycle)) m.energy += m.fieldRegen;
                     if (m.energy < 0) m.energy = 0
                 }
@@ -3011,7 +2975,7 @@ const tech = {
             name: "anthropic principle",
             nameInfo: "<span id = 'tech-anthropic'></span>",
             addNameInfo() {
-                setTimeout(function () {
+                setTimeout(function() {
                     powerUps.research.changeRerolls(0)
                 }, 1000);
             },
@@ -3030,7 +2994,7 @@ const tech = {
             effect() {
                 tech.isDeathAvoid = true;
                 tech.isDeathAvoidedThisLevel = false;
-                setTimeout(function () {
+                setTimeout(function() {
                     powerUps.research.changeRerolls(0)
                 }, 1000);
             },
@@ -8421,7 +8385,7 @@ const tech = {
                 const loop = () => {
                     if ((simulation.isChoosing) && m.alive && !build.isExperimentSelection) {
                         const dmg = Math.floor(33 * Math.random()) * 0.01
-                        this.text = `<strong style = "font-family: 'Courier New', monospace;">+${(dmg*100).toFixed(0).padStart(2, '0')}%</strong> <strong class='color-d'>damage</strong>`
+                        this.text = `<strong style = "font-family: 'Courier New', monospace;">+${(dmg*100).toFixed(0).padStart(2, '0')}%</strong> <strong class='color-d'>damage</strong><br>&nbsp;`
                         this.damage = 1 + dmg
                         if (document.getElementById(`damage-JUNK-id${this.id}`)) document.getElementById(`damage-JUNK-id${this.id}`).innerHTML = this.text
                         setTimeout(() => {
@@ -8548,7 +8512,7 @@ const tech = {
         },
         {
             name: "meteor shower",
-            description: "take a shower, but meteors instead of water",
+            description: "take a shower, but meteors instead of water<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -8559,7 +8523,7 @@ const tech = {
             effect() {
                 setInterval(() => {
 
-                    fireBlock = function (xPos, yPos) {
+                    fireBlock = function(xPos, yPos) {
                         const index = body.length
                         spawn.bodyRect(xPos, yPos, 20 + 50 * Math.random(), 20 + 50 * Math.random());
                         const bodyBullet = body[index]
@@ -8694,7 +8658,7 @@ const tech = {
         // },
         {
             name: "discount",
-            description: "get 3 random <strong class='color-j'>JUNK</strong><strong class='color-m'>tech</strong> for the price of 1!",
+            description: "get 3 random <strong class='color-j'>JUNK</strong><strong class='color-m'>tech</strong> for the price of 1!<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -8763,7 +8727,7 @@ const tech = {
         },
         {
             name: "harvest",
-            description: "convert all the mobs on this level into <strong class='color-ammo'>ammo</strong>",
+            description: "convert all the mobs on this level into <strong class='color-ammo'>ammo</strong><br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -8786,19 +8750,6 @@ const tech = {
                 //     }
                 // }
             },
-            remove() {}
-        },
-        {
-            name: "&nbsp;",
-            description: "",
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            frequencyDefault: 0,
-            isJunk: true,
-            allowed: () => true,
-            requires: "",
-            effect() {},
             remove() {}
         },
         {
@@ -8843,7 +8794,7 @@ const tech = {
         },
         {
             name: "palantír",
-            description: `see far away lands`,
+            description: `see far away lands<br>&nbsp;`,
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -8874,7 +8825,7 @@ const tech = {
         },
         {
             name: "motion sickness",
-            description: `disable camera smoothing`,
+            description: `disable camera smoothing<br>&nbsp;`,
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -8907,7 +8858,7 @@ const tech = {
         },
         {
             name: "facsimile",
-            description: `inserts a copy of your current level into the level list`,
+            description: `inserts a copy of your current level into the level list<br>&nbsp;`,
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -8943,7 +8894,7 @@ const tech = {
         },
         {
             name: "bounce",
-            description: "you bounce off things.  It's annoying, but not that bad.",
+            description: "you bounce off things.  It's annoying, but not that bad.<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -8961,7 +8912,7 @@ const tech = {
         },
         {
             name: "mouth",
-            description: "mobs have a non functional mouth",
+            description: "mobs have a non functional mouth<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9007,7 +8958,7 @@ const tech = {
         },
         {
             name: "all-stars",
-            description: "make all mobs look like stars",
+            description: "make all mobs look like stars<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9068,7 +9019,7 @@ const tech = {
         // },
         {
             name: "true colors",
-            description: `set all power ups to their real world colors`,
+            description: `set all power ups to their real world colors<br>&nbsp;`,
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9283,7 +9234,7 @@ const tech = {
         },
         {
             name: "not a bug",
-            description: "initiate a totally safe game crash for 10 seconds",
+            description: "initiate a totally safe game crash for 10 seconds<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9310,7 +9261,7 @@ const tech = {
         },
         {
             name: "spinor",
-            description: "the direction you aim is determined by your position",
+            description: "the direction you aim is determined by your position<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9321,7 +9272,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                m.look = function () {
+                m.look = function() {
                     //always on mouse look
                     m.angle = (((m.pos.x + m.pos.y) / 100 + Math.PI) % Math.PI * 2) - Math.PI
                     //smoothed mouse look translations
@@ -9339,7 +9290,7 @@ const tech = {
         },
         {
             name: "decomposers",
-            description: "after they die <strong>mobs</strong> leave behind <strong>spawns</strong>",
+            description: "after they die <strong>mobs</strong> leave behind <strong>spawns</strong><br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9358,7 +9309,7 @@ const tech = {
         },
         {
             name: "panopticon",
-            description: "<strong>mobs</strong> can always see you",
+            description: "<strong>mobs</strong> can always see you<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9482,7 +9433,7 @@ const tech = {
         },
         {
             name: "encryption",
-            description: "secure <strong class='color-m'>tech</strong> information",
+            description: "secure <strong class='color-m'>tech</strong> information<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9493,7 +9444,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                String.prototype.shuffle = function () {
+                String.prototype.shuffle = function() {
                     var a = this.split(""),
                         n = a.length;
 
@@ -9532,7 +9483,7 @@ const tech = {
         },
         {
             name: "score",
-            description: "Add a score to n-gon!",
+            description: "Add a score to n-gon!<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9571,7 +9522,7 @@ const tech = {
         },
         {
             name: "music",
-            description: "add music to n-gon",
+            description: "add music to n-gon<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9588,7 +9539,7 @@ const tech = {
         },
         {
             name: "performance",
-            description: "display performance stats to n-gon",
+            description: "display performance stats to n-gon<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9599,9 +9550,9 @@ const tech = {
             },
             requires: "",
             effect() {
-                (function () {
+                (function() {
                     var script = document.createElement('script');
-                    script.onload = function () {
+                    script.onload = function() {
                         var stats = new Stats();
                         document.body.appendChild(stats.dom);
                         requestAnimationFrame(function loop() {
@@ -9644,7 +9595,7 @@ const tech = {
         },
         {
             name: "defragment",
-            description: "set the <strong class='flicker'>frequency</strong> of finding <strong class='color-j'>JUNK</strong><strong class='color-m'>tech</strong> to zero",
+            description: "set the <strong class='flicker'>frequency</strong> of finding <strong class='color-j'>JUNK</strong><strong class='color-m'>tech</strong> to zero<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9684,7 +9635,7 @@ const tech = {
         // },
         {
             name: "pitch",
-            description: "oscillate the pitch of your world",
+            description: "oscillate the pitch of your world<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9721,7 +9672,7 @@ const tech = {
         },
         {
             name: "lighter",
-            description: `ctx.globalCompositeOperation = "lighter"`,
+            description: `ctx.globalCompositeOperation = "lighter"<br>&nbsp;`,
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9738,7 +9689,7 @@ const tech = {
         },
         {
             name: "rewind",
-            description: "every 10 seconds <strong class='color-rewind'>rewind</strong> <strong>2</strong> seconds",
+            description: "every 10 seconds <strong class='color-rewind'>rewind</strong> <strong>2</strong> seconds<br>&nbsp;",
             maxCount: 9,
             count: 0,
             frequency: 0,
@@ -9761,7 +9712,7 @@ const tech = {
         },
         {
             name: "undo",
-            description: "every 4 seconds <strong class='color-rewind'>rewind</strong> <strong>1/2</strong> a second",
+            description: "every 4 seconds <strong class='color-rewind'>rewind</strong> <strong>1/2</strong> a second<br>&nbsp;",
             maxCount: 9,
             count: 0,
             frequency: 0,
@@ -9781,7 +9732,7 @@ const tech = {
         },
         {
             name: "energy to mass conversion",
-            description: "convert your <strong class='color-f'>energy</strong> into <strong class='color-block'>blocks</strong>",
+            description: "convert your <strong class='color-f'>energy</strong> into <strong class='color-block'>blocks</strong><br>&nbsp;",
             maxCount: 9,
             count: 0,
             frequency: 0,
@@ -9813,7 +9764,7 @@ const tech = {
         },
         {
             name: "level.nextLevel()",
-            description: "advance to the next level",
+            description: "advance to the next level<br>&nbsp;",
             maxCount: 9,
             count: 0,
             frequency: 0,
@@ -9899,7 +9850,7 @@ const tech = {
         },
         {
             name: "missile launching system",
-            description: "fire missiles for the next 120 seconds",
+            description: "fire missiles for the next 120 seconds<br>&nbsp;",
             maxCount: 9,
             count: 0,
             frequency: 0,
@@ -9924,7 +9875,7 @@ const tech = {
         },
         {
             name: "grenade production",
-            description: "drop a grenade every 2 seconds",
+            description: "drop a grenade every 2 seconds<br>&nbsp;",
             maxCount: 9,
             count: 0,
             frequency: 0,
@@ -9977,7 +9928,7 @@ const tech = {
         // },
         {
             name: "Sleipnir",
-            description: "grow more legs",
+            description: "grow more legs<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -9989,7 +9940,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                m.draw = function () {
+                m.draw = function() {
                     ctx.fillStyle = m.fillColor;
                     m.walk_cycle += m.flipLegs * m.Vx;
 
@@ -10035,7 +9986,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                m.draw = function () {
+                m.draw = function() {
                     ctx.fillStyle = m.fillColor;
                     m.walk_cycle += m.flipLegs * m.Vx;
 
@@ -10064,7 +10015,7 @@ const tech = {
         },
         {
             name: "🐱",
-            description: "🐈",
+            description: "🐈<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -10076,7 +10027,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                m.draw = function () {
+                m.draw = function() {
                     ctx.fillStyle = m.fillColor;
                     m.walk_cycle += m.flipLegs * m.Vx;
                     ctx.save();
@@ -10164,7 +10115,7 @@ const tech = {
         },
         {
             name: "posture",
-            description: "stand a bit taller",
+            description: "stand a bit taller<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -10183,7 +10134,7 @@ const tech = {
         },
         {
             name: "rhythm",
-            description: "you oscillate up and down",
+            description: "you oscillate up and down<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -10204,7 +10155,7 @@ const tech = {
         },
         {
             name: "pareidolia",
-            description: "don't",
+            description: "don't<br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -10216,7 +10167,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                m.draw = function () {
+                m.draw = function() {
                     ctx.fillStyle = m.fillColor;
                     m.walk_cycle += m.flipLegs * m.Vx;
                     ctx.save();
@@ -10273,7 +10224,7 @@ const tech = {
         },
         {
             name: "prism",
-            description: "you cycle through different <strong>colors</strong>",
+            description: "you cycle through different <strong>colors</strong><br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -10290,7 +10241,7 @@ const tech = {
                     sat: 100,
                     light: 50
                 }
-                setInterval(function () {
+                setInterval(function() {
                     m.color.hue++
                     m.setFillColors()
                 }, 10);
@@ -10427,7 +10378,7 @@ const tech = {
         },
         {
             name: "growth hacking",
-            description: "increase combat <strong>difficulty</strong> by <strong>1 level</strong>",
+            description: "increase combat <strong>difficulty</strong> by <strong>1 level</strong><br>&nbsp;",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -10444,7 +10395,7 @@ const tech = {
         },
         {
             name: "stun",
-            description: "<strong>stun</strong> all mobs for up to <strong>8</strong> seconds",
+            description: "<strong>stun</strong> all mobs for up to <strong>8</strong> seconds<br>&nbsp;",
             maxCount: 9,
             count: 0,
             frequency: 0,
@@ -10489,7 +10440,7 @@ const tech = {
         },
         {
             name: "re-research",
-            description: `<strong>eject</strong> all your ${powerUps.orb.research(1)}`,
+            description: `<strong>eject</strong> all your ${powerUps.orb.research(1)}<br>&nbsp;`,
             maxCount: 9,
             count: 0,
             frequency: 0,
@@ -10527,7 +10478,7 @@ const tech = {
         },
         {
             name: "black hole cluster",
-            description: `spawn <strong>30</strong> nearby <strong>black holes</strong>`,
+            description: `spawn <strong>30</strong> nearby <strong>black holes</strong><br>&nbsp;`,
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -10755,7 +10706,7 @@ const tech = {
                 const bc = new BroadcastChannel('planetesimals');
                 bc.activated = false
 
-                bc.onmessage = function (ev) {
+                bc.onmessage = function(ev) {
                     if (ev.data === 'tech') powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
                     if (ev.data === 'death') {
                         m.death()
@@ -11056,7 +11007,6 @@ const tech = {
     fastTime: null,
     squirrelJump: null,
     isFastRadiation: null,
-    isExtraMaxEnergy: null,
     isAmmoForGun: null,
     isRapidPulse: null,
     isSporeFreeze: null,
@@ -11239,7 +11189,6 @@ const tech = {
     isHarpoonPowerUp: null,
     harpoonDensity: null,
     isAddRemoveMaxHealth: null,
-    isSpawnExitTech: null,
     cloakDuplication: null,
     extruderRange: null,
     isForeverDrones: null,
@@ -11250,11 +11199,9 @@ const tech = {
     isFreeWormHole: null,
     isRewindField: null,
     isCrouchRegen: null,
-    // OccamDamage: null,
     isAxion: null,
     isWormholeMapIgnore: null,
     isLessDamageReduction: null,
-    // bulletSize: null,
     needleTunnel: null,
     isBrainstorm: null,
     isBrainstormActive: null,

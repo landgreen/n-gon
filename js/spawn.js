@@ -397,6 +397,8 @@ const spawn = {
                     //spawn 6 mobs
                     me.mobType = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]; //fire a bullet from each vertex
                     for (let i = 0; i < 6; i++) me.spawnMobs(i)
+
+                    level.newLevelOrPhase() //run some new level tech effects
                 }
                 ctx.beginPath(); //draw invulnerable
                 let vertices = this.vertices;
@@ -499,36 +501,32 @@ const spawn = {
             {
                 name: "mines",
                 bombCycle: 0,
-                bombInterval: 55 - 2 * simulation.difficultyMode,
+                bombInterval: 10 - simulation.difficultyMode,
                 do() {
                     const yOff = 120
                     this.bombCycle++
-                    if (!(this.bombCycle % this.bombInterval) && (this.bombCycle & 60) > 30) { //mines above player
+                    if (!(this.bombCycle % this.bombInterval) && (this.bombCycle % 660) > 330) { //mines above player
                         if (simulation.isHorizontalFlipped) {
-                            if (this.bombCycle > 120) { //wait 2 seconds before targeted mines drop
-                                const x = m.pos.x + 200 * (Math.random() - 0.5)
-                                if (x > -750) { //mines above player IN tunnel
-                                    spawn.mine(Math.min(Math.max(-730, x), 100), -450 - yOff * Math.random()) //player in main room
-                                    mob[mob.length - 1].fallHeight = -209
-                                } else { //mines above player NOT in tunnel
-                                    spawn.mine(Math.min(Math.max(-5375, x), -765), -1500 - yOff * Math.random()) //player in tunnel
-                                    mob[mob.length - 1].fallHeight = -9
-                                }
+                            const x = m.pos.x + 200 * (Math.random() - 0.5)
+                            if (x > -750) { //mines above player IN tunnel
+                                spawn.mine(Math.min(Math.max(-730, x), 100), -450 - yOff * Math.random()) //player in main room
+                                mob[mob.length - 1].fallHeight = -209
+                            } else { //mines above player NOT in tunnel
+                                spawn.mine(Math.min(Math.max(-5375, x), -765), -1500 - yOff * Math.random()) //player in tunnel
+                                mob[mob.length - 1].fallHeight = -9
                             }
                             if (Math.random() < 0.5) {
                                 spawn.mine(-5350 + 4550 * Math.random(), -1500 - yOff * Math.random()) //random mines
                                 mob[mob.length - 1].fallHeight = -9
                             }
                         } else {
-                            if (this.bombCycle > 120) { //wait 2 seconds before targeted mines drop
-                                const x = m.pos.x + 200 * (Math.random() - 0.5)
-                                if (x < 750) { //mines above player IN tunnel
-                                    spawn.mine(Math.min(Math.max(-100, x), 735), -450 - yOff * Math.random()) //player in main room
-                                    mob[mob.length - 1].fallHeight = -209
-                                } else { //mines above player NOT in tunnel
-                                    spawn.mine(Math.min(Math.max(760, x), 5375), -1500 - yOff * Math.random()) //player in tunnel
-                                    mob[mob.length - 1].fallHeight = -9
-                                }
+                            const x = m.pos.x + 200 * (Math.random() - 0.5)
+                            if (x < 750) { //mines above player IN tunnel
+                                spawn.mine(Math.min(Math.max(-100, x), 735), -450 - yOff * Math.random()) //player in main room
+                                mob[mob.length - 1].fallHeight = -209
+                            } else { //mines above player NOT in tunnel
+                                spawn.mine(Math.min(Math.max(760, x), 5375), -1500 - yOff * Math.random()) //player in tunnel
+                                mob[mob.length - 1].fallHeight = -9
                             }
                             if (Math.random() < 0.5) { //random mines, but not in tunnel
                                 spawn.mine(800 + 4550 * Math.random(), -1500 - yOff * Math.random()) //random mines
@@ -561,12 +559,17 @@ const spawn = {
             },
             {
                 name: "orbiters",
-                spawnRate: 42 - 2 * simulation.difficultyMode,
+                spawnRate: Math.ceil(4 - 0.25 * simulation.difficultyMode),
+                orbitersCycle: 0,
                 do() {
-                    if (!(me.cycle % this.spawnRate) && mob.length < me.maxMobs) {
+                    this.orbitersCycle++
+                    if (!(this.orbitersCycle % this.spawnRate) && (this.orbitersCycle % 660) > 600 && mob.length < me.maxMobs) {
                         const speed = (0.01 + 0.0005 * simulation.difficultyMode) * ((Math.random() < 0.5) ? 0.85 : -1.15)
                         const phase = 0 //Math.floor(2 * Math.random()) * Math.PI
-                        me.orbitalNoVelocity(me, 360 + 2150 * Math.random(), 0.1 * Math.random() + phase, speed) // orbital(who, radius, phase, speed)
+                        //find distance to play and set orbs at that range
+                        const dist = me.distanceToPlayer()
+                        //360 + 2150 * Math.random()
+                        me.orbitalNoVelocity(me, dist + 900 * (Math.random() - 0.5), 0.1 * Math.random() + phase, speed) // orbital(who, radius, phase, speed)
                     }
                 },
                 enter() {},
@@ -706,6 +709,7 @@ const spawn = {
                 this.damageReductionDecay();
                 for (let i = 0; i < this.totalModes; i++) this.mode[i].do()
             }
+            // this.mode[5].do() //deelete this
             // this.cycle++;
             // this.mode[4].do()
             // this.mode[7].do()
@@ -1537,16 +1541,18 @@ const spawn = {
     zombie(x, y, radius, sides, color) { //mob that attacks other mobs
         mobs.spawn(x, y, sides, radius, color);
         let me = mob[mob.length - 1];
+        me.damageReduction = 0.5 //take less damage
+        // Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
         me.isZombie = true
+        me.isBadTarget = true;
         me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.stroke = "#83a"
         me.accelMag = 0.0015
         me.frictionAir = 0.01
-        // me.repulsionRange = 400000 + radius * radius; //squared
+        // me.collisionFilter.mask = cat.player | cat.map | cat.body
         // me.memory = 120;
         me.seeAtDistance2 = 1000000 //1000 vision range
-        // Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
         me.do = function() {
             this.zombieHealthBar();
             this.lookForMobTargets();
@@ -1556,15 +1562,31 @@ const spawn = {
         me.mobSearchIndex = 0;
         me.target = null
         me.lookForMobTargets = function() {
-            if (this.target && !this.target.alive) this.target = null
-            if (this.target === null && !(simulation.cycle % 10) && mob.length > 1) { //if you have no target
-                this.mobSearchIndex++ //look for a different mob index every time
-                if (this.mobSearchIndex > mob.length - 1) this.mobSearchIndex = 0
+            if (!(simulation.cycle % 10)) {
+                if (this.target === null) { //if you have no target
+                    this.mobSearchIndex++ //look for a different mob index every time
+                    if (this.mobSearchIndex > mob.length - 1) this.mobSearchIndex = 0
+                    if (
+                        mob.length > 1 &&
+                        !mob[this.mobSearchIndex].isZombie &&
+                        (Vector.magnitudeSquared(Vector.sub(this.position, mob[this.mobSearchIndex].position)) < this.seeAtDistance2 && Matter.Query.ray(map, this.position, mob[this.mobSearchIndex].position).length === 0)
+                    ) {
+                        this.target = mob[this.mobSearchIndex]
+                    } else if (Math.random() < 0.05 && (Vector.magnitudeSquared(Vector.sub(this.position, player.position)) < this.seeAtDistance2 || Matter.Query.ray(map, this.position, player.position).length === 0)) {
+                        this.target = player
+                        this.isBadTarget = false;
+                    }
+                }
+            }
+            //chance to forget target
+            if (!(simulation.cycle % this.memory) && this.target) {
                 if (
-                    !mob[this.mobSearchIndex].isZombie &&
-                    (Vector.magnitudeSquared(Vector.sub(this.position, mob[this.mobSearchIndex].position)) < this.seeAtDistance2 || Matter.Query.ray(map, this.position, mob[this.mobSearchIndex].position).length === 0)
+                    (this.target && this.target !== player && !this.target.alive) ||
+                    Vector.magnitudeSquared(Vector.sub(this.position, this.target.position)) > this.seeAtDistance2 ||
+                    Matter.Query.ray(map, this.position, this.target.position).length !== 0
                 ) {
-                    this.target = mob[this.mobSearchIndex]
+                    if (this.target === player) this.isBadTarget = true
+                    this.target = null
                 }
             }
         }
@@ -1600,13 +1622,11 @@ const spawn = {
                         const force = Vector.mult(Vector.normalise(Vector.sub(who.position, this.position)), 0.03 * this.mass)
                         this.force.x -= force.x;
                         this.force.y -= force.y;
-
                         this.target = null //look for a new target
-
-
 
                         const dmg = 0.3 * m.dmgScale
                         who.damage(dmg);
+                        who.locatePlayer();
                         simulation.drawList.push({
                             x: this.position.x,
                             y: this.position.y,

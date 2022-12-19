@@ -6,8 +6,6 @@ body {
     font-family: "Helvetica", "Arial", sans-serif;
     margin: 0;
     overflow: hidden;
-    /* background-color: #eee; */
-    
     cursor: auto;
 }
 
@@ -23,9 +21,6 @@ select {
     font-size: 0.8em;
     border: 1px #333 solid;
     border-radius: 6px;
-    /* margin-bottom: -20px; */
-    /* position: "relative";
-  top: "-15px"; */
 }
 
 select option {
@@ -33,13 +28,10 @@ select option {
 }
 
 input {
-    /* font-family: Monaco, monospace; */
     padding: 0px 4px;
     font-size: 0.8em;
     border: 1px #333 solid;
     border-radius: 4px;
-    /* margin: 0.2em; */
-    /* width: 38px; */
 }
 
 a {
@@ -68,9 +60,7 @@ em {
 
 table {
     border-collapse: collapse;
-    /* border: 1px solid #eee; */
     width: 360px;
-    /* background-color: #ddd; */
 }
 
 tr {
@@ -142,16 +132,10 @@ summary {
 
 #training-button {
     position: absolute;
-    /* bottom: 4px; */
-    /* right: 0px;
-    left: 0px;
-    margin: auto; */
-    /* bottom: 58px; */
     top: 4px;
     right: 4px;
     z-index: 12;
     transition: opacity 5s ease-in;
-
 }
 
 #construct {
@@ -170,19 +154,6 @@ summary {
     border: 1px #333 solid;
 }
 
-#choose-background {
-    position: absolute;
-    z-index: 2;
-    width: 100%;
-    height: 100%;
-    background-color: #ccc;
-    /* opacity: 0.6; */
-    /* display: none; */
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.25s linear;
-    
-}
 #flex-center{
     display: flex;
     align-items: center;
@@ -384,11 +355,12 @@ summary {
 .card-text {
     background-color: rgba(255,255,255,1); 
     /* border-radius: 8px; */
-    padding: 8px; 
+    padding: 11px 13px; 
     /* border-top: 1px solid var(--build-bg-color); */
     border: 1px solid #444;
     margin-top: -1px;
     margin-right: -1px;
+    font-size: 0.92em;
 }
 
 /* .no-image-cards{

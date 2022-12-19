@@ -322,7 +322,7 @@ const powerUps = {
             document.getElementById("choose-grid").style.visibility = "visible"
 
             requestAnimationFrame(() => {
-                ctx.fillStyle = `rgba(221,221,221,0.6)`;
+                ctx.fillStyle = `rgba(150,150,150,0.6)`; //`rgba(221,221,221,0.6)`;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             });
             // document.getElementById("pause-grid-right").style.opacity = "0.7"
@@ -378,9 +378,6 @@ const powerUps = {
         // document.getElementById("choose-grid").style.display = "none"
         document.getElementById("choose-grid").style.visibility = "hidden"
         document.getElementById("choose-grid").style.opacity = "0"
-        // document.getElementById("choose-background").style.display = "none"
-        document.getElementById("choose-background").style.visibility = "hidden"
-        document.getElementById("choose-background").style.opacity = "0"
 
         document.body.style.cursor = "none";
         // document.body.style.overflow = "hidden"
@@ -623,21 +620,21 @@ const powerUps = {
         if (tech.isSuperDeterminism) {
             return `<div></div>`
         } else if (tech.isCancelTech) {
-            return `<div class='choose-grid-module' onclick='powerUps.endDraft("${type}",true)' style="width: 115px; text-align: center;font-size: 1.1em;font-weight: 100;justify-self: end;">randomize</div>`
+            return `<div class='choose-grid-module' onclick='powerUps.endDraft("${type}",true)' style="width: 115px; text-align: center;font-size: 1.1em;font-weight: 100;justify-self: end;border: 1px solid #444;">randomize</div>`
         } else {
-            return `<div class='choose-grid-module' onclick='powerUps.endDraft("${type}",true)' style="width: 82px; text-align: center;font-size: 1.1em;font-weight: 100;justify-self: end;">cancel</div>`
+            return `<div class='choose-grid-module' onclick='powerUps.endDraft("${type}",true)' style="width: 82px; text-align: center;font-size: 1.1em;font-weight: 100;justify-self: end;border: 1px solid #444;">cancel</div>`
         }
     },
     researchText(type) {
         let text = ""
         if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
-            text += `<div onclick="powerUps.research.use('${type}')" class='choose-grid-module' style="font-size: 1.1em;font-weight: 100;">` // style = "margin-left: 192px; margin-right: -192px;"
+            text += `<div onclick="powerUps.research.use('${type}')" class='choose-grid-module' style="font-size: 1.1em;font-weight: 100;border: 1px solid #444;">` // style = "margin-left: 192px; margin-right: -192px;"
             tech.junkResearchNumber = Math.ceil(4 * Math.random())
             text += `<div><div> <span style="position:relative;">`
             for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
             text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div></div>`
         } else if (powerUps.research.count > 0) {
-            text += `<div onclick="powerUps.research.use('${type}')" class='choose-grid-module' style="font-size: 1.1em;font-weight: 100;">` // style = "margin-left: 192px; margin-right: -192px;"
+            text += `<div onclick="powerUps.research.use('${type}')" class='choose-grid-module' style="font-size: 1.1em;font-weight: 100;border: 1px solid #444;">` // style = "margin-left: 192px; margin-right: -192px;"
             text += `<div><div><span style="position:relative;">`
             for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.21)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
             text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality?"<span class='alt'>alternate reality</span>": "research"}</span></div></div></div>`
@@ -649,7 +646,6 @@ const powerUps = {
     hideStyle: `style="height:auto; border: none; background-color: transparent;"`,
     gunText(choose, click) {
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/gun/${b.guns[choose].name}.webp');"`
-
         return `<div class="choose-grid-module card-background" onclick="${click}" ${style}>
         <div class="card-text">
         <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choose].name}</div>
@@ -657,16 +653,14 @@ const powerUps = {
     },
     fieldText(choose, click) {
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/field/${m.fieldUpgrades[choose].name}${choose === 0 ? Math.floor(Math.random()*10) : ""}.webp');"`
-
         return `<div class="choose-grid-module card-background" onclick="${click}" ${style}>
         <div class="card-text">
         <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div>
         ${m.fieldUpgrades[choose].description}</div></div>`
     },
     techText(choose, click) {
-        const techCountText = tech.tech[choose].count > 1 ? `(${tech.tech[choose].count}x)` : "";
+        const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-
         return `<div class="choose-grid-module card-background" onclick="${click}" ${style}>
                 <div class="card-text">
                 <div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
@@ -674,9 +668,8 @@ const powerUps = {
     },
 
     fieldTechText(choose, click) {
-        const techCountText = tech.tech[choose].count > 1 ? `(${tech.tech[choose].count}x)` : "";
+        const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-
         return `<div class="choose-grid-module card-background" onclick="${click}" ${style}>
                 <div class="card-text">
                 <div class="grid-title">
@@ -688,9 +681,8 @@ const powerUps = {
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
     },
     gunTechText(choose, click) {
-        const techCountText = tech.tech[choose].count > 1 ? `(${tech.tech[choose].count}x)` : "";
+        const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-
         return `<div class="choose-grid-module card-background" onclick="${click}" ${style}>
                 <div class="card-text">
                 <div class="grid-title">         
@@ -702,28 +694,33 @@ const powerUps = {
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
     },
     junkTechText(choose, click) {
-        const techCountText = tech.tech[choose].count > 1 ? `(${tech.tech[choose].count}x)` : "";
-        const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-size: contain;background-repeat: no-repeat;"`
+        const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
+        const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-size: contain;background-repeat: no-repeat;background-image: url('img/junk.webp');"`
         if (!localSettings.isHideImages) {
-            setTimeout(() => { //pull image from web search if no url
-                if (tech.tech[choose].url === undefined) {
+            setTimeout(() => { //delay so that the html element exists
+                if (tech.tech[choose].url === undefined) { //if on url has been set yet
                     const url = "https://images.search.yahoo.com/search/images?p=" + tech.tech[choose].name;
-                    fetch(url)
+                    fetch(url, { signal: AbortSignal.timeout(1000) }) //give up if it takes over 1 second
                         .then((response) => response.text())
                         .then((html) => {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(html, "text/html");
                             const elements = doc.getElementsByClassName("ld");
-                            // console.log(JSON.parse(elements[i].getAttribute("data")).iurl)
-                            tech.tech[choose].url = JSON.parse(elements[i].getAttribute("data")).iurl
-                            document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
+                            // console.log(i, elements[i].getAttribute("data"), JSON.parse(elements[i].getAttribute("data")).iurl)
+                            const index = Math.floor(Math.random() * 4) //randomly choose from the first 4 images
+                            if (parseInt(JSON.parse(elements[index].getAttribute("data")).s.slice(0, -2)) < 500) { //make sure it isn't too big
+                                tech.tech[choose].url = JSON.parse(elements[index].getAttribute("data")).iurl //store the url
+                                document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')` //make the url the background image
+                            } else if (parseInt(JSON.parse(elements[index + 1].getAttribute("data")).s.slice(0, -2)) < 500) { //try a different images and see if it is smaller
+                                tech.tech[choose].url = JSON.parse(elements[index + 1].getAttribute("data")).iurl
+                                document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
+                            }
                         });
                 } else {
                     document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
                 }
-            }, 100);
+            }, 1);
         }
-
         return `<div id = "junk-${choose}" class="choose-grid-module card-background" onclick="${click}" ${style}>
                 <div class="card-text">
                 <div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
@@ -731,7 +728,6 @@ const powerUps = {
     },
     incoherentTechText(choose, click) {
         // text += `<div class="choose-grid-module" style = "background-color: #efeff5; border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding-top: 6px; padding-bottom: 6px;"><div class="grid-title">${tech.tech[choose].name} <span style = "color: #aaa;font-weight: normal;font-size:80%;">- incoherent</span></div></div>`
-        const techCountText = tech.tech[choose].count > 1 ? `(${tech.tech[choose].count}x)` : "";
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
         return `<div class="choose-grid-module card-background" ${style}>
                 <div class="card-text" style = "background-color: #efeff5;">
@@ -801,7 +797,7 @@ const powerUps = {
                             // const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
                             // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"> <span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
-                            const techCountText = tech.tech[choose].count > 1 ? `(${tech.tech[choose].count}x)` : "";
+                            const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
                             const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
                             text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
                                     <div class="card-text">
@@ -880,7 +876,7 @@ const powerUps = {
                             // const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
                             // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"> <span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
-                            const techCountText = tech.tech[choose].count > 1 ? `(${tech.tech[choose].count}x)` : "";
+                            const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
                             const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
                             text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
                                     <div class="card-text">
@@ -1001,7 +997,7 @@ const powerUps = {
                             // const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
                             // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title">          <span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>          ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
-                            const techCountText = tech.tech[choose].count > 1 ? `(${tech.tech[choose].count}x)` : "";
+                            const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
                             const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
                             text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
                                     <div class="card-text">
