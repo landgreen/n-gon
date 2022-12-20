@@ -5976,9 +5976,9 @@ const b = {
                     spray(12); //fires normal shotgun bullets
                 } else if (tech.isIncendiary) {
                     spread *= 0.15
-                    const END = Math.floor(input.down ? 10 : 7);
-                    const totalBullets = 10
-                    const angleStep = (input.down ? 0.4 : 1.3) / totalBullets
+                    const END = Math.floor(input.down ? 8 : 5);
+                    const totalBullets = 9
+                    const angleStep = (input.down ? 0.3 : 0.8) / totalBullets
                     let dir = m.angle - angleStep * totalBullets / 2;
                     for (let i = 0; i < totalBullets; i++) { //5 -> 7
                         dir += angleStep
@@ -5993,7 +5993,7 @@ const b = {
                             y: speed * Math.sin(dirOff)
                         });
                         bullet[me].onEnd = function() {
-                            b.explosion(this.position, 150 * (tech.isShotgunReversed ? 1.4 : 1) + (Math.random() - 0.5) * 40); //makes bullet do explosive damage at end
+                            b.explosion(this.position, 150 * (tech.isShotgunReversed ? 1.4 : 1) + (Math.random() - 0.5) * 30); //makes bullet do explosive damage at end
                         }
                         bullet[me].beforeDmg = function() {
                             this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion

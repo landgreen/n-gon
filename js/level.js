@@ -21,7 +21,7 @@ const level = {
             // level.difficultyIncrease(30 * 4) //30 is near max on hard  //60 is near max on why
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(20)
+            // powerUps.research.changeRerolls(10)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
@@ -35,7 +35,7 @@ const level = {
             // tech.giveTech("posture")
             // for (let i = 0; i < 1; ++i) tech.giveTech("Sleipnir")
             // tech.isFoamBall = true
-            // for (let i = 0; i < 1; ++i) tech.giveTech("emergence")
+            // for (let i = 0; i < 9; ++i) tech.giveTech("emergence")
             // for (let i = 0; i < 2; i++) tech.giveTech("unified field theory")
             // for (let i = 0; i < 9; i++) tech.giveTech("replication")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");

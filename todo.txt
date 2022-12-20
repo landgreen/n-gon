@@ -1,21 +1,7 @@
 ******************************************************** NEXT PATCH **************************************************
 
-card font is 10% smaller with a bit more padding on the edges
-background is darker on power up selection
-css border added to research and cancel buttons
-JUNK images now timeout if you don't download the image in under 1 sec
-  and it will not even try to download an image above 500KB
-  and it will try a different random image if it's first attempt is too big
-    (gotta protect our friends with slow internet)
-
-finalBoss
-  mine mode comes in waves
-  orbiters mode comes in waves, and they spawn at a radius that intersects the player
-
-several on new level tech effects now also run on each new final Boss phase
-  gun stuff, many worlds, negative entropy heal spawns
-
-perfect diamagnetism slow fall is much strong, but works better when angled like a parachute
+some image updates
+single column power up choice for small screens or no image setting
 
 *********************************************************** TODO *****************************************************
 
@@ -1178,6 +1164,8 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   thermal runaway - infrared maybe?
   redo the energy tech images with by Laurie Greasley
     now that you can use --ar 3:2 --stylize 1000 and photo repair
+  in general too many black background
+    redo fractal tech with white background
 ***past style themes***
   field emitter - isometric, clean white robot spherical gun turret on bird legs, blender 3d, style of artstation and behance, Disney Pixar, cute 
   standing wave - concentric transparent blue geometric circles science  
