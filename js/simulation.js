@@ -895,7 +895,7 @@ const simulation = {
             if (tech.isMutualism && !tech.isEnergyHealth) {
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].isMutualismActive) {
-                        m.health += 0.01 + 0.01 * (bullet[i].isSpore || bullet[i].isFlea)
+                        m.health += 0.01 + 0.01 * ((bullet[i].isSpore || bullet[i].isFlea) ? 0: 1)
                         if (m.health > m.maxHealth) m.health = m.maxHealth;
                         m.displayHealth();
                     }

@@ -6,7 +6,7 @@ const spawn = {
         "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
         "powerUpBoss", "powerUpBossBaby", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss",
         "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss", "shieldingBoss",
-        "timeSkipBoss", "dragonFlyBoss", "beetleBoss"
+        "timeSkipBoss", "dragonFlyBoss", "beetleBoss", "sneakBoss"
     ],
     bossTypeSpawnOrder: [], //preset list of boss names calculated at the start of a run by the randomSeed
     bossTypeSpawnIndex: 0, //increases as the boss type cycles
@@ -31,7 +31,8 @@ const spawn = {
         "striker", "striker",
         "laser", "laser",
         "pulsar", "pulsar",
-        "launcher", "launcherOne", "exploder", "sneaker", "sucker", "sniper", "spinner", "grower", "beamer", "spawner", "ghoster",
+        "sneaker", "sneaker",
+        "launcher", "launcherOne", "exploder", "sucker", "sniper", "spinner", "grower", "beamer", "spawner", "ghoster",
         //, "focuser"
     ],
     mobTypeSpawnOrder: [], //preset list of mob names calculated at the start of a run by the randomSeed
@@ -1541,8 +1542,7 @@ const spawn = {
     zombie(x, y, radius, sides, color) { //mob that attacks other mobs
         mobs.spawn(x, y, sides, radius, color);
         let me = mob[mob.length - 1];
-        me.damageReduction = 0.5 //take less damage
-        // Matter.Body.setDensity(me, 0.0005) // normal density is 0.001 // this reduces life by half and decreases knockback
+        me.damageReduction = 0 //take NO damage until targeting player, but also slowly lose health
         me.isZombie = true
         me.isBadTarget = true;
         me.isDropPowerUp = false;
@@ -1550,9 +1550,24 @@ const spawn = {
         me.stroke = "#83a"
         me.accelMag = 0.0015
         me.frictionAir = 0.01
-        // me.collisionFilter.mask = cat.player | cat.map | cat.body
-        // me.memory = 120;
+        me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.mob
         me.seeAtDistance2 = 1000000 //1000 vision range
+        // me.onDeath = function() {
+        //     const amount = Math.min(10, Math.ceil(this.mass * 0.5))
+        //     if (tech.isSporeFlea) {
+        //         const len = amount / 2
+        //         for (let i = 0; i < len; i++) {
+        //             const speed = 10 + 5 * Math.random()
+        //             const angle = 2 * Math.PI * Math.random()
+        //             b.flea(this.position, { x: speed * Math.cos(angle), y: speed * Math.sin(angle) })
+        //         }
+        //     } else if (tech.isSporeWorm) {
+        //         const len = amount / 2
+        //         for (let i = 0; i < len; i++) b.worm(this.position)
+        //     } else {
+        //         for (let i = 0; i < amount; i++) b.spore(this.position)
+        //     }
+        // }
         me.do = function() {
             this.zombieHealthBar();
             this.lookForMobTargets();
@@ -1572,9 +1587,11 @@ const spawn = {
                         (Vector.magnitudeSquared(Vector.sub(this.position, mob[this.mobSearchIndex].position)) < this.seeAtDistance2 && Matter.Query.ray(map, this.position, mob[this.mobSearchIndex].position).length === 0)
                     ) {
                         this.target = mob[this.mobSearchIndex]
-                    } else if (Math.random() < 0.05 && (Vector.magnitudeSquared(Vector.sub(this.position, player.position)) < this.seeAtDistance2 || Matter.Query.ray(map, this.position, player.position).length === 0)) {
+                    } else if (Math.random() < 0.005 * player.speed && (Vector.magnitudeSquared(Vector.sub(this.position, player.position)) < this.seeAtDistance2 || Matter.Query.ray(map, this.position, player.position).length === 0)) {
                         this.target = player
                         this.isBadTarget = false;
+                        this.damageReduction = 0.5
+                        me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob
                     }
                 }
             }
@@ -1585,13 +1602,13 @@ const spawn = {
                     Vector.magnitudeSquared(Vector.sub(this.position, this.target.position)) > this.seeAtDistance2 ||
                     Matter.Query.ray(map, this.position, this.target.position).length !== 0
                 ) {
-                    if (this.target === player) this.isBadTarget = true
                     this.target = null
                 }
             }
         }
         me.zombieHealthBar = function() {
-            this.damage(0.001); //decay
+            this.health -= 0.0005 //decay
+            if ((this.health < 0.01 || isNaN(this.health)) && this.alive) this.death();
 
             const h = this.radius * 0.3;
             const w = this.radius * 2;
@@ -1624,7 +1641,7 @@ const spawn = {
                         this.force.y -= force.y;
                         this.target = null //look for a new target
 
-                        const dmg = 0.3 * m.dmgScale
+                        const dmg = 0.2 * m.dmgScale
                         who.damage(dmg);
                         who.locatePlayer();
                         simulation.drawList.push({
@@ -1647,7 +1664,6 @@ const spawn = {
         }
         // me.onDamage = function(dmg) {
         // }
-
     },
     starter(x, y, radius = Math.floor(15 + 20 * Math.random())) { //easy mob for on level 1
         mobs.spawn(x, y, 8, radius, "#9ccdc6");
@@ -5703,21 +5719,132 @@ const spawn = {
             ctx.setLineDash([]);
         }
     },
-    sneaker(x, y, radius = 15 + Math.ceil(Math.random() * 10)) {
+    sneakBoss(x, y, radius = 70) {
         mobs.spawn(x, y, 5, radius, "transparent");
         let me = mob[mob.length - 1];
         Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
+        me.isBoss = true;
+        me.damageReduction = 0.4 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+
+        me.accelMag = 0.0017 * Math.sqrt(simulation.accelScale);
+        me.frictionAir = 0.01;
+        me.g = 0.0001; //required if using this.gravity
+        me.stroke = "transparent"; //used for drawSneaker
+        me.alpha = 1; //used in drawSneaker
+        me.isCloaked = true; //used in drawSneaker
+        me.isBadTarget = true;
+        me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
+        me.showHealthBar = false;
+        me.memory = 30;
+        me.vanishesLeft = 2+simulation.difficultyMode
+        me.onDamage = function() {
+            if (this.vanishesLeft>0 && this.health < 0.1){ //if health is below 10% teleport to a random spot on player history, heal, and cloak
+                this.vanishesLeft--
+
+                // const scale = 0.95;
+                // Matter.Body.scale(this, scale, scale);
+                // this.radius *= scale;
+
+                //flash screen to hide vanish
+                for(let i=0; i<8; i++){
+                    simulation.drawList.push({
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: 3000,
+                        color: `rgba(0, 0, 0,${1-0.1*i})`,
+                        time: (i+1)*3
+                    });
+                }
+                //teleport to near the end of player history
+                const index = Math.floor(  (m.history.length-1)*(0.66+0.2*Math.random() ))
+                let history = m.history[(m.cycle - index) % 600]
+                Matter.Body.setPosition(this, history.position)
+                Matter.Body.setVelocity(this, {x: 0,y: 0});
+                
+                this.seePlayer.recall = 0
+                this.cloak();
+                this.health = 1;
+            }
+        };
+        me.cloak = function() {
+            if (!this.isCloaked) { //stealth
+                this.alpha = 0;
+                this.isCloaked = true;
+                this.isBadTarget = true;
+                this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
+                this.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+            }
+        } 
+        me.deCloak = function() {
+            if (this.isCloaked) {
+                this.damageReduction = 0.4 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+                this.isCloaked = false;
+                this.isBadTarget = false;
+                this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can touch player
+            }
+        }
+        me.do = function() {
+            this.gravity();
+            this.seePlayerByHistory(55);
+            this.checkStatus();
+            this.attraction();
+            //draw
+            if (this.seePlayer.recall) {
+                if (this.alpha < 1) this.alpha += 0.005 + 0.003 / simulation.CDScale;
+            } else {
+                if (this.alpha > 0) this.alpha -= 0.04;
+            }
+            if (this.alpha > 0) {
+                if (this.alpha > 0.7) {
+                    this.healthBar();
+                    this.deCloak()
+                }
+                //draw body
+                ctx.beginPath();
+                const vertices = this.vertices;
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+                ctx.lineTo(vertices[0].x, vertices[0].y);
+                ctx.fillStyle = `rgba(0,0,0,${this.alpha * this.alpha})`;
+                ctx.fill();
+            } else {
+                this.cloak()
+            }
+        };
+    },
+    sneaker(x, y, radius = 15 + Math.ceil(Math.random() * 10)) {
+        mobs.spawn(x, y, 5, radius, "transparent");
+        let me = mob[mob.length - 1];
+        // Matter.Body.setDensity(me, 0.001); //extra dense //normal is 0.001 //makes effective life much larger
         me.accelMag = 0.001 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.01;
         me.g = 0.0002; //required if using this.gravity
         me.stroke = "transparent"; //used for drawSneaker
         me.alpha = 1; //used in drawSneaker
-        // me.leaveBody = false;
-        me.canTouchPlayer = false; //used in drawSneaker
+        me.isNotCloaked = false; //used in drawSneaker
         me.isBadTarget = true;
         me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
         me.showHealthBar = false;
         me.memory = 240;
+        me.isVanished = false;
+        me.onDamage = function() {
+            if (!this.isVanished && this.health < 0.1){ //if health is below 10% teleport to a random spot on player history, heal, and cloak
+                this.health = 1;
+                this.isVanished = true
+                this.cloak();
+                //teleport to near the end of player history
+                Matter.Body.setPosition(this, m.history[Math.floor((m.history.length-1)*(0.66+0.33*Math.random()))].position)
+                Matter.Body.setVelocity(this, {x: 0,y: 0});
+            }
+        };
+        me.cloak = function() {
+            if (this.isNotCloaked) { //stealth
+                this.alpha = 0;
+                this.isNotCloaked = false;
+                this.isBadTarget = true;
+                this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
+            }
+        }
         me.do = function() {
             this.gravity();
             this.seePlayerByHistory(15);
@@ -5732,8 +5859,8 @@ const spawn = {
             if (this.alpha > 0) {
                 if (this.alpha > 0.7) {
                     this.healthBar();
-                    if (!this.canTouchPlayer) {
-                        this.canTouchPlayer = true;
+                    if (!this.isNotCloaked) {
+                        this.isNotCloaked = true;
                         this.isBadTarget = false;
                         this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can touch player
                     }
@@ -5748,10 +5875,8 @@ const spawn = {
                 ctx.lineTo(vertices[0].x, vertices[0].y);
                 ctx.fillStyle = `rgba(0,0,0,${this.alpha * this.alpha})`;
                 ctx.fill();
-            } else if (this.canTouchPlayer) { //stealth
-                this.canTouchPlayer = false;
-                this.isBadTarget = true;
-                this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
+            } else {
+                this.cloak()
             }
         };
     },
@@ -5764,7 +5889,7 @@ const spawn = {
         Matter.Body.setDensity(me, 0.0015); //normal is 0.001 //makes effective life much lower
         me.stroke = "transparent"; //used for drawGhost
         me.alpha = 1; //used in drawGhost
-        me.canTouchPlayer = false; //used in drawGhost
+        me.isNotCloaked = false; //used in drawGhost
         me.isBadTarget = true;
         // me.leaveBody = false;
         me.collisionFilter.mask = cat.bullet //| cat.body
@@ -5791,8 +5916,8 @@ const spawn = {
             if (this.alpha > 0) {
                 if (this.alpha > 0.8 && this.seePlayer.recall) {
                     this.healthBar();
-                    if (!this.canTouchPlayer) {
-                        this.canTouchPlayer = true;
+                    if (!this.isNotCloaked) {
+                        this.isNotCloaked = true;
                         this.isBadTarget = false;
                         this.collisionFilter.mask = cat.player | cat.bullet
                     }
@@ -5808,8 +5933,8 @@ const spawn = {
                 ctx.lineWidth = 1;
                 ctx.fillStyle = `rgba(255,255,255,${this.alpha * this.alpha})`;
                 ctx.fill();
-            } else if (this.canTouchPlayer) {
-                this.canTouchPlayer = false;
+            } else if (this.isNotCloaked) {
+                this.isNotCloaked = false;
                 this.isBadTarget = true;
                 this.collisionFilter.mask = cat.bullet; //can't touch player or walls
             }
@@ -6110,7 +6235,7 @@ const spawn = {
         me.showHealthBar = false;
         me.frictionStatic = 0;
         me.friction = 0;
-        me.canTouchPlayer = false; //used in drawSneaker
+        me.isNotCloaked = false; //used in drawSneaker
         me.isBadTarget = true;
         me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
 
@@ -6192,8 +6317,8 @@ const spawn = {
             if (this.alpha > 0) {
                 if (this.alpha > 0.95) {
                     this.healthBar();
-                    if (!this.canTouchPlayer) {
-                        this.canTouchPlayer = true;
+                    if (!this.isNotCloaked) {
+                        this.isNotCloaked = true;
                         this.isBadTarget = false;
                         this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can touch player
                     }
@@ -6208,8 +6333,8 @@ const spawn = {
                 ctx.lineTo(vertices[0].x, vertices[0].y);
                 ctx.fillStyle = `rgba(25,0,50,${this.alpha * this.alpha})`;
                 ctx.fill();
-            } else if (this.canTouchPlayer) {
-                this.canTouchPlayer = false;
+            } else if (this.isNotCloaked) {
+                this.isNotCloaked = false;
                 this.isBadTarget = true
                 this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
             }
@@ -6373,7 +6498,7 @@ const spawn = {
     //     // Matter.Body.setDensity(me, 0.001); //normal is 0.001 //makes effective life much lower
     //     me.stroke = "transparent"; //used for drawGhost
     //     me.alpha = 1; //used in drawGhost
-    //     me.canTouchPlayer = false; //used in drawGhost
+    //     me.isNotCloaked = false; //used in drawGhost
     //     me.isBadTarget = true;
     //     // me.leaveBody = false;
     //     me.collisionFilter.mask = cat.bullet //| cat.body
@@ -6414,8 +6539,8 @@ const spawn = {
     //         if (this.alpha > 0) {
     //             if (this.alpha > 0.8 && this.seePlayer.recall) {
     //                 this.healthBar();
-    //                 if (!this.canTouchPlayer) {
-    //                     this.canTouchPlayer = true;
+    //                 if (!this.isNotCloaked) {
+    //                     this.isNotCloaked = true;
     //                     this.isBadTarget = false;
     //                     this.collisionFilter.mask = cat.player | cat.bullet
     //                 }
@@ -6452,8 +6577,8 @@ const spawn = {
     //             }
 
 
-    //         } else if (this.canTouchPlayer) {
-    //             this.canTouchPlayer = false;
+    //         } else if (this.isNotCloaked) {
+    //             this.isNotCloaked = false;
     //             this.isBadTarget = true;
     //             this.collisionFilter.mask = cat.bullet; //can't touch player or walls
     //         }

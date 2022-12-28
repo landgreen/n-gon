@@ -636,7 +636,7 @@ const powerUps = {
         } else if (powerUps.research.count > 0) {
             text += `<div onclick="powerUps.research.use('${type}')" class='choose-grid-module research-card' >` // style = "margin-left: 192px; margin-right: -192px;"
             text += `<div><div><span style="position:relative;">`
-            for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.21)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
+            for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="font-size:0.82em; position:absolute; top:0; left:${(18 - len*0.21)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
             text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality?"<span class='alt'>alternate reality</span>": "research"}</span></div></div></div>`
         } else {
             text += `<div></div>`
@@ -1300,7 +1300,6 @@ const powerUps = {
 
                 if (have.length) {
                     choose = have[Math.floor(Math.random() * have.length)]
-                    // simulation.makeTextLog(`<div class='circle tech'></div> &nbsp; <strong>${tech.tech[choose].name}</strong> was ejected`, 600) //message about what tech was lost
                     simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
 
                     for (let i = 0; i < tech.tech[choose].count; i++) {
@@ -1318,7 +1317,6 @@ const powerUps = {
                     return false
                 }
             } else if (tech.tech[choose].count && !tech.tech[choose].isNonRefundable) {
-                // simulation.makeTextLog(`<div class='circle tech'></div> &nbsp; <strong>${tech.tech[choose].name}</strong> was ejected`, 600) //message about what tech was lost
                 simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
 
                 for (let i = 0; i < tech.tech[choose].count; i++) {

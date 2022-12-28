@@ -31,19 +31,21 @@ const level = {
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("spores") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 10000
-            // tech.giveTech("alternator")
-            // tech.giveTech("posture")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Sleipnir")
+            // tech.giveTech("Zectron")
+            // tech.giveTech("cordyceps")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("super ball")
             // tech.isFoamBall = true
-            // for (let i = 0; i < 9; ++i) tech.giveTech("emergence")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("incendiary ammunition")
             // for (let i = 0; i < 2; i++) tech.giveTech("unified field theory")
-            // for (let i = 0; i < 9; i++) tech.giveTech("replication")
+            // for (let i = 0; i < 1; i++) tech.giveTech("colony")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
             // level.testing();
             // spawn.shooter(1900, -500, 200)
-            // spawn.starter(1900, -500)
+            // spawn.sneakBoss(1900, -500)
+            // spawn.starter(1900, -500, 25)
+            // spawn.sneaker(1900, -500, 25)
             // spawn.hopper(2538, -950)
             // for (let i = 0; i < 2; ++i) spawn.starter(1000 + 1000 * Math.random(), -500 + 300 * Math.random())
             // tech.addJunkTechToPool(2)

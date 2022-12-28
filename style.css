@@ -192,7 +192,7 @@ summary {
 
 .choose-grid-module {
     /* padding: 5px; */
-    line-height: 170%;
+    line-height: 160%;
     /* border-radius: 8px; */
     background-color: #fafcfd;
     font-size: 0.75em;
@@ -259,13 +259,13 @@ summary {
 .pause-grid-module {
     /* margin: -1px;
     padding: 10px;
-    line-height: 170%;
+    line-height: 160%;
     border: 1px #333 solid;
     border-radius: 8px;
     background-color: #fff;
     font-size: 0.65em; */
     padding: 5px;
-    line-height: 170%;
+    line-height: 160%;
     /* border-radius: 8px; */
     background-color: #fafcfd;
     font-size: 0.75em;
@@ -308,7 +308,7 @@ summary {
 
 .experiment-grid-module {
     padding: 5px;
-    line-height: 170%;
+    line-height: 160%;
     /* border-radius: 8px; */
     background-color: #fafcfd;
     font-size: 0.75em;
@@ -331,8 +331,9 @@ summary {
 }
 
 .card-background {
+    /* width:288;  */
     height:340px; 
-    width:288; 
+    background-size: contain;
     background-repeat: no-repeat; 
     display: flex; 
     justify-content:flex-end;
@@ -368,6 +369,53 @@ summary {
     margin-right: -1px;
     padding: 1px 0px 1px 10px;
 }
+
+
+/* media rules for smaller screens
+4->3 at 1550
+*/
+@media (width < 0px) {
+    .experiment-grid-module {
+        line-height: 140%;
+        font-size: 0.65em;
+    }
+    .choose-grid-module{
+        line-height: 140%;
+        font-size: 0.65em;
+    }
+    .pause-grid-module {
+        line-height: 140%;
+        font-size: 0.65em;
+    }
+    .card-background{
+        height:270px; 
+    }
+    #experiment-grid{
+        grid-template-columns: repeat(auto-fit, 360px);
+    }
+    #choose-grid{
+        grid-template-columns: repeat(auto-fit, 360px);
+    }
+    .pause-grid{
+        grid-template-columns: repeat(auto-fit, 360px);
+    }
+}
+
+/* default
+.experiment-grid-module {
+    line-height: 160%;
+    font-size: 0.75em;
+}
+.card-background {
+    height:340px;
+}
+#experiment-grid{
+    grid-template-columns: repeat(auto-fit, 384px);
+}
+*/
+
+
+
 
 
 /* .no-image-cards{
@@ -581,7 +629,7 @@ summary {
     color: #222;
     text-align: right;
     opacity: 0.35;
-    line-height: 130%;
+    line-height: 120%;
     background-color: rgba(255, 255, 255, 0.4);
     user-select: none;
     pointer-events: none;
@@ -811,7 +859,7 @@ summary {
     padding: 4px;
     border-radius: 4px;
     font-weight: 800;
-    line-height: 170%;
+    line-height: 160%;
     font-size: 1em;
 }
 
@@ -851,98 +899,89 @@ summary {
     font-size: 90%;
 }
 
-.circle {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-bottom: -2px;
-}
-
 .circle-grid {
-    width: 27px;
-    height: 27px;
+    width: 1.35em;
+    height: 1.35em;
     border-radius: 50%;
     display: inline-block;
-    margin-bottom: -7px;
-    /* opacity: 0; */
-    /* transition: opacity 0.5s ease-in; */
+    margin-bottom: -0.3em;
 }
 
 .research-circle {
-    width: 13px;
-    height: 13px;
+    width: 0.9em;
+    height: 0.9em;
     border-radius: 50%;
     display: inline-block;
     background-color: #f7b;
-    border: 0.5px #fff solid;
+    border: 0.065em #fff solid;
     opacity: 0.85;
-    margin-bottom: -2.5px;
+    margin-bottom: -0.1em;
 }
 
 .ammo-circle {
-    width: 11px;
-    height: 11px;
+    width: 0.75em;
+    height: 0.75em;
     border-radius: 50%;
     display: inline-block;
     background-color: #467;
-    border: 0.5px #fff solid;
+    border: 0.05em #fff solid;
     opacity: 0.95;
     margin-bottom: -1.5px;
 }
 
 .heal-circle {
-    width: 14px;
-    height: 14px;
+    width: 0.95em;
+    height: 0.95em;
     border-radius: 50%;
     display: inline-block;
     background-color: #0d9;
-    border: 0.5px #fff solid;
+    border: 0.05em #fff solid;
     opacity: 0.85;
     margin-bottom: -3px;
 }
 .heal-circle-energy {
-    width: 14px;
-    height: 14px;
+    width: 0.95em;
+    height: 0.95em;
     border-radius: 50%;
     display: inline-block;
     background-color: #ff0;
-    border: 0.5px #000 solid;
+    border: 0.05em #000 solid;
     opacity: 0.85;
     margin-bottom: -3px;
 }
 
 .coupling-circle {
-    width: 10px;
-    height: 10px;
+    width: 0.7em;
+    height: 0.7em;
     border-radius: 50%;
     display: inline-block;
     background-color: #0ae;
-    border: 0.5px #fff solid;
+    border: 0.05em #fff solid;
     margin-bottom: -0.5px;
 }
+
 .boost-circle {
-    width: 10px;
-    height: 10px;
+    width: 0.7em;
+    height: 0.7em;
     border-radius: 50%;
     display: inline-block;
     background-color: #f03;
-    border: 0.5px #fff solid;
+    border: 0.05em #fff solid;
     opacity: 0.9;
     margin-bottom: -0.5px;
 }
 
-.circle-grid-shadow {
+/* .circle-grid-shadow {
     width: 43px;
     height: 43px;
     border-radius: 50%;
     display: inline-block;
     margin-bottom: -15px;
-}
+} */
 
-.circle-gun-tech {
+/* .circle-gun-tech {
     box-shadow: 0 0 0 3px #025;
-}
+} */
 
 .junk {
     background-color: hsl(254, 44%, 75%);

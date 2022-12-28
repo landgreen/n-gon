@@ -1,28 +1,34 @@
 ******************************************************** NEXT PATCH **************************************************
 
+adjust card size based on window width for smaller screens
+  switched from px to em css units for many elements
+
 some image updates
 single column power up choice for small screens or no image setting
 
+tech Zectron - super ball can damage you, but they do more damage to mobs
+  superBall bullets are converted to run off generic b.superBall()
+  !!still needs testing for balance
+
+tech: cordyceps - sporangium infect mobs, making them fight for you
+  zombies might attack player if there are no mob targets
+  !!still needs testing for balance
+
+sneakers - after taking damage if sneakers are low on life they teleport to a random point on the player history and sneak attack again
+sneakBoss - a large sneaker that can hide several times before it dies
+
+bug fixes
+
 *********************************************************** TODO *****************************************************
 
-maybe harpoon should start with less ammo?
-
-tech: p-zombie - sporangium infect mobs, making them fight for you
-  zombies should attack player if there are no mob targets
-  name: cordyceps, zombie, p-zombie?
-  infected mobs get a status debuff.  when they die they return as zombie mob type
-    zombie mobs run code similar to drones
-      they inherit color, sides, radius from host
-
-tech super balls - super ball can damage you, but it does more damage to mobs
+tech - all mobs return as zombies?
 
 set media rules for smaller screens
+  should fit 4 tech per row on my laptop
   smaller card size
     set font to 0.8em
     set card width to 384*0.8
       and set background images to fit
-
-bug reactor boss + harpoon foam production seems to make too much foam
 
 set mob health bar colors based on status effects?
   make mob damage immunity a mob status effect?
@@ -30,10 +36,8 @@ set mob health bar colors based on status effects?
 physics notes: add link to double slit content
   https://www.youtube.com/watch?v=v_uBaBuarEM
 
-seekers after taking damage if seekers are below 1/2 life they teleport to a random point on the player history and sneak attack again
-  make sure they don't teleport on top of the player
 
-tech:  railgun area damage effect, but for all harpoon mode
+tech: rail gun area damage effect, but for all harpoon mode
 
 laser momentum pushed back on player?
   might just be annoying

@@ -588,7 +588,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
     },
     populateGrid() { //background-color:var(--build-bg-color);
         let text = `
-  <div class="experiment-grid-module" style="position: sticky; top:0; z-index: 10; align-self: start; width: 160px; font-size: 1.00em; line-height: 170%; background-color: #fafcfd;display: flex; flex-direction: column; justify-content: center; align-items: center;border: 1.5px #333 solid;border-radius:10px;">  
+  <div class="experiment-grid-module" style="position: sticky; top:0; z-index: 10; align-self: start; width: 165px; font-size: 1.00em; line-height: 170%; background-color: #fafcfd;display: flex; flex-direction: column; justify-content: center; align-items: center;border: 1.5px #333 solid;border-radius:10px;">  
 <div>
     <svg class="SVG-button" onclick="build.startExperiment()" width="150" height="68" >
         <g stroke='none' fill='#333' stroke-width="2" font-size="60px" font-family="Ariel, sans-serif">

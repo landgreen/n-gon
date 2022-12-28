@@ -4669,9 +4669,9 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles) || (tech.haveGunCheck("super balls") && !tech.isFoamBall) || (tech.isRivets && !tech.isNailCrit) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 3) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
+                return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles) || (tech.haveGunCheck("super balls") && !tech.isFoamBall && !tech.isSuperHarm) || (tech.isRivets && !tech.isNailCrit) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 3) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
             },
-            requires: "shotgun, super balls, rivets, drones, not irradiated drones, burst drones, polyurethane",
+            requires: "shotgun, super balls, rivets, drones, not irradiated drones, burst drones, polyurethane, Zectron",
             effect() {
                 tech.isIncendiary = true
             },
@@ -4704,6 +4704,25 @@ const tech = {
                         if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
                     }
                 }
+            }
+        },
+        {
+            name: "Zectron",
+            description: `<strong>+100%</strong> <strong>super ball</strong> density and <strong class='color-d'>damage</strong><br>after colliding with <strong>super balls</strong> <strong>lose</strong> <strong class='color-h'>health</strong>`,
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("super balls") && !tech.isIncendiary
+            },
+            requires: "super balls not incendiary ammunition",
+            effect() {
+                tech.isSuperHarm = true
+            },
+            remove() {
+                tech.isSuperHarm = false
             }
         },
         {
@@ -5016,7 +5035,7 @@ const tech = {
         },
         {
             name: "launch system",
-            description: `<strong>+500%</strong> <strong>missile</strong> <strong><em>fire rate</em></strong><br><strong>+20%</strong> missile <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
+            description: `<strong>+500%</strong> <strong>missile</strong> <strong class='color-g'>gun</strong> <strong><em>fire rate</em></strong><br><strong>+20%</strong> missile <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5605,6 +5624,25 @@ const tech = {
             },
             remove() {
                 tech.isSporeGrowth = false
+            }
+        },
+        {
+            name: "cordyceps",
+            description: "mobs infected by <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong><br><strong>resurrect</strong> and attack other mobs",
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.haveGunCheck("spores")
+            },
+            requires: "spores",
+            effect() {
+                tech.isZombieMobs = true
+            },
+            remove() {
+                tech.isZombieMobs = false
             }
         },
         {
@@ -6314,28 +6352,18 @@ const tech = {
             ammoBonus: 9,
             effect() {
                 tech.isRailGun = true;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                    if (b.guns[i].name === "harpoon") {
-                        b.guns[i].chooseFireMethod()
-                        b.guns[i].ammoPack = 5;
-                        b.guns[i].ammo = b.guns[i].ammo * 6;
-                        simulation.updateGunHUD();
-                        break
-                    }
-                }
+                b.guns[9].chooseFireMethod()
+                b.guns[9].ammoPack = 5;
+                b.guns[9].ammo = b.guns[9].ammo * 6;
+                simulation.updateGunHUD();
             },
             remove() {
                 if (tech.isRailGun) {
                     tech.isRailGun = false;
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "harpoon") {
-                            b.guns[i].chooseFireMethod()
-                            b.guns[i].ammoPack = 1.7;
-                            b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 6);
-                            simulation.updateGunHUD();
-                            break
-                        }
-                    }
+                    b.guns[9].chooseFireMethod()
+                    b.guns[9].ammoPack = 1.7;
+                    b.guns[9].ammo = Math.ceil(b.guns[9].ammo / 6);
+                    simulation.updateGunHUD();
                 }
             }
         },
@@ -9289,6 +9317,28 @@ const tech = {
             }
         },
         {
+            name: "p-zombie",
+            description: "set your <strong class='color-h'>health</strong> to <strong>1</strong><br>all mobs die and <strong>resurrect</strong> as zombies",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() {return true},
+            requires: "",
+            effect() {
+                m.health = 0.01 //set health to 1
+                m.displayHealth();
+                for (let i = mob.length - 1; i > -1; i--) { //replace mobs with zombies
+                    if (mob[i].isDropPowerUp && !mob[i].isBoss && mob[i].alive) { 
+                        mob[i].isSoonZombie = true
+                        mob[i].death()
+                    }
+                }
+            },
+            remove() {}
+        },
+        {
             name: "decomposers",
             description: "after they die <strong>mobs</strong> leave behind <strong>spawns</strong><br>&nbsp;",
             maxCount: 1,
@@ -11256,4 +11306,6 @@ const tech = {
     buffedGun: 0,
     isGunChoice: null,
     railChargeRate: null,
+    isSuperHarm: null,
+    isZombieMobs: null
 }
