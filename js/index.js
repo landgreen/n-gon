@@ -157,7 +157,6 @@ window.addEventListener('load', () => {
                 simulation.molecularMode = Number(set[property])
                 const i = 4 //update experiment text
                 m.fieldUpgrades[i].description = m.fieldUpgrades[i].setDescription()
-                // document.getElementById(`field-${i}`).innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div> ${m.fieldUpgrades[i].description}`
                 document.getElementById(`field-${i}`).innerHTML = `<div class="card-text">
                 <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
                 ${m.fieldUpgrades[i].description}</div>`
@@ -325,7 +324,8 @@ const build = {
         if (tech.plasmaBotCount) botText += `<br>plasma-bots: ${tech.plasmaBotCount}`
         if (tech.missileBotCount) botText += `<br>missile-bots: ${tech.missileBotCount}`
 
-        let text = `<div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;"> 
+        let text = `<div class="pause-grid-module" style = "padding: 10px; line-height: 110%;">
+<span style = "font-size: 0.87em;">
 <svg class="SVG-button" onclick="build.shareURL(false)" width="92" height="20" style="padding:0px; margin: 1px;">
     <g stroke='none' fill='#333' stroke-width="2" font-size="14px" font-family="Ariel, sans-serif"> <text x="5" y="15">copy build url</text></g>
 </svg><span style="font-size:1.5em;font-weight: 600; float: right;">PAUSED</span> 
@@ -349,13 +349,13 @@ ${botText}
 <span style="float: right;">mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)})</span> 
 <br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}
 <span style="float: right;">velocity: (${player.velocity.x.toFixed(3)}, ${player.velocity.y.toFixed(3)})</span> 
-${junkCount ?  `<br><strong class='color-j'>JUNK</strong>: ${(junkCount / totalCount * 100).toFixed(1)}%  `: ""}
+${junkCount ?  `<br><strong class='color-junk'>JUNK</strong>: ${(junkCount / totalCount * 100).toFixed(1)}%  `: ""}
 <br>
 <br>level: ${level.levelsCleared} ${level.levels[level.onLevel]} (${level.difficultyText()})
 <br>seed: ${Math.initialSeed} &nbsp; ${m.cycle} cycles
 <br>mobs: ${mob.length} &nbsp; blocks: ${body.length} &nbsp; bullets: ${bullet.length} &nbsp; power ups: ${powerUp.length} 
 ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
-</div>`;
+</span></div>`;
         // deaths: ${mobs.mobDeaths} &nbsp;
         if (tech.isPauseSwitchField && !simulation.isChoosing) {
             const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? Math.floor(Math.random()*10) : ""}.webp');"`
@@ -588,7 +588,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
     },
     populateGrid() { //background-color:var(--build-bg-color);
         let text = `
-  <div class="experiment-grid-module" style="position: sticky; top:0; z-index: 10; align-self: start; width: 165px; font-size: 1.00em; line-height: 170%; background-color: #fafcfd;display: flex; flex-direction: column; justify-content: center; align-items: center;border: 1.5px #333 solid;border-radius:10px;">  
+  <div class="experiment-grid-module" style="position: sticky; top:0; z-index: 10; align-self: start; width: 165px; font-size: 1.00em; line-height: 170%; background-color: #fafcfd;display: flex; flex-direction: column; justify-content: center; align-items: center;border: 1.5px #333 solid;border-radius:10px; padding:7px;  height: 190px;">  
 <div>
     <svg class="SVG-button" onclick="build.startExperiment()" width="150" height="68" >
         <g stroke='none' fill='#333' stroke-width="2" font-size="60px" font-family="Ariel, sans-serif">

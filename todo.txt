@@ -1,41 +1,35 @@
 ******************************************************** NEXT PATCH **************************************************
 
-adjust card size based on window width for smaller screens
-  switched from px to em css units for many elements
-
-some image updates
-single column power up choice for small screens or no image setting
+card images and text scale based on browser width for smaller screens
 
 tech Zectron - super ball can damage you, but they do more damage to mobs
   superBall bullets are converted to run off generic b.superBall()
-  !!still needs testing for balance
 
-tech: cordyceps - sporangium infect mobs, making them fight for you
-  zombies might attack player if there are no mob targets
-  !!still needs testing for balance
-
-sneakers - after taking damage if sneakers are low on life they teleport to a random point on the player history and sneak attack again
+sneakers - after taking damage if sneakers are low on life they teleport to a random point from the player's history and they sneak attack again
 sneakBoss - a large sneaker that can hide several times before it dies
 
 bug fixes
 
 *********************************************************** TODO *****************************************************
 
+tech: cordyceps - sporangium infect mobs, making them fight for you
+  zombies might attack player if there are no mob targets
+  !! needs to explore when there are no targets
+  !! mechanics are confusing
+  !! still needs testing for balance
+    it's targeting player even when there are mobs
 tech - all mobs return as zombies?
 
-set media rules for smaller screens
-  should fit 4 tech per row on my laptop
-  smaller card size
-    set font to 0.8em
-    set card width to 384*0.8
-      and set background images to fit
+Now that super balls are generic maybe something else should produce them
+  super-bot 
+  molecular fabricator - how to aim?
+  shotgun - too similar to super ball gun
 
 set mob health bar colors based on status effects?
   make mob damage immunity a mob status effect?
   
 physics notes: add link to double slit content
   https://www.youtube.com/watch?v=v_uBaBuarEM
-
 
 tech: rail gun area damage effect, but for all harpoon mode
 
@@ -1162,6 +1156,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
 ***maybe redo***
   dynamical systems
   harpoon gun
+    Eiichiro Oda --niji
   nail-bot
   homeostasis
   heuristics

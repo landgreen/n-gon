@@ -177,6 +177,7 @@ summary {
     display: grid;
     grid-template-columns: repeat(3, 384px);
     align-items: stretch;
+    /* align-items: start; */
     /* align-content: start; */
     /* grid-auto-rows: minmax(auto, 140px); */
     visibility: hidden;
@@ -221,6 +222,7 @@ summary {
     /* grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); */
     grid-auto-rows: minmax(auto, auto);
     align-content: start;
+    align-items: start;
     /* align-content: space-between; */
     /* gap: 10px; */
     z-index: 2;
@@ -264,7 +266,7 @@ summary {
     border-radius: 8px;
     background-color: #fff;
     font-size: 0.65em; */
-    padding: 5px;
+    /* padding: 5px; */
     line-height: 160%;
     /* border-radius: 8px; */
     background-color: #fafcfd;
@@ -280,6 +282,8 @@ summary {
     display: flex;
     justify-content: center;
     /* align-content: space-between; */
+    /* align-items: start; */
+    /* align-items: stretch; */
     /* padding-top: 10px; */
     /* padding: 16px; */
     padding: 10px 1px;
@@ -307,7 +311,8 @@ summary {
 }
 
 .experiment-grid-module {
-    padding: 5px;
+    /* padding: 0.1em; */
+    /* padding: 5px; */
     line-height: 160%;
     /* border-radius: 8px; */
     background-color: #fafcfd;
@@ -322,6 +327,7 @@ summary {
 
 .grid-title {
     padding-bottom: 6px;
+    padding-top: 4px;
     font-size: 1.4em;
     font-weight: 600;
 }
@@ -337,19 +343,22 @@ summary {
     background-repeat: no-repeat; 
     display: flex; 
     justify-content:flex-end;
-    flex-direction: column; 
-    padding:0px;
+    flex-direction: column;  
+    /* margin: 5px; */
 }
 
 .card-text {
     background-color: rgba(255,255,255,1); 
     /* border-radius: 8px; */
-    padding: 11px 13px; 
+    /* padding: 11px 13px;  */
+    padding: 0.5em 1em;
     /* border-top: 1px solid var(--build-bg-color); */
     border: 1px solid #444;
     margin-top: -1px;
     margin-right: -1px;
     font-size: 0.92em;
+    min-height: 88px;
+    /* height:78px; */
 }
 .cancel-card {
     text-align: center;
@@ -360,6 +369,9 @@ summary {
     margin-top: -1px;
     margin-right: -1px;
     padding: 1px;
+
+    line-height: 160%;
+    background-color: #fafcfd;
 }
 .research-card {
     font-size: 1.1em;
@@ -368,36 +380,42 @@ summary {
     margin-top: -1px;
     margin-right: -1px;
     padding: 1px 0px 1px 10px;
+    line-height: 160%;
+    background-color: #fafcfd;
 }
 
 
 /* media rules for smaller screens
 4->3 at 1550
 */
-@media (width < 0px) {
-    .experiment-grid-module {
-        line-height: 140%;
-        font-size: 0.65em;
+@media (1500px <= width < 1950px) {
+    .experiment-grid-module, .choose-grid-module, .pause-grid-module {
+        line-height: 150%;
+        font-size: 0.72em;
     }
-    .choose-grid-module{
-        line-height: 140%;
-        font-size: 0.65em;
-    }
-    .pause-grid-module {
-        line-height: 140%;
-        font-size: 0.65em;
+    #experiment-grid, #choose-grid, .pause-grid{
+        grid-template-columns: repeat(auto-fit, 360px);
     }
     .card-background{
-        height:270px; 
+        height:315px;
     }
-    #experiment-grid{
-        grid-template-columns: repeat(auto-fit, 360px);
+    .card-text {
+        min-height: 82px;
     }
-    #choose-grid{
-        grid-template-columns: repeat(auto-fit, 360px);
+}
+@media (width < 1500px) {
+    .experiment-grid-module, .choose-grid-module, .pause-grid-module {
+        line-height: 143%;
+        font-size: 0.68em;
     }
-    .pause-grid{
-        grid-template-columns: repeat(auto-fit, 360px);
+    #experiment-grid, #choose-grid, .pause-grid{
+        grid-template-columns: repeat(auto-fit, 340px);
+    }
+    .card-background{
+        height:290px; 
+    }
+    .card-text {
+        min-height: 75px;
     }
 }
 
@@ -855,15 +873,14 @@ summary {
 }
 .color-cancel {
     background-color: #fafcfd;
-    border: 2px #444 solid;
-    padding: 4px;
-    border-radius: 4px;
+    border: 0.15em #444 solid;
+    padding: 0.2em;
+    border-radius: 0.2em;
     font-weight: 800;
-    line-height: 160%;
     font-size: 1em;
 }
 
-.color-j {
+.color-junk {
     letter-spacing: 1px;
     /* font-weight: 100; */
     font-family: Lucida Console, Courier, monospace;
@@ -905,6 +922,11 @@ summary {
     border-radius: 50%;
     display: inline-block;
     margin-bottom: -0.3em;
+}
+
+.junk {
+    background-color: hsl(254, 44%, 75%);
+    border-radius: 25%;
 }
 
 .research-circle {
@@ -983,11 +1005,7 @@ summary {
     box-shadow: 0 0 0 3px #025;
 } */
 
-.junk {
-    background-color: hsl(254, 44%, 75%);
-    border-radius: 25%;
-    /* animation: 3s linear infinite alternate pulse; */
-}
+
 
 @keyframes pulse {
     0% {

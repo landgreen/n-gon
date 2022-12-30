@@ -1860,7 +1860,7 @@ const b = {
                 if (tech.isFoamBall) {
                     for (let i = 0, len = Math.min(50, 3 + 4 * Math.sqrt(this.mass)); i < len; i++) {
                         const radius = 5 + 8 * Math.random()
-                        const velocity = {x: Math.max(0.5, 2 - radius * 0.1),y: 0}
+                        const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                         b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
                     }
                 }
@@ -3763,71 +3763,71 @@ const b = {
             y: speed * Math.sin(dir)
         });
     },
-    superBall(where, velocity, radius){
-                let dir = m.angle
-                const me = bullet.length;
-                bullet[me] = Bodies.polygon(where.x,where.y, 12, radius, b.fireAttributes(dir, false));
-                Composite.add(engine.world, bullet[me]); //add bullet to world
-                Matter.Body.setVelocity(bullet[me], velocity);
-                Matter.Body.setDensity(bullet[me], 0.0001 + 0.001 * tech.isSuperHarm);
-                bullet[me].endCycle = simulation.cycle + Math.floor(300 + 90 * Math.random());
-                bullet[me].minDmgSpeed = 0;
-                bullet[me].restitution = 1;
-                bullet[me].friction = 0;
-                if (tech.isIncendiary) {
-                    bullet[me].do = function() {
-                        this.force.y += this.mass * 0.0012;
-                        if (Matter.Query.collides(this, map).length) {
-                            b.explosion(this.position, this.mass * 280); //makes bullet do explosive damage at end
-                            this.endCycle = 0
-                        }
-                    };
-                } else if (tech.isSuperHarm){
-                    bullet[me].collidePlayerDo = function(){
-                        if (Matter.Query.collides(this, [player]).length) {
-                            this.endCycle = 0
-                            let dmg = 0.03
-                            m.damage(dmg);
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: this.position.x,
-                                y: this.position.y,
-                                radius: Math.sqrt(dmg) * 200,
-                                color: simulation.mobDmgColor,
-                                time: simulation.drawTime*2
-                            });
-                        }
-                    }
-                    bullet[me].cycle= 0
-                    bullet[me].do = function() {
-                        this.cycle++
-                        if (this.cycle > 60) this.do = this.collidePlayerDo
-                        this.force.y += this.mass * 0.0012;
-                    };
-                } else {
-                    bullet[me].do = function() {
-                        this.cycle++
-                        this.force.y += this.mass * 0.0012;
-                    };
+    superBall(where, velocity, radius) {
+        let dir = m.angle
+        const me = bullet.length;
+        bullet[me] = Bodies.polygon(where.x, where.y, 12, radius, b.fireAttributes(dir, false));
+        Composite.add(engine.world, bullet[me]); //add bullet to world
+        Matter.Body.setVelocity(bullet[me], velocity);
+        Matter.Body.setDensity(bullet[me], 0.0001 + 0.001 * tech.superHarm);
+        bullet[me].endCycle = simulation.cycle + Math.floor(300 + 90 * Math.random());
+        bullet[me].minDmgSpeed = 0;
+        bullet[me].restitution = 1;
+        bullet[me].friction = 0;
+        if (tech.isIncendiary) {
+            bullet[me].do = function() {
+                this.force.y += this.mass * 0.0012;
+                if (Matter.Query.collides(this, map).length) {
+                    b.explosion(this.position, this.mass * 280); //makes bullet do explosive damage at end
+                    this.endCycle = 0
                 }
-                bullet[me].beforeDmg = function(who) {
-                    if (tech.oneSuperBall) mobs.statusStun(who, 120) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
-                    // if (tech.isIncendiary) {
-                    //     b.explosion(this.position, this.mass * (240+70 * Math.random()) ); //makes bullet do explosive damage at end
-                    //     this.endCycle = 0
-                    // }
-                    if (tech.isFoamBall) {
-                        for (let i = 0, len = 6 * this.mass; i < len; i++) {
-                            const radius = 5 + 8 * Math.random()
-                            // const velocity = { x: Math.max(2, 10 - radius * 0.25), y: 0 }
-                            const velocity = {
-                                x: Math.max(0.5, 2 - radius * 0.1),
-                                y: 0
-                            }
-                            b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
-                        }
-                        this.endCycle = 0
+            };
+        } else if (tech.superHarm) {
+            bullet[me].collidePlayerDo = function() {
+                if (Matter.Query.collides(this, [player]).length) {
+                    this.endCycle = 0
+                    let dmg = 0.03 * this.mass * tech.superHarm
+                    m.damage(dmg);
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: Math.sqrt(dmg) * 200,
+                        color: simulation.mobDmgColor,
+                        time: simulation.drawTime * 2
+                    });
+                }
+            }
+            bullet[me].cycle = 0
+            bullet[me].do = function() {
+                this.cycle++
+                if (this.cycle > 6) this.do = this.collidePlayerDo
+                this.force.y += this.mass * 0.0012;
+            };
+        } else {
+            bullet[me].do = function() {
+                this.cycle++
+                this.force.y += this.mass * 0.0012;
+            };
+        }
+        bullet[me].beforeDmg = function(who) {
+            if (tech.oneSuperBall) mobs.statusStun(who, 120) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
+            // if (tech.isIncendiary) {
+            //     b.explosion(this.position, this.mass * (240+70 * Math.random()) ); //makes bullet do explosive damage at end
+            //     this.endCycle = 0
+            // }
+            if (tech.isFoamBall) {
+                for (let i = 0, len = 6 * this.mass; i < len; i++) {
+                    const radius = 5 + 8 * Math.random()
+                    // const velocity = { x: Math.max(2, 10 - radius * 0.25), y: 0 }
+                    const velocity = {
+                        x: Math.max(0.5, 2 - radius * 0.1),
+                        y: 0
                     }
-                };
+                    b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
+                }
+                this.endCycle = 0
+            }
+        };
     },
     // plasmaBall(position, velocity, radius) {
     //     // radius *= Math.sqrt(tech.bulletSize)
@@ -6177,9 +6177,9 @@ const b = {
                 m.fireCDcycle = m.cycle + Math.floor((input.down ? 27 : 19) * b.fireCDscale); // cool down
                 const speed = input.down ? 43 : 36
                 b.superBall({
-                    x:m.pos.x + 30 * Math.cos(m.angle),
-                    y:m.pos.y + 30 * Math.sin(m.angle)
-                },{
+                    x: m.pos.x + 30 * Math.cos(m.angle),
+                    y: m.pos.y + 30 * Math.sin(m.angle)
+                }, {
                     x: speed * Math.cos(m.angle),
                     y: speed * Math.sin(m.angle)
                 }, 21 * tech.bulletSize)
@@ -6192,9 +6192,9 @@ const b = {
                 let dir = m.angle - SPREAD * (num - 1) / 2;
                 for (let i = 0; i < num; i++) {
                     b.superBall({
-                        x:m.pos.x + 30 * Math.cos(dir),
-                        y:m.pos.y + 30 * Math.sin(dir)
-                    },{
+                        x: m.pos.x + 30 * Math.cos(dir),
+                        y: m.pos.y + 30 * Math.sin(dir)
+                    }, {
                         x: speed * Math.cos(dir),
                         y: speed * Math.sin(dir)
                     }, 11 * tech.bulletSize)
@@ -6211,9 +6211,9 @@ const b = {
                 function cycle() {
                     count++
                     b.superBall({
-                        x:m.pos.x + 30 * Math.cos(m.angle),
-                        y:m.pos.y + 30 * Math.sin(m.angle)
-                    },{
+                        x: m.pos.x + 30 * Math.cos(m.angle),
+                        y: m.pos.y + 30 * Math.sin(m.angle)
+                    }, {
                         x: speed * Math.cos(m.angle),
                         y: speed * Math.sin(m.angle)
                     }, 11 * tech.bulletSize)
@@ -6816,7 +6816,7 @@ const b = {
                         this.stuckTo = mobCollisions[0].bodyA
                         if (tech.isZombieMobs) this.stuckTo.isSoonZombie = true
                         if (this.stuckTo.isVerticesChange) {
-                            this.stuckToRelativePosition = {x: 0, y: 0}
+                            this.stuckToRelativePosition = { x: 0, y: 0 }
                         } else {
                             //find the relative position for when the mob is at angle zero by undoing the mobs rotation
                             this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
@@ -6936,8 +6936,8 @@ const b = {
                         },
                         () => { //super ball
                             const speed = 36
-                            const angle = 2*Math.PI*Math.random()
-                            b.superBall(this.position,{
+                            const angle = 2 * Math.PI * Math.random()
+                            b.superBall(this.position, {
                                 x: speed * Math.cos(angle),
                                 y: speed * Math.sin(angle)
                             }, 11 * tech.bulletSize)

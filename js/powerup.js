@@ -620,21 +620,21 @@ const powerUps = {
         if (tech.isSuperDeterminism) {
             return `<div></div>`
         } else if (tech.isCancelTech) {
-            return `<div class='choose-grid-module cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;">randomize</div>`
+            return `<div class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;">randomize</div>`
         } else {
-            return `<div class='choose-grid-module cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 85px;">cancel</div>`
+            return `<div class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 85px;">cancel</div>`
         }
     },
     researchText(type) {
         let text = ""
         if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
-            text += `<div onclick="powerUps.research.use('${type}')" class='choose-grid-module research-card'>` // style = "margin-left: 192px; margin-right: -192px;"
+            text += `<div onclick="powerUps.research.use('${type}')" class='research-card'>` // style = "margin-left: 192px; margin-right: -192px;"
             tech.junkResearchNumber = Math.ceil(4 * Math.random())
             text += `<div><div> <span style="position:relative;">`
-            for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
+            for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;width: 1.15em;height: 1.15em;"></div>`
             text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div></div>`
         } else if (powerUps.research.count > 0) {
-            text += `<div onclick="powerUps.research.use('${type}')" class='choose-grid-module research-card' >` // style = "margin-left: 192px; margin-right: -192px;"
+            text += `<div onclick="powerUps.research.use('${type}')" class='research-card' >` // style = "margin-left: 192px; margin-right: -192px;"
             text += `<div><div><span style="position:relative;">`
             for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="font-size:0.82em; position:absolute; top:0; left:${(18 - len*0.21)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
             text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality?"<span class='alt'>alternate reality</span>": "research"}</span></div></div></div>`
@@ -644,21 +644,29 @@ const powerUps = {
         return text
     },
     buildColumns(totalChoices, type) {
+        let width
+        if (canvas.width < 1500) {
+            width = "340px"
+        } else if (canvas.width < 1950) {
+            width = "360px"
+        } else {
+            width = "384px"
+        }
         let text = ""
         if (localSettings.isHideImages || canvas.width < 1200) {
-            document.getElementById("choose-grid").style.gridTemplateColumns = "384px"
+            document.getElementById("choose-grid").style.gridTemplateColumns = width
             text += powerUps.cancelText(type)
             text += powerUps.researchText(type)
         } else if (totalChoices === 2) {
-            document.getElementById("choose-grid").style.gridTemplateColumns = "384px 384px"
+            document.getElementById("choose-grid").style.gridTemplateColumns = `repeat(2, ${width})`
             text += powerUps.researchText(type)
             text += powerUps.cancelText(type)
         } else if (totalChoices === 1) {
-            document.getElementById("choose-grid").style.gridTemplateColumns = "384px"
+            document.getElementById("choose-grid").style.gridTemplateColumns = width
             text += powerUps.cancelText(type)
             text += powerUps.researchText(type)
         } else {
-            document.getElementById("choose-grid").style.gridTemplateColumns = "384px 384px 384px"
+            document.getElementById("choose-grid").style.gridTemplateColumns = `repeat(3, ${width})`
             text += "<div></div>"
             text += powerUps.researchText(type)
             text += powerUps.cancelText(type)
