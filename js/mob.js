@@ -1194,7 +1194,7 @@ const mobs = {
                 if (this.isDropPowerUp) {
                     if (this.isSoonZombie) { //spawn zombie on death
                         this.leaveBody = false;
-                        let count = 45 //delay spawn cycles
+                        let count = 5 //delay spawn cycles
                         let cycle = () => {
                             if (count > 0) {
                                 if (m.alive) requestAnimationFrame(cycle);

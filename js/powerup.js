@@ -645,13 +645,20 @@ const powerUps = {
     },
     buildColumns(totalChoices, type) {
         let width
-        if (canvas.width < 1500) {
-            width = "340px"
+        if (canvas.width < 1710) {
+            width = "285px"
         } else if (canvas.width < 1950) {
-            width = "360px"
+            width = "340px"
         } else {
             width = "384px"
         }
+        // if (canvas.width < 1500) {
+        //     width = "340px"
+        // } else if (canvas.width < 1950) {
+        //     width = "360px"
+        // } else {
+        //     width = "384px"
+        // }
         let text = ""
         if (localSettings.isHideImages || canvas.width < 1200) {
             document.getElementById("choose-grid").style.gridTemplateColumns = width
@@ -1150,7 +1157,7 @@ const powerUps = {
         powerUps.research.currentRerollCount = 0
         if (tech.isTechDamage && who.name === "tech") m.damage(0.1)
         if (tech.isMassEnergy) m.energy += 2;
-        if (tech.isMineDrop && bullet.length < 150 && Math.random() < 0.6) {
+        if (tech.isMineDrop && bullet.length < 150 && Math.random() < 0.5) {
             if (tech.isLaserMine && input.down) {
                 b.laserMine(who.position)
             } else {

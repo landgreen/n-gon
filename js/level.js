@@ -18,7 +18,7 @@ const level = {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // tech.giveTech("performance")
-            // level.difficultyIncrease(30 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(10 * 4) //30 is near max on hard  //60 is near max on why
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
             // powerUps.research.changeRerolls(10)
@@ -28,15 +28,16 @@ const level = {
             // m.setField("perfect diamagnetism") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave   plasma torch
             // simulation.molecularMode = 2
             // m.damage(0.1);
-            // b.giveGuns("super balls") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("mine") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("spores") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 10000
-            // tech.giveTech("cordyceps")
-            // tech.giveTech("Zectron")
+            // tech.giveTech("blast ball")
+            // tech.giveTech("elephants toothpaste")
+            // tech.giveTech("sentry gun")
             // for (let i = 0; i < 1; ++i) tech.giveTech("super ball")
             // tech.isFoamBall = true
-            // for (let i = 0; i < 1; ++i) tech.giveTech("incendiary ammunition")
-            // for (let i = 0; i < 2; i++) tech.giveTech("unified field theory")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("super ball")
+            // for (let i = 0; i < 1; i++) tech.giveTech("irradiated nails")
             // for (let i = 0; i < 1; i++) tech.giveTech("colony")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
@@ -47,7 +48,8 @@ const level = {
             // spawn.starter(1900, -500, 25)
             // spawn.sneaker(1900, -500, 25)
             // spawn.hopper(2538, -950)
-            // for (let i = 0; i < 2; ++i) spawn.starter(1000 + 1000 * Math.random(), -500 + 300 * Math.random())
+            // spawn.zombie(1000 + 1000 * Math.random(), -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)
+            // for (let i = 0; i < 20; ++i) spawn.starter(1000 + 1000 * Math.random(), -500 + 300 * Math.random())
             // tech.addJunkTechToPool(2)
             // tech.tech[322].frequency = 100
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })

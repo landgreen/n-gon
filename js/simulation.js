@@ -447,9 +447,10 @@ const simulation = {
             }
         }
         if (tech.crouchAmmoCount) tech.crouchAmmoCount = 1 //this prevents hacking the tech by switching guns
-
-        b.activeGun = b.inventory[b.inventoryGun];
-        if (b.guns[b.activeGun].charge) b.guns[b.activeGun].charge = 0; //if switching into foam set charge to 0
+        if (b.inventory.length > 0) {
+            b.activeGun = b.inventory[b.inventoryGun];
+            if (b.guns[b.activeGun].charge) b.guns[b.activeGun].charge = 0; //if switching into foam set charge to 0
+        }
         simulation.updateGunHUD();
         simulation.boldActiveGunHUD();
     },
@@ -895,7 +896,7 @@ const simulation = {
             if (tech.isMutualism && !tech.isEnergyHealth) {
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].isMutualismActive) {
-                        m.health += 0.01 + 0.01 * ((bullet[i].isSpore || bullet[i].isFlea) ? 0: 1)
+                        m.health += 0.01 + 0.01 * ((bullet[i].isSpore || bullet[i].isFlea) ? 0 : 1)
                         if (m.health > m.maxHealth) m.health = m.maxHealth;
                         m.displayHealth();
                     }
@@ -1168,18 +1169,6 @@ const simulation = {
                 m.energy -= 0.1 * simulation.difficultyMode
             }
             if (isNaN(player.position.x)) m.death();
-
-            // if (tech.isEnergyDamage) {
-            //   document.getElementById("tech-capacitor").innerHTML = `(+${(m.energy/0.05).toFixed(0)}%)`
-            // }
-            // if (tech.restDamage) {
-            //   if (player.speed < 1) {
-            //     document.getElementById("tech-rest").innerHTML = `(+20%)`
-            //   } else {
-            //     document.getElementById("tech-rest").innerHTML = `(+0%)`
-            //   }
-            // }
-
             if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
                 if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) m.energy += m.maxEnergy * 0.05
                 if (tech.isHealthRecovery) m.addHealth(0.005 * m.maxHealth)

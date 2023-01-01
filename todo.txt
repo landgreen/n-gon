@@ -1,29 +1,29 @@
 ******************************************************** NEXT PATCH **************************************************
 
-card images and text scale based on browser width for smaller screens
+tech: cordyceps - sporangium infect mobs, making them fight for you as zombies
 
-tech Zectron - super ball can damage you, but they do more damage to mobs
-  superBall bullets are converted to run off generic b.superBall()
+tech: blast ball - mines fire super balls
+tech: extended magazine - sentry fires 50% more shots
+  sentry works with foam, nails, or super balls
 
-sneakers - after taking damage if sneakers are low on life they teleport to a random point from the player's history and they sneak attack again
-sneakBoss - a large sneaker that can hide several times before it dies
+dark patterns - stacks to 9
+  38->15% damage, 53->15% JUNK
+electronegativity - stacks to 9
+  0.12->0.1% damage per energy
 
 bug fixes
 
 *********************************************************** TODO *****************************************************
 
-tech: cordyceps - sporangium infect mobs, making them fight for you
-  zombies might attack player if there are no mob targets
-  !! needs to explore when there are no targets
-  !! mechanics are confusing
-  !! still needs testing for balance
-    it's targeting player even when there are mobs
-tech - all mobs return as zombies?
+super-bot
 
-Now that super balls are generic maybe something else should produce them
-  super-bot 
-  molecular fabricator - how to aim?
-  shotgun - too similar to super ball gun
+tech - shotgun triple shot, but a bit longer of a delay
+
+tech - after standing wave runs out of energy from blocking, gain a buff
+  buff: defense, damage?
+
+make super balls with Zectron deflectable with field
+  but is there a simple way to do this?
 
 set mob health bar colors based on status effects?
   make mob damage immunity a mob status effect?
@@ -87,6 +87,8 @@ hookBoss fires a hook that pulls player towards it
 finalBoss
   add synergies between modes:
   new modes:
+    something that needs to be killed quickly
+      if you don't kill it boss gets a shield
     rotating quadrant immunity shield, can't take damage from that quadrant
       maybe also attack player near that quadrant
       but how to tell the angle of incoming damage
@@ -1136,7 +1138,7 @@ possible names for tech
 
 ******************************************************** CARS IMAGES ********************************************************
 
-process:  discord midjourney prompts -> "pixelmator pro" -> adjust color, repair, scale to 384x256, export PNG -> webP? -> place in /img folder
+process:  discord midjourney prompts -> "pixelmator pro" adjust color, repair, scale to 384x256, export PNG -> webP? -> place in /img folder
 make n-gon a progressive web app to manage image downloads, cache
 wave function collapse opens the pause menu after it triggers alternate reality
   this is actually good, maybe reuse this code to get pause menu to open at any time
@@ -1155,16 +1157,12 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
 ***major themes missing***
 ***maybe redo***
   dynamical systems
-  harpoon gun
-    Eiichiro Oda --niji
   nail-bot
   homeostasis
   heuristics
   thermal runaway - infrared maybe?
   redo the energy tech images with by Laurie Greasley
     now that you can use --ar 3:2 --stylize 1000 and photo repair
-  in general too many black background
-    redo fractal tech with white background
 ***past style themes***
   field emitter - isometric, clean white robot spherical gun turret on bird legs, blender 3d, style of artstation and behance, Disney Pixar, cute 
   standing wave - concentric transparent blue geometric circles science  

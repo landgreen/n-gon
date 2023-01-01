@@ -1992,7 +1992,7 @@ const m = {
                         //
                         const angleReduction = 0.1 + (Math.PI / 2 - Math.min(Math.PI / 2, Math.abs(m.angle + Math.PI / 2)))
                         if (player.velocity.y > 1) {
-                            player.force.y -= angleReduction * (tech.isBigField ? 0.87 : 0.7) * player.mass * simulation.g;
+                            player.force.y -= angleReduction * (tech.isBigField ? 0.9 : 0.7) * player.mass * simulation.g;
                             Matter.Body.setVelocity(player, {
                                 x: player.velocity.x,
                                 y: 0.98 * player.velocity.y

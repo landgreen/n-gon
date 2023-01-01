@@ -1542,14 +1542,15 @@ const spawn = {
     zombie(x, y, radius, sides, color) { //mob that attacks other mobs
         mobs.spawn(x, y, sides, radius, color);
         let me = mob[mob.length - 1];
-        me.damageReduction = 0 //take NO damage until targeting player, but also slowly lose health
+        me.damageReduction = 0 //take NO damage, but also slowly lose health
+        Matter.Body.setDensity(me, 0.0001) // normal density is 0.001 // this reduces life by half and decreases knockback
         me.isZombie = true
         me.isBadTarget = true;
         me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.stroke = "#83a"
-        me.accelMag = 0.0015
-        me.frictionAir = 0.01
+        me.accelMag = 0.001
+        me.frictionAir = 0.005
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.mob
         me.seeAtDistance2 = 1000000 //1000 vision range
         // me.onDeath = function() {
@@ -1577,39 +1578,36 @@ const spawn = {
         me.mobSearchIndex = 0;
         me.target = null
         me.lookForMobTargets = function() {
-            if (!(simulation.cycle % 10)) {
-                if (this.target === null) { //if you have no target
-                    this.mobSearchIndex++ //look for a different mob index every time
-                    if (this.mobSearchIndex > mob.length - 1) this.mobSearchIndex = 0
+            if (this.target === null && mob.length > 1 && !(simulation.cycle % this.seePlayerFreq)) { //find mob targets
+                let closeDist = Infinity;
+                for (let i = 0, len = mob.length; i < len; ++i) {
                     if (
-                        mob.length > 1 &&
-                        !mob[this.mobSearchIndex].isZombie &&
-                        (Vector.magnitudeSquared(Vector.sub(this.position, mob[this.mobSearchIndex].position)) < this.seeAtDistance2 && Matter.Query.ray(map, this.position, mob[this.mobSearchIndex].position).length === 0)
+                        !mob[i].isZombie &&
+                        !mob[i].isUnblockable &&
+                        Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                        Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                        // !mob[i].isBadTarget &&
+                        // !mob[i].isInvulnerable &&
+                        // (Vector.magnitudeSquared(Vector.sub(this.position, mob[this.mobSearchIndex].position)) < this.seeAtDistance2)
                     ) {
-                        this.target = mob[this.mobSearchIndex]
-                    } else if (Math.random() < 0.005 * player.speed && (Vector.magnitudeSquared(Vector.sub(this.position, player.position)) < this.seeAtDistance2 || Matter.Query.ray(map, this.position, player.position).length === 0)) {
-                        this.target = player
-                        this.isBadTarget = false;
-                        this.damageReduction = 0.5
-                        me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob
+                        const DIST = Vector.magnitude(Vector.sub(this.position, mob[i].position));
+                        if (DIST < closeDist) {
+                            closeDist = DIST;
+                            this.target = mob[i]
+                        }
                     }
                 }
-            }
-            //chance to forget target
-            if (!(simulation.cycle % this.memory) && this.target) {
-                if (
-                    (this.target && this.target !== player && !this.target.alive) ||
-                    Vector.magnitudeSquared(Vector.sub(this.position, this.target.position)) > this.seeAtDistance2 ||
-                    Matter.Query.ray(map, this.position, this.target.position).length !== 0
-                ) {
-                    this.target = null
-                }
+            } else if (
+                !(simulation.cycle % this.memory) &&
+                this.target &&
+                (!this.target.alive || Matter.Query.ray(map, this.position, this.target.position).length !== 0)
+            ) {
+                this.target = null //chance to forget target
             }
         }
         me.zombieHealthBar = function() {
-            this.health -= 0.0005 //decay
+            this.health -= 0.0004 //decay
             if ((this.health < 0.01 || isNaN(this.health)) && this.alive) this.death();
-
             const h = this.radius * 0.3;
             const w = this.radius * 2;
             const x = this.position.x - w / 2;
@@ -1624,14 +1622,18 @@ const spawn = {
             if (this.hitCD < simulation.cycle) {
                 if (this.target) {
                     this.force = Vector.mult(Vector.normalise(Vector.sub(this.target.position, this.position)), this.accelMag * this.mass)
-                    if (this.speed > 6) { // speed cap instead of friction to give more agility
-                        Matter.Body.setVelocity(this, {
-                            x: this.velocity.x * 0.97,
-                            y: this.velocity.y * 0.97
-                        });
-                    }
+                } else { //wonder around
+                    this.torque += 0.0000003 * this.inertia;
+                    const mag = 0.00015 * this.mass
+                    this.force.x += mag * Math.cos(this.angle)
+                    this.force.y += mag * Math.sin(this.angle)
                 }
-
+                if (this.speed > 6) { // speed cap instead of friction to give more agility
+                    Matter.Body.setVelocity(this, {
+                        x: this.velocity.x * 0.93,
+                        y: this.velocity.y * 0.93
+                    });
+                }
                 const hit = (who) => {
                     if (!who.isZombie && who.damageReduction) {
                         this.hitCD = simulation.cycle + 15
@@ -1641,7 +1643,7 @@ const spawn = {
                         this.force.y -= force.y;
                         this.target = null //look for a new target
 
-                        const dmg = 0.2 * m.dmgScale
+                        const dmg = 1.3 * m.dmgScale
                         who.damage(dmg);
                         who.locatePlayer();
                         simulation.drawList.push({
@@ -1662,8 +1664,6 @@ const spawn = {
                 }
             }
         }
-        // me.onDamage = function(dmg) {
-        // }
     },
     starter(x, y, radius = Math.floor(15 + 20 * Math.random())) { //easy mob for on level 1
         mobs.spawn(x, y, 8, radius, "#9ccdc6");
@@ -5736,9 +5736,9 @@ const spawn = {
         me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
         me.showHealthBar = false;
         me.memory = 30;
-        me.vanishesLeft = 2+simulation.difficultyMode
+        me.vanishesLeft = 2 + simulation.difficultyMode
         me.onDamage = function() {
-            if (this.vanishesLeft>0 && this.health < 0.1){ //if health is below 10% teleport to a random spot on player history, heal, and cloak
+            if (this.vanishesLeft > 0 && this.health < 0.1) { //if health is below 10% teleport to a random spot on player history, heal, and cloak
                 this.vanishesLeft--
 
                 // const scale = 0.95;
@@ -5746,21 +5746,21 @@ const spawn = {
                 // this.radius *= scale;
 
                 //flash screen to hide vanish
-                for(let i=0; i<8; i++){
+                for (let i = 0; i < 8; i++) {
                     simulation.drawList.push({
                         x: this.position.x,
                         y: this.position.y,
                         radius: 3000,
                         color: `rgba(0, 0, 0,${1-0.1*i})`,
-                        time: (i+1)*3
+                        time: (i + 1) * 3
                     });
                 }
                 //teleport to near the end of player history
-                const index = Math.floor(  (m.history.length-1)*(0.66+0.2*Math.random() ))
+                const index = Math.floor((m.history.length - 1) * (0.66 + 0.2 * Math.random()))
                 let history = m.history[(m.cycle - index) % 600]
                 Matter.Body.setPosition(this, history.position)
-                Matter.Body.setVelocity(this, {x: 0,y: 0});
-                
+                Matter.Body.setVelocity(this, { x: 0, y: 0 });
+
                 this.seePlayer.recall = 0
                 this.cloak();
                 this.health = 1;
@@ -5774,7 +5774,7 @@ const spawn = {
                 this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
                 this.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
             }
-        } 
+        }
         me.deCloak = function() {
             if (this.isCloaked) {
                 this.damageReduction = 0.4 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
@@ -5828,13 +5828,13 @@ const spawn = {
         me.memory = 240;
         me.isVanished = false;
         me.onDamage = function() {
-            if (!this.isVanished && this.health < 0.1){ //if health is below 10% teleport to a random spot on player history, heal, and cloak
+            if (!this.isVanished && this.health < 0.1 && !this.isStunned && !this.isSlowed) { //if health is below 10% teleport to a random spot on player history, heal, and cloak
                 this.health = 1;
                 this.isVanished = true
                 this.cloak();
                 //teleport to near the end of player history
-                Matter.Body.setPosition(this, m.history[Math.floor((m.history.length-1)*(0.66+0.33*Math.random()))].position)
-                Matter.Body.setVelocity(this, {x: 0,y: 0});
+                Matter.Body.setPosition(this, m.history[Math.floor((m.history.length - 1) * (0.66 + 0.33 * Math.random()))].position)
+                Matter.Body.setVelocity(this, { x: 0, y: 0 });
             }
         };
         me.cloak = function() {
@@ -5847,7 +5847,7 @@ const spawn = {
         }
         me.do = function() {
             this.gravity();
-            this.seePlayerByHistory(15);
+            this.seePlayerByHistory(25);
             this.checkStatus();
             this.attraction();
             //draw
