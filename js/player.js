@@ -697,7 +697,7 @@ const m = {
         }
         m.lastHarmCycle = m.cycle
         if (tech.isDroneOnDamage && bullet.length < 150) { //chance to build a drone on damage  from tech
-            const len = Math.min((dmg - 0.06 * Math.random()) * 40, 40) / tech.droneEnergyReduction
+            const len = Math.min((dmg - 0.06 * Math.random()) * 40, 40) / tech.droneEnergyReduction * (tech.isEnergyHealth ? 0.5 : 1)
             for (let i = 0; i < len; i++) {
                 if (Math.random() < 0.5) b.drone({
                     x: m.pos.x + 30 * Math.cos(m.angle) + 100 * (Math.random() - 0.5),

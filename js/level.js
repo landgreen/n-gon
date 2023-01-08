@@ -28,24 +28,24 @@ const level = {
             // m.setField("perfect diamagnetism") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave   plasma torch
             // simulation.molecularMode = 2
             // m.damage(0.1);
-            // b.giveGuns("mine") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("spores") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 10000
-            // tech.giveTech("blast ball")
-            // tech.giveTech("elephants toothpaste")
-            // tech.giveTech("sentry gun")
+            // tech.giveTech("needle gun")
+            // tech.giveTech("repeater")
+            // tech.giveTech("ice-shot")
             // for (let i = 0; i < 1; ++i) tech.giveTech("super ball")
             // tech.isFoamBall = true
-            // for (let i = 0; i < 1; ++i) tech.giveTech("super ball")
+            // for (let i = 0; i < 3; ++i) tech.giveTech("repeater")
             // for (let i = 0; i < 1; i++) tech.giveTech("irradiated nails")
             // for (let i = 0; i < 1; i++) tech.giveTech("colony")
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
             // level.testing();
-            // spawn.shooter(1900, -500, 200)
+            // spawn.blinkBoss(1900, -500)
             // spawn.sneakBoss(1900, -500)
-            // spawn.starter(1900, -500, 25)
+            // spawn.starter(1900, -500, 200)
             // spawn.sneaker(1900, -500, 25)
             // spawn.hopper(2538, -950)
             // spawn.zombie(1000 + 1000 * Math.random(), -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)

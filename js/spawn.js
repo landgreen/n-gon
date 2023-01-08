@@ -623,7 +623,7 @@ const spawn = {
             {
                 name: "black hole",
                 eventHorizon: 0,
-                eventHorizonRadius: 2100,
+                eventHorizonRadius: 1900,
                 eventHorizonCycle: 0,
                 do() {
                     this.eventHorizonCycle++
@@ -4146,7 +4146,7 @@ const spawn = {
         Matter.Body.rotate(me, Math.PI * 0.1);
         Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
-        me.damageReduction = 0.03 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.035 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
 
         me.frictionStatic = 0;
         me.friction = 0;
@@ -4160,7 +4160,7 @@ const spawn = {
             me.grenadeDelay = 100
         }
         me.pulseRadius = 1.5 * Math.min(550, 200 + simulation.difficulty * 2)
-        me.delay = 35 + 35 * simulation.CDScale;
+        me.delay = 55 + 35 * simulation.CDScale;
         me.nextBlinkCycle = me.delay;
         spawn.shield(me, x, y, 1);
         me.onDamage = function() {
@@ -5058,7 +5058,7 @@ const spawn = {
                 if (this.phaseCycle > -1) {
                     Matter.Body.rotate(this, 0.02)
                     for (let i = 0, len = this.vertices.length; i < len; i++) { //fire a bullet from each vertex
-                        spawn.sniperBullet(this.vertices[i].x, this.vertices[i].y, 5, 4);
+                        spawn.sniperBullet(this.vertices[i].x, this.vertices[i].y, 3, 4);
                         const velocity = Vector.mult(Vector.normalise(Vector.sub(this.position, this.vertices[i])), -15)
                         Matter.Body.setVelocity(mob[mob.length - 1], {
                             x: velocity.x,
@@ -5724,7 +5724,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
-        me.damageReduction = 0.4 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
 
         me.accelMag = 0.0017 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.01;
@@ -5736,17 +5736,15 @@ const spawn = {
         me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
         me.showHealthBar = false;
         me.memory = 30;
-        me.vanishesLeft = 2 + simulation.difficultyMode
+        me.vanishesLeft = Math.ceil(1 + simulation.difficultyMode * 0.5)
+        me.onDeath = function() {
+            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+        };
         me.onDamage = function() {
             if (this.vanishesLeft > 0 && this.health < 0.1) { //if health is below 10% teleport to a random spot on player history, heal, and cloak
                 this.vanishesLeft--
 
-                // const scale = 0.95;
-                // Matter.Body.scale(this, scale, scale);
-                // this.radius *= scale;
-
-                //flash screen to hide vanish
-                for (let i = 0; i < 8; i++) {
+                for (let i = 0; i < 8; i++) { //flash screen to hide vanish 
                     simulation.drawList.push({
                         x: this.position.x,
                         y: this.position.y,
@@ -5761,6 +5759,7 @@ const spawn = {
                 Matter.Body.setPosition(this, history.position)
                 Matter.Body.setVelocity(this, { x: 0, y: 0 });
 
+                this.damageReduction = 0 //immune to harm for the rest of this game cycle
                 this.seePlayer.recall = 0
                 this.cloak();
                 this.health = 1;
@@ -5784,6 +5783,14 @@ const spawn = {
             }
         }
         me.do = function() {
+            if (this.damageReduction === 0) {
+                this.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+                let i = this.status.length //clear bad status effects
+                while (i--) {
+                    if (this.status[i].type === "stun" || this.status[i].type === "dot") this.status.splice(i, 1);
+                }
+                this.isStunned = false;
+            }
             this.gravity();
             this.seePlayerByHistory(55);
             this.checkStatus();
@@ -5835,6 +5842,7 @@ const spawn = {
                 //teleport to near the end of player history
                 Matter.Body.setPosition(this, m.history[Math.floor((m.history.length - 1) * (0.66 + 0.33 * Math.random()))].position)
                 Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                this.damageReduction = 0 //immune to harm for the rest of this game cycle
             }
         };
         me.cloak = function() {
@@ -5846,6 +5854,14 @@ const spawn = {
             }
         }
         me.do = function() {
+            if (this.damageReduction === 0) {
+                this.damageReduction = 1 //stop being immune to harm immediately
+                let i = this.status.length //clear bad status effects
+                while (i--) {
+                    if (this.status[i].type === "stun" || this.status[i].type === "dot") this.status.splice(i, 1);
+                }
+                this.isStunned = false;
+            }
             this.gravity();
             this.seePlayerByHistory(25);
             this.checkStatus();

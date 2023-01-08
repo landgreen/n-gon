@@ -255,16 +255,16 @@ summary {
 #experiment-grid {
     display: flex;
     justify-content: center;
-    padding: 10px 1px;
+    padding: 0px;
     margin: 0px;
     border: 0px;
     background-color: var(--build-bg-color);
     display: none;
     grid-template-columns: repeat(auto-fit, 384px);
     grid-auto-flow: row;
-    grid-auto-rows: minmax(auto, auto);
+    /* grid-auto-rows: minmax(auto, auto); */
     position: relative;
-    bottom: 0px;
+    /* bottom: 0px; */
     z-index: 10;
     font-size: 1.3em;
     -ms-overflow-style: none;  /* IE and Edge */
@@ -293,6 +293,30 @@ summary {
 
 .experiment-grid-module:hover:not(.build-tech-selected, .build-field-selected, .build-gun-selected) {
     background-color: #efeff5;
+}
+
+.experiment-start-box{
+    background-color: #fafcfd;
+    /* font-size: 1em; */
+    position: sticky; 
+    top:0; 
+    z-index: 10; 
+    align-self: start; 
+    width: 195px; 
+    line-height: 170%; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;
+    border: 2px #333 solid;
+    border-top: 0px;
+    border-radius: 10px;
+    border-top-left-radius: 0px;
+    /* border-bottom-left-radius: 0px; */
+    border-top-right-radius: 0px;
+    padding:0.2em 0px;  
+    height: 190px;
+    box-shadow: 8px 8px 7px rgba(0,0,50,0.15);
 }
 
 .card-background {
@@ -325,6 +349,9 @@ summary {
     line-height: 160%;
     background-color: #fafcfd;
 }
+.cancel-card:hover {
+    background-color: #efeff5;
+}
 .research-card {
     font-size: 1.1em;
     font-weight: 100;
@@ -334,6 +361,9 @@ summary {
     padding: 1px 0px 1px 10px;
     line-height: 160%;
     background-color: #fafcfd;
+}
+.research-card:hover {
+    background-color: #efeff5;
 }
 
 

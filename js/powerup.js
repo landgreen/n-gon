@@ -769,6 +769,9 @@ const powerUps = {
                             } else if (parseInt(JSON.parse(elements[index + 1].getAttribute("data")).s.slice(0, -2)) < 500) { //try a different images and see if it is smaller
                                 tech.tech[choose].url = JSON.parse(elements[index + 1].getAttribute("data")).iurl
                                 document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
+                            } else if (parseInt(JSON.parse(elements[index + 2].getAttribute("data")).s.slice(0, -2)) < 500) { //try a different images and see if it is smaller
+                                tech.tech[choose].url = JSON.parse(elements[index + 2].getAttribute("data")).iurl
+                                document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
                             }
                         });
                 } else {

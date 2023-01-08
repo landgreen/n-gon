@@ -2382,7 +2382,7 @@ const tech = {
             // description: `after you collect ${powerUps.orb.heal()}<br><strong>+${0.1 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`,
             // descriptionFunction: `convert current and future ${powerUps.orb.heal()} into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${10 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`,
             descriptionFunction() {
-                return `convert current and future <div class="heal-circle"></div> into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${8 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`
+                return `convert current and future <div class="heal-circle"></div> into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${8 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)}</strong> maximum <strong class='color-f'>energy</strong>`
             },
             maxCount: 1,
             count: 0,
@@ -2585,7 +2585,7 @@ const tech = {
         },
         {
             name: "energy conservation",
-            description: "<strong>5%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
+            description: "<strong>4%</strong> of <strong class='color-d'>damage</strong> done recovered as <strong class='color-f'>energy</strong>",
             maxCount: 9,
             count: 0,
             frequency: 1,
@@ -2595,7 +2595,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                tech.energySiphon += 0.05;
+                tech.energySiphon += 0.04;
             },
             remove() {
                 tech.energySiphon = 0;
@@ -4152,6 +4152,25 @@ const tech = {
             }
         },
         {
+            name: "ceramics",
+            description: `<strong>needles</strong> and <strong>harpoons</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
+            isGunTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return (!tech.isLargeHarpoon && tech.haveGunCheck("harpoon")) || tech.isNeedles
+            },
+            requires: "needle gun, harpoon, not Bessemer process",
+            effect() {
+                tech.isShieldPierce = true
+            },
+            remove() {
+                tech.isShieldPierce = false
+            }
+        },
+        {
             name: "needle gun",
             description: "<strong>nail gun</strong> and <strong>shotgun</strong> fire mob piercing <strong>needles</strong>",
             isGunTech: true,
@@ -4503,6 +4522,25 @@ const tech = {
             },
             remove() {
                 tech.isShotgunReversed = false;
+            }
+        },
+        {
+            name: "repeater",
+            description: "<strong>shotgun</strong> immediately fires again for no <strong class='color-ammo'>ammo</strong><br><strong>-50%</strong> <strong>shotgun</strong> <strong><em>fire rate</em></strong>",
+            isGunTech: true,
+            maxCount: 9,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return (tech.haveGunCheck("shotgun"))
+            },
+            requires: "shotgun, not Newtons 3rd law",
+            effect() {
+                tech.shotgunExtraShots++;
+            },
+            remove() {
+                tech.shotgunExtraShots = 0
             }
         },
         {
@@ -5569,7 +5607,7 @@ const tech = {
         {
             name: "blast ball",
             descriptionFunction() {
-                return `instead of nails <strong>mines</strong> fire bouncy ${b.guns[10].nameString('s')}`
+                return `instead of nails <strong>mines</strong> fire <strong>bouncy balls</strong>`
             },
             isGunTech: true,
             maxCount: 1,
@@ -6386,7 +6424,7 @@ const tech = {
         },
         {
             name: "railgun",
-            description: `<strong>harpoons</strong> can't <strong>retract</strong>, hold fire to charge<br><strong>+50%</strong> <strong>harpoon</strong> density and <strong class='color-d'>damage</strong>`,
+            description: `hold fire to charge <strong>harpoon</strong> and release to launch<br><strong>harpoons</strong> can't <strong>retract</strong>`,
             // description: `<strong>+900%</strong> <strong>harpoon</strong> <strong class='color-ammo'>ammo</strong>, but it can't <strong>retract</strong><br><strong>+50%</strong> <strong>harpoon</strong> density and <strong class='color-d'>damage</strong>`,
             isGunTech: true,
             maxCount: 1,
@@ -6481,25 +6519,6 @@ const tech = {
             }
         },
         {
-            name: "ceramics",
-            description: `<strong>needles</strong> and <strong>harpoons</strong> pierce <strong>shields</strong><br>directly <strong class='color-d'>damaging</strong> shielded mobs`,
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return (!tech.isLargeHarpoon && tech.haveGunCheck("harpoon")) || tech.isNeedles
-            },
-            requires: "needle gun, harpoon, not Bessemer process",
-            effect() {
-                tech.isShieldPierce = true
-            },
-            remove() {
-                tech.isShieldPierce = false
-            }
-        },
-        {
             name: "Bessemer process",
             descriptionFunction() {
                 return `+${(10 * Math.sqrt(b.guns[9].ammo)).toFixed(0)}% <strong>harpoon</strong> size and <strong class='color-d'>damage</strong><br><em>(1/10 √ harpoon <strong class='color-ammo'>ammo</strong>)</em>`
@@ -6535,7 +6554,7 @@ const tech = {
                 return (tech.isRailGun ? 5 : 1) * (2 + 2 * this.count)
             },
             allowed() {
-                return tech.haveGunCheck("harpoon") && b.returnGunAmmo('harpoon') >= this.removeAmmo()
+                return tech.haveGunCheck("harpoon") && b.guns[9].ammo >= this.removeAmmo()
             },
             requires: "harpoon",
             effect() {
@@ -10095,7 +10114,7 @@ const tech = {
                     m.drawLeg("#4a4a4a");
                     m.calcLeg(0, 0);
                     m.drawLeg("#333");
-                    ctx.rotate(m.angle - (m.fireCDcycle != Infinity ? m.flipLegs * 0.25 * Math.pow(Math.max(m.fireCDcycle - m.cycle, 0), 0.5) : 0));
+                    ctx.rotate(m.angle - (m.fireCDcycle !== Infinity ? m.flipLegs * 0.25 * Math.pow(Math.max(m.fireCDcycle - m.cycle, 0), 0.5) : 0));
 
                     ctx.beginPath();
                     ctx.arc(0, 0, 30, 0, 2 * Math.PI);
@@ -10510,7 +10529,7 @@ const tech = {
         },
         {
             name: "translucent",
-            description: "remove your <strong class='color-g'>guns</strong> and <strong>spawn</strong> new ones<br>your <strong class='color-g'>bullets</strong> and bots are transparent",
+            description: "spawn <strong>3</strong> <strong class='color-g'>gun</strong> power ups<br>your <strong class='color-g'>bullets</strong> and bots are transparent",
             maxCount: 1,
             count: 0,
             frequency: 0,
@@ -10521,18 +10540,18 @@ const tech = {
             },
             requires: "",
             effect() {
-                for (let i = 0; i < b.inventory.length; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "gun");
+                for (let i = 0; i < 3; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "gun");
 
-                //removes guns and ammo  
-                b.inventory = [];
-                b.activeGun = null;
-                b.inventoryGun = 0;
-                for (let i = 0, len = b.guns.length; i < len; ++i) {
-                    b.guns[i].have = false;
-                    if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = 0;
-                }
-                simulation.makeGunHUD(); //update gun HUD
-                b.bulletDraw = () => {};
+                // //removes guns and ammo  
+                // b.inventory = [];
+                // b.activeGun = null;
+                // b.inventoryGun = 0;
+                // for (let i = 0, len = b.guns.length; i < len; ++i) {
+                //     b.guns[i].have = false;
+                //     if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = 0;
+                // }
+                // simulation.makeGunHUD(); //update gun HUD
+                b.bulletDraw = () => {}; //make bullets invisible
             },
             remove() {}
         },

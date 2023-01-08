@@ -297,6 +297,34 @@ const simulation = {
         ctx.strokeStyle = "#000"; //'rgba(0,0,0,0.4)'
         ctx.stroke(); // Draw it
     },
+    drawCursorBasic() {
+        const size = 10;
+        ctx.beginPath();
+        ctx.moveTo(simulation.mouse.x - size, simulation.mouse.y);
+        ctx.lineTo(simulation.mouse.x + size, simulation.mouse.y);
+        ctx.moveTo(simulation.mouse.x, simulation.mouse.y - size);
+        ctx.lineTo(simulation.mouse.x, simulation.mouse.y + size);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#000"; //'rgba(0,0,0,0.4)'
+        ctx.stroke(); // Draw it
+    },
+    drawCursorCoolDown() {
+        const size = 10;
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#000"; //'rgba(0,0,0,0.4)'
+        ctx.beginPath();
+        if (m.fireCDcycle > m.cycle) {
+            ctx.strokeStyle = "#777"; //'rgba(0,0,0,0.4)'
+            ctx.arc(simulation.mouse.x, simulation.mouse.y, size + 1, 0, 2 * Math.PI);
+        } else {
+            ctx.strokeStyle = "#000"; //'rgba(0,0,0,0.4)'
+        }
+        ctx.moveTo(simulation.mouse.x - size, simulation.mouse.y);
+        ctx.lineTo(simulation.mouse.x + size, simulation.mouse.y);
+        ctx.moveTo(simulation.mouse.x, simulation.mouse.y - size);
+        ctx.lineTo(simulation.mouse.x, simulation.mouse.y + size);
+        ctx.stroke(); // Draw it
+    },
     drawList: [], //so you can draw a first frame of explosions.. I know this is bad
     drawTime: 8, //how long circles are drawn.  use to push into drawlist.time
     mobDmgColor: "rgba(255,0,0,0.7)", //color when a mob damages the player  // set by mass-energy tech
@@ -437,15 +465,14 @@ const simulation = {
             simulation.switchGun();
         }
     },
-    switchGun() {
-        if (tech.isLongitudinal && b.guns[b.activeGun].name === "wave") {
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
-                if (b.guns[i].name === "wave") {
-                    b.guns[i].waves = []; //empty array of wave bullets
-                    break;
-                }
-            }
+    switchToGunInInventory(num) {
+        if (b.inventory[num] !== undefined && b.inventoryGun !== num) {
+            b.inventoryGun = num
+            simulation.switchGun();
         }
+    },
+    switchGun() {
+        if (tech.isLongitudinal && b.activeGun === 3) b.guns[3].waves = []; //empty array of wave bullets
         if (tech.crouchAmmoCount) tech.crouchAmmoCount = 1 //this prevents hacking the tech by switching guns
         if (b.inventory.length > 0) {
             b.activeGun = b.inventory[b.inventoryGun];
@@ -453,6 +480,12 @@ const simulation = {
         }
         simulation.updateGunHUD();
         simulation.boldActiveGunHUD();
+        //set crosshairs
+        if (b.activeGun === 1) {
+            simulation.drawCursor = simulation.drawCursorCoolDown
+        } else {
+            simulation.drawCursor = simulation.drawCursorBasic
+        }
     },
     zoom: null,
     zoomScale: 1000,
@@ -741,6 +774,7 @@ const simulation = {
 
         input.endKeySensing();
         b.removeAllGuns();
+        simulation.switchGun();
 
         tech.setupAllTech(); //sets tech to default values
         tech.cancelCount = 0;
@@ -881,7 +915,7 @@ const simulation = {
 
             let count = 0;
             for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
-                if (bullet[i].bulletType === "mine" || bullet[i].bulletType === "laser mine") count++
+                if ((bullet[i].bulletType === "mine" || bullet[i].bulletType === "laser mine") && !bullet[i].isArmed) count++
             }
             for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
                 if (b.guns[i].name === "mine") {

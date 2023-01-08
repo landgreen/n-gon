@@ -415,7 +415,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                 const style = (localSettings.isHideImages || tech.tech[i].isJunk) ? `style="height:auto;"` : `style = "background-image: url('img/${tech.tech[i].name}.webp');"`
                 const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                 if (tech.tech[i].isNonRefundable) {
-                    text += `<div class="pause-grid-module" id ="${i}-pause-tech"  style = "border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding-top: 6px; padding-bottom: 6px;"><div class="grid-title">${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech"  style = "border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding: 6px;"><div class="grid-title">${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                     // } else if (tech.tech[i].isLore) {
                     //     text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isFieldTech) {
@@ -588,13 +588,19 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
     },
     populateGrid() { //background-color:var(--build-bg-color);
         let text = `
-  <div class="experiment-grid-module" style="position: sticky; top:0; z-index: 10; align-self: start; width: 165px; font-size: 1.00em; line-height: 170%; background-color: #fafcfd;display: flex; flex-direction: column; justify-content: center; align-items: center;border: 1.5px #333 solid;border-radius:10px; padding:7px;  height: 190px;">  
+  <div class="experiment-start-box">  
+  <div>
+  <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
+  <select name="difficulty-select" id="difficulty-select-experiment">
+      <option value="1">easy</option>
+      <option value="2" selected>normal</option>
+      <option value="4">hard</option>
+      <option value="6">why?</option>
+  </select>
+</div>
 <div>
-    <svg class="SVG-button" onclick="build.startExperiment()" width="150" height="68" >
-        <g stroke='none' fill='#333' stroke-width="2" font-size="60px" font-family="Ariel, sans-serif">
-        <text x="14" y="54">start</text>
-        </g>
-    </svg>
+<label for="hide-images-experiment" title="reload experiment with no images for fields, guns, and tech">hide images:</label>
+<input onclick="build.showImages('experiment')" type="checkbox" id="hide-images-experiment" name="hide-images-experiment" style="width:17px; height:17px; margin-bottom: 15px;" ${localSettings.isHideImages? "checked": ""}>
 </div>
 <div>
     <svg class="SVG-button" onclick="build.reset()" width="50" height="25">
@@ -610,17 +616,11 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
     </svg>
 </div>
 <div>
-    <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
-    <select name="difficulty-select" id="difficulty-select-experiment">
-        <option value="1">easy</option>
-        <option value="2" selected>normal</option>
-        <option value="4">hard</option>
-        <option value="6">why?</option>
-    </select>
-</div>
-<div>
-<label for="hide-images-experiment" title="reload experiment with no images for fields, guns, and tech">hide images:</label>
-<input onclick="build.showImages('experiment')" type="checkbox" id="hide-images-experiment" name="hide-images-experiment" style="width:17px; height:17px;" ${localSettings.isHideImages? "checked": ""}>
+    <svg class="SVG-button" onclick="build.startExperiment()" width="165" height="70" >
+        <g stroke='none' fill='#333' stroke-width="2" font-size="65px" font-family="Ariel, sans-serif">
+        <text x="17" y="57">start</text>
+        </g>
+    </svg>
 </div>
 </div>`
         const hideStyle = `style="height:auto; border: none; background-color: transparent;"`
@@ -905,6 +905,7 @@ const input = {
         document.getElementById("key-previous-gun").style.background = backgroundColor
         document.getElementById("key-testing").style.background = backgroundColor
         if (input.focus) input.focus.style.background = 'rgb(0, 200, 255)';
+        document.getElementById("key-num").style.background = backgroundColor //always not highlighted
     },
     setKeys(event) {
         //check for duplicate keys
@@ -923,7 +924,8 @@ const input = {
                 // event.code === "Escape" ||
                 event.code === input.key.nextGun ||
                 event.code === input.key.previousGun ||
-                event.code === input.key.testing
+                event.code === input.key.testing ||
+                event.code === "Digit1" || event.code === "Digit2" || event.code === "Digit3" || event.code === "Digit4" || event.code === "Digit5" || event.code === "Digit6" || event.code === "Digit7" || event.code === "Digit8" || event.code === "Digit9" || event.code === "Digit0" || event.code === "Minus" || event.code === "Equal"
             )) {
             switch (input.focus.id) {
                 case "key-fire":
@@ -1029,11 +1031,9 @@ window.addEventListener("keydown", function(event) {
             input.down = true
             break;
         case input.key.fire:
-            // event.preventDefault();
             input.fire = true
             break
         case input.key.field:
-            // event.preventDefault();
             input.field = true
             break
         case input.key.nextGun:
@@ -1042,7 +1042,6 @@ window.addEventListener("keydown", function(event) {
         case input.key.previousGun:
             simulation.previousGun();
             break
-            // case "Escape":
         case input.key.pause:
             if (!simulation.isChoosing && input.isPauseKeyReady && m.alive) {
                 input.isPauseKeyReady = false
@@ -1160,6 +1159,47 @@ window.addEventListener("keydown", function(event) {
             }
             break
     }
+    if (b.inventory.length > 1 && !simulation.testing) {
+        switch (event.code) {
+            case "Digit1":
+                simulation.switchToGunInInventory(0);
+                break
+            case "Digit2":
+                simulation.switchToGunInInventory(1);
+                break
+            case "Digit3":
+                simulation.switchToGunInInventory(2);
+                break
+            case "Digit4":
+                simulation.switchToGunInInventory(3);
+                break
+            case "Digit5":
+                simulation.switchToGunInInventory(4);
+                break
+            case "Digit6":
+                simulation.switchToGunInInventory(5);
+                break
+            case "Digit7":
+                simulation.switchToGunInInventory(6);
+                break
+            case "Digit8":
+                simulation.switchToGunInInventory(7);
+                break
+            case "Digit9":
+                simulation.switchToGunInInventory(8);
+                break
+            case "Digit0":
+                simulation.switchToGunInInventory(9);
+                break
+            case "Minus":
+                simulation.switchToGunInInventory(10);
+                break
+            case "Equal":
+                simulation.switchToGunInInventory(11);
+                break
+        }
+    }
+
     if (simulation.testing) {
         if (event.key === "X") m.death(); //only uppercase
         switch (event.key.toLowerCase()) {

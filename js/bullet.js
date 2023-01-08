@@ -23,7 +23,7 @@ const b = {
     },
     fire() {},
     fireNormal() {
-        if (b.inventory.length) {
+        if (b.inventory.length && b.activeGun !== null) {
             if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire)) {
                 if (b.guns[b.activeGun].ammo > 0) {
                     b.fireWithAmmo()
@@ -36,7 +36,7 @@ const b = {
         }
     },
     fireNotMove() { //added  && player.speed < 0.5 && m.onGround  
-        if (b.inventory.length) {
+        if (b.inventory.length && b.activeGun !== null) {
             if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire) && player.speed < 2.5 && m.onGround && Math.abs(m.yOff - m.yOffGoal) < 1) {
                 if (b.guns[b.activeGun].ammo > 0) {
                     b.fireWithAmmo()
@@ -49,7 +49,7 @@ const b = {
         }
     },
     fireAlwaysFire() { //added  && player.speed < 0.5 && m.onGround  //removed input.fire && (!input.field || m.fieldFire)
-        if (b.inventory.length) {
+        if (b.inventory.length && b.activeGun !== null) {
             if (m.fireCDcycle < m.cycle && player.speed < 0.5 && m.onGround && Math.abs(m.yOff - m.yOffGoal) < 1) {
                 if (b.guns[b.activeGun].ammo > 0) {
                     b.fireWithAmmo()
@@ -60,7 +60,7 @@ const b = {
         }
     },
     fireFloat() { //added  && player.speed < 0.5 && m.onGround  
-        if (b.inventory.length) {
+        if (b.inventory.length && b.activeGun !== null) {
             if (input.fire && (!input.field || m.fieldFire)) {
                 if (m.fireCDcycle < m.cycle) {
                     if (b.guns[b.activeGun].ammo > 0) {
@@ -125,11 +125,11 @@ const b = {
             simulation.updateGunHUD();
         }
     },
-    returnGunAmmo(name) {
-        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-            if (b.guns[i].name === name) return b.guns[i].ammo
-        }
-    },
+    // returnGunAmmo(name) {
+    //     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+    //         if (b.guns[i].name === name) return b.guns[i].ammo
+    //     }
+    // },
     giveGuns(gun = "random", ammoPacks = 10) {
         if (tech.ammoCap) ammoPacks = 0.45 * tech.ammoCap
         if (tech.isOneGun) b.removeAllGuns();
@@ -173,6 +173,7 @@ const b = {
             // if (tech.infiniteWaveAmmo === 2) b.guns[3].ammo = Infinity
         }
         simulation.makeGunHUD();
+        simulation.switchGun();
         b.setFireCD();
         if (tech.isOneGun && b.inventory > 0) {
             //count how many gun tech you have and remove them
@@ -323,11 +324,19 @@ const b = {
             };
         }
     },
-    muzzleFlash(radius = 10) {
-        ctx.fillStyle = "#fb0";
-        ctx.beginPath();
-        ctx.arc(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), radius, 0, 2 * Math.PI);
-        ctx.fill();
+    muzzleFlash(radius = 30) {
+        // ctx.fillStyle = "#fb0";
+        // ctx.beginPath();
+        // ctx.arc(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), radius, 0, 2 * Math.PI);
+        // ctx.fill();
+
+        simulation.drawList.push({ //add dmg to draw queue
+            x: m.pos.x + 35 * Math.cos(m.angle),
+            y: m.pos.y + 35 * Math.sin(m.angle),
+            radius: radius,
+            color: "#fb0",
+            time: 1
+        });
     },
     removeConsBB(me) {
         for (let i = 0, len = consBB.length; i < len; ++i) {
@@ -1618,13 +1627,16 @@ const b = {
                     player.force.x += momentum.x
                     player.force.y += momentum.y
                     // refund ammo
-                    for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        if (b.guns[i].name === "harpoon") {
-                            b.guns[i].ammo++;
-                            simulation.updateGunHUD();
-                            break;
-                        }
-                    }
+                    b.guns[9].ammo++;
+                    simulation.updateGunHUD();
+
+                    // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    //     if (b.guns[i].name === "harpoon") {
+                    //         b.guns[i].ammo++;
+                    //         simulation.updateGunHUD();
+                    //         break;
+                    //     }
+                    // }
                 } else {
                     if (m.energy > this.drain) m.energy -= this.drain
                     const sub = Vector.sub(this.position, m.pos)
@@ -1743,13 +1755,13 @@ const b = {
                                             this.endCycle = 0;
                                             if (m.cycle + 50 < m.fireCDcycle) m.fireCDcycle = m.cycle + 50
                                             // refund ammo
-                                            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                                                if (b.guns[i].name === "harpoon") {
-                                                    b.guns[i].ammo++;
-                                                    simulation.updateGunHUD();
-                                                    break;
-                                                }
-                                            }
+                                            b.guns[9].ammo++;
+                                            simulation.updateGunHUD();
+                                            // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                                            //     if (b.guns[i].name === "harpoon") {
+                                            //         break;
+                                            //     }
+                                            // }
                                         }
                                     }
                                 }
@@ -1941,13 +1953,13 @@ const b = {
                     player.force.y += momentum.y
                     // refund ammo
                     if (isReturnAmmo) {
-                        for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                            if (b.guns[i].name === "harpoon") {
-                                b.guns[i].ammo++;
-                                simulation.updateGunHUD();
-                                break;
-                            }
-                        }
+                        b.guns[9].ammo++;
+                        simulation.updateGunHUD();
+                        // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                        //     if (b.guns[i].name === "harpoon") {
+                        //         break;
+                        //     }
+                        // }
                     }
                 } else {
                     const sub = Vector.sub(this.position, m.pos)
@@ -2818,7 +2830,7 @@ const b = {
                                     ) {
                                         if (tech.isStun) b.AoEStunEffect(this.position, this.range + mob[i].radius + random); //AoEStunEffect(where, range, cycles = 90 + 60 * Math.random()) {
                                         if (tech.isMineSentry) {
-                                            this.lookFrequency = 15 + 10 * (tech.oneSuperBall && tech.isSuperMine) + Math.floor(3 * Math.random())
+                                            this.lookFrequency = Math.floor(7 + 7 * b.fireCDscale + 10 * (tech.oneSuperBall && tech.isSuperMine) + Math.floor(3 * Math.random()))
                                             // this.endCycle = Infinity
                                             this.shots = tech.sentryAmmo
                                             this.do = function() { //overwrite the do method for this bullet
@@ -3376,17 +3388,14 @@ const b = {
                 }
             },
             onEnd() {
-                if (tech.isDroneRespawn && b.inventory.length) {
-                    const who = b.guns[b.activeGun]
-                    if (who.name === "drones" && who.ammo > 0 && mob.length) {
-                        b.drone({
-                            x: this.position.x,
-                            y: this.position.y
-                        }, 0)
-                        if (Math.random() < 0.2) {
-                            b.guns[b.activeGun].ammo--;
-                            simulation.updateGunHUD();
-                        }
+                if (tech.isDroneRespawn && b.inventory.length && b.activeGun === 7 && b.guns[b.activeGun].ammo > 0 && mob.length) {
+                    b.drone({
+                        x: this.position.x,
+                        y: this.position.y
+                    }, 0)
+                    if (Math.random() < 0.2) {
+                        b.guns[b.activeGun].ammo--;
+                        simulation.updateGunHUD();
                     }
                 }
             },
@@ -3565,17 +3574,14 @@ const b = {
             maxRadioRadius: 270 + Math.floor(90 * Math.random()),
             beforeDmg() {},
             onEnd() {
-                if (tech.isDroneRespawn && b.inventory.length) {
-                    const who = b.guns[b.activeGun]
-                    if (who.name === "drones" && who.ammo > 0 && mob.length) {
-                        b.droneRadioactive({
-                            x: this.position.x,
-                            y: this.position.y
-                        }, 0)
-                        if (Math.random() < 0.2) {
-                            b.guns[b.activeGun].ammo--;
-                            simulation.updateGunHUD();
-                        }
+                if (tech.isDroneRespawn && b.inventory.length && b.activeGun === 7 && b.guns[b.activeGun].ammo > 0 && mob.length) {
+                    b.droneRadioactive({
+                        x: this.position.x,
+                        y: this.position.y
+                    }, 0)
+                    if (Math.random() < 0.2) {
+                        b.guns[b.activeGun].ammo--;
+                        simulation.updateGunHUD();
                     }
                 }
             },
@@ -3756,15 +3762,7 @@ const b = {
         bullet[me].minDmgSpeed = 0;
         bullet[me].restitution = 1;
         bullet[me].friction = 0;
-        if (tech.isIncendiary) {
-            bullet[me].do = function() {
-                this.force.y += this.mass * 0.0012;
-                if (Matter.Query.collides(this, map).length) {
-                    b.explosion(this.position, this.mass * 280); //makes bullet do explosive damage at end
-                    this.endCycle = 0
-                }
-            };
-        } else if (tech.superHarm) {
+        if (tech.superHarm) {
             bullet[me].collidePlayerDo = function() {
                 if (Matter.Query.collides(this, [player]).length) {
                     this.endCycle = 0
@@ -3781,13 +3779,11 @@ const b = {
             }
             bullet[me].cycle = 0
             bullet[me].do = function() {
-                this.cycle++
                 if (this.cycle > 6) this.do = this.collidePlayerDo
                 this.force.y += this.mass * 0.0012;
             };
         } else {
             bullet[me].do = function() {
-                this.cycle++
                 this.force.y += this.mass * 0.0012;
             };
         }
@@ -3799,6 +3795,10 @@ const b = {
                     const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                     b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
                 }
+                this.endCycle = 0
+            }
+            if (tech.isIncendiary) {
+                b.explosion(this.position, this.mass * 280); //makes bullet do explosive damage at end
                 this.endCycle = 0
             }
         };
@@ -5818,7 +5818,7 @@ const b = {
                         this.rotateToVelocity()
                     };
                 }
-                b.muzzleFlash(30);
+                b.muzzleFlash();
                 //very complex recoil system
                 if (m.onGround) {
                     if (input.down) {
@@ -5905,7 +5905,7 @@ const b = {
                     };
                 }
 
-                b.muzzleFlash(30);
+                b.muzzleFlash();
                 //very complex recoil system
                 if (m.onGround) {
                     if (input.down) {
@@ -5970,33 +5970,58 @@ const b = {
             ammoPack: 3.5,
             defaultAmmoPack: 3.5,
             have: false,
-            do() {},
+            do() {
+                //fade cross hairs
+
+
+
+                // draw loop around player head
+                // const left = m.fireCDcycle !== Infinity ? 0.05 * Math.max(m.fireCDcycle - m.cycle, 0) : 0
+                // if (left > 0) {
+                //     ctx.beginPath();
+                //     // ctx.arc(simulation.mouseInGame.x, simulation.mouseInGame.y, 30, 0, left);
+                //     ctx.arc(m.pos.x, m.pos.y, 28, m.angle - left, m.angle);
+                //     // ctx.fillStyle = "rgba(0,0,0,0.3)" //"#333"
+                //     // ctx.fill();
+                //     ctx.strokeStyle = "#333";
+                //     ctx.lineWidth = 2;
+                //     ctx.stroke();
+                // }
+
+
+                //draw hip circle
+                // ctx.beginPath();
+                // ctx.arc(m.pos.x + m.hip.x, m.pos.y + m.hip.y, 11, 0, 2 * Math.PI);
+                // ctx.fillStyle = "rgba(0,0,0,0.3)" //"#333"
+                // ctx.fill();
+            },
             fire() {
                 let knock, spread
-                if (input.down) {
-                    spread = 0.65
-                    m.fireCDcycle = m.cycle + Math.floor(73 * b.fireCDscale) // cool down
-                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(60 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(60 * b.fireCDscale); //player is immune to damage for 30 cycles
-                    knock = 0.01
-                } else {
-                    m.fireCDcycle = m.cycle + Math.floor(56 * b.fireCDscale) // cool down
-                    if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCDscale); //player is immune to damage for 30 cycles
-                    spread = 1.3
-                    knock = 0.1
-                }
+                const coolDown = function() {
+                    if (input.down) {
+                        spread = 0.65
+                        m.fireCDcycle = m.cycle + Math.floor((73 + 36 * tech.shotgunExtraShots) * b.fireCDscale) // cool down
+                        if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(60 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(60 * b.fireCDscale); //player is immune to damage for 30 cycles
+                        knock = 0.01
+                    } else {
+                        m.fireCDcycle = m.cycle + Math.floor((56 + 28 * tech.shotgunExtraShots) * b.fireCDscale) // cool down
+                        if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCDscale); //player is immune to damage for 30 cycles
+                        spread = 1.3
+                        knock = 0.1
+                    }
 
-                if (tech.isShotgunReversed) {
-                    player.force.x += 1.6 * knock * Math.cos(m.angle)
-                    player.force.y += 1.6 * knock * Math.sin(m.angle) - 3 * player.mass * simulation.g
-                } else if (tech.isShotgunRecoil) {
-                    m.fireCDcycle -= 0.66 * (56 * b.fireCDscale)
-                    player.force.x -= 2 * knock * Math.cos(m.angle)
-                    player.force.y -= 2 * knock * Math.sin(m.angle)
-                } else {
-                    player.force.x -= knock * Math.cos(m.angle)
-                    player.force.y -= knock * Math.sin(m.angle) * 0.5 //reduce knock back in vertical direction to stop super jumps
+                    if (tech.isShotgunReversed) {
+                        player.force.x += 1.5 * knock * Math.cos(m.angle)
+                        player.force.y += 1.5 * knock * Math.sin(m.angle) - 3 * player.mass * simulation.g
+                    } else if (tech.isShotgunRecoil) {
+                        m.fireCDcycle -= 0.66 * (56 * b.fireCDscale)
+                        player.force.x -= 2 * knock * Math.cos(m.angle)
+                        player.force.y -= 2 * knock * Math.sin(m.angle)
+                    } else {
+                        player.force.x -= knock * Math.cos(m.angle)
+                        player.force.y -= knock * Math.sin(m.angle) * 0.5 //reduce knock back in vertical direction to stop super jumps
+                    }
                 }
-
                 const spray = (num) => {
                     const side = 22
                     for (let i = 0; i < num; i++) {
@@ -6020,188 +6045,210 @@ const b = {
                         };
                     }
                 }
-
-                b.muzzleFlash(35);
-
-                if (tech.isRivets) {
-                    const me = bullet.length;
-                    // const dir = m.angle + 0.02 * (Math.random() - 0.5)
-                    bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 56 * tech.bulletSize, 25 * tech.bulletSize, b.fireAttributes(m.angle));
-
-                    Matter.Body.setDensity(bullet[me], 0.005 * (tech.isShotgunReversed ? 1.5 : 1));
-                    Composite.add(engine.world, bullet[me]); //add bullet to world
-                    const SPEED = (input.down ? 50 : 43)
-                    Matter.Body.setVelocity(bullet[me], {
-                        x: SPEED * Math.cos(m.angle),
-                        y: SPEED * Math.sin(m.angle)
-                    });
-                    if (tech.isIncendiary) {
-                        bullet[me].endCycle = simulation.cycle + 60
-                        bullet[me].onEnd = function() {
-                            b.explosion(this.position, 360 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
-                        }
-                        bullet[me].beforeDmg = function() {
-                            this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
-                        };
-                    } else {
-                        bullet[me].endCycle = simulation.cycle + 180
-                    }
-                    bullet[me].minDmgSpeed = 7
-                    // bullet[me].restitution = 0.4
-                    bullet[me].frictionAir = 0.004;
-                    bullet[me].turnMag = 0.04 * Math.pow(tech.bulletSize, 3.75)
-                    bullet[me].do = function() {
-                        this.force.y += this.mass * 0.002
-                        if (this.speed > 6) { //rotates bullet to face current velocity?
-                            const facing = {
-                                x: Math.cos(this.angle),
-                                y: Math.sin(this.angle)
-                            }
-                            if (Vector.cross(Vector.normalise(this.velocity), facing) < 0) {
-                                this.torque += this.turnMag
-                            } else {
-                                this.torque -= this.turnMag
-                            }
-                        }
-                        if (tech.isIncendiary && Matter.Query.collides(this, map).length) {
-                            this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
-                        }
-                    };
-                    bullet[me].beforeDmg = function(who) {
-                        if (this.speed > 4) {
-                            if (tech.fragments) {
-                                b.targetedNail(this.position, 6 * tech.fragments * tech.bulletSize)
-                                this.endCycle = 0 //triggers despawn
-                            }
-                            if (tech.isIncendiary) this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
-                            if (tech.isCritKill) b.crit(who, this)
-                        }
-                    }
-                    spray(12); //fires normal shotgun bullets
-                } else if (tech.isIncendiary) {
-                    spread *= 0.15
-                    const END = Math.floor(input.down ? 8 : 5);
-                    const totalBullets = 9
-                    const angleStep = (input.down ? 0.3 : 0.8) / totalBullets
-                    let dir = m.angle - angleStep * totalBullets / 2;
-                    for (let i = 0; i < totalBullets; i++) { //5 -> 7
-                        dir += angleStep
+                const chooseBulletType = function() {
+                    if (tech.isRivets) {
                         const me = bullet.length;
-                        bullet[me] = Bodies.rectangle(m.pos.x + 50 * Math.cos(m.angle), m.pos.y + 50 * Math.sin(m.angle), 17, 4, b.fireAttributes(dir));
-                        const end = END + Math.random() * 4
-                        bullet[me].endCycle = 2 * end * tech.isBulletsLastLonger + simulation.cycle
-                        const speed = 25 * end / END
-                        const dirOff = dir + (Math.random() - 0.5) * spread
-                        Matter.Body.setVelocity(bullet[me], {
-                            x: speed * Math.cos(dirOff),
-                            y: speed * Math.sin(dirOff)
-                        });
-                        bullet[me].onEnd = function() {
-                            b.explosion(this.position, 150 * (tech.isShotgunReversed ? 1.4 : 1) + (Math.random() - 0.5) * 30); //makes bullet do explosive damage at end
-                        }
-                        bullet[me].beforeDmg = function() {
-                            this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
-                        };
-                        bullet[me].do = function() {
-                            if (Matter.Query.collides(this, map).length) this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
-                        }
+                        // const dir = m.angle + 0.02 * (Math.random() - 0.5)
+                        bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 56 * tech.bulletSize, 25 * tech.bulletSize, b.fireAttributes(m.angle));
+
+                        Matter.Body.setDensity(bullet[me], 0.005 * (tech.isShotgunReversed ? 1.5 : 1));
                         Composite.add(engine.world, bullet[me]); //add bullet to world
-                    }
-                } else if (tech.isNailShot) {
-                    spread *= 0.65
-                    const dmg = 2 * (tech.isShotgunReversed ? 1.5 : 1)
-                    if (input.down) {
-                        for (let i = 0; i < 17; i++) {
-                            speed = 38 + 15 * Math.random()
-                            const dir = m.angle + (Math.random() - 0.5) * spread
-                            const pos = {
-                                x: m.pos.x + 35 * Math.cos(m.angle) + 15 * (Math.random() - 0.5),
-                                y: m.pos.y + 35 * Math.sin(m.angle) + 15 * (Math.random() - 0.5)
+                        const SPEED = (input.down ? 50 : 43)
+                        Matter.Body.setVelocity(bullet[me], {
+                            x: SPEED * Math.cos(m.angle),
+                            y: SPEED * Math.sin(m.angle)
+                        });
+                        if (tech.isIncendiary) {
+                            bullet[me].endCycle = simulation.cycle + 60
+                            bullet[me].onEnd = function() {
+                                b.explosion(this.position, 360 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
                             }
-                            b.nail(pos, {
-                                x: speed * Math.cos(dir),
-                                y: speed * Math.sin(dir)
-                            }, dmg)
+                            bullet[me].beforeDmg = function() {
+                                this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                            };
+                        } else {
+                            bullet[me].endCycle = simulation.cycle + 180
+                        }
+                        bullet[me].minDmgSpeed = 7
+                        // bullet[me].restitution = 0.4
+                        bullet[me].frictionAir = 0.004;
+                        bullet[me].turnMag = 0.04 * Math.pow(tech.bulletSize, 3.75)
+                        bullet[me].do = function() {
+                            this.force.y += this.mass * 0.002
+                            if (this.speed > 6) { //rotates bullet to face current velocity?
+                                const facing = {
+                                    x: Math.cos(this.angle),
+                                    y: Math.sin(this.angle)
+                                }
+                                if (Vector.cross(Vector.normalise(this.velocity), facing) < 0) {
+                                    this.torque += this.turnMag
+                                } else {
+                                    this.torque -= this.turnMag
+                                }
+                            }
+                            if (tech.isIncendiary && Matter.Query.collides(this, map).length) {
+                                this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                            }
+                        };
+                        bullet[me].beforeDmg = function(who) {
+                            if (this.speed > 4) {
+                                if (tech.fragments) {
+                                    b.targetedNail(this.position, 6 * tech.fragments * tech.bulletSize)
+                                    this.endCycle = 0 //triggers despawn
+                                }
+                                if (tech.isIncendiary) this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                                if (tech.isCritKill) b.crit(who, this)
+                            }
+                        }
+                        spray(12); //fires normal shotgun bullets
+                    } else if (tech.isIncendiary) {
+                        spread *= 0.15
+                        const END = Math.floor(input.down ? 8 : 5);
+                        const totalBullets = 9
+                        const angleStep = (input.down ? 0.3 : 0.8) / totalBullets
+                        let dir = m.angle - angleStep * totalBullets / 2;
+                        for (let i = 0; i < totalBullets; i++) { //5 -> 7
+                            dir += angleStep
+                            const me = bullet.length;
+                            bullet[me] = Bodies.rectangle(m.pos.x + 50 * Math.cos(m.angle), m.pos.y + 50 * Math.sin(m.angle), 17, 4, b.fireAttributes(dir));
+                            const end = END + Math.random() * 4
+                            bullet[me].endCycle = 2 * end * tech.isBulletsLastLonger + simulation.cycle
+                            const speed = 25 * end / END
+                            const dirOff = dir + (Math.random() - 0.5) * spread
+                            Matter.Body.setVelocity(bullet[me], {
+                                x: speed * Math.cos(dirOff),
+                                y: speed * Math.sin(dirOff)
+                            });
+                            bullet[me].onEnd = function() {
+                                b.explosion(this.position, 150 * (tech.isShotgunReversed ? 1.4 : 1) + (Math.random() - 0.5) * 30); //makes bullet do explosive damage at end
+                            }
+                            bullet[me].beforeDmg = function() {
+                                this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                            };
+                            bullet[me].do = function() {
+                                if (Matter.Query.collides(this, map).length) this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
+                            }
+                            Composite.add(engine.world, bullet[me]); //add bullet to world
+                        }
+                    } else if (tech.isNailShot) {
+                        spread *= 0.65
+                        const dmg = 2 * (tech.isShotgunReversed ? 1.5 : 1)
+                        if (input.down) {
+                            for (let i = 0; i < 17; i++) {
+                                speed = 38 + 15 * Math.random()
+                                const dir = m.angle + (Math.random() - 0.5) * spread
+                                const pos = {
+                                    x: m.pos.x + 35 * Math.cos(m.angle) + 15 * (Math.random() - 0.5),
+                                    y: m.pos.y + 35 * Math.sin(m.angle) + 15 * (Math.random() - 0.5)
+                                }
+                                b.nail(pos, {
+                                    x: speed * Math.cos(dir),
+                                    y: speed * Math.sin(dir)
+                                }, dmg)
+                            }
+                        } else {
+                            for (let i = 0; i < 17; i++) {
+                                speed = 38 + 15 * Math.random()
+                                const dir = m.angle + (Math.random() - 0.5) * spread
+                                const pos = {
+                                    x: m.pos.x + 35 * Math.cos(m.angle) + 15 * (Math.random() - 0.5),
+                                    y: m.pos.y + 35 * Math.sin(m.angle) + 15 * (Math.random() - 0.5)
+                                }
+                                b.nail(pos, {
+                                    x: speed * Math.cos(dir),
+                                    y: speed * Math.sin(dir)
+                                }, dmg)
+                            }
+                        }
+                    } else if (tech.isSporeFlea) {
+                        const where = {
+                            x: m.pos.x + 35 * Math.cos(m.angle),
+                            y: m.pos.y + 35 * Math.sin(m.angle)
+                        }
+                        const number = 2 * (tech.isShotgunReversed ? 1.5 : 1)
+                        for (let i = 0; i < number; i++) {
+                            const angle = m.angle + 0.2 * (Math.random() - 0.5)
+                            const speed = (input.down ? 35 * (1 + 0.05 * Math.random()) : 30 * (1 + 0.15 * Math.random()))
+                            b.flea(where, {
+                                x: speed * Math.cos(angle),
+                                y: speed * Math.sin(angle)
+                            })
+                            bullet[bullet.length - 1].setDamage()
+                        }
+                        spray(10); //fires normal shotgun bullets
+                    } else if (tech.isSporeWorm) {
+                        const where = {
+                            x: m.pos.x + 35 * Math.cos(m.angle),
+                            y: m.pos.y + 35 * Math.sin(m.angle)
+                        }
+                        const spread = (input.down ? 0.02 : 0.07)
+                        const number = 3 * (tech.isShotgunReversed ? 1.5 : 1)
+                        let angle = m.angle - (number - 1) * spread * 0.5
+                        for (let i = 0; i < number; i++) {
+                            b.worm(where)
+                            const SPEED = (30 + 10 * input.down) * (1 + 0.2 * Math.random())
+                            Matter.Body.setVelocity(bullet[bullet.length - 1], {
+                                x: player.velocity.x * 0.5 + SPEED * Math.cos(angle),
+                                y: player.velocity.y * 0.5 + SPEED * Math.sin(angle)
+                            });
+                            angle += spread
+                        }
+                        spray(7); //fires normal shotgun bullets
+                    } else if (tech.isIceShot) {
+                        const spread = (input.down ? 0.7 : 1.2)
+                        for (let i = 0, len = 10 * (tech.isShotgunReversed ? 1.5 : 1); i < len; i++) {
+                            b.iceIX(23 + 10 * Math.random(), m.angle + spread * (Math.random() - 0.5))
+                        }
+                        spray(10); //fires normal shotgun bullets
+                    } else if (tech.isFoamShot) {
+                        const spread = (input.down ? 0.15 : 0.4)
+                        const where = {
+                            x: m.pos.x + 25 * Math.cos(m.angle),
+                            y: m.pos.y + 25 * Math.sin(m.angle)
+                        }
+                        const number = 16 * (tech.isShotgunReversed ? 1.5 : 1)
+                        for (let i = 0; i < number; i++) {
+                            const SPEED = 13 + 4 * Math.random();
+                            const angle = m.angle + spread * (Math.random() - 0.5)
+                            b.foam(where, {
+                                x: SPEED * Math.cos(angle),
+                                y: SPEED * Math.sin(angle)
+                            }, 8 + 7 * Math.random())
+                        }
+                    } else if (tech.isNeedles) {
+                        const number = 9 * (tech.isShotgunReversed ? 1.5 : 1)
+                        const spread = (input.down ? 0.03 : 0.05)
+                        let angle = m.angle - (number - 1) * spread * 0.5
+                        for (let i = 0; i < number; i++) {
+                            b.needle(angle)
+                            angle += spread
                         }
                     } else {
-                        for (let i = 0; i < 17; i++) {
-                            speed = 38 + 15 * Math.random()
-                            const dir = m.angle + (Math.random() - 0.5) * spread
-                            const pos = {
-                                x: m.pos.x + 35 * Math.cos(m.angle) + 15 * (Math.random() - 0.5),
-                                y: m.pos.y + 35 * Math.sin(m.angle) + 15 * (Math.random() - 0.5)
-                            }
-                            b.nail(pos, {
-                                x: speed * Math.cos(dir),
-                                y: speed * Math.sin(dir)
-                            }, dmg)
+                        spray(16); //fires normal shotgun bullets
+                    }
+                }
+
+
+                coolDown();
+                b.muzzleFlash(35);
+                chooseBulletType();
+
+                if (tech.shotgunExtraShots) {
+                    const delay = 7
+                    let count = tech.shotgunExtraShots * delay
+
+                    function cycle() {
+                        count--
+                        if (!(count % delay)) {
+                            coolDown();
+                            b.muzzleFlash(35);
+                            chooseBulletType();
+                        }
+                        if (count > 0) {
+                            requestAnimationFrame(cycle);
                         }
                     }
-                } else if (tech.isSporeFlea) {
-                    const where = {
-                        x: m.pos.x + 35 * Math.cos(m.angle),
-                        y: m.pos.y + 35 * Math.sin(m.angle)
-                    }
-                    const number = 2 * (tech.isShotgunReversed ? 1.5 : 1)
-                    for (let i = 0; i < number; i++) {
-                        const angle = m.angle + 0.2 * (Math.random() - 0.5)
-                        const speed = (input.down ? 35 * (1 + 0.05 * Math.random()) : 30 * (1 + 0.15 * Math.random()))
-                        b.flea(where, {
-                            x: speed * Math.cos(angle),
-                            y: speed * Math.sin(angle)
-                        })
-                        bullet[bullet.length - 1].setDamage()
-                    }
-                    spray(10); //fires normal shotgun bullets
-                } else if (tech.isSporeWorm) {
-                    const where = {
-                        x: m.pos.x + 35 * Math.cos(m.angle),
-                        y: m.pos.y + 35 * Math.sin(m.angle)
-                    }
-                    const spread = (input.down ? 0.02 : 0.07)
-                    const number = 3 * (tech.isShotgunReversed ? 1.5 : 1)
-                    let angle = m.angle - (number - 1) * spread * 0.5
-                    for (let i = 0; i < number; i++) {
-                        b.worm(where)
-                        const SPEED = (30 + 10 * input.down) * (1 + 0.2 * Math.random())
-                        Matter.Body.setVelocity(bullet[bullet.length - 1], {
-                            x: player.velocity.x * 0.5 + SPEED * Math.cos(angle),
-                            y: player.velocity.y * 0.5 + SPEED * Math.sin(angle)
-                        });
-                        angle += spread
-                    }
-                    spray(7); //fires normal shotgun bullets
-                } else if (tech.isIceShot) {
-                    const spread = (input.down ? 0.7 : 1.2)
-                    for (let i = 0, len = 10 * (tech.isShotgunReversed ? 1.5 : 1); i < len; i++) {
-                        b.iceIX(23 + 10 * Math.random(), m.angle + spread * (Math.random() - 0.5))
-                    }
-                    spray(10); //fires normal shotgun bullets
-                } else if (tech.isFoamShot) {
-                    const spread = (input.down ? 0.15 : 0.4)
-                    const where = {
-                        x: m.pos.x + 25 * Math.cos(m.angle),
-                        y: m.pos.y + 25 * Math.sin(m.angle)
-                    }
-                    const number = 16 * (tech.isShotgunReversed ? 1.5 : 1)
-                    for (let i = 0; i < number; i++) {
-                        const SPEED = 13 + 4 * Math.random();
-                        const angle = m.angle + spread * (Math.random() - 0.5)
-                        b.foam(where, {
-                            x: SPEED * Math.cos(angle),
-                            y: SPEED * Math.sin(angle)
-                        }, 8 + 7 * Math.random())
-                    }
-                } else if (tech.isNeedles) {
-                    const number = 9 * (tech.isShotgunReversed ? 1.5 : 1)
-                    const spread = (input.down ? 0.03 : 0.05)
-                    let angle = m.angle - (number - 1) * spread * 0.5
-                    for (let i = 0; i < number; i++) {
-                        b.needle(angle)
-                        angle += spread
-                    }
-                } else {
-                    spray(16); //fires normal shotgun bullets
+                    requestAnimationFrame(cycle);
                 }
             }
         }, {

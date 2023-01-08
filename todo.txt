@@ -1,26 +1,34 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: cordyceps - sporangium infect mobs, making them fight for you as zombies
 
-tech: blast ball - mines fire super balls
-tech: extended magazine - sentry fires 50% more shots
-  sentry works with foam, nails, or super balls
+tech: repeater - shotgun gets another shot, and a longer fire delay
+  shotgun cross hairs show when fire is on cooldown
 
-dark patterns - stacks to 9
-  38->15% damage, 53->15% JUNK
-electronegativity - stacks to 9
-  0.12->0.1% damage per energy
+keys 1,2,3,4,5,6,7,8,9,0,-,= switch to a gun in your inventory
+Nerfed blinkBoss health and speed
+sneaker mobs are immune to harm for one cycles after vanishing
+experiment button new style
+new images for energy, bots
 
 bug fixes
 
 *********************************************************** TODO *****************************************************
 
-super-bot
+tech - only allow 1,2 turrets at time?
+  turrets drain energy?  
+  turrets never run out of ammo
+    turrets automatically use one of your mine ammos when they run out?
+    good with multi gun builds
+  conflict with booby trap
 
-tech - shotgun triple shot, but a bit longer of a delay
+tech: Bose Einstein condensate - freezes enemies in pilot wave, and drains some energy?
+
+super-bot
 
 tech - after standing wave runs out of energy from blocking, gain a buff
   buff: defense, damage?
+  aoe damage like railgun
+    push mobs away
 
 make super balls with Zectron deflectable with field
   but is there a simple way to do this?
@@ -1157,12 +1165,8 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
 ***major themes missing***
 ***maybe redo***
   dynamical systems
-  nail-bot
-  homeostasis
   heuristics
-  thermal runaway - infrared maybe?
-  redo the energy tech images with by Laurie Greasley
-    now that you can use --ar 3:2 --stylize 1000 and photo repair
+  negative feedback - too dark
 ***past style themes***
   field emitter - isometric, clean white robot spherical gun turret on bird legs, blender 3d, style of artstation and behance, Disney Pixar, cute 
   standing wave - concentric transparent blue geometric circles science  
