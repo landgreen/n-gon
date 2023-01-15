@@ -314,7 +314,7 @@ const simulation = {
         ctx.strokeStyle = "#000"; //'rgba(0,0,0,0.4)'
         ctx.beginPath();
         if (m.fireCDcycle > m.cycle) {
-            ctx.strokeStyle = "#777"; //'rgba(0,0,0,0.4)'
+            ctx.strokeStyle = "#000"; //'rgba(0,0,0,0.4)'
             ctx.arc(simulation.mouse.x, simulation.mouse.y, size + 1, 0, 2 * Math.PI);
         } else {
             ctx.strokeStyle = "#000"; //'rgba(0,0,0,0.4)'
@@ -474,10 +474,8 @@ const simulation = {
     switchGun() {
         if (tech.isLongitudinal && b.activeGun === 3) b.guns[3].waves = []; //empty array of wave bullets
         if (tech.crouchAmmoCount) tech.crouchAmmoCount = 1 //this prevents hacking the tech by switching guns
-        if (b.inventory.length > 0) {
-            b.activeGun = b.inventory[b.inventoryGun];
-            if (b.guns[b.activeGun].charge) b.guns[b.activeGun].charge = 0; //if switching into foam set charge to 0
-        }
+        if (b.inventory.length > 0) b.activeGun = b.inventory[b.inventoryGun];
+        b.guns[8].charge = 0; // foam charge to 0
         simulation.updateGunHUD();
         simulation.boldActiveGunHUD();
         //set crosshairs
@@ -774,8 +772,6 @@ const simulation = {
 
         input.endKeySensing();
         b.removeAllGuns();
-        simulation.switchGun();
-
         tech.setupAllTech(); //sets tech to default values
         tech.cancelCount = 0;
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -904,28 +900,30 @@ const simulation = {
     clearMap() {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (m.alive) {
-            if (tech.isLongitudinal) {
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
-                    if (b.guns[i].name === "wave") {
-                        b.guns[i].waves = []; //empty array of wave bullets
-                        break;
+            if (tech.isLongitudinal) b.guns[3].waves = []; //empty array of wave bullets
+            if (b.guns[10].have) { //do you have mines as a gun
+                let count = 0;
+                for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
+                    if (
+                        (bullet[i].bulletType === "mine" && (!tech.isMineSentry || bullet[i].shots === undefined)) ||
+                        bullet[i].bulletType === "laser mine") {
+                        count++
                     }
                 }
+                if (tech.crouchAmmoCount) count = Math.ceil(count / 2)
+                b.guns[10].ammo += count
+                if (tech.ammoCap) b.guns[10].ammo = Math.min(tech.ammoCap, b.guns[10].ammo)
+                simulation.updateGunHUD();
             }
 
-            let count = 0;
-            for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
-                if ((bullet[i].bulletType === "mine" || bullet[i].bulletType === "laser mine") && !bullet[i].isArmed) count++
-            }
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
-                if (b.guns[i].name === "mine") {
-                    if (tech.crouchAmmoCount) count = Math.ceil(count / 2)
-                    b.guns[i].ammo += count
-                    if (tech.ammoCap) b.guns[i].ammo = Math.min(tech.ammoCap, b.guns[i].ammo)
-                    simulation.updateGunHUD();
-                    break;
-                }
-            }
+            // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
+            //     if (b.guns[i].name === "mine") {
+            //         b.guns[i].ammo += count
+            //         if (tech.ammoCap) b.guns[i].ammo = Math.min(tech.ammoCap, b.guns[i].ammo)
+            //         simulation.updateGunHUD();
+            //         break;
+            //     }
+            // }
 
             if (tech.isMutualism && !tech.isEnergyHealth) {
                 for (let i = 0; i < bullet.length; i++) {

@@ -1,25 +1,64 @@
 ******************************************************** NEXT PATCH **************************************************
 
+tech: RPG - gains the rocket jumping effects from electric armor
 
-tech: repeater - shotgun gets another shot, and a longer fire delay
-  shotgun cross hairs show when fire is on cooldown
+eternalism no longer makes tech options have 50% opacity when choosing
 
-keys 1,2,3,4,5,6,7,8,9,0,-,= switch to a gun in your inventory
-Nerfed blinkBoss health and speed
-sneaker mobs are immune to harm for one cycles after vanishing
-experiment button new style
-new images for energy, bots
+some new images for cloaking tech
+and some images were made brighter
 
 bug fixes
+  safari media rules css fixed
 
 *********************************************************** TODO *****************************************************
 
+
+ tech:  maybe missiles explode when they hit walls, but explosions only drain energy
+
+tech: sticky grenades
+  needs another effect to be good enough
+  stick to mobs?
+
+testChamber2
+  mechanics
+    cover exit with slime, press button to lower slime and exit
+    companion cube
+      bring cube to the end and use it to unlock research
+      level draws on the block to show it's different
+      only this block can trigger a button?
+      if cube no longer exists or is off the map spawn a new one
+        or maybe add a button for the player to destroy current cube and spawn new cube
+    double portal fling chain
+      for player?
+      for cube
+    button that activates a laser beam that hits a target and opens a door
+      in order to enter the door you need to place the cube on the button to activate the laser
+        cube has to fly through a portal in order to get to the button
+      you can't use your body
+  story:
+    you pick up the cube early on and have to get it to a button
+    you run through the level to get the cube, clearing the level of mobs
+      picking up the cube spawns the boss
+        maybe an extra hard boss that is designed for that level
+        blockBoss?
+    you must get the cube to a button near the start of the level
+    the button opens a door
+      normal blocks don't work
+        normal blocks spawn into mobs like blockBoss
+        or mobs don't spawn blocks
+        or just the code looks for the cube
+        or the cube is resting on a button, and when you take the cube off the button the laser fires
+
+
+make a mob similar to slasher
+  because it's just a very well made mob.
+
+
 tech - only allow 1,2 turrets at time?
-  turrets drain energy?  
   turrets never run out of ammo
-    turrets automatically use one of your mine ammos when they run out?
+    or turrets automatically use one of your mine ammos when they run out?
     good with multi gun builds
-  conflict with booby trap
+  conflict with booby trap?
 
 tech: Bose Einstein condensate - freezes enemies in pilot wave, and drains some energy?
 
@@ -62,14 +101,6 @@ tech: sporangium that grow little trees
   the trees have an area of effect damage for about 6-10 seconds
   maybe something similar to radioactive drones, but maybe a few smaller shapes
 
-spores, worms, fleas - can target player
-  when to target player 
-    probably have to not go after player for at least a few seconds
-    only go after player if there are no mobs
-    go after what ever is closest target
-    go after a random target
-  if distance to player < 60 damage player
-    
 new bot type that makes phonon waves
   name: phono-bot?
   each bot has to generate it themselves, can't run code in gun.do
@@ -336,34 +367,6 @@ make plasma ball power up and block pick up still work when you have no no energ
 
 tech: entropic gravity - gain defense for each research
   requires wormhole or pilot wave or negative mass field?
-
-testChamber2
-  mechanics
-    companion cube
-      bring cube to the end and use it to unlock research
-      level draws on the block to show it's different
-      only this block can trigger a button
-      if cube no longer exists or is off the map spawn a new one
-    double portal fling chain
-      for player?
-      for cube
-    button that activates a laser beam that hits a target and opens a door
-      in order to enter the door you need to place the cube on the button to activate the laser
-        cube has to fly through a portal in order to get to the button
-      you can't use your body
-  story:
-    you pick up the cube early on and have to get it to a button
-    you run through the level to get the cube, clearing the level of mobs
-      picking up the cube spawns the boss
-        maybe an extra hard boss that is designed for that level
-        blockBoss?
-    you must get the cube to a button near the start of the level
-    the button opens a door
-      normal blocks don't work
-        normal blocks spawn into mobs like blockBoss
-        or mobs don't spawn blocks
-        or just the code looks for the cube
-        or the cube is resting on a button, and when you take the cube off the button the laser fires
 
 mitosis: after needle,bullets or rivets hit a surface split off into two smaller less damaging versions that have their velocity reset -firerate
 
@@ -1164,9 +1167,9 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   quantum stuff -- Hypertorus, Glowing Opal Pearlescent, Physics, Hydro-Dipping	Hydrodipped, Vija Celmins, Matt Molloy (photo of golden waves in the sky)
 ***major themes missing***
 ***maybe redo***
-  dynamical systems
   heuristics
   negative feedback - too dark
+  supercritical fission
 ***past style themes***
   field emitter - isometric, clean white robot spherical gun turret on bird legs, blender 3d, style of artstation and behance, Disney Pixar, cute 
   standing wave - concentric transparent blue geometric circles science  
@@ -1174,7 +1177,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   time dilation - graphic of a hyperbolic equation Luminogram
   negative mass - Blacklight painting by Moebius
   plasma torch - by Dan Mumford
-  metamaterial cloaking - Scientific photography by Miki Asai
+  metamaterial cloaking - Scientific photography by Miki Asai,   by Bruce Munro
   molecular assembler - by Laurie Greasley 16-bit Isometric 
   wormhole - by Tim White
 

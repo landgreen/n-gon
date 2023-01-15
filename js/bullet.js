@@ -114,7 +114,7 @@ const b = {
         }
     },
     refundAmmo() { //triggers after firing when you removed ammo for a gun, but didn't need to
-        if (tech.crouchAmmoCount && input.down) {
+        if (tech.crouchAmmoCount && input.down && b.activeGun !== null) {
             tech.crouchAmmoCount--
             if ((tech.crouchAmmoCount) % 2) {
                 b.guns[b.activeGun].ammo++;
@@ -144,13 +144,13 @@ const b = {
             gun = options[Math.floor(Math.random() * options.length)]
         }
         if (gun === "all") {
-            b.inventoryGun = 0;
             for (let i = 0; i < b.guns.length; i++) {
                 b.inventory[i] = i;
                 b.guns[i].have = true;
                 if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = Math.ceil(b.guns[i].ammoPack * ammoPacks);
             }
-            b.activeGun = 0;
+            b.inventoryGun = 0;
+            b.activeGun = b.inventory[0];
         } else {
             if (isNaN(gun)) { //find gun by name
                 let found = false;
@@ -167,7 +167,8 @@ const b = {
             b.guns[gun].have = true;
             if (b.guns[gun].ammo !== Infinity) b.guns[gun].ammo = Math.ceil(b.guns[gun].ammoPack * ammoPacks);
             if (b.activeGun === null) {
-                b.activeGun = gun //if no active gun switch to new gun
+                b.inventoryGun = 0;
+                b.activeGun = b.inventory[0] //if no active gun switch to new gun
                 if (b.guns[b.activeGun].charge) b.guns[b.activeGun].charge = 0; //set foam charge to zero if foam is a new gun
             }
             // if (tech.infiniteWaveAmmo === 2) b.guns[3].ammo = Infinity
@@ -219,11 +220,10 @@ const b = {
                 }
                 if (b.inventory.length > 0) {
                     b.activeGun = b.inventory[0];
-                    b.inventoryGun = 0;
                 } else {
                     b.activeGun = null;
-                    b.inventoryGun = 0;
                 }
+                b.inventoryGun = 0;
                 simulation.makeGunHUD();
                 break
             }
@@ -237,7 +237,10 @@ const b = {
             b.guns[i].have = false;
             if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
         }
+        tech.buffedGun = 0
         b.activeGun = null;
+        b.inventoryGun = 0;
+        simulation.drawCursor = simulation.drawCursorBasic //set cross hairs
     },
     bulletRemove() { //run in main loop
         //remove bullet if at end cycle for that bullet
@@ -445,9 +448,9 @@ const b = {
                 if (dist < radius) {
                     if (simulation.dmgScale) {
                         const harm = tech.isExplosionHarm ? 0.07 : 0.05
-                        if (tech.isImmuneExplosion && m.energy > 0.12) {
+                        if (tech.isImmuneExplosion && m.energy > 0.25) {
                             // const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
-                            m.energy -= 0.12
+                            m.energy -= 0.25
                             // m.damage(0.01 * harm); //remove 99% of the damage  1-0.99
                             knock = Vector.mult(Vector.normalise(sub), -0.6 * player.mass * Math.max(0, Math.min(0.15 - 0.002 * player.speed, 0.15)));
                             player.force.x = knock.x; // not +=  so crazy forces can't build up with MIRV
@@ -2759,26 +2762,17 @@ const b = {
                 if (collide.length > 0) {
                     for (let i = 0; i < collide.length; i++) {
                         if (collide[i].bodyA.collisionFilter.category === cat.map) { // || collide[i].bodyB.collisionFilter.category === cat.map) {
-                            const angle = Vector.angle(collide[i].normal, {
-                                x: 1,
-                                y: 0
-                            })
+                            const angle = Vector.angle(collide[i].normal, { x: 1, y: 0 })
                             Matter.Body.setAngle(this, Math.atan2(collide[i].tangent.y, collide[i].tangent.x))
                             for (let j = 0; j < 10; j++) { //move until touching map again after rotation
                                 if (Matter.Query.collides(this, map).length > 0) { //touching map
                                     if (angle > -0.2 || angle < -1.5) { //don't stick to level ground
-                                        Matter.Body.setVelocity(this, {
-                                            x: 0,
-                                            y: 0
-                                        });
+                                        Matter.Body.setVelocity(this, { x: 0, y: 0 });
                                         Matter.Body.setStatic(this, true) //don't set to static if not touching map
                                         this.collisionFilter.category = 0
                                         this.collisionFilter.mask = 0 //cat.map | cat.bullet
                                     } else {
-                                        Matter.Body.setVelocity(this, {
-                                            x: 0,
-                                            y: 0
-                                        });
+                                        Matter.Body.setVelocity(this, { x: 0, y: 0 });
                                         Matter.Body.setAngularVelocity(this, 0)
                                     }
                                     this.arm();
@@ -3764,6 +3758,7 @@ const b = {
         bullet[me].friction = 0;
         if (tech.superHarm) {
             bullet[me].collidePlayerDo = function() {
+                this.force.y += this.mass * 0.0012;
                 if (Matter.Query.collides(this, [player]).length) {
                     this.endCycle = 0
                     let dmg = 0.02 * this.mass * tech.superHarm
@@ -3779,7 +3774,8 @@ const b = {
             }
             bullet[me].cycle = 0
             bullet[me].do = function() {
-                if (this.cycle > 6) this.do = this.collidePlayerDo
+                this.cycle++
+                if (this.cycle > 2) this.do = this.collidePlayerDo
                 this.force.y += this.mass * 0.0012;
             };
         } else {

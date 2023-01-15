@@ -1,5 +1,7 @@
 :root {
     --build-bg-color: #aeb6c2;
+    --card-color: #fafcfd;
+    --hover-card-color: #e5e5ed;
 }
 
 body {
@@ -185,15 +187,15 @@ summary {
 
 .choose-grid-module {
     line-height: 160%;
-    background-color: #fafcfd;
+    background-color: var(--card-color);
     font-size: 0.75em;
 }
 
 .choose-grid-module:hover {
-    background-color: #efeff5;
+    background-color: var(--hover-card-color);
 }
 .choose-grid-module:hover .card-text {
-    background-color: #efeff5;
+    background-color: var(--hover-card-color);
 }
 
 .research-select {
@@ -244,7 +246,7 @@ summary {
 
 .pause-grid-module {
     line-height: 160%;
-    background-color: #fafcfd;
+    background-color: var(--card-color);
     font-size: 0.75em;
 }
 
@@ -276,7 +278,7 @@ summary {
 
 .experiment-grid-module {
     line-height: 160%;
-    background-color: #fafcfd;
+    background-color: var(--card-color);
     font-size: 0.75em;
 }
 
@@ -292,11 +294,11 @@ summary {
 }
 
 .experiment-grid-module:hover:not(.build-tech-selected, .build-field-selected, .build-gun-selected) {
-    background-color: #efeff5;
+    background-color: var(--card-color);
 }
 
 .experiment-start-box{
-    background-color: #fafcfd;
+    background-color: var(--card-color);
     /* font-size: 1em; */
     position: sticky; 
     top:0; 
@@ -347,10 +349,10 @@ summary {
     margin-right: -1px;
     padding: 1px;
     line-height: 160%;
-    background-color: #fafcfd;
+    background-color: var(--card-color);
 }
 .cancel-card:hover {
-    background-color: #efeff5;
+    background-color: var(--hover-card-color);
 }
 .research-card {
     font-size: 1.1em;
@@ -360,15 +362,15 @@ summary {
     margin-right: -1px;
     padding: 1px 0px 1px 10px;
     line-height: 160%;
-    background-color: #fafcfd;
+    background-color: var(--card-color);
 }
 .research-card:hover {
-    background-color: #efeff5;
+    background-color: var(--hover-card-color);
 }
 
 
 /* keeps 5 columns at 1440px */
-@media (1710px <= width < 1950px) {
+@media (min-width: 1710px) and (max-width: 1950px) {
     .experiment-grid-module, .choose-grid-module, .pause-grid-module {
         line-height: 143%;
         font-size: 0.68em;
@@ -383,7 +385,8 @@ summary {
         min-height: 75px;
     }
 }
-@media (width < 1710px) {
+/* (min-width: 30em) and (max-width: 80em) */
+@media (max-width: 1709px) {
     .experiment-grid-module, .choose-grid-module, .pause-grid-module {
         line-height: 139%;
         font-size: 0.58em;
@@ -431,7 +434,7 @@ summary {
 } */
 
 .experiment-grid-module:hover .card-text {
-    background-color: #efeff5;
+    background-color: var(--hover-card-color);
 }
 .build-tech-selected .card-text{
     background-color: hsl(253, 100%, 84%);
@@ -453,9 +456,9 @@ summary {
 }
 
 .experiment-grid-disabled {
-    background-color: var(--build-bg-color);
-    color: #000;
-    opacity: 0.25;
+    /* background-color: var(--build-bg-color); */
+    /* color: #000; */
+    opacity: 0.35;
 }
 
 .experiment-grid-disabled[data-descr] {
@@ -756,7 +759,7 @@ summary {
     font-weight: 100;
 }
 .color-cancel {
-    background-color: #fafcfd;
+    background-color: var(--card-color);
     border: 0.15em #444 solid;
     padding: 0.2em;
     border-radius: 0.2em;
@@ -980,7 +983,7 @@ summary {
     text-align: center;
     letter-spacing: 10px;
     border: none;
-    background-color: #efeff5;
+    background-color: var(--card-color);
 }
 .flipX {
     animation: 14s anim-flipX linear infinite;

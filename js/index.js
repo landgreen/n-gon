@@ -382,7 +382,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         }
 
         let el = document.getElementById("pause-grid-left")
-        el.style.display = tech.isNoDraftPause ? "none" : "grid" //disabled for eternalism because eternalism lets the player play while this menu is up but the menu doesn't update
+        el.style.display = "grid"
         el.innerHTML = text
         //right side
         text = "";
@@ -433,7 +433,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             }
         }
         el = document.getElementById("pause-grid-right")
-        el.style.display = tech.isNoDraftPause ? "none" : "grid" //disabled for eternalism because eternalism lets the player play while this menu is up but the menu doesn't update
+        el.style.display = "grid"
         el.innerHTML = text
 
         document.getElementById("tech").style.display = "none"
@@ -500,7 +500,10 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                     b.guns[index].count = 0;
                     b.guns[index].have = false;
                     if (b.guns[index].ammo != Infinity) b.guns[index].ammo = 0;
-                    if (b.inventory.length === 0) b.activeGun = null;
+                    if (b.inventory.length === 0) {
+                        b.activeGun = null;
+                        b.inventoryGun = 0;
+                    }
                     simulation.makeGunHUD();
                     break
                 }
@@ -698,6 +701,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
         }
         b.activeGun = null;
+        b.inventoryGun = 0;
         simulation.makeGunHUD();
         tech.setupAllTech();
         build.populateGrid();
@@ -765,6 +769,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         spawn.setSpawnList();
         if (b.inventory.length > 0) {
             b.activeGun = b.inventory[0] //set first gun to active gun
+            b.inventoryGun = 0;
             simulation.makeGunHUD();
         }
         for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);

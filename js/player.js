@@ -3016,20 +3016,10 @@ const m = {
                     //not shooting (or using field) enable cloak
                     if (m.energy < 0.05 && m.fireCDcycle < m.cycle && !input.fire) m.fireCDcycle = m.cycle
                     if (m.fireCDcycle + 30 < m.cycle && !input.fire) { //automatically cloak if not firing
-                        const drain = 0.05
-                        if (!m.isCloak && m.energy > drain + 0.05) {
+                        const drain = 0.03
+                        if (!m.isCloak && m.energy > drain + 0.03) {
                             m.energy -= drain
                             m.isCloak = true //enter cloak
-
-
-                            // m.color = {
-                            //     hue: 0,
-                            //     sat: 0,
-                            //     light: 100
-                            // }
-                            // m.setFillColorsAlpha(0)
-
-
                             m.enterCloakCycle = m.cycle
                             if (tech.isCloakHealLastHit && m.lastHit > 0) {
                                 const heal = Math.min(0.75 * m.lastHit, m.energy)
@@ -3063,7 +3053,7 @@ const m = {
                         if (tech.isCloakStun) { //stun nearby mobs after exiting cloak
                             let isMobsAround = false
                             const stunRange = m.fieldDrawRadius * 1.5
-                            const drain = 0.2
+                            const drain = 0.15
                             if (m.energy > drain) {
                                 for (let i = 0, len = mob.length; i < len; ++i) {
                                     if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) < stunRange && Matter.Query.ray(map, mob[i].position, m.pos).length === 0 && !mob[i].isBadTarget) {
@@ -3085,11 +3075,11 @@ const m = {
                         }
                     }
                     if (m.isCloak) {
-                        m.fieldRange = m.fieldRange * 0.9 + 80
-                        m.fieldDrawRadius = m.fieldRange * 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
+                        m.fieldRange = m.fieldRange * 0.85 + 115
+                        m.fieldDrawRadius = m.fieldRange * 1.1 //* 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                         m.drawCloak()
                     } else if (m.fieldRange < 4000) {
-                        m.fieldRange += 50
+                        m.fieldRange += 90
                         m.fieldDrawRadius = m.fieldRange //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                         m.drawCloak()
                     }

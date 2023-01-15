@@ -578,7 +578,7 @@ const spawn = {
             },
             {
                 name: "laser",
-                spinForce: 0.00000012, // * (Math.random() < 0.5 ? -1 : 1),
+                spinForce: 0.00000008, // * (Math.random() < 0.5 ? -1 : 1),
                 fadeCycle: 0, //fades in over 4 seconds
                 do() {
                     this.fadeCycle++

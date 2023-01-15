@@ -381,6 +381,14 @@ const tech = {
                             if (regex !== -1 && (not === -1 || not > regex)) gunTechPool.push(j) //look for the gun name in the requirements, but the gun name needs to show up before the word ' not '                        
                         }
                         b.activeGun = originalActiveGunIndex
+                        if (!b.guns[b.activeGun].have) {
+                            if (b.inventory.length === 0) {
+                                b.activeGun = null
+                            } else {
+                                b.activeGun = b.inventory[0]
+                            }
+                            b.inventoryGun = 0;
+                        }
                     }
                     if (gunTechPool.length) {
                         const index = Math.floor(Math.random() * gunTechPool.length)
@@ -4356,7 +4364,7 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.isMineDrop + tech.isNailBotUpgrade + tech.fragments + tech.nailsDeathMob + (tech.haveGunCheck("super balls") + (tech.haveGunCheck("mine") && !(tech.isFoamMine || tech.isSuperMine)) + (tech.haveGunCheck("nail gun")) + tech.isNeedles + tech.isNailShot + tech.isRivets) * 2 > 1
+                return tech.isMineDrop + tech.isNailBotUpgrade + tech.fragments + tech.nailsDeathMob + (tech.haveGunCheck("super balls") + (tech.haveGunCheck("mine") && !tech.isFoamMine) + (tech.haveGunCheck("nail gun")) + tech.isNeedles + tech.isNailShot + tech.isRivets) * 2 > 1
             },
             requires: "nails, nail gun, rivets, shotgun, super balls, mine",
             effect() {
@@ -5280,26 +5288,26 @@ const tech = {
                 if (this.count > 0) powerUps.research.changeRerolls(3)
             }
         },
-        {
-            name: "electric armor",
-            // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-defense'>defense</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
-            description: "instead of causing <strong class='color-h'>health</strong> loss, <strong class='color-e'>explosions</strong><br>drain <strong>12</strong> <strong class='color-f'>energy</strong> and have more knockback",
-            isGunTech: true,
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return !tech.isSmartRadius && !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
-            },
-            requires: "an explosive damage source, not iridium-192",
-            effect() {
-                tech.isImmuneExplosion = true;
-            },
-            remove() {
-                tech.isImmuneExplosion = false;
-            }
-        },
+        // {
+        //     name: "electric armor",
+        //     // description: "<strong class='color-e'>explosions</strong> do no <strong class='color-defense'>defense</strong><br> while your <strong class='color-f'>energy</strong> is above <strong>98%</strong>",
+        //     description: "instead of causing <strong class='color-h'>health</strong> loss, <strong class='color-e'>explosions</strong><br>drain <strong>12</strong> <strong class='color-f'>energy</strong> and have more knockback",
+        //     isGunTech: true,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 2,
+        //     frequencyDefault: 2,
+        //     allowed() {
+        //         return !tech.isSmartRadius && !tech.isExplodeRadio && tech.hasExplosiveDamageCheck()
+        //     },
+        //     requires: "an explosive damage source, not iridium-192",
+        //     effect() {
+        //         tech.isImmuneExplosion = true;
+        //     },
+        //     remove() {
+        //         tech.isImmuneExplosion = false;
+        //     }
+        // },
         {
             name: "MIRV",
             description: "fire <strong>+1</strong> <strong>missile</strong> or <strong>grenade</strong> per shot<br><strong>–12%</strong> <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> and <strong>radius</strong>",
@@ -5321,21 +5329,23 @@ const tech = {
         },
         {
             name: "rocket-propelled grenade",
-            description: "<strong>grenades</strong> rapidly <strong>accelerate</strong> forward<br>map <strong>collisions</strong> trigger an <strong class='color-e'>explosion</strong>",
+            description: "<strong>grenades</strong> <strong class='color-e'>explode</strong> on map <strong>collisions</strong><br><strong class='color-e'>explosions</strong> drain <strong class='color-f'>energy</strong>, not <strong class='color-h'>health</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("grenades")
+                return tech.haveGunCheck("grenades") && !tech.isVacuumBomb
             },
-            requires: "grenades",
+            requires: "grenades, not vacuum bomb",
             effect() {
+                tech.isImmuneExplosion = true;
                 tech.isRPG = true;
                 b.setGrenadeMode()
             },
             remove() {
+                tech.isImmuneExplosion = true;
                 tech.isRPG = false;
                 b.setGrenadeMode()
             }
@@ -5349,9 +5359,9 @@ const tech = {
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("grenades") && !tech.isNeutronBomb && !tech.isBlockExplode
+                return tech.haveGunCheck("grenades") && !tech.isNeutronBomb && !tech.isBlockExplode && !tech.isRPG
             },
-            requires: "grenades, not neutron bomb, chain reaction",
+            requires: "grenades, not neutron bomb, chain reaction, RPG",
             effect() {
                 tech.isVacuumBomb = true;
                 b.setGrenadeMode()
@@ -5646,7 +5656,7 @@ const tech = {
             }
         },
         {
-            name: "sentry gun",
+            name: "sentry",
             descriptionFunction() {
                 return `<strong>mines</strong> fire one ${b.guns[10].nameString()} at a time<br><strong>mines</strong> fire <strong>50%</strong> more ${b.guns[10].nameString('s')}`
             },
