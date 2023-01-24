@@ -1529,13 +1529,11 @@ const simulation = {
                 } else if (e.button === 4) {
                     simulation.outputMapString(`${Math.floor(simulation.constructMouseDownPosition.x)}, ${Math.floor(simulation.constructMouseDownPosition.y)}`);
                 } else if (simulation.mouseInGame.x > simulation.constructMouseDownPosition.x && simulation.mouseInGame.y > simulation.constructMouseDownPosition.y) { //make sure that the width and height are positive
-
                     if (e.button === 0) { //add map
                         if (level.isProcedural) {
                             simulation.outputMapString(`spawn.mapRect(x+${x}, y+${y}, ${dx}, ${dy});\n`);
                         } else {
                             simulation.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});\n`);
-
                         }
                         //see map in world
                         spawn.mapRect(x, y, dx, dy);
@@ -1545,14 +1543,12 @@ const simulation = {
                         Matter.Body.setStatic(map[len], true); //make static
                         Composite.add(engine.world, map[len]); //add to world
                         simulation.draw.setPaths() //update map graphics
-
                     } else if (e.button === 2) { //add body
                         if (level.isProcedural) {
                             simulation.outputMapString(`spawn.bodyRect(x+${x}, y+${y}, ${dx}, ${dy});\n`);
                         } else {
                             simulation.outputMapString(`spawn.bodyRect(${x}, ${y}, ${dx}, ${dy});\n`);
                         }
-
                         //see map in world
                         spawn.bodyRect(x, y, dx, dy);
                         len = body.length - 1

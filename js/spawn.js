@@ -2664,9 +2664,6 @@ const spawn = {
         me.spin = function() {
             this.checkStatus();
             this.torque += 0.000035 * this.inertia;
-            this.fill = randomColor({
-                hue: "blue"
-            });
             //draw attack vector
             const mag = this.radius * 2.5 + 50;
             ctx.strokeStyle = "rgba(0,0,0,0.2)";

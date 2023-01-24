@@ -1076,7 +1076,7 @@ const m = {
     },
     setFieldRegen() {
         if (m.fieldMode === 6) {
-            m.fieldRegen = 0.003 //18 energy per second
+            m.fieldRegen = 0.0025 //15 energy per second
         } else if (m.fieldMode === 4) {
             m.fieldRegen = 0.002 //12 energy per second
         } else {
@@ -2785,7 +2785,7 @@ const m = {
         },
         {
             name: "time dilation",
-            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>+25%</strong> movement and <strong><em>fire rate</em></strong><br>generate <strong>18</strong> <strong class='color-f'>energy</strong> per second",
+            description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>+25%</strong> movement and <strong><em>fire rate</em></strong><br>generate <strong>15</strong> <strong class='color-f'>energy</strong> per second",
             set() {
                 // m.fieldMeterColor = "#0fc"
                 // m.fieldMeterColor = "#ff0"

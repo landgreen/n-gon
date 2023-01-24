@@ -1,58 +1,49 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: RPG - gains the rocket jumping effects from electric armor
+new level: lock
+  it's a work in progress 
+  I'm looking for feedback:
+    anything confusing?
+    combat too hard/easy?
+      it will probably feel hard because you don't know the map yet
 
-eternalism no longer makes tech options have 50% opacity when choosing
+images are now hidden by default for new players
+time dilation 18->15 energy/s
 
-some new images for cloaking tech
-and some images were made brighter
-
-bug fixes
-  safari media rules css fixed
+bug fixes:
+  extended CSS media rules and power up selection code to entanglement
 
 *********************************************************** TODO *****************************************************
 
+level: lock
+  replace vanish elements with doors to fit theme better
+    can you do a sideways door?
+  should there be something in the top part of the map?
+  add alt versions of left and right sides
+  make flipped L/R version (after everything else is done)
 
- tech:  maybe missiles explode when they hit walls, but explosions only drain energy
+tech: add an selection option to all tech, gun, fields to do something
+  set all mobs to 30% health, and stun all mobs
+  50% chance to convert all power ups into research
+  heal to full
+
+tech: if you die inside MACHO, heal to full and delete the MACHO for the rest of the Level
+  MACHO gives less defense
+
+tech: after bosses die<br>they spawn a research
+
+tech: neutrino oscillation - when a mob dies there is a __% chance to convert a random existing power up to a different type
+
+tech: +8% damage each time you kill a boss
+
+tech:  maybe missiles explode when they hit walls, but explosions only drain energy
 
 tech: sticky grenades
   needs another effect to be good enough
   stick to mobs?
 
-testChamber2
-  mechanics
-    cover exit with slime, press button to lower slime and exit
-    companion cube
-      bring cube to the end and use it to unlock research
-      level draws on the block to show it's different
-      only this block can trigger a button?
-      if cube no longer exists or is off the map spawn a new one
-        or maybe add a button for the player to destroy current cube and spawn new cube
-    double portal fling chain
-      for player?
-      for cube
-    button that activates a laser beam that hits a target and opens a door
-      in order to enter the door you need to place the cube on the button to activate the laser
-        cube has to fly through a portal in order to get to the button
-      you can't use your body
-  story:
-    you pick up the cube early on and have to get it to a button
-    you run through the level to get the cube, clearing the level of mobs
-      picking up the cube spawns the boss
-        maybe an extra hard boss that is designed for that level
-        blockBoss?
-    you must get the cube to a button near the start of the level
-    the button opens a door
-      normal blocks don't work
-        normal blocks spawn into mobs like blockBoss
-        or mobs don't spawn blocks
-        or just the code looks for the cube
-        or the cube is resting on a button, and when you take the cube off the button the laser fires
-
-
 make a mob similar to slasher
   because it's just a very well made mob.
-
 
 tech - only allow 1,2 turrets at time?
   turrets never run out of ammo
@@ -1168,7 +1159,6 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
 ***major themes missing***
 ***maybe redo***
   heuristics
-  negative feedback - too dark
   supercritical fission
 ***past style themes***
   field emitter - isometric, clean white robot spherical gun turret on bird legs, blender 3d, style of artstation and behance, Disney Pixar, cute 
