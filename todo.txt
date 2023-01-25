@@ -1,17 +1,10 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new level: lock
-  it's a work in progress 
-  I'm looking for feedback:
-    anything confusing?
-    combat too hard/easy?
-      it will probably feel hard because you don't know the map yet
+level: lock
+  there is a way to escape the slime on the right side now
 
-images are now hidden by default for new players
-time dilation 18->15 energy/s
-
-bug fixes:
-  extended CSS media rules and power up selection code to entanglement
+new community level!
+  stereoMadness by Richard0820
 
 *********************************************************** TODO *****************************************************
 

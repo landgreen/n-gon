@@ -10,7 +10,7 @@ const level = {
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     //see level.populateLevels:   (intro, ... , reservoir, reactor, ... , gauntlet, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
-    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard"],
+    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
@@ -4404,9 +4404,10 @@ const level = {
         const doorCenterLeft = level.door(2537, 775, 25, 225, 195, 5)
         const doorButtonRight = level.door(4462, 1010, 25, 225, 195, 5)
         const doorLeft = level.door(2538, 1825, 25, 225, 195, 5)
-        const buttonRight = level.button(4178, -355)
-        const buttonLeft = level.button(4585, 1235)
-        spawn.mapRect(4000, -350, 700, 125); //button platform
+        const buttonLeft = level.button(4565, 1235)
+        const buttonRight = level.button(4142, -355)
+        // spawn.mapRect(4000, -350, 700, 125); //button platform
+        spawn.mapRect(4000, -350, 600, 75);
         buttonLeft.isUp = true
         buttonRight.isUp = true
         const hazardSlimeLeft = level.hazard(900, -300, 1638, 2450) //hazard(x, y, width, height, damage = 0.002) {
@@ -4520,6 +4521,22 @@ const level = {
             spawn.mapVertex(4425, 1743, "-150 30 -120 0  150 0   150 1000   -150 1000");
             spawn.mapVertex(4250, 1811, "-150 30 -120 0  150 0   150 600   -150 600");
             spawn.mapVertex(4075, 2079, "-150 30 -120 0  150 0   150 600   -150 600");
+
+            //escape ledge when drowning
+            spawn.mapRect(4425, 800, 75, 25);
+            spawn.mapRect(4425, 325, 75, 25);
+            // spawn.mapRect(4425, -100, 75, 25);
+            // spawn.mapRect(4425, -550, 75, 25);
+            // spawn.mapRect(4425, -1000, 75, 25);
+
+
+            // if (Math.random() < 0.5) {
+            //     spawn.mapRect(2775, 525, 100, 25);
+            //     spawn.mapRect(3200, 75, 125, 25);
+            // } else {
+            //     spawn.mapRect(4400, 800, 100, 25);
+            //     spawn.mapRect(3925, 400, 100, 25);
+            // }
         }
         //left side
         if (Math.random() < 1) {
@@ -13105,7 +13122,1593 @@ const level = {
         //POWERUPS
 
     },
+    stereoMadness() {
 
+        simulation.makeTextLog(`<strong>stereoMadness</strong> by <span class='color-var'>Richard0820</span>`);
+
+        let totalCoin = 0;
+        const hunter = function(x, y, radius = 30) { //doesn't stop chasing until past 105000
+            mobs.spawn(x, y, 6, radius, "black");
+            let me = mob[mob.length - 1];
+            me.stroke = "transparent";
+            me.collisionFilter.mask = cat.player | cat.bullet;
+            me.accelMag = 0.0006 * Math.min(simulation.difficulty + 1, 6);
+            me.showHealthBar = false;
+            me.isUnblockable = true;
+            me.isShielded = true;
+            me.memory = Infinity;
+            me.seeAtDistance2 = Infinity;
+            Matter.Body.setDensity(me, 1)
+            simulation.makeTextLog(`<b style="color: #3498DB;">Ω:</b><em style="color: #141414;"><b> Intruder Detected</b></em>`);
+            me.boost = 10;
+            me.do = function() {
+                if (me.boost == 1 && m.fieldMode == 3 || m.fieldMode == 9 && me.boost == 1) {
+                    me.accelMag *= 1.5;
+                    me.boost--;
+                }
+                this.attraction();
+                this.checkStatus();
+                this.repelBullets();
+                this.locatePlayer();
+                this.alwaysSeePlayer()
+                if (player.position.x > 105000) {
+                    this.death()
+                }
+            };
+            me.onHit = function() {
+                for (let i = 0; i < 10; i++) {
+                    spawn.spawns(this.position.x + Math.random() * 1000 - Math.random() * 1000, this.position.y - Math.random() * 1000)
+                }
+            }
+        }
+        const coin = function(x, y, radius = 50) {
+            mobs.spawn(x, y, 40, radius, "yellow");
+            let me = mob[mob.length - 1];
+            me.stroke = "#00000055"
+            me.isShielded = true;
+            me.leaveBody = false;
+            me.isBadTarget = true;
+            me.isUnblockable = true;
+            me.isDropPowerUp = false;
+            me.showHealthBar = false;
+            me.collisionFilter.category = 0;
+            Matter.Body.setDensity(me, 0.0045);
+            me.onDeath = function() {
+                totalCoin++;
+            };
+            me.damageReduction = 0.35 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+            me.do = function() {
+                ctx.save()
+                ctx.translate(this.position.x, this.position.y)
+                ctx.rotate(Math.PI / 2 + 0.5)
+                ctx.strokeStyle = "#000000";
+                ctx.beginPath()
+                ctx.arc(0, 0, 30, -1, Math.PI, false)
+                ctx.moveTo(20, -5)
+                ctx.arc(0, 0, 20, -1, Math.PI, false)
+                ctx.lineWidth = 5;
+                ctx.stroke()
+                ctx.restore()
+                if (!simulation.isTimeSkipping) {
+                    const sine = Math.sin(simulation.cycle * 0.015)
+                    this.radius = 50 * (1 + 0.1 * sine)
+                    const sub = Vector.sub(player.position, this.position)
+                    const mag = Vector.magnitude(sub)
+                    const force = Vector.mult(Vector.normalise(sub), 0.000000003)
+                    if (mag < this.radius) { //heal player when inside radius
+                        if (m.health < 0.7) {
+                            m.damage(-0.001);
+                        } else if (m.health == 0.7 || m.health > 0.7) {
+                            this.death()
+                        }
+                        ctx.strokeStyle = "#00FFDD55";
+                        ctx.beginPath();
+                        ctx.arc(m.pos.x, m.pos.y, 34, 0, 2 * Math.PI);
+                        ctx.lineWidth = 6;
+                        ctx.stroke();
+                    }
+                    ctx.beginPath();
+                    ctx.arc(this.position.x, this.position.y, this.radius + 15, 0, 2 * Math.PI);
+                    ctx.strokeStyle = "#000"
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                };
+            }
+        }
+        const spike = function(x, y, angle = Math.PI * 0.5, radius = 50) {
+            mobs.spawn(x, y, 3, radius, "#454545");
+            let me = mob[mob.length - 1];
+            me.stroke = "transparent";
+            me.isDropPowerUp = false;
+            me.showHealthBar = false;
+            Matter.Body.setDensity(me, 50)
+            me.collisionFilter.mask = cat.player | cat.mob | cat.bullet;
+            me.constraint = Constraint.create({
+                pointA: {
+                    x: me.position.x,
+                    y: me.position.y
+                },
+                bodyB: me,
+                stiffness: 0,
+                damping: 0
+            });
+            me.do = function() {
+                if (this.health < 1) {
+                    this.health += 0.001; //regen
+                    simulation.drawList.push({
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: this.radius / 1.5,
+                        color: `rgba(0, 255, 20, ${Math.random() * 0.1})`,
+                        time: simulation.drawTime
+                    });
+                }
+                this.checkStatus();
+                Matter.Body.setAngle(me, angle);
+            };
+            me.onHit = function() {
+                m.damage(0.01) //extra damage
+                me.collisionFilter.mask = 0;
+                setTimeout(() => {
+                    me.collisionFilter.mask = cat.player | cat.mob | cat.bullet;
+                }, 1000);
+            }
+            me.onDeath = function() {
+                tech.addJunkTechToPool(0.1)
+            }
+            Composite.add(engine.world, me.constraint);
+        }
+
+        function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
+            outerRadius *= (1 + 0.1 * Math.sin(simulation.cycle * 0.15));
+            innerRadius *= (1 + 0.1 * Math.sin(simulation.cycle * 0.15));
+            var rot = Math.PI / 2 * 3;
+            var xs = cx;
+            var y = cy;
+            var step = Math.PI / spikes;
+
+            ctx.strokeSyle = "#000";
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - outerRadius)
+            for (i = 0; i < spikes; i++) {
+                xs = cx + Math.cos(rot) * outerRadius;
+                y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(xs, y)
+                rot += step
+
+                xs = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(xs, y)
+                rot += step
+            }
+            ctx.lineTo(cx, cy - outerRadius)
+            ctx.closePath();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = 'red';
+            ctx.stroke();
+            ctx.fillStyle = 'darkred';
+            ctx.fill();
+
+        }
+        const slimePit1 = level.hazard(7475, -75, 475, 100, 0.01)
+        const slimePit2 = level.hazard(11275, -75, 1450, 100, 0.01)
+        const slimePit3 = level.hazard(13400, -150, 3500, 200, 0.1)
+        const slimePit4 = level.hazard(20275, -400, 3475, 450, 0.01)
+        const slimePit5 = level.hazard(25300, -800, 20000, 650, 0.003)
+        const slimePit6 = level.hazard(47725, -425, 2500, 475, 0.01)
+        const slimePit7 = level.hazard(50975, -575, 4050, 650, 0.01)
+        const slimePit8 = level.hazard(54950, -950, 6650, 1050, 0.01)
+        const slimePit9 = level.hazard(63550, -75, 2150, 100, 0.01)
+        const slimePit10 = level.hazard(70875, -75, 1200, 100, 0.01)
+        const slimePit11 = level.hazard(72075, -50, 900, 75, 1)
+        const slimePit12 = level.hazard(75900, -75, 2575, 100, 0.01)
+        const slimePit13 = level.hazard(78475, -35, 2300, 70, 0.01)
+        const slimePit14 = level.hazard(82875, -75, 5100, 100, 0.1)
+
+        const drip1 = level.drip(32474, -2165, -800, 100);
+        const drip2 = level.drip(37750, -2165, -800, 100);
+        const drip3 = level.drip(43525, -2165, -800, 100);
+        const drip4 = level.drip(20475, -830, -375, 100);
+        const drip5 = level.drip(49960, -2315, -423, 200)
+        let textlogOne = 0;
+        let textlogTwo = 0;
+        let barThere = true;
+        let bar = document.createElement("div");
+        bar.style.cssText = `position: absolute; top: 80px; background-color: black; width: 80vw; z-index: 1; border-radius: 10px; height: 20px; left: 5em; right: 5em;`;
+        bar.innerHTML += `<div id="innerBar" style="height: 12px; border-radius: 10px; margin-top: 3px; margin-left: 4px; border: 1px solid gray;"></div>`
+        document.body.appendChild(bar);
+        let innerBar = document.getElementById("innerBar");
+        level.custom = () => {
+            level.exit.drawAndCheck();
+            if (barThere == true) {
+                innerBar.style.width = "calc(" + `${Math.max(0, Math.min(player.position.x/1310, 80))}` + "vw - 10px)";
+                innerBar.style.backgroundColor = m.eyeFillColor;
+            }
+            if (m.pos.x > 25360 && textlogOne == 0) {
+                simulation.makeTextLog(`<div><em>A stong force pushes you forward...</em></div>`)
+                textlogOne++;
+            }
+            if (m.pos.x < -3000) {
+                Matter.Body.setVelocity(player, {
+                    x: 99,
+                    y: 19
+                });
+
+                if (textlogTwo == 0)
+                    simulation.makeTextLog(`<div><em>A strong force pushes you away...</em></div>`);
+                textlogTwo++;
+            }
+            if (m.pos.y > 1055) {
+                Matter.Body.setPosition(player, { x: 0, y: -150 });
+                simulation.makeTextLog(`<div><em>There is nowhere to run...</em></div>`);
+                m.damage(0.1 * simulation.difficultyMode);
+            }
+            if (m.alive == false && barThere == true) {
+                document.body.removeChild(bar);
+                barThere = false;
+            }
+            ctx.beginPath()
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = "#000000";
+            ctx.moveTo(40, -1000)
+            ctx.arc(0, -1000, 40, 0, 2 * Math.PI)
+            ctx.stroke()
+            ctx.fillStyle = "#FF00FF55"
+            ctx.fillRect(89750, -1300, 800, 200)
+            ctx.fillRect(89750, -200, 800, 200)
+            ctx.fillRect(92050, -200, 800, 200)
+            ctx.fillRect(92050, -1675, 800, 575)
+            ctx.fillRect(93950, -350, 200, 350);
+            ctx.fillRect(95100, -1350, 150, 375);
+            ctx.fillRect(100900, -1325, 1175, 250);
+            ctx.fillRect(100900, -225, 1200, 250);
+            ctx.fillRect(98725, -1325, 450, 150);
+            ctx.fillRect(98725, -125, 450, 150);
+            ctx.beginPath()
+            //lines!
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = "#000000";
+            ctx.moveTo(7462.5, -250)
+            ctx.lineTo(7462.5, -170)
+            ctx.moveTo(7710, -330)
+            ctx.lineTo(7710, -250)
+            ctx.moveTo(7960, -420)
+            ctx.lineTo(7960, -320)
+            ctx.moveTo(13725, -250)
+            ctx.lineTo(13725, -180)
+            ctx.moveTo(14025, -350)
+            ctx.lineTo(14025, -280)
+            ctx.moveTo(14325, -450)
+            ctx.lineTo(14325, -380)
+            ctx.moveTo(14625, -550)
+            ctx.lineTo(14625, -480)
+            ctx.moveTo(14925, -650)
+            ctx.lineTo(14925, -580)
+            ctx.moveTo(15225, -750)
+            ctx.lineTo(15225, -680)
+            ctx.moveTo(15525, -850)
+            ctx.lineTo(15525, -780)
+            ctx.moveTo(15825, -950)
+            ctx.lineTo(15825, -880)
+            ctx.moveTo(16125, -1050)
+            ctx.lineTo(16125, -980)
+            ctx.moveTo(16425, -1150)
+            ctx.lineTo(16425, -1080)
+            ctx.moveTo(22600, -650)
+            ctx.lineTo(22600, -580)
+            ctx.moveTo(22800, -750)
+            ctx.lineTo(22800, -680)
+            ctx.moveTo(23000, -850)
+            ctx.lineTo(23000, -780)
+            ctx.moveTo(23200, -950)
+            ctx.lineTo(23200, -880)
+            ctx.moveTo(23400, -1050)
+            ctx.lineTo(23400, -980)
+            ctx.moveTo(23600, -1150)
+            ctx.lineTo(23600, -1080)
+            ctx.moveTo(29550, -1625)
+            ctx.lineTo(29550, -1425)
+            ctx.moveTo(32275, -2125)
+            ctx.lineTo(32275, -1925)
+            ctx.moveTo(33775, -2125)
+            ctx.lineTo(33775, -1925)
+            ctx.moveTo(32275, -350)
+            ctx.lineTo(32275, -550)
+            ctx.moveTo(33775, -350)
+            ctx.lineTo(33775, -550)
+            ctx.moveTo(35475, -650)
+            ctx.lineTo(35475, -450)
+            ctx.moveTo(37650, -2000)
+            ctx.lineTo(37650, -1800)
+            ctx.moveTo(39675, -400)
+            ctx.lineTo(39675, -600)
+            ctx.moveTo(40375, -500)
+            ctx.lineTo(40375, -700)
+            ctx.moveTo(41075, -600)
+            ctx.lineTo(41075, -800)
+            ctx.moveTo(43625, -1925)
+            ctx.lineTo(43625, -1725)
+            ctx.moveTo(50975, -1125)
+            ctx.lineTo(50975, -925)
+            ctx.moveTo(51387.5, -1325)
+            ctx.lineTo(51387.5, -1125)
+            ctx.moveTo(51787.5, -1525)
+            ctx.lineTo(51787.5, -1325)
+            ctx.moveTo(52187.5, -1725)
+            ctx.lineTo(52187.5, -1525)
+            ctx.moveTo(52587.5, -1725)
+            ctx.lineTo(52587.5, -1925)
+            ctx.moveTo(52987.5, -2125)
+            ctx.lineTo(52987.5, -1925)
+            ctx.moveTo(53387.5, -2325)
+            ctx.lineTo(53387.5, -2125)
+            ctx.moveTo(53787.5, -2525)
+            ctx.lineTo(53787.5, -2325)
+            ctx.moveTo(54187.5, -2725)
+            ctx.lineTo(54187.5, -2525)
+            ctx.moveTo(54587.5, -2925)
+            ctx.lineTo(54587.5, -2725)
+            ctx.moveTo(54987.5, -3125)
+            ctx.lineTo(54987.5, -2925)
+            ctx.moveTo(57500, -1925)
+            ctx.lineTo(57650, -1925)
+            ctx.moveTo(57520, -1845)
+            ctx.lineTo(57650, -1845)
+            ctx.moveTo(57500, -1925)
+            ctx.lineTo(57895 + 300, -1925)
+            ctx.moveTo(57520, -1845)
+            ctx.lineTo(57895 + 300, -1845)
+            ctx.moveTo(58525, -1725)
+            ctx.lineTo(58525 + 125, -1725)
+            ctx.moveTo(58525, -1625)
+            ctx.lineTo(58525 + 125, -1625)
+            ctx.moveTo(59000, -1725)
+            ctx.lineTo(59150, -1725)
+            ctx.moveTo(59150, -1625)
+            ctx.lineTo(59000, -1625)
+            ctx.moveTo(70875, -200)
+            ctx.lineTo(70875, -100)
+            ctx.moveTo(63700, -200)
+            ctx.lineTo(63800, -200)
+            ctx.moveTo(64000, -200)
+            ctx.lineTo(64100, -200)
+            ctx.moveTo(64675, -200)
+            ctx.lineTo(64575, -200)
+            ctx.moveTo(64875, -200)
+            ctx.lineTo(64975, -200)
+            ctx.moveTo(65025, -300)
+            ctx.lineTo(64925, -300)
+            ctx.moveTo(65225, -300)
+            ctx.lineTo(65325, -300)
+            ctx.moveTo(71275, -200)
+            ctx.lineTo(71275, -300)
+            ctx.moveTo(71675, -300)
+            ctx.lineTo(71675, -400)
+            ctx.moveTo(72075, -400)
+            ctx.lineTo(72075, -500)
+            ctx.moveTo(72425, -325)
+            ctx.lineTo(72425, -425)
+            ctx.moveTo(72675, -200)
+            ctx.lineTo(72675, -300)
+            ctx.moveTo(72925, -75)
+            ctx.lineTo(72925, -175)
+            ctx.moveTo(75225, -100)
+            ctx.lineTo(75225, -200)
+            ctx.moveTo(76600, -125)
+            ctx.lineTo(76600, -225)
+            ctx.moveTo(76900, -200)
+            ctx.lineTo(76900, -300)
+            ctx.moveTo(77175, -275)
+            ctx.lineTo(77175, -375)
+            ctx.moveTo(77475, -350)
+            ctx.lineTo(77475, -450)
+            ctx.moveTo(85575, -275)
+            ctx.lineTo(85575, -375)
+            ctx.moveTo(86000, -275)
+            ctx.lineTo(86000, -375)
+            ctx.moveTo(86275, -275)
+            ctx.lineTo(86275, -375)
+            ctx.moveTo(86950, -425)
+            ctx.lineTo(86950, -525)
+            ctx.moveTo(89700, -175)
+            ctx.lineTo(89700, -75)
+            ctx.moveTo(89700, -1125)
+            ctx.lineTo(89700, -1225)
+            ctx.moveTo(90600, -1225)
+            ctx.lineTo(90600, -1125)
+            ctx.moveTo(90600, -100)
+            ctx.lineTo(90600, -175)
+            ctx.moveTo(92000, -100)
+            ctx.lineTo(92000, -175)
+            ctx.moveTo(92900, -100)
+            ctx.lineTo(92900, -175)
+            ctx.moveTo(92900, -1225)
+            ctx.lineTo(92900, -1125)
+            ctx.moveTo(94500, -1475)
+            ctx.lineTo(94500, -1575)
+            ctx.moveTo(94700, -1475)
+            ctx.lineTo(94700, -1575)
+            ctx.moveTo(94900, -1475)
+            ctx.lineTo(94900, -1575)
+            ctx.moveTo(96125, -1500)
+            ctx.lineTo(96125, -1575)
+            ctx.moveTo(96550, -1575)
+            ctx.lineTo(96550, -1500)
+            ctx.moveTo(97000, -1475)
+            ctx.lineTo(97000, -1575)
+
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.strokeStyle = "#FFFFFF";
+            ctx.fillStyle = document.body.style.backgroundColor;
+            let cycles = Math.sin(simulation.cycle * 0.15)
+            ctx.moveTo(7482.5, -270)
+            ctx.arc(7462.5, -270, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI);
+            ctx.moveTo(7730, -350)
+            ctx.arc(7710, -350, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI);
+            ctx.moveTo(7980, -420)
+            ctx.arc(7960, -420, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(13745, -180)
+            ctx.arc(13725, -180, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(14045, -280)
+            ctx.arc(14025, -280, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(14345, -380)
+            ctx.arc(14325, -380, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(14645, -480)
+            ctx.arc(14625, -480, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(14945, -580)
+            ctx.arc(14925, -580, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(15245, -680)
+            ctx.arc(15225, -680, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(15545, -780)
+            ctx.arc(15525, -780, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(15845, -880)
+            ctx.arc(15825, -880, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(16145, -980)
+            ctx.arc(16125, -980, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(16445, -1080)
+            ctx.arc(16425, -1080, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(22620, -580);
+            ctx.arc(22600, -580, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(22820, -680);
+            ctx.arc(22800, -680, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(23020, -780);
+            ctx.arc(23000, -780, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(23220, -880);
+            ctx.arc(23200, -880, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(23420, -980);
+            ctx.arc(23400, -980, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(23620, -1080);
+            ctx.arc(23600, -1080, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(29570, -1425)
+            ctx.arc(29550, -1425, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(32295, -1925)
+            ctx.arc(32275, -1925, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(33795, -1925)
+            ctx.arc(33775, -1925, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(32295, -550)
+            ctx.arc(32275, -550, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(33795, -550)
+            ctx.arc(33775, -550, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(35495, -650)
+            ctx.arc(35475, -650, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(37670, -1800)
+            ctx.arc(37650, -1800, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(39695, -600)
+            ctx.arc(39675, -600, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(40395, -700)
+            ctx.arc(40375, -700, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(41095, -800)
+            ctx.arc(41075, -800, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(43645, -1725)
+            ctx.arc(43625, -1725, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(50995, -1125)
+            ctx.arc(50975, -1125, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(51407.5, -1325)
+            ctx.arc(51387.5, -1325, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(51807.5, -1525)
+            ctx.arc(51787.5, -1525, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(52207.5, -1725)
+            ctx.arc(52187.5, -1725, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(52607.5, -1925)
+            ctx.arc(52587.5, -1925, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(53007.5, -2125)
+            ctx.arc(52987.5, -2125, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(53407.5, -2325)
+            ctx.arc(53387.5, -2325, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(53807.5, -2525)
+            ctx.arc(53787.5, -2525, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(54207.5, -2725)
+            ctx.arc(54187.5, -2725, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(54607.5, -2925)
+            ctx.arc(54587.5, -2925, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(55007.5, -3125)
+            ctx.arc(54987.5, -3125, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(57520, -1925)
+            ctx.arc(57500, -1925, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(57520, -1845)
+            ctx.arc(57500, -1845, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(58525, -1725)
+            ctx.arc(58505, -1725, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(57895 + 300, -1925)
+            ctx.arc(57875 + 300, -1925, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(57895 + 300, -1845)
+            ctx.arc(57875 + 300, -1845, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(58525, -1625)
+            ctx.arc(58505, -1625, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(58690 + 375 + 125, -1625)
+            ctx.arc(58670 + 375 + 125, -1625, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(59190, -1725)
+            ctx.arc(59170, -1725, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(70895, -200)
+            ctx.arc(70875, -200, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(63720, -200)
+            ctx.arc(63700, -200, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(64120, -200)
+            ctx.arc(64100, -200, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(64595, -200)
+            ctx.arc(64575, -200, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(64995, -200)
+            ctx.arc(64975, -200, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(64945, -300)
+            ctx.arc(64925, -300, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(65345, -300)
+            ctx.arc(65325, -300, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(71295, -300)
+            ctx.arc(71275, -300, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(71695, -400)
+            ctx.arc(71675, -400, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(72095, -500)
+            ctx.arc(72075, -500, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(72445, -425)
+            ctx.arc(72425, -425, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(72695, -300)
+            ctx.arc(72675, -300, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(72945, -175)
+            ctx.arc(72925, -175, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(75245, -200)
+            ctx.arc(75225, -200, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(76620, -125)
+            ctx.arc(76600, -125, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(76920, -200)
+            ctx.arc(76900, -200, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(77195, -275)
+            ctx.arc(77175, -275, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(77495, -350)
+            ctx.arc(77475, -350, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(85595, -375)
+            ctx.arc(85575, -375, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(86020, -375)
+            ctx.arc(86000, -375, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(86295, -375)
+            ctx.arc(86275, -375, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(86970, -525)
+            ctx.arc(86950, -525, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(89720, -175)
+            ctx.arc(89700, -175, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(89720, -1125)
+            ctx.arc(89700, -1125, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(90620, -1125)
+            ctx.arc(90600, -1125, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(90620, -175)
+            ctx.arc(90600, -175, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(92020, -175)
+            ctx.arc(92000, -175, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(92920, -175)
+            ctx.arc(92900, -175, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(92920, -1125)
+            ctx.arc(92900, -1125, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(94520, -1575)
+            ctx.arc(94500, -1575, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(94720, -1575)
+            ctx.arc(94700, -1575, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(94920, -1575)
+            ctx.arc(94900, -1575, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(96145, -1575)
+            ctx.arc(96125, -1575, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(96570, -1500)
+            ctx.arc(96550, -1500, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.moveTo(97020, -1575)
+            ctx.arc(97000, -1575, 20 * (1 + 0.1 * cycles), 0, 2 * Math.PI)
+            ctx.fill()
+            ctx.stroke()
+            slimePit1.query()
+            slimePit2.query()
+            slimePit3.query()
+            slimePit4.query()
+            slimePit5.query()
+            slimePit5.query()
+            slimePit6.query()
+            slimePit7.query()
+            slimePit8.query()
+            slimePit9.query()
+            slimePit10.query()
+            slimePit11.query()
+            slimePit12.query()
+            slimePit13.query()
+            slimePit14.query()
+            drip1.draw()
+            drip2.draw()
+            drip3.draw()
+            drip4.draw()
+            drip5.draw()
+
+            ctx.fillStyle = "rgba(0,255,255,0.9)"
+            ctx.fillRect(25325, -1375, 75, 400)
+            ctx.fillRect(46425, -1350, 100, 500)
+            ctx.fillRect(87925, -725, 75, 450)
+
+            /*
+                if (player.position.x < 46470) {
+                    document.body.style.backgroundColor = "#DD00DD";
+                }
+            */
+            if (player.position.x > 25360 && player.position.x < 46470) {
+                Matter.Body.setVelocity(player, {
+                    x: player.velocity.x, //+ 0.2,
+                    y: player.velocity.y,
+                });
+                if (input.up) {
+                    Matter.Body.setVelocity(player, {
+                        x: player.velocity.x,
+                        y: player.velocity.y, //- 1,
+                    });
+                }
+                document.body.style.backgroundColor = "#fb3310"
+            } else if (player.position.x > 46470 && player.position.x < 61675) {
+                document.body.style.backgroundColor = "#7704FF"
+            } else if (player.position.x > 9700 && player.position.x < 46470) {
+                document.body.style.backgroundColor = "#7704FF"
+            } else if (player.position.x > 61675 && player.position.x < 87950) {
+                document.body.style.backgroundColor = "#DD1111"
+            } else if (player.position.x > 87950) {
+                document.body.style.backgroundColor = "#7704FF"
+            }
+
+            if (m.pos.y > -200 && 20350 < m.pos.x && m.pos.x < 23635) {
+                Matter.Body.setVelocity(player, {
+                    x: 0,
+                    y: 0
+                });
+                Matter.Body.setPosition(player, {
+                    x: 20250,
+                    y: -1000
+                });
+                // move bots
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType) {
+                        Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                            x: 250 * (Math.random() - 0.5),
+                            y: 250 * (Math.random() - 0.5)
+                        }));
+                        Matter.Body.setVelocity(bullet[i], {
+                            x: 0,
+                            y: 0
+                        });
+                    }
+                }
+                m.damage(0.1 * simulation.difficultyMode)
+                m.energy -= 0.1 * simulation.difficultyMode
+            }
+            if (m.pos.y > -150 && m.pos.x > 47770 && m.pos.x < 50130) {
+                Matter.Body.setVelocity(player, {
+                    x: 0,
+                    y: 0
+                });
+                Matter.Body.setPosition(player, {
+                    x: 47640,
+                    y: -900
+                });
+                // move bots
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType) {
+                        Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                            x: 250 * (Math.random() - 0.5),
+                            y: 250 * (Math.random() - 0.5)
+                        }));
+                        Matter.Body.setVelocity(bullet[i], {
+                            x: 0,
+                            y: 0
+                        });
+                    }
+                }
+                m.damage(0.1 * simulation.difficultyMode)
+                m.energy -= 0.1 * simulation.difficultyMode
+            }
+            if (m.pos.y > -150 && 50975 < m.pos.x && m.pos.x < 54925) {
+                Matter.Body.setVelocity(player, {
+                    x: 0,
+                    y: 0
+                });
+                Matter.Body.setPosition(player, {
+                    x: 50965,
+                    y: -1100
+                });
+                // move bots
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType) {
+                        Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                            x: 250 * (Math.random() - 0.5),
+                            y: 250 * (Math.random() - 0.5)
+                        }));
+                        Matter.Body.setVelocity(bullet[i], {
+                            x: 0,
+                            y: 0
+                        });
+                    }
+                }
+                m.damage(0.1 * simulation.difficultyMode)
+                m.energy -= 0.1 * simulation.difficultyMode
+            }
+            if (m.pos.y > -150 && 55025 < m.pos.x && m.pos.x < 57675) {
+                Matter.Body.setVelocity(player, {
+                    x: 0,
+                    y: 0
+                });
+                Matter.Body.setPosition(player, {
+                    x: 55148,
+                    y: -3072
+                });
+                // move bots
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType) {
+                        Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                            x: 250 * (Math.random() - 0.5),
+                            y: 250 * (Math.random() - 0.5)
+                        }));
+                        Matter.Body.setVelocity(bullet[i], {
+                            x: 0,
+                            y: 0
+                        });
+                    }
+                }
+                m.damage(0.1 * simulation.difficultyMode)
+                m.energy -= 0.1 * simulation.difficultyMode
+            }
+            if (m.pos.y > -150 && 57875 < m.pos.x && m.pos.x < 58700) {
+                Matter.Body.setVelocity(player, {
+                    x: 0,
+                    y: 0
+                });
+                Matter.Body.setPosition(player, {
+                    x: 57800,
+                    y: -2200
+
+                });
+                // move bots
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType) {
+                        Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                            x: 250 * (Math.random() - 0.5),
+                            y: 250 * (Math.random() - 0.5)
+                        }));
+                        Matter.Body.setVelocity(bullet[i], {
+                            x: 0,
+                            y: 0
+                        });
+                    }
+                }
+                m.damage(0.1 * simulation.difficultyMode)
+                m.energy -= 0.1 * simulation.difficultyMode
+            }
+            if (m.pos.y > -150 && 58875 < m.pos.x && m.pos.x < 61650) {
+                Matter.Body.setVelocity(player, {
+                    x: 0,
+                    y: 0
+                });
+                Matter.Body.setPosition(player, {
+                    x: 58850,
+                    y: -2025
+
+                });
+                // move bots
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType) {
+                        Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                            x: 250 * (Math.random() - 0.5),
+                            y: 250 * (Math.random() - 0.5)
+                        }));
+                        Matter.Body.setVelocity(bullet[i], {
+                            x: 0,
+                            y: 0
+                        });
+                    }
+                }
+                m.damage(0.1 * simulation.difficultyMode)
+                m.energy -= 0.1 * simulation.difficultyMode
+            }
+            if (m.pos.y > -1677 && 104650 < m.pos.x && m.pos.x < 105000 && barThere == true) {
+                Matter.Body.setVelocity(player, {
+                    x: 0,
+                    y: 0
+                });
+                Matter.Body.setPosition(player, {
+                    x: 132577,
+                    y: -300
+
+                });
+                // move bots
+                for (let i = 0; i < bullet.length; i++) {
+                    if (bullet[i].botType) {
+                        Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                            x: 250 * (Math.random() - 0.5),
+                            y: 250 * (Math.random() - 0.5)
+                        }));
+                        Matter.Body.setVelocity(bullet[i], {
+                            x: 0,
+                            y: 0
+                        });
+                    }
+                }
+                document.body.style.transitionDuration = "0ms";
+                document.body.style.backgroundColor = "#696969";
+                simulation.makeTextLog(`<div><em>You have earned: </em><b>` + Math.min(3, totalCoin) + `</b><em> tech</em></div>`)
+                if (barThere == true) { //only runs once
+                    document.body.removeChild(bar);
+                    for (let i = 0, len = Math.min(3, totalCoin); i < len; i++) powerUps.directSpawn(player.position.x, player.position.y, "tech");
+                    barThere = false;
+
+
+                }
+            }
+            ctx.fillStyle = "#FFFFFF53"
+            ctx.fillRect(57645, -2055, 385, 85)
+            ctx.fillRect(58645, -1880, 385, 85)
+            //chains	
+            ctx.strokeStyle = "#FF0000"
+            ctx.strokeRect(66975, -725, 25, 50)
+            ctx.strokeRect(67050, -725, 25, 50)
+            ctx.strokeRect(66975 + 1150, -725, 25, 50)
+            ctx.strokeRect(67050 + 1250, -725, 25, 50)
+            ctx.strokeRect(69162, -725, 25, 50)
+            ctx.strokeRect(69862, -725, 25, 50)
+            ctx.strokeRect(74412.5, -412.5, 25, 50)
+            ctx.strokeRect(74612.5, -412.5, 25, 50)
+            ctx.strokeRect(77962.5, -900, 25, 50)
+            ctx.strokeRect(78212.5, -775, 25, 50)
+            ctx.strokeRect(78462.5, -650, 25, 50)
+            ctx.strokeRect(81587.5, -725, 25, 50)
+            ctx.strokeRect(81687.5, -725, 25, 50)
+            ctx.strokeRect(81787.5, -725, 25, 50)
+            ctx.strokeRect(83037.5, -215, 25, 50)
+            ctx.strokeRect(83362.5, -215, 25, 50)
+            ctx.strokeRect(83687.5, -215, 25, 50)
+            ctx.strokeRect(84187.5, -315, 25, 50)
+            ctx.strokeStyle = "#FF000088"
+            ctx.strokeRect(66975, -850, 25, 50)
+            ctx.strokeRect(67050, -850, 25, 50)
+            ctx.strokeRect(66975 + 1150, -850, 25, 50)
+            ctx.strokeRect(67050 + 1250, -850, 25, 50)
+            ctx.strokeRect(69162, -850, 25, 50)
+            ctx.strokeRect(69862, -850, 25, 50)
+            ctx.strokeRect(74412.5, -525, 25, 50)
+            ctx.strokeRect(74612.5, -525, 25, 50)
+            ctx.strokeRect(77962.5, -985, 25, 50)
+            ctx.strokeRect(78212.5, -860, 25, 50)
+            ctx.strokeRect(78462.5, -735, 25, 50)
+            ctx.strokeRect(81587.5, -850, 25, 50)
+            ctx.strokeRect(81687.5, -850, 25, 50)
+            ctx.strokeRect(81787.5, -850, 25, 50)
+            ctx.strokeRect(83037.5, -315, 25, 50)
+            ctx.strokeRect(83362.5, -315, 25, 50)
+            ctx.strokeRect(83687.5, -315, 25, 50)
+            ctx.strokeRect(84187.5, -415, 25, 50)
+            ctx.strokeStyle = "#FF000044"
+            ctx.strokeRect(66975, -975, 25, 50)
+            ctx.strokeRect(67050, -975, 25, 50)
+            ctx.strokeRect(66975 + 1150, -975, 25, 50)
+            ctx.strokeRect(67050 + 1250, -975, 25, 50)
+            ctx.strokeRect(69162, -975, 25, 50)
+            ctx.strokeRect(69862, -975, 25, 50)
+            ctx.strokeRect(74412.5, -633, 25, 50)
+            ctx.strokeRect(74612.5, -633, 25, 50)
+            ctx.strokeRect(77962.5, -1075, 25, 50)
+            ctx.strokeRect(78212.5, -950, 25, 50)
+            ctx.strokeRect(78462.5, -825, 25, 50)
+            ctx.strokeRect(81587.5, -975, 25, 50)
+            ctx.strokeRect(81687.5, -975, 25, 50)
+            ctx.strokeRect(81787.5, -975, 25, 50)
+            ctx.strokeRect(83037.5, -415, 25, 50)
+            ctx.strokeRect(83362.5, -415, 25, 50)
+            ctx.strokeRect(83687.5, -415, 25, 50)
+            ctx.strokeRect(84187.5, -515, 25, 50)
+            ctx.strokeStyle = "#FF000011"
+            ctx.strokeRect(66975, -1100, 25, 50)
+            ctx.strokeRect(67050, -1100, 25, 50)
+            ctx.strokeRect(66975 + 1150, -1100, 25, 50)
+            ctx.strokeRect(67050 + 1250, -1100, 25, 50)
+            ctx.strokeRect(69162, -1100, 25, 50)
+            ctx.strokeRect(69862, -1100, 25, 50)
+            ctx.strokeRect(74412.5, -741, 25, 50)
+            ctx.strokeRect(74612.5, -741, 25, 50)
+            ctx.strokeRect(77962.5, -1165, 25, 50)
+            ctx.strokeRect(78212.5, -1040, 25, 50)
+            ctx.strokeRect(78462.5, -915, 25, 50)
+            ctx.strokeRect(81587.5, -1100, 25, 50)
+            ctx.strokeRect(81687.5, -1100, 25, 50)
+            ctx.strokeRect(81787.5, -1100, 25, 50)
+            ctx.strokeRect(83037.5, -515, 25, 50)
+            ctx.strokeRect(83362.5, -515, 25, 50)
+            ctx.strokeRect(83687.5, -515, 25, 50)
+            ctx.strokeRect(84187.5, -615, 25, 50)
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.strokeStyle = "#FF0000"
+            ctx.moveTo(66987.5, -680)
+            ctx.lineTo(66987.5, -625)
+            ctx.moveTo(67062.5, -680)
+            ctx.lineTo(67062.5, -625)
+            ctx.moveTo(66987.5 + 1150, -680)
+            ctx.lineTo(66987.5 + 1150, -625)
+            ctx.moveTo(67062.5 + 1250, -680)
+            ctx.lineTo(67062.5 + 1250, -625)
+            ctx.moveTo(69175, -680)
+            ctx.lineTo(69175, -625)
+            ctx.moveTo(69875, -680)
+            ctx.lineTo(69875, -625)
+            ctx.moveTo(74425, -290)
+            ctx.lineTo(74425, -370)
+            ctx.moveTo(74625, -290)
+            ctx.lineTo(74625, -370)
+            ctx.moveTo(77975, -790)
+            ctx.lineTo(77975, -855)
+            ctx.moveTo(78225, -665)
+            ctx.lineTo(78225, -730)
+            ctx.moveTo(78475, -540)
+            ctx.lineTo(78475, -605)
+            ctx.moveTo(81600, -680)
+            ctx.lineTo(81600, -625)
+            ctx.moveTo(81700, -680)
+            ctx.lineTo(81700, -625)
+            ctx.moveTo(81800, -680)
+            ctx.lineTo(81800, -625)
+            ctx.moveTo(83050, -100)
+            ctx.lineTo(83050, -170)
+            ctx.moveTo(83375, -100)
+            ctx.lineTo(83375, -170)
+            ctx.moveTo(83700, -100)
+            ctx.lineTo(83700, -170)
+            ctx.moveTo(84200, -200)
+            ctx.lineTo(84200, -270)
+            ctx.stroke()
+            ctx.strokeStyle = "#FF000099"
+            ctx.moveTo(66987.5, -810)
+            ctx.lineTo(66987.5, -715)
+            ctx.moveTo(67062.5, -810)
+            ctx.lineTo(67062.5, -715)
+            ctx.moveTo(66987.5 + 1150, -810)
+            ctx.lineTo(66987.5 + 1150, -715)
+            ctx.moveTo(67062.5 + 1250, -810)
+            ctx.lineTo(67062.5 + 1250, -715)
+            ctx.moveTo(69175, -810)
+            ctx.lineTo(69175, -715)
+            ctx.moveTo(69875, -810)
+            ctx.lineTo(69875, -715)
+            ctx.moveTo(74425, -405)
+            ctx.lineTo(74425, -480)
+            ctx.moveTo(74625, -405)
+            ctx.lineTo(74625, -480)
+            ctx.moveTo(77975, -890)
+            ctx.lineTo(77975, -940)
+            ctx.moveTo(78225, -765)
+            ctx.lineTo(78225, -815)
+            ctx.moveTo(78475, -640)
+            ctx.lineTo(78475, -690)
+            ctx.moveTo(81600, -810)
+            ctx.lineTo(81600, -715)
+            ctx.moveTo(81700, -810)
+            ctx.lineTo(81700, -715)
+            ctx.moveTo(81800, -810)
+            ctx.lineTo(81800, -715)
+            ctx.moveTo(83050, -210)
+            ctx.lineTo(83050, -270)
+            ctx.moveTo(83375, -210)
+            ctx.lineTo(83375, -270)
+            ctx.moveTo(83700, -210)
+            ctx.lineTo(83700, -270)
+            ctx.moveTo(84200, -310)
+            ctx.lineTo(84200, -370)
+            ctx.stroke()
+            ctx.strokeStyle = "#FF000044"
+            ctx.moveTo(66987.5, -930)
+            ctx.lineTo(66987.5, -845)
+            ctx.moveTo(67062.5, -930)
+            ctx.lineTo(67062.5, -845)
+            ctx.moveTo(66987.5 + 1150, -930)
+            ctx.lineTo(66987.5 + 1150, -845)
+            ctx.moveTo(67062.5 + 1250, -930)
+            ctx.lineTo(67062.5 + 1250, -845)
+            ctx.moveTo(69175, -930)
+            ctx.lineTo(69175, -845)
+            ctx.moveTo(69875, -930)
+            ctx.lineTo(69875, -845)
+            ctx.moveTo(74425, -515)
+            ctx.lineTo(74425, -590)
+            ctx.moveTo(74625, -515)
+            ctx.lineTo(74625, -590)
+            ctx.moveTo(77975, -975)
+            ctx.lineTo(77975, -1040)
+            ctx.moveTo(78225, -850)
+            ctx.lineTo(78225, -915)
+            ctx.moveTo(78475, -725)
+            ctx.lineTo(78475, -790)
+            ctx.moveTo(81600, -930)
+            ctx.lineTo(81600, -845)
+            ctx.moveTo(81700, -930)
+            ctx.lineTo(81700, -845)
+            ctx.moveTo(81800, -930)
+            ctx.lineTo(81800, -845)
+            ctx.moveTo(83050, -305)
+            ctx.lineTo(83050, -370)
+            ctx.moveTo(83375, -305)
+            ctx.lineTo(83375, -370)
+            ctx.moveTo(83700, -305)
+            ctx.lineTo(83700, -370)
+            ctx.moveTo(84200, -405)
+            ctx.lineTo(84200, -470)
+            ctx.stroke()
+            ctx.strokeStyle = "#FF000022"
+            ctx.moveTo(66987.5, -1060)
+            ctx.lineTo(66987.5, -965)
+            ctx.moveTo(67062.5, -1060)
+            ctx.lineTo(67062.5, -965)
+            ctx.moveTo(66987.5 + 1150, -1060)
+            ctx.lineTo(66987.5 + 1150, -965)
+            ctx.moveTo(67062.5 + 1250, -1060)
+            ctx.lineTo(67062.5 + 1250, -965)
+            ctx.moveTo(69175, -1060)
+            ctx.lineTo(69175, -965)
+            ctx.moveTo(69875, -1060)
+            ctx.lineTo(69875, -965)
+            ctx.moveTo(74425, -620)
+            ctx.lineTo(74425, -712.5)
+            ctx.moveTo(74625, -620)
+            ctx.lineTo(74625, -712.5)
+            ctx.moveTo(77975, -1075)
+            ctx.lineTo(77975, -1120)
+            ctx.moveTo(78225, -950)
+            ctx.lineTo(78225, -995)
+            ctx.moveTo(78475, -825)
+            ctx.lineTo(78475, -870)
+            ctx.moveTo(81600, -1060)
+            ctx.lineTo(81600, -965)
+            ctx.moveTo(81700, -1060)
+            ctx.lineTo(81700, -965)
+            ctx.moveTo(81800, -1060)
+            ctx.lineTo(81800, -965)
+            ctx.moveTo(83050, -405)
+            ctx.lineTo(83050, -470)
+            ctx.moveTo(83375, -405)
+            ctx.lineTo(83375, -470)
+            ctx.moveTo(83700, -405)
+            ctx.lineTo(83700, -470)
+            ctx.moveTo(84200, -505)
+            ctx.lineTo(84200, -570)
+            ctx.stroke()
+            let star = 95525;
+            for (let i = 0; i < 3; i++) {
+                drawStar(star, -1540, 5, 40, 15);
+                star += 200;
+            }
+            drawStar(97375, -1540, 5, 25, 10)
+            drawStar(97675, -1540, 5, 25, 10)
+            drawStar(97975, -1540, 5, 25, 10)
+            drawStar(98275, -1540, 5, 25, 10)
+            drawStar(98575, -1540, 5, 25, 10)
+
+        };
+        var gradient = ctx.createLinearGradient(0, 0, 175, 0);
+        gradient.addColorStop(0, "#7704FF00");
+        gradient.addColorStop(1, "#00FFFF");
+        level.customTopLayer = () => {
+            if (player.position.x > 25360 && player.position.x < 46470 && player.position.y > -2348 || player.position.x > 87995 && player.position.x < 103950 && player.position.y > -1350) {
+                player.force.x += 0.0045
+                m.airControl = () => {
+                    if (input.up) {
+                        player.force.y -= 0.02
+                    }
+                }
+                m.draw = () => {
+                    ctx.save();
+                    ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
+                    ctx.translate(player.position.x, player.position.y);
+                    ctx.rotate(player.angle);
+                    if (input.up) { //forward thrust drawing
+                        ctx.rotate(`${Math.max(-0.5, Math.min(m.angle, 0.5))}`)
+                    } else {
+                        ctx.rotate(`${Math.max(0.5, Math.min(m.angle, -0.5))}`)
+                    }
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                    ctx.fillStyle = m.bodyGradient
+                    ctx.fill();
+                    ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                    ctx.strokeStyle = "#333";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.beginPath()
+                    ctx.moveTo(30, 0)
+                    ctx.lineTo(60, 10)
+                    ctx.lineTo(60, 30)
+                    ctx.lineTo(20, 40)
+                    ctx.lineTo(0, 40)
+                    ctx.lineTo(-50, 60)
+                    ctx.lineTo(-50, 0)
+                    ctx.lineTo(-40, -40)
+                    ctx.lineTo(-40, -40)
+                    ctx.lineTo(-30, 10)
+                    ctx.lineTo(30, 10)
+                    ctx.lineTo(30, 0)
+                    ctx.fill();
+                    ctx.moveTo(-50, 30)
+                    ctx.lineTo(-60, 30)
+                    ctx.lineTo(-60, 0)
+                    ctx.lineTo(-50, 0)
+                    ctx.fill()
+                    ctx.stroke()
+                    ctx.restore();
+                }
+            } else {
+                m.draw = () => {
+                    m.drawDefault()
+                }
+                m.airControl = () => {
+                    if (input.up && m.buttonCD_jump + 20 < m.cycle && m.yOffWhen.stand > 23 && m.lastOnGroundCycle + 5 > m.cycle) m.jump()
+                    if (m.buttonCD_jump + 60 > m.cycle && !(input.up) && m.Vy < 0) {
+                        Matter.Body.setVelocity(player, {
+                            x: player.velocity.x,
+                            y: player.velocity.y * 0.94
+                        });
+                    }
+                    if (input.left) {
+                        if (player.velocity.x > -m.airSpeedLimit / player.mass / player.mass) player.force.x -= m.FxAir; // move player   left / a
+                    } else if (input.right) {
+                        if (player.velocity.x < m.airSpeedLimit / player.mass / player.mass) player.force.x += m.FxAir; //move player  right / d
+                    }
+                }
+            }
+            ctx.fillStyle = `rgba(68, 68, 68, ${Math.max(0.1,Math.min((-1400 - m.pos.y) / -100, 0.99))})`;
+            ctx.fillRect(91900, -1675, 12050, 375)
+            ctx.save()
+            ctx.translate(104700, -1675);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 175, 1675)
+            ctx.restore()
+        };
+        level.setPosToSpawn(0, -150); //spawn     
+        level.defaultZoom = 1800 //default I think
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#0150FF";
+        document.body.style.transitionDuration = "1500ms"; //smoother transitions, so that people don't complain
+        level.exit.x = 133150;
+        level.exit.y = -260;
+        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 20);
+        //ground? I forgot
+        spawn.mapRect(-5000, 0, 110000, 1000);
+        //*mountains to prevent player from running away*
+        spawn.mapVertex(-5775, -1330, "0 0 1000 7000 -1000 7000");
+        spawn.mapVertex(-7000, -330, "0 0 1000 4000 -1000 4000");
+        spawn.mapVertex(-10000, -330, "0 0 1000 4000 -1000 4000");
+        spawn.mapVertex(-9000, -330, "0 0 1000 4000 -1000 4000");
+        spawn.mapVertex(-7500, -330, "0 0 1000 4000 -1000 4000");
+        spawn.mapRect(-10000, 0, 3500, 1000);
+        //spawn.mapRect(-10000, -10000, 1000, 11000);
+        //hunter(-600, -150) 
+        //stage one --> 0%
+        //spikes
+        spike(3000, -30);
+        spike(5000, -30);
+        spike(4925, 0);
+        spike(7275, -30);
+        spike(7375, -30);
+        spike(9806, -30);
+        spike(9900, -30);
+        spike(12000, -130);
+        spike(13050, -255);
+        spike(17300, -1105);
+        spike(17400, -1105);
+        spike(17200, -1105);
+        spike(17500, -1105);
+        spike(18200, -1105);
+        spike(18100, -1105);
+        spike(18300, -1105);
+        spike(18400, -1105);
+        spike(19875, -1108);
+        spike(19975, -930);
+        spike(21000, -930);
+        spike(21725, -780);
+        spike(23600, -1230);
+        spawn.mapVertex(62000, -300, "0 1000 1000 1000 0 0");
+        //upside down spikes
+        let u = Math.PI * 1.5;
+        spike(18825, -1170, u);
+        spike(18925, -1170, u);
+        spike(19025, -1170, u);
+        spike(19125, -1170, u);
+        spike(19225, -1170, u);
+        spike(19325, -1170, u);
+        spike(49962.5, -2370, u);
+        spike(50062.5, -2370, u);
+        spike(50162.5, -2370, u);
+        spike(50262.5, -2370, u);
+        spike(50362.5, -2370, u);
+        //bottom of the flying part
+        spike(32375, -280);
+        spike(32475, -280);
+        spike(32575, -280);
+        spike(32675, -280);
+        spike(32775, -280);
+        spike(32875, -280);
+        spike(32975, -280);
+        spike(33075, -280);
+        spike(33175, -280);
+        spike(33275, -280);
+        spike(33375, -280);
+        spike(33475, -280);
+        spike(33575, -280);
+        spike(33675, -280);
+        spike(35575, -280);
+        spike(35675, -280);
+        spike(35775, -280);
+        spike(35875, -280);
+        spike(39775, -280);
+        spike(39875, -280);
+        spike(39975, -280);
+        spike(40075, -280);
+        spike(40175, -280);
+        spike(40275, -280);
+        spike(40475, -280);
+        spike(40575, -280);
+        spike(40675, -280);
+        spike(40775, -280);
+        spike(40875, -280);
+        spike(40975, -280);
+        //top of the flying part
+        spike(32375, -2193, u);
+        spike(32475, -2193, u);
+        spike(32575, -2193, u);
+        spike(32675, -2193, u);
+        spike(32775, -2193, u);
+        spike(32875, -2193, u);
+        spike(32975, -2193, u);
+        spike(33075, -2193, u);
+        spike(33175, -2193, u);
+        spike(33275, -2193, u);
+        spike(33375, -2193, u);
+        spike(33475, -2193, u);
+        spike(33575, -2193, u);
+        spike(33675, -2193, u);
+        spike(37750, -2193, u);
+        spike(37850, -2193, u);
+        spike(37950, -2193, u);
+        spike(38050, -2193, u);
+        spike(43025, -2193, u);
+        spike(43125, -2193, u);
+        spike(43225, -2193, u);
+        spike(43325, -2193, u);
+        spike(43425, -2193, u);
+        spike(43525, -2193, u);
+        spike(43725, -2193, u);
+        spike(43825, -2193, u);
+        spike(43925, -2193, u);
+        spike(44025, -2193, u);
+        spike(44125, -2193, u);
+        spike(44225, -2193, u);
+        spike(44325, -2193, u);
+        spike(44425, -2193, u);
+        spike(44525, -2193, u);
+        spike(44625, -2193, u);
+        spike(44725, -2193, u);
+        spike(44825, -2193, u);
+        //about 55% of the map 
+        spike(63375, -30);
+        spike(63475, -30);
+        spike(65775, -30);
+        spike(65875, -30);
+        spike(66975, -30);
+        spike(67075, -30);
+        spike(66975, -500, u);
+        spike(67075, -500, u);
+        spike(68125, -30);
+        spike(68225, -30);
+        spike(68325, -30);
+        spike(68125, -500, u);
+        spike(68225, -500, u);
+        spike(68325, -500, u);
+        spike(69175, -500, u);
+        spike(69175, -30);
+        spike(69875, -500, u);
+        spike(69875, -30);
+        spike(70675, -30);
+        spike(70775, -30);
+        spike(73725, -30);
+        spike(73825, -30);
+        spike(74425, -195, u);
+        spike(74525, -195, u);
+        spike(74625, -195, u);
+        spike(75125, -30);
+        spawn.mapVertex(78725, -466, "0 50 100 50 50 0"); //ocd still triggers from -467
+        spike(79300, -180);
+        spike(80800, -30);
+        spike(80900, -30);
+        spike(81600, -30);
+        spike(81700, -30);
+        spike(81800, -30);
+        spike(81600, -500, u);
+        spike(81700, -500, u);
+        spike(81800, -500, u);
+        spike(93425, -1430);
+        spike(93525, -1430);
+        spike(85800, -305);
+        spike(86475, -305);
+        spike(87150, -455);
+        spike(94025, -1570, u);
+        spike(94125, -1570, u);
+        spike(94500, -1430);
+        spike(94700, -1430);
+        spike(94900, -1430);
+        spike(94600, -1400);
+        spike(94800, -1400);
+        spike(94212.5, -1675, u);
+        spike(94287.5, -1675, u);
+        //even more 90%
+        spike(95525, -1400)
+        spike(95525, -1675, u)
+        spike(95625, -1400)
+        spike(95625, -1675, u)
+        spike(95725, -1400)
+        spike(95725, -1675, u)
+        spike(95825, -1400)
+        spike(95825, -1675, u)
+        spike(95925, -1400)
+        spike(95925, -1675, u)
+        spike(96025, -1400)
+        spike(96225, -1400)
+        spike(96650, -1675, u)
+        spike(96900, -1400)
+        spike(97150, -1675, u)
+        spike(98900, -1400)
+        spike(96975, -155)
+        spike(97075, -155)
+        spike(97175, -155)
+        spike(97275, -155)
+        spike(97375, -155)
+        spike(97475, -155)
+        spike(96975, -1170, u)
+        spike(97075, -1170, u)
+        spike(97175, -1170, u)
+        spike(97275, -1170, u)
+        spike(97375, -1170, u)
+        spike(97475, -1170, u)
+        spike(98700, -1070, u)
+        spike(98800, -1070, u)
+        spike(98900, -1070, u)
+        spike(99000, -1070, u)
+        spike(99100, -1070, u)
+        spike(99200, -1070, u)
+        spike(98700, -230)
+        spike(98800, -230)
+        spike(98900, -230)
+        spike(99000, -230)
+        spike(99100, -230)
+        spike(99200, -230)
+        spike(98975, -1400)
+        spike(99375, -1675, u)
+        spike(99300, -1675, u)
+        spike(99575, -1675, u)
+        spike(100000, -1400)
+        //actual stuff
+        spawn.mapRect(7425, -175, 75, 175);
+        spawn.mapRect(7675, -250, 75, 250);
+        spawn.mapRect(7925, -325, 75, 325);
+        spawn.mapRect(10625, -100, 725, 100);
+        spawn.mapRect(11625, -100, 725, 100);
+        spawn.mapRect(12650, -225, 800, 225);
+        spawn.mapRect(13675, -300, 100, 50);
+        spawn.mapRect(13975, -400, 100, 50);
+        spawn.mapRect(14275, -500, 100, 50);
+        spawn.mapRect(14575, -600, 100, 50);
+        spawn.mapRect(14875, -700, 100, 50);
+        spawn.mapRect(15175, -800, 100, 50);
+        spawn.mapRect(15475, -900, 100, 50);
+        spawn.mapRect(15775, -1000, 100, 50);
+        spawn.mapRect(16075, -1100, 100, 50);
+        spawn.mapRect(16375, -1200, 100, 50);
+        spawn.mapRect(16625, -1075, 350, 100);
+        spawn.mapRect(16800, -1075, 1825, 1125);
+        spawn.mapRect(17250, -1225, 200, 50);
+        spawn.mapRect(18150, -1225, 200, 50);
+        spawn.mapRect(18550, -975, 1050, 1025);
+        spawn.mapRect(19525, -1075, 400, 1125);
+        spawn.mapRect(18775, -1275, 600, 75);
+        spawn.mapRect(19825, -900, 500, 950);
+        spawn.mapRect(20150, -900, 375, 125);
+        spawn.mapRect(20750, -900, 300, 50);
+        spawn.mapRect(21225, -750, 550, 50);
+        spawn.mapRect(21950, -625, 450, 50);
+        spawn.mapRect(22550, -700, 100, 50);
+        spawn.mapRect(22750, -800, 100, 50);
+        spawn.mapRect(22950, -900, 100, 50);
+        spawn.mapRect(23150, -1000, 100, 50);
+        spawn.mapRect(23350, -1100, 100, 50);
+        spawn.mapRect(23550, -1200, 100, 50);
+        spawn.mapRect(23525, -975, 400, 100);
+        spawn.mapRect(23650, -975, 1825, 1025);
+        spawn.mapRect(23750, -2500, 625, 1125);
+        spawn.mapRect(24000, -2500, 1200, 1300);
+        spawn.mapRect(24900, -2500, 575, 1125);
+        spawn.mapRect(25425, -2500, 20000, 275);
+        spawn.mapRect(25425, -250, 20000, 300);
+        spawn.mapRect(29450, -2300, 200, 675);
+        spawn.mapRect(32225, -2225, 100, 100);
+        spawn.mapRect(33725, -2225, 100, 100);
+        spawn.mapRect(32225, -350, 100, 100);
+        spawn.mapRect(33725, -350, 100, 100);
+        spawn.mapRect(37600, -2225, 100, 225);
+        spawn.mapRect(35425, -475, 100, 225);
+        spawn.mapRect(39625, -400, 100, 150);
+        spawn.mapRect(40325, -500, 100, 250);
+        spawn.mapRect(41025, -600, 100, 350);
+        spawn.mapRect(43575, -2225, 100, 300);
+        spawn.mapRect(44875, -2500, 1675, 1225);
+        spawn.mapRect(44875, -950, 1675, 1000);
+        spawn.mapRect(46425, -825, 1400, 875);
+        spawn.mapRect(48075, -1100, 175, 1150);
+        spawn.mapRect(48575, -1300, 175, 1375);
+        spawn.mapRect(49075, -1500, 175, 1550);
+        spawn.mapRect(49575, -1700, 175, 975);
+        spawn.mapRect(49575, -500, 175, 550);
+        spawn.mapRect(50075, -1900, 175, 700);
+        spawn.mapRect(50075, -1000, 1000, 1000);
+        spawn.mapRect(49912.5, -2525, 500, 125);
+        spawn.mapRect(51300, -1200, 175, 1225);
+        spawn.mapRect(51700, -1400, 175, 1425);
+        spawn.mapRect(52100, -1600, 175, 1625);
+        spawn.mapRect(52500, -1800, 175, 1825);
+        spawn.mapRect(52900, -2000, 175, 2025);
+        spawn.mapRect(53300, -2200, 175, 2225);
+        spawn.mapRect(53700, -2400, 175, 2425);
+        spawn.mapRect(54100, -2600, 175, 2625);
+        spawn.mapRect(54500, -2800, 175, 2825);
+        spawn.mapRect(54900, -3000, 175, 3025);
+        spawn.mapRect(55050, -3000, 175, 75);
+        spawn.mapRect(55475, -2875, 250, 75);
+        spawn.mapRect(55900, -2625, 250, 75);
+        spawn.mapRect(56500, -2400, 375, 75);
+        spawn.mapRect(57200, -2200, 250, 75);
+        spawn.mapRect(57650, -2050, 375, 75);
+        spawn.mapRect(57650, -1970, 375, 1975);
+        spawn.mapRect(58650, -1875, 375, 75);
+        spawn.mapRect(58650, -1795, 375, 1975);
+        spawn.mapRect(59525, -1750, 175, 75);
+        spawn.mapRect(60125, -1600, 175, 75);
+        spawn.mapRect(60750, -1425, 175, 75);
+        spawn.mapRect(61250, -1225, 175, 75);
+        spawn.mapRect(61550, -1025, 225, 1125);
+        spawn.mapRect(63525, -100, 100, 100);
+        spawn.mapRect(63800, -225, 200, 50);
+        spawn.mapRect(64175, -100, 100, 100);
+        spawn.mapRect(64275, -100, 100, 100);
+        spawn.mapRect(64375, -100, 100, 100);
+        spawn.mapRect(64675, -225, 200, 50);
+        spawn.mapRect(65025, -325, 200, 50);
+        spawn.mapRect(65425, -100, 300, 100);
+        spawn.mapRect(66925, -650, 200, 120);
+        spawn.mapRect(68075, -650, 300, 120);
+        spawn.mapRect(69125, -650, 100, 120);
+        spawn.mapRect(69825, -650, 100, 120);
+        spawn.mapRect(70825, -100, 100, 100);
+        spawn.mapRect(71225, -200, 100, 200);
+        spawn.mapRect(71625, -300, 100, 300);
+        spawn.mapRect(72025, -400, 100, 400);
+        spawn.mapRect(72125, -400, 100, 50);
+        spawn.mapRect(72375, -325, 100, 50);
+        spawn.mapRect(72625, -200, 100, 50);
+        spawn.mapRect(72875, -75, 100, 50);
+        spawn.mapRect(74375, -300, 300, 75);
+        spawn.mapRect(75175, -100, 100, 100);
+        spawn.mapRect(75900, -150, 400, 50);
+        spawn.mapRect(76550, -250, 100, 50);
+        spawn.mapRect(76850, -325, 100, 50);
+        spawn.mapRect(77125, -400, 100, 50);
+        spawn.mapRect(77425, -475, 300, 50);
+        spawn.mapRect(77925, -400, 100, 100);
+        spawn.mapRect(78175, -275, 100, 100);
+        spawn.mapRect(78425, -150, 100, 100);
+        spawn.mapRect(78675, -50, 100, 100);
+        spawn.mapRect(77925, -800, 100, 100);
+        spawn.mapRect(78175, -675, 100, 100);
+        spawn.mapRect(78425, -550, 100, 100);
+        spawn.mapRect(78675, -450, 100, 100);
+        spawn.mapRect(78450, -100, 50, 125);
+        spawn.mapRect(79025, -150, 100, 50);
+        spawn.mapRect(79250, -150, 100, 50);
+        spawn.mapRect(79475, -150, 100, 50);
+        spawn.mapRect(79800, -225, 300, 50);
+        spawn.mapRect(80250, -150, 100, 50);
+        spawn.mapRect(80450, -100, 300, 50);
+        spawn.mapRect(81550, -650, 300, 120);
+        spawn.mapRect(82800, -100, 100, 100);
+        spawn.mapRect(82900, -100, 200, 50);
+        spawn.mapRect(83325, -100, 100, 50);
+        spawn.mapRect(83650, -100, 200, 50);
+        spawn.mapRect(83850, -100, 100, 100);
+        spawn.mapRect(83950, -200, 100, 200);
+        spawn.mapRect(84050, -200, 200, 50);
+        spawn.mapRect(84500, -350, 100, 50);
+        spawn.mapRect(84725, -250, 100, 50);
+        spawn.mapRect(84950, -150, 300, 50);
+        spawn.mapRect(85525, -275, 100, 50);
+        spawn.mapRect(85750, -275, 100, 50);
+        spawn.mapRect(85950, -275, 375, 50);
+        spawn.mapRect(86425, -275, 100, 50);
+        spawn.mapRect(86625, -275, 100, 50);
+        spawn.mapRect(86900, -425, 300, 50);
+        spawn.mapRect(87375, -275, 300, 50);
+        spawn.mapRect(87900, -300, 125, 300);
+        spawn.mapRect(87900, -1850, 125, 1150);
+        spawn.mapRect(87900, -1850, 17000, 175);
+        spawn.mapRect(104875, -1850, 125, 2850); //Last part
+        spawn.mapRect(87900, -1850, 4000, 550);
+        spawn.mapRect(89650, -100, 100, 100);
+        spawn.mapRect(89750, -200, 100, 100);
+        spawn.mapRect(89850, -300, 600, 100);
+        spawn.mapRect(90450, -200, 100, 100);
+        spawn.mapRect(90550, -100, 100, 100);
+        spawn.mapRect(89650, -1300, 100, 100);
+        spawn.mapRect(89750, -1200, 100, 100);
+        spawn.mapRect(89850, -1100, 600, 100);
+        spawn.mapRect(90450, -1200, 100, 100);
+        spawn.mapRect(90550, -1300, 100, 100);
+        spawn.mapRect(91950, -100, 100, 100);
+        spawn.mapRect(92050, -200, 100, 100);
+        spawn.mapRect(92150, -300, 600, 100);
+        spawn.mapRect(92750, -200, 100, 100);
+        spawn.mapRect(92850, -100, 100, 100);
+        spawn.mapRect(92050, -1200, 100, 100);
+        spawn.mapRect(92150, -1100, 600, 100);
+        spawn.mapRect(92750, -1200, 100, 100);
+        spawn.mapRect(92850, -1300, 100, 100);
+        spawn.mapRect(92950, -1400, 11000, 100);
+        spawn.mapRect(93975, -1700, 200, 100);
+        spawn.mapRect(96075, -1500, 100, 100);
+        spawn.mapRect(96500, -1675, 100, 100);
+        spawn.mapRect(96950, -1490, 1900, 100);
+        spawn.mapRect(97200, -1685, 1650, 100);
+        spawn.mapRect(93900, -300, 100, 300);
+        spawn.mapRect(93900, -400, 300, 100);
+        spawn.mapRect(94100, -300, 100, 300);
+        spawn.mapRect(95025, -1300, 100, 300);
+        spawn.mapRect(95025, -1000, 300, 100);
+        spawn.mapRect(95225, -1300, 100, 300);
+        spawn.mapRect(96925, -1300, 600, 100);
+        spawn.mapRect(96925, -125, 600, 125);
+        spawn.mapRect(98650, -1300, 100, 200);
+        spawn.mapRect(98650, -1200, 600, 100);
+        spawn.mapRect(99150, -1300, 100, 200);
+        spawn.mapRect(98650, -200, 100, 200);
+        spawn.mapRect(99150, -200, 100, 200);
+        spawn.mapRect(98650, -200, 600, 100);
+        spawn.mapRect(100825, -1300, 100, 300);
+        spawn.mapRect(100825, -1100, 1325, 100);
+        spawn.mapRect(102050, -1300, 100, 300);
+        spawn.mapRect(100825, -300, 100, 300);
+        spawn.mapRect(100825, -300, 1350, 100);
+        spawn.mapRect(102075, -300, 100, 300);
+        spawn.mapRect(99425, -1675, 100, 125);
+        spawn.mapRect(100050, -1525, 100, 125);
+
+        spawn.mapRect(132025, -225, 2325, 525);
+        spawn.mapRect(132025, -1450, 500, 1750);
+        spawn.mapRect(133875, -1475, 475, 1775);
+        spawn.mapRect(132025, -1925, 2325, 475);
+
+        simulation.enableConstructMode() //also remove when done
+        coin(50165.9, -1090)
+        coin(78725.4, -600)
+        coin(103830.0, -1473)
+        hunter(0, -1000)
+    },
     // ********************************************************************************************************
     // ********************************************************************************************************
     // ***************************************** training levels **********************************************
