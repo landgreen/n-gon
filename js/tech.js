@@ -966,7 +966,7 @@ const tech = {
             name: "zoospore vector",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Disease_vector' class="link">zoospore vector</a>`,
             descriptionFunction() {
-                return `after mobs <strong>die</strong><br>they have a <strong>+10%</strong> chance to grow ${b.guns[6].nameString('s')}`
+                return `after mobs <strong>die</strong> there is a <strong>+10%</strong> chance<br>they grow ${b.guns[6].nameString('s')}`
             },
             // description: "after mobs <strong>die</strong><br>they have a <strong>+10%</strong> chance to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
             maxCount: 9,
@@ -1003,6 +1003,24 @@ const tech = {
             },
             remove() {
                 tech.deathSkipTime = 0
+            }
+        },
+        {
+            name: "collider",
+            descriptionFunction() {
+                return `after mobs <strong>die</strong> there is a <strong>+33%</strong> chance <br>to change a <strong>power up</strong> into a different <strong>flavor</strong>`
+            },
+            maxCount: 3,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed: () => true,
+            requires: "",
+            effect() {
+                tech.collidePowerUps += 0.33333
+            },
+            remove() {
+                tech.collidePowerUps = 0
             }
         },
         {
@@ -3335,9 +3353,9 @@ const tech = {
             isNonRefundable: true,
             // isJunk: true,
             allowed() {
-                return !tech.isDeterminism
+                return !tech.isDeterminism && !tech.isBrainstorm
             },
-            requires: "not determinism",
+            requires: "not determinism, brainstorm",
             effect() {
                 tech.tooManyTechChoices = 1
                 // for (let i = 0; i < this.bonusResearch; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
@@ -8574,6 +8592,22 @@ const tech = {
             },
             remove() {}
         },
+        // {
+        //     name: "synchrotron",
+        //     descriptionFunction() {
+        //         return `<strong>power ups</strong> change into a different <strong>flavor</strong> after a boss dies`
+        //     },
+        //     maxCount: 3,
+        //     count: 0,
+        //     frequency: 1,
+        //     frequencyDefault: 1,
+        //     allowed: () => true,
+        //     requires: "",
+        //     effect() {
+        //     },
+        //     remove() {
+        //     }
+        // },
         {
             name: "return",
             description: "return to the introduction level<br>reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>",
@@ -11387,4 +11421,5 @@ const tech = {
     isZombieMobs: null,
     isSuperMine: null,
     sentryAmmo: null,
+    collidePowerUps: null,
 }

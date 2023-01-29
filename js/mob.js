@@ -1187,6 +1187,7 @@ const mobs = {
             leaveBody: true,
             isDropPowerUp: true,
             death() {
+                if (tech.collidePowerUps && Math.random() < tech.collidePowerUps && this.isDropPowerUp) powerUps.randomize(this.position) //needs to run before onDeath spawns power ups
                 this.onDeath(this); //custom death effects
                 this.removeConsBB();
                 this.alive = false; //triggers mob removal in mob[i].replace(i)
@@ -1207,9 +1208,6 @@ const mobs = {
                         }
                         requestAnimationFrame(cycle);
                     }
-
-
-
                     if (tech.iceIXOnDeath && this.isSlowed) {
                         for (let i = 0, len = 2 * Math.sqrt(Math.min(this.mass, 25)) * tech.iceIXOnDeath; i < len; i++) b.iceIX(3, Math.random() * 2 * Math.PI, this.position)
                     }

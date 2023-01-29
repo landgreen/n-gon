@@ -1,19 +1,37 @@
 ******************************************************** NEXT PATCH **************************************************
 
-level: lock
-  there is a way to escape the slime on the right side now
+exit doors take longer to open
+  it's nice to take a few seconds to relax between levels
+  please don't submit a bug report about this
 
-new community level!
-  stereoMadness by Richard0820
+plasma torch energy regen 6->10
+perfect diamagnetism energy regen 6->5
+
+a few more new images
+
+tech: collider - after a mob dies smash power ups and change the flavor of one of them
+  powerUps.randomize(where)
+    if there is a tech,field,gun it will split into 4 small power ups
+    else if there are at least 4 small power ups they have a 1/4 chance to combine into a tech, field, gun
+    else a random small power up will change
 
 *********************************************************** TODO *****************************************************
 
+diagetic UI Elements
+  ammo number?
+    doesn't text look choppy when camera moves?
+  health bar could be rendered similarly to energy bar
+    what about 2 bezier curves on left and right of player head that looks like 1/3 circleRadiusScale
+      what about 2 bezier both above player
+      as the total energy and health increases the curses could asymptotically approach a maximum length as max energy/health goes to infinity
+
+
 level: lock
-  replace vanish elements with doors to fit theme better
-    can you do a sideways door?
   should there be something in the top part of the map?
   add alt versions of left and right sides
   make flipped L/R version (after everything else is done)
+
+Tech: Drones always follow you mouse, never going to attack enemies or pick up power ups unless they are close to your mouse
 
 tech: add an selection option to all tech, gun, fields to do something
   set all mobs to 30% health, and stun all mobs
@@ -1149,9 +1167,8 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
     subtractive sculpture
     kinetic sculpture
   quantum stuff -- Hypertorus, Glowing Opal Pearlescent, Physics, Hydro-Dipping	Hydrodipped, Vija Celmins, Matt Molloy (photo of golden waves in the sky)
-***major themes missing***
 ***maybe redo***
-  heuristics
+  laser
   supercritical fission
 ***past style themes***
   field emitter - isometric, clean white robot spherical gun turret on bird legs, blender 3d, style of artstation and behance, Disney Pixar, cute 

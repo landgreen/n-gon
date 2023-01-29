@@ -30,12 +30,12 @@ const level = {
             // m.setField("perfect diamagnetism") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave   plasma torch
             // simulation.molecularMode = 2
             // m.damage(0.1);
-            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 10000
             // tech.giveTech("vacuum bomb")
-            // tech.giveTech("time crystals")
-            // tech.giveTech("ice-shot")
+            // for (let i = 0; i < 3; ++i) tech.giveTech("collider")
+            // tech.giveTech("diffuse beam")
             // for (let i = 0; i < 1; ++i) tech.giveTech("super ball")
             // tech.isFoamBall = true
             // for (let i = 0; i < 3; ++i) tech.giveTech("repeater")
@@ -421,7 +421,8 @@ const level = {
                 player.position.y < level.exit.y - 0 &&
                 player.velocity.y < 0.15
             ) {
-                level.exitCount += input.down ? 8 : 2
+                // level.exitCount += input.down ? 8 : 2
+                level.exitCount++
             } else if (level.exitCount > 0) {
                 level.exitCount -= 2
             }
@@ -3289,20 +3290,16 @@ const level = {
         spawn.mapRect(-1950, -3300, 8200, 1800); //roof
         spawn.mapRect(-250, -200, 1000, 300); // shelf
         spawn.mapRect(-250, -1700, 1000, 1250); // shelf roof
-        // spawn.blockDoor(710, -210);
         spawn.mapRect(705, -210, 25, 50);
         spawn.mapRect(725, -220, 25, 50);
         spawn.bodyRect(750, -125, 125, 125);
         spawn.bodyRect(875, -50, 50, 50);
-
 
         spawn.mapRect(5400, -1700, 400, 1150); //right wall
         spawn.mapRect(5400, -300, 400, 400); //right wall
         spawn.mapRect(5700, -3300, 1800, 5100); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
         spawn.mapRect(5403, -650, 400, 450); //blocking exit
-        // spawn.secondaryBossChance(4800, -500) //no bonus bosses on final level
-
         if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) { //pacifist run
             for (let i = 0; i < 250; i++) spawn.starter(1000 + 4000 * Math.random(), -1500 * Math.random())
         } else {
@@ -14703,7 +14700,7 @@ const level = {
         spawn.mapRect(133875, -1475, 475, 1775);
         spawn.mapRect(132025, -1925, 2325, 475);
 
-        simulation.enableConstructMode() //also remove when done
+        // simulation.enableConstructMode() //also remove when done
         coin(50165.9, -1090)
         coin(78725.4, -600)
         coin(103830.0, -1473)

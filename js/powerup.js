@@ -1385,6 +1385,58 @@ const powerUps = {
     //     }
     //     return 0
     // },
+    randomize(where) { //makes a random power up convert into a random different power up
+        //put 10 power ups close together
+        const len = Math.min(10, powerUp.length)
+        for (let i = 0; i < len; i++) { //collide the first 10 power ups
+            const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
+            Matter.Body.setPosition(powerUp[i], Vector.add(where, Vector.mult(unit, 20 + 25 * Math.random())));
+            Matter.Body.setVelocity(powerUp[i], Vector.mult(unit, 20));
+        }
+
+        //count big power ups and small power ups
+        let options = ["heal", "research", "ammo"]
+        if (m.coupling) options.push("coupling")
+        if (tech.isBoostPowerUps) options.push("boost")
+        let bigIndexes = []
+        let smallIndexes = []
+        for (let i = 0; i < powerUp.length; i++) {
+            if (powerUp[i].name === "tech" || powerUp[i].name === "gun" || powerUp[i].name === "field") {
+                bigIndexes.push(i)
+            } else {
+                smallIndexes.push(i)
+            }
+        }
+        if (bigIndexes.length > 0) {
+            // console.log("at least 1 big will always spilt")
+            const index = bigIndexes[Math.floor(Math.random() * bigIndexes.length)]
+            for (let i = 0; i < 4; i++) powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
+
+            Matter.Composite.remove(engine.world, powerUp[index]);
+            powerUp.splice(index, 1);
+        } else if (smallIndexes.length > 3 && Math.random() < 0.25) {
+            // console.log("no big, at least 4 small can combine")
+            for (let j = 0; j < 4; j++) {
+                for (let i = 0; i < powerUp.length; i++) {
+                    if (powerUp[i].name === "heal" || powerUp[i].name === "research" || powerUp[i].name === "ammo" || powerUp[i].name === "coupling" || powerUp[i].name === "boost") {
+                        Matter.Composite.remove(engine.world, powerUp[i]);
+                        powerUp.splice(i, 1);
+                        break
+                    }
+                }
+            }
+
+            options = ["tech", "gun", "field"]
+            powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
+        } else if (smallIndexes.length > 0) {
+            // console.log("no big, at least 1 small will swap flavors")
+            const index = Math.floor(Math.random() * powerUp.length)
+            options = options.filter(e => e !== powerUp[index].name); //don't repeat the current power up type
+            powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
+            Matter.Composite.remove(engine.world, powerUp[index]);
+            powerUp.splice(index, 1);
+        }
+    },
     directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
         let index = powerUp.length;
         target = powerUps[target];
