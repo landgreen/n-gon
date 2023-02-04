@@ -1,37 +1,49 @@
 ******************************************************** NEXT PATCH **************************************************
 
-exit doors take longer to open
-  it's nice to take a few seconds to relax between levels
-  please don't submit a bug report about this
+some tech come with a skin - but only 1 at a time
+  tech aperture -  skin, damage cycles between -25% and +125%
+  tungsten carbide - skin, +100->150 max health
+  mass-energy equivalence - skin, gets a bit more benefit from defense
+  CPT symmetry - skin, costs a bit less energy
+  flip-flop, and relay switch and a few JUNK tech are also skins
 
-plasma torch energy regen 6->10
-perfect diamagnetism energy regen 6->5
-
-a few more new images
-
-tech: collider - after a mob dies smash power ups and change the flavor of one of them
-  powerUps.randomize(where)
-    if there is a tech,field,gun it will split into 4 small power ups
-    else if there are at least 4 small power ups they have a 1/4 chance to combine into a tech, field, gun
-    else a random small power up will change
+some new images
+bug fixes
 
 *********************************************************** TODO *****************************************************
+
+tech: if a needle hits 2 mobs reset your fire CD
+  and maybe to 2x damage for each consecutive mob hit?
+
+tech for lens - you can only fire through the lens and some buff? damage or energy?
+  this was in todo.txt on GitHub. I think it should be 'laser never drains energy, but you can only fire through lens and +90° lens arc, +100% damage (also you can not gain compound lens with this upgrade)
+
+Tech: Von Neuman probes - Drones will consume blocks to replicate themselves
+  it's a little too similar to the drone repair tech, but I kinda like it better.  drones that eat blocks and spit out more drones is cool 
+
+new boss level like reactor with a very very big boss
+  mechanics around a very big boss?
+    maybe the boss moves into rooms so you have to do platforming to clear the room before the boss enters the room
+    boss can destroy blocks and smaller map elements
+    
+tech - after standing wave runs out of energy from blocking, gain a buff
+  buff: defense, damage?
+  aoe damage like railgun
+    push mobs away
 
 diagetic UI Elements
   ammo number?
     doesn't text look choppy when camera moves?
   health bar could be rendered similarly to energy bar
     what about 2 bezier curves on left and right of player head that looks like 1/3 circleRadiusScale
-      what about 2 bezier both above player
+      rotate the curves as the head rotates
+    what about 2 bezier both above player
       as the total energy and health increases the curses could asymptotically approach a maximum length as max energy/health goes to infinity
-
 
 level: lock
   should there be something in the top part of the map?
   add alt versions of left and right sides
   make flipped L/R version (after everything else is done)
-
-Tech: Drones always follow you mouse, never going to attack enemies or pick up power ups unless they are close to your mouse
 
 tech: add an selection option to all tech, gun, fields to do something
   set all mobs to 30% health, and stun all mobs
@@ -42,8 +54,6 @@ tech: if you die inside MACHO, heal to full and delete the MACHO for the rest of
   MACHO gives less defense
 
 tech: after bosses die<br>they spawn a research
-
-tech: neutrino oscillation - when a mob dies there is a __% chance to convert a random existing power up to a different type
 
 tech: +8% damage each time you kill a boss
 
@@ -65,11 +75,6 @@ tech - only allow 1,2 turrets at time?
 tech: Bose Einstein condensate - freezes enemies in pilot wave, and drains some energy?
 
 super-bot
-
-tech - after standing wave runs out of energy from blocking, gain a buff
-  buff: defense, damage?
-  aoe damage like railgun
-    push mobs away
 
 make super balls with Zectron deflectable with field
   but is there a simple way to do this?
@@ -1172,6 +1177,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   supercritical fission
 ***past style themes***
   field emitter - isometric, clean white robot spherical gun turret on bird legs, blender 3d, style of artstation and behance, Disney Pixar, cute 
+      damaged dirty white robot spherical gun turret on bird legs in the style of Solarpunk
   standing wave - concentric transparent blue geometric circles science  
   perfect diamagnetism - physics magnetic field chalk diagram 
   time dilation - graphic of a hyperbolic equation Luminogram

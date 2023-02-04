@@ -220,6 +220,7 @@ const tech = {
     damage: 1, //used for tech changes to player damage that don't have complex conditions
     damageFromTech() {
         let dmg = tech.damage //m.fieldDamage
+        if (tech.isDilate) dmg *= 1.25 + Math.sin(m.cycle * 0.01)
         if (tech.isGunChoice && tech.buffedGun === b.inventoryGun) dmg *= 1 + 0.31 * b.inventory.length
         if (powerUps.boost.endCycle > m.cycle) dmg *= 1 + powerUps.boost.damage
         if (m.coupling && (m.fieldMode === 0 || m.fieldMode === 5)) dmg *= 1 + 0.15 * m.coupling
@@ -733,10 +734,10 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return true
+                return this.count > 0
             },
             requires: "",
-            effect() { // good with melee builds, content skipping builds
+            effect() {
                 tech.squirrelFx += 0.25;
                 tech.squirrelJump += 0.1;
                 m.setMovement()
@@ -1008,7 +1009,7 @@ const tech = {
         {
             name: "collider",
             descriptionFunction() {
-                return `after mobs <strong>die</strong> there is a <strong>+33%</strong> chance <br>to change a <strong>power up</strong> into a different <strong>flavor</strong>`
+                return `after mobs <strong>die</strong> there is a <strong>+33%</strong> chance <br>to smash <strong>power ups</strong> into a different <strong>flavor</strong>`
             },
             maxCount: 3,
             count: 0,
@@ -1896,6 +1897,7 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
+            isSkin: true,
             allowed() {
                 return !tech.isRelay
             },
@@ -1912,7 +1914,7 @@ const tech = {
                     }
                 }
                 if (!m.isShipMode) {
-                    m.draw = m.drawFlipFlop
+                    m.skin.flipFlop()
                 }
             },
             remove() {
@@ -1927,6 +1929,7 @@ const tech = {
                     }
                 }
                 m.eyeFillColor = 'transparent'
+                m.resetSkin();
             }
         },
         {
@@ -2047,11 +2050,13 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
+            isSkin: true,
             allowed() {
                 return !tech.isFlipFlop
             },
             requires: "not flip-flop",
             effect() {
+                m.isAltSkin = true
                 tech.isRelay = true //do you have this tech?
                 if (!tech.isFlipFlopOn) {
                     tech.isFlipFlopOn = true //what is the state of flip-Flop?
@@ -2063,7 +2068,7 @@ const tech = {
                     }
                 }
                 if (!m.isShipMode) {
-                    m.draw = m.drawFlipFlop
+                    m.skin.flipFlop()
                 }
             },
             remove() {
@@ -2078,6 +2083,7 @@ const tech = {
                     }
                 }
                 m.eyeFillColor = 'transparent'
+                m.resetSkin();
             }
         },
         {
@@ -2293,21 +2299,24 @@ const tech = {
             // description: "<strong>charge</strong>, <strong>parity</strong>, and <strong>time</strong> invert to undo <strong class='color-defense'>defense</strong><br><strong class='color-rewind'>rewind</strong> <strong>(1.5—5)</strong> seconds for <strong>(66—220)</strong> <strong class='color-f'>energy</strong>",
             // description: "after losing <strong class='color-h'>health</strong>, if you have <strong>full</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>44</strong> <strong class='color-f'>energy</strong> per second",
             descriptionFunction() {
-                return `after losing <strong class='color-h'>health</strong>, if you have <strong>${(100*Math.min(100,m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>44</strong> <strong class='color-f'>energy</strong> per second`
+                return `after losing <strong class='color-h'>health</strong>, if you have <strong>${(100*Math.min(100,m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>40</strong> <strong class='color-f'>energy</strong> per second`
             },
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
+            isSkin: true,
             allowed() {
-                return m.fieldUpgrades[m.fieldMode].name !== "standing wave" && !tech.isRewindField && !tech.isEnergyHealth
+                return !m.isAltSkin && m.fieldUpgrades[m.fieldMode].name !== "standing wave" && !tech.isRewindField && !tech.isEnergyHealth
             },
-            requires: "not standing wave, max energy reduction, retrocausality, mass-energy",
+            requires: "not skinned, standing wave, max energy reduction, retrocausality, mass-energy",
             effect() {
                 tech.isRewindAvoidDeath = true;
+                m.skin.CPT()
             },
             remove() {
                 tech.isRewindAvoidDeath = false;
+                m.resetSkin();
             }
         },
         {
@@ -2371,13 +2380,14 @@ const tech = {
         {
             name: "mass-energy equivalence",
             // description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>√ of <strong class='color-defense'>defense</strong> <strong>reduction</strong> reduces max <strong class='color-f'>energy</strong>",
-            description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>exponentially <strong>reduced</strong> <strong class='color-defense'>defense</strong> <em>(~ x^0.1)</em>",
+            description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>exponentially <strong>reduced</strong> <strong class='color-defense'>defense</strong> <em>(~ x^0.12)</em>",
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
+            isSkin: true,
             allowed() {
-                return !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isAnnihilation //&& !tech.isAmmoFromHealth && !tech.isRewindGun
+                return !m.isAltSkin && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isAnnihilation //&& !tech.isAmmoFromHealth && !tech.isRewindGun
             },
             requires: "not piezoelectricity, CPT, annihilation",
             effect() {
@@ -2386,8 +2396,9 @@ const tech = {
                 document.getElementById("health-bg").style.display = "none"
                 document.getElementById("dmg").style.backgroundColor = "#0cf";
                 tech.isEnergyHealth = true;
-                simulation.mobDmgColor = "rgba(14, 190, 235,0.7)" //"#0cf"
+                simulation.mobDmgColor = "rgba(0, 255, 255,0.6)" //"#0cf"
                 m.displayHealth();
+                m.skin.energy();
             },
             remove() {
                 if (tech.isEnergyHealth) {
@@ -2400,6 +2411,7 @@ const tech = {
                     m.displayHealth();
                 }
                 tech.isEnergyHealth = false;
+                m.resetSkin();
             }
         },
         {
@@ -2850,23 +2862,26 @@ const tech = {
         },
         {
             name: "tungsten carbide",
-            description: "<strong>+100</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
+            description: "<strong>+150</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
+            isSkin: true,
             allowed() {
-                return true
+                return !m.isAltSkin
             },
-            requires: "",
+            requires: "not skin",
             effect() {
                 tech.isFallingDamage = true;
                 m.setMaxHealth();
                 m.addHealth(1 / simulation.healScale)
+                m.skin.tungsten()
             },
             remove() {
                 tech.isFallingDamage = false;
                 m.setMaxHealth();
+                m.resetSkin();
             }
         },
         {
@@ -3493,6 +3508,27 @@ const tech = {
                     tech.damage /= this.damage
                     if (this.refundAmount > 0) tech.removeJunkTechFromPool(this.refundAmount)
                 }
+            }
+        },
+        {
+            name: "aperture",
+            description: "your damage cycles every <strong>6</strong> seconds<br>between <strong>-75%</strong> and <strong>+125%</strong> <strong class='color-d'>damage</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            isSkin: true,
+            allowed() {
+                return !m.isAltSkin
+            },
+            requires: "not skinned",
+            effect() {
+                tech.isDilate = true
+                m.skin.dilate()
+            },
+            remove() {
+                tech.isDilate = false
+                m.resetSkin();
             }
         },
         {
@@ -10063,30 +10099,25 @@ const tech = {
             },
             remove() {}
         },
-        // {
-        //     name: "inverted input",
-        //     description: "left input becomes right and up input becomes down",
-        //     maxCount: 9,
-        //     count: 0,
-        //     frequency: 0,
-        //     isNonRefundable: true,
-        //     isExperimentHide: true,
-        //     isJunk: true,
-        //     allowed() {
-        //         return true
-        //     },
-        //     requires: "",
-        //     effect() {
-        //         const left = input.key.left
-        //         input.key.left = input.key.right
-        //         input.key.right = left
-
-        //         const up = input.key.up
-        //         input.key.up = input.key.down
-        //         input.key.down = up
-        //     },
-        //     remove() {}
-        // },
+        {
+            name: "stubs",
+            description: "no knees or toes are drawn on the player",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isSkin: true,
+            isJunk: true,
+            allowed() {
+                return !m.isShipMode
+            },
+            requires: "",
+            effect() {
+                m.skin.stubs()
+            },
+            remove() {
+                m.resetSkin();
+            }
+        },
         {
             name: "Sleipnir",
             description: "grow more legs",
@@ -10094,44 +10125,17 @@ const tech = {
             count: 0,
             frequency: 0,
             isSkin: true,
-            isNonRefundable: true,
             isJunk: true,
             allowed() {
                 return !m.isShipMode
             },
             requires: "",
             effect() {
-                m.draw = function() {
-                    ctx.fillStyle = m.fillColor;
-                    m.walk_cycle += m.flipLegs * m.Vx;
-
-                    //draw body
-                    ctx.save();
-                    ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
-                    ctx.translate(m.pos.x, m.pos.y);
-                    for (let i = 0; i < 16; i++) {
-                        m.calcLeg(Math.PI * i / 8, -3 * i / 16)
-                        m.drawLeg("#444")
-                    }
-                    ctx.rotate(m.angle);
-
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                    ctx.fillStyle = m.bodyGradient
-                    ctx.fill();
-                    ctx.arc(15, 0, 4, 0, 2 * Math.PI);
-                    ctx.strokeStyle = "#333";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                    // ctx.beginPath();
-                    // ctx.arc(15, 0, 3, 0, 2 * Math.PI);
-                    // ctx.fillStyle = '#0cf';
-                    // ctx.fill()
-                    ctx.restore();
-                    m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
-                }
+                m.skin.Sleipnir()
             },
-            remove() {}
+            remove() {
+                m.resetSkin();
+            }
         },
         {
             name: "diegesis",
@@ -10140,39 +10144,17 @@ const tech = {
             count: 0,
             frequency: 0,
             isSkin: true,
-            isNonRefundable: true,
             isJunk: true,
             allowed() {
                 return !m.isShipMode
             },
             requires: "",
             effect() {
-                m.draw = function() {
-                    ctx.fillStyle = m.fillColor;
-                    m.walk_cycle += m.flipLegs * m.Vx;
-
-                    ctx.save();
-                    ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
-                    ctx.translate(m.pos.x, m.pos.y);
-                    m.calcLeg(Math.PI, -3);
-                    m.drawLeg("#4a4a4a");
-                    m.calcLeg(0, 0);
-                    m.drawLeg("#333");
-                    ctx.rotate(m.angle - (m.fireCDcycle !== Infinity ? m.flipLegs * 0.25 * Math.pow(Math.max(m.fireCDcycle - m.cycle, 0), 0.5) : 0));
-
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                    ctx.fillStyle = m.bodyGradient
-                    ctx.fill();
-                    ctx.arc(15, 0, 4, 0, 2 * Math.PI);
-                    ctx.strokeStyle = "#333";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                    ctx.restore();
-                    m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
-                }
+                m.skin.diegesis()
             },
-            remove() {}
+            remove() {
+                m.resetSkin();
+            }
         },
         {
             name: "🐱",
@@ -10181,80 +10163,17 @@ const tech = {
             count: 0,
             frequency: 0,
             isSkin: true,
-            isNonRefundable: true,
             isJunk: true,
             allowed() {
                 return !m.isShipMode
             },
             requires: "",
             effect() {
-                m.draw = function() {
-                    ctx.fillStyle = m.fillColor;
-                    m.walk_cycle += m.flipLegs * m.Vx;
-                    ctx.save();
-                    ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5
-                    ctx.translate(m.pos.x, m.pos.y);
-                    m.calcLeg(Math.PI, -3);
-                    m.drawLeg("#4a4a4a");
-
-
-                    if (!(m.angle > -Math.PI / 2 && m.angle < Math.PI / 2)) {
-                        ctx.scale(1, -1);
-                        ctx.rotate(Math.PI);
-                    }
-                    ctx.beginPath();
-                    ctx.moveTo(-30, 0);
-                    ctx.bezierCurveTo(-65, -75,
-                        -5, 150 + (5 * Math.sin(simulation.cycle / 10)),
-                        -70 + (10 * Math.sin(simulation.cycle / 10)), 0 + (10 * Math.sin(simulation.cycle / 10)));
-                    ctx.strokeStyle = "#333";
-                    ctx.lineWidth = 4;
-                    ctx.stroke();
-
-                    if (!(m.angle > -Math.PI / 2 && m.angle < Math.PI / 2)) {
-                        ctx.scale(1, -1);
-                        ctx.rotate(0 - Math.PI);
-                    }
-                    m.calcLeg(0, 0);
-                    m.drawLeg("#333");
-
-                    ctx.rotate(m.angle);
-                    if (!(m.angle > -Math.PI / 2 && m.angle < Math.PI / 2)) ctx.scale(1, -1);
-                    ctx.beginPath();
-                    ctx.moveTo(5, -30);
-                    ctx.lineTo(20, -40);
-                    ctx.lineTo(20, -20);
-                    ctx.lineWidth = 2;
-                    ctx.fillStyle = "#f3f";
-                    ctx.fill();
-                    ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                    ctx.fillStyle = m.bodyGradient
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.moveTo(19, 0);
-                    ctx.arc(15, 0, 4, Math.PI, 2 * Math.PI);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(24.3, 6, 5, Math.PI * 2, Math.PI);
-                    ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.moveTo(30, 6);
-                    ctx.lineTo(32, 0);
-                    ctx.lineTo(26, 0);
-                    ctx.lineTo(30, 6);
-                    ctx.fillStyle = "#f3f";
-                    ctx.fill();
-                    ctx.stroke();
-
-                    ctx.restore();
-                    m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
-                }
+                m.skin.cat();
             },
-            remove() {}
+            remove() {
+                m.resetSkin();
+            }
         },
         {
             name: "n-gone",
@@ -10263,7 +10182,6 @@ const tech = {
             count: 0,
             frequency: 0,
             isSkin: true,
-            isNonRefundable: true,
             isJunk: true,
             allowed() {
                 return true
@@ -10272,7 +10190,29 @@ const tech = {
             effect() {
                 m.draw = () => {}
             },
-            remove() {}
+            remove() {
+                m.resetSkin();
+            }
+        },
+        {
+            name: "pareidolia",
+            description: "don't",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isSkin: true,
+            isNonRefundable: true,
+            isJunk: true,
+            allowed() {
+                return !m.isShipMode
+            },
+            requires: "",
+            effect() {
+                m.skin.pareidolia()
+            },
+            remove() {
+                m.resetSkin();
+            }
         },
         {
             name: "posture",
@@ -10280,7 +10220,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isSkin: true,
             isJunk: true,
             allowed() {
                 return !m.isShipMode
@@ -10299,7 +10238,6 @@ const tech = {
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isSkin: true,
             isJunk: true,
             isNonRefundable: true,
             allowed() {
@@ -10315,81 +10253,11 @@ const tech = {
             remove() {}
         },
         {
-            name: "pareidolia",
-            description: "don't",
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isSkin: true,
-            isNonRefundable: true,
-            isJunk: true,
-            allowed() {
-                return !m.isShipMode
-            },
-            requires: "",
-            effect() {
-                m.draw = function() {
-                    ctx.fillStyle = m.fillColor;
-                    m.walk_cycle += m.flipLegs * m.Vx;
-                    ctx.save();
-                    ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.7
-                    ctx.translate(m.pos.x, m.pos.y);
-                    m.calcLeg(Math.PI, -3);
-                    m.drawLeg("#4a4a4a");
-                    m.calcLeg(0, 0);
-                    m.drawLeg("#333");
-                    ctx.rotate(m.angle);
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                    ctx.fillStyle = m.bodyGradient
-                    ctx.fill();
-                    ctx.strokeStyle = "#333";
-                    ctx.lineWidth = 2;
-                    if (!(m.angle > -Math.PI / 2 && m.angle < Math.PI / 2)) ctx.scale(1, -1); //here is the flip
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(2, -6, 7, 0, 2 * Math.PI);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(25, -6, 7, 0.25 * Math.PI, 1.6 * Math.PI);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(2, -10, 9, 1.25 * Math.PI, 1.75 * Math.PI);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(25, -10, 9, 1.25 * Math.PI, 1.4 * Math.PI);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(18, 13, 10, 0, 2 * Math.PI);
-                    ctx.fillStyle = m.bodyGradient;
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(18, 13, 6, 0, 2 * Math.PI);
-                    ctx.fillStyle = "#555";
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(3, -6, 3, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(26, -6, 3, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.restore();
-                    m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15;
-                }
-            },
-            remove() {}
-        },
-        {
             name: "prism",
             description: "you cycle through different <strong>colors</strong>",
             maxCount: 1,
             count: 0,
             frequency: 0,
-            isSkin: true,
             isNonRefundable: true,
             isJunk: true,
             allowed() {
@@ -10409,24 +10277,24 @@ const tech = {
             },
             remove() {}
         },
-        {
-            name: "microtransactions",
-            description: `when you choose a <strong class='color-m'>tech</strong> you can<br>use ${powerUps.orb.research(1)} to buy a free in game <strong>skin</strong>`,
-            maxCount: 1,
-            count: 0,
-            frequency: 0,
-            isJunk: true,
-            allowed() {
-                return true
-            },
-            requires: "",
-            effect() {
-                tech.isMicroTransactions = true
-            },
-            remove() {
-                tech.isMicroTransactions = false
-            }
-        },
+        // {
+        //     name: "microtransactions",
+        //     description: `when you choose a <strong class='color-m'>tech</strong> you can<br>use ${powerUps.orb.research(1)} to buy a free in game <strong>skin</strong>`,
+        //     maxCount: 1,
+        //     count: 0,
+        //     frequency: 0,
+        //     isJunk: true,
+        //     allowed() {
+        //         return true
+        //     },
+        //     requires: "",
+        //     effect() {
+        //         tech.isMicroTransactions = true
+        //     },
+        //     remove() {
+        //         tech.isMicroTransactions = false
+        //     }
+        // },
         {
             name: "ship",
             description: "fly around with no legs<br>reduce combat <strong>difficulty</strong> by <strong>1 level</strong>",
@@ -10436,10 +10304,11 @@ const tech = {
             isNonRefundable: true,
             isJunk: true,
             allowed() {
-                return !m.isShipMode && m.fieldUpgrades[m.fieldMode].name !== "negative mass"
+                return !m.isShipMode && !m.isAltSkin && m.fieldUpgrades[m.fieldMode].name !== "negative mass"
             },
             requires: "",
             effect() {
+                m.isAltSkin = true
                 m.shipMode()
                 level.difficultyDecrease(simulation.difficultyMode)
                 //unlock relativistic rotation
@@ -11399,7 +11268,7 @@ const tech = {
     quantumEraserCount: null,
     isPhononBlock: null,
     isPhononWave: null,
-    isMicroTransactions: null,
+    // isMicroTransactions: null,
     isLaserLens: null,
     laserCrit: null,
     isSporeColony: null,
@@ -11422,4 +11291,5 @@ const tech = {
     isSuperMine: null,
     sentryAmmo: null,
     collidePowerUps: null,
+    isDilate: null,
 }

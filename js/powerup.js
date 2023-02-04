@@ -663,7 +663,7 @@ const powerUps = {
         //     width = "384px"
         // }
         let text = ""
-        if (localSettings.isHideImages || canvas.width < 1200) {
+        if (totalChoices === 1 || localSettings.isHideImages || canvas.width < 1200) {
             document.getElementById("choose-grid").style.gridTemplateColumns = width
             text += powerUps.cancelText(type)
             text += powerUps.researchText(type)
@@ -671,10 +671,6 @@ const powerUps = {
             document.getElementById("choose-grid").style.gridTemplateColumns = `repeat(2, ${width})`
             text += powerUps.researchText(type)
             text += powerUps.cancelText(type)
-        } else if (totalChoices === 1) {
-            document.getElementById("choose-grid").style.gridTemplateColumns = width
-            text += powerUps.cancelText(type)
-            text += powerUps.researchText(type)
         } else {
             document.getElementById("choose-grid").style.gridTemplateColumns = `repeat(3, ${width})`
             text += "<div></div>"
@@ -718,7 +714,7 @@ const powerUps = {
     },
     techText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
-        const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
+        const style = localSettings.isHideImages || tech.tech[choose].isLore ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
         return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
                 <div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
@@ -1044,15 +1040,15 @@ const powerUps = {
                             text += powerUps.fieldText(pick, `powerUps.choose('field',${pick})`)
                         }
                     }
-                    if (tech.isMicroTransactions && powerUps.research.count > 0) {
-                        const skins = [] //find skins
-                        for (let i = 0; i < tech.tech.length; i++) {
-                            if (tech.tech[i].isSkin) skins.push(i)
-                        }
-                        const choose = skins[Math.floor(Math.seededRandom(0, skins.length))] //pick an element from the array of options
+                    // if (tech.isMicroTransactions && powerUps.research.count > 0) {
+                    //     const skins = [] //find skins
+                    //     for (let i = 0; i < tech.tech.length; i++) {
+                    //         if (tech.tech[i].isSkin) skins.push(i)
+                    //     }
+                    //     const choose = skins[Math.floor(Math.seededRandom(0, skins.length))] //pick an element from the array of options
 
-                        text += `<div class="choose-grid-module" onclick="tech.giveTech(${choose});powerUps.research.changeRerolls(-1);powerUps.endDraft('tech');powerUps.tech.effect();"><div class="grid-title"><div class="circle-grid research"></div> <span style = 'font-size:90%; font-weight: 100; letter-spacing: -1.5px;'>microtransaction:</span> ${tech.tech[choose].name}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
-                    }
+                    //     text += `<div class="choose-grid-module" onclick="tech.giveTech(${choose});powerUps.research.changeRerolls(-1);powerUps.endDraft('tech');powerUps.tech.effect();"><div class="grid-title"><div class="circle-grid research"></div> <span style = 'font-size:90%; font-weight: 100; letter-spacing: -1.5px;'>microtransaction:</span> ${tech.tech[choose].name}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                    // }
                     if (tech.isBrainstorm && !tech.isBrainstormActive && !simulation.isChoosing) {
                         tech.isBrainstormActive = true
                         let count = 0
@@ -1410,13 +1406,13 @@ const powerUps = {
         if (bigIndexes.length > 0) {
             // console.log("at least 1 big will always spilt")
             const index = bigIndexes[Math.floor(Math.random() * bigIndexes.length)]
-            for (let i = 0; i < 4; i++) powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
+            for (let i = 0; i < 3; i++) powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
 
             Matter.Composite.remove(engine.world, powerUp[index]);
             powerUp.splice(index, 1);
-        } else if (smallIndexes.length > 3 && Math.random() < 0.25) {
-            // console.log("no big, at least 4 small can combine")
-            for (let j = 0; j < 4; j++) {
+        } else if (smallIndexes.length > 2 && Math.random() < 0.33) {
+            // console.log("no big, at least 3 small can combine")
+            for (let j = 0; j < 3; j++) {
                 for (let i = 0; i < powerUp.length; i++) {
                     if (powerUp[i].name === "heal" || powerUp[i].name === "research" || powerUp[i].name === "ammo" || powerUp[i].name === "coupling" || powerUp[i].name === "boost") {
                         Matter.Composite.remove(engine.world, powerUp[i]);

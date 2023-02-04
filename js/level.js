@@ -23,7 +23,7 @@ const level = {
             // spawn.setSpawnList();
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(10)
+            // powerUps.research.changeRerolls(6)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
@@ -33,18 +33,16 @@ const level = {
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 10000
-            // tech.giveTech("vacuum bomb")
-            // for (let i = 0; i < 3; ++i) tech.giveTech("collider")
-            // tech.giveTech("diffuse beam")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("super ball")
-            // tech.isFoamBall = true
-            // for (let i = 0; i < 3; ++i) tech.giveTech("repeater")
-            // for (let i = 0; i < 1; i++) tech.giveTech("irradiated nails")
-            // for (let i = 0; i < 1; i++) tech.giveTech("colony")
-            // for (let i = 0; i < 10; i++) powerUps.directSpawn(450, -50, "tech");
+            // tech.giveTech("tungsten carbide")
+            // tech.giveTech("ship")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("mass-energy equivalence")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("squirrel-cage rotor")
+            for (let i = 0; i < 1; i++) tech.giveTech("CPT symmetry")
+            // for (let i = 0; i < 1; i++) tech.giveTech("Meissner effect")
+            // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.lock();
+            // level.testChamber();
             // spawn.nodeGroup(1200, 0, "slasher")
             // spawn.blinkBoss(1900, -500)
             // spawn.sneakBoss(1900, -500)
@@ -60,6 +58,10 @@ const level = {
             // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
 
             level[simulation.isTraining ? "walk" : "intro"]() //normal starting level ************************************************
+
+            // simulation.isAutoZoom = false;
+            // simulation.zoomScale *= 0.5;
+            // simulation.setZoom();
 
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "gun");
@@ -422,7 +424,7 @@ const level = {
                 player.velocity.y < 0.15
             ) {
                 // level.exitCount += input.down ? 8 : 2
-                level.exitCount++
+                level.exitCount += 2
             } else if (level.exitCount > 0) {
                 level.exitCount -= 2
             }
@@ -4520,6 +4522,8 @@ const level = {
             spawn.mapVertex(4075, 2079, "-150 30 -120 0  150 0   150 600   -150 600");
 
             //escape ledge when drowning
+            spawn.mapRect(2750, 525, 100, 25);
+            spawn.mapRect(2750, 125, 100, 25);
             spawn.mapRect(4425, 800, 75, 25);
             spawn.mapRect(4425, 325, 75, 25);
             // spawn.mapRect(4425, -100, 75, 25);
@@ -14246,9 +14250,7 @@ const level = {
                     ctx.restore();
                 }
             } else {
-                m.draw = () => {
-                    m.drawDefault()
-                }
+                m.resetSkin()
                 m.airControl = () => {
                     if (input.up && m.buttonCD_jump + 20 < m.cycle && m.yOffWhen.stand > 23 && m.lastOnGroundCycle + 5 > m.cycle) m.jump()
                     if (m.buttonCD_jump + 60 > m.cycle && !(input.up) && m.Vy < 0) {
