@@ -37,7 +37,7 @@ const level = {
             // tech.giveTech("ship")
             // for (let i = 0; i < 1; ++i) tech.giveTech("mass-energy equivalence")
             // for (let i = 0; i < 1; ++i) tech.giveTech("squirrel-cage rotor")
-            for (let i = 0; i < 1; i++) tech.giveTech("CPT symmetry")
+            // for (let i = 0; i < 1; i++) tech.giveTech("CPT symmetry")
             // for (let i = 0; i < 1; i++) tech.giveTech("Meissner effect")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
