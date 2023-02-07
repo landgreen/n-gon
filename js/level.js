@@ -33,12 +33,12 @@ const level = {
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 10000
-            // tech.giveTech("tungsten carbide")
-            // tech.giveTech("ship")
+            // tech.giveTech("aperture")
+            // tech.giveTech("diaphragm")
             // for (let i = 0; i < 1; ++i) tech.giveTech("mass-energy equivalence")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("squirrel-cage rotor")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("tungsten carbide")
             // for (let i = 0; i < 1; i++) tech.giveTech("CPT symmetry")
-            // for (let i = 0; i < 1; i++) tech.giveTech("Meissner effect")
+            // for (let i = 0; i < 1; i++) tech.giveTech("elasticity")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
@@ -57,9 +57,13 @@ const level = {
             // for (let i = 0; i < 40; ++i) tech.giveTech()
             // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
 
+            //a for loop that produces Fibinochi numbers
+
+
+
             level[simulation.isTraining ? "walk" : "intro"]() //normal starting level ************************************************
 
-            // simulation.isAutoZoom = false;
+            // simulation.isAutoZoom = false; //look in close
             // simulation.zoomScale *= 0.5;
             // simulation.setZoom();
 
@@ -259,7 +263,7 @@ const level = {
                     level.disableExit = true
                     document.getElementById("health").style.display = "none"
                     document.getElementById("health-bg").style.display = "none"
-                    document.getElementById("text-log").style.opacity = 0; //fade out any active text logs
+                    document.getElementById("text-log").style.display = "none"
                     document.getElementById("fade-out").style.opacity = 1; //slowly fades out
                     setTimeout(function() {
                         simulation.paused = true;
@@ -314,6 +318,7 @@ const level = {
         }
 
         if (simulation.isTraining) {
+            simulation.isHorizontalFlipped = false
             level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
         } else { //add remove and shuffle levels for the normal game (not training levels)
             level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment

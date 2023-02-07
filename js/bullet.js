@@ -3751,7 +3751,7 @@ const b = {
         bullet[me] = Bodies.polygon(where.x, where.y, 12, radius, b.fireAttributes(dir, false));
         Composite.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
-        Matter.Body.setDensity(bullet[me], 0.0008 + 0.0008 * tech.superHarm);
+        Matter.Body.setDensity(bullet[me], 0.0008 + 0.0009 * tech.superHarm);
         bullet[me].endCycle = simulation.cycle + Math.floor(300 + 90 * Math.random());
         bullet[me].minDmgSpeed = 0;
         bullet[me].restitution = 1;
@@ -3761,7 +3761,7 @@ const b = {
                 this.force.y += this.mass * 0.0012;
                 if (Matter.Query.collides(this, [player]).length) {
                     this.endCycle = 0
-                    let dmg = 0.02 * this.mass * tech.superHarm
+                    let dmg = 0.015 * this.mass * tech.superHarm
                     m.damage(dmg);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,

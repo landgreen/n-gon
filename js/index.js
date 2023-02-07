@@ -380,7 +380,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                     <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div>
                     ${b.guns[b.inventory[i]].description}</div> </div>`
         }
-
+        text += `<div class="pause-grid-module pause-console" style = "background-color: rgba(255,255,255,0.3);">${document.getElementById("text-log").innerHTML}</div>` //show last in game console message
         let el = document.getElementById("pause-grid-left")
         el.style.display = "grid"
         el.innerHTML = text
@@ -441,6 +441,11 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         document.getElementById("field").style.display = "none"
         document.getElementById("health").style.display = "none"
         document.getElementById("health-bg").style.display = "none"
+
+        //show in game console
+        // document.getElementById("text-log").style.display = "inline"
+        simulation.lastLogTime = m.cycle //hide in game console
+
     },
     unPauseGrid() {
         document.getElementById("tech").style.display = "inline"

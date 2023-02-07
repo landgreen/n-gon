@@ -239,6 +239,11 @@ summary {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
+.pause-console {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 10px;
+}
 
 #pause-grid-left::-webkit-scrollbar {
     display: none;
@@ -623,12 +628,18 @@ summary {
     font-size: 1.15em;
     color: #555;
     background-color: rgba(255, 255, 255, 0.5);
-    transition: opacity 0.25s;
+    /* transition: opacity 0.15s; */
     pointer-events: none;
     user-select: none;
 }
 
 /* color for in game console output */
+/* .ammo-flash {
+    color: #f33;
+    transition: color 2s;
+} */
+
+
 .color-text {
     color: #000;
 }

@@ -1,25 +1,40 @@
 ******************************************************** NEXT PATCH **************************************************
 
-some tech come with a skin - but only 1 at a time
-  tech aperture -  skin, damage cycles between -25% and +125%
-  tungsten carbide - skin, +100->150 max health
-  mass-energy equivalence - skin, gets a bit more benefit from defense
-  CPT symmetry - skin, costs a bit less energy
-  flip-flop, and relay switch and a few JUNK tech are also skins
+tech: elasticity - skin, does "crouch landings" a tiny bit more
+  jump and move faster, +15% defense
+  (replaces squirrel cage rotor)
 
-some new images
+tech: diaphragm -  skin, defense cycles between -33% and +100%
+  requires aperture
+
+tungsten carbide 150->200 maximum health
+  but now does "crouch landings" a more
+Zectron damage 80->100% and it does a bit less harm to player
+flip-flop, relay switch are no longer skins
+
+pause brings up the most recent in game console message 
+  in game console no longer fades out it just instantly goes on and off
+
 bug fixes
+
 
 *********************************************************** TODO *****************************************************
 
+Tech: Von Neuman probes - Drones will consume blocks to replicate themselves
+  it's a little too similar to the drone repair tech, but I kinda like it better.  drones that eat blocks and spit out more drones is cool 
+
+when gaining ammo have the ammo test quickly count up by Math.floor(1/20x) of the total ammo given
+  maybe bold, flash the text for a second after
+
+tech: parry - immune to harm for 0.25-0.5 seconds after pressing field button
+  needs a 5 second CD?
+
 tech: if a needle hits 2 mobs reset your fire CD
-  and maybe to 2x damage for each consecutive mob hit?
+  maybe to 2x damage for each consecutive mob hit?
+  maybe after a needle hits a mob the needle splits into 3 needles
 
 tech for lens - you can only fire through the lens and some buff? damage or energy?
   this was in todo.txt on GitHub. I think it should be 'laser never drains energy, but you can only fire through lens and +90° lens arc, +100% damage (also you can not gain compound lens with this upgrade)
-
-Tech: Von Neuman probes - Drones will consume blocks to replicate themselves
-  it's a little too similar to the drone repair tech, but I kinda like it better.  drones that eat blocks and spit out more drones is cool 
 
 new boss level like reactor with a very very big boss
   mechanics around a very big boss?

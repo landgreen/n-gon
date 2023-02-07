@@ -379,17 +379,34 @@ const simulation = {
         }
         requestAnimationFrame(loop)
     },
-    // lastLogTimeBig: 0,
     boldActiveGunHUD() {
         if (b.inventory.length > 0) {
-            for (let i = 0, len = b.inventory.length; i < len; ++i) document.getElementById(b.inventory[i]).style.opacity = "0.3";
-            // document.getElementById(b.activeGun).style.fontSize = "30px";
-            if (document.getElementById(b.activeGun)) document.getElementById(b.activeGun).style.opacity = "1";
+            for (let i = 0, len = b.inventory.length; i < len; ++i) {
+                if (b.inventory[i] === b.activeGun && document.getElementById(b.activeGun)) {
+                    document.getElementById(b.inventory[i]).style.opacity = "1";
+                } else {
+                    document.getElementById(b.inventory[i]).style.opacity = "0.3";
+                }
+            }
         }
+
+        // if (b.inventory.length > 0) {
+        //     for (let i = 0, len = b.inventory.length; i < len; ++i) document.getElementById(b.inventory[i]).style.opacity = "0.3";
+        //     // document.getElementById(b.activeGun).style.fontSize = "30px";
+        //     if (document.getElementById(b.activeGun)) document.getElementById(b.activeGun).style.opacity = "1";
+        // }
     },
     updateGunHUD() {
+        // for (let i = 0, len = b.inventory.length; i < len; ++i) {
+        //     if (flashIndex === i) {
+        //         document.getElementById(b.inventory[i]).innerHTML = b.guns[b.inventory[i]].name + " - " + b.guns[b.inventory[i]].ammo;
+        //     } else {
+        //         document.getElementById(b.inventory[i]).innerHTML = b.guns[b.inventory[i]].name + " - " + b.guns[b.inventory[i]].ammo;
+        //     }
+        // }
         for (let i = 0, len = b.inventory.length; i < len; ++i) {
-            document.getElementById(b.inventory[i]).innerHTML = b.guns[b.inventory[i]].name + " - " + b.guns[b.inventory[i]].ammo;
+            // document.getElementById(b.inventory[i]).innerHTML = b.guns[b.inventory[i]].name + " - " + b.guns[b.inventory[i]].ammo;
+            document.getElementById(b.inventory[i]).innerHTML = `${b.guns[b.inventory[i]].name} - ${b.guns[b.inventory[i]].ammo}`
         }
     },
     makeGunHUD() {
@@ -402,8 +419,8 @@ const simulation = {
         for (let i = 0, len = b.inventory.length; i < len; ++i) {
             const node = document.createElement("div");
             node.setAttribute("id", b.inventory[i]);
-            let textnode = document.createTextNode(b.guns[b.inventory[i]].name + " - " + b.guns[b.inventory[i]].ammo);
-            node.appendChild(textnode);
+            const textNode = document.createTextNode(`${b.guns[b.inventory[i]].name} - ${b.guns[b.inventory[i]].ammo}`); //b.guns[b.inventory[i]].name + " - " + b.guns[b.inventory[i]].ammo);
+            node.appendChild(textNode);
             document.getElementById("guns").appendChild(node);
         }
         simulation.boldActiveGunHUD();
@@ -439,7 +456,7 @@ const simulation = {
                 simulation.lastLogTime = m.cycle + time;
             } else {
                 document.getElementById("text-log").innerHTML = text;
-                document.getElementById("text-log").style.opacity = 1;
+                document.getElementById("text-log").style.display = "inline";
                 simulation.lastLogTime = m.cycle + time;
             }
         }
@@ -448,7 +465,7 @@ const simulation = {
         if (simulation.lastLogTime && simulation.lastLogTime < m.cycle) {
             simulation.lastLogTime = 0;
             // document.getElementById("text-log").innerHTML = " ";
-            document.getElementById("text-log").style.opacity = 0;
+            document.getElementById("text-log").style.display = "none";
         }
     },
     nextGun() {
@@ -790,7 +807,7 @@ const simulation = {
         simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
 
         simulation.clearNow = true;
-        document.getElementById("text-log").style.opacity = 0;
+        document.getElementById("text-log").style.display = "none"
         document.getElementById("fade-out").style.opacity = 0;
         document.title = "n-gon";
         // simulation.makeTextLog(`input.key.up<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]`);

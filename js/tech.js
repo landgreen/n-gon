@@ -299,6 +299,234 @@ const tech = {
         }
     },
     tech: [{
+            name: "tungsten carbide",
+            description: "<strong>+200</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            isSkin: true,
+            allowed() {
+                return !m.isAltSkin
+            },
+            requires: "not skin",
+            effect() {
+                tech.hardLanding = 40
+                tech.isFallingDamage = true;
+                m.setMaxHealth();
+                m.addHealth(1 / simulation.healScale)
+                m.skin.tungsten()
+            },
+            remove() {
+                tech.hardLanding = 130
+                tech.isFallingDamage = false;
+                m.setMaxHealth();
+                m.resetSkin();
+            }
+        },
+        {
+            name: "elasticity",
+            description: "<strong>+33%</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>+15%</strong> <strong class='color-defense'>defense</strong>",
+            maxCount: 3,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed() {
+                return !m.isAltSkin
+            },
+            requires: "not skinned",
+            effect() {
+                m.skin.mech();
+                tech.hardLanding = 80
+                tech.squirrelFx += 0.4;
+                tech.squirrelJump += 0.16;
+                m.setMovement()
+            },
+            remove() {
+                tech.hardLanding = 130
+                tech.squirrelFx = 1;
+                tech.squirrelJump = 1;
+                m.setMovement()
+                m.resetSkin();
+            }
+        },
+        {
+            name: "aperture",
+            description: "your <strong class='color-d'>damage</strong> cycles every <strong>6</strong> seconds<br>between <strong>-75%</strong> and <strong>+125%</strong> <strong class='color-d'>damage</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            isSkin: true,
+            allowed() {
+                return !m.isAltSkin
+            },
+            requires: "not skinned",
+            effect() {
+                tech.isDilate = true
+                m.skin.dilate()
+            },
+            remove() {
+                tech.isDilate = false
+                m.resetSkin();
+            }
+        },
+        {
+            name: "diaphragm",
+            description: "your <strong class='color-defense'>defense</strong> cycles every <strong>6</strong> seconds<br>between <strong>+100%</strong> and <strong>-33%</strong> <strong class='color-defense'>defense</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            isSkin: true,
+            allowed() {
+                return tech.isDilate
+            },
+            requires: "aperture",
+            effect() {
+                tech.isDiaphragm = true
+                m.resetSkin();
+                m.skin.dilate2()
+            },
+            remove() {
+                tech.isDiaphragm = false
+                m.resetSkin();
+            }
+        },
+        {
+            name: "mass-energy equivalence",
+            // description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>√ of <strong class='color-defense'>defense</strong> <strong>reduction</strong> reduces max <strong class='color-f'>energy</strong>",
+            description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>exponentially <strong>reduced</strong> <strong class='color-defense'>defense</strong> <em>(~ x^0.12)</em>",
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            isSkin: true,
+            allowed() {
+                return !m.isAltSkin && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isAnnihilation //&& !tech.isAmmoFromHealth && !tech.isRewindGun
+            },
+            requires: "not piezoelectricity, CPT, annihilation",
+            effect() {
+                m.health = 0
+                document.getElementById("health").style.display = "none"
+                document.getElementById("health-bg").style.display = "none"
+                document.getElementById("dmg").style.backgroundColor = "#0cf";
+                tech.isEnergyHealth = true;
+                simulation.mobDmgColor = "rgba(0, 255, 255,0.6)" //"#0cf"
+                m.displayHealth();
+                m.skin.energy();
+            },
+            remove() {
+                if (tech.isEnergyHealth) {
+                    tech.isEnergyHealth = false;
+                    document.getElementById("health").style.display = "inline"
+                    document.getElementById("health-bg").style.display = "inline"
+                    document.getElementById("dmg").style.backgroundColor = "#f67";
+                    m.health = Math.max(Math.min(m.maxHealth, m.energy), 0.1);
+                    simulation.mobDmgColor = "rgba(255,0,0,0.7)"
+                    m.displayHealth();
+                }
+                tech.isEnergyHealth = false;
+                m.resetSkin();
+            }
+        },
+        {
+            name: "1st ionization energy",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ionization_energy' class="link">1st ionization energy</a>`,
+            // description: `after you collect ${powerUps.orb.heal()}<br><strong>+${0.1 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`,
+            // descriptionFunction: `convert current and future ${powerUps.orb.heal()} into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${10 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`,
+            descriptionFunction() {
+                return `convert current and future <div class="heal-circle"></div> into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${8 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)}</strong> maximum <strong class='color-f'>energy</strong>`
+            },
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.isEnergyHealth
+            },
+            requires: "mass-energy equivalence",
+            effect() {
+                powerUps.healGiveMaxEnergy = true; //tech.healMaxEnergyBonus given from heal power up 
+                powerUps.heal.color = "#ff0" //"#0ae"
+                for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
+                    if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
+                }
+            },
+            remove() {
+                powerUps.healGiveMaxEnergy = false;
+                // tech.healMaxEnergyBonus = 0
+                powerUps.heal.color = "#0eb"
+                for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
+                    if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
+                }
+            }
+        },
+        {
+            name: "CPT symmetry",
+            // description: "<strong>charge</strong>, <strong>parity</strong>, and <strong>time</strong> invert to undo <strong class='color-defense'>defense</strong><br><strong class='color-rewind'>rewind</strong> <strong>(1.5—5)</strong> seconds for <strong>(66—220)</strong> <strong class='color-f'>energy</strong>",
+            // description: "after losing <strong class='color-h'>health</strong>, if you have <strong>full</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>44</strong> <strong class='color-f'>energy</strong> per second",
+            descriptionFunction() {
+                return `after losing <strong class='color-h'>health</strong>, if you have <strong>${(100*Math.min(100,m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>40</strong> <strong class='color-f'>energy</strong> per second`
+            },
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            isSkin: true,
+            allowed() {
+                return !m.isAltSkin && m.fieldUpgrades[m.fieldMode].name !== "standing wave" && !tech.isRewindField && !tech.isEnergyHealth
+            },
+            requires: "not skinned, standing wave, max energy reduction, retrocausality, mass-energy",
+            effect() {
+                tech.isRewindAvoidDeath = true;
+                m.skin.CPT()
+            },
+            remove() {
+                tech.isRewindAvoidDeath = false;
+                m.resetSkin();
+            }
+        },
+        {
+            name: "causality bots",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Causality' class="link">causality bots</a>`,
+            description: "when you <strong class='color-rewind'>rewind</strong> build scrap <strong class='color-bot'>bots</strong><br>that protect you for about <strong>9</strong> seconds",
+            maxCount: 3,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            isBotTech: true,
+            allowed() {
+                return tech.isRewindAvoidDeath || tech.isRewindField
+            },
+            requires: "CPT, retrocausality",
+            effect() {
+                tech.isRewindBot++;
+            },
+            remove() {
+                tech.isRewindBot = 0;
+            }
+        },
+        {
+            name: "causality bombs",
+            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Causality' class="link">causality bombs</a>`,
+            description: "when you <strong class='color-rewind'>rewind</strong> drop several <strong>grenades</strong><br>become <strong>invulnerable</strong> until they <strong class='color-e'>explode</strong>",
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return tech.isRewindAvoidDeath || tech.isRewindField
+            },
+            requires: "CPT, retrocausality",
+            effect() {
+                tech.isRewindGrenade = true;
+            },
+            remove() {
+                tech.isRewindGrenade = false;
+            }
+        },
+        {
             name: "ordnance",
             description: "<strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong><br>spawn a <strong class='color-g'>gun</strong> and <strong>+7%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
             maxCount: 1,
@@ -726,28 +954,7 @@ const tech = {
                 }
             }
         },
-        {
-            name: "squirrel-cage rotor",
-            description: "<strong>+30%</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>–5%</strong> <strong class='color-defense'>defense</strong>",
-            maxCount: 9,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            allowed() {
-                return this.count > 0
-            },
-            requires: "",
-            effect() {
-                tech.squirrelFx += 0.25;
-                tech.squirrelJump += 0.1;
-                m.setMovement()
-            },
-            remove() {
-                tech.squirrelFx = 1;
-                tech.squirrelJump = 1;
-                m.setMovement()
-            }
-        },
+
         // {
         //     name: "coyote",
         //     description: "",
@@ -1913,9 +2120,9 @@ const tech = {
                         }
                     }
                 }
-                if (!m.isShipMode) {
-                    m.skin.flipFlop()
-                }
+                // if (!m.isShipMode) {
+                //     m.skin.flipFlop()
+                // }
             },
             remove() {
                 tech.isFlipFlop = false
@@ -1929,7 +2136,7 @@ const tech = {
                     }
                 }
                 m.eyeFillColor = 'transparent'
-                m.resetSkin();
+                // m.resetSkin();
             }
         },
         {
@@ -2067,9 +2274,9 @@ const tech = {
                         }
                     }
                 }
-                if (!m.isShipMode) {
-                    m.skin.flipFlop()
-                }
+                // if (!m.isShipMode) {
+                //     m.skin.flipFlop()
+                // }
             },
             remove() {
                 tech.isRelay = false
@@ -2083,7 +2290,7 @@ const tech = {
                     }
                 }
                 m.eyeFillColor = 'transparent'
-                m.resetSkin();
+                // m.resetSkin();
             }
         },
         {
@@ -2294,70 +2501,7 @@ const tech = {
                 tech.isSlowFPS = false;
             }
         },
-        {
-            name: "CPT symmetry",
-            // description: "<strong>charge</strong>, <strong>parity</strong>, and <strong>time</strong> invert to undo <strong class='color-defense'>defense</strong><br><strong class='color-rewind'>rewind</strong> <strong>(1.5—5)</strong> seconds for <strong>(66—220)</strong> <strong class='color-f'>energy</strong>",
-            // description: "after losing <strong class='color-h'>health</strong>, if you have <strong>full</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>44</strong> <strong class='color-f'>energy</strong> per second",
-            descriptionFunction() {
-                return `after losing <strong class='color-h'>health</strong>, if you have <strong>${(100*Math.min(100,m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>40</strong> <strong class='color-f'>energy</strong> per second`
-            },
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            isSkin: true,
-            allowed() {
-                return !m.isAltSkin && m.fieldUpgrades[m.fieldMode].name !== "standing wave" && !tech.isRewindField && !tech.isEnergyHealth
-            },
-            requires: "not skinned, standing wave, max energy reduction, retrocausality, mass-energy",
-            effect() {
-                tech.isRewindAvoidDeath = true;
-                m.skin.CPT()
-            },
-            remove() {
-                tech.isRewindAvoidDeath = false;
-                m.resetSkin();
-            }
-        },
-        {
-            name: "causality bots",
-            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Causality' class="link">causality bots</a>`,
-            description: "when you <strong class='color-rewind'>rewind</strong> build scrap <strong class='color-bot'>bots</strong><br>that protect you for about <strong>9</strong> seconds",
-            maxCount: 3,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            isBotTech: true,
-            allowed() {
-                return tech.isRewindAvoidDeath || tech.isRewindField
-            },
-            requires: "CPT, retrocausality",
-            effect() {
-                tech.isRewindBot++;
-            },
-            remove() {
-                tech.isRewindBot = 0;
-            }
-        },
-        {
-            name: "causality bombs",
-            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Causality' class="link">causality bombs</a>`,
-            description: "when you <strong class='color-rewind'>rewind</strong> drop several <strong>grenades</strong><br>become <strong>invulnerable</strong> until they <strong class='color-e'>explode</strong>",
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.isRewindAvoidDeath || tech.isRewindField
-            },
-            requires: "CPT, retrocausality",
-            effect() {
-                tech.isRewindGrenade = true;
-            },
-            remove() {
-                tech.isRewindGrenade = false;
-            }
-        },
+
         {
             name: "piezoelectricity",
             description: "if you <strong>collide</strong> with a mob<br>generate <strong>+2048</strong> <strong class='color-f'>energy</strong>", //<br>reduce <strong class='color-defense'>defense</strong> by <strong>15%</strong>
@@ -2375,75 +2519,6 @@ const tech = {
             },
             remove() {
                 tech.isPiezo = false;
-            }
-        },
-        {
-            name: "mass-energy equivalence",
-            // description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>√ of <strong class='color-defense'>defense</strong> <strong>reduction</strong> reduces max <strong class='color-f'>energy</strong>",
-            description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>exponentially <strong>reduced</strong> <strong class='color-defense'>defense</strong> <em>(~ x^0.12)</em>",
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            isSkin: true,
-            allowed() {
-                return !m.isAltSkin && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isAnnihilation //&& !tech.isAmmoFromHealth && !tech.isRewindGun
-            },
-            requires: "not piezoelectricity, CPT, annihilation",
-            effect() {
-                m.health = 0
-                document.getElementById("health").style.display = "none"
-                document.getElementById("health-bg").style.display = "none"
-                document.getElementById("dmg").style.backgroundColor = "#0cf";
-                tech.isEnergyHealth = true;
-                simulation.mobDmgColor = "rgba(0, 255, 255,0.6)" //"#0cf"
-                m.displayHealth();
-                m.skin.energy();
-            },
-            remove() {
-                if (tech.isEnergyHealth) {
-                    tech.isEnergyHealth = false;
-                    document.getElementById("health").style.display = "inline"
-                    document.getElementById("health-bg").style.display = "inline"
-                    document.getElementById("dmg").style.backgroundColor = "#f67";
-                    m.health = Math.max(Math.min(m.maxHealth, m.energy), 0.1);
-                    simulation.mobDmgColor = "rgba(255,0,0,0.7)"
-                    m.displayHealth();
-                }
-                tech.isEnergyHealth = false;
-                m.resetSkin();
-            }
-        },
-        {
-            name: "1st ionization energy",
-            link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ionization_energy' class="link">1st ionization energy</a>`,
-            // description: `after you collect ${powerUps.orb.heal()}<br><strong>+${0.1 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`,
-            // descriptionFunction: `convert current and future ${powerUps.orb.heal()} into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${10 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`,
-            descriptionFunction() {
-                return `convert current and future <div class="heal-circle"></div> into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${8 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)}</strong> maximum <strong class='color-f'>energy</strong>`
-            },
-            maxCount: 1,
-            count: 0,
-            frequency: 2,
-            frequencyDefault: 2,
-            allowed() {
-                return tech.isEnergyHealth
-            },
-            requires: "mass-energy equivalence",
-            effect() {
-                powerUps.healGiveMaxEnergy = true; //tech.healMaxEnergyBonus given from heal power up 
-                powerUps.heal.color = "#ff0" //"#0ae"
-                for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
-                    if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
-                }
-            },
-            remove() {
-                powerUps.healGiveMaxEnergy = false;
-                // tech.healMaxEnergyBonus = 0
-                powerUps.heal.color = "#0eb"
-                for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
-                    if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
-                }
             }
         },
         {
@@ -2860,30 +2935,7 @@ const tech = {
                 tech.isAcidDmg = false;
             }
         },
-        {
-            name: "tungsten carbide",
-            description: "<strong>+150</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            isSkin: true,
-            allowed() {
-                return !m.isAltSkin
-            },
-            requires: "not skin",
-            effect() {
-                tech.isFallingDamage = true;
-                m.setMaxHealth();
-                m.addHealth(1 / simulation.healScale)
-                m.skin.tungsten()
-            },
-            remove() {
-                tech.isFallingDamage = false;
-                m.setMaxHealth();
-                m.resetSkin();
-            }
-        },
+
         {
             name: "adiabatic healing",
             descriptionFunction() {
@@ -3508,27 +3560,6 @@ const tech = {
                     tech.damage /= this.damage
                     if (this.refundAmount > 0) tech.removeJunkTechFromPool(this.refundAmount)
                 }
-            }
-        },
-        {
-            name: "aperture",
-            description: "your damage cycles every <strong>6</strong> seconds<br>between <strong>-75%</strong> and <strong>+125%</strong> <strong class='color-d'>damage</strong>",
-            maxCount: 1,
-            count: 0,
-            frequency: 1,
-            frequencyDefault: 1,
-            isSkin: true,
-            allowed() {
-                return !m.isAltSkin
-            },
-            requires: "not skinned",
-            effect() {
-                tech.isDilate = true
-                m.skin.dilate()
-            },
-            remove() {
-                tech.isDilate = false
-                m.resetSkin();
             }
         },
         {
@@ -4781,7 +4812,7 @@ const tech = {
         },
         {
             name: "Zectron",
-            description: `<strong>+80%</strong> <strong>super ball</strong> density and <strong class='color-d'>damage</strong>, but<br>after colliding with <strong>super balls</strong> <strong>lose</strong> <strong class='color-h'>health</strong>`,
+            description: `<strong>+100%</strong> <strong>super ball</strong> density and <strong class='color-d'>damage</strong>, but<br>after colliding with <strong>super balls</strong> <strong>lose</strong> <strong class='color-h'>health</strong>`,
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -11292,4 +11323,6 @@ const tech = {
     sentryAmmo: null,
     collidePowerUps: null,
     isDilate: null,
+    isDiaphragm: null,
+    hardLanding: null,
 }
