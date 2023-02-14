@@ -39,43 +39,43 @@ const powerUps = {
                     return `<div class="research-circle"></div> `
                 case 2:
                     return `<span style="position:relative;">
-                    <div class="research-circle" style="position:absolute; top:0; left:0;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:7px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:0;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:7px;"></div>
                     </span> &nbsp; &nbsp; &nbsp; &nbsp;`
                 case 3:
                     return `<span style="position:relative;">
-                    <div class="research-circle" style="position:absolute; top:0; left:0;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:8px;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:16px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:0;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:8px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:16px;"></div>
                     </span> &nbsp; &nbsp; &nbsp; &nbsp; &thinsp; `
                 case 4:
                     return `<span style="position:relative;">
-                    <div class="research-circle" style="position:absolute; top:0; left:0;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:8px;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:16px;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:24px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:0;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:8px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:16px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:24px;"></div>
                     </span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `
                 case 5:
                     return `<span style="position:relative;">
-                    <div class="research-circle" style="position:absolute; top:0; left:0;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:8px;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:16px;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:24px;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:32px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:0;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:8px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:16px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:24px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:32px;"></div>
                     </span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `
                 case 6:
                     return `<span style="position:relative;">
-                    <div class="research-circle" style="position:absolute; top:0; left:0;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:8px;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:16px;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:24px;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:32px;"></div>
-                    <div class="research-circle" style="position:absolute; top:0; left:40px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:0;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:8px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:16px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:24px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:32px;"></div>
+                    <div class="research-circle" style="position:absolute; top:1.5px; left:40px;"></div>
                     </span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `
             }
             let text = '<span style="position:relative;">'
             for (let i = 0; i < num; i++) {
-                text += `<div class="research-circle" style="position:absolute; top:0; left:${i*8}px;"></div>`
+                text += `<div class="research-circle" style="position:absolute; top:1.5px; left:${i*8}px;"></div>`
             }
             text += '</span> &nbsp; &nbsp; '
             for (let i = 0; i < num; i++) {
@@ -720,7 +720,19 @@ const powerUps = {
                 <div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
     },
-
+    skinTechText(choose, click) {
+        const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
+        const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
+        return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
+                <div class="card-text">
+                <div class="grid-title">         
+                <span style="position:relative;">
+                    <div class="circle-grid-skin"></div>
+                    <div class="circle-grid-skin-eye"></div>
+                </span>
+                &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
+                ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
+    },
     fieldTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
@@ -993,10 +1005,10 @@ const powerUps = {
                             text += powerUps.fieldTechText(choose, `powerUps.choose('tech',${choose})`)
                         } else if (tech.tech[choose].isGunTech) {
                             text += powerUps.gunTechText(choose, `powerUps.choose('tech',${choose})`)
-                            // } else if (tech.tech[choose].isLore) {
-                            //     text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
                         } else if (tech.tech[choose].isJunk) {
                             text += powerUps.junkTechText(choose, `powerUps.choose('tech',${choose})`)
+                        } else if (tech.tech[choose].isSkin) {
+                            text += powerUps.skinTechText(choose, `powerUps.choose('tech',${choose})`)
                         } else { //normal tech
                             text += powerUps.techText(choose, `powerUps.choose('tech',${choose})`)
                         }
@@ -1127,6 +1139,8 @@ const powerUps = {
                             text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
                         } else if (tech.tech[choose].isJunk) {
                             text += powerUps.junkTechText(choose, `powerUps.choose('tech',${choose})`)
+                        } else if (tech.tech[choose].isSkin) {
+                            text += powerUps.skinTechText(choose, `powerUps.choose('tech',${choose})`)
                         } else { //normal tech
                             text += powerUps.techText(choose, `powerUps.choose('tech',${choose})`)
                         }

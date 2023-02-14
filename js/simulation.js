@@ -930,8 +930,15 @@ const simulation = {
         tech.deathSpawnsFromBoss = 0;
         simulation.fallHeight = 3000;
         document.body.style.backgroundColor = "#eee" //"#d8dadf";
-        color.map = "#444";
-
+        // color.map = "#444";
+        // color.bullet = "#FFFFFF";
+        color = { //light
+            // background: "#ddd", // used instead:  document.body.style.backgroundColor
+            block: "rgba(140,140,140,0.85)",
+            blockS: "#222",
+            map: "#444",
+            bullet: "#000"
+        }
         m.fireCDcycle = 0
         m.drop();
         m.hole.isOn = false;

@@ -812,7 +812,31 @@ summary {
     display: inline-block;
     margin-bottom: -0.3em;
 }
-
+.circle-grid-skin {
+    width: 1.25em;
+    height: 1.25em;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: #fff;
+    opacity: 0.8;
+    border: 0.08em solid #222;
+    position: absolute;
+    top:-0.05em;
+    left:0em;
+    margin-bottom: -0.3em;
+}
+.circle-grid-skin-eye {
+    width: 0.18em;
+    height: 0.18em;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: #fff;
+    border: 0.08em solid #222;
+    position: absolute;
+    top: 0.45em;
+    left: 0.9em;
+    margin-bottom: -0.3em;
+}
 .junk {
     background-color: hsl(254, 44%, 75%);
     border-radius: 25%;

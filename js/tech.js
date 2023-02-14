@@ -220,13 +220,14 @@ const tech = {
     damage: 1, //used for tech changes to player damage that don't have complex conditions
     damageFromTech() {
         let dmg = tech.damage //m.fieldDamage
-        if (tech.isDilate) dmg *= 1.25 + Math.sin(m.cycle * 0.01)
+        if (tech.isNoGroundDamage) dmg *= m.onGround ? 0.78 : 1.88
+        if (tech.isDilate) dmg *= 1.5 + Math.sin(m.cycle * 0.0075)
         if (tech.isGunChoice && tech.buffedGun === b.inventoryGun) dmg *= 1 + 0.31 * b.inventory.length
         if (powerUps.boost.endCycle > m.cycle) dmg *= 1 + powerUps.boost.damage
         if (m.coupling && (m.fieldMode === 0 || m.fieldMode === 5)) dmg *= 1 + 0.15 * m.coupling
         if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= 4.33 * (1 + 0.33 * m.coupling)
         if (tech.deathSkipTime) dmg *= 1 + 0.6 * tech.deathSkipTime
-        if (tech.isTechDebt) dmg *= Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount)
+        if (tech.isTechDebt) dmg *= Math.max(Math.pow(0.85, tech.totalCount - 20), 4 - 0.15 * tech.totalCount)
         if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
         if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
         if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
@@ -331,6 +332,7 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
+            isSkin: true,
             allowed() {
                 return !m.isAltSkin
             },
@@ -352,7 +354,7 @@ const tech = {
         },
         {
             name: "aperture",
-            description: "your <strong class='color-d'>damage</strong> cycles every <strong>6</strong> seconds<br>between <strong>-75%</strong> and <strong>+125%</strong> <strong class='color-d'>damage</strong>",
+            description: "every <strong>6</strong> seconds your <strong class='color-d'>damage</strong> cycles<br>between <strong>-50%</strong> and <strong>+150%</strong> <strong class='color-d'>damage</strong>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -373,7 +375,7 @@ const tech = {
         },
         {
             name: "diaphragm",
-            description: "your <strong class='color-defense'>defense</strong> cycles every <strong>6</strong> seconds<br>between <strong>+100%</strong> and <strong>-33%</strong> <strong class='color-defense'>defense</strong>",
+            description: "every <strong>6</strong> seconds your <strong class='color-defense'>defense</strong> cycles<br>between <strong>+100%</strong> and <strong>-33%</strong> <strong class='color-defense'>defense</strong>",
             maxCount: 1,
             count: 0,
             frequency: 2,
@@ -396,7 +398,7 @@ const tech = {
         {
             name: "mass-energy equivalence",
             // description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>√ of <strong class='color-defense'>defense</strong> <strong>reduction</strong> reduces max <strong class='color-f'>energy</strong>",
-            description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>exponentially <strong>reduced</strong> <strong class='color-defense'>defense</strong> <em>(~ x^0.12)</em>",
+            description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>exponentially <strong>reduced</strong> <strong class='color-defense'>defense</strong> <em>(~ x^0.13)</em>",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -2104,7 +2106,6 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            isSkin: true,
             allowed() {
                 return !tech.isRelay
             },
@@ -2257,7 +2258,6 @@ const tech = {
             count: 0,
             frequency: 1,
             frequencyDefault: 1,
-            isSkin: true,
             allowed() {
                 return !tech.isFlipFlop
             },
@@ -3482,9 +3482,9 @@ const tech = {
             }
         },
         {
-            name: "technical debt", // overengineering
+            name: "technical debt",
             descriptionFunction() {
-                return `<strong>+300%</strong> <strong class='color-d'>damage</strong> <strong>–15%</strong> <strong class='color-d'>damage</strong><br>for each <strong class='color-m'>tech</strong> you have learned <em>(-${Math.floor(100*(Math.max(41 / (tech.totalCount + 21), 4 - 0.15 * tech.totalCount) ))-100}%)</em>`
+                return `<strong>+300%</strong> <strong class='color-d'>damage</strong> <strong>–15%</strong> <strong class='color-d'>damage</strong><br>for each <strong class='color-m'>tech</strong> you have learned <em>(${(Math.floor(100*(Math.min(Math.pow(0.85, tech.totalCount-20), 4 - 0.15 * tech.totalCount)))-100)}%)</em>`
             },
             maxCount: 1,
             count: 0,
@@ -4274,7 +4274,7 @@ const tech = {
             allowed() {
                 return ((tech.haveGunCheck("nail gun") && !tech.nailInstantFireRate && !tech.nailRecoil && !tech.isRicochet) || (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea)) && !tech.isRivets && !tech.isIncendiary && !tech.isIceCrystals && !tech.isIceShot
             },
-            requires: "nail gun, shotgun, not ice crystal, rivets, rotary cannon, or pneumatic, incendiary, nail-shot, rivets, foam-shot, worm-shot, ice-shot",
+            requires: "nail gun, shotgun, not ice crystal, rivets, rotary cannon, pneumatic, incendiary, nail-shot, foam-shot, worm-shot, ice-shot",
             effect() {
                 tech.isNeedles = true
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
@@ -7397,6 +7397,25 @@ const tech = {
             }
         },
         {
+            name: "aerostat",
+            description: `<strong>+88%</strong> <strong class='color-d'>damage</strong> while <strong>off</strong> the <strong>ground</strong><br><strong>-22%</strong> <strong class='color-d'>damage</strong> while <strong>on</strong> the <strong>ground</strong>`,
+            isFieldTech: true,
+            maxCount: 1,
+            count: 0,
+            frequency: 2,
+            frequencyDefault: 2,
+            allowed() {
+                return m.fieldUpgrades[m.fieldMode].name === "negative mass"
+            },
+            requires: "negative mass",
+            effect() {
+                tech.isNoGroundDamage = true
+            },
+            remove() {
+                tech.isNoGroundDamage = false
+            }
+        },
+        {
             name: "annihilation",
             description: "after <strong>colliding</strong> with non-boss mobs<br>they are <strong>annihilated</strong> and <strong>–33%</strong> <strong class='color-f'>energy</strong>",
             isFieldTech: true,
@@ -8025,7 +8044,7 @@ const tech = {
         {
             name: "symbiosis",
             descriptionFunction() {
-                return `after a <strong>boss</strong> <strong>dies</strong> spawn a <strong class='color-m'>tech</strong>, ${powerUps.orb.ammo(1)}, ${powerUps.orb.research(1)}, and ${powerUps.orb.heal(1)}<br>after a <strong>mob</strong> <strong>dies</strong> <strong>–0.5</strong> maximum ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"}`
+                return `after a <strong>boss</strong> <strong>dies</strong> spawn ${powerUps.orb.research(3)}${powerUps.orb.heal(3)} and a <strong class='color-m'>tech</strong><br>after a <strong>mob</strong> <strong>dies</strong> <strong>–0.5</strong> maximum ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"}`
             },
             isFieldTech: true,
             maxCount: 1,
@@ -8176,28 +8195,28 @@ const tech = {
         },
         {
             name: "vacuum fluctuation",
-            description: `use ${powerUps.orb.research(5)}to exploit your <strong class='color-f'>field</strong> for a<br><strong>+11%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
+            description: `use ${powerUps.orb.research(4)}to exploit your <strong class='color-f'>field</strong> for a<br><strong>+11%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
             isFieldTech: true,
             maxCount: 1,
             count: 0,
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "wormhole") && (build.isExperimentSelection || powerUps.research.count > 4)
+                return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "wormhole") && (build.isExperimentSelection || powerUps.research.count > 3)
             },
             requires: "wormhole, time dilation, negative mass, pilot wave",
             effect() {
                 tech.fieldDuplicate = 0.11
                 powerUps.setDupChance(); //needed after adjusting duplication chance
                 if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.11);
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 4; i++) {
                     if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
                 }
             },
             remove() {
                 tech.fieldDuplicate = 0
                 powerUps.setDupChance(); //needed after adjusting duplication chance
-                if (this.count > 0) powerUps.research.changeRerolls(5)
+                if (this.count > 0) powerUps.research.changeRerolls(4)
             }
         },
         // {
@@ -11325,4 +11344,5 @@ const tech = {
     isDilate: null,
     isDiaphragm: null,
     hardLanding: null,
+    isNoGroundDamage: null,
 }

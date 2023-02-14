@@ -3764,18 +3764,6 @@ const spawn = {
                     this.pushAway(Math.sqrt(this.flapRate) * 0.13, Math.sqrt(this.flapRate) * 0.06) //this.flapRate = 0.2, +0.13x3 -> 0.6
                     me.babies(0.05 * simulation.difficulty + 1)
                 }
-                // //draw wings as if they are protecting
-                // const wingShield = (a, size) => {
-                //     ctx.beginPath();
-                //     const perp = { x: Math.cos(a), y: Math.sin(a) } //
-                //     const where = Vector.add(this.position, Vector.mult(perp, 0.2 * this.radius))
-                //     ctx.ellipse(where.x, where.y, size, size * 0.8, a, 0, 2 * Math.PI)
-                //     ctx.fillStyle = this.fill = `hsla(${160+40*Math.random()}, 100%, ${25 + 25*Math.random()*Math.random()}%, 0.9)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
-                //     ctx.fill();
-                // }
-                // wingShield(this.angle + Math.PI / 2, radius * 1.3)
-                // wingShield(this.angle - Math.PI / 2, radius * 1.3)
-
                 //draw invulnerable
                 ctx.beginPath();
                 let vertices = this.vertices;
@@ -5943,7 +5931,7 @@ const spawn = {
                     ctx.lineTo(vertices[j].x, vertices[j].y);
                 }
                 ctx.lineTo(vertices[0].x, vertices[0].y);
-                ctx.lineWidth = 1;
+                // ctx.lineWidth = 1;
                 ctx.fillStyle = `rgba(255,255,255,${this.alpha * this.alpha})`;
                 ctx.fill();
             } else if (this.isNotCloaked) {
@@ -7460,17 +7448,19 @@ const spawn = {
         mobs.spawn(x, y, 8, radius, "rgb(0,60,80)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-
-        me.g = 0.0001; //required if using this.gravity
-        me.accelMag = 0.002 * simulation.accelScale;
-        me.memory = 20;
         Matter.Body.setDensity(me, 0.0005 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.startingDamageReduction = me.damageReduction
+        me.isInvulnerable = false
+        me.nextHealthThreshold = 0.75
+        me.invulnerableCount = 0
+        me.g = 0.0001; //required if using this.gravity
+        me.accelMag = 0.0012 + 0.0013 * simulation.accelScale;
+        me.memory = 20;
+        me.repulsionRange = 1800 * 1800
 
         cons[cons.length] = Constraint.create({
-            pointA: {
-                x: constraint.x,
-                y: constraint.y
-            },
+            pointA: { x: constraint.x, y: constraint.y },
             bodyB: me,
             stiffness: 0.00012
         });
@@ -7481,42 +7471,74 @@ const spawn = {
         me.onDeath = function() {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             this.removeCons(); //remove constraint
-            //spawn seekers
-            // for (let i = 0, len = 100; i < len; i++) {
-            //     const unit = Vector.rotate({ x: 10 + i, y: 0 }, Math.random() * 6.28)
-            //     const where = Vector.add(this.position, unit)
-            //     spawn.seeker(where.x, where.y); //(x, y, radius = 8, sides = 6)
-            // }
-            const delay = 4
+            me.babies(0.05 * simulation.difficulty + 1)
+        };
+        me.babies = function(len) {
+            const delay = Math.max(3, Math.floor(15 - len / 2))
             let i = 0
-            const len = 3 * simulation.difficulty
             let spawnFlutters = () => {
                 if (i < len) {
                     if (!(simulation.cycle % delay) && !simulation.paused && !simulation.isChoosing && m.alive) {
-                        const unit = Vector.rotate({ x: radius * Math.random(), y: 0 }, Math.random() * 6.28)
-                        const where = Vector.add(this.position, unit)
-                        spawn.seeker(where.x, where.y); //(x, y, radius = 8, sides = 6)
+                        // const phase = i / len * 2 * Math.PI
+                        // const where = Vector.add(this.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
+                        const unit = Vector.normalise(Vector.sub(player.position, this.position))
+                        const velocity = Vector.mult(unit, 10 + 10 * Math.random())
+                        const where = Vector.add(this.position, Vector.mult(unit, radius * 1.2))
+                        spawn.allowShields = false
+                        spawn.flutter(where.x, where.y, Math.floor(9 + 8 * Math.random()))
+                        const who = mob[mob.length - 1]
+                        Matter.Body.setDensity(who, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
+                        Matter.Body.setVelocity(who, velocity);
+                        Matter.Body.setAngle(who, Math.atan2(velocity.y, velocity.x))
+
+                        this.alertNearByMobs();
+                        spawn.allowShields = true
                         i++
                     }
                     requestAnimationFrame(spawnFlutters);
                 }
             }
             requestAnimationFrame(spawnFlutters);
-            simulation.drawList.push({ //add dmg to draw queue
-                x: this.position.x,
-                y: this.position.y,
-                radius: radius * 0.9,
-                color: "rgba(255,0,255,0.2)",
-                time: len * (delay - 1)
-            });
+        }
+        me.onDamage = function() {
+            if (this.health < this.nextHealthThreshold && this.alive) {
+                this.health = this.nextHealthThreshold - 0.01
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4
+                this.invulnerableCount = 90 + Math.floor(30 * Math.random())
+                this.isInvulnerable = true
+                this.damageReduction = 0
+            }
         };
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.do = function() {
-            // this.armor();
             this.gravity();
-            this.seePlayerCheck();
-            this.checkStatus();
-            this.attraction();
+            if (this.isInvulnerable) {
+                this.repulsion();
+                this.invulnerableCount--
+                if (this.invulnerableCount < 0) {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                    this.frictionAir = 0.05
+                    me.babies(0.07 * simulation.difficulty + 2)
+                    if (this.radius > 15) {
+                        const scale = 0.88;
+                        Matter.Body.scale(this, scale, scale);
+                        this.radius *= scale;
+                    }
+                }
+                //draw invulnerable
+                ctx.beginPath();
+                let vertices = this.vertices;
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                ctx.lineTo(vertices[0].x, vertices[0].y);
+                ctx.lineWidth = 13 + 5 * Math.random();
+                ctx.strokeStyle = `rgba(255,255,255,${0.5+0.2*Math.random()})`;
+                ctx.stroke();
+            } else {
+                this.seePlayerCheck();
+                this.checkStatus();
+                this.attraction();
+            }
         };
     },
     shield(target, x, y, chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2) + tech.duplicationChance(), isExtraShield = false) {

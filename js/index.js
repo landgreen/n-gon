@@ -54,7 +54,7 @@ const cat = {
     phased: 0x100000000,
 }
 
-const color = { //light
+let color = { //light
     // background: "#ddd", // used instead:  document.body.style.backgroundColor
     block: "rgba(140,140,140,0.85)",
     blockS: "#222",
@@ -335,7 +335,7 @@ const build = {
 <span style="float: right;">press ${input.key.pause} to resume</span> 
 <br>
 <br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)} &nbsp; &nbsp; difficulty: ${((m.dmgScale)).toPrecision(4)}
-<br><strong class='color-defense'>defense</strong>: ${tech.isEnergyHealth  ? (1-Math.pow(m.harmReduction(), 0.12)).toPrecision(5) : (1-m.harmReduction()).toPrecision(5) } &nbsp; &nbsp; difficulty: ${(1/simulation.dmgScale).toPrecision(4)}
+<br><strong class='color-defense'>defense</strong>: ${tech.isEnergyHealth  ? (1-Math.pow(m.harmReduction(), 0.13)).toPrecision(5) : (1-m.harmReduction()).toPrecision(5) } &nbsp; &nbsp; difficulty: ${(1/simulation.dmgScale).toPrecision(4)}
 <br><strong><em>fire rate</em></strong>: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
 ${tech.duplicationChance() ?  `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance()*100).toFixed(0)}%`: ""}
 ${m.coupling ? `<br><strong class='color-coupling'>coupling</strong>: ${(m.coupling).toFixed(2)} &nbsp; <span style = 'font-size:90%;'>`+m.couplingDescription()+"</span>": ""}
@@ -424,6 +424,9 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                 } else if (tech.tech[i].isGunTech) {
                     text += `<div id="${i}-pause-tech" class="pause-grid-module card-background ${ejectClass}" onclick="powerUps.pauseEjectTech(${i})" ${style}>`
                     text += build.gunTechText(i) + "</div>"
+                } else if (tech.tech[i].isSkin) {
+                    text += `<div id="${i}-pause-tech" class="pause-grid-module card-background ${ejectClass}" onclick="powerUps.pauseEjectTech(${i})" ${style}>`
+                    text += build.skinTechText(i) + "</div>"
                 } else {
                     text += `<div id="${i}-pause-tech" class="pause-grid-module card-background ${ejectClass}" onclick="powerUps.pauseEjectTech(${i})" ${style}>`
                     text += build.techText(i) + "</div>"
@@ -470,6 +473,14 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
     techText(i) {
         return `<div class="card-text" >
         <div class="grid-title" ><div class="circle-grid tech"></div> &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
+        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+    },
+    skinTechText(i) {
+        return `<div class="card-text"> <div class="grid-title">
+        <span style="position:relative;">
+            <div class="circle-grid-skin"></div>
+            <div class="circle-grid-skin-eye"></div>
+        </span> &nbsp; &nbsp; &nbsp;&nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
         ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
     },
     gunTechText(i) {
@@ -565,6 +576,9 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                     } else if (tech.tech[i].isJunk) {
                         techID.innerHTML = build.junkTechText(i)
                         // `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
+                    } else if (tech.tech[i].isSkin) {
+                        techID.classList.remove('experiment-grid-hide');
+                        techID.innerHTML = build.skinTechText(i)
                     } else {
                         techID.innerHTML = build.techText(i)
                     }
@@ -588,6 +602,8 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                         techID.innerHTML = build.gunTechText(i)
                     } else if (tech.tech[i].isJunk) {
                         techID.innerHTML = build.junkTechText(i)
+                    } else if (tech.tech[i].isSkin) {
+                        techID.innerHTML = build.skinTechText(i)
                     } else {
                         techID.innerHTML = build.techText(i)
                     }
@@ -661,12 +677,15 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                     text += `<div id="tech-${i}" class="experiment-grid-module card-background experiment-grid-disabled" ${style}>`
                     // text += `<div id="tech-${i}" class="experiment-grid-module card-background experiment-grid-disabled" onclick="build.choosePowerUp(${i},'tech')" ${style}>`
                 }
-                if (tech.tech[i].isJunk) {
-                    text += build.junkTechText(i)
+
+                if (tech.tech[i].isFieldTech) {
+                    text += build.fieldTechText(i)
                 } else if (tech.tech[i].isGunTech) {
                     text += build.gunTechText(i)
-                } else if (tech.tech[i].isFieldTech) {
-                    text += build.fieldTechText(i)
+                } else if (tech.tech[i].isSkin) {
+                    text += build.skinTechText(i)
+                } else if (tech.tech[i].isJunk) {
+                    text += build.junkTechText(i)
                 } else {
                     text += build.techText(i)
                 }

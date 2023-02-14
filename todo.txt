@@ -1,24 +1,60 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: elasticity - skin, does "crouch landings" a tiny bit more
-  jump and move faster, +15% defense
-  (replaces squirrel cage rotor)
+tech: aerostat - +88% damage off the ground, but -22% damage on the ground
+  negative mass field required
 
-tech: diaphragm -  skin, defense cycles between -33% and +100%
-  requires aperture
+tetherBoss now has beetle babies, and immunity
+skins have a unique orb for their description card
+  and some new images
+cloaking field has a new graphic for sneak attack on the cross hairs
 
-tungsten carbide 150->200 maximum health
-  but now does "crouch landings" a more
-Zectron damage 80->100% and it does a bit less harm to player
-flip-flop, relay switch are no longer skins
+new community map yingYang by Richard0820
 
-pause brings up the most recent in game console message 
-  in game console no longer fades out it just instantly goes on and off
 
 bug fixes
 
-
 *********************************************************** TODO *****************************************************
+
+live updating defense and damage HUD?
+  makes more sense for defense
+  for damage many effects only apply to one type of damage so it would show up
+  update frequency
+    per s
+    every cycle? (only if canvas)
+  don't include difficulty effects
+  draw in canvas or html?
+    add border for readability
+    a number
+    bars
+      horizontal
+      vertical
+    circles
+  defense
+    color: grey, white
+    scales from 0-1
+    wrapped around health bar like armor
+      what about mass-energy which has no health bar
+    at defense = 1 outlines health bar fully
+  health bar
+    color: keep red (green?)
+      red is the same as mob health bars
+  damage
+    color: red if not used for health
+    scales from 1-infinity maps to 0->1
+      1-1/(1+damage)
+
+
+
+
+map element - conveyor belt
+  for blocks, player, power ups touching map element apply vector force
+
+perfect diamagnatism could bounce on mobs, or even map elements?
+  could work like a rocket jump?
+
+field tech:  negative mass, wormhole?
+  tech: do 60% damage when not touching ground
+  tech: 50% defense when not touching ground
 
 Tech: Von Neuman probes - Drones will consume blocks to replicate themselves
   it's a little too similar to the drone repair tech, but I kinda like it better.  drones that eat blocks and spit out more drones is cool 
