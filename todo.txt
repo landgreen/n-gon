@@ -1,19 +1,24 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: aerostat - +88% damage off the ground, but -22% damage on the ground
-  negative mass field required
+tech: rebound - super balls speed up and reset duration after they hit a mob
+Zectron does 100->66% damage and it drains 25% of current energy instead of health
+mantisBoss is back
+level element: mover - rectangular map element that pushes horizontally
+  it's in a possible room for labs
 
-tetherBoss now has beetle babies, and immunity
-skins have a unique orb for their description card
-  and some new images
-cloaking field has a new graphic for sneak attack on the cross hairs
+new community level - staircase by ryanbear
 
-new community map yingYang by Richard0820
-
-
-bug fixes
 
 *********************************************************** TODO *****************************************************
+
+level element - mover
+  test effect of changing m.Vx on things like:  shooting bullets?
+  ad mobs
+
+
+
+extend uncertainty to superballs
+  maybe make aiming them more random?
 
 live updating defense and damage HUD?
   makes more sense for defense
@@ -42,12 +47,15 @@ live updating defense and damage HUD?
     color: red if not used for health
     scales from 1-infinity maps to 0->1
       1-1/(1+damage)
+diagetic UI Elements
+  ammo number?
+    doesn't text look choppy when camera moves?
+  health bar could be rendered similarly to energy bar
+    what about 2 bezier curves on left and right of player head that looks like 1/3 circleRadiusScale
+      rotate the curves as the head rotates
+    what about 2 bezier both above player
+      as the total energy and health increases the curses could asymptotically approach a maximum length as max energy/health goes to infinity
 
-
-
-
-map element - conveyor belt
-  for blocks, player, power ups touching map element apply vector force
 
 perfect diamagnatism could bounce on mobs, or even map elements?
   could work like a rocket jump?
@@ -82,14 +90,6 @@ tech - after standing wave runs out of energy from blocking, gain a buff
   aoe damage like railgun
     push mobs away
 
-diagetic UI Elements
-  ammo number?
-    doesn't text look choppy when camera moves?
-  health bar could be rendered similarly to energy bar
-    what about 2 bezier curves on left and right of player head that looks like 1/3 circleRadiusScale
-      rotate the curves as the head rotates
-    what about 2 bezier both above player
-      as the total energy and health increases the curses could asymptotically approach a maximum length as max energy/health goes to infinity
 
 level: lock
   should there be something in the top part of the map?
@@ -1227,7 +1227,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   laser
   supercritical fission
 ***past style themes***
-  field emitter - isometric, clean white robot spherical gun turret on bird legs, blender 3d, style of artstation and behance, Disney Pixar, cute 
+  field emitter - bipedal white robot spherical gun turret on bird legs
       damaged dirty white robot spherical gun turret on bird legs in the style of Solarpunk
   standing wave - concentric transparent blue geometric circles science  
   perfect diamagnetism - physics magnetic field chalk diagram 

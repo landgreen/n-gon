@@ -256,6 +256,7 @@ const m = {
             y: Math.max(-10, Math.min(m.standingOn.velocity.y, 10)) //cap velocity contribution from blocks you are standing on to 10 in the vertical
         });
     },
+    moverX: 0, //used to tell the player about moving platform x velocity
     groundControl() {
         //check for crouch or jump
         if (m.crouch) {
@@ -265,35 +266,30 @@ const m = {
         } else if (input.up && m.buttonCD_jump + 20 < m.cycle && m.yOffWhen.stand > 23) {
             m.jump()
         }
-
+        const moveX = player.velocity.x - m.moverX //account for mover platforms
         if (input.left) {
-            if (player.velocity.x > -2) {
+            if (moveX > -2) {
                 player.force.x -= m.Fx * 1.5
             } else {
                 player.force.x -= m.Fx
             }
             // }
         } else if (input.right) {
-            if (player.velocity.x < 2) {
+            if (moveX < 2) {
                 player.force.x += m.Fx * 1.5
             } else {
                 player.force.x += m.Fx
             }
         } else {
             const stoppingFriction = 0.92; //come to a stop if no move key is pressed
-            Matter.Body.setVelocity(player, {
-                x: player.velocity.x * stoppingFriction,
-                y: player.velocity.y * stoppingFriction
-            });
+            Matter.Body.setVelocity(player, { x: m.moverX * 0.08 + player.velocity.x * stoppingFriction, y: player.velocity.y * stoppingFriction });
         }
-        //come to a stop if fast 
-        if (player.speed > 4) {
+
+        if (Math.abs(moveX) > 4) { //come to a stop if fast     // if (player.speed > 4) { //come to a stop if fast 
             const stoppingFriction = (m.crouch) ? 0.65 : 0.89; // this controls speed when crouched
-            Matter.Body.setVelocity(player, {
-                x: player.velocity.x * stoppingFriction,
-                y: player.velocity.y * stoppingFriction
-            });
+            Matter.Body.setVelocity(player, { x: m.moverX * (1 - stoppingFriction) + player.velocity.x * stoppingFriction, y: player.velocity.y * stoppingFriction });
         }
+        m.moverX = 0 //reset the level mover offset
     },
     airControl() {
         //check for coyote time jump
@@ -302,11 +298,7 @@ const m = {
 
         //check for short jumps   //moving up   //recently pressed jump  //but not pressing jump key now
         if (m.buttonCD_jump + 60 > m.cycle && !(input.up) && m.Vy < 0) {
-            Matter.Body.setVelocity(player, {
-                //reduce player y-velocity every cycle
-                x: player.velocity.x,
-                y: player.velocity.y * 0.94
-            });
+            Matter.Body.setVelocity(player, { x: player.velocity.x, y: player.velocity.y * 0.94 }); //reduce player y-velocity every cycle
         }
 
         if (input.left) {
@@ -2106,7 +2098,8 @@ const m = {
                     const solid = function(that) {
                         const dx = that.position.x - player.position.x;
                         const dy = that.position.y - player.position.y;
-                        if (that.speed < 3 && dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
+                        // if (that.speed < 3 && dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
+                        if (dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
                             that.collisionFilter.category = cat.body; //make solid
                             that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet; //can hit player now
                         } else {
