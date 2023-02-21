@@ -550,7 +550,7 @@ const m = {
         if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.73 ** m.coupling
         if (tech.isLowHealthDefense) dmg *= 1 - Math.max(0, 1 - m.health) * 0.8
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.33
-        if (tech.squirrelFx !== 1) dmg *= 1 - 3 * (tech.squirrelFx - 1) / 5 //cause more damage
+        if (tech.squirrelFx !== 1) dmg *= Math.pow(0.7, (tech.squirrelFx - 1) / 0.4) //cause more damage
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.15
         if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.25

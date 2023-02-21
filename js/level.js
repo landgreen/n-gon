@@ -10,7 +10,7 @@ const level = {
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     //see level.populateLevels:   (intro, ... , reservoir, reactor, ... , gauntlet, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
-    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase"],
+    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
@@ -42,7 +42,7 @@ const level = {
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.labs();
+            // level.factory();
             // spawn.nodeGroup(1200, 0, "starter")
             // spawn.mantisBoss(1900, -500)
             // spawn.sneakBoss(1900, -500)
@@ -2350,14 +2350,18 @@ const level = {
                                 }
                                 //map elements go here
                                 //box around portals
-                                spawn.mapRect(x + -75, y + -2700, 150, 100);
-                                spawn.mapRect(x + -75, y + -2450, 150, 25);
-                                spawn.mapRect(x + 1925, y + -2725, 125, 550);
-                                spawn.mapRect(x + 1925, y + -2025, 125, 50);
-                                spawn.mapRect(x + 1925, y + -1125, 150, 150);
-                                spawn.mapRect(x + 1925, y + -825, 125, 50);
-                                spawn.mapRect(x + -50, y + -350, 125, 50);
-                                spawn.mapRect(x + -50, y + -650, 125, 150);
+                                spawn.mapRect(x + -50, y + -2700, 150, 100);
+                                spawn.mapRect(x + -50, y + -2450, 150, 25);
+                                spawn.mapRect(x + 1900, y + -2725, 150, 550);
+                                spawn.mapRect(x + 1900, y + -2025, 150, 50);
+                                spawn.mapRect(x + 1900, y + -1125, 150, 150);
+                                spawn.mapRect(x + 1900, y + -825, 150, 50);
+                                spawn.mapRect(x + -50, y + -350, 150, 50);
+                                spawn.mapRect(x + -50, y + -650, 150, 150);
+                                spawn.mapRect(x + 1975, y - 1025, 50, 225);
+                                spawn.mapRect(x + 1975, y - 2200, 50, 200);
+                                spawn.mapRect(x + -25, y - 2625, 50, 200);
+                                spawn.mapRect(x + -25, y - 525, 75, 200);
 
                                 const rampSpeed = 4 + Math.floor(9 * Math.random())
                                 const mover4 = level.mover(x, y + -2425, 1000, 50, rampSpeed)
@@ -2365,18 +2369,18 @@ const level = {
                                 const mover2 = level.mover(x + 1000, y + -800, 1000, 50, -rampSpeed)
                                 const mover1 = level.mover(x, y + -325, 1000, 50, -rampSpeed)
                                 const portal1 = level.portal({
-                                    x: x + 100,
+                                    x: x + 125,
                                     y: y - 425
                                 }, 2 * Math.PI, { //right
-                                    x: x + 100,
+                                    x: x + 125,
                                     y: y - 2525
                                 }, 2 * Math.PI) //right
 
                                 const portal2 = level.portal({
-                                    x: x + 1900,
+                                    x: x + 1875,
                                     y: y - 900
                                 }, Math.PI, { //left
-                                    x: x + 1900,
+                                    x: x + 1875,
                                     y: y - 2100
                                 }, Math.PI) //left
 
@@ -2407,13 +2411,27 @@ const level = {
                                 for (let i = 0, numberOfMapElementsAdded = map.length - mapStartingLength; i < numberOfMapElementsAdded; i++) addMapToLevelInProgress(map[map.length - 1 - i])
                                 simulation.draw.setPaths() //update map graphics
 
+                                //blocks that ride the movers and portals
+                                const addBody = (index) => {
+                                    body[index].collisionFilter.category = cat.body;
+                                    body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+                                    body[index].classType = "body";
+                                    Composite.add(engine.world, body[index]); //add to world
+                                }
+                                spawn.bodyRect(x + 175, y + -2525, 50, 75);
+                                addBody(body.length - 1)
+                                spawn.bodyRect(x + 300, y + -2525, 50, 50);
+                                addBody(body.length - 1)
+                                spawn.bodyRect(x + 500, y + -2525, 80, 75);
+                                addBody(body.length - 1)
+
                                 //mobs go here
                                 spawn.randomMob(x + 175, y + -125, 0);
                                 spawn.randomMob(x + 1775, y + -125, 0);
-                                spawn.randomMob(x + 1750, y + -525, 0);
+                                // spawn.randomMob(x + 1750, y + -525, 0);
                                 spawn.randomMob(x + 225, y + -1000, 0);
                                 spawn.randomMob(x + 1675, y + -1075, 0);
-                                spawn.randomMob(x + 1575, y + -2450, 0);
+                                // spawn.randomMob(x + 1575, y + -2450, 0);
                                 spawn.randomMob(x + 425, y + -1850, 0);
                                 spawn.randomMob(x + 1425, y + -1200, 0);
                                 spawn.randomMob(x + 350, y + -1000, 0);
@@ -2846,8 +2864,8 @@ const level = {
         exit = exitOptions[Math.floor(Math.random() * exitOptions.length)];
         empty = emptyOptions[Math.floor(Math.random() * emptyOptions.length)];
         loot = lootOptions[Math.floor(Math.random() * lootOptions.length)];
-        // upDown = upDownOptions[Math.floor(Math.random() * upDownOptions.length)];
-        upDown = upDownOptions[0] //controls what level spawns for map designing building //********************************* DO   !NOT!  RUN THIS LINE IN THE FINAL VERSION ***************************************
+        upDown = upDownOptions[Math.floor(Math.random() * upDownOptions.length)];
+        // upDown = upDownOptions[0] //controls what level spawns for map designing building //********************************* DO   !NOT!  RUN THIS LINE IN THE FINAL VERSION ***************************************
         //3x2:  4 short rooms (3000x1500),  1 double tall room (3000x3000)
         //rooms
         let rooms = ["exit", "loot", "enter", "empty"]
@@ -3411,28 +3429,63 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     template() {
+        simulation.enableConstructMode()
+        level.setPosToSpawn(0, -50); //normal spawn
+        level.exit.x = 1500;
+        level.exit.y = -1875;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d8dadf";
+        // color.map = "#444" //custom map color
+
         level.custom = () => {
             level.exit.drawAndCheck();
 
             level.enter.draw();
         };
         level.customTopLayer = () => {};
-        level.setPosToSpawn(0, -50); //normal spawn
-        level.exit.x = 1500;
-        level.exit.y = -1875;
-        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-        level.defaultZoom = 1800
-        simulation.zoomTransition(level.defaultZoom)
-        document.body.style.backgroundColor = "#d8dadf";
-        // powerUps.spawnStartingPowerUps(1475, -1175);
-        // spawn.debris(750, -2200, 3700, 16); //16 debris per level
 
         spawn.mapRect(-100, 0, 1000, 100);
+        // powerUps.spawnStartingPowerUps(1475, -1175);
+        // spawn.debris(750, -2200, 3700, 16); //16 debris per level
         // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
         // spawn.randomSmallMob(1300, -70);
         // spawn.randomMob(2650, -975, 0.8);
         // spawn.randomGroup(1700, -900, 0.4);
         // if (simulation.difficulty > 1) spawn.randomLevelBoss(2200, -1300);
+        // spawn.secondaryBossChance(100, -1500)
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+    },
+    factory() {
+        simulation.enableConstructMode()
+        level.setPosToSpawn(0, -50); //normal spawn
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
+        level.exit.x = 1500;
+        level.exit.y = -1875;
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d8dadf";
+        color.map = "#222629"
+
+        level.custom = () => {
+            level.exit.drawAndCheck();
+
+            level.enter.draw();
+        };
+        level.customTopLayer = () => {};
+
+        spawn.mapRect(-100, 0, 1000, 100);
+        // powerUps.spawnStartingPowerUps(1475, -1175);
+        // spawn.debris(750, -2200, 3700, 16); //16 debris per level
+        // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
+        // spawn.randomSmallMob(1300, -70);
+        // spawn.randomMob(2650, -975, 0.8);
+        // spawn.randomGroup(1700, -900, 0.4);
+        // if (simulation.difficulty > 1) spawn.randomLevelBoss(2200, -1300);
+        // spawn.secondaryBossChance(100, -1500)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     final() {
@@ -15310,7 +15363,147 @@ const level = {
         // if (simulation.difficulty > 1) spawn.randomLevelBoss(2200, -1300);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
+    fortress() {
+        simulation.makeTextLog(`<strong>fortress</strong> by <span class='color-var'>Desboot</span>`);
+        const boost1 = level.boost(3600, -250, 1000)
+        const boost2 = level.boost(60, -604, 1000)
+        const boost3 = level.boost(2160, -1260, 1000)
+        powerUps.spawnStartingPowerUps(1033.3, -121.4)
+        level.custom = () => {
+            boost1.query();
+            boost2.query();
+            boost3.query();
+            level.exit.drawAndCheck();
+            level.enter.draw();
+        };
+        level.setPosToSpawn(0, -50); //normal spawn
+        level.exit.x = 3586; //3586.5, -1464.0
+        level.exit.y = -1494;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d8dadf";
+        level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(0,0,0,0.3)"
+            ctx.fillRect(-272, -580, 1700, 600)
+            ctx.fillRect(1427.5, -487, 1280, 600)
+            ctx.fillRect(2707.3, -580, 1200, 600)
+            ctx.fillStyle = "rgba(0,0,0,0.2)"
+            ctx.fillRect(2752, -1744, 1075, 1164)
+            ctx.fillRect(937, -1590, 339, 550)
+            ctx.fillRect(1158, -1040, 118, 550)
+            ctx.fillRect(3049, -1063, 339, 500)
+            ctx.fillRect(1439, -1281, 297, 800)
+            ctx.fillRect(2130, -1182, 167, 800)
+            ctx.fillRect(1892, -2073, 238, 1593)
+            ctx.fillRect(2297, -2073, 238, 1593)
+            ctx.fillStyle = "rgba(0,0,0,0.15)"
+            ctx.fillRect(483, -1277, 350, 700)
+            ctx.fillRect(833, -1000, 325, 450)
+            ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
+            ctx.fillRect(2800, -1712, 730, 300)
+        };
 
+        spawn.debris(2700, -120, 180, 3);
+        spawn.debris(1350, -100, 280, 3);
+        spawn.debris(2300, -700, 380, 5);
+        spawn.debris(976, -775, 38, 5);
+        spawn.debris(840, -1424, 3080, 5);
+        spawn.debris(2300, -700, 3080, 5);
+
+        spawn.mapRect(-272, 0, 4198, 123);
+        spawn.mapRect(-272, -581, 132, 581);
+        spawn.mapRect(-272, -581, 572, 326);
+        spawn.mapRect(1462, -229, 92, 229);
+        spawn.mapRect(1462, -229, 352, 57);
+        spawn.mapRect(2872, -220, 1056, 330);
+        spawn.mapRect(170, -260, 484, 80);
+        spawn.mapRect(476, -581, 1162, 75);
+        spawn.mapRect(951, -519, 1760, 132);
+        spawn.mapRect(1747, -492, 506, 66);
+        spawn.mapRect(2462, -581, 1074, 75);
+        spawn.mapRect(1136, -616, 510, 100);
+        spawn.mapRect(3815.6, -1461, 114, 1300); //far right wall
+        spawn.mapRect(480, -1456, 106, 651); //far left wall
+        spawn.mapRect(1426, -906, 106, 400);
+        spawn.mapRect(480, -1302, 374, 57);
+        spawn.mapRect(788, -1302, 75, 308);
+        spawn.mapRect(788, -1055, 370, 62);
+        spawn.mapRect(3049, -1170, 471, 106);
+        spawn.mapRect(3348, -1170, 188, 663);
+        spawn.mapRect(2751, -1461, 1088, 53); //roof under the exit
+        spawn.mapRect(2751, -1743, 92, 915); //wall on left or far right side
+        spawn.mapRect(937, -1667, 339, 84); //upper left platform
+        spawn.mapRect(1135, -3239, 119, 1450);
+        spawn.mapRect(1440, -1346, 295, 66); //center left platform
+        spawn.mapRect(2090, -1240, 242, 57); //center righ platform
+        spawn.mapRect(1892, -2214, 88, 220); //vertical part of left L
+        spawn.mapRect(1892, -2073, 238, 84); //flat part of left L
+        spawn.mapRect(2447, -2214, 88, 220); //vertical part of right L
+        spawn.mapRect(2297, -2073, 238, 84); //flat part of right L
+        spawn.mapRect(2751, -1743, 1078, 57); //exit roof //3587.2, -1470.0
+        spawn.mapRect(3584, -1470, 103, 57); //wall below door3689
+        spawn.mapRect(3428, -1735, 103, 173); //wall covering secret
+
+        spawn.mapRect(-11000, -1000, 100, 10); //SAL
+        spawn.mapRect(-11000, -1000, 10, 100); //SAL
+        spawn.mapRect(-10900, -900, 10, 100); //SAL
+        spawn.mapRect(-11000, -900, 100, 10); //SAL
+        spawn.mapRect(-11000, -800, 100, 10); //SAL
+        spawn.mapRect(-10800, -1000, 10, 200); //SAL
+        spawn.mapRect(-10700, -1000, 10, 200); //SAL
+        spawn.mapRect(-10800, -1000, 100, 10); //SAL
+        spawn.mapRect(-10800, -900, 100, 10); //SAL
+        spawn.mapRect(-10600, -1000, 10, 200); //SAL
+        spawn.mapRect(-10600, -800, 100, 10); //SAL
+
+        spawn.mapRect(-11000, -91000, 100, 10); //SAL
+        spawn.mapRect(-11000, -91000, 10, 100); //SAL
+        spawn.mapRect(-10900, -90900, 10, 100); //SAL
+        spawn.mapRect(-11000, -90900, 100, 10); //SAL
+        spawn.mapRect(-11000, -90800, 100, 10); //SAL
+        spawn.mapRect(-10800, -91000, 10, 200); //SAL
+        spawn.mapRect(-10700, -91000, 10, 200); //SAL
+        spawn.mapRect(-10800, -91000, 100, 10); //SAL
+        spawn.mapRect(-10800, -90900, 100, 10); //SAL
+        spawn.mapRect(-10600, -91000, 10, 200); //SAL
+        spawn.mapRect(-10600, -90800, 100, 10); //SAL
+        //mobs
+        spawn.randomMob(3104.9, -1284.9, 0.2);
+        spawn.randomMob(1784.7, -95.9, 0.2);
+        spawn.randomMob(3474.2, -406.7, 0.1);
+        spawn.randomMob(1603.2, -1493.5, 0.4);
+        spawn.randomMob(772.4, -1505.2, 0.2);
+        spawn.randomMob(824.6, -781.3, 0.2);
+        spawn.randomMob(818.8, -1468.9, 0.2);
+        spawn.randomMob(-124.7, -853, 0.2);
+        spawn.randomMob(3011.1, -1978.0, -0.2);
+        spawn.randomMob(2428.0, -236.8, 0.1);
+        spawn.randomSmallMob(694.3, -385.3);
+        spawn.randomSmallMob(1142.0, -808.4);
+        spawn.randomSmallMob(791.5, -803.7);
+        spawn.randomSmallMob(3175.8, -830.8);
+        spawn.randomSmallMob(1558.5, -1940.8);
+        spawn.randomSmallMob(2700, -475);
+        spawn.randomSmallMob(2700, -475);
+        spawn.pulsar(1762.9, -2768.3)
+        spawn.pulsar(3821.5, -2373.9)
+        let randomBoss = Math.floor(Math.random() * 5);
+        spawn[["laserBoss", "blinkBoss", "shooterBoss", "launcherBoss", "pulsarBoss", "beetleBoss", "bladeBoss", "revolutionBoss", "dragonFlyBoss", "spiderBoss"][randomBoss]](2058.5, -711.4, 100, false);
+
+        //spawn powerups
+        // powerUps.spawn(3167.6, -1300, "tech")
+        powerUps.spawn(3125.8, -1543.4, "tech")
+        powerUps.spawn(3125.8, -1543.4, "heal")
+        powerUps.spawn(3125.8, -1543.4, "ammo")
+        powerUps.spawn(3125.8, -1543.4, "ammo")
+        powerUps.spawn(3137.6, -1300, "ammo")
+        powerUps.spawn(1605.2, -1436.9, "heal")
+        powerUps.spawn(2912.9, -1940.9, "ammo")
+        powerUps.spawn(3167.6, -1300, "heal")
+        powerUps.spawn(1, 1, "ammo")
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+    },
     // ********************************************************************************************************
     // ********************************************************************************************************
     // ***************************************** training levels **********************************************

@@ -327,7 +327,7 @@ const tech = {
         },
         {
             name: "elasticity",
-            description: "<strong>+33%</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>+15%</strong> <strong class='color-defense'>defense</strong>",
+            description: "<strong>+33%</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>+30%</strong> <strong class='color-defense'>defense</strong>",
             maxCount: 3,
             count: 0,
             frequency: 1,
@@ -339,7 +339,7 @@ const tech = {
             requires: "not skinned",
             effect() {
                 m.skin.mech();
-                tech.hardLanding = 80
+                tech.hardLanding = 90
                 tech.squirrelFx += 0.4;
                 tech.squirrelJump += 0.16;
                 m.setMovement()
@@ -6311,7 +6311,7 @@ const tech = {
         },
         {
             name: "surfactant",
-            description: `use ${powerUps.orb.research(2)}to trade your <strong>foam</strong> <strong class='color-g'>gun</strong><br>for <strong>3</strong> <strong class='color-bot'>foam-bots</strong> and <strong>foam-bot upgrade</strong>`,
+            description: `use ${powerUps.orb.research(2)}to trade your <strong>foam</strong> <strong class='color-g'>gun</strong><br>for <strong>2</strong> <strong class='color-bot'>foam-bots</strong> and <strong>foam-bot upgrade</strong>`,
             isGunTech: true,
             isRemoveGun: true,
             maxCount: 1,

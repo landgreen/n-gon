@@ -1,19 +1,11 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: rebound - super balls speed up and reset duration after they hit a mob
-Zectron does 100->66% damage and it drains 25% of current energy instead of health
-mantisBoss is back
-level element: mover - rectangular map element that pushes horizontally
-  it's in a possible room for labs
-
-new community level - staircase by ryanbear
-
 
 *********************************************************** TODO *****************************************************
 
 level element - mover
   test effect of changing m.Vx on things like:  shooting bullets?
-  ad mobs
+  add mobs
 
 
 
