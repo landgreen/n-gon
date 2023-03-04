@@ -2528,7 +2528,7 @@ const spawn = {
         me.friction = 1
         me.frictionStatic = 1
         me.restitution = 0;
-        me.delay = 100 + 40 * simulation.CDScale;
+        me.delay = 120 + 40 * simulation.CDScale;
         Matter.Body.rotate(me, Math.random() * Math.PI);
         spawn.shield(me, x, y, 1);
         me.onDeath = function() {
@@ -3029,21 +3029,16 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "#6ba");
         let me = mob[mob.length - 1];
         me.babyList = [] //list of mobs that are apart of this boss
-        Matter.Body.setDensity(me, 0.001); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
+        Matter.Body.setDensity(me, 0.0015); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
         me.damageReduction = 0.13 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) //normal is 1,  most bosses have 0.25
         me.isBoss = true;
 
         me.friction = 0;
-        me.frictionAir = 0.0067;
+        me.frictionAir = 0.006;
         me.g = 0.0002; //required if using this.gravity
-        me.seePlayerFreq = 33;
+        me.seePlayerFreq = 31;
         const springStiffness = 0.00003; //simulation.difficulty
         const springDampening = 0.0002;
-
-        // const springStiffness = 0.00014;
-        // const springDampening = 0.0005;
-
-
         me.springTarget = {
             x: me.position.x,
             y: me.position.y
@@ -4957,6 +4952,7 @@ const spawn = {
         mobs.spawn(x, y, 16, radius, "rgb(255,255,255)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
+        me.isReactorBoss = true;
         me.inertia = Infinity; //no rotation
         me.burstFireFreq = 22 + Math.floor(13 * simulation.CDScale)
         me.burstTotalPhases = 3 + Math.floor(1.4 / simulation.CDScale)
@@ -5060,6 +5056,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         // Matter.Body.rotate(me, 2 * Math.PI * Math.random());
         me.isBoss = true;
+        me.isReactorBoss = true;
         Matter.Body.setDensity(me, 0.001); //normal is 0.001
         me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.startingDamageReduction = me.damageReduction
@@ -5218,6 +5215,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
         me.isBoss = true;
+        me.isReactorBoss = true;
         Matter.Body.setDensity(me, 0.003); //normal is 0.001
         me.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.startingDamageReduction = me.damageReduction
@@ -5299,7 +5297,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
         me.isBoss = true;
-
+        me.isReactorBoss = true;
         me.inertia = Infinity;
         me.frictionAir = 0.01
         me.restitution = 1

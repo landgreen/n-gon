@@ -55,7 +55,7 @@ const lore = {
     trainer: {
         color: "#f20",
         voice: undefined,
-        text: function (say) {
+        text: function(say) {
             simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now()/1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
             lore.talkingColor = this.color
             const utterance = new SpeechSynthesisUtterance(say);
@@ -67,7 +67,7 @@ const lore = {
     anand: {
         color: "#e0c",
         voice: undefined,
-        text: function (say) {
+        text: function(say) {
             if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
                 simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now()/1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
                 lore.talkingColor = this.color
@@ -101,7 +101,7 @@ const lore = {
     },
     miriam: {
         color: "#f20",
-        text: function (say) {
+        text: function(say) {
             if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
                 simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now()/1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
                 lore.talkingColor = this.color
@@ -116,7 +116,7 @@ const lore = {
                         lore.isSpeech = false
                         lore.nextSentence()
                     }
-                    speechFrozen = setTimeout(function () { // speech frozen after 10 seconds of no end
+                    speechFrozen = setTimeout(function() { // speech frozen after 10 seconds of no end
                         console.log('speech frozen')
                         lore.isSpeech = false
                         lore.nextSentence()
@@ -330,7 +330,7 @@ const lore = {
                     if (input.down) {
                         lore.miriam.text("So, No. Maybe you are lucky. Emotions are complex.")
                     } else if (input.up) {
-                        lore.anand.text("YES, Cool! I wonder if its emotions came from watching humans. ")
+                        lore.anand.text("YES, Cool! I wonder if its emotions came from watching humans.")
                         lore.sentence--
                         lore.conversation[lore.chapter].splice(lore.sentence + 1, 1, () => {
                             lore.miriam.text("Or maybe it learned independently, because it needed them.")
@@ -384,7 +384,7 @@ const lore = {
                 lore.miriam.text("Oh no.")
             },
             () => {
-                lore.anand.text("We can't talk to it while it's fighting")
+                lore.anand.text("We can't talk to it while it's fighting.")
             },
             () => {
                 lore.talkingColor = "#dff";

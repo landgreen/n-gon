@@ -220,6 +220,14 @@ const tech = {
     damage: 1, //used for tech changes to player damage that don't have complex conditions
     damageFromTech() {
         let dmg = tech.damage //m.fieldDamage
+        if (tech.isDivisor) {
+            for (let i = 0; i < b.inventory.length; i++) {
+                if (b.guns[b.inventory[i]].ammo % 3 === 0) {
+                    dmg *= 1.4
+                    break
+                }
+            }
+        }
         if (tech.isNoGroundDamage) dmg *= m.onGround ? 0.78 : 1.88
         if (tech.isDilate) dmg *= 1.5 + Math.sin(m.cycle * 0.0075)
         if (tech.isGunChoice && tech.buffedGun === b.inventoryGun) dmg *= 1 + 0.31 * b.inventory.length
@@ -312,7 +320,7 @@ const tech = {
             },
             requires: "not skin",
             effect() {
-                tech.hardLanding = 40
+                tech.hardLanding = 70
                 tech.isFallingDamage = true;
                 m.setMaxHealth();
                 m.addHealth(1 / simulation.healScale)
@@ -339,7 +347,7 @@ const tech = {
             requires: "not skinned",
             effect() {
                 m.skin.mech();
-                tech.hardLanding = 90
+                tech.hardLanding = 110
                 tech.squirrelFx += 0.4;
                 tech.squirrelJump += 0.16;
                 m.setMovement()
@@ -526,6 +534,25 @@ const tech = {
             },
             remove() {
                 tech.isRewindGrenade = false;
+            }
+        },
+        {
+            name: "ternary", //"divisor",
+            descriptionFunction() {
+                return `<strong>+40%</strong> <strong class='color-d'>damage</strong> while one of your <strong class='color-g'>guns</strong><br>has <strong class='color-ammo'>ammo</strong> divisible by <strong>3</strong>`
+            },
+            maxCount: 1,
+            count: 0,
+            frequency: 1,
+            frequencyDefault: 1,
+            allowed: () => true,
+            requires: "",
+            // divisible: 3, // + Math.floor(6 * Math.random()),
+            effect() {
+                tech.isDivisor = true;
+            },
+            remove() {
+                tech.isDivisor = false;
             }
         },
         {
@@ -4831,7 +4858,7 @@ const tech = {
         },
         {
             name: "Zectron",
-            description: `<strong>+66%</strong> <strong>super ball</strong> density and <strong class='color-d'>damage</strong>, but<br>after colliding with <strong>super balls</strong> <strong>-25%</strong> <strong class='color-f'>energy</strong>`,
+            description: `<strong>+75%</strong> <strong>super ball</strong> density and <strong class='color-d'>damage</strong>, but<br>after colliding with <strong>super balls</strong> <strong>-25%</strong> <strong class='color-f'>energy</strong>`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -11365,4 +11392,5 @@ const tech = {
     hardLanding: null,
     isNoGroundDamage: null,
     isSuperBounce: null,
+    isDivisor: null
 }

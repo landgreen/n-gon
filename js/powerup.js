@@ -458,10 +458,12 @@ const powerUps = {
                 // }
             }
             if (tech.isRerollBots) {
-                let delay = 0
-                for (const cost = 2 + Math.floor(0.2 * b.totalBots()); powerUps.research.count > cost - 1; powerUps.research.count -= cost) { // 1/5 = 0.2
-                    delay += 500
-                    setTimeout(() => {
+
+                let cycle = () => {
+                    const cost = 2 + Math.floor(0.2 * b.totalBots())
+                    if (m.alive && powerUps.research.count >= cost) requestAnimationFrame(cycle);
+                    if (!simulation.paused && !simulation.isChoosing && !(simulation.cycle % 60)) {
+                        powerUps.research.count -= cost
                         b.randomBot()
                         if (tech.renormalization) {
                             for (let i = 0; i < cost; i++) {
@@ -471,8 +473,27 @@ const powerUps = {
                                 }
                             }
                         }
-                    }, delay);
+                    }
                 }
+                requestAnimationFrame(cycle);
+
+
+                // let delay = 0
+                // for (let cost = 2 + Math.floor(0.2 * b.totalBots()); powerUps.research.count > cost - 1; powerUps.research.count -= cost) { // 1/5 = 0.2
+                //     cost = 2 + Math.floor(0.2 * b.totalBots())
+                //     delay += 500
+                //     setTimeout(() => {
+                //         b.randomBot()
+                //         if (tech.renormalization) {
+                //             for (let i = 0; i < cost; i++) {
+                //                 if (Math.random() < 0.44) {
+                //                     m.fieldCDcycle = m.cycle + 20;
+                //                     powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
+                //                 }
+                //             }
+                //         }
+                //     }, delay);
+                // }
             }
             if (tech.isDeathAvoid && document.getElementById("tech-anthropic")) {
                 document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.count}`
