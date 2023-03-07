@@ -235,7 +235,7 @@ const tech = {
         if (m.coupling && (m.fieldMode === 0 || m.fieldMode === 5)) dmg *= 1 + 0.15 * m.coupling
         if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= 4.33 * (1 + 0.33 * m.coupling)
         if (tech.deathSkipTime) dmg *= 1 + 0.6 * tech.deathSkipTime
-        if (tech.isTechDebt) dmg *= Math.min(Math.pow(0.85, tech.totalCount - 20), 4 - 0.15 * tech.totalCount)
+        if (tech.isTechDebt) dmg *= tech.totalCount > 2 ? Math.pow(0.85, tech.totalCount - 20) : 4 - 0.15 * tech.totalCount // if (tech.isTechDebt) dmg *= Math.min(Math.pow(0.85, tech.totalCount - 20), 4 - 0.15 * tech.totalCount)
         if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
         if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
         if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
@@ -4969,16 +4969,16 @@ const tech = {
         },
         {
             name: "phase velocity",
-            description: "wave particles <strong>propagate</strong> faster as <strong>solids</strong><br><strong>+35%</strong> wave <strong class='color-d'>damage</strong>",
+            description: "wave particles <strong>propagate</strong> faster as <strong>solids</strong><br><strong>+40%</strong> wave <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 1,
             count: 0,
             frequency: 2,
             frequencyDefault: 2,
             allowed() {
-                return tech.haveGunCheck("wave")
+                return tech.haveGunCheck("wave") && !tech.isLongitudinal
             },
-            requires: "wave",
+            requires: "wave, not phonon",
             effect() {
                 tech.isPhaseVelocity = true;
             },
@@ -5009,7 +5009,7 @@ const tech = {
         },
         {
             name: "propagation",
-            description: "<strong>–25%</strong> wave packet propagation <strong>speed</strong><br><strong>+37%</strong> wave <strong class='color-d'>damage</strong>",
+            description: "<strong>–25%</strong> wave packet propagation <strong>speed</strong><br><strong>+41%</strong> wave <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -5020,17 +5020,17 @@ const tech = {
             },
             requires: "wave",
             effect() {
-                tech.waveBeamSpeed *= 0.8;
-                tech.waveBeamDamage += 1.55 * 0.37 //this sets base  wave damage
+                tech.waveBeamSpeed *= 0.75;
+                tech.waveBeamDamage += 0.33 * 0.41 //this sets base  wave damage
             },
             remove() {
-                tech.waveBeamSpeed = 12;
-                tech.waveBeamDamage = 1.55 //this sets base  wave damage
+                tech.waveBeamSpeed = 11;
+                tech.waveBeamDamage = 0.33 //this sets base  wave damage
             }
         },
         {
             name: "bound state",
-            description: "wave packets <strong>reflect</strong> backwards <strong>2</strong> times<br><strong>–20%</strong> <strong>range</strong>",
+            description: "wave packets <strong>reflect</strong> backwards <strong>2</strong> times<br><strong>–33%</strong> <strong>range</strong>",
             isGunTech: true,
             maxCount: 9,
             count: 0,
@@ -5049,7 +5049,7 @@ const tech = {
         },
         {
             name: "frequency",
-            description: `<strong>wave</strong> has unlimited <strong class='color-ammo'>ammo</strong><br><strong>-50%</strong> wave <strong><em>fire rate</em></strong>`,
+            description: `<strong>wave</strong> has unlimited <strong class='color-ammo'>ammo</strong><br><strong>-25%</strong> wave <strong class='color-d'>damage</strong>`,
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5058,13 +5058,13 @@ const tech = {
             allowed: () => tech.haveGunCheck("wave"),
             requires: "wave",
             effect() {
-                tech.infiniteWaveAmmo = 2
+                tech.isInfiniteWaveAmmo = true
                 b.guns[3].savedAmmo = b.guns[3].ammo
                 b.guns[3].ammo = Infinity
                 simulation.updateGunHUD();
             },
             remove() {
-                tech.infiniteWaveAmmo = 1
+                tech.isInfiniteWaveAmmo = false
                 if (this.count > 0 && b.guns[3].savedAmmo !== undefined) {
                     b.guns[3].ammo = b.guns[3].savedAmmo
                     simulation.updateGunHUD();
@@ -5082,18 +5082,18 @@ const tech = {
             frequency: 3,
             frequencyDefault: 3,
             allowed() {
-                return tech.haveGunCheck("wave")
+                return tech.haveGunCheck("wave") && !tech.isPhaseVelocity
             },
-            requires: "wave",
-            ammoScale: 11,
+            requires: "wave, not phase velocity",
+            ammoScale: 10,
             effect() {
                 tech.isLongitudinal = true;
                 b.guns[3].chooseFireMethod()
                 b.guns[3].ammoPack = b.guns[3].defaultAmmoPack / this.ammoScale
-                if (tech.infiniteWaveAmmo === 1) {
-                    b.guns[3].ammo = Math.ceil(b.guns[3].ammo / this.ammoScale);
-                } else {
+                if (tech.isInfiniteWaveAmmo) {
                     b.guns[3].savedAmmo = Math.ceil(b.guns[3].savedAmmo / this.ammoScale); //used with low frequency
+                } else {
+                    b.guns[3].ammo = Math.ceil(b.guns[3].ammo / this.ammoScale);
                 }
                 simulation.updateGunHUD();
             },
@@ -5102,10 +5102,10 @@ const tech = {
                     tech.isLongitudinal = false;
                     b.guns[3].chooseFireMethod()
                     b.guns[3].ammoPack = b.guns[3].defaultAmmoPack
-                    if (tech.infiniteWaveAmmo === 1) {
-                        b.guns[3].ammo = Math.ceil(b.guns[3].ammo * this.ammoScale);
-                    } else {
+                    if (tech.isInfiniteWaveAmmo) {
                         b.guns[3].savedAmmo = Math.ceil(b.guns[3].savedAmmo * this.ammoScale); //used with low frequency
+                    } else {
+                        b.guns[3].ammo = Math.ceil(b.guns[3].ammo * this.ammoScale);
                     }
                     simulation.updateGunHUD();
                 }
@@ -6348,7 +6348,7 @@ const tech = {
             isBot: true,
             isBotTech: true,
             isNonRefundable: true,
-            requires: "foam gun, bot upgrades, fractionation, pressure vessel",
+            requires: "foam gun, not bot upgrades, fractionation, pressure vessel",
             allowed() {
                 return tech.haveGunCheck("foam", false) && !b.hasBotUpgrade() && !tech.isAmmoFoamSize && !tech.isFoamPressure && (build.isExperimentSelection || powerUps.research.count > 1)
             },
@@ -6776,7 +6776,7 @@ const tech = {
             frequency: 1,
             frequencyDefault: 1,
             allowed() {
-                return ((tech.haveGunCheck("wave") && tech.infiniteWaveAmmo !== 1) || tech.haveGunCheck("laser") || (tech.haveGunCheck("harpoon") && !tech.isRailGun)) && !tech.isEnergyNoAmmo
+                return ((tech.haveGunCheck("wave") && !tech.isInfiniteWaveAmmo) || tech.haveGunCheck("laser") || (tech.haveGunCheck("harpoon") && !tech.isRailGun)) && !tech.isEnergyNoAmmo
             },
             requires: "harpoon, laser, wave, frequency, not railgun, non-renewables",
             effect() {
@@ -8721,6 +8721,20 @@ const tech = {
             requires: "",
             effect() {
                 if (Math.random() < 0.1) tech.damage *= 8.77
+            },
+            remove() {}
+        },
+        {
+            name: "universal healthcare",
+            description: "make your <strong class='color-d'>damage</strong> negative",
+            maxCount: 1,
+            count: 0,
+            frequency: 0,
+            isJunk: true,
+            allowed: () => true,
+            requires: "",
+            effect() {
+                tech.damage *= -1
             },
             remove() {}
         },
@@ -11377,7 +11391,7 @@ const tech = {
     isBoostPowerUps: null,
     isBoostReplaceAmmo: null,
     isFlipFlopCoupling: null,
-    infiniteWaveAmmo: null,
+    isInfiniteWaveAmmo: null,
     isJunkDNA: null,
     buffedGun: 0,
     isGunChoice: null,

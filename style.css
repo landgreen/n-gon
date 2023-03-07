@@ -567,13 +567,14 @@ summary {
 
 #guns {
     position: absolute;
-    top: 40px;
+    top: 82px;
     left: 15px;
     z-index: 2;
     font-size: 23px;
     color: #222;
-    background-color: rgba(255, 255, 255, 0.4);
-    line-height: 120%;
+    /* background-color: rgba(255, 255, 255, 0.4); */
+    background-color: rgba(255, 255, 255, 0.2);
+        line-height: 120%;
     user-select: none;
     pointer-events: none;
     padding: 0px 5px 0px 5px;
@@ -583,8 +584,8 @@ summary {
 
 #field {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 45px;
+    left: 15px;
     z-index: 2;
     font-size: 23px;
     color: #000;
@@ -601,7 +602,7 @@ summary {
 
 #tech {
     position: absolute;
-    top: 60px;
+    top: 15px;
     right: 15px;
     z-index: 2;
     font-size: 20px;

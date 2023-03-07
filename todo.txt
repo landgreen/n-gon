@@ -1,28 +1,24 @@
 ******************************************************** NEXT PATCH **************************************************
 
-map: factory
-  this is completely unbalanced, so let me know if what rough edges need to be sanded
-  found on seed 47086 level 6
-tech: ternary - +40 damage if any gun has ammo divisible by 3
+base wave gun rework
+  damage per hit 1.55 -> 0.33, -15% range, +20% ammo
+  no pause between wave packets
+  wave bullets can hit about once every 10 game cycles (1/6 of a second)
+    time between hits is reduced by fire rate
+  wave tech frequency has -25% damage no longer reduces fire rate
+  +10% phonon damage and ammo
 
-level element: transport - horizontal moving platforms
-level element: mover - stationary platform that pushes the player horizontally
-  to see examples of transport and mover look in level.testing()
+JUNK tech: universal healthcare - your damage heals mobs
+
+bug fixes
 
 *********************************************************** TODO *****************************************************
 
 level element - mover, transport
   test effect of changing m.Vx on things like:  shooting bullets?
-  add mobs?
   extend the recentered friction zero to other things
     like blocks the player stands on?
     maybe zero on the horizontal velocity of whatever the player is standing on
-
-remove the pause on wave between wave packets
-  maybe don't do packets, do sine wave beats instead?
-  wave tech don't end wave bullets on hitting mob, instead add a short cooldown, 1/4 of a second between hurting mobs
-    maybe fire rate could lower the frequency that wave bullets damage mobs as they pass through them
-      add a graphic to show the time when doing damage
 
 extend uncertainty to superballs
   maybe make aiming them more random?

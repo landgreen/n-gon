@@ -171,7 +171,6 @@ const b = {
                 b.activeGun = b.inventory[0] //if no active gun switch to new gun
                 if (b.guns[b.activeGun].charge) b.guns[b.activeGun].charge = 0; //set foam charge to zero if foam is a new gun
             }
-            // if (tech.infiniteWaveAmmo === 2) b.guns[3].ammo = Infinity
         }
         simulation.makeGunHUD();
         simulation.switchGun();
@@ -6367,8 +6366,8 @@ const b = {
             name: "wave", //3
             description: "emit a <strong>wave packet</strong> of oscillating particles<br>that propagates through <strong>solids</strong>",
             ammo: 0,
-            ammoPack: 115,
-            defaultAmmoPack: 115,
+            ammoPack: 135,
+            defaultAmmoPack: 135,
             have: false,
             wavePacketCycle: 0,
             delay: 40,
@@ -6397,7 +6396,7 @@ const b = {
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();
                     const end = 700 * Math.sqrt(tech.isBulletsLastLonger) * Math.pow(0.93, tech.waveReflections) // / Math.sqrt(tech.waveReflections * 0.5) //should equal about 1060
-                    const damage = 1.9 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) * (tech.isPhaseVelocity ? 1.25 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                    const damage = 2.1 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
 
                     for (let i = this.waves.length - 1; i > -1; i--) {
                         //draw wave
@@ -6489,7 +6488,7 @@ const b = {
                 }
             },
             fire360Longitudinal() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 4 : 8) * b.fireCDscale * tech.infiniteWaveAmmo); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 4 : 8) * b.fireCDscale); // cool down
                 this.waves.push({
                     position: {
                         x: m.pos.x,
@@ -6508,7 +6507,7 @@ const b = {
                     ctx.beginPath();
                     // const end = 1100 * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
                     const end = 1100 * tech.isBulletsLastLonger * Math.pow(0.93, tech.waveReflections) //should equal about  1767
-                    const damage = 1.9 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.4 : 1) * (tech.isPhaseVelocity ? 1.25 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                    const damage = 2.1 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.4 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
                     for (let i = this.waves.length - 1; i > -1; i--) {
                         const v1 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit1, this.waves[i].radius))
                         const v2 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit2, this.waves[i].radius))
@@ -6615,7 +6614,7 @@ const b = {
                 }
             },
             fireLongitudinal() {
-                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 4 : 8) * b.fireCDscale * tech.infiniteWaveAmmo); // cool down
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 4 : 8) * b.fireCDscale); // cool down
                 const halfArc = (m.crouch ? 0.0785 : 0.275) * (tech.isBulletTeleport ? 0.66 + (Math.random() - 0.5) : 1) //6.28 is a full circle, but these arcs needs to stay small because we are using small angle linear approximation, for collisions
                 // if (tech.isBulletTeleport && Math.random() < 0.04) {
                 //     const scale = 400 * Math.random()
@@ -6644,13 +6643,13 @@ const b = {
                 })
             },
             doTransverse() {
-                if (this.wavePacketCycle && !input.fire) {
-                    this.wavePacketCycle = 0;
-                    m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCDscale); // cool down
-                }
+                // if (this.wavePacketCycle && !input.fire) {
+                //     this.wavePacketCycle = 0;
+                //     m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCDscale); // cool down
+                // }
             },
             fireTransverse() {
-                totalCycles = Math.floor(4.3 * 35 * tech.waveReflections * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5))
+                totalCycles = Math.floor((3.5) * 35 * tech.waveReflections * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5))
                 const me = bullet.length;
                 bullet[me] = Bodies.polygon(m.pos.x + 25 * Math.cos(m.angle), m.pos.y + 25 * Math.sin(m.angle), 5, 4, {
                     angle: m.angle,
@@ -6659,9 +6658,11 @@ const b = {
                     inertia: Infinity,
                     frictionAir: 0,
                     slow: 0,
-                    amplitude: (m.crouch ? 5 : 10) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin((this.wavePacketCycle + 1) * 0.088), //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
+                    // amplitude: (m.crouch ? 5 : 10) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin((this.wavePacketCycle + 1) * 0.088), //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
+                    amplitude: (m.crouch ? 6 : 12) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin(this.wavePacketCycle * 0.088) * Math.sin(this.wavePacketCycle * 0.04), //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
                     minDmgSpeed: 0,
-                    dmg: m.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage * (tech.isBulletTeleport ? 1.43 : 1), //also control damage when you divide by mob.mass 
+                    dmg: m.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage * (tech.isBulletTeleport ? 1.43 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1), //also control damage when you divide by mob.mass 
+                    dmgCoolDown: 0,
                     classType: "bullet",
                     collisionFilter: {
                         category: 0,
@@ -6685,23 +6686,31 @@ const b = {
                             this.slow = slowCheck
                             Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), tech.waveBeamSpeed * slowCheck));
                         }
-                        q = Matter.Query.point(mob, this.position) // check if inside a mob
-                        for (let i = 0; i < q.length; i++) {
-                            let dmg = this.dmg // / Math.min(10, q[i].mass)
-                            q[i].damage(dmg);
-                            if (q[i].alive) q[i].foundPlayer();
-                            Matter.Body.setVelocity(q[i], Vector.mult(q[i].velocity, 0.9))
 
-                            this.endCycle = 0; //bullet ends cycle after doing damage
-                            if (q[i].damageReduction) {
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: this.position.x,
-                                    y: this.position.y,
-                                    radius: Math.log(dmg + 1.1) * 40 * q[i].damageReduction + 3,
-                                    color: 'rgba(0,0,0,0.4)',
-                                    time: simulation.drawTime
-                                });
+                        if (this.dmgCoolDown < 1) {
+                            q = Matter.Query.point(mob, this.position) // check if inside a mob
+                            for (let i = 0; i < q.length; i++) {
+                                this.dmgCoolDown = 5 + Math.floor(11 * Math.random() * Math.sqrt(b.fireCDscale));
+                                let dmg = this.dmg
+                                q[i].damage(dmg);
+                                if (q[i].alive) {
+                                    q[i].foundPlayer();
+                                    Matter.Body.setVelocity(q[i], Vector.mult(q[i].velocity, 0.9))
+                                }
+
+                                // this.endCycle = 0; //bullet ends cycle after doing damage
+                                if (q[i].damageReduction) {
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: this.position.x,
+                                        y: this.position.y,
+                                        radius: Math.log(dmg + 1.1) * 40 * q[i].damageReduction + 3,
+                                        color: 'rgba(0,0,0,0.4)',
+                                        time: simulation.drawTime
+                                    });
+                                }
                             }
+                        } else {
+                            this.dmgCoolDown--
                         }
                     },
                     wiggle() {
@@ -6736,7 +6745,7 @@ const b = {
                 if (tech.isPhaseVelocity) {
                     waveSpeedMap = 3.5
                     waveSpeedBody = 2
-                    bullet[me].dmg *= 1.35
+                    bullet[me].dmg *= 1.4
                 }
                 if (tech.waveReflections) {
                     bullet[me].reflectCycle = totalCycles / tech.waveReflections //tech.waveLengthRange
@@ -6761,12 +6770,7 @@ const b = {
                     y: tech.waveBeamSpeed * Math.sin(m.angle)
                 });
                 const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
-                //fire a packet of bullets then delay for a while
                 this.wavePacketCycle++
-                if (this.wavePacketCycle > 35) {
-                    m.fireCDcycle = m.cycle + Math.floor(this.delay * b.fireCDscale * tech.infiniteWaveAmmo); // cool down
-                    this.wavePacketCycle = 0;
-                }
             },
             fire() {}
         },

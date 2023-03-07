@@ -8,8 +8,8 @@ const level = {
     onLevel: -1,
     levelsCleared: 0,
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
-    //see level.populateLevels:   (intro, ... , reservoir, reactor, ... , gauntlet, final)    added later
-    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "factory"],
+    //see level.populateLevels:   (intro, ... , reservoir or factory, reactor, ... , gauntlet, final)    added later
+    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
     communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
@@ -18,7 +18,7 @@ const level = {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // tech.giveTech("performance")
-            // level.difficultyIncrease(3 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(9 * 4) //30 is near max on hard  //60 is near max on why
             // spawn.setSpawnList();
             // spawn.setSpawnList();
             // m.maxHealth = m.health = 100
@@ -27,24 +27,24 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
-            // m.setField("metamaterial cloaking") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave   plasma torch
+            // m.setField("time dilation") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave   plasma torch
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.guns[8].ammo = 10000
-            // tech.giveTech("inductive charging")
-            // tech.giveTech("laser-bot")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("mass-energy equivalence")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Zectron")
-            // for (let i = 0; i < 1; i++) tech.giveTech("CPT symmetry")
-            // for (let i = 0; i < 1; i++) tech.giveTech("elasticity")
+            // b.guns[3].ammo = 100000000
+            // tech.giveTech("propagation")
+            // tech.giveTech("amplitude")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("bound state")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Higgs mechanism")
+            // for (let i = 0; i < 1; i++) tech.giveTech("frequency")
+            // for (let i = 0; i < 1; i++) tech.giveTech("phonon")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
             // level.factory();
             // level.testing();
-            // spawn.nodeGroup(1200, 0, "starter")
+            // spawn.nodeGroup(1200, -300, "starter")
             // spawn.mantisBoss(1900, -500)
             // spawn.sneakBoss(1900, -500)
             // spawn.starter(1900, -500, 200)
@@ -164,7 +164,7 @@ const level = {
             var gun = b.guns[b.inventory[tech.buffedGun]].name
             simulation.makeTextLog(`pigeonhole principle: <strong>+${(31 * Math.max(0, b.inventory.length)).toFixed(0)}%</strong> <strong class='color-d'>damage</strong> for <strong class="highlight">${gun}</strong>`, 600);
         }
-        if (tech.isSwitchReality) {
+        if (tech.isSwitchReality && level.levelsCleared !== 0) {
             simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             m.switchWorlds()
             simulation.trails()
@@ -194,8 +194,8 @@ const level = {
         m.dmgScale = 1; //damage done by player decreases each level
         simulation.accelScale = 1 //mob acceleration increases each level
         simulation.CDScale = 1 //mob CD time decreases each level
-        simulation.dmgScale = Math.max(0.1, 0.32 * simulation.difficulty) //damage done by mobs scales with total levels
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.05) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
+        simulation.dmgScale = Math.max(0.1, 0.31 * simulation.difficulty) //damage done by mobs scales with total levels
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.047) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
     },
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
@@ -204,8 +204,8 @@ const level = {
             if (simulation.accelScale < 6) simulation.accelScale *= 1.024 //mob acceleration increases each level
             if (simulation.CDScale > 0.15) simulation.CDScale *= 0.964 //mob CD time decreases each level
         }
-        simulation.dmgScale = Math.max(0.1, 0.32 * simulation.difficulty) //damage done by mobs scales with total levels
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.05) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
+        simulation.dmgScale = Math.max(0.1, 0.31 * simulation.difficulty) //damage done by mobs scales with total levels
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.047) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
         // console.log(`CD = ${simulation.CDScale}`)
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
@@ -216,8 +216,8 @@ const level = {
             if (simulation.CDScale < 1) simulation.CDScale /= 0.964 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = Math.max(0.1, 0.32 * simulation.difficulty) //damage done by mobs scales with total levels
-        simulation.healScale = 1 / (1 + simulation.difficulty * 0.05)
+        simulation.dmgScale = Math.max(0.1, 0.31 * simulation.difficulty) //damage done by mobs scales with total levels
+        simulation.healScale = 1 / (1 + simulation.difficulty * 0.047)
     },
     difficultyText() {
         if (simulation.difficultyMode === 1) {
@@ -326,7 +326,7 @@ const level = {
             }
             level.levels = shuffle(level.levels); //shuffles order of maps with seeded random
             level.levels.length = 9 //remove any extra levels past 9
-            level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, "reservoir"); //add level to the back half of the randomized levels list
+            level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, Math.random() < 0.5 ? "factory" : "reservoir"); //add level to the back half of the randomized levels list
             level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
             if (!build.isExperimentSelection || (build.hasExperimentalMode && !simulation.isCheating)) { //experimental mode is endless, unless you only have an experiment Tech
                 level.levels.unshift("intro"); //add level to the start of the randomized levels list
@@ -3008,19 +3008,19 @@ const level = {
     },
     testing() {
 
-        const mover = level.mover(800, -300, 3000, 25); //x,y,width.height,VxGoal,force
+        const mover = level.mover(2800, -300, 1000, 25); //x,y,width.height,VxGoal,force
 
-        const train = level.transport(600, -500, 500, 25, 8); //x,y,width.height,VxGoal,force
+        const train = level.transport(2900, -500, 500, 25, 8); //x,y,width.height,VxGoal,force
         spawn.bodyRect(1900, -550, 50, 50);
-        const button = level.button(350, -400)
-        spawn.bodyRect(250, -450, 50, 50); //block on button
+        const button = level.button(2535, -200)
+        // spawn.bodyRect(250, -450, 50, 50); //block on button
 
         level.custom = () => {
 
             //oscillate back and forth
-            if (train.position.x < 800) {
+            if (train.position.x < 2000) {
                 train.changeDirection(true) //go right
-            } else if (train.position.x > 2000) {
+            } else if (train.position.x > 4000) {
                 train.changeDirection(false) //go left
             }
             if (!button.isUp) train.move();
@@ -3035,7 +3035,7 @@ const level = {
             level.enter.draw();
         };
         level.customTopLayer = () => {
-            train.draw()
+            // train.draw()
             mover.draw();
             // hazard.opticalQuery();
             button.query();
@@ -3470,7 +3470,7 @@ const level = {
                     movers[2].force = 0
                     spawnBlock(2730, -1600); //3315, -1600);
                     if ((simulation.cycle % (rate * 3)) === 0) {
-                        if (bonusAmmoCount < 6 && Math.random() < 0.6) { //some extra ammo because of all the extra mobs that don't drop ammo
+                        if (bonusAmmoCount < 3 && Math.random() < 0.5) { //some extra ammo because of all the extra mobs that don't drop ammo
                             bonusAmmoCount++
                             powerUps.spawn(2760, -1550, Math.random() < 0.5 ? "heal" : "ammo", false);
                         }
@@ -3595,7 +3595,6 @@ const level = {
         spawn.mapRect(-1550, -3050, 6525, 1400);
         spawn.mapRect(3000, -1700, 1975, 675); //ceiling center
 
-
         spawn.mapRect(3800, -4000, 5650, 950);
         spawn.mapRect(3800, -4000, 1175, 2975);
         spawn.mapRect(8175, -4000, 1275, 3685); //right wall
@@ -3618,7 +3617,6 @@ const level = {
 
         spawn.mapRect(5400, -3100, 50, 250); //exit
         spawn.mapRect(4875, -2675, 675, 50); //exit
-
         spawn.mapRect(1925, -1325, 550, 50); //entrance
         spawn.mapRect(2050, -1675, 50, 175); //entrance
         spawn.mapRect(1700, -200, 750, 275); //button shelf
@@ -3632,9 +3630,7 @@ const level = {
             spawn.mapRect(75, -775, 400, 50);
             spawn.mapRect(1700, -760, 75, 35);
             spawn.mapRect(-200, -425, 150, 35);
-
         }
-
         spawn.mapRect(2400, -600, 125, 675);
         spawn.mapRect(2400, -1750, 125, 1050);
         spawn.mapRect(2700, -1700, 125, 85);
@@ -3643,12 +3639,10 @@ const level = {
         spawn.randomMob(875, -375, 0.5);
         spawn.randomMob(1250, -575, 0.5);
         spawn.randomMob(1550, -600, 0.5);
-
         spawn.randomSmallMob(1250, -175);
         spawn.randomSmallMob(1500, -229);
         spawn.randomSmallMob(1850, -300);
         powerUps.spawn(5200, -1300, "ammo");
-
     },
     final() {
         // color.map = "rgba(0,0,0,0.8)"
