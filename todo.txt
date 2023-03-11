@@ -1,18 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
-base wave gun rework
-  damage per hit 1.55 -> 0.33, -15% range, +20% ammo
-  no pause between wave packets
-  wave bullets can hit about once every 10 game cycles (1/6 of a second)
-    time between hits is reduced by fire rate
-  wave tech frequency has -25% damage no longer reduces fire rate
-  +10% phonon damage and ammo
-
-JUNK tech: universal healthcare - your damage heals mobs
+added defense bar to HUD
+new community map commandeer by Desboot
 
 bug fixes
 
 *********************************************************** TODO *****************************************************
+
+switch to prettier formatter or remove beautify
+
+extend brainstorming animation timers to fps cap?
+  will it be smoother or choppier?
+  anything else needs to hit limited fps on a high fps monitor?
 
 level element - mover, transport
   test effect of changing m.Vx on things like:  shooting bullets?
@@ -59,6 +58,9 @@ diagetic UI Elements
     what about 2 bezier both above player
       as the total energy and health increases the curses could asymptotically approach a maximum length as max energy/health goes to infinity
 
+
+foam gun could have a knock back effect
+  maybe with pressure vessel?
 
 perfect diamagnatism could bounce on mobs, or even map elements?
   could work like a rocket jump?

@@ -335,7 +335,7 @@ const build = {
 <span style="float: right;">press ${input.key.pause} to resume</span> 
 <br>
 <br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)} &nbsp; &nbsp; difficulty: ${((m.dmgScale)).toPrecision(4)}
-<br><strong class='color-defense'>defense</strong>: ${tech.isEnergyHealth  ? (1-Math.pow(m.harmReduction(), 0.13)).toPrecision(5) : (1-m.harmReduction()).toPrecision(5) } &nbsp; &nbsp; difficulty: ${(1/simulation.dmgScale).toPrecision(4)}
+<br><strong class='color-defense'>defense</strong>: ${tech.isEnergyHealth  ? (1-Math.pow(m.defense(), 0.13)).toPrecision(5) : (1-m.defense()).toPrecision(5) } &nbsp; &nbsp; difficulty: ${(1/simulation.dmgScale).toPrecision(4)}
 <br><strong><em>fire rate</em></strong>: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
 ${tech.duplicationChance() ?  `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance()*100).toFixed(0)}%`: ""}
 ${m.coupling ? `<br><strong class='color-coupling'>coupling</strong>: ${(m.coupling).toFixed(2)} &nbsp; <span style = 'font-size:90%;'>`+m.couplingDescription()+"</span>": ""}
@@ -444,6 +444,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         document.getElementById("field").style.display = "none"
         document.getElementById("health").style.display = "none"
         document.getElementById("health-bg").style.display = "none"
+        document.getElementById("defense").style.display = "none"
 
         //show in game console
         // document.getElementById("text-log").style.display = "inline"
@@ -461,6 +462,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             document.getElementById("health").style.display = "inline"
             document.getElementById("health-bg").style.display = "inline"
         }
+        document.getElementById("defense").style.display = "inline"
         // document.body.style.overflow = "hidden"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"
@@ -728,6 +730,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         b.activeGun = null;
         b.inventoryGun = 0;
         simulation.makeGunHUD();
+        m.resetSkin()
         tech.setupAllTech();
         build.populateGrid();
         document.getElementById("field-0").classList.add("build-field-selected");
@@ -1700,3 +1703,59 @@ function cycle() {
         simulation.loop();
     }
 }
+
+// function cycle() {
+//     if (!simulation.paused) requestAnimationFrame(cycle);
+//     const now = Date.now();
+//     const elapsed = now - simulation.then; // calc elapsed time since last loop
+//     if (elapsed > simulation.fpsInterval) { // if enough time has elapsed, draw the next frame
+//         simulation.then = now - (elapsed % simulation.fpsInterval); // Get ready for next frame by setting then=now.   Also, adjust for fpsInterval not being multiple of 16.67
+
+//         simulation.cycle++; //tracks game cycles
+//         m.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
+//         if (simulation.clearNow) {
+//             simulation.clearNow = false;
+//             simulation.clearMap();
+//             level.start();
+//         }
+//         simulation.loop();
+//     }
+// }
+
+// let timeStart = performance.now()
+// //0,  16.6666666666,   33.333333333333, 50.000000000
+// function cycle(timestamp) {
+//     if (!simulation.paused) requestAnimationFrame(cycle);
+//     if (timestamp - timeStart > 0) { //simulation.fpsInterval) { // if enough time has elapsed, draw the next frame
+//         console.log(timestamp - timeStart)
+//         timeStart = timestamp
+//         simulation.cycle++; //tracks game cycles
+//         m.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
+//         if (simulation.clearNow) {
+//             simulation.clearNow = false;
+//             simulation.clearMap();
+//             level.start();
+//         }
+//         simulation.loop();
+//     }
+// }
+
+// let count = 1
+// let timeStart = performance.now()
+// const cycle = (timestamp) => {
+//     // if (timeStart === undefined) timeStart = timestamp
+//     // console.log(timestamp, timeStart)
+//     if (timestamp - timeStart > tech.brainStormDelay * count) {
+//         count++
+//         powerUps.tech.effect();
+//         document.getElementById("choose-grid").style.pointerEvents = "auto"; //turn off the normal 500ms delay
+//         document.body.style.cursor = "auto";
+//         document.getElementById("choose-grid").style.transitionDuration = "0s";
+//     }
+//     if (count < 5 && simulation.isChoosing) {
+//         requestAnimationFrame(cycle);
+//     } else {
+//         tech.isBrainstormActive = false
+//     }
+// }
+// requestAnimationFrame(cycle);

@@ -20,10 +20,8 @@ const simulation = {
         mobs.draw();
         simulation.draw.cons();
         simulation.draw.body();
-        if (!m.isBodiesAsleep) {
-            simulation.checks();
-            mobs.loop();
-        }
+        simulation.checks();
+        if (!m.isBodiesAsleep) mobs.loop();
         mobs.healthBar();
         m.draw();
         m.hold();
@@ -110,10 +108,8 @@ const simulation = {
             Engine.update(engine, simulation.delta);
             // level.custom();
             // level.customTopLayer();
-            if (!m.isBodiesAsleep) {
-                simulation.checks();
-                mobs.loop();
-            }
+            simulation.checks();
+            if (!m.isBodiesAsleep) mobs.loop();
             if (m.fieldMode !== 7) m.hold();
             b.bulletRemove();
             if (!m.isBodiesAsleep) b.bulletDo();
@@ -683,6 +679,7 @@ const simulation = {
         document.getElementById("splash").style.opacity = "0";
         document.getElementById("dmg").style.display = "none";
         document.getElementById("health-bg").style.display = "none";
+        document.getElementById("defense").style.display = "none"
         document.body.style.cursor = "auto";
         setTimeout(() => {
             document.getElementById("experiment-button").style.opacity = "1";
@@ -717,13 +714,13 @@ const simulation = {
         document.getElementById("splash").onclick = null; //removes the onclick effect so the function only runs once
         document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
         document.getElementById("dmg").style.display = "inline";
+        document.getElementById("health").style.display = "inline"
         document.getElementById("health-bg").style.display = "inline";
+        document.getElementById("defense").style.display = "inline"
 
         document.getElementById("tech").style.display = "inline"
         document.getElementById("guns").style.display = "inline"
         document.getElementById("field").style.display = "inline"
-        document.getElementById("health").style.display = "inline"
-        document.getElementById("health-bg").style.display = "inline"
         // document.body.style.overflow = "hidden"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"
@@ -1137,6 +1134,33 @@ const simulation = {
     //   }
     // },
     checks() {
+        if (!(m.cycle % 15)) { //4 times a second
+            //update defense bar
+            const defense = m.defense()
+            if (m.lastCalculatedDefense !== defense) {
+                document.getElementById("defense").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
+
+                // if (m.lastCalculatedDefense === 1) document.getElementById("defense").style.display = "inline"
+                // if (defense === 1) document.getElementById("defense").style.display = "none"
+                // Math.pow(m.defense(), 0.13)
+                m.lastCalculatedDefense = defense
+                console.log(defense)
+            }
+            // const defense = m.defense()
+            // if (m.lastCalculatedDefense !== defense) {
+            //     if (m.lastCalculatedDefense === 1) {
+            //         document.getElementById("defense").style.display = "inline"
+            //         requestAnimationFrame(() => { document.getElementById("defense").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px"; })
+            //     } else if (defense === 1) {
+            //         document.getElementById("defense").style.display = "none"
+            //         document.getElementById("defense").style.width = "0px";
+            //     } else {
+            //         document.getElementById("defense").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
+            //     }
+            //     m.lastCalculatedDefense = defense
+            //     console.log(defense)
+            // }
+        }
         if (!(m.cycle % 60)) { //once a second
             //energy overfill 
             if (m.energy > m.maxEnergy) {
@@ -1223,23 +1247,6 @@ const simulation = {
                 fallCheck(mob);
                 fallCheck(body);
                 fallCheck(powerUp, true);
-
-
-                //check for double crouch
-                //crouch playerHead.position.y - player.position.y = 9.7  //positive
-                //standing playerHead.position.y - player.position.y = -30 //negative
-                // m.undoCrouch()
-                // if (!m.crouch && ((playerHead.position.y - player.position.y) > 0)) {
-                //     Matter.Body.translate(playerHead, {
-                //         x: 0,
-                //         y: 40
-                //     });
-                // } else if (m.crouch && ((playerHead.position.y - player.position.y) > 10)) {
-                //     Matter.Body.translate(playerHead, {
-                //         x: 0,
-                //         y: 40
-                //     });
-                // }
             }
         }
     },

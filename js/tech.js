@@ -251,9 +251,9 @@ const tech = {
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.6
-        if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.harmReduction()
+        if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.defense()
         if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
-        if (tech.lastHitDamage && m.lastHit) dmg *= 1 + tech.lastHitDamage * m.lastHit * (2 - m.harmReduction()) // if (!simulation.paused) m.lastHit = 0
+        if (tech.lastHitDamage && m.lastHit) dmg *= 1 + tech.lastHitDamage * m.lastHit * (2 - m.defense()) // if (!simulation.paused) m.lastHit = 0
         if (tech.isLowHealthDmg) dmg *= 1 + 0.7 * Math.max(0, 1 - (tech.isEnergyHealth ? m.energy : m.health))
         return dmg
     },
@@ -330,7 +330,7 @@ const tech = {
                 tech.hardLanding = 130
                 tech.isFallingDamage = false;
                 m.setMaxHealth();
-                m.resetSkin();
+                if (this.count) m.resetSkin();
             }
         },
         {
@@ -357,7 +357,7 @@ const tech = {
                 tech.squirrelFx = 1;
                 tech.squirrelJump = 1;
                 m.setMovement()
-                m.resetSkin();
+                if (this.count)  m.resetSkin();
             }
         },
         {
@@ -378,7 +378,7 @@ const tech = {
             },
             remove() {
                 tech.isDilate = false
-                m.resetSkin();
+                if (this.count) m.resetSkin();
             }
         },
         {
@@ -400,7 +400,7 @@ const tech = {
             },
             remove() {
                 tech.isDiaphragm = false
-                m.resetSkin();
+                if (this.count) m.resetSkin();
             }
         },
         {
@@ -424,6 +424,7 @@ const tech = {
                 tech.isEnergyHealth = true;
                 simulation.mobDmgColor = "rgba(0, 255, 255,0.6)" //"#0cf"
                 m.displayHealth();
+                m.lastCalculatedDefense = 0 //this triggers a redraw of the defense bar
                 m.skin.energy();
             },
             remove() {
@@ -435,9 +436,10 @@ const tech = {
                     m.health = Math.max(Math.min(m.maxHealth, m.energy), 0.1);
                     simulation.mobDmgColor = "rgba(255,0,0,0.7)"
                     m.displayHealth();
+                    m.lastCalculatedDefense = 0 //this triggers a redraw of the defense bar
+                    m.resetSkin();
                 }
                 tech.isEnergyHealth = false;
-                m.resetSkin();
             }
         },
         {
@@ -494,7 +496,7 @@ const tech = {
             },
             remove() {
                 tech.isRewindAvoidDeath = false;
-                m.resetSkin();
+                if (this.count) m.resetSkin();
             }
         },
         {
@@ -3050,7 +3052,7 @@ const tech = {
         {
             name: "enthalpy",
             descriptionFunction() {
-                return `doing <strong class='color-d'>damage</strong> has a chance to spawn ${powerUps.orb.heal(1)}<br><strong>–10%</strong> <strong class='color-defense'>defense</strong>`
+                return `doing <strong class='color-d'>damage</strong> has a small chance to spawn ${powerUps.orb.heal(1)}` //<br><strong>–10%</strong> <strong class='color-defense'>defense</strong>
             },
             maxCount: 9,
             count: 0,
@@ -3062,7 +3064,7 @@ const tech = {
             },
             requires: "",
             effect() {
-                tech.healthDrain += 0.02;
+                tech.healthDrain += 0.019;
             },
             remove() {
                 tech.healthDrain = 0;
@@ -3384,7 +3386,7 @@ const tech = {
             effect() {
                 tech.isBrainstorm = true
                 tech.isBrainstormActive = false
-                tech.brainStormDelay = 150 - simulation.difficultyMode * 7
+                tech.brainStormDelay = 2000 - simulation.difficultyMode * 100
             },
             remove() {
                 tech.isBrainstorm = false
@@ -5021,11 +5023,11 @@ const tech = {
             requires: "wave",
             effect() {
                 tech.waveBeamSpeed *= 0.75;
-                tech.waveBeamDamage += 0.33 * 0.41 //this sets base  wave damage
+                tech.waveBeamDamage += 0.36 * 0.41 //this sets base  wave damage
             },
             remove() {
                 tech.waveBeamSpeed = 11;
-                tech.waveBeamDamage = 0.33 //this sets base  wave damage
+                tech.waveBeamDamage = 0.36 //this sets base  wave damage
             }
         },
         {
@@ -7197,18 +7199,18 @@ const tech = {
             requires: "standing wave",
             effect() {
                 tech.harmonics++
-                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
+                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.6) * Math.pow(0.6, (tech.harmonics - 2))
                 m.harmonicShield = m.harmonicAtomic
             },
             remove() {
                 tech.harmonics = 2
-                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.3) * Math.pow(0.6, (tech.harmonics - 2))
+                m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.6) * Math.pow(0.6, (tech.harmonics - 2))
                 m.harmonicShield = m.harmonic3Phase
             }
         },
         {
             name: "expansion",
-            description: "<strong>+40%</strong> <strong>standing wave</strong> deflection efficiency<br>using <strong>standing wave</strong> field <strong>expands</strong> its <strong>radius</strong>",
+            description: "<strong>+50%</strong> <strong>standing wave</strong> deflection efficiency<br>using <strong>standing wave</strong> field <strong>expands</strong> its <strong>radius</strong>",
             // description: "use <strong class='color-f'>energy</strong> to <strong>expand</strong> <strong>standing wave</strong><br>the field slowly <strong>contracts</strong> when not used",
             isFieldTech: true,
             maxCount: 1,
@@ -7395,9 +7397,9 @@ const tech = {
         {
             name: "dynamic equilibrium",
             descriptionFunction() {
-                return `increase <strong class='color-d'>damage</strong> by your <strong class='color-defense'>defense</strong> and<br><strong>5%</strong> of your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss &nbsp; <em style = 'font-size:94%;'>(+${(100*Math.max(5,tech.lastHitDamage) * m.lastHit * (2 - m.harmReduction())).toFixed(0)}% damage)</em>`
-            }, // = <strong>+${10*m.harmReduction()}%</strong>
-            // descriptionFunction() { return `increase <strong class='color-d'>damage</strong> by your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss<br><strong style = 'font-size:90%;'>(${(tech.lastHitDamage).toFixed(0)}%)(${(100*m.lastHit).toFixed(0)} ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"})(${2 - m.harmReduction()} <strong class='color-defense'>defense</strong>) = ${(100*tech.lastHitDamage * m.lastHit * (2 - m.harmReduction())).toFixed(0)}% <strong class='color-d'>damage</strong></strong> ` }, // = <strong>+${10*m.harmReduction()}%</strong>
+                return `increase <strong class='color-d'>damage</strong> by your <strong class='color-defense'>defense</strong> and<br><strong>5%</strong> of your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss &nbsp; <em style = 'font-size:94%;'>(+${(100*Math.max(5,tech.lastHitDamage) * m.lastHit * (2 - m.defense())).toFixed(0)}% damage)</em>`
+            }, // = <strong>+${10*m.defense()}%</strong>
+            // descriptionFunction() { return `increase <strong class='color-d'>damage</strong> by your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss<br><strong style = 'font-size:90%;'>(${(tech.lastHitDamage).toFixed(0)}%)(${(100*m.lastHit).toFixed(0)} ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"})(${2 - m.defense()} <strong class='color-defense'>defense</strong>) = ${(100*tech.lastHitDamage * m.lastHit * (2 - m.defense())).toFixed(0)}% <strong class='color-d'>damage</strong></strong> ` }, // = <strong>+${10*m.defense()}%</strong>
             isFieldTech: true,
             maxCount: 9,
             count: 0,
@@ -9050,7 +9052,7 @@ const tech = {
             effect() {
                 tech.isBrainstorm = true
                 tech.isBrainstormActive = false
-                tech.brainStormDelay = 30
+                tech.brainStormDelay = 500
             },
             remove() {
                 tech.isBrainstorm = false
@@ -9513,6 +9515,7 @@ const tech = {
             effect() {
                 document.getElementById("health").style.display = "none"
                 document.getElementById("health-bg").style.display = "none"
+                document.getElementById("defense").style.display = "none"
                 for (let i = 0; i < 20; i++) powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
             },
             remove() {}
@@ -9873,6 +9876,7 @@ const tech = {
                 //move health to the right
                 document.getElementById("health").style.left = "86px"
                 document.getElementById("health-bg").style.left = "86px"
+                document.getElementById("defense").style.left = "86px"
             },
             remove() {}
         },
@@ -10225,7 +10229,7 @@ const tech = {
                 m.skin.stubs()
             },
             remove() {
-                m.resetSkin();
+                if (this.count) m.resetSkin();
             }
         },
         {
@@ -10244,7 +10248,7 @@ const tech = {
                 m.skin.Sleipnir()
             },
             remove() {
-                m.resetSkin();
+                if (this.count) m.resetSkin();
             }
         },
         {
@@ -10263,7 +10267,7 @@ const tech = {
                 m.skin.diegesis()
             },
             remove() {
-                m.resetSkin();
+                if (this.count) m.resetSkin();
             }
         },
         {
@@ -10282,7 +10286,7 @@ const tech = {
                 m.skin.cat();
             },
             remove() {
-                m.resetSkin();
+                if (this.count) m.resetSkin();
             }
         },
         {
@@ -10301,7 +10305,7 @@ const tech = {
                 m.draw = () => {}
             },
             remove() {
-                m.resetSkin();
+                if (this.count) m.resetSkin();
             }
         },
         {
@@ -10321,7 +10325,7 @@ const tech = {
                 m.skin.pareidolia()
             },
             remove() {
-                m.resetSkin();
+                if (this.count) m.resetSkin();
             }
         },
         {

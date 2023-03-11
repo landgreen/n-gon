@@ -976,6 +976,7 @@ const spawn = {
                                 // m.displayHealth();
                                 document.getElementById("health").style.display = "none"
                                 document.getElementById("health-bg").style.display = "none"
+                                document.getElementById("defense").style.display = "none"
                                 document.getElementById("text-log").style.display = "none"
                                 document.getElementById("fade-out").style.opacity = 1; //slowly fades out
                                 // build.shareURL(false)

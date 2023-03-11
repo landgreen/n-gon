@@ -6690,14 +6690,13 @@ const b = {
                         if (this.dmgCoolDown < 1) {
                             q = Matter.Query.point(mob, this.position) // check if inside a mob
                             for (let i = 0; i < q.length; i++) {
-                                this.dmgCoolDown = 5 + Math.floor(11 * Math.random() * Math.sqrt(b.fireCDscale));
+                                this.dmgCoolDown = 5 + Math.floor(7 * Math.random() * b.fireCDscale);
                                 let dmg = this.dmg
                                 q[i].damage(dmg);
                                 if (q[i].alive) {
                                     q[i].foundPlayer();
                                     Matter.Body.setVelocity(q[i], Vector.mult(q[i].velocity, 0.9))
                                 }
-
                                 // this.endCycle = 0; //bullet ends cycle after doing damage
                                 if (q[i].damageReduction) {
                                     simulation.drawList.push({ //add dmg to draw queue
