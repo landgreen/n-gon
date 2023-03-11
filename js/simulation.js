@@ -1144,7 +1144,7 @@ const simulation = {
                 // if (defense === 1) document.getElementById("defense").style.display = "none"
                 // Math.pow(m.defense(), 0.13)
                 m.lastCalculatedDefense = defense
-                console.log(defense)
+                // console.log(defense)
             }
             // const defense = m.defense()
             // if (m.lastCalculatedDefense !== defense) {
