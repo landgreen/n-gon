@@ -24,7 +24,8 @@
     <div id="fade-out"></div>
     <div id="health-bg"></div>
     <div id="health"></div>
-    <div id="defense"></div>
+    <div id="defense-bar"></div>
+    <div id="damage-bar"></div>
     <div id="dmg"></div>
     <div id='construct'></div>
     <canvas id="canvas"></canvas>
@@ -100,6 +101,7 @@
                         <option value="biohazard">
                         <option value="islands">
                         <option value="tunnel">
+                        <option value="clock">
                         <option value="coliseum">
                         <option value="staircase">
                         <option value="perplex">
@@ -115,12 +117,26 @@
                         <option value="crossfire">
                         <option value="temple">
                         <option value="run">
+                            <!-- biohazard
+                            islands
+                            tunnel
+                            clock
+                            coliseum
+                            staircase
+                            perplex
+                            n-gon
+                            vats
+                            yingYang
+                            basement
+                            stronghold
+                            commandeer
+                            stereoMadness
+                            house
+                            dripp
+                            crossfire
+                            temple
+                            run -->
                     </datalist>
-                    <!-- communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp"], -->
-                    <!-- playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion"], -->
-
-                    <!--                <label for="banned">banned levels:</label>
-                    <input type="text" id="ban-list" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="true" style="width: 183px;"> -->
                     <br>
                     <label for="classic-select" title="play older versions of n-gon">classic n-gon:</label>
                     <select name="classic-select" id="classic-select" onChange="window.location.href=this.value">

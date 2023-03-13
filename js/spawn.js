@@ -976,7 +976,8 @@ const spawn = {
                                 // m.displayHealth();
                                 document.getElementById("health").style.display = "none"
                                 document.getElementById("health-bg").style.display = "none"
-                                document.getElementById("defense").style.display = "none"
+                                document.getElementById("defense-bar").style.display = "none"
+                                document.getElementById("damage-bar").style.display = "none"
                                 document.getElementById("text-log").style.display = "none"
                                 document.getElementById("fade-out").style.opacity = 1; //slowly fades out
                                 // build.shareURL(false)
@@ -5733,7 +5734,7 @@ const spawn = {
                         y: this.position.y,
                         radius: 3000,
                         color: `rgba(0, 0, 0,${1-0.1*i})`,
-                        time: (i + 1) * 3
+                        time: (i + 2) * 4
                     });
                 }
                 //teleport to near the end of player history

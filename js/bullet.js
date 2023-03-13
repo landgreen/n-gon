@@ -6366,8 +6366,8 @@ const b = {
             name: "wave", //3
             description: "emit a <strong>wave packet</strong> of oscillating particles<br>that propagates through <strong>solids</strong>",
             ammo: 0,
-            ammoPack: 135,
-            defaultAmmoPack: 135,
+            ammoPack: 115,
+            defaultAmmoPack: 115,
             have: false,
             wavePacketCycle: 0,
             delay: 40,
@@ -6396,7 +6396,7 @@ const b = {
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();
                     const end = 700 * Math.sqrt(tech.isBulletsLastLonger) * Math.pow(0.93, tech.waveReflections) // / Math.sqrt(tech.waveReflections * 0.5) //should equal about 1060
-                    const damage = 2.1 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                    const damage = 2.3 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
 
                     for (let i = this.waves.length - 1; i > -1; i--) {
                         //draw wave
@@ -6507,7 +6507,7 @@ const b = {
                     ctx.beginPath();
                     // const end = 1100 * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
                     const end = 1100 * tech.isBulletsLastLonger * Math.pow(0.93, tech.waveReflections) //should equal about  1767
-                    const damage = 2.1 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.4 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                    const damage = 2.3 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.4 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
                     for (let i = this.waves.length - 1; i > -1; i--) {
                         const v1 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit1, this.waves[i].radius))
                         const v2 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit2, this.waves[i].radius))
@@ -6690,7 +6690,7 @@ const b = {
                         if (this.dmgCoolDown < 1) {
                             q = Matter.Query.point(mob, this.position) // check if inside a mob
                             for (let i = 0; i < q.length; i++) {
-                                this.dmgCoolDown = 5 + Math.floor(7 * Math.random() * b.fireCDscale);
+                                this.dmgCoolDown = 5 + Math.floor(8 * Math.random() * b.fireCDscale);
                                 let dmg = this.dmg
                                 q[i].damage(dmg);
                                 if (q[i].alive) {

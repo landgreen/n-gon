@@ -455,7 +455,8 @@ const m = {
             m.alive = false;
             simulation.paused = true;
             m.health = 0;
-            document.getElementById("defense").style.display = "none"; //hide defense
+            document.getElementById("defense-bar").style.display = "none"; //hide defense
+            document.getElementById("damage-bar").style.display = "none"
             m.displayHealth();
             document.getElementById("text-log").style.display = "none"
             document.getElementById("fade-out").style.opacity = 0.9; //slowly fade to 90% white on top of canvas
@@ -511,11 +512,11 @@ const m = {
         // health display is a x^1.5 rule to make it seem like the player has lower health, this makes the player feel more excitement
         id.style.width = Math.floor(300 * m.maxHealth * Math.pow(m.health / m.maxHealth, 1.4)) + "px";
         //css animation blink if health is low
-        if (m.health < 0.3) {
-            id.classList.add("low-health");
-        } else {
-            id.classList.remove("low-health");
-        }
+        // if (m.health < 0.3) {
+        //     id.classList.add("low-health");
+        // } else {
+        //     id.classList.remove("low-health");
+        // }
     },
     addHealth(heal) {
         if (!tech.isEnergyHealth) {
@@ -535,6 +536,7 @@ const m = {
 
     defaultFPSCycle: 0, //tracks when to return to normal fps
     immuneCycle: 0, //used in engine
+    lastCalculatedDamage: 0, //used to decided if damage bar needs to be redrawn  (in simulation.checks)
     lastCalculatedDefense: 0, //used to decided if defense bar needs to be redrawn  (in simulation.checks)
     defense() {
         let dmg = 1
@@ -3921,41 +3923,16 @@ const m = {
                         }
                     }
                     this.drawRegenEnergyCloaking()
-                    //show sneak attack status 
+                    //show sneak attack status
                     // if (m.cycle > m.lastKillCycle + 240) {
                     // if (m.sneakAttackCharge > 0) {
-                    if (m.sneakAttackCycle + Math.min(120, 0.7 * (m.cycle - m.enterCloakCycle)) > m.cycle) {
-
-
-
-
-                        // ctx.strokeStyle = "rgba(0,0,0,0.2)"
-                        // ctx.lineWidth = 1
-                        // ctx.fillStyle = "rgba(0,0,0,0.02)"
-                        // for (let i = 0; i < 4; i++) {
-                        //     ctx.beginPath();
-                        //     ctx.ellipse(m.pos.x, m.pos.y, 50, 30, 0.2 * m.cycle + i * Math.PI / 4, 0, 2 * Math.PI);
-                        //     ctx.stroke()
-                        //     // ctx.fill();
-                        // }
-                        ctx.strokeStyle = "rgba(0,0,0,0.5)" //m.fieldMeterColor; //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
-                        ctx.beginPath();
-                        ctx.arc(simulation.mouseInGame.x, simulation.mouseInGame.y, 16, 0, 2 * Math.PI);
-                        // ctx.lineWidth = 3
-                        ctx.fillStyle = "rgba(0,0,0,0.2)"
-                        ctx.fill();
-
-
-                        // const unit = Vector.add(m.pos, Vector.rotate({ x: 45, y: 0 }, 2 * Math.PI * Math.random()))
-                        // simulation.drawList.push({ //add dmg to draw queue
-                        //     x: unit.x,
-                        //     y: unit.y,
-                        //     radius: 4 + 10 * Math.random(),
-                        //     color: 'rgba(0, 0, 0, 0.1)',
-                        //     time: 15
-                        // });
-
-                    }
+                    // if (m.sneakAttackCycle + Math.min(120, 0.7 * (m.cycle - m.enterCloakCycle)) > m.cycle) {
+                    //     ctx.strokeStyle = "rgba(0,0,0,0.5)" //m.fieldMeterColor; //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
+                    //     ctx.beginPath();
+                    //     ctx.arc(simulation.mouseInGame.x, simulation.mouseInGame.y, 16, 0, 2 * Math.PI);
+                    //     ctx.fillStyle = "rgba(0,0,0,0.2)"
+                    //     ctx.fill();
+                    // }
                 }
             }
         },

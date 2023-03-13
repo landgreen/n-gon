@@ -553,27 +553,112 @@ summary {
     transition: opacity 1s;
 }
 
-#defense {
+#damage-bar {
+    position: absolute;
+    /* top: 1px;
+    left: 15px;
+    height: 7px;
+    width: 0px;
+    transition: width 0.3s linear; */
+    top: 16px;
+    right: 4px;
+    height: 0px;
+    width: 7px;
+    transition: height 0.15s linear;
+    opacity: 1;
+    z-index: 2;
+    pointer-events: none;
+    background-color: rgb(255, 55, 95);
+    /* border-bottom: 1.5px solid #701; */
+    /* border-right: 1.5px solid #701; */
+    display: none;
+}
+
+#defense-bar {
+    position: absolute;
+    top: 8px;
+    left: 15px;
+    height: 7px;
+    width: 0px;
+    transition: width 0.3s linear;
+    opacity: 1;
+    z-index: 2;
+    pointer-events: none;
+    background-color: #fff;
+    border-right: 1.5px solid #777;
+    display: none;
+}
+#health {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    height: 20px;
+    width: 0px;
+    transition: width 1s ease-out;    z-index: 2;
+    pointer-events: none;
+    background-color: rgb(9, 245, 166);
+    border-right: 2px solid rgb(51, 162, 125);
+    display: none;
+}
+#health-bg {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    height: 20px;
+    width: 0px;
+    transition: width 1s ease-out;
+    background-color: #032;
+    opacity: 0.1;
+    z-index: 1;
+    pointer-events: none;
+    display: none;
+}
+
+/* #damage-bar {
+    position: absolute;
+    top: 0px;
+    left: 15px;
+    height: 6px;
+    width: 0px;
+    transition: width 0.3s linear;
+    opacity: 1;
+    z-index: 2;
+    pointer-events: none;
+    background-color: #f03;
+    border: 1px solid #701;
+    display: none;
+}
+
+#defense-bar {
     position: absolute;
     top: 9px;
     left: 15px;
     height: 5px;
     width: 0px;
-    transition: width 0.25s linear;
+    transition: width 0.3s linear;
     opacity: 1;
     z-index: 2;
     pointer-events: none;
     background-color: #fff;
-    border-top: 1px solid #000;
-    /* border-bottom: 1px solid #000; */
-    /* border-left: 1px solid #000; */
-    border-right: 1px solid #000;
+    border: 1px solid #333;
     display: none;
 }
-
+#health {
+    position: absolute;
+    top: 16px;
+    left: 15px;
+    height: 20px;
+    width: 0px;
+    transition: width 1s ease-out;    z-index: 2;
+    pointer-events: none;
+    background-color: #0fa;
+    border: 2px solid rgb(51, 162, 125);
+    border-radius: 8px;
+    display: none;
+}
 #health-bg {
     position: absolute;
-    top: 15px;
+    top: 18px;
     left: 15px;
     height: 20px;
     width: 0px;
@@ -582,36 +667,23 @@ summary {
     opacity: 0.1;
     z-index: 1;
     pointer-events: none;
+    border-radius: 8px;
     display: none;
-}
+} */
 
-#health {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    height: 20px;
-    width: 0px;
-    transition: width 1s ease-out;
-    opacity: 0.6;
-    z-index: 2;
-    pointer-events: none;
-    background-color: #f00;
-    /* display: none; */
-}
-
-.low-health {
+/* .low-health {
     animation: blink 250ms infinite alternate;
 }
 
 @keyframes blink {
     from {
-        opacity: 0.9;
+        opacity: 1;
     }
 
     to {
-        opacity: 0.2;
+        opacity: 0.6;
     }
-}
+} */
 
 /* background on title page */
 #fade-out {

@@ -679,7 +679,8 @@ const simulation = {
         document.getElementById("splash").style.opacity = "0";
         document.getElementById("dmg").style.display = "none";
         document.getElementById("health-bg").style.display = "none";
-        document.getElementById("defense").style.display = "none"
+        document.getElementById("defense-bar").style.display = "none"
+        document.getElementById("damage-bar").style.display = "none"
         document.body.style.cursor = "auto";
         setTimeout(() => {
             document.getElementById("experiment-button").style.opacity = "1";
@@ -716,7 +717,8 @@ const simulation = {
         document.getElementById("dmg").style.display = "inline";
         document.getElementById("health").style.display = "inline"
         document.getElementById("health-bg").style.display = "inline";
-        document.getElementById("defense").style.display = "inline"
+        document.getElementById("defense-bar").style.display = "inline"
+        document.getElementById("damage-bar").style.display = "inline"
 
         document.getElementById("tech").style.display = "inline"
         document.getElementById("guns").style.display = "inline"
@@ -1138,28 +1140,28 @@ const simulation = {
             //update defense bar
             const defense = m.defense()
             if (m.lastCalculatedDefense !== defense) {
-                document.getElementById("defense").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
+                document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
 
-                // if (m.lastCalculatedDefense === 1) document.getElementById("defense").style.display = "inline"
-                // if (defense === 1) document.getElementById("defense").style.display = "none"
+                // if (m.lastCalculatedDefense === 1) document.getElementById("defense-bar").style.display = "inline"
+                // if (defense === 1) document.getElementById("defense-bar").style.display = "none"
                 // Math.pow(m.defense(), 0.13)
                 m.lastCalculatedDefense = defense
                 // console.log(defense)
             }
-            // const defense = m.defense()
-            // if (m.lastCalculatedDefense !== defense) {
-            //     if (m.lastCalculatedDefense === 1) {
-            //         document.getElementById("defense").style.display = "inline"
-            //         requestAnimationFrame(() => { document.getElementById("defense").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px"; })
-            //     } else if (defense === 1) {
-            //         document.getElementById("defense").style.display = "none"
-            //         document.getElementById("defense").style.width = "0px";
-            //     } else {
-            //         document.getElementById("defense").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
-            //     }
-            //     m.lastCalculatedDefense = defense
-            //     console.log(defense)
-            // }
+
+            //update damage bar
+            const damage = tech.damageFromTech()
+            if (m.lastCalculatedDamage !== damage) {
+                canvas.width
+                // document.getElementById("damage-bar").style.width = Math.floor(Math.atan(damage - 1) / 6.28 * canvas.width) + "px";
+                document.getElementById("damage-bar").style.height = Math.floor(Math.atan(damage - 1) / 3.14 * canvas.height) + "px";
+
+                m.lastCalculatedDamage = damage
+                console.log(damage)
+            }
+
+
+
         }
         if (!(m.cycle % 60)) { //once a second
             //energy overfill 

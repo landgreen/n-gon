@@ -444,7 +444,9 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         document.getElementById("field").style.display = "none"
         document.getElementById("health").style.display = "none"
         document.getElementById("health-bg").style.display = "none"
-        document.getElementById("defense").style.display = "none"
+        document.getElementById("defense-bar").style.display = "none"
+        document.getElementById("damage-bar").style.display = "none"
+
 
         //show in game console
         // document.getElementById("text-log").style.display = "inline"
@@ -462,7 +464,8 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             document.getElementById("health").style.display = "inline"
             document.getElementById("health-bg").style.display = "inline"
         }
-        document.getElementById("defense").style.display = "inline"
+        document.getElementById("defense-bar").style.display = "inline"
+        document.getElementById("damage-bar").style.display = "inline"
         // document.body.style.overflow = "hidden"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"

@@ -945,7 +945,7 @@ const tech = {
         },
         {
             name: "kinetic bombardment",
-            description: "<strong class='color-d'>damage</strong> is proportional to mob <strong>distance</strong><br>up to <strong>+33%</strong> <strong class='color-d'>damage</strong> at <strong>3000</strong> displacement",
+            description: "far away mobs take more <strong class='color-d'>damage</strong><br>up to <strong>+33%</strong> <strong class='color-d'>damage</strong> at <strong>3000</strong> displacement",
             maxCount: 1,
             count: 0,
             frequency: 1,
@@ -4510,7 +4510,7 @@ const tech = {
         {
             name: "irradiated nails",
             link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Irradiation' class="link">irradiated nails</a>`,
-            description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br>about <strong>+90%</strong> <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
+            description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br><strong>+90%</strong> <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -5023,11 +5023,11 @@ const tech = {
             requires: "wave",
             effect() {
                 tech.waveBeamSpeed *= 0.75;
-                tech.waveBeamDamage += 0.36 * 0.41 //this sets base  wave damage
+                tech.waveBeamDamage += 0.27 * 0.41 //this sets base  wave damage
             },
             remove() {
                 tech.waveBeamSpeed = 11;
-                tech.waveBeamDamage = 0.36 //this sets base  wave damage
+                tech.waveBeamDamage = 0.27 //this sets base  wave damage
             }
         },
         {
@@ -5087,7 +5087,7 @@ const tech = {
                 return tech.haveGunCheck("wave") && !tech.isPhaseVelocity
             },
             requires: "wave, not phase velocity",
-            ammoScale: 10,
+            ammoScale: 6,
             effect() {
                 tech.isLongitudinal = true;
                 b.guns[3].chooseFireMethod()
@@ -5285,7 +5285,7 @@ const tech = {
         },
         {
             name: "iridium-192",
-            description: "<strong class='color-e'>explosions</strong> release <strong class='color-p'>gamma radiation</strong><br><strong>+100%</strong> <strong class='color-d'>damage</strong> over <strong>4</strong>  seconds",
+            description: "<strong class='color-e'>explosions</strong> release <strong class='color-p'>gamma radiation</strong><br><strong>+100%</strong> <strong class='color-e'>explosion</strong> <strong class='color-d'>damage</strong> over <strong>4</strong>  seconds",
             isGunTech: true,
             maxCount: 1,
             count: 0,
@@ -6071,7 +6071,7 @@ const tech = {
         },
         {
             name: "K-selection",
-            description: "<strong>+37%</strong> size and <strong class='color-d'>damage</strong><br>for <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong> and <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>",
+            description: "<strong>+37%</strong> <strong class='color-p' style='letter-spacing: -0.8px;'>worm</strong> and <strong class='color-p' style='letter-spacing: -0.8px;'>flea</strong> <strong class='color-d'>damage</strong>",
             isGunTech: true,
             maxCount: 3,
             count: 0,
@@ -9515,7 +9515,7 @@ const tech = {
             effect() {
                 document.getElementById("health").style.display = "none"
                 document.getElementById("health-bg").style.display = "none"
-                document.getElementById("defense").style.display = "none"
+                document.getElementById("defense-bar").style.display = "none"
                 for (let i = 0; i < 20; i++) powerUps.spawn(m.pos.x + 160 * (Math.random() - 0.5), m.pos.y + 160 * (Math.random() - 0.5), "heal");
             },
             remove() {}
@@ -9876,7 +9876,8 @@ const tech = {
                 //move health to the right
                 document.getElementById("health").style.left = "86px"
                 document.getElementById("health-bg").style.left = "86px"
-                document.getElementById("defense").style.left = "86px"
+                document.getElementById("defense-bar").style.left = "86px"
+                document.getElementById("damage-bar").style.left = "86px"   
             },
             remove() {}
         },
@@ -10215,21 +10216,23 @@ const tech = {
         },
         {
             name: "stubs",
-            description: "no knees or toes are drawn on the player",
+            description: "no knees or toes are drawn on the player<br>you can wall climb though",
             maxCount: 1,
             count: 0,
             frequency: 0,
             isSkin: true,
             isJunk: true,
+            isNonRefundable: true,
             allowed() {
                 return !m.isShipMode
             },
             requires: "",
             effect() {
                 m.skin.stubs()
+                Matter.Body.scale(player.parts[3], 2, 2);
             },
             remove() {
-                if (this.count) m.resetSkin();
+                // if (this.count) m.resetSkin();
             }
         },
         {

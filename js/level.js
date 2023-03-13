@@ -10,7 +10,7 @@ const level = {
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     //see level.populateLevels:   (intro, ... , reservoir or factory, reactor, ... , gauntlet, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
-    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer"],
+    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
@@ -18,7 +18,7 @@ const level = {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // tech.giveTech("performance")
-            // level.difficultyIncrease(9 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(16 * 4) //30 is near max on hard  //60 is near max on why
             // spawn.setSpawnList();
             // spawn.setSpawnList();
             // m.maxHealth = m.health = 100
@@ -27,26 +27,26 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
-            // m.setField("negative mass") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave   plasma torch
+            // m.setField("metamaterial cloaking") //molecular assembler  standing wave   time dilation   perfect diamagnetism   metamaterial cloaking   wormhole   negative mass    pilot wave   plasma torch
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[3].ammo = 100000000
-            // tech.giveTech("tungsten carbide")
-            // tech.giveTech("diaphragm")
+            // tech.giveTech("phonon")
+            // tech.giveTech("dead reckoning")
             // for (let i = 0; i < 1; ++i) tech.giveTech("mass-energy equivalence")
             // for (let i = 0; i < 1; ++i) tech.giveTech("decorrelation")
             // for (let i = 0; i < 1; i++) tech.giveTech("gun turret")
-            // for (let i = 0; i < 1; i++) tech.giveTech("decorrelation")
+            // for (let i = 0; i < 1; i++) tech.giveTech("simulated annealing")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.commandeer();
+            // level.testing();
             // spawn.nodeGroup(1200, -300, "starter")
             // spawn.mantisBoss(1900, -500)
             // spawn.sneakBoss(1900, -500)
-            // spawn.starter(1900, -500, 200)
+            // spawn.starter(1900, -500, 50)
             // spawn.sneaker(1900, -500, 25)
             // spawn.hopper(2538, -950)
             // spawn.zombie(1000 + 1000 * Math.random(), -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)
@@ -55,17 +55,16 @@ const level = {
             // tech.tech[322].frequency = 100
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
+
             level[simulation.isTraining ? "walk" : "intro"]() //normal starting level ************************************************
 
             // simulation.isAutoZoom = false; //look in close
             // simulation.zoomScale *= 0.5;
             // simulation.setZoom();
-
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "gun");
             // for (let i = 0; i < 13; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
-
             //lore testing
             // for (let i = 0; i < 5; i++) tech.giveTech("undefined")
             // lore.techCount = 2
@@ -86,6 +85,7 @@ const level = {
             // powerUps.spawn(m.pos.x, m.pos.y, "entanglement", false);
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
+
             // spawn.pickList = ["focuser", "focuser"]
             level[level.levels[level.onLevel]](); //picks the current map from the the levels array
             if (!simulation.isCheating && !build.isExperimentRun && !simulation.isTraining) {
@@ -258,7 +258,8 @@ const level = {
                     level.disableExit = true
                     document.getElementById("health").style.display = "none"
                     document.getElementById("health-bg").style.display = "none"
-                    document.getElementById("defense").style.display = "none"
+                    document.getElementById("defense-bar").style.display = "none"
+                    document.getElementById("damage-bar").style.display = "none"
                     document.getElementById("text-log").style.display = "none"
                     document.getElementById("fade-out").style.opacity = 1; //slowly fades out
                     setTimeout(function() {
@@ -3033,7 +3034,7 @@ const level = {
             level.enter.draw();
         };
         level.customTopLayer = () => {
-            // train.draw()
+            train.draw()
             mover.draw();
             // hazard.opticalQuery();
             button.query();
@@ -16404,6 +16405,1327 @@ const level = {
         // spawn.secondaryBossChance(100, -1500)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
+    clock() {
+        simulation.makeTextLog(`<strong>clock</strong> by <span class='color-var'>Cornbread 2100</span>`);
+
+        function drawBackgroundGear(x, y, r1, r2, rot, color, speed, numTeeth = 5, toothWidth = 75, linew = 2) {
+            var vertices = getGearVertices(x, y, r1, r2, numTeeth, m.cycle * speed + rot, toothWidth / 100);
+
+            // draw gear
+            ctx.beginPath();
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (var i = 1; i < vertices.length; i++) {
+                ctx.lineTo(vertices[i].x, vertices[i].y);
+            }
+            ctx.lineTo(vertices[0].x, vertices[0].y);
+            ctx.lineWidth = 2;
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = "#3a3f20";
+            ctx.lineWidth = linew;
+            ctx.stroke();
+        }
+
+        function drawFallingBackgroundGear(x, y, r1, r2, rot, color, speed, fallSpeed, startCycle, numTeeth = 5, linew = 2) {
+            rot *= speed;
+            numTeeth *= 2;
+
+            const gearInc = (2 * Math.PI) / numTeeth;
+            ctx.beginPath()
+            for (var i = 0; i <= numTeeth; i++) {
+                var gear_r = r2;
+                if (i % 2 == 1) gear_r = r1;
+                ctx.arc(x, y + (m.cycle - startCycle) * fallSpeed, gear_r, (i * gearInc) + rot, ((i + 1) * gearInc) + rot);
+            }
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = "#3a3f20";
+            ctx.lineWidth = linew;
+            ctx.stroke();
+        }
+
+        function getGearVertices(x, y, r1, r2, numTeeth, rot = 0, teethWidth = 0) {
+            if (teethWidth == 0) {
+                teethWidth = (2 * Math.PI) / (2 * numTeeth);
+            }
+            const gearInc = (2 * Math.PI) / numTeeth;
+            var vertices = [];
+
+            for (var i = 0; i < numTeeth; i++) {
+                //inner vertices of gear teeth
+                var distance = i * gearInc + rot;
+                var vX = Math.sin(distance + teethWidth / 2) * r1;
+                var vY = Math.cos(distance + teethWidth / 2) * r1;
+
+                var point1 = { x: vX, y: vY, point: 1 };
+
+                vX = Math.sin(distance - teethWidth / 2) * r1;
+                vY = Math.cos(distance - teethWidth / 2) * r1;
+
+                var point4 = { x: vX, y: vY, point: 4 };
+
+                vX = Math.sin(distance) * r1;
+                vY = Math.cos(distance) * r1;
+
+                if (vX == 0) {
+                    vX = 0.0001
+                }
+
+                var slope = vY / vX;
+
+                var angle = Math.atan2(vY, vX);
+
+                //outer vertices of gear teeth
+                var point2 = { x: point1.x, y: point1.y, point: 2 };
+                point2.x += Math.cos(angle) * (r2 - r1);
+                point2.y += Math.sin(angle) * (r2 - r1);
+
+                var point3 = { x: point4.x, y: point4.y, point: 3 };
+                point3.x += Math.cos(angle) * (r2 - r1);
+                point3.y += Math.sin(angle) * (r2 - r1);
+
+                vertices.push(point4);
+                vertices.push(point3);
+                vertices.push(point2);
+                vertices.push(point1);
+            }
+
+            for (var i = 0; i < vertices.length; i++) {
+                vertices[i].x += x;
+                vertices[i].y += y;
+            }
+
+            return vertices;
+        }
+
+        function getGearTeethVertices(x, y, r1, r2, numTeeth, toothIndex, teethWidth = 0) {
+            if (teethWidth == 0) {
+                teethWidth = (2 * Math.PI) / (2 * numTeeth);
+            }
+
+            const gearInc = (2 * Math.PI) / numTeeth;
+            var vertices = [];
+
+            for (var i = 0; i < numTeeth; i++) {
+                //inner vertices of gear teeth
+                var distance = i * gearInc;
+                var vX = Math.sin(distance + teethWidth / 2) * r1;
+                var vY = Math.cos(distance + teethWidth / 2) * r1;
+
+                var point1 = { x: vX, y: vY, point: 1 };
+
+                vX = Math.sin(distance - teethWidth / 2) * r1;
+                vY = Math.cos(distance - teethWidth / 2) * r1;
+
+                var point4 = { x: vX, y: vY, point: 4 };
+
+                vX = Math.sin(distance) * r1;
+                vY = Math.cos(distance) * r1;
+
+                if (vX == 0) {
+                    vX = 0.0001
+                }
+
+                var slope = vY / vX;
+
+                var angle = Math.atan2(vY, vX);
+
+                //outer vertices of gear teeth
+                var point2 = { x: point1.x, y: point1.y, point: 2 };
+                point2.x += Math.cos(angle) * (r2 - r1);
+                point2.y += Math.sin(angle) * (r2 - r1);
+
+                var point3 = { x: point4.x, y: point4.y, point: 3 };
+                point3.x += Math.cos(angle) * (r2 - r1);
+                point3.y += Math.sin(angle) * (r2 - r1);
+
+                if (i == toothIndex) {
+                    vertices.push(point4);
+                    vertices.push(point3);
+                    vertices.push(point2);
+                    vertices.push(point1);
+                }
+            }
+
+            for (var i = 0; i < vertices.length; i++) {
+                vertices[i].x += x;
+                vertices[i].y += y;
+            }
+
+            return vertices;
+        }
+
+        function mapGear(x, y, r1, r2, rot, speed, numTeeth = 5, toothWidth = 50, additionalCircleRadius = 10) {
+            const part1 = body[body.length] = Bodies.polygon(x, y, 0, r1 + additionalCircleRadius, {
+                collisionFilter: {
+                    category: cat.body,
+                    mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                },
+                isNoSetCollision: true,
+                isNotHoldable: true,
+                frictionAir: 0,
+                friction: 1,
+                frictionStatic: 1,
+                restitution: 0
+            });
+
+            var parts = [part1];
+
+            for (var i = 0; i < numTeeth; i++) {
+                var toothVertices = getGearTeethVertices(0, 0, r2 - r1, toothWidth + r2 - r1, numTeeth, i, 70); // for some reason the teeth are sideways
+
+                var center = { // the center of the inner line of the gear
+                    x: toothVertices[3].x - toothVertices[0].x,
+                    y: toothVertices[3].y - toothVertices[0].y
+                };
+
+                distanceToCenter = Math.sqrt((center.x ** 2) + (center.y ** 2));
+
+                var radiusScale = (r1 + ((r2 - r1) / 2)) / distanceToCenter;
+
+                gearToothSlope = center.y / center.x;
+
+                var newPart = body[body.length] = Bodies.fromVertices(x + center.x * radiusScale, y + center.y * radiusScale, toothVertices, {
+                    collisionFilter: {
+                        category: cat.body,
+                        mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                    },
+                    isNoSetCollision: true,
+                    isNotHoldable: true,
+                    frictionAir: 0.01,
+                    friction: 1,
+                    frictionStatic: 1,
+                    restitution: 0
+                });
+
+                parts.push(newPart);
+            }
+
+            const who = Body.create({
+                parts: parts
+            });
+
+            Composite.add(engine.world, who);
+            composite[composite.length] = who;
+            who.collisionFilter.category = cat.body;
+            who.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
+
+            const constraint = Constraint.create({
+                pointA: {
+                    x: x,
+                    y: y
+                },
+                bodyB: who,
+                stiffness: 1,
+                damping: 1
+            });
+
+
+            Matter.Body.setDensity(who, 0.0001)
+            Composite.add(engine.world, constraint);
+            Matter.Body.setAngle(who, 0)
+            Matter.Body.setAngularVelocity(who, 0);
+            who.center = { x: x, y: y }
+
+            who.rotate = function () {
+                var rotation = m.cycle * speed + rot;
+                Matter.Body.setAngle(who, rotation);
+            }
+
+            who.gearSettings = {
+                x: x,
+                y: y,
+                r1: r1,
+                r2: r2,
+                rot: rot,
+                speed: speed,
+                numTeeth: numTeeth,
+                toothWidth: toothWidth
+            }
+
+            return who;
+        }
+
+        function clockHand(x, y, width, height, speed = 15 * Math.PI / 180, angle = 0, density = 0.001) {
+            var who1 = body[body.length] = Bodies.rectangle(x, y + height / 2, width, height, {
+                collisionFilter: {
+                    category: cat.body,
+                    mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                },
+                isNoSetCollision: true,
+                isNotHoldable: true,
+                friction: 1,
+                frictionStatic: 1,
+                restitution: 0
+            });
+
+            const who = Body.create({
+                parts: [who1],
+                handRotation: 0
+            });
+
+            Composite.add(engine.world, who);
+            composite[composite.length] = who;
+            who.collisionFilter.category = cat.body;
+            who.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
+
+            who.position.y = y;
+
+            const constraint = Constraint.create({
+                pointA: {
+                    x: who.position.x,
+                    y: who.position.y
+                },
+                bodyB: who,
+                stiffness: 1,
+                damping: 1
+            });
+
+            Matter.Body.setDensity(who, density)
+            Composite.add(engine.world, constraint);
+            who.center = { x: who.position.x, y: who.position.y }
+
+            who.rotate = function () {
+                if (m.cycle % 60 == 0) {
+                    who.handRotation += speed;
+                    if (Math.abs(who.handRotation % (Math.PI * 2) - Math.PI) < 0.2) {
+                        // spawn random mob at exit door
+                        const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
+                        spawn[pick](300, 600);
+                    };
+                    if (Matter.Query.collides(player, [this]).length != 0) {
+                        var playerAngle = Math.atan((m.pos.y - y) / (m.pos.x - x));
+                        if (m.pos.x - x < 0) playerAngle += Math.PI;
+                        const playerDistance = Math.sqrt((m.pos.x - x) ** 2 + (m.pos.y - y) ** 2);
+                        Matter.Body.setPosition(player, {
+                            x: x + Math.cos(playerAngle + speed) * playerDistance,
+                            y: y + Math.sin(playerAngle + speed) * playerDistance
+                        })
+                    }
+                }
+                Matter.Body.setAngle(who, who.handRotation + angle);
+            }
+
+            return who
+        }
+
+        function pendulum(x, y, width, height, swingTime = 50, swingDistanceMultiplier = 0.5, bobSides = 0, bobRadius = 200, density = 100, angle = 0, frictionAir = 0, angularVelocity = 0) {
+            const who1 = body[body.length] = Bodies.rectangle(x, y + height / 2, width, height, {
+                collisionFilter: {
+                    category: cat.body,
+                    mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                },
+                isNoSetCollision: true,
+                isNotHoldable: true,
+                frictionAir: frictionAir,
+                friction: 1,
+                frictionStatic: 1,
+                restitution: 0
+            });
+
+            const who2 = body[body.length] = Bodies.polygon(x, y + height, bobSides, bobRadius, {
+                collisionFilter: {
+                    category: cat.body,
+                    mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                },
+                isNoSetCollision: true,
+                isNotHoldable: true,
+                frictionAir: 0.01,
+                friction: 1,
+                frictionStatic: 1,
+                restitution: 0
+            });
+
+            const who = Body.create({
+                parts: [who1, who2],
+            });
+
+            Composite.add(engine.world, who);
+            composite[composite.length] = who;
+            who.collisionFilter.category = cat.body;
+            who.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mob | cat.mobBullet | cat.map
+
+            who.position.y = y;
+
+            const constraint = Constraint.create({
+                pointA: {
+                    x: x,
+                    y: y
+                },
+                bodyB: who,
+                stiffness: 1,
+                damping: 1
+            });
+
+
+            Matter.Body.setDensity(who, density)
+            Composite.add(engine.world, constraint);
+            Matter.Body.setAngle(who, angle)
+            Matter.Body.setAngularVelocity(who, angularVelocity);
+            who.center = { x: x, y: y + height / 2 }
+
+            who.rotate = function () {
+                var rotation = Math.sin(m.cycle / swingTime) * swingDistanceMultiplier;
+                Matter.Body.setAngle(who, rotation);
+            }
+
+            return who;
+        }
+
+        function gearMob(x, y, leaveBody = true, autoFindPlayer = false, radius = Math.floor(25 + 40 * Math.random()), teethRadius = 0) {
+            if (teethRadius == 0) {
+                teethRadius = radius + 15 + Math.floor(Math.random() * 20);
+            }
+
+            mobs.spawn(x, y, 0, teethRadius, "transparent");
+            let me = mob[mob.length - 1];
+            me.stroke = "transparent";
+
+            me.delay = 100 + 40 * simulation.CDScale;
+            me.accelMag = Math.PI / 10000;
+            me.memory = 120;
+            me.seeAtDistance2 = 2000000; // 140
+            Matter.Body.setDensity(me, 0.001);
+
+            me.leaveBody = leaveBody;
+
+            const numTeeth = Math.round(5 + Math.random() * 3);
+
+            me.gearRotation = 0;
+            me.gearSpeed = Math.round(-0.1 + Math.random() * 0.2);
+            me.gearAccelerating = true;
+
+            me.do = function () {
+                if (autoFindPlayer) {
+                    me.locatePlayer();
+                }
+
+                this.seePlayerByLookingAt();
+                this.checkStatus();
+                this.attraction();
+
+                if (me.gearAccelerating && (Math.random() > 0.99 || me.gearSpeed >= 0.1)) {
+                    me.gearAccelerating = false;
+                } else if (!me.gearAccelerating && (Math.random() > 0.99 || me.gearSpeed <= -0.1)) {
+                    me.gearAccelerating = true;
+                }
+
+                if (me.gearAccelerating) {
+                    me.gearSpeed += 0.001;
+                } else {
+                    me.gearSpeed -= 0.001;
+                }
+
+                me.gearRotation += me.gearSpeed;
+
+                var newVertices = getGearVertices(me.position.x, me.position.y, radius, teethRadius, numTeeth, me.gearRotation);
+                // draw body
+                ctx.beginPath();
+                ctx.moveTo(newVertices[0].x, newVertices[0].y);
+                for (let i = 1; i < newVertices.length; i++) {
+                    ctx.lineTo(newVertices[i].x, newVertices[i].y);
+                }
+                ctx.lineTo(newVertices[0].x, newVertices[0].y);
+                ctx.fillStyle = "#7b3f00";
+                ctx.fill();
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        function customDoor(x, y, width, height) {
+            x = x + width / 2
+            y = y + height / 2
+            const doorBlock = body[body.length] = Bodies.rectangle(x, y, width, height, {
+                collisionFilter: {
+                    category: cat.map,
+                    mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                },
+                isNoSetCollision: true,
+                inertia: Infinity, //prevents rotation
+                isNotHoldable: true,
+                friction: 1,
+                frictionStatic: 1,
+                restitution: 0,
+                isClosing: false,
+                setPos(x, y) {
+                    if (y - this.position.y <= 0 || ( // only move down if clear of stuff
+                        Matter.Query.ray([player], Matter.Vector.create(this.position.x - width / 2, this.position.y + height / 2), Matter.Vector.create(this.position.x + width / 2, this.position.y + height / 2), 5).length === 0 &&
+                        Matter.Query.ray(body, Matter.Vector.create(this.position.x - width / 2, this.position.y + height / 2), Matter.Vector.create(this.position.x + width / 2, this.position.y + height / 2), 5).length <= 1 &&
+                        Matter.Query.ray(mob, Matter.Vector.create(this.position.x - width / 2, this.position.y + height / 2), Matter.Vector.create(this.position.x + width / 2, this.position.y + height / 2), 5).length === 0)
+                    ) {
+                        const position = {
+                            x: x,
+                            y: y
+                        }
+                        Matter.Body.setPosition(this, position);
+                    }
+                },
+                draw() {
+                    ctx.fillStyle = "#555"
+                    ctx.beginPath();
+                    const v = this.vertices;
+                    ctx.moveTo(v[0].x, v[0].y);
+                    for (let i = 1; i < v.length; ++i) {
+                        ctx.lineTo(v[i].x, v[i].y);
+                    }
+                    ctx.lineTo(v[0].x, v[0].y);
+                    ctx.fill();
+                }
+            });
+            Matter.Body.setStatic(doorBlock, true); //make static
+            return doorBlock
+        }
+
+        function horizontalDoor(x, y, width, height, distance, speed = 1) {
+            x = x + width / 2
+            y = y + height / 2
+            const doorBlock = body[body.length] = Bodies.rectangle(x, y, width, height, {
+                collisionFilter: {
+                    category: cat.map,
+                    mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                },
+                isNoSetCollision: true,
+                inertia: Infinity, //prevents rotation
+                isNotHoldable: true,
+                friction: 1,
+                frictionStatic: 1,
+                restitution: 0,
+                isClosing: false,
+                openClose() {
+                    if (!m.isBodiesAsleep) {
+                        if (this.isClosing) {
+                            if (this.position.x > x) { //try to close
+                                if ( //if clear of stuff
+                                    Matter.Query.collides(this, [player]).length === 0 &&
+                                    Matter.Query.collides(this, body).length < 2 &&
+                                    Matter.Query.collides(this, mob).length === 0
+                                ) {
+                                    const position = {
+                                        x: this.position.x - speed,
+                                        y: this.position.y
+                                    }
+                                    Matter.Body.setPosition(this, position)
+                                }
+                            }
+                        } else {
+                            if (this.position.x < x + distance) { //try to open 
+                                const position = {
+                                    x: this.position.x + speed,
+                                    y: this.position.y
+                                }
+                                Matter.Body.setPosition(this, position)
+                            }
+                        }
+                    }
+                },
+                isClosed() {
+                    return this.position.x < x + 1
+                },
+                draw() {
+                    ctx.fillStyle = "#555"
+                    ctx.beginPath();
+                    const v = this.vertices;
+                    ctx.moveTo(v[0].x, v[0].y);
+                    for (let i = 1; i < v.length; ++i) {
+                        ctx.lineTo(v[i].x, v[i].y);
+                    }
+                    ctx.lineTo(v[0].x, v[0].y);
+                    ctx.fill();
+                }
+            });
+            Matter.Body.setStatic(doorBlock, true); //make static
+            return doorBlock
+        }
+
+        function drawBelt(circle1, circle2) {
+            // circle 1
+            const distance = Math.sqrt((circle2.x - circle1.x) ** 2 + (circle2.y - circle1.y) ** 2);
+            const distanceToIntersection = (-circle1.radius * distance) / (-circle1.radius + circle2.radius);
+            const slopeAngle = Math.atan((circle2.y - circle1.y) / (circle2.x - circle1.x));
+            const angleToTangent = Math.acos(-circle1.radius / distanceToIntersection);
+            const tangentIntersection = {
+                x: Math.cos(slopeAngle) * distanceToIntersection + circle1.x,
+                y: Math.sin(slopeAngle) * distanceToIntersection + circle1.y
+            }
+            const tangentPoint = {
+                x: Math.cos(angleToTangent + slopeAngle) * -circle1.radius + circle1.x,
+                y: Math.sin(angleToTangent + slopeAngle) * -circle1.radius + circle1.y
+            }
+            const invertedTangentPoint = {
+                x: Math.cos(-angleToTangent + slopeAngle) * -circle1.radius + circle1.x,
+                y: Math.sin(-angleToTangent + slopeAngle) * -circle1.radius + circle1.y
+            }
+
+            // circle 2
+            const tangentPoint2 = {
+                x: Math.cos(angleToTangent + slopeAngle) * -circle2.radius + circle2.x,
+                y: Math.sin(angleToTangent + slopeAngle) * -circle2.radius + circle2.y
+            }
+            const invertedTangentPoint2 = {
+                x: Math.cos(-angleToTangent + slopeAngle) * -circle2.radius + circle2.x,
+                y: Math.sin(-angleToTangent + slopeAngle) * -circle2.radius + circle2.y
+            }
+
+            // draw
+            ctx.beginPath();
+            ctx.moveTo(tangentPoint.x, tangentPoint.y);
+            ctx.lineTo(tangentPoint2.x, tangentPoint2.y);
+            const newAngle = Math.atan((tangentPoint2.y - circle2.y) / (tangentPoint2.x - circle2.x));
+            const newAngle2 = Math.atan((invertedTangentPoint2.y - circle2.y) / (invertedTangentPoint2.x - circle2.x));
+            ctx.arc(circle2.x, circle2.y, circle2.radius, newAngle, newAngle2 + Math.PI);
+            ctx.lineTo(invertedTangentPoint.x, invertedTangentPoint.y);
+            const newAngle3 = Math.atan((invertedTangentPoint.y - circle1.y) / (invertedTangentPoint.x - circle1.x));
+            const newAngle4 = Math.atan((tangentPoint.y - circle1.y) / (tangentPoint.x - circle1.x));
+            ctx.arc(circle1.x, circle1.y, circle1.radius, newAngle3 + Math.PI, newAngle4);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+        }
+
+        function drawDiagonalBelt(circle1, circle2) {
+            // circle 1
+            const distance = Math.sqrt((circle2.x - circle1.x) ** 2 + (circle2.y - circle1.y) ** 2);
+            const distanceToIntersection = (circle1.radius * distance) / (circle1.radius + circle2.radius);
+            const slopeAngle = Math.atan((circle2.y - circle1.y) / (circle2.x - circle1.x));
+            const angleToTangent = Math.acos(circle1.radius / distanceToIntersection);
+            const tangentIntersection = {
+                x: Math.cos(slopeAngle) * distanceToIntersection + circle1.x,
+                y: Math.sin(slopeAngle) * distanceToIntersection + circle1.y
+            }
+            const tangentPoint = {
+                x: Math.cos(angleToTangent + slopeAngle) * circle1.radius + circle1.x,
+                y: Math.sin(angleToTangent + slopeAngle) * circle1.radius + circle1.y
+            }
+            const invertedTangentPoint = {
+                x: Math.cos(-angleToTangent + slopeAngle) * circle1.radius + circle1.x,
+                y: Math.sin(-angleToTangent + slopeAngle) * circle1.radius + circle1.y
+            }
+
+            // circle 2
+            const tangentPoint2 = {
+                x: Math.cos(angleToTangent + slopeAngle) * -circle2.radius + circle2.x,
+                y: Math.sin(angleToTangent + slopeAngle) * -circle2.radius + circle2.y
+            }
+            const invertedTangentPoint2 = {
+                x: Math.cos(-angleToTangent + slopeAngle) * -circle2.radius + circle2.x,
+                y: Math.sin(-angleToTangent + slopeAngle) * -circle2.radius + circle2.y
+            }
+
+            // draw
+            ctx.beginPath();
+            ctx.moveTo(tangentPoint.x, tangentPoint.y);
+            ctx.lineTo(tangentPoint2.x, tangentPoint2.y);
+            const newAngle = Math.atan((tangentPoint2.y - circle2.y) / (tangentPoint2.x - circle2.x));
+            const newAngle2 = Math.atan((invertedTangentPoint2.y - circle2.y) / (invertedTangentPoint2.x - circle2.x));
+            ctx.arc(circle2.x, circle2.y, circle2.radius, newAngle, newAngle2 + Math.PI);
+            ctx.lineTo(invertedTangentPoint.x, invertedTangentPoint.y);
+            const newAngle3 = Math.atan((invertedTangentPoint.y - circle1.y) / (invertedTangentPoint.x - circle1.x));
+            const newAngle4 = Math.atan((tangentPoint.y - circle1.y) / (tangentPoint.x - circle1.x));
+            ctx.arc(circle1.x, circle1.y, circle1.radius, newAngle3, newAngle4 + Math.PI, true);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+        }
+
+        function addPartToMap(len) { // from "run" map
+            map[len].collisionFilter.category = cat.map;
+            map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+            Matter.Body.setStatic(map[len], true);
+            Composite.add(engine.world, map[len]);
+        }
+
+        level.setPosToSpawn(-500, -50);
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        level.exit.x = 250;
+        level.exit.y = 720;
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+        level.defaultZoom = 1800;
+        simulation.zoomTransition(level.defaultZoom);
+        document.body.style.backgroundColor = "#d8dadf";
+        //spawn.debris(750, -2200, 3700, 16); //16 debris per level
+
+        //spawn.bodyVertex(100, -200, verticesString)
+
+        spawn.mapRect(-925, 0, 2650, 100);
+
+        spawn.mapRect(-925, -1700, 325, 1800);
+        spawn.mapRect(-650, -325, 325, 50);
+        spawn.mapRect(-650, -1400, 325, 50);
+        spawn.mapRect(-1700, -1700, 1100, 200);
+        spawn.mapRect(-1700, -4600, 300, 3100);
+        spawn.mapRect(-1700, -4600, 1250, 200);
+        spawn.mapRect(200, -4600, 2750, 200);
+        spawn.mapRect(-400, -4225, 200, 50);
+        spawn.mapRect(2800, -4600, 150, 1400);
+
+        spawn.mapRect(1350, -325, 100, 50);
+        spawn.mapRect(1400, -1500, 325, 1600);
+        spawn.mapRect(1400, -1500, 1550, 50);
+        spawn.mapRect(1400, -1900, 900, 50);
+        spawn.mapRect(1400, -2900, 100, 1050);
+
+        spawn.mapRect(-600, -2900, 3550, 100);
+        spawn.mapRect(2850, -2900, 100, 700);
+
+        spawn.mapRect(2300, -1900, 500, 50);
+        map[map.length - 1].fallsOff = true; // this piece wall fall off in cutscene
+
+        spawn.mapRect(2800, -1900, 200, 50);
+        spawn.mapRect(2900, -1900, 50, 450);
+        powerUps.directSpawn(2700, -1675, "tech");
+
+        spawn.mapRect(2800, -3300, 825, 100);
+        spawn.mapRect(3525, -3300, 100, 3000);
+        spawn.mapRect(3400, -2850, 225, 50);
+        spawn.mapRect(2875, -2525, 175, 25);
+        spawn.mapRect(3325, -2675, 150, 25);
+        spawn.mapRect(3400, -2850, 75, 200);
+        spawn.mapRect(3150, -2225, 100, 25);
+
+        spawn.mapRect(-2300, 750, 5450, 100);
+
+        pendulum1 = pendulum(400, -2500, 75, 1700, 50, 0.3, 0, 300);
+        const gear1 = mapGear(-1200, -2000, 100, 200, 0, -0.05, 5, 75);
+        const gear2 = mapGear(-700, -2500, 150, 270, -0.5, 0.05, 5, 50);
+        const gear3 = mapGear(-3500, -1000, 1100, 1500, -0.5, 0.005, 10, 150, 40);
+        const piston1 = customDoor(1650, -1850, 100, 350); // x, y, width, height, distance, speed = 1
+        const piston2 = customDoor(1950, -1850, 100, 350);
+        const piston3 = horizontalDoor(-2000, -4200, 300, 100, 300, 20);
+        const piston4 = horizontalDoor(-2000, -3800, 300, 100, 300, 20);
+        const piston5 = horizontalDoor(-2000, -3400, 300, 100, 300, 20);
+        const piston6 = horizontalDoor(-2000, -3000, 300, 100, 300, 20);
+        const piston7 = horizontalDoor(-2000, -2600, 300, 100, 300, 20);
+        const hand1 = clockHand(400, -3700, 75, 600);
+        const elevator1 = level.elevator(3200, 0, 150, 50, -1750, 0.0025, { up: 0.05, down: 0.2 });
+
+        spawn.randomSmallMob(-500, -500, 1);
+        spawn.randomMob(190, -1300, 1);
+        spawn.randomMob(200, -320, 0.3);
+        spawn.randomMob(1000, -1100, 1);
+        spawn.randomMob(-160, -2050, 1);
+        spawn.randomMob(-1100, -2900, 0.5);
+        spawn.randomLevelBoss(1900, -3800);
+        spawn.randomMob(2500, -3500, 0.3);
+        spawn.randomMob(1300, -4100, 0.5);
+        spawn.randomMob(3400, -2450, 1);
+        spawn.randomMob(2850, -2050, 0.4);
+        spawn.randomGroup(-150, -2400, 0.5);
+        spawn.randomMob(-1250, -5150, 1);
+        spawn.randomMob(-2900, -4000, 0.4);
+        spawn.randomMob(-1350, -950, 1);
+        spawn.randomMob(2700, -850, 0.4);
+        spawn.randomMob(2500, -50, 0.4);
+
+        // spawn.randomSmallMob(1300, -70);
+        // spawn.randomMob(2650, -975, 0.8);
+        // spawn.randomGroup(1700, -900, 0.4);
+        // if (simulation.difficulty > 1) spawn.randomLevelBoss(2200, -1300);
+
+        powerUps.addResearchToLevel() // needs to run after mobs are spawned
+
+        var dealtPiston1Damage = false;
+        var dealtPiston2Damage = false;
+        var dealtPiston1MobDamage = false;
+        var dealtPiston2MobDamage = false;
+        var lastPistonDirection = false;
+        var pistonsLocked = false;
+        var finishedGearFight = false;
+        var roofReadyToFall = false;
+        var roofFallCycle = 0;
+        var drawGear = false;
+        var gearCycle = m.cycle;
+        var gearPositions = [];
+        var pistonUnlockCycle = 0;
+
+        for (var i = 0; i < 15; i++) {
+            gearPositions.push({
+                x: 2400 + Math.random() * 200,
+                y: -3300 - Math.random() * 3000
+            });
+        }
+
+        var gearSizes = [];
+
+        for (var i = 0; i < 15; i++) {
+            const r1 = 30 + Math.random() * 50;
+            gearSizes.push({
+                r1: r1,
+                r2: r1 + 15 + Math.random() * 30
+            })
+        }
+
+        var spawnGearMobCycle = 0;
+        var gearsSpawned = 0;
+        var lastSmallGearRot = 0;
+        var smallGearRot = 0;
+        var smallGearPosRot = 0;
+        var bigGearRot = 0;
+        var finalGearRot;
+        var lastFinalGearRot;
+        var startCycle = m.cycle; // used to offset m.cycle to avoid the swing starting halfway through at the start of the level and messing up syncronization
+
+        level.custom = () => {
+            pendulum1.rotate();
+            gear1.rotate();
+            gear2.rotate();
+            gear3.rotate();
+            hand1.rotate();
+            drawBackgroundGear(-1200, -2300, 75, 150, 0.3, "#ccc", -0.05);
+            drawBackgroundGear(-1010, -2380, 30, 100, -0.1, "#ccc", 0.05);
+
+            // pendulum gears
+            smallGearPosRot += Math.sin((m.cycle - startCycle) / 50) * 0.3 - Math.sin((m.cycle - startCycle - 1) / 50) * 0.3;
+            if (smallGearPosRot > 0.1) smallGearPosRot = 0.1;
+            if (smallGearPosRot < -0.1) smallGearPosRot = -0.1;
+            var circ = 2 * Math.PI * 150;
+            var arcLength = ((smallGearPosRot - Math.sin((m.cycle - startCycle) / 50) * 0.2) / (Math.PI * 2)) * circ;
+            lastSmallGearRot = smallGearRot;
+            smallGearRot = arcLength / (2 * Math.PI * 50) * Math.PI * -2 + 0.6;
+
+            if (Math.abs(smallGearPosRot) == 0.1) {
+                bigGearRot += Math.abs((smallGearRot - lastSmallGearRot) * (50 / 75));
+            }
+
+            drawBackgroundGear(740, -2625, 270, 330, bigGearRot, "#d2d3d4", 0, 15, 20); // the big one in the background
+
+            drawBackgroundGear(400, -2500, 100, 150, Math.sin((m.cycle - startCycle) / 50) * -0.3, "#ccc", 0, 8, 20); // attached to pendulum
+
+            drawBackgroundGear(400 + Math.cos(smallGearPosRot) * 200, -2500 + Math.sin(smallGearPosRot) * 200, 50, 75, smallGearRot, "#ccc", 0, 7, 20);
+            ctx.beginPath();
+            ctx.arc(400 + Math.cos(smallGearPosRot) * 200, -2500 + Math.sin(smallGearPosRot) * 200, 10, 0, 2 * Math.PI);
+            ctx.strokeStyle = "#444";
+            ctx.lineWidth = 10;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(400, -2500, 200, -0.1, 0.1);
+            ctx.strokeStyle = "#444";
+            ctx.lineWidth = 10;
+            ctx.stroke();
+
+            drawBackgroundGear(740, -2625, 75, 110, bigGearRot, "#ccc", 0, 8, 20);
+            ctx.beginPath();
+            ctx.arc(740, -2625, 40, 0, 2 * Math.PI);
+            ctx.fillStyle = "#bbb";
+            ctx.fill();
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            drawBackgroundGear(740, -2375, 75, 110, bigGearRot * -1, "#ccc", 0, 8, 20);
+            ctx.beginPath();
+            ctx.arc(740, -2375, 40, 0, 2 * Math.PI);
+            ctx.fillStyle = "#bbb";
+            ctx.fill();
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            drawDiagonalBelt({ x: 740, y: -2625, radius: 40 }, { x: 740, y: -2375, radius: 40 })
+
+            if (finalGearRot != null) lastFinalGearRot = finalGearRot;
+            finalGearRot = Math.round((-bigGearRot * 294.72 / 25) * 100) / 100 + Math.PI / 2;
+
+            drawBackgroundGear(1080, -2650, 10, 20, finalGearRot, "#ccc", 0, 5, 50);
+            ctx.beginPath();
+            ctx.arc(1080, -2650, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = "#bbb";
+            ctx.fill();
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            drawBackgroundGear(1650, -2550, 300, 360, finalGearRot, "#ccc", 0, 6, 50);
+            ctx.beginPath();
+            ctx.arc(1650, -2550, 100, 0, 2 * Math.PI);
+            ctx.fillStyle = "#bbb";
+            ctx.fill();
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            drawBelt({ x: 1080, y: -2650, radius: 10 }, { x: 1650, y: -2550, radius: 100 });
+            ctx.beginPath();
+            ctx.arc(Math.cos(-finalGearRot) * 294 + 1650, Math.sin(-finalGearRot) * 294 - 2550, 25, 0, 2 * Math.PI);
+            ctx.fillStyle = "#000";
+            ctx.fill();
+            drawBackgroundGear(2300, -2550, 300, 360, -finalGearRot + 0.5, "#ccc", 0, 6, 50);
+            ctx.beginPath();
+            ctx.arc(Math.cos(finalGearRot) * 294 + 2300, Math.sin(finalGearRot) * 294 - 2550, 25, 0, 2 * Math.PI);
+            ctx.fillStyle = "#000";
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(1630, -2215, 15, 0, 2 * Math.PI);
+            ctx.fillStyle = "#000";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(1670, -2215, 15, 0, 2 * Math.PI);
+            ctx.fillStyle = "#000";
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(1940, -2250, 15, 0, 2 * Math.PI);
+            ctx.fillStyle = "#000";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(2300, -2215, 15, 0, 2 * Math.PI);
+            ctx.fillStyle = "#000";
+            ctx.fill();
+
+            if (!finishedGearFight && !pistonsLocked && m.pos.x > 2100 && m.pos.x < 2900 && m.pos.y > -1850 && m.pos.y < -1500) {
+                pistonsLocked = true;
+
+                roofFallCycle = m.cycle + 250;
+                roofReadyToFall = true;
+            }
+
+            if (roofReadyToFall && m.cycle >= roofFallCycle) {
+                // section of roof is deleted
+                for (var i = 0; i < map.length; i++) {
+                    if (map[i].fallsOff) {
+                        Matter.Composite.remove(engine.world, map[i]);
+                        map.splice(i, 1);
+                    }
+                }
+
+                // replace it with a block
+                spawn.bodyRect(2310, -1900, 480, 50);
+                body[body.length - 1].collisionFilter.category = cat.body;
+                body[body.length - 1].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+                body[body.length - 1].classType = "body";
+                Composite.add(engine.world, body[body.length - 1]); //add to world
+
+                roofReadyToFall = false;
+                drawGear = true;
+                gearCycle = m.cycle + 100;
+            }
+
+            //draw some background gears falling when roof falls
+            if (drawGear && m.cycle >= gearCycle) {
+                for (var i = 0; i < 15; i++) {
+                    drawFallingBackgroundGear(gearPositions[i].x, gearPositions[i].y, gearSizes[i].r1, gearSizes[i].r2, m.cycle, "#ccc", 0.1, 25, gearCycle);
+                }
+
+                if (spawnGearMobCycle == 0) {
+                    spawnGearMobCycle = m.cycle + 100;
+                }
+            }
+
+            if (spawnGearMobCycle > 0 && m.cycle >= spawnGearMobCycle) {
+                if (gearsSpawned < 40) {
+                    gearMob(2400 + Math.random() * 200, -2300 - Math.random() * 200, false, true);
+                    gearsSpawned++;
+                    spawnGearMobCycle = m.cycle + 25 - (simulation.difficulty - simulation.difficultyMode) / 2;
+                } else if (pistonUnlockCycle == 0) {
+                    pistonUnlockCycle = m.cycle + 50;
+                }
+            }
+
+            if (pistonUnlockCycle > 0 && m.cycle > pistonUnlockCycle) {
+                pistonsLocked = false;
+                finishedGearFight = true;
+            }
+
+            if (Math.sin((m.cycle + 15) / 25) < 0 && !lastPistonDirection) { // 15 cycles early to line up better with pendulum
+                piston3.isClosing = true;
+                piston4.isClosing = false;
+                piston5.isClosing = true;
+                piston6.isClosing = false;
+                piston7.isClosing = true;
+            } else if (Math.sin((m.cycle + 15) / 25) > 0 && lastPistonDirection) {
+                piston3.isClosing = false;
+                piston4.isClosing = true;
+                piston5.isClosing = false;
+                piston6.isClosing = true;
+                piston7.isClosing = false;
+            }
+
+            if (Math.sin(-finalGearRot) - Math.sin(-lastFinalGearRot) < -0.01) {
+                dealtPiston1Damage = false;
+                dealtPiston1MobDamage = false;
+            }
+            if (Math.sin(-finalGearRot) - Math.sin(-lastFinalGearRot) > 0.01) {
+                dealtPiston2Damage = false;
+                dealtPiston2MobDamage = false;
+            }
+
+            piston3.openClose();
+            piston4.openClose();
+            piston5.openClose();
+            piston6.openClose();
+            piston7.openClose();
+
+            if (!pistonsLocked) {
+                piston1.isLocked = false;
+            }
+
+            if (!pistonsLocked || ((Math.sin(-finalGearRot) - Math.sin(-lastFinalGearRot) != 0 || piston1.position.y < -1850) && !piston1.isLocked)) {
+                piston1.setPos(1650, -1850 + Math.sin(-finalGearRot) * 175);
+            } else {
+                piston1.isLocked = true;
+            }
+
+            piston2.setPos(1950, -1850 + Math.sin(finalGearRot) * 175);
+            ctx.beginPath();
+            ctx.moveTo(Math.cos(-finalGearRot) * 294 + 1650, Math.sin(-finalGearRot) * 294 - 2550);
+            ctx.lineTo(1650, -2230);
+            ctx.lineTo(piston1.position.x, piston1.position.y - 175)
+            ctx.strokeStyle = "#777";
+            ctx.lineWidth = 10;
+            ctx.stroke();
+
+            var circle1;
+            var circle2;
+            if (Math.cos(finalGearRot) * 294 > 0) {
+                circle1 = {
+                    x: Math.cos(finalGearRot) * 294 + 2300,
+                    y: Math.sin(finalGearRot) * 294 - 2550,
+                    radius: -25
+                }
+
+                circle2 = {
+                    x: 2300,
+                    y: -2215,
+                    radius: -15
+                }
+            } else {
+                circle1 = {
+                    x: Math.cos(finalGearRot) * 294 + 2300,
+                    y: Math.sin(finalGearRot) * 294 - 2550,
+                    radius: 25
+                }
+
+                circle2 = {
+                    x: 2300,
+                    y: -2215,
+                    radius: 15
+                }
+            }
+
+            // same method used in drawBelt()
+            var distance = Math.sqrt((circle2.x - circle1.x) ** 2 + (circle2.y - circle1.y) ** 2);
+            var distanceToIntersection = (-circle1.radius * distance) / (-circle1.radius + circle2.radius);
+            var slopeAngle = Math.atan((circle2.y - circle1.y) / (circle2.x - circle1.x));
+            var angleToTangent = Math.acos(-circle1.radius / distanceToIntersection);
+            const tangentPoint = {
+                x: Math.cos(angleToTangent + slopeAngle) * -circle2.radius + circle2.x,
+                y: Math.sin(angleToTangent + slopeAngle) * -circle2.radius + circle2.y
+            }
+
+            // same method used in drawDiagonalBelt()
+            const circle3 = {
+                x: 1940,
+                y: -2250,
+                radius: 15
+            }
+
+            distance = Math.sqrt((circle2.x - circle3.x) ** 2 + (circle2.y - circle3.y) ** 2);
+            distanceToIntersection = (circle3.radius * distance) / (circle3.radius + circle2.radius);
+            slopeAngle = Math.atan((circle2.y - circle3.y) / (circle2.x - circle3.x));
+            angleToTangent = Math.acos(circle3.radius / distanceToIntersection);
+            const tangentPoint2 = {
+                x: Math.cos(angleToTangent + slopeAngle) * circle3.radius + circle3.x,
+                y: Math.sin(angleToTangent + slopeAngle) * circle3.radius + circle3.y
+            }
+            const invertedTangentPoint2 = {
+                x: Math.cos(-angleToTangent + slopeAngle) * circle3.radius + circle3.x,
+                y: Math.sin(-angleToTangent + slopeAngle) * circle3.radius + circle3.y
+            }
+
+            const tangentPoint3 = {
+                x: Math.cos(angleToTangent + slopeAngle) * -circle2.radius + circle2.x,
+                y: Math.sin(angleToTangent + slopeAngle) * -circle2.radius + circle2.y
+            }
+            const invertedTangentPoint3 = {
+                x: Math.cos(-angleToTangent + slopeAngle) * -circle2.radius + circle2.x,
+                y: Math.sin(-angleToTangent + slopeAngle) * -circle2.radius + circle2.y
+            }
+
+            distance = Math.sqrt((piston2.position.y - 175 - circle3.y) ** 2 + (piston2.position.x - 50 - circle3.x) ** 2);
+            slopeAngle = Math.atan((piston2.position.y - 175 - circle3.y) / (piston2.position.x - 50 - circle3.x));
+            angleToTangent = Math.acos(circle3.radius / distance);
+            const tangentPoint4 = {
+                x: Math.cos(angleToTangent) * distance + circle3.x,
+                y: Math.sin(angleToTangent) * distance + circle3.y
+            }
+
+            // draw
+            ctx.beginPath();
+            ctx.moveTo(circle1.x, circle1.y);
+            ctx.lineTo(tangentPoint.x, tangentPoint.y);
+            const newAngle = Math.atan((tangentPoint.y - circle2.y) / (tangentPoint.x - circle2.x));
+            const newAngle2 = Math.atan((tangentPoint3.y - circle2.y) / (tangentPoint3.x - circle2.x));
+            ctx.arc(circle2.x, circle2.y, Math.abs(circle2.radius), newAngle, -newAngle2);
+            ctx.lineTo(invertedTangentPoint2.x, invertedTangentPoint2.y);
+            const newAngle3 = Math.atan((invertedTangentPoint2.y - circle3.y) / (invertedTangentPoint2.x - circle3.x));
+            ctx.arc(circle3.x, circle3.y, circle3.radius, newAngle3, Math.PI / 2 + angleToTangent, true);
+            ctx.lineTo(tangentPoint4.x, tangentPoint4.y);
+            ctx.strokeStyle = '#777';
+            ctx.lineWidth = 10;
+            ctx.stroke();
+
+            lastPistonDirection = Math.sin((m.cycle + 15) / 25) < 0;
+
+            if (Matter.Query.ray([player], Matter.Vector.create(piston1.position.x - 50, piston1.position.y + 175), Matter.Vector.create(piston1.position.x + 50, piston1.position.y + 175), 5).length > 0 && !dealtPiston1Damage && Math.sin(-finalGearRot) - Math.sin(-lastFinalGearRot) > 0.01) {
+                m.damage(0.1);
+                dealtPiston1Damage = true;
+            }
+
+            var piston1MobCollisions = Matter.Query.ray(mob, Matter.Vector.create(piston1.position.x - 50, piston1.position.y + 175), Matter.Vector.create(piston1.position.x + 50, piston1.position.y + 175), 5);
+            if (piston1MobCollisions.length > 0 && !dealtPiston1MobDamage && Math.sin(-finalGearRot) - Math.sin(-lastFinalGearRot) > 0.01) {
+                for (var mobHit of piston1MobCollisions) {
+                    mobHit.body.damage(1);
+                }
+                dealtPiston1MobDamage = true;
+            }
+
+            if (Matter.Query.ray([player], Matter.Vector.create(piston2.position.x - 50, piston2.position.y + 175), Matter.Vector.create(piston2.position.x + 50, piston2.position.y + 175), 5).length > 0 && !dealtPiston2Damage && Math.sin(-finalGearRot) - Math.sin(-lastFinalGearRot) < -0.01) {
+                m.damage(0.1);
+                dealtPiston2Damage = true;
+            }
+
+            var piston2MobCollisions = Matter.Query.ray(mob, Matter.Vector.create(piston2.position.x - 50, piston2.position.y + 175), Matter.Vector.create(piston2.position.x + 50, piston2.position.y + 175), 5);
+            if (piston2MobCollisions.length > 0 && !dealtPiston2MobDamage && Math.sin(-finalGearRot) - Math.sin(-lastFinalGearRot) > 0.01) {
+                for (var mobHit of piston2MobCollisions) {
+                    mobHit.body.damage(1);
+                }
+                dealtPiston2MobDamage = true;
+            }
+
+            // clock
+            ctx.beginPath();
+            ctx.arc(400, -3700, 600, 0, 2 * Math.PI);
+            ctx.fillStyle = "#e9e9e9";
+            ctx.fill();
+            ctx.strokeStyle = "#3a3f20";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.lineCap = "butt";
+            ctx.beginPath();
+            ctx.moveTo(350, -4275);
+            ctx.lineTo(390, -4150);
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 20;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(390, -4275);
+            ctx.lineTo(350, -4150);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(420, -4275);
+            ctx.lineTo(420, -4150);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(450, -4275);
+            ctx.lineTo(450, -4150);
+            ctx.stroke();
+
+            var numberOffset = {
+                x: 400 + Math.cos(-Math.PI / 3) * 510,
+                y: -3700 + Math.sin(-Math.PI / 3) * 510
+            }
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x, numberOffset.y + 63);
+            ctx.stroke();
+
+            var numberOffset = {
+                x: 400 + Math.cos(-Math.PI / 6) * 510,
+                y: -3700 + Math.sin(-Math.PI / 6) * 510
+            }
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 20, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x - 20, numberOffset.y + 63);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x + 20, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x + 20, numberOffset.y + 63);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(870, -3762);
+            ctx.lineTo(870, -3637);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(910, -3762);
+            ctx.lineTo(910, -3637);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(950, -3762);
+            ctx.lineTo(950, -3637);
+            ctx.stroke();
+
+            var numberOffset = {
+                x: 400 + Math.cos(Math.PI / 6) * 535,
+                y: -3700 + Math.sin(Math.PI / 6) * 535
+            }
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 50, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x - 50, numberOffset.y + 63);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 20, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x, numberOffset.y + 53);
+            ctx.lineTo(numberOffset.x + 20, numberOffset.y - 62);
+            ctx.stroke();
+
+            var numberOffset = {
+                x: 400 + Math.cos(Math.PI / 3) * 515,
+                y: -3700 + Math.sin(Math.PI / 3) * 515
+            }
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 20, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x, numberOffset.y + 53);
+            ctx.lineTo(numberOffset.x + 20, numberOffset.y - 62);
+            ctx.stroke();
+
+            var numberOffset = {
+                x: 400 + Math.cos(Math.PI / 2) * 515,
+                y: -3700 + Math.sin(Math.PI / 2) * 515
+            }
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 35, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x - 15, numberOffset.y + 53);
+            ctx.lineTo(numberOffset.x + 5, numberOffset.y - 62);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x + 35, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x + 35, numberOffset.y + 63);
+            ctx.stroke();
+
+            var numberOffset = {
+                x: 400 + Math.cos(Math.PI * 2 / 3) * 500,
+                y: -3700 + Math.sin(Math.PI * 2 / 3) * 500
+            }
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 65, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x - 45, numberOffset.y + 53);
+            ctx.lineTo(numberOffset.x - 25, numberOffset.y - 62);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x + 5, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x + 5, numberOffset.y + 63);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x + 35, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x + 35, numberOffset.y + 63);
+            ctx.stroke();
+
+            var numberOffset = {
+                x: 400 + Math.cos(Math.PI * 5 / 6) * 500,
+                y: -3700 + Math.sin(Math.PI * 5 / 6) * 500
+            }
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 65, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x - 45, numberOffset.y + 53);
+            ctx.lineTo(numberOffset.x - 25, numberOffset.y - 62);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x + 5, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x + 5, numberOffset.y + 63);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x + 35, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x + 35, numberOffset.y + 63);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x + 65, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x + 65, numberOffset.y + 63);
+            ctx.stroke();
+
+            var numberOffset = {
+                x: 400 + Math.cos(Math.PI) * 500,
+                y: -3700 + Math.sin(Math.PI) * 500
+            }
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 5, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x + 35, numberOffset.y + 63);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 5, numberOffset.y + 63);
+            ctx.lineTo(numberOffset.x + 35, numberOffset.y - 62);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 35, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x - 35, numberOffset.y + 63);
+            ctx.stroke();
+
+            var numberOffset = {
+                x: 400 + Math.cos(-Math.PI * 5 / 6) * 500,
+                y: -3700 + Math.sin(-Math.PI * 5 / 6) * 500
+            }
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 25, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x + 25, numberOffset.y + 63);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 25, numberOffset.y + 63);
+            ctx.lineTo(numberOffset.x + 25, numberOffset.y - 62);
+            ctx.stroke();
+
+            var numberOffset = {
+                x: 400 + Math.cos(-Math.PI * 2 / 3) * 500,
+                y: -3700 + Math.sin(-Math.PI * 2 / 3) * 500
+            }
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 10, numberOffset.y - 62);
+            ctx.lineTo(numberOffset.x + 40, numberOffset.y + 63);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 10, numberOffset.y + 63);
+            ctx.lineTo(numberOffset.x + 40, numberOffset.y - 62);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(numberOffset.x - 40, numberOffset.y + 63);
+            ctx.lineTo(numberOffset.x - 40, numberOffset.y - 62);
+            ctx.stroke();
+
+            ctx.lineCap = "round";
+
+            level.exit.drawAndCheck();
+            level.enter.draw();
+        }
+
+        var lastBlock = Math.sin(m.cycle / 50) < 0;
+
+        level.customTopLayer = () => {
+            elevator1.move();
+
+            ctx.fillStyle = "#444";
+            ctx.fillRect(3275, -1750, 1, 1750);
+
+            ctx.fillStyle = "#888";
+
+            if (Math.sin(m.cycle / 50) < 0 && !lastBlock) {
+                // remove old elements
+                for (var i = 0; i < map.length; i++) {
+                    if (map[i].isRemove) {
+                        Matter.Composite.remove(engine.world, map[i]);
+                        map.splice(i, 1);
+                    }
+                }
+
+                // add new element
+                spawn.mapRect(-200, -600, 275, 50);
+                addPartToMap(map.length - 1);
+                map[map.length - 1].isRemove = true;
+            } else if (Math.sin(m.cycle / 50) * 0.3 >= 0 && lastBlock) {
+                for (var i = 0; i < map.length; i++) {
+                    if (map[i].isRemove) {
+                        Matter.Composite.remove(engine.world, map[i]);
+                        map.splice(i, 1);
+                    }
+                }
+
+                spawn.mapRect(825, -600, 275, 50);
+                addPartToMap(map.length - 1);
+                map[map.length - 1].isRemove = true;
+            }
+
+            simulation.draw.setPaths();
+            lastBlock = Math.sin(m.cycle / 50) * 0.3 < 0;
+        }
+    },
     // ********************************************************************************************************
     // ********************************************************************************************************
     // ***************************************** training levels **********************************************
@@ -16413,7 +17735,8 @@ const level = {
         m.addHealth(Infinity)
         document.getElementById("health").style.display = "none" //hide your health bar
         document.getElementById("health-bg").style.display = "none"
-        document.getElementById("defense").style.display = "none"
+        document.getElementById("defense-bar").style.display = "none"
+        document.getElementById("damage-bar").style.display = "none"
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
@@ -16984,7 +18307,8 @@ const level = {
         m.addHealth(0.25)
         document.getElementById("health").style.display = "inline" //show your health bar
         document.getElementById("health-bg").style.display = "inline"
-        document.getElementById("defense").style.display = "inline"
+        document.getElementById("defense-bar").style.display = "inline"
+        document.getElementById("damage-bar").style.display = "inline"
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
@@ -17831,7 +19155,8 @@ const level = {
         m.addHealth(Infinity)
         document.getElementById("health").style.display = "none" //hide your health bar
         document.getElementById("health-bg").style.display = "none"
-        document.getElementById("defense").style.display = "none"
+        document.getElementById("defense-bar").style.display = "none"
+        document.getElementById("damage-bar").style.display = "none"
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
