@@ -1137,31 +1137,16 @@ const simulation = {
     // },
     checks() {
         if (!(m.cycle % 15)) { //4 times a second
-            //update defense bar
-            const defense = m.defense()
+            const defense = m.defense()             //update defense bar
             if (m.lastCalculatedDefense !== defense) {
                 document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
-
-                // if (m.lastCalculatedDefense === 1) document.getElementById("defense-bar").style.display = "inline"
-                // if (defense === 1) document.getElementById("defense-bar").style.display = "none"
-                // Math.pow(m.defense(), 0.13)
                 m.lastCalculatedDefense = defense
-                // console.log(defense)
             }
-
-            //update damage bar
-            const damage = tech.damageFromTech()
+            const damage = tech.damageFromTech()             //update damage bar
             if (m.lastCalculatedDamage !== damage) {
-                canvas.width
-                // document.getElementById("damage-bar").style.width = Math.floor(Math.atan(damage - 1) / 6.28 * canvas.width) + "px";
-                document.getElementById("damage-bar").style.height = Math.floor(Math.atan(damage - 1) / 3.14 * canvas.height) + "px";
-
+                document.getElementById("damage-bar").style.height = Math.floor(Math.atan(0.25 * damage - 0.25) / 1.65 * canvas.height) + "px";
                 m.lastCalculatedDamage = damage
-                console.log(damage)
             }
-
-
-
         }
         if (!(m.cycle % 60)) { //once a second
             //energy overfill 
@@ -1211,7 +1196,17 @@ const simulation = {
             if (isNaN(player.position.x)) m.death();
             if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
                 if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) m.energy += m.maxEnergy * 0.05
-                if (tech.isHealthRecovery) m.addHealth(0.005 * m.maxHealth)
+                if (tech.isHealthRecovery) {
+                    const heal = 0.005 * m.maxHealth
+                    m.addHealth(heal)
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: m.pos.x,
+                        y: m.pos.y,
+                        radius: Math.sqrt(heal) * 150,
+                        color: "rgba(0,255,200,0.6)",
+                        time: 8
+                    });
+                }
             }
 
             if (!(m.cycle % 420)) { //once every 7 seconds

@@ -161,7 +161,7 @@ summary {
     height: 100%;
 }
 
-#choose-grid {
+.choose-grid {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -180,9 +180,34 @@ summary {
     transition: opacity 0.25s linear;
     overflow: auto;
     -ms-overflow-style: none;
-    /* IE and Edge */
     scrollbar-width: none;
-    /* Firefox */
+}
+
+.choose-grid-no-images {
+    border-radius: 12px;
+    border: 10px solid #444;
+    gap: 10px;
+    background-color: #444;
+    /* padding: 10px 1px; */
+
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0px;
+    z-index: 12;
+    max-height: 99vh;
+    font-size: 1.3em;
+    display: grid;
+    grid-template-columns: 384px;
+    align-items: stretch;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.25s linear;
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 #choose-grid::-webkit-scrollbar {
@@ -356,6 +381,7 @@ summary {
     margin-right: -1px;
     font-size: 0.92em;
     min-height: 88px;
+    /* border-radius: 5px; */
 }
 
 .cancel-card {
@@ -390,19 +416,31 @@ summary {
     background-color: var(--hover-card-color);
 }
 
+.research-cancel {
+    display: flex;
+    gap: 10px;
+    line-height: 160%;
+    /* background-color: var(--card-color); */
+    font-size: 1em;
+}
 
 /* keeps 5 columns at 1440px */
 @media (min-width: 1710px) and (max-width: 1950px) {
 
     .experiment-grid-module,
     .choose-grid-module,
-    .pause-grid-module {
+    .pause-grid-module,
+    .research-cancel {
         line-height: 143%;
         font-size: 0.68em;
     }
 
+    .research-cancel {
+        font-size: 0.9em;
+    }
+
     #experiment-grid,
-    #choose-grid,
+    .choose-grid,
     .pause-grid {
         grid-template-columns: repeat(auto-fit, 340px);
     }
@@ -426,8 +464,12 @@ summary {
         font-size: 0.58em;
     }
 
+    .research-cancel {
+        font-size: 0.8em;
+    }
+
     #experiment-grid,
-    #choose-grid,
+    .choose-grid,
     .pause-grid {
         grid-template-columns: repeat(auto-fit, 285px);
     }
@@ -512,7 +554,7 @@ summary {
 }
 
 .experiment-grid-disabled[data-descr]:hover::after {
-    content: '\a \00a0 \00a0 \00a0 REQUIRES:\a \00a0 \00a0 \00a0 'attr(data-descr);
+    content: '\a \00a0 \00a0 \00a0 REQUIRES:\a \00a0 \00a0 \00a0 ' attr(data-descr);
     white-space: pre-wrap;
     position: absolute;
     left: 0;
@@ -564,7 +606,7 @@ summary {
     right: 4px;
     height: 0px;
     width: 7px;
-    transition: height 0.15s linear;
+    transition: height 0.25s linear;
     opacity: 1;
     z-index: 2;
     pointer-events: none;
@@ -580,7 +622,7 @@ summary {
     left: 15px;
     height: 7px;
     width: 0px;
-    transition: width 0.3s linear;
+    transition: width 0.25s linear;
     opacity: 1;
     z-index: 2;
     pointer-events: none;
@@ -588,18 +630,21 @@ summary {
     border-right: 1.5px solid #777;
     display: none;
 }
+
 #health {
     position: absolute;
     top: 15px;
     left: 15px;
     height: 20px;
     width: 0px;
-    transition: width 1s ease-out;    z-index: 2;
+    transition: width 1s ease-out;
+    z-index: 2;
     pointer-events: none;
     background-color: rgb(9, 245, 166);
     border-right: 2px solid rgb(51, 162, 125);
     display: none;
 }
+
 #health-bg {
     position: absolute;
     top: 15px;

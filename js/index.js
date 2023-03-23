@@ -14,7 +14,7 @@ Math.hash = s => {
 
 document.getElementById("seed").placeholder = Math.initialSeed = String(Math.floor(Date.now() % 100000))
 Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
-Math.seededRandom = function(min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined
+Math.seededRandom = function (min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined
     Math.seed = (Math.seed * 9301 + 49297) % 233280;
     return min + Math.seed / 233280 * (max - min);
 }
@@ -100,7 +100,7 @@ let color = { //light
 //difficulty is 0 easy, 1 normal, 2 hard, 4 why
 function getUrlVars() {
     let vars = {};
-    window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, k, v) {
+    window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, k, v) {
         vars[k] = v;
     });
     return vars;
@@ -201,7 +201,7 @@ const ctx = canvas.getContext("2d");
 document.body.style.backgroundColor = "#fff";
 
 //disable pop up menu on right click
-document.oncontextmenu = function() {
+document.oncontextmenu = function () {
     return false;
 }
 
@@ -287,18 +287,18 @@ const build = {
         localSettings.isHideImages = !localSettings.isHideImages
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         if (from === 'experiment') {
-            // build.startExperiment()
-            // openExperimentMenu()
             build.reset();
-            // build.populateGrid();
-            // build.choosePowerUp(null, 'none')
         } else if (from === 'pause') {
             build.unPauseGrid()
             build.pauseGrid() //redraw pause text with images
-        } else { //settings
-            //nothing needs to be here I think
         }
-
+        if (localSettings.isHideImages) {
+            document.getElementById("choose-grid").classList.add('choose-grid-no-images');
+            document.getElementById("choose-grid").classList.remove('choose-grid');
+        } else {
+            document.getElementById("choose-grid").classList.add('choose-grid');
+            document.getElementById("choose-grid").classList.remove('choose-grid-no-images');
+        }
         document.getElementById("hide-images").checked = localSettings.isHideImages
         // console.log(localSettings.isHideImages, from)
     },
@@ -331,30 +331,30 @@ const build = {
 </svg><span style="font-size:1.5em;font-weight: 600; float: right;">PAUSED</span> 
 <br>
 <label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.3em;" >hide images:</label>
-<input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages? "checked": ""}>
+<input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages ? "checked" : ""}>
 <span style="float: right;">press ${input.key.pause} to resume</span> 
 <br>
 <br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)} &nbsp; &nbsp; difficulty: ${((m.dmgScale)).toPrecision(4)}
-<br><strong class='color-defense'>defense</strong>: ${tech.isEnergyHealth  ? (1-Math.pow(m.defense(), 0.13)).toPrecision(5) : (1-m.defense()).toPrecision(5) } &nbsp; &nbsp; difficulty: ${(1/simulation.dmgScale).toPrecision(4)}
-<br><strong><em>fire rate</em></strong>: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
-${tech.duplicationChance() ?  `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance()*100).toFixed(0)}%`: ""}
-${m.coupling ? `<br><strong class='color-coupling'>coupling</strong>: ${(m.coupling).toFixed(2)} &nbsp; <span style = 'font-size:90%;'>`+m.couplingDescription()+"</span>": ""}
+<br><strong class='color-defense'>defense</strong>: ${tech.isEnergyHealth ? (1 - Math.pow(m.defense(), 0.13)).toPrecision(5) : (1 - m.defense()).toPrecision(5)} &nbsp; &nbsp; difficulty: ${(1 / simulation.dmgScale).toPrecision(4)}
+<br><strong><em>fire rate</em></strong>: ${((1 - b.fireCDscale) * 100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
+${tech.duplicationChance() ? `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance() * 100).toFixed(0)}%` : ""}
+${m.coupling ? `<br><strong class='color-coupling'>coupling</strong>: ${(m.coupling).toFixed(2)} &nbsp; <span style = 'font-size:90%;'>` + m.couplingDescription() + "</span>" : ""}
 ${botText}
 <br>
-<br><strong class='color-h'>health</strong>: (${(m.health*100).toFixed(0)} / ${(m.maxHealth*100).toFixed(0)})
+<br><strong class='color-h'>health</strong>: (${(m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
 <span style="float: right;">mass: ${player.mass.toFixed(1)}</span>
-<br><strong class='color-f'>energy</strong>: (${(m.energy*100).toFixed(0)} / ${(m.maxEnergy*100).toFixed(0)}) +(${(m.fieldRegen*6000).toFixed(0)}/s)
+<br><strong class='color-f'>energy</strong>: (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000).toFixed(0)}/s)
 <span style="float: right;">position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)})</span> 
-<br><strong class='color-g'>gun</strong>: ${b.activeGun === null || b.activeGun === undefined ? "undefined":b.guns[b.activeGun].name} &nbsp; <strong class='color-g'>ammo</strong>: ${b.activeGun === null || b.activeGun === undefined ? "0":b.guns[b.activeGun].ammo}
+<br><strong class='color-g'>gun</strong>: ${b.activeGun === null || b.activeGun === undefined ? "undefined" : b.guns[b.activeGun].name} &nbsp; <strong class='color-g'>ammo</strong>: ${b.activeGun === null || b.activeGun === undefined ? "0" : b.guns[b.activeGun].ammo}
 <span style="float: right;">mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)})</span> 
 <br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}
 <span style="float: right;">velocity: (${player.velocity.x.toFixed(3)}, ${player.velocity.y.toFixed(3)})</span> 
-${junkCount ?  `<br><strong class='color-junk'>JUNK</strong>: ${(junkCount / totalCount * 100).toFixed(1)}%  `: ""}
+${junkCount ? `<br><strong class='color-junk'>JUNK</strong>: ${(junkCount / totalCount * 100).toFixed(1)}%  ` : ""}
 <br>
 <br>level: ${level.levelsCleared} ${level.levels[level.onLevel]} (${level.difficultyText()})
 <br>seed: ${Math.initialSeed} &nbsp; ${m.cycle} cycles
 <br>mobs: ${mob.length} &nbsp; blocks: ${body.length} &nbsp; bullets: ${bullet.length} &nbsp; power ups: ${powerUp.length} 
-${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
+${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 </span></div>`;
         // deaths: ${mobs.mobDeaths} &nbsp;
         if (tech.isPauseSwitchField && !simulation.isChoosing) {
@@ -415,7 +415,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                 const style = (localSettings.isHideImages || tech.tech[i].isJunk || tech.tech[i].isLore) ? `style="height:auto;"` : `style = "background-image: url('img/${tech.tech[i].name}.webp');"`
                 const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                 if (tech.tech[i].isNonRefundable) {
-                    text += `<div class="pause-grid-module" id ="${i}-pause-tech"  style = "border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding: 6px;"><div class="grid-title">${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech"  style = "border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding: 6px;"><div class="grid-title">${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`
                     // } else if (tech.tech[i].isLore) {
                     //     text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isFieldTech) {
@@ -432,7 +432,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                     text += build.techText(i) + "</div>"
                 }
             } else if (tech.tech[i].isLost) {
-                text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].link}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].link}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`
             }
         }
         el = document.getElementById("pause-grid-right")
@@ -478,7 +478,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
     techText(i) {
         return `<div class="card-text" >
         <div class="grid-title" ><div class="circle-grid tech"></div> &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
-        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     skinTechText(i) {
         return `<div class="card-text"> <div class="grid-title">
@@ -486,7 +486,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             <div class="circle-grid-skin"></div>
             <div class="circle-grid-skin-eye"></div>
         </span> &nbsp; &nbsp; &nbsp;&nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
-        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     gunTechText(i) {
         return `<div class="card-text"> <div class="grid-title">
@@ -494,7 +494,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
             <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
         </span> &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
-        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     fieldTechText(i) {
         return `<div class="card-text"><div class="grid-title">
@@ -502,12 +502,12 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                 <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
         </span> &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
-        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     junkTechText(i) {
         return `<div class="card-text">
         <div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
-        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     choosePowerUp(index, type, isAllowed = false) {
         if (type === "gun") {
@@ -594,7 +594,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                         techID.setAttribute("onClick", `javascript: build.choosePowerUp(${i},'tech')`);
                     }
                 } else { //disabled color for disabled tech
-                    techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+                    techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
                     if (!techID.classList.contains("experiment-grid-disabled")) {
                         techID.classList.add("experiment-grid-disabled");
                         techID.onclick = null
@@ -630,7 +630,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
 </div>
 <div>
 <label for="hide-images-experiment" title="reload experiment with no images for fields, guns, and tech">hide images:</label>
-<input onclick="build.showImages('experiment')" type="checkbox" id="hide-images-experiment" name="hide-images-experiment" style="width:17px; height:17px; margin-bottom: 15px;" ${localSettings.isHideImages? "checked": ""}>
+<input onclick="build.showImages('experiment')" type="checkbox" id="hide-images-experiment" name="hide-images-experiment" style="width:17px; height:17px; margin-bottom: 15px;" ${localSettings.isHideImages ? "checked" : ""}>
 </div>
 <div>
     <svg class="SVG-button" onclick="build.reset()" width="50" height="25">
@@ -775,17 +775,17 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         }
         console.log('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         console.log(url)
-        navigator.clipboard.writeText(url).then(function() {
+        navigator.clipboard.writeText(url).then(function () {
             /* clipboard successfully set */
             if (isCustom) {
-                setTimeout(function() {
+                setTimeout(function () {
                     alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
                 }, 300);
             }
-        }, function() {
+        }, function () {
             /* clipboard write failed */
             if (isCustom) {
-                setTimeout(function() {
+                setTimeout(function () {
                     alert('copy failed')
                 }, 300);
             }
@@ -946,23 +946,23 @@ const input = {
     setKeys(event) {
         //check for duplicate keys
         if (event.code && !(
-                event.code === "ArrowRight" ||
-                event.code === "ArrowLeft" ||
-                event.code === "ArrowUp" ||
-                event.code === "ArrowDown" ||
-                event.code === input.key.fire ||
-                event.code === input.key.field ||
-                event.code === input.key.up ||
-                event.code === input.key.down ||
-                event.code === input.key.left ||
-                event.code === input.key.right ||
-                event.code === input.key.pause ||
-                // event.code === "Escape" ||
-                event.code === input.key.nextGun ||
-                event.code === input.key.previousGun ||
-                event.code === input.key.testing ||
-                event.code === "Digit1" || event.code === "Digit2" || event.code === "Digit3" || event.code === "Digit4" || event.code === "Digit5" || event.code === "Digit6" || event.code === "Digit7" || event.code === "Digit8" || event.code === "Digit9" || event.code === "Digit0" || event.code === "Minus" || event.code === "Equal"
-            )) {
+            event.code === "ArrowRight" ||
+            event.code === "ArrowLeft" ||
+            event.code === "ArrowUp" ||
+            event.code === "ArrowDown" ||
+            event.code === input.key.fire ||
+            event.code === input.key.field ||
+            event.code === input.key.up ||
+            event.code === input.key.down ||
+            event.code === input.key.left ||
+            event.code === input.key.right ||
+            event.code === input.key.pause ||
+            // event.code === "Escape" ||
+            event.code === input.key.nextGun ||
+            event.code === input.key.previousGun ||
+            event.code === input.key.testing ||
+            event.code === "Digit1" || event.code === "Digit2" || event.code === "Digit3" || event.code === "Digit4" || event.code === "Digit5" || event.code === "Digit6" || event.code === "Digit7" || event.code === "Digit8" || event.code === "Digit9" || event.code === "Digit0" || event.code === "Minus" || event.code === "Equal"
+        )) {
             switch (input.focus.id) {
                 case "key-fire":
                     input.key.fire = event.code
@@ -1013,14 +1013,14 @@ document.getElementById("control-table").addEventListener('click', (event) => {
         window.addEventListener("keydown", input.setKeys);
     }
 });
-document.getElementById("control-details").addEventListener("toggle", function() {
+document.getElementById("control-details").addEventListener("toggle", function () {
     input.controlTextUpdate()
     input.endKeySensing();
 })
 
 document.getElementById("control-reset").addEventListener('click', input.setDefault);
 
-window.addEventListener("keyup", function(event) {
+window.addEventListener("keyup", function (event) {
     switch (event.code) {
         case input.key.right:
         case "ArrowRight":
@@ -1047,7 +1047,7 @@ window.addEventListener("keyup", function(event) {
     }
 });
 
-window.addEventListener("keydown", function(event) {
+window.addEventListener("keydown", function (event) {
     // console.log(event.code)
     switch (event.code) {
         case input.key.right:
@@ -1081,7 +1081,7 @@ window.addEventListener("keydown", function(event) {
         case input.key.pause:
             if (!simulation.isChoosing && input.isPauseKeyReady && m.alive) {
                 input.isPauseKeyReady = false
-                setTimeout(function() {
+                setTimeout(function () {
                     input.isPauseKeyReady = true
                 }, 300);
                 if (simulation.paused) {
@@ -1110,7 +1110,7 @@ window.addEventListener("keydown", function(event) {
                             }
                             m.energy = energy //return to current energy
                             // document.getElementById("pause-field").innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}`
-                            document.getElementById("pause-field").style.backgroundImage = `url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? Math.floor(Math.random()*10) : ""}.webp')`
+                            document.getElementById("pause-field").style.backgroundImage = `url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? Math.floor(Math.random() * 10) : ""}.webp')`
                             document.getElementById("pause-field").innerHTML = `
                             <div class="card-text" style = "animation: fieldColorCycle 1s linear infinite alternate;">
                             <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
@@ -1310,7 +1310,7 @@ window.addEventListener("keydown", function(event) {
                 break
             case "b":
                 tech.isRerollDamage = true
-                powerUps.research.changeRerolls(100000)
+                powerUps.research.changeRerolls(1000000)
                 break
             case "r":
                 m.resetHistory();
@@ -1564,10 +1564,10 @@ document.getElementById("difficulty-select").addEventListener("input", () => {
 });
 
 
-document.getElementById("updates").addEventListener("toggle", function() {
+document.getElementById("updates").addEventListener("toggle", function () {
     function loadJSON(path, success, error) { //generic function to get JSON
         var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
+        xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     if (success)
@@ -1586,7 +1586,7 @@ document.getElementById("updates").addEventListener("toggle", function() {
 
     ///  https://api.github.com/repos/landgreen/n-gon/stats/commit_activity
     loadJSON('https://api.github.com/repos/landgreen/n-gon/commits',
-        function(data) {
+        function (data) {
             // console.log(data)
             for (let i = 0, len = 20; i < len; i++) {
                 text += "<strong>" + data[i].commit.author.date.substr(0, 10) + "</strong> - "; //+ "<br>"
@@ -1595,14 +1595,14 @@ document.getElementById("updates").addEventListener("toggle", function() {
             }
             document.getElementById("updates-div").innerHTML = text.replace(/\n/g, "<br />")
         },
-        function(xhr) {
+        function (xhr) {
             console.error(xhr);
         }
     );
 })
 const sound = {
     tone(frequency, end = 1000, gain = 0.05) {
-        const audioCtx = new(window.AudioContext || window.webkitAudioContext)(); //setup audio context
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)(); //setup audio context
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
         gainNode.gain.value = gain; //controls volume
@@ -1618,7 +1618,7 @@ const sound = {
         // return audioCtx
     },
     portamento(frequency, end = 1000, shiftRate = 10, gain = 0.05) {
-        const audioCtx = new(window.AudioContext || window.webkitAudioContext)(); //setup audio context
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)(); //setup audio context
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
         gainNode.gain.value = gain; //controls volume
@@ -1681,6 +1681,9 @@ if (!localSettings.isHideImages) {
         }
         // console.log(urls, images)
     });
+    document.getElementById("choose-grid").classList.add('choose-grid');
+} else {
+    document.getElementById("choose-grid").classList.add('choose-grid-no-images');
 }
 
 
