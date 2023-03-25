@@ -3841,7 +3841,7 @@ const m = {
                 //not shooting (or using field) enable cloak
                 if (m.energy < 0.05 && m.fireCDcycle < m.cycle && !input.fire) m.fireCDcycle = m.cycle
                 if (m.fireCDcycle + 30 < m.cycle && !input.fire) { //automatically cloak if not firing
-                    const drain = 0.03
+                    const drain = 0.02
                     if (!m.isCloak && m.energy > drain + 0.03) {
                         m.energy -= drain
                         m.isCloak = true //enter cloak
@@ -3878,7 +3878,7 @@ const m = {
                     if (tech.isCloakStun) { //stun nearby mobs after exiting cloak
                         let isMobsAround = false
                         const stunRange = m.fieldDrawRadius * 1.5
-                        const drain = 0.15
+                        const drain = 0.14
                         if (m.energy > drain) {
                             for (let i = 0, len = mob.length; i < len; ++i) {
                                 if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) < stunRange && Matter.Query.ray(map, mob[i].position, m.pos).length === 0 && !mob[i].isBadTarget) {
@@ -3900,7 +3900,7 @@ const m = {
                     }
                 }
                 if (m.isCloak) {
-                    m.fieldRange = m.fieldRange * 0.85 + 115
+                    m.fieldRange = m.fieldRange * 0.85 + 130
                     m.fieldDrawRadius = m.fieldRange * 1.1 //* 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                     m.drawCloak()
                 } else if (m.fieldRange < 4000) {

@@ -184,7 +184,7 @@ summary {
 }
 
 .choose-grid-no-images {
-    border-radius: 12px;
+    border-radius: 8px;
     border: 10px solid #444;
     gap: 10px;
     background-color: #444;
@@ -209,6 +209,7 @@ summary {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
 
 #choose-grid::-webkit-scrollbar {
     display: none;
@@ -481,6 +482,13 @@ summary {
     .card-text {
         min-height: 64px;
     }
+}
+
+/* .card-text */
+.choose-grid-no-images .card-text,
+.choose-grid-no-images .research-card,
+.choose-grid-no-images .cancel-card {
+    border-radius: 5px;
 }
 
 /* keeps 4 columns at 1440px */

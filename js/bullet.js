@@ -7143,6 +7143,7 @@ const b = {
         have: false,
         charge: 0,
         isDischarge: false,
+        knockBack: 0.001,
         chooseFireMethod() {
             if (tech.isFoamPressure) {
                 this.do = this.doCharges
@@ -7170,6 +7171,9 @@ const b = {
                 y: m.pos.y + 30 * Math.sin(m.angle)
             }
             b.foam(position, Vector.rotate(velocity, spread), radius)
+            //knock back player
+            player.force.x -= this.knockBack * velocity.x
+            player.force.y -= this.knockBack * velocity.y
             m.fireCDcycle = m.cycle + Math.floor(1.5 * b.fireCDscale);
         },
         doCharges() {
@@ -7196,6 +7200,9 @@ const b = {
                         y: m.pos.y + 30 * Math.sin(m.angle)
                     }
                     b.foam(position, Vector.rotate(velocity, spread), radius)
+                    //knock back player
+                    player.force.x -= this.knockBack * velocity.x
+                    player.force.y -= this.knockBack * velocity.y
                     this.charge -= 0.75
                     m.fireCDcycle = m.cycle + 2; //disable firing and adding more charge until empty
                 } else if (!input.fire) {
@@ -7241,6 +7248,9 @@ const b = {
             // } else {
             // }
             b.foam(position, Vector.rotate(velocity, spread), radius)
+            //knock back player
+            player.force.x -= this.knockBack * velocity.x
+            player.force.y -= this.knockBack * velocity.y
             m.fireCDcycle = m.cycle + Math.floor(1.5 * b.fireCDscale);
             this.charge += 1 + tech.isCapacitor
         },

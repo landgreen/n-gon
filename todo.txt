@@ -1,23 +1,23 @@
 ******************************************************** NEXT PATCH **************************************************
 
-mob damage difficulty setting is lower
-recycling now flashes green when it heals
+community map downpour by DesBoot
+community map buttonbutton by ||Destabilized E||
 
-merged cancel and research bars for single column selection
-added some dark grey borders for no images selection mode
-
-new images with midJourney V5
-  spores, pilot wave, standing wave
+rounded borders on no-image mode selection cards
+foam gun has some recoil
+new superball gun image
 
 bug fixes
 
 *********************************************************** TODO *****************************************************
 
+foam gun tech cavitation - a knock back effect, and 1 out of 5 foam bullets are larger and faster?
+
+Tech: Turbine - Energy generation is proportional to your speed up to +X% energy generation at 40 speed 
+Tech: "Electric Reactive Armor": Defeanse increases by 2% for each 1 energy generation you have
+
 wormhole tech - teleport away mobs with mass below 3 when they get too near the player
     short CD, small energy cost, only mobs below a mass
-
-foam gun could have a knock back effect
-  maybe with pressure vessel?
 
 extend brainstorming animation timers to fps cap?
   will it be smoother or choppier?

@@ -5799,7 +5799,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("mine") && !tech.isFoamMine
+            return tech.haveGunCheck("mine")
         },
         requires: "mines, not elephants toothpaste",
         effect() {
@@ -6520,6 +6520,27 @@ const tech = {
             b.guns[8].chooseFireMethod()
         }
     },
+    // {
+    //     name: "cavitation",
+    //     description: "increase <strong>foam</strong> <strong class='color-g'>gun</strong> <strong>recoil</strong> by <strong>300%</strong><br>",
+    //     isGunTech: true,
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 2,
+    //     frequencyDefault: 2,
+    //     allowed() {
+    //         return tech.haveGunCheck("foam")
+    //     },
+    //     requires: "foam",
+    //     effect() {
+    //         tech.isFoamCavitation = true;
+    //         b.guns[8].knockBack = 0.003
+    //     },
+    //     remove() {
+    //         tech.isFoamCavitation = false;
+    //         b.guns[8].knockBack = 0.001
+    //     }
+    // },
     {
         name: "capacitor bank",
         // description: "<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, foam, railgun, pulse, tokamak</em>",
@@ -11413,5 +11434,6 @@ const tech = {
     hardLanding: null,
     isNoGroundDamage: null,
     isSuperBounce: null,
-    isDivisor: null
+    isDivisor: null,
+    isFoamCavitation: null,
 }

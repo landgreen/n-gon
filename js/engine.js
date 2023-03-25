@@ -107,7 +107,7 @@ function collisionChecks(event) {
                         !mob[k].isSlowed && !mob[k].isStunned
                     ) {
                         let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * simulation.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
-                        if (m.isCloak) dmg *= 0.75
+                        if (m.isCloak) dmg *= 0.5
                         mob[k].foundPlayer();
                         if (tech.isRewindAvoidDeath && (m.energy + 0.05) > Math.min(0.95, m.maxEnergy) && dmg > 0.01) { //CPT reversal runs in m.damage, but it stops the rest of the collision code here too
                             m.damage(dmg);
@@ -336,15 +336,15 @@ function collisionChecks(event) {
 }
 
 //determine if player is on the ground
-Events.on(engine, "collisionStart", function(event) {
+Events.on(engine, "collisionStart", function (event) {
     playerOnGroundCheck(event);
     // playerHeadCheck(event);
     collisionChecks(event);
 });
-Events.on(engine, "collisionActive", function(event) {
+Events.on(engine, "collisionActive", function (event) {
     playerOnGroundCheck(event);
     // playerHeadCheck(event);
 });
-Events.on(engine, "collisionEnd", function(event) {
+Events.on(engine, "collisionEnd", function (event) {
     playerOffGroundCheck(event);
 });
