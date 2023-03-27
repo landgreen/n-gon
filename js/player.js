@@ -1854,7 +1854,7 @@ const m = {
     },
     setMaxEnergy() {
         // (m.fieldMode === 0 || m.fieldMode === 1) * 0.4 * m.coupling +
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 0.66 * (m.fieldUpgrades[m.fieldMode].name === "standing wave")
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 0.66 * (m.fieldMode === 1)
         // if (tech.isEnergyHealth) m.maxEnergy *= Math.sqrt(m.defense())
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
@@ -3050,6 +3050,29 @@ const m = {
                     this.fieldDrawRadius = 0
                 }
                 m.drawRegenEnergy("rgba(0,0,0,0.2)")
+
+
+                if (tech.isHealAttract) {
+                    for (let i = 0; i < powerUp.length; i++) {
+                        if (powerUp[i].name === "heal") {
+                            //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
+                            let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.01 * powerUp[i].mass)
+                            powerUp[i].force.x += attract.x;
+                            powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
+                            Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
+                        }
+                    }
+                }
+
+
+                // powerUp[i].force.x += 0.05 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
+                // powerUp[i].force.y += 0.05 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
+                // //extra friction
+                // Matter.Body.setVelocity(powerUp[i], {
+                //     x: powerUp[i].velocity.x * 0.11,
+                //     y: powerUp[i].velocity.y * 0.11
+                // });
+
             }
         }
     },
@@ -3539,6 +3562,17 @@ const m = {
                     }
                     m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
                     m.plasmaBall.do()
+                    if (tech.isHealAttract) {
+                        for (let i = 0; i < powerUp.length; i++) {
+                            if (powerUp[i].name === "heal") {
+                                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
+                                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.01 * powerUp[i].mass)
+                                powerUp[i].force.x += attract.x;
+                                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
+                                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
+                            }
+                        }
+                    }
                 }
             } else if (tech.isExtruder) {
                 m.hold = function () {
@@ -3581,6 +3615,17 @@ const m = {
                     ctx.lineWidth = tech.extruderRange;
                     ctx.strokeStyle = "rgba(255,0,110,0.06)"
                     ctx.stroke();
+                    if (tech.isHealAttract) {
+                        for (let i = 0; i < powerUp.length; i++) {
+                            if (powerUp[i].name === "heal") {
+                                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
+                                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.01 * powerUp[i].mass)
+                                powerUp[i].force.x += attract.x;
+                                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
+                                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
+                            }
+                        }
+                    }
                 }
             } else {
                 m.hold = function () {
@@ -3599,6 +3644,17 @@ const m = {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     }
                     m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
+                    if (tech.isHealAttract) {
+                        for (let i = 0; i < powerUp.length; i++) {
+                            if (powerUp[i].name === "heal") {
+                                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
+                                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.01 * powerUp[i].mass)
+                                powerUp[i].force.x += attract.x;
+                                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
+                                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
+                            }
+                        }
+                    }
                 }
             }
         },

@@ -4064,6 +4064,10 @@ const b = {
     //     Matter.Body.setVelocity(bullet[me], velocity);
     // },
     foam(position, velocity, radius) {
+        if (tech.isFoamCavitation && Math.random() < 0.25) {
+            velocity = Vector.mult(velocity, 1.35)
+            radius = 1.2 * radius + 13
+        }
         // radius *= Math.sqrt(tech.bulletSize)
         const me = bullet.length;
         bullet[me] = Bodies.polygon(position.x, position.y, 20, radius, {
@@ -4840,7 +4844,7 @@ const b = {
             minDmgSpeed: 2,
             // lookFrequency: 56 + Math.floor(17 * Math.random()) - isUpgraded * 20,
             lastLookCycle: simulation.cycle + 60 * Math.random(),
-            delay: Math.floor((tech.isNailBotUpgrade ? 20 : 110) * b.fireCDscale),
+            delay: Math.floor((tech.isNailBotUpgrade ? 20 : 100) * b.fireCDscale),
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(),
             endCycle: Infinity,
@@ -4875,7 +4879,7 @@ const b = {
                                     b.nail(this.position, Vector.mult(unit, SPEED))
                                     this.force = Vector.mult(unit, -0.018 * this.mass)
                                 } else {
-                                    const SPEED = 35
+                                    const SPEED = 40
                                     b.nail(this.position, Vector.mult(unit, SPEED))
                                     this.force = Vector.mult(unit, -0.01 * this.mass)
                                 }
@@ -4965,10 +4969,7 @@ const b = {
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
-    foamBot(position = {
-        x: player.position.x + 50 * (Math.random() - 0.5),
-        y: player.position.y + 50 * (Math.random() - 0.5)
-    }, isConsole = true) {
+    foamBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
         if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.foamBot()`);
         const me = bullet.length;
         const dir = m.angle;
@@ -4983,11 +4984,13 @@ const b = {
             restitution: 0.6 * (1 + 0.5 * Math.random()),
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
-            lookFrequency: 60 + Math.floor(17 * Math.random()) - 45 * tech.isFoamBotUpgrade,
+            lookFrequency: 60 + Math.floor(17 * Math.random()) - 50 * tech.isFoamBotUpgrade,
             cd: 0,
-            delay: 20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
+            fireCount: 0,
+            fireLimit: 5 + 2 * tech.isFoamBotUpgrade,
+            delay: Math.floor((200 + (tech.isFoamBotUpgrade ? 0 : 300)) * b.fireCDscale),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
-            range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(),
+            range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(), //how far from the player the bot will move
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -4996,29 +4999,93 @@ const b = {
             },
             beforeDmg() { },
             onEnd() { },
-            do() {
-                const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, m.pos))
-                if (distanceToPlayer > this.range) { //if far away move towards player
-                    this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.position)), this.mass * this.acceleration)
-                } else { //close to player
-                    Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
+            fireTarget: { x: 0, y: 0 },
+            fire() {
+                this.fireCount++
+                if (this.fireCount > this.fireLimit) {
+                    this.fireCount = 0
+                    this.cd = simulation.cycle + this.delay;
+                } // else {this.cd = simulation.cycle + 1;}
 
-                    if (this.cd < simulation.cycle && !(simulation.cycle % this.lookFrequency) && !m.isCloak) {
-                        let target
+                const radius = 5 + 3 * Math.random()
+                const SPEED = Math.max(5, 25 - radius * 0.4); //(m.crouch ? 32 : 20) - radius * 0.7;
+                const velocity = Vector.mult(Vector.normalise(Vector.sub(this.fireTarget, this.position)), SPEED)
+                b.foam(this.position, Vector.rotate(velocity, 0.07 * (Math.random() - 0.5)), radius + 6 * this.isUpgraded)
+
+                //recoil
+                // const force = Vector.mult(Vector.normalise(velocity), 0.005 * this.mass * (tech.isFoamCavitation ? 2 : 1))
+                const force = Vector.mult(velocity, 0.0001 * this.mass * (tech.isFoamCavitation ? 2 : 1))
+                this.force.x -= force.x
+                this.force.y -= force.y
+            },
+            do() {
+                if (this.fireCount === 0) { //passive mode: look for targets and following player
+                    const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, m.pos))
+                    if (distanceToPlayer > this.range) { //if far away move towards player
+                        this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.position)), this.mass * this.acceleration)
+                    } else { //close to player
+                        Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
+                    }
+
+                    if (this.cd < simulation.cycle && !m.isCloak && !(simulation.cycle % this.lookFrequency)) {
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist2 = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-                            if (dist2 < 1000000 && !mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
-                                this.cd = simulation.cycle + this.delay;
-                                target = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist2) / 60))
-                                const radius = 6 + 7 * Math.random()
-                                const SPEED = 29 - radius * 0.4; //(m.crouch ? 32 : 20) - radius * 0.7;
-                                const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
-                                b.foam(this.position, velocity, radius + 7.5 * this.isUpgraded)
+                            if (dist2 < 1700000 && !mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
+                                this.fireTarget = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist2) / 60)) //set target to where the mob will be in 1 second
+                                this.fire()
                                 break;
                             }
                         }
                     }
+                } else { //fire mode: quickly fire at targets and doesn't follow player
+                    this.fire()
                 }
+
+
+
+
+
+
+
+
+
+                // const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, m.pos))
+                // if (distanceToPlayer > this.range) { //if far away move towards player
+                //     this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.position)), this.mass * this.acceleration)
+                // } else { //close to player
+                //     Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
+
+                //     //&& !(simulation.cycle % this.lookFrequency)
+                //     if (this.cd < simulation.cycle && !m.isCloak) {
+                //         let target
+                //         for (let i = 0, len = mob.length; i < len; i++) {
+                //             const dist2 = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
+                //             if (dist2 < 2000000 && !mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
+
+                //                 this.fireCount++
+                //                 if (this.fireCount > 5) {
+                //                     this.fireCount = 0
+                //                     this.cd = simulation.cycle + this.delay;
+                //                 } else {
+                //                     // this.cd = simulation.cycle + 1;
+                //                 }
+
+                //                 target = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist2) / 60))
+                //                 const radius = 6 + 7 * Math.random()
+                //                 const SPEED = Math.max(5, 25 - radius * 0.4); //(m.crouch ? 32 : 20) - radius * 0.7;
+                //                 const velocity = Vector.mult(Vector.normalise(Vector.sub(target, this.position)), SPEED)
+                //                 b.foam(this.position, velocity, radius + 7.5 * this.isUpgraded)
+
+                //                 //recoil
+                //                 // const force = Vector.mult(Vector.normalise(velocity), 0.005 * this.mass * (tech.isFoamCavitation ? 2 : 1))
+                //                 const force = Vector.mult(velocity, 0.0003 * this.mass * (tech.isFoamCavitation ? 2 : 1))
+                //                 this.force.x -= force.x
+                //                 this.force.y -= force.y
+                //                 break;
+                //             }
+                //         }
+                //     }
+                // }
             }
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
@@ -5040,17 +5107,14 @@ const b = {
             restitution: 0.5 * (1 + 0.5 * Math.random()),
             acceleration: 0.0015 * (1 + 0.3 * Math.random()),
             playerRange: 140 + Math.floor(30 * Math.random()) + 2 * b.totalBots(),
-            offPlayer: {
-                x: 0,
-                y: 0,
-            },
+            offPlayer: { x: 0, y: 0, },
             dmg: 0, //damage done in addition to the damage from momentum
             minDmgSpeed: 2,
             lookFrequency: 20 + Math.floor(7 * Math.random()) - 13 * tech.isLaserBotUpgrade,
             range: (700 + 500 * tech.isLaserBotUpgrade) * (1 + 0.1 * Math.random()),
             drainThreshold: tech.isEnergyHealth ? 0.6 : 0.4,// laser bot will not attack if the player is below this energy
-            drain: (0.52 - 0.44 * tech.isLaserBotUpgrade) * tech.laserDrain,
-            laserDamage: 0.82 + 0.8 * tech.isLaserBotUpgrade,
+            drain: (0.57 - 0.45 * tech.isLaserBotUpgrade) * tech.laserDrain,
+            laserDamage: 0.75 + 0.75 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -7139,11 +7203,15 @@ const b = {
         name: "foam", //8
         description: "spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time",
         ammo: 0,
-        ammoPack: 24, //set in froth flotation
+        ammoPack: 24,
         have: false,
         charge: 0,
         isDischarge: false,
-        knockBack: 0.001,
+        knockBack: 0.0005, //set in tech: cavitation
+        applyKnock(velocity) {
+            player.force.x -= this.knockBack * velocity.x
+            player.force.y -= 2 * this.knockBack * velocity.y
+        },
         chooseFireMethod() {
             if (tech.isFoamPressure) {
                 this.do = this.doCharges
@@ -7171,9 +7239,7 @@ const b = {
                 y: m.pos.y + 30 * Math.sin(m.angle)
             }
             b.foam(position, Vector.rotate(velocity, spread), radius)
-            //knock back player
-            player.force.x -= this.knockBack * velocity.x
-            player.force.y -= this.knockBack * velocity.y
+            this.applyKnock(velocity)
             m.fireCDcycle = m.cycle + Math.floor(1.5 * b.fireCDscale);
         },
         doCharges() {
@@ -7200,9 +7266,7 @@ const b = {
                         y: m.pos.y + 30 * Math.sin(m.angle)
                     }
                     b.foam(position, Vector.rotate(velocity, spread), radius)
-                    //knock back player
-                    player.force.x -= this.knockBack * velocity.x
-                    player.force.y -= this.knockBack * velocity.y
+                    this.applyKnock(velocity)
                     this.charge -= 0.75
                     m.fireCDcycle = m.cycle + 2; //disable firing and adding more charge until empty
                 } else if (!input.fire) {
@@ -7248,9 +7312,7 @@ const b = {
             // } else {
             // }
             b.foam(position, Vector.rotate(velocity, spread), radius)
-            //knock back player
-            player.force.x -= this.knockBack * velocity.x
-            player.force.y -= this.knockBack * velocity.y
+            this.applyKnock(velocity)
             m.fireCDcycle = m.cycle + Math.floor(1.5 * b.fireCDscale);
             this.charge += 1 + tech.isCapacitor
         },

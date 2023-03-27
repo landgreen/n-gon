@@ -10,7 +10,7 @@ const level = {
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     //see level.populateLevels:   (intro, ... , reservoir or factory, reactor, ... , gauntlet, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
-    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "n-gon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour"],
+    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
@@ -18,7 +18,7 @@ const level = {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // tech.giveTech("performance")
-            // level.difficultyIncrease(0 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(4 * 4) //30 is near max on hard  //60 is near max on why
             // spawn.setSpawnList();
             // spawn.setSpawnList();
             // m.maxHealth = m.health = 100
@@ -27,7 +27,7 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
-            // m.setField("metamaterial cloaking") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole
+            // m.setField("negative mass") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
@@ -35,20 +35,21 @@ const level = {
             // b.guns[3].ammo = 100000000
             // tech.giveTech("recycling")
             // tech.giveTech("pressure vessel")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("pseudoscience")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("options exchange")
-            // for (let i = 0; i < 1; i++) tech.giveTech("laser-bot")
-            // for (let i = 0; i < 1; i++) tech.giveTech("simulated annealing")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("cavitation")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("accretion")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("superdeterminism")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("foam-bot") });
+            // for (let i = 0; i < 1; i++) tech.giveTech("foam-bot upgrade")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.downpour();
+            // level.testing();
             // spawn.nodeGroup(3200, -300, "sniper")
             // spawn.nodeGroup(2200, -300, "sniper")
             // spawn.nodeGroup(2200, -300, "sniper")
             // spawn.mantisBoss(1900, -500)
             // spawn.sneakBoss(1900, -500)
-            // spawn.starter(1900, -500, 50)
+            // spawn.starter(1900, -500, 250)
             // spawn.sneaker(1900, -500, 25)
             // spawn.sniper(2000, -450)
             // spawn.zombie(1000 + 1000 * Math.random(), -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)
@@ -65,7 +66,7 @@ const level = {
             // simulation.setZoom();
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "gun");
-            // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
+            // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "heal");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             //lore testing
             // for (let i = 0; i < 5; i++) tech.giveTech("undefined")
@@ -1311,6 +1312,13 @@ const level = {
                             y: 250 * (Math.random() - 0.5)
                         }));
                         Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
+                    }
+                }
+                if (tech.isHealAttract && (m.fieldMode === 3 || m.fieldMode === 5)) {
+                    for (let i = 0; i < powerUp.length; i++) {
+                        if (powerUp[i].name === "heal" && Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 1000000) {
+                            Matter.Body.setPosition(powerUp[i], Vector.add(this.portalPair.portal.position, { x: 500 * (Math.random() - 0.5), y: 500 * (Math.random() - 0.5) }));
+                        }
                     }
                 }
             }
@@ -9249,8 +9257,8 @@ const level = {
             portal2[2].draw()
         }
     },
-    "n-gon"() { //make by Oranger
-        simulation.makeTextLog(`<strong>"n-gon"</strong> by <span class='color-var'>Oranger</span>`);
+    ngon() { //make by Oranger
+        simulation.makeTextLog(`<strong>"ngon"</strong> by <span class='color-var'>Oranger</span>`);
 
         document.body.style.backgroundColor = "#dcdcde";
         let needGravity = [];
@@ -18166,7 +18174,6 @@ const level = {
     },
     downpour() {
         simulation.makeTextLog(`<strong>Downpour</strong> by <span class='color-var'>DesBoot</span>`);
-        simulation.makeTextLog(`<span class='color-var'>level</span>.onLevel = "Downpour"`);
         let mobsspawned = 0
         const laser = level.hazard(7492, -2612, 10, 500, 0.3) //laserintro
 

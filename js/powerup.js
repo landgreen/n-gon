@@ -695,9 +695,11 @@ const powerUps = {
             }
             text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality ? "<span class='alt'>alternate reality</span>" : "research"}</span></div></div></span>`
         } else {
-            text += `<span class='research-card' style="width: 275px;float: right; background-color: #bbb;">research</span>` //&zwnj;
+            text += `<span class='research-card' style="width: 275px;float: right; background-color: #aaa;color:#888;">research</span>` //&zwnj;
         }
-        if (tech.isCancelTech) {
+        if (tech.isSuperDeterminism) {
+            text += `<span class='cancel-card' style="width: 95px;float: right;background-color: #aaa;color:#888;">cancel</span>`
+        } else if (tech.isCancelTech) {
             text += `<span class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;float: right;font-size:0.9em;padding-top:5px">randomize</span>`
         } else {
             text += `<span class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 95px;float: right;">cancel</span>`
@@ -873,7 +875,7 @@ const powerUps = {
                 for (let i = 0; i < b.guns.length; i++) {
                     if (!b.guns[i].have) options.push(i);
                 }
-                let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + (m.fieldUpgrades[m.fieldMode].name === "pilot wave")))
+                let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + (m.fieldMode === 8)))
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
                 function removeOption(index) {
                     for (let i = 0; i < options.length; i++) {
@@ -937,7 +939,7 @@ const powerUps = {
                 for (let i = 1; i < m.fieldUpgrades.length; i++) { //skip field emitter
                     if (i !== m.fieldMode) options.push(i);
                 }
-                let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + (m.fieldUpgrades[m.fieldMode].name === "pilot wave")))
+                let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + (m.fieldMode === 8)))
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
 
                 function removeOption(index) {
@@ -1020,7 +1022,7 @@ const powerUps = {
                     }
                 }
                 //set total choices
-                let totalChoices = (tech.isDeterminism ? 1 : 3 + tech.extraChoices + (m.fieldUpgrades[m.fieldMode].name === "pilot wave"))
+                let totalChoices = (tech.isDeterminism ? 1 : 3 + tech.extraChoices + (m.fieldMode === 8))
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
                 if (optionLengthNoDuplicates < totalChoices + 1) { //if not enough options for all the choices
                     totalChoices = optionLengthNoDuplicates

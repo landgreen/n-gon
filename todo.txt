@@ -1,20 +1,25 @@
 ******************************************************** NEXT PATCH **************************************************
 
-community map downpour by DesBoot
-community map buttonbutton by ||Destabilized E||
+field tech: accretion - health power ups follow you around and they travel with you to the to next level
+  spawn 6 heal power ups
+  negative mass, plasma torch
 
-rounded borders on no-image mode selection cards
-foam gun has some recoil
-new superball gun image
+foam gun tech cavitation - more knock back, and 25% to make a foam bullet extra large and fast
 
-bug fixes
+foam-bots now discharge a few bullets in a stream with a long reload time
+laser-bot +5% energy drain, -5% damage
+nail-bot +10% fire rate
 
 *********************************************************** TODO *****************************************************
 
-foam gun tech cavitation - a knock back effect, and 1 out of 5 foam bullets are larger and faster?
+
+extend accretion to all fields
+  run the code in power ups
+
+tech: using research spawns a heal and ammo
 
 Tech: Turbine - Energy generation is proportional to your speed up to +X% energy generation at 40 speed 
-Tech: "Electric Reactive Armor": Defeanse increases by 2% for each 1 energy generation you have
+Tech: "Electric Reactive Armor": Defense increases by 2% for each 1 energy generation you have
 
 wormhole tech - teleport away mobs with mass below 3 when they get too near the player
     short CD, small energy cost, only mobs below a mass
@@ -1196,6 +1201,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
 ***past style themes***
   field emitter - bipedal white robot spherical gun turret on bird legs
       damaged dirty white robot spherical gun turret on bird legs in the style of Solarpunk
+      a white spherical bipedal mech standing motionless while black lines travel quickly in the background, minimalist style --no arms --v5
   standing wave - concentric transparent blue geometric circles science  
   perfect diamagnetism - physics magnetic field chalk diagram 
   time dilation - graphic of a hyperbolic equation Luminogram
@@ -1215,7 +1221,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   wave - sound wave oscilloscope by Paul Catherall,   concentric circles by Paul Catherall 
     Barbara Takenaga's painting depicting a clean sound wave on aoscilloscope device --ar 3:2 --v 5
   foam - black blobs Ink doodle
-  harpoon - by Eiichiro Oda
+  harpoon - iron harpoon on a rope weapon art white background by Eiichiro Oda --no fish --ar 3:2 --v 5 --s 750
   mine - by Dan McPharlin
   laser - complex optical scientific equipment
 

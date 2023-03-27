@@ -215,7 +215,7 @@ const tech = {
         }
     },
     hasExplosiveDamageCheck() {
-        return tech.haveGunCheck("missiles") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isBoomBotUpgrade || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb)
+        return tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isBoomBotUpgrade || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb)
     },
     damage: 1, //used for tech changes to player damage that don't have complex conditions
     damageFromTech() {
@@ -1954,7 +1954,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name !== "wormhole"
+            return m.fieldMode !== 9
         },
         requires: "not wormhole",
         effect() {
@@ -1973,7 +1973,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return tech.blockDamage > 0.075 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
+            return tech.blockDamage > 0.075 && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
         },
         requires: "mass driver, not pilot wave, tokamak, wormhole",
         effect() {
@@ -2027,7 +2027,7 @@ const tech = {
     //     frequency: 2,
     //     frequencyDefault: 2,
     //     allowed() {
-    //         return (tech.blockDamage > 0.075 || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && !tech.isTokamak
+    //         return (tech.blockDamage > 0.075 || m.fieldMode === 8) && !tech.isTokamak
     //     },
     //     requires: "mass driver or pilot wave, not tokamak",
     //     effect() {
@@ -3018,9 +3018,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return true
+            return !tech.isHealAttract
         },
-        requires: "",
+        requires: "not accretion",
         effect() {
             tech.isOverHeal = true;
         },
@@ -4734,7 +4734,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)
+            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)
         },
         requires: "a freeze effect",
         effect() {
@@ -4753,7 +4753,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)
+            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)
         },
         requires: "a freeze effect",
         effect() {
@@ -4772,7 +4772,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
+            return (tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
         },
         requires: "a localized freeze effect, no other mob death tech",
         effect() {
@@ -4791,7 +4791,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3) || tech.iceIXOnDeath || tech.isIceShot
+            return (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3) || tech.iceIXOnDeath || tech.isIceShot
         },
         requires: "ice IX",
         effect() {
@@ -4810,7 +4810,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3) || tech.iceIXOnDeath || tech.isIceShot
+            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3) || tech.iceIXOnDeath || tech.isIceShot
         },
         requires: "a localized freeze effect",
         effect() {
@@ -4829,7 +4829,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles) || ((tech.haveGunCheck("super balls") || tech.isSuperMine) && !tech.isSuperBounce && !tech.isFoamBall && !tech.isSuperHarm) || (tech.isRivets && !tech.isNailCrit) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 3) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
+            return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles) || ((tech.haveGunCheck("super balls") || tech.isSuperMine) && !tech.isSuperBounce && !tech.isFoamBall && !tech.isSuperHarm) || (tech.isRivets && !tech.isNailCrit) || (m.fieldMode === 4 && simulation.molecularMode === 3) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
         },
         requires: "shotgun, super balls, rivets, drones, not irradiated drones, burst drones, polyurethane, Zectron",
         effect() {
@@ -5182,7 +5182,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.haveGunCheck("missiles") && tech.missileFireCD === 45) || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.missileBotCount
+            return (tech.haveGunCheck("missiles") && tech.missileFireCD === 45) || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount
         },
         requires: "missiles, not launch system",
         effect() {
@@ -5201,7 +5201,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.haveGunCheck("missiles") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1)) && tech.isMissileBig
+            return (tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1)) && tech.isMissileBig
         },
         requires: "missiles, cruise missile",
         effect() {
@@ -5292,7 +5292,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return !tech.isImmuneExplosion && tech.explosiveRadius === 1 && !tech.isSmallExplosion && !tech.isBlockExplode && !tech.fragments && (tech.haveGunCheck("missiles") || tech.missileBotCount || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.isBoomBotUpgrade || tech.isTokamak)
+            return !tech.isImmuneExplosion && tech.explosiveRadius === 1 && !tech.isSmallExplosion && !tech.isBlockExplode && !tech.fragments && (tech.haveGunCheck("missiles") || tech.missileBotCount || tech.isIncendiary || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isPulseLaser || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.isBoomBotUpgrade || tech.isTokamak)
         },
         requires: "an explosive damage source, not ammonium nitrate, nitroglycerin, chain reaction, fragmentation, electric armor",
         effect() {
@@ -5311,7 +5311,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return !tech.isExplodeRadio && ((tech.haveGunCheck("harpoon") && !tech.isFoamBall) || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.missileBotCount || tech.isRivets || tech.blockDamage > 0.075)
+            return !tech.isExplodeRadio && ((tech.haveGunCheck("harpoon") && !tech.isFoamBall) || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount || tech.isRivets || tech.blockDamage > 0.075)
         },
         requires: "grenades, missiles, rivets, harpoon, or mass driver, not iridium-192, not polyurethane foam",
         effect() {
@@ -5407,7 +5407,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 2) && (tech.haveGunCheck("missiles") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
+            return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 2) && (tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
         },
         requires: "an explosive damage source, not rocket propelled grenade",
         effect() {
@@ -5904,7 +5904,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0) || tech.isSporeWorm || tech.isSporeFlea
+            return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldMode === 4 && simulation.molecularMode === 0) || tech.isSporeWorm || tech.isSporeFlea
         },
         requires: "spores",
         effect() {
@@ -5926,7 +5926,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0) || tech.isSporeWorm || tech.isSporeFlea
+            return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldMode === 4 && simulation.molecularMode === 0) || tech.isSporeWorm || tech.isSporeFlea
         },
         requires: "spores",
         effect() {
@@ -5947,7 +5947,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0) || tech.isSporeWorm || tech.isSporeFlea
+            return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldMode === 4 && simulation.molecularMode === 0) || tech.isSporeWorm || tech.isSporeFlea
         },
         requires: "spores",
         effect() {
@@ -5973,7 +5973,7 @@ const tech = {
     //     frequency: 3,
     //     frequencyDefault: 3,
     //     allowed() {
-    //         return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0) || tech.isSporeWorm || tech.isSporeFlea
+    //         return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldMode === 4 && simulation.molecularMode === 0) || tech.isSporeWorm || tech.isSporeFlea
     //     },
     //     requires: "spores",
     //     effect() {
@@ -6001,7 +6001,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0)) || tech.isSporeWorm || tech.isSporeFlea
+            return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldMode === 4 && simulation.molecularMode === 0)) || tech.isSporeWorm || tech.isSporeFlea
         },
         requires: "spores",
         effect() {
@@ -6039,7 +6039,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0) || (tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isFoamShot && !tech.isNeedles && !tech.isNailShot)) && !tech.isSporeWorm
+            return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldMode === 4 && simulation.molecularMode === 0) || (tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isFoamShot && !tech.isNeedles && !tech.isNailShot)) && !tech.isSporeWorm
         },
         requires: "spores, not worms",
         effect() {
@@ -6059,7 +6059,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 0) || (tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isFoamShot && !tech.isNeedles && !tech.isNailShot)) && !tech.isSporeFlea
+            return (tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldMode === 4 && simulation.molecularMode === 0) || (tech.haveGunCheck("shotgun") && !tech.isIncendiary && !tech.isRivets && !tech.isIceShot && !tech.isFoamShot && !tech.isNeedles && !tech.isNailShot)) && !tech.isSporeFlea
         },
         requires: "spores, not fleas",
         effect() {
@@ -6099,7 +6099,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.isSporeFollow && (tech.haveGunCheck("spores") || (tech.haveGunCheck("shotgun") && tech.isSporeWorm))) || tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && (simulation.molecularMode === 0 || simulation.molecularMode === 3))
+            return (tech.isSporeFollow && (tech.haveGunCheck("spores") || (tech.haveGunCheck("shotgun") && tech.isSporeWorm))) || tech.haveGunCheck("drones") || (m.fieldMode === 4 && (simulation.molecularMode === 0 || simulation.molecularMode === 3))
         },
         requires: "spores, worms, flagella, drones",
         effect() {
@@ -6119,7 +6119,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return !tech.isDroneRadioactive && (tech.haveGunCheck("drones") || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 3))
+            return !tech.isDroneRadioactive && (tech.haveGunCheck("drones") || (m.fieldMode === 4 && simulation.molecularMode === 3))
         },
         requires: "drones, not irradiated drones",
         effect() {
@@ -6149,7 +6149,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 3)
+            return tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldMode === 4 && simulation.molecularMode === 3)
         },
         requires: "drones",
         effect() {
@@ -6189,7 +6189,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 3)) && !tech.isDroneRadioactive && !tech.isIncendiary
+            return (tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldMode === 4 && simulation.molecularMode === 3)) && !tech.isDroneRadioactive && !tech.isIncendiary
         },
         requires: "drones, molecular assembler, not irradiated drones, incendiary",
         effect() {
@@ -6228,7 +6228,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.droneCycleReduction === 1 && !tech.isIncendiary && !tech.isDroneTeleport && (tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && simulation.molecularMode === 3))
+            return tech.droneCycleReduction === 1 && !tech.isIncendiary && !tech.isDroneTeleport && (tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldMode === 4 && simulation.molecularMode === 3))
         },
         requires: "drones, not reduced tolerances, incendiary, torque bursts",
         effect() {
@@ -6454,6 +6454,27 @@ const tech = {
         }
     },
     {
+        name: "cavitation",
+        description: "<strong>25%</strong> chance to discharge a huge <strong>foam</strong> bubble<br>increase <strong>foam</strong> <strong>recoil</strong> by <strong>100%</strong>",
+        isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return tech.haveGunCheck("foam") || tech.isFoamBotUpgrade || tech.isFoamShot || tech.isFoamBall || tech.isFoamMine
+        },
+        requires: "foam",
+        effect() {
+            tech.isFoamCavitation = true;
+            b.guns[8].knockBack = 0.001
+        },
+        remove() {
+            tech.isFoamCavitation = false;
+            b.guns[8].knockBack = 0.0005
+        }
+    },
+    {
         name: "foam fractionation",
         description: "if you have below <strong>300</strong> <strong class='color-ammo'>ammo</strong><br><strong>+100%</strong> <strong>foam</strong> <strong class='color-g'>gun</strong> bubble <strong>size</strong>",
         isGunTech: true,
@@ -6520,27 +6541,6 @@ const tech = {
             b.guns[8].chooseFireMethod()
         }
     },
-    // {
-    //     name: "cavitation",
-    //     description: "increase <strong>foam</strong> <strong class='color-g'>gun</strong> <strong>recoil</strong> by <strong>300%</strong><br>",
-    //     isGunTech: true,
-    //     maxCount: 1,
-    //     count: 0,
-    //     frequency: 2,
-    //     frequencyDefault: 2,
-    //     allowed() {
-    //         return tech.haveGunCheck("foam")
-    //     },
-    //     requires: "foam",
-    //     effect() {
-    //         tech.isFoamCavitation = true;
-    //         b.guns[8].knockBack = 0.003
-    //     },
-    //     remove() {
-    //         tech.isFoamCavitation = false;
-    //         b.guns[8].knockBack = 0.001
-    //     }
-    // },
     {
         name: "capacitor bank",
         // description: "<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, foam, railgun, pulse, tokamak</em>",
@@ -6579,11 +6579,11 @@ const tech = {
         requires: "harpoon, railgun",
         effect() {
             tech.railChargeRate *= 1.06
-            tech.harpoonDensity += 0.0065
+            tech.harpoonDensity += 0.007
         },
         remove() {
             tech.railChargeRate = 0.97;
-            tech.harpoonDensity = 0.0065
+            tech.harpoonDensity = 0.007
         }
     },
     {
@@ -7190,7 +7190,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (m.fieldUpgrades[m.fieldMode].name === "standing wave" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "time dilation") && (build.isExperimentSelection || powerUps.research.count > 1)
+            return (m.fieldMode === 1 || m.fieldMode === 8 || m.fieldMode === 6) && (build.isExperimentSelection || powerUps.research.count > 1)
         },
         requires: "standing wave, pilot wave, time dilation",
         effect() {
@@ -7215,7 +7215,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "standing wave"
+            return m.fieldMode === 1
         },
         requires: "standing wave",
         effect() {
@@ -7239,7 +7239,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "standing wave"
+            return m.fieldMode === 1
         },
         requires: "standing wave",
         effect() {
@@ -7263,7 +7263,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "standing wave" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
+            return m.fieldMode === 1 || m.fieldMode === 2
         },
         requires: "standing wave, perfect diamagnetism",
         effect() {
@@ -7286,7 +7286,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "standing wave" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+            return m.fieldMode === 1 || m.fieldMode === 2 || m.fieldMode === 8
         },
         requires: "standing wave, perfect diamagnetism, pilot wave",
         effect() {
@@ -7305,7 +7305,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldUpgrades[m.fieldMode].name === "standing wave" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && tech.blockDmg
+            return (m.fieldMode === 1 || m.fieldMode === 2 || m.fieldMode === 8) && tech.blockDmg
         },
         requires: "bremsstrahlung",
         effect() {
@@ -7324,7 +7324,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "standing wave" || m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
+            return m.fieldMode === 2 || m.fieldMode === 1 || m.fieldMode === 4
         },
         requires: "a field that can block",
         effect() {
@@ -7343,7 +7343,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
+            return m.fieldMode === 2
         },
         requires: "perfect diamagnetism",
         effect() {
@@ -7362,7 +7362,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism"
+            return m.fieldMode === 2
         },
         requires: "perfect diamagnetism",
         effect() {
@@ -7382,7 +7382,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "negative mass") && (build.isExperimentSelection || powerUps.research.count > 3)
+            return (m.fieldMode === 8 || m.fieldMode === 2 || m.fieldMode === 3) && (build.isExperimentSelection || powerUps.research.count > 3)
         },
         requires: "perfect diamagnetism, negative mass, pilot wave",
         effect() {
@@ -7405,7 +7405,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass"
+            return m.fieldMode === 8 || m.fieldMode === 3
         },
         requires: "negative mass, pilot wave",
         effect() {
@@ -7427,7 +7427,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass" || m.fieldUpgrades[m.fieldMode].name === "standing wave") && !tech.isCloakHealLastHit
+            return (m.fieldMode === 8 || m.fieldMode === 3 || m.fieldMode === 1) && !tech.isCloakHealLastHit
         },
         requires: "negative mass, pilot wave, standing wave, not patch",
         effect() {
@@ -7446,7 +7446,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "negative mass"
+            return m.fieldMode === 3
         },
         requires: "negative mass",
         effect() {
@@ -7466,6 +7466,26 @@ const tech = {
         }
     },
     {
+        name: "accretion",
+        description: `${powerUps.orb.heal(1)} follow you, even between levels<br>spawn ${powerUps.orb.heal(6)}`,
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return (m.fieldMode === 3 || m.fieldMode === 5) && !tech.isOverHeal
+        },
+        requires: "negative mass, plasma torch, not quenching",
+        effect() {
+            tech.isHealAttract = true
+            for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
+        },
+        remove() {
+            tech.isHealAttract = false
+        },
+    },
+    {
         name: "aerostat",
         description: `<strong>+88%</strong> <strong class='color-d'>damage</strong> while <strong>off</strong> the <strong>ground</strong><br><strong>-22%</strong> <strong class='color-d'>damage</strong> while <strong>on</strong> the <strong>ground</strong>`,
         isFieldTech: true,
@@ -7474,7 +7494,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "negative mass"
+            return m.fieldMode === 3
         },
         requires: "negative mass",
         effect() {
@@ -7493,7 +7513,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "negative mass" && !tech.isEnergyHealth
+            return m.fieldMode === 3 && !tech.isEnergyHealth
         },
         requires: "negative mass, not mass-energy",
         effect() {
@@ -7512,7 +7532,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "negative mass"
+            return m.fieldMode === 3
         },
         requires: "negative mass",
         effect() {
@@ -7531,7 +7551,7 @@ const tech = {
     //     frequency: 2,
     //     frequencyDefault: 2,
     //     allowed() {
-    //         return m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass" || (m.fieldUpgrades[m.fieldMode].name === "time dilation" && !tech.isRewindField)
+    //         return m.fieldMode === 8 || m.fieldMode === 3 || (m.fieldMode === 6 && !tech.isRewindField)
     //     },
     //     requires: "pilot wave, negative mass, time dilation, not retrocausality",
     //     effect() {
@@ -7552,7 +7572,7 @@ const tech = {
         isBotTech: true,
         isNonRefundable: true,
         allowed() {
-            return powerUps.research.count > 0 && (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || m.fieldUpgrades[m.fieldMode].name === "pilot wave")
+            return powerUps.research.count > 0 && (m.fieldMode === 4 || m.fieldMode === 8)
         },
         requires: "molecular assembler, pilot wave",
         effect() {
@@ -7577,7 +7597,7 @@ const tech = {
         isBotTech: true,
         isNonRefundable: true,
         allowed() {
-            return powerUps.research.count > 1 && (m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || m.fieldUpgrades[m.fieldMode].name === "pilot wave")
+            return powerUps.research.count > 1 && (m.fieldMode === 4 || m.fieldMode === 8)
         },
         requires: "molecular assembler, pilot wave",
         effect() {
@@ -7652,7 +7672,7 @@ const tech = {
     //     frequency: 3,
     //     frequencyDefault: 3,
     //     allowed() {
-    //         return (build.isExperimentSelection || powerUps.research.count > 0) && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
+    //         return (build.isExperimentSelection || powerUps.research.count > 0) && m.fieldMode === 4 && !(tech.isMissileField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport)
     //     },
     //     requires: "molecular assembler, no other manufacturing, no drone tech",
     //     effect() {
@@ -7679,7 +7699,7 @@ const tech = {
     //     frequency: 3,
     //     frequencyDefault: 3,
     //     allowed() {
-    //         return (build.isExperimentSelection || powerUps.research.count > 0) && m.maxEnergy > 0.5 && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport || tech.isDronesTravel)
+    //         return (build.isExperimentSelection || powerUps.research.count > 0) && m.maxEnergy > 0.5 && m.fieldMode === 4 && !(tech.isSporeField || tech.isIceField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport || tech.isDronesTravel)
     //     },
     //     requires: "molecular assembler, no other manufacturing, no drone tech",
     //     effect() {
@@ -7706,7 +7726,7 @@ const tech = {
     //     frequency: 3,
     //     frequencyDefault: 3,
     //     allowed() {
-    //         return (build.isExperimentSelection || powerUps.research.count > 0) && m.fieldUpgrades[m.fieldMode].name === "molecular assembler" && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport || tech.isDronesTravel)
+    //         return (build.isExperimentSelection || powerUps.research.count > 0) && m.fieldMode === 4 && !(tech.isSporeField || tech.isMissileField || tech.isFastDrones || tech.isDroneGrab || tech.isDroneRadioactive || tech.isDroneTeleport || tech.isDronesTravel)
     //     },
     //     requires: "molecular assembler, no other manufacturing, no drone tech",
     //     effect() {
@@ -7731,7 +7751,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || m.fieldUpgrades[m.fieldMode].name === "standing wave" || m.fieldUpgrades[m.fieldMode].name === "pilot wave"
+            return m.fieldMode === 4 || m.fieldMode === 1 || m.fieldMode === 8
         },
         requires: "molecular assembler, pilot wave, standing wave",
         effect() {
@@ -7751,7 +7771,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
+            return m.fieldMode === 4
         },
         requires: "molecular assembler",
         effect() {
@@ -7770,7 +7790,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
+            return m.fieldMode === 5 || m.fieldMode === 6 || m.fieldMode === 7 || m.fieldMode === 8 || m.fieldMode === 4
         },
         requires: "cloaking, molecular assembler, plasma torch, pilot wave",
         damage: 1.35,
@@ -7794,7 +7814,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "molecular assembler"
+            return m.fieldMode === 5 || m.fieldMode === 4
         },
         requires: "plasma torch, molecular assembler",
         effect() {
@@ -7813,7 +7833,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "molecular assembler" || m.fieldUpgrades[m.fieldMode].name === "perfect diamagnetism" || m.fieldUpgrades[m.fieldMode].name === "pilot wave")
+            return (m.fieldMode === 5 || m.fieldMode === 4 || m.fieldMode === 2 || m.fieldMode === 8)
         },
         requires: "molecular assembler, plasma torch, perfect diamagnetism, pilot wave",
         effect() {
@@ -7835,7 +7855,7 @@ const tech = {
         isBot: true,
         isBotTech: true,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isPlasmaBall && !tech.isExtruder && (build.isExperimentSelection || powerUps.research.count > 1)
+            return m.fieldMode === 5 && !tech.isPlasmaBall && !tech.isExtruder && (build.isExperimentSelection || powerUps.research.count > 1)
         },
         requires: "plasma torch, not extruder, plasma ball",
         effect() {
@@ -7876,7 +7896,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.plasmaBotCount || m.fieldUpgrades[m.fieldMode].name === "plasma torch") && (build.isExperimentSelection || powerUps.research.count > 1) && !tech.isPlasmaBall
+            return (tech.plasmaBotCount || m.fieldMode === 5) && (build.isExperimentSelection || powerUps.research.count > 1) && !tech.isPlasmaBall
         },
         requires: "plasma torch, not plasma ball",
         effect() {
@@ -7899,7 +7919,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isPlasmaBall
+            return m.fieldMode === 5 && !tech.isPlasmaBall
         },
         requires: "plasma torch, not plasma ball",
         effect() {
@@ -7908,7 +7928,7 @@ const tech = {
         },
         remove() {
             tech.isExtruder = false;
-            if (this.count && m.fieldUpgrades[m.fieldMode].name === "plasma torch") m.fieldUpgrades[m.fieldMode].set()
+            if (this.count && m.fieldMode === 5) m.fieldUpgrades[m.fieldMode].set()
         }
     },
     {
@@ -7920,7 +7940,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && tech.isExtruder
+            return m.fieldMode === 5 && tech.isExtruder
         },
         requires: "extruder",
         effect() {
@@ -7939,7 +7959,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && !tech.isExtruder && tech.isPlasmaRange === 1
+            return m.fieldMode === 5 && !tech.isExtruder && tech.isPlasmaRange === 1
         },
         requires: "plasma torch, not extruder, plasma jet",
         effect() {
@@ -7948,7 +7968,7 @@ const tech = {
         },
         remove() {
             tech.isPlasmaBall = false;
-            if (this.count && m.fieldUpgrades[m.fieldMode].name === "plasma torch") m.fieldUpgrades[m.fieldMode].set()
+            if (this.count && m.fieldMode === 5) m.fieldUpgrades[m.fieldMode].set()
         }
     },
     {
@@ -7960,7 +7980,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "plasma torch" && tech.isPlasmaBall
+            return m.fieldMode === 5 && tech.isPlasmaBall
         },
         requires: "plasma ball",
         effect() {
@@ -7979,7 +7999,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "time dilation" && !m.isShipMode && !tech.isRewindAvoidDeath && !tech.isTimeSkip
+            return m.fieldMode === 6 && !m.isShipMode && !tech.isRewindAvoidDeath && !tech.isTimeSkip
         },
         requires: "time dilation, not CPT symmetry",
         effect() {
@@ -8001,7 +8021,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "time dilation"
+            return m.fieldMode === 6
         },
         requires: "time dilation",
         effect() {
@@ -8010,7 +8030,7 @@ const tech = {
         },
         remove() {
             tech.isTimeStop = false;
-            if (m.fieldUpgrades[m.fieldMode].name === "time dilation") m.fieldHarmReduction = 1;
+            if (m.fieldMode === 6) m.fieldHarmReduction = 1;
         }
     },
     {
@@ -8022,7 +8042,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (m.fieldUpgrades[m.fieldMode].name === "time dilation") && (build.isExperimentSelection || powerUps.research.count > 2)
+            return (m.fieldMode === 6) && (build.isExperimentSelection || powerUps.research.count > 2)
         },
         requires: "time dilation",
         effect() {
@@ -8049,7 +8069,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return !tech.isGroundState && (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "pilot wave")
+            return !tech.isGroundState && (m.fieldMode === 6 || m.fieldMode === 8)
         },
         requires: "time dilation or pilot wave, not ground state",
         effect() {
@@ -8071,7 +8091,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking") && !tech.isQuantumEraser
+            return (m.fieldMode === 6 || m.fieldMode === 7) && !tech.isQuantumEraser
         },
         requires: "cloaking, time dilation, not quantum eraser",
         effect() {
@@ -8096,7 +8116,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "time dilation") && !tech.cloakDuplication
+            return (m.fieldMode === 7 || m.fieldMode === 6) && !tech.cloakDuplication
         },
         requires: "cloaking or time dilation",
         effect() {
@@ -8121,7 +8141,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" //|| m.fieldUpgrades[m.fieldMode].name === "time dilation"
+            return m.fieldMode === 7 //|| m.fieldMode === 6
         },
         requires: "cloaking",
         effect() {
@@ -8141,7 +8161,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
+            return m.fieldMode === 7
         },
         requires: "metamaterial cloaking",
         effect() {
@@ -8164,7 +8184,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" && !tech.lastHitDamage && !tech.isEnergyHealth
+            return m.fieldMode === 7 && !tech.lastHitDamage && !tech.isEnergyHealth
         },
         requires: "metamaterial cloaking, not dynamic equilibrium, mass-energy",
         effect() {
@@ -8184,7 +8204,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
+            return m.fieldMode === 7
         },
         requires: "metamaterial cloaking",
         effect() {
@@ -8203,7 +8223,7 @@ const tech = {
     //     frequency: 2,
     //     frequencyDefault: 2,
     //     allowed() {
-    //         return m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking"
+    //         return m.fieldMode === 7
     //     },
     //     requires: "metamaterial cloaking",
     //     effect() {
@@ -8222,7 +8242,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (m.fieldUpgrades[m.fieldMode].name === "plasma torch" || m.fieldUpgrades[m.fieldMode].name === "metamaterial cloaking" || m.fieldUpgrades[m.fieldMode].name === "pilot wave") && (build.isExperimentSelection || powerUps.research.count > 1)
+            return (m.fieldMode === 5 || m.fieldMode === 7 || m.fieldMode === 8) && (build.isExperimentSelection || powerUps.research.count > 1)
         },
         requires: "cloaking, pilot wave, or plasma torch",
         damage: 1.35,
@@ -8250,7 +8270,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "wormhole" || m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "time dilation"
+            return m.fieldMode === 9 || m.fieldMode === 8 || m.fieldMode === 6
         },
         requires: "wormhole, pilot wave, time dilation",
         effect() {
@@ -8271,7 +8291,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (m.fieldUpgrades[m.fieldMode].name === "pilot wave" || m.fieldUpgrades[m.fieldMode].name === "negative mass" || m.fieldUpgrades[m.fieldMode].name === "time dilation" || m.fieldUpgrades[m.fieldMode].name === "wormhole") && (build.isExperimentSelection || powerUps.research.count > 3)
+            return (m.fieldMode === 8 || m.fieldMode === 3 || m.fieldMode === 6 || m.fieldMode === 9) && (build.isExperimentSelection || powerUps.research.count > 3)
         },
         requires: "wormhole, time dilation, negative mass, pilot wave",
         effect() {
@@ -8297,7 +8317,7 @@ const tech = {
     //     frequency: 2,
     //     frequencyDefault: 2,
     //     allowed() {
-    //         return m.fieldUpgrades[m.fieldMode].name === "wormhole"
+    //         return m.fieldMode === 9
     //     },
     //     requires: "wormhole",
     //     effect() {
@@ -8317,7 +8337,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "wormhole"
+            return m.fieldMode === 9
         },
         requires: "wormhole",
         effect() {
@@ -8336,7 +8356,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "wormhole"
+            return m.fieldMode === 9
         },
         requires: "wormhole",
         effect() {
@@ -8362,7 +8382,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "wormhole"
+            return m.fieldMode === 9
         },
         requires: "wormhole",
         effect() {
@@ -8381,7 +8401,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "wormhole" && !tech.isNoDraftPause
+            return m.fieldMode === 9 && !tech.isNoDraftPause
         },
         requires: "wormhole, not eternalism",
         effect() {
@@ -8401,7 +8421,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "wormhole" && !tech.isWormholeMapIgnore
+            return m.fieldMode === 9 && !tech.isWormholeMapIgnore
         },
         requires: "wormhole, not affine connection",
         effect() {
@@ -8429,7 +8449,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name === "wormhole" && !tech.isFreeWormHole
+            return m.fieldMode === 9 && !tech.isFreeWormHole
         },
         requires: "wormhole, not charmed baryons",
         effect() {
@@ -10012,7 +10032,7 @@ const tech = {
         isNonRefundable: true,
         isJunk: true,
         allowed() {
-            return m.fieldUpgrades[m.fieldMode].name !== "negative mass"
+            return true
         },
         requires: "",
         effect() {
@@ -11436,4 +11456,5 @@ const tech = {
     isSuperBounce: null,
     isDivisor: null,
     isFoamCavitation: null,
+    isHealAttract: null,
 }
