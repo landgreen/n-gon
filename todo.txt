@@ -1,22 +1,31 @@
 ******************************************************** NEXT PATCH **************************************************
 
-field tech: accretion - health power ups follow you around and they travel with you to the to next level
-  spawn 6 heal power ups
-  negative mass, plasma torch
+new favicon
+heal power up overheals don't consume the entire heal power up
 
-foam gun tech cavitation - more knock back, and 25% to make a foam bullet extra large and fast
+accretion works with all fields except wormhole
+  (only because wormhole eat up heals so it's bad)
+  spawns 6 -> 3 heals
 
-foam-bots now discharge a few bullets in a stream with a long reload time
-laser-bot +5% energy drain, -5% damage
-nail-bot +10% fire rate
+pilot wave 1 -> 2 extra power up choices
+standing wave 66 -> 150 max energy
+electronegativity  0.1% -> 0.15% energy per energy  (10->15% damage at 100 energy)
+
+a few more images
+bug fixes
 
 *********************************************************** TODO *****************************************************
 
+tech: thorns?
 
 extend accretion to all fields
   run the code in power ups
 
 tech: using research spawns a heal and ammo
+
+Tech: relativity
+  Simulation speed scales with movement speed. When still, time moves at 0.4 speed, at full walking speed it’s 1. (So if you’re falling or something and you move faster the simulation will be faster than usual)
+  Also a damage and/or defense boost to make it worth using
 
 Tech: Turbine - Energy generation is proportional to your speed up to +X% energy generation at 40 speed 
 Tech: "Electric Reactive Armor": Defense increases by 2% for each 1 energy generation you have
@@ -1214,7 +1223,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
 
   nail gun - Screenprint
   shotgun - blueprint by Dan McPharlin
-  grenades, missiles, explosions - by Victo Ngai
+  grenades, missiles, explosions - vibrant fireball explosion sonic shockwave ring art by Victo Ngai --ar 3:2 --v 5 --s 750
   spores - turquoise black spores on a white background full color scientific anatomy by Ernst Haeckel
   drones - tilt-shift photography
   super balls - By Akari Toriyama

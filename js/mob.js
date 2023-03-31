@@ -201,7 +201,7 @@ const mobs = {
                         }
                     }
                 },
-                endEffect() {},
+                endEffect() { },
                 dmg: tickDamage,
                 type: "dot",
                 endCycle: simulation.cycle + cycles,
@@ -506,7 +506,7 @@ const mobs = {
                 }
             },
             laser() {
-                const vertexCollision = function(v1, v1End, domain) {
+                const vertexCollision = function (v1, v1End, domain) {
                     for (let i = 0; i < domain.length; ++i) {
                         let vertices = domain[i].vertices;
                         const len = vertices.length - 1;
@@ -658,7 +658,7 @@ const mobs = {
                     ctx.fillStyle = "rgba(0,0,0,0.07)";
                     ctx.fill();
                     //spring to random place on map
-                    const vertexCollision = function(v1, v1End, domain) {
+                    const vertexCollision = function (v1, v1End, domain) {
                         for (let i = 0; i < domain.length; ++i) {
                             let vertices = domain[i].vertices;
                             const len = vertices.length - 1;
@@ -756,7 +756,7 @@ const mobs = {
             },
             curl(range = 1000, mag = -10) {
                 //cause all mobs, and bodies to rotate in a circle
-                applyCurl = function(center, array, isAntiGravity = true) {
+                applyCurl = function (center, array, isAntiGravity = true) {
                     for (let i = 0; i < array.length; ++i) {
                         if (!array[i].isNotHoldable) {
                             const sub = Vector.sub(center, array[i].position)
@@ -924,7 +924,7 @@ const mobs = {
                 //be sure to declare searchTarget in mob spawn
                 //accelerate towards the searchTarget
                 if (!this.seePlayer.recall) {
-                    const newTarget = function(that) {
+                    const newTarget = function (that) {
                         if (Math.random() < 0.0007) {
                             that.searchTarget = player.position; //chance to target player
                         } else {
@@ -1297,7 +1297,7 @@ const mobs = {
                     }
                     if (tech.cloakDuplication && !this.isBoss) {
                         tech.cloakDuplication -= 0.02
-                        powerUps.setDupChance(); //needed after adjusting duplication chance
+                        powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                     }
                 } else if (tech.isShieldAmmo && this.shield && !this.isExtraShield) {
                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
@@ -1350,7 +1350,7 @@ const mobs = {
                 for (let i = 0, len = consBB.length; i < len; ++i) {
                     if (consBB[i].bodyA === this) {
                         if (consBB[i].bodyB.shield) { //&& !this.shield
-                            consBB[i].bodyB.do = function() { this.death() }
+                            consBB[i].bodyB.do = function () { this.death() }
                         }
                         consBB[i].bodyA = consBB[i].bodyB;
                         consBB.splice(i, 1);
@@ -1358,7 +1358,7 @@ const mobs = {
                         break;
                     } else if (consBB[i].bodyB === this) {
                         if (consBB[i].bodyA.shield) {
-                            consBB[i].bodyA.do = function() { this.death() }
+                            consBB[i].bodyA.do = function () { this.death() }
                         }
                         consBB[i].bodyB = consBB[i].bodyA;
                         consBB.splice(i, 1);
@@ -1415,7 +1415,7 @@ const mobs = {
                         //large mobs shrink so they don't block paths
                         if (body[len].mass + body[len2].mass > 16) {
                             const massLimit = 8 + 6 * Math.random()
-                            const shrink = function(that1, that2) {
+                            const shrink = function (that1, that2) {
                                 if (that1.mass + that2.mass > massLimit) {
                                     const scale = 0.95;
                                     Matter.Body.scale(that1, scale, scale);
@@ -1438,7 +1438,7 @@ const mobs = {
                         //large mobs shrink so they don't block paths
                         if (body[len].mass > 9) {
                             const massLimit = 7 + 4 * Math.random()
-                            const shrink = function(that) {
+                            const shrink = function (that) {
                                 if (that.mass > massLimit) {
                                     const scale = 0.95;
                                     Matter.Body.scale(that, scale, scale);

@@ -23,7 +23,7 @@ const level = {
             // spawn.setSpawnList();
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(500)
+            // powerUps.research.changeRerolls(11)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
@@ -35,13 +35,13 @@ const level = {
             // b.guns[3].ammo = 100000000
             // tech.giveTech("recycling")
             // tech.giveTech("pressure vessel")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("cavitation")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("bot fabrication")
             // for (let i = 0; i < 1; ++i) tech.giveTech("accretion")
             // for (let i = 0; i < 1; ++i) tech.giveTech("superdeterminism")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("foam-bot") });
             // for (let i = 0; i < 1; i++) tech.giveTech("foam-bot upgrade")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
-            // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "boost");
+            // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
             // level.testing();
             // spawn.nodeGroup(3200, -300, "sniper")
@@ -58,6 +58,7 @@ const level = {
             // tech.tech[322].frequency = 100
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
+
 
             level[simulation.isTraining ? "walk" : "intro"]() //normal starting level ************************************************
 
@@ -1314,7 +1315,7 @@ const level = {
                         Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
                     }
                 }
-                if (tech.isHealAttract && (m.fieldMode === 3 || m.fieldMode === 5)) {
+                if (tech.isHealAttract) {  //send heals to next portal
                     for (let i = 0; i < powerUp.length; i++) {
                         if (powerUp[i].name === "heal" && Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 1000000) {
                             Matter.Body.setPosition(powerUp[i], Vector.add(this.portalPair.portal.position, { x: 500 * (Math.random() - 0.5), y: 500 * (Math.random() - 0.5) }));
@@ -15999,9 +16000,12 @@ const level = {
     commandeer() {
         simulation.makeTextLog(`<strong>commandeer</strong> by <span class='color-var'>Desboot</span>`);
 
+        let waterFallWidth = 400
+        let waterFallX = 15900
+        let waterFallSmoothX = 0
         const elevator = level.elevator(-80.4, -931.6, 180, 50, -1550)
         15900 && player.position.x < 16300 && player.position.y > -960.2
-        const slime = level.hazard(15900, -960, 400, 6000);
+        //const slime = level.hazard(15900, -960, 400, 6000);
         const slime2 = level.hazard(15147.2, -1782.4, 2000, 822);
         const boost1 = level.boost(5950, -20, 700)
         const boost2 = level.boost(21088, -1672, 700)
@@ -16035,7 +16039,6 @@ const level = {
             //spawn.mapRect(22330, -2688.75, 400, 800);
             //spawn.mapRect(22330, -1793.5, 400, 800);//-46.25*2=-92.5
             //spawn.mapRect(22330, -804.25, 400, 800);//-46.25*3
-
 
 
             ctx.fillStyle = "rgba(250,250,250,0.8)"//lights
@@ -16073,7 +16076,6 @@ const level = {
 
             ctx.fillRect(6237, -1830.7, 550, 700)
             ctx.fillRect(6237, -840.4, 550, 700)
-            ctx.fillRect(15845.0, -1262.2, 550, 300)
             ctx.fillStyle = "rgba(200,200,200,0.8)"
             ctx.fillRect(-192, -1973, 6484, 2071)
             ctx.fillStyle = "rgba(240,240,240,0.8)"
@@ -16099,12 +16101,10 @@ const level = {
             buttonDoor3.draw();
 
 
-            slime.query();
+            //slime.query();
             slime2.query();
 
-            ctx.fillStyle = `hsla(160, 100%, 43%,${0.3 + 0.07 * Math.random()})`
-            ctx.fillRect(15900 + 400 * Math.random(), -1360, 2, 6000)
-            ctx.fillRect(15900 + 400 * Math.random(), -1360, 2, 6000)
+
             if (buttonDoor.isUp) {
                 door.isClosing = true
             } else {
@@ -16172,6 +16172,17 @@ const level = {
             ctx.fillRect(20820, -243, 410, 300)
             ctx.fillRect(5772, -609, 469, 700)
             ctx.fillRect(5772, -609, 469, 700)
+
+            ctx.fillStyle = "rgba(48,184,140,255)"
+            ctx.fillRect(waterFallX, -960, waterFallWidth, 6000)
+            ctx.fillStyle = `hsla(160, 100%, 43%,${0.3 + 0.07 * Math.random()})`
+            ctx.fillRect(waterFallX + waterFallWidth * Math.random(), -900 - Math.random() * 400, Math.random() * 5 + 8, 6000)
+            ctx.fillRect(waterFallX + waterFallWidth * Math.random(), -900 - Math.random() * 400, Math.random() * 5 + 5, 6000)
+            waterFallWidth = 0.995 * waterFallWidth + 4 * Math.random()//4.7
+            waterFalSmoothlX = 0.96 * waterFallSmoothX + 20 * Math.random()//3.5
+            waterFallX = waterFallSmoothX + 15900
+
+
             ctx.fillStyle = "rgba(0,0,0,0.4)"//wires
             ctx.fillRect(20990, -2672, 20, 112)
             ctx.fillRect(21090, -2506, 72, 20)
@@ -16304,7 +16315,7 @@ const level = {
             if (player.position.x > 15900 && player.position.x < 16300 && player.position.y > -1360.2) {
                 Matter.Body.setVelocity(player, {
                     x: player.velocity.x,
-                    y: player.velocity.y + 10
+                    y: player.velocity.y + 2
                 });
             } else {
                 if (Math.abs(player.velocity.x) > 0.5) {
@@ -16576,9 +16587,7 @@ const level = {
 
 
 
-        let randomBoss = Math.floor(Math.random() * 5);//change the bosses
-        spawn[["blinkBoss", "shooterBoss", "launcherBoss", "pulsarBoss", "beetleBoss", "bladeBoss", "revolutionBoss", "dragonFlyBoss", "spiderBoss"][randomBoss]](17902, -1689, 100, false);
-
+        spawn.randomLevelBoss(17902, -1689, ["blinkBoss", "shooterBoss", "launcherBoss", "pulsarBoss", "blockBoss", "bladeBoss", "revolutionBoss", "spawnerBossCulture", "spiderBoss", "sneakBoss", "snakeSpitBoss"])
 
 
         // powerUps.spawnStartingPowerUps(1475, -1175);
@@ -18372,19 +18381,6 @@ const level = {
             ctx.lineTo(11003, -2400)
             ctx.fill()
             ctx.fillRect(6100, -2000, 400, 50)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
             // -2000 -> 2500
             // Math.random() * 5000 -2500

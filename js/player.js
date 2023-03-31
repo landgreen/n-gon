@@ -916,6 +916,48 @@ const m = {
         none() {
             m.isAltSkin = true
         },
+        favicon() { //used to render the favicon, not actually in game
+            m.yOffWhen.jump = 70
+            m.yOffWhen.stand = 49
+            m.yOffWhen.crouch = 22
+            m.isAltSkin = false
+            m.color = {
+                hue: 0,
+                sat: 0,
+                light: 100,
+            }
+
+            m.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
+            m.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 10}%)`
+            let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+            grd.addColorStop(0, m.fillColorDark);
+            grd.addColorStop(1, m.fillColor);
+            m.bodyGradient = grd
+
+            m.draw = function () {
+                ctx.fillStyle = m.fillColor;
+                m.walk_cycle += m.flipLegs * m.Vx;
+                ctx.save();
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
+                ctx.translate(m.pos.x, m.pos.y);
+                // m.calcLeg(Math.PI, -3);
+                // m.drawLeg("#4a4a4a");
+                // m.calcLeg(0, 0);
+                // m.drawLeg("#333");
+                // ctx.rotate(m.angle);
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                ctx.fillStyle = m.bodyGradient
+                ctx.fill();
+                ctx.arc(12, 0, 4.5, 0, 2 * Math.PI);
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 4.5;
+                ctx.stroke();
+                ctx.restore();
+                m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                powerUps.boost.draw()
+            }
+        },
         mech() {
             m.isAltSkin = true
             m.yOffWhen.stand = 52
@@ -1801,11 +1843,11 @@ const m = {
         m.fieldThreshold = Math.cos((m.fieldArc) * Math.PI)
     },
     setHoldDefaults() {
-        if (tech.isFreeWormHole && m.fieldUpgrades[m.fieldMode].name !== "wormhole") {
+        if (tech.isFreeWormHole && m.fieldMode !== 9) { //not wormhole
             const removed = tech.removeTech("charmed baryon") //neutronum can get player stuck so it has to be removed if player has wrong field
             if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
         }
-        if (tech.isNeutronium && m.fieldUpgrades[m.fieldMode].name !== "negative mass") {
+        if (tech.isNeutronium && m.fieldMode !== 3) { //not negative mass field
             const removed = tech.removeTech("neutronium") //neutronum can get player stuck so it has to be removed if player has wrong field
             if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
         }
@@ -1854,7 +1896,7 @@ const m = {
     },
     setMaxEnergy() {
         // (m.fieldMode === 0 || m.fieldMode === 1) * 0.4 * m.coupling +
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 0.66 * (m.fieldMode === 1)
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 1.5 * (m.fieldMode === 1)
         // if (tech.isEnergyHealth) m.maxEnergy *= Math.sqrt(m.defense())
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
@@ -2211,7 +2253,7 @@ const m = {
                 if ( //use power up if it is close enough
                     dist2 < 5000 &&
                     !simulation.isChoosing &&
-                    (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)
+                    (powerUp[i].name !== "heal" || m.maxHealth - m.health > 0.01 || tech.isOverHeal)
                 ) {
                     powerUps.onPickUp(powerUp[i]);
                     Matter.Body.setVelocity(player, { //player knock back, after grabbing power up
@@ -2471,7 +2513,7 @@ const m = {
         // m.setMaxHealth();
         m.setFieldRegen()
         mobs.setMobSpawnHealth();
-        powerUps.setDupChance();
+        powerUps.setPowerUpMode();
 
         if ((m.fieldMode === 0 || m.fieldMode === 9) && !build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.4);
         // m.collisionImmuneCycles = 30 + m.coupling * 120 //2 seconds
@@ -2551,7 +2593,7 @@ const m = {
         name: "standing wave",
         //<strong>deflecting</strong> protects you in every <strong>direction</strong>
         description: `<strong>3</strong> oscillating <strong>shields</strong> are permanently active
-            <br><strong>+66</strong> max <strong class='color-f'>energy</strong>
+            <br><strong>+150</strong> max <strong class='color-f'>energy</strong>
             <br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
         drainCD: 0,
         effect: () => {
@@ -2565,7 +2607,7 @@ const m = {
                 const fieldRange1 = (0.75 + 0.3 * Math.sin(m.cycle / 23)) * m.fieldRange * m.harmonicRadius
                 const fieldRange2 = (0.68 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange * m.harmonicRadius
                 const fieldRange3 = (0.7 + 0.35 * Math.sin(m.cycle / 47)) * m.fieldRange * m.harmonicRadius
-                const netfieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
+                const netFieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
                 ctx.fillStyle = "rgba(110,170,200," + Math.min(0.6, (0.04 + m.energy * (0.1 + 0.11 * Math.random()))) + ")";
                 ctx.beginPath();
                 ctx.arc(m.pos.x, m.pos.y, fieldRange1, 0, 2 * Math.PI);
@@ -2578,7 +2620,7 @@ const m = {
                 ctx.fill();
                 //360 block
                 for (let i = 0, len = mob.length; i < len; ++i) {
-                    if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) - mob[i].radius < netfieldRange && !mob[i].isUnblockable) { // && Matter.Query.ray(map, mob[i].position, m.pos).length === 0
+                    if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) - mob[i].radius < netFieldRange && !mob[i].isUnblockable) { // && Matter.Query.ray(map, mob[i].position, m.pos).length === 0
                         mob[i].locatePlayer();
                         if (this.drainCD > m.cycle) {
                             m.pushMass(mob[i], 0);
@@ -3052,17 +3094,17 @@ const m = {
                 m.drawRegenEnergy("rgba(0,0,0,0.2)")
 
 
-                if (tech.isHealAttract) {
-                    for (let i = 0; i < powerUp.length; i++) {
-                        if (powerUp[i].name === "heal") {
-                            //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
-                            let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.01 * powerUp[i].mass)
-                            powerUp[i].force.x += attract.x;
-                            powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
-                            Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
-                        }
-                    }
-                }
+                // if (tech.isHealAttract) {
+                //     for (let i = 0; i < powerUp.length; i++) {
+                //         if (powerUp[i].name === "heal") {
+                //             //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
+                //             let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.01 * powerUp[i].mass)
+                //             powerUp[i].force.x += attract.x;
+                //             powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
+                //             Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
+                //         }
+                //     }
+                // }
 
 
                 // powerUp[i].force.x += 0.05 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
@@ -3562,17 +3604,6 @@ const m = {
                     }
                     m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
                     m.plasmaBall.do()
-                    if (tech.isHealAttract) {
-                        for (let i = 0; i < powerUp.length; i++) {
-                            if (powerUp[i].name === "heal") {
-                                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
-                                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.01 * powerUp[i].mass)
-                                powerUp[i].force.x += attract.x;
-                                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
-                                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
-                            }
-                        }
-                    }
                 }
             } else if (tech.isExtruder) {
                 m.hold = function () {
@@ -3615,17 +3646,6 @@ const m = {
                     ctx.lineWidth = tech.extruderRange;
                     ctx.strokeStyle = "rgba(255,0,110,0.06)"
                     ctx.stroke();
-                    if (tech.isHealAttract) {
-                        for (let i = 0; i < powerUp.length; i++) {
-                            if (powerUp[i].name === "heal") {
-                                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
-                                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.01 * powerUp[i].mass)
-                                powerUp[i].force.x += attract.x;
-                                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
-                                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
-                            }
-                        }
-                    }
                 }
             } else {
                 m.hold = function () {
@@ -3644,17 +3664,6 @@ const m = {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     }
                     m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
-                    if (tech.isHealAttract) {
-                        for (let i = 0; i < powerUp.length; i++) {
-                            if (powerUp[i].name === "heal") {
-                                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
-                                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.01 * powerUp[i].mass)
-                                powerUp[i].force.x += attract.x;
-                                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
-                                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
-                            }
-                        }
-                    }
                 }
             }
         },
@@ -4133,7 +4142,7 @@ const m = {
         //<br><strong class='color-block'>blocks</strong> can't <strong>collide</strong> with <strong>intangible</strong> mobs
         //field <strong>radius</strong> decreases out of <strong>line of sight</strong>
         //<strong>unlock</strong> <strong class='color-m'>tech</strong> from other <strong class='color-f'>fields</strong>
-        description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+1</strong> <strong>choice</strong><br>generate <strong>10</strong> <strong class='color-f'>energy</strong> per second",
+        description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+2</strong> <strong>choice</strong><br>generate <strong>10</strong> <strong class='color-f'>energy</strong> per second",
         effect: () => {
             m.fieldMeterColor = "#333"
             m.eyeFillColor = m.fieldMeterColor
@@ -4213,7 +4222,7 @@ const m = {
                                 if (
                                     dist2 < 5000 &&
                                     !simulation.isChoosing &&
-                                    (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)
+                                    (powerUp[i].name !== "heal" || m.maxHealth - m.health > 0.01 || tech.isOverHeal)
                                     // (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth)
                                     // (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity)
                                 ) { //use power up if it is close enough
@@ -4340,7 +4349,7 @@ const m = {
 
             m.duplicateChance = 0.03
             m.fieldRange = 0
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
 
             m.hold = function () {
                 // m.hole = {  //this is reset with each new field, but I'm leaving it here for reference

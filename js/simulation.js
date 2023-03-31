@@ -943,8 +943,7 @@ const simulation = {
         m.hole.isOn = false;
         simulation.drawList = [];
 
-        //send health power ups to the next level
-        if (tech.isHealAttract && m.alive && (m.fieldMode === 3 || m.fieldMode === 5)) {
+        if (tech.isHealAttract && m.alive) { //send health power ups to the next level
             let healCount = 0
             for (let i = 0, len = powerUp.length; i < len; i++) {
                 if (powerUp[i].name === "heal" && Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 1000000) healCount++

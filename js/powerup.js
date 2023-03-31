@@ -165,17 +165,17 @@ const powerUps = {
     },
     totalPowerUps: 0, //used for tech that count power ups at the end of a level
     do() { },
-    setDupChance() {
+    setPowerUpMode() {
         if (tech.duplicationChance() > 0 || tech.isAnthropicTech) {
             if (tech.isPowerUpsVanish) {
                 powerUps.do = powerUps.doDuplicatesVanish
-            } else if (tech.isPowerUpsAttract) {
+            } else if (tech.isHealAttract) {
                 powerUps.do = powerUps.doAttractDuplicates
             } else {
                 powerUps.do = powerUps.doDuplicates
             }
             tech.maxDuplicationEvent() //check to see if hitting 100% duplication
-        } else if (tech.isPowerUpsAttract) {
+        } else if (tech.isHealAttract) {
             powerUps.do = powerUps.doAttract
         } else {
             powerUps.do = powerUps.doDefault
@@ -194,16 +194,32 @@ const powerUps = {
     },
     doAttract() {
         powerUps.doDefault();
-        //pull in 
-        for (let i = 0, len = powerUp.length; i < len; ++i) {
-            const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.0015 * powerUp[i].mass)
-            powerUp[i].force.x += force.x
-            powerUp[i].force.y = force.y - simulation.g
+        for (let i = 0; i < powerUp.length; i++) {  //attract heal power ups to player
+            if (powerUp[i].name === "heal") {
+                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
+                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.015 * powerUp[i].mass)
+                powerUp[i].force.x += attract.x;
+                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
+                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
+            }
         }
+        // for (let i = 0, len = powerUp.length; i < len; ++i) {
+        //     const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.0015 * powerUp[i].mass)
+        //     powerUp[i].force.x += force.x
+        //     powerUp[i].force.y = force.y - simulation.g
+        // }
     },
     doAttractDuplicates() {
         powerUps.doDuplicates();
-        //pull in 
+        for (let i = 0; i < powerUp.length; i++) { //attract heal power ups to player
+            if (powerUp[i].name === "heal") {
+                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
+                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.015 * powerUp[i].mass)
+                powerUp[i].force.x += attract.x;
+                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
+                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
+            }
+        }
     },
     doDuplicates() { //draw power ups but give duplicates some electricity
         ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
@@ -448,20 +464,18 @@ const powerUps = {
         effect() {
             powerUps.research.changeRerolls(1)
         },
+        isMakingBots: false, //to prevent bot fabrication from running 2 sessions at once
         changeRerolls(amount) {
-            if (amount !== 0) {
-                powerUps.research.count += amount
-                // if (powerUps.research.count < 0) powerUps.research.count = 0
-
-                // else {
-                //     simulation.makeTextLog(`powerUps.research.count <span class='color-symbol'>+=</span> ${amount}`) // <br>${powerUps.research.count}
-                // }
-            }
-            if (tech.isRerollBots) {
-
+            if (amount !== 0) powerUps.research.count += amount
+            if (tech.isRerollBots && !this.isMakingBots) {
                 let cycle = () => {
                     const cost = 2 + Math.floor(0.2 * b.totalBots())
-                    if (m.alive && powerUps.research.count >= cost) requestAnimationFrame(cycle);
+                    if (m.alive && powerUps.research.count >= cost) {
+                        requestAnimationFrame(cycle);
+                        this.isMakingBots = true
+                    } else {
+                        this.isMakingBots = false
+                    }
                     if (!simulation.paused && !simulation.isChoosing && !(simulation.cycle % 60)) {
                         powerUps.research.count -= cost
                         b.randomBot()
@@ -476,24 +490,6 @@ const powerUps = {
                     }
                 }
                 requestAnimationFrame(cycle);
-
-
-                // let delay = 0
-                // for (let cost = 2 + Math.floor(0.2 * b.totalBots()); powerUps.research.count > cost - 1; powerUps.research.count -= cost) { // 1/5 = 0.2
-                //     cost = 2 + Math.floor(0.2 * b.totalBots())
-                //     delay += 500
-                //     setTimeout(() => {
-                //         b.randomBot()
-                //         if (tech.renormalization) {
-                //             for (let i = 0; i < cost; i++) {
-                //                 if (Math.random() < 0.44) {
-                //                     m.fieldCDcycle = m.cycle + 20;
-                //                     powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
-                //                 }
-                //             }
-                //         }
-                //     }, delay);
-                // }
             }
             if (tech.isDeathAvoid && document.getElementById("tech-anthropic")) {
                 document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.count}`
@@ -563,6 +559,11 @@ const powerUps = {
                         });
                         tech.extraMaxHealth += scaledOverHeal * simulation.healScale //increase max health
                         m.setMaxHealth();
+                    } else if (overHeal > 0.1) {
+                        requestAnimationFrame(() => {
+                            powerUps.directSpawn(this.position.x, this.position.y, "heal", true, null, overHeal * 40 * (simulation.healScale ** 0.25))//    directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
+                        });
+
                     }
                 }
             }
@@ -875,7 +876,7 @@ const powerUps = {
                 for (let i = 0; i < b.guns.length; i++) {
                     if (!b.guns[i].have) options.push(i);
                 }
-                let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + (m.fieldMode === 8)))
+                let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + 2 * (m.fieldMode === 8)))
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
                 function removeOption(index) {
                     for (let i = 0; i < options.length; i++) {
@@ -939,7 +940,7 @@ const powerUps = {
                 for (let i = 1; i < m.fieldUpgrades.length; i++) { //skip field emitter
                     if (i !== m.fieldMode) options.push(i);
                 }
-                let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + (m.fieldMode === 8)))
+                let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + 2 * (m.fieldMode === 8)))
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
 
                 function removeOption(index) {
@@ -1022,7 +1023,7 @@ const powerUps = {
                     }
                 }
                 //set total choices
-                let totalChoices = (tech.isDeterminism ? 1 : 3 + tech.extraChoices + (m.fieldMode === 8))
+                let totalChoices = (tech.isDeterminism ? 1 : 3 + tech.extraChoices + 2 * (m.fieldMode === 8))
                 if (tech.isFlipFlopChoices) totalChoices += tech.isRelay ? (tech.isFlipFlopOn ? -1 : 7) : (tech.isFlipFlopOn ? 7 : -1) //flip the order for relay
                 if (optionLengthNoDuplicates < totalChoices + 1) { //if not enough options for all the choices
                     totalChoices = optionLengthNoDuplicates

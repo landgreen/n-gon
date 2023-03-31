@@ -246,7 +246,7 @@ const tech = {
         if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
         if (tech.isLowEnergyDamage) dmg *= 1 + 0.7 * Math.max(0, 1 - m.energy)
-        if (tech.energyDamage) dmg *= 1 + m.energy * 0.1 * tech.energyDamage;
+        if (tech.energyDamage) dmg *= 1 + m.energy * 0.15 * tech.energyDamage;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
@@ -1271,6 +1271,7 @@ const tech = {
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
+        isHealTech: true,
         allowed() {
             return true
         },
@@ -2553,7 +2554,7 @@ const tech = {
     {
         name: "electronegativity",
         descriptionFunction() {
-            return `<strong>+0.1%</strong> <strong class='color-d'>damage</strong> per current stored <strong class='color-f'>energy</strong><br><em>(+${(10 * m.energy).toFixed(0)}%)</em>`
+            return `<strong>+0.15%</strong> <strong class='color-d'>damage</strong> per current stored <strong class='color-f'>energy</strong><br><em>(+${(15 * m.energy).toFixed(0)}%)</em>`
         },
         // description: "<strong>+1%</strong> <strong class='color-d'>damage</strong> per <strong>8</strong> stored <strong class='color-f'>energy</strong>",
         maxCount: 9,
@@ -3017,6 +3018,7 @@ const tech = {
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
+        isHealTech: true,
         allowed() {
             return !tech.isHealAttract
         },
@@ -3028,6 +3030,29 @@ const tech = {
             tech.isOverHeal = false;
         }
     },
+    {
+        name: "accretion",
+        description: `${powerUps.orb.heal(1)} follow you, even between levels<br>spawn ${powerUps.orb.heal(3)}`,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        isHealTech: true,
+        allowed() {
+            return m.fieldMode !== 9 && !tech.isOverHeal
+        },
+        requires: "not wormhole, quenching",
+        effect() {
+            tech.isHealAttract = true
+            powerUps.setPowerUpMode();
+            for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
+        },
+        remove() {
+            tech.isHealAttract = false
+            powerUps.setPowerUpMode();
+        },
+    },
+
     {
         name: "negative entropy",
         descriptionFunction() {
@@ -3137,11 +3162,11 @@ const tech = {
         requires: "anthropic principle",
         effect() {
             tech.isAnthropicTech = true
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         },
         remove() {
             tech.isAnthropicTech = false
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         }
     },
     {
@@ -3889,11 +3914,11 @@ const tech = {
         requires: "below 100% duplication chance, not superdeterminism",
         effect() {
             tech.isCancelDuplication = true //search for tech.cancelCount  to balance
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         },
         remove() {
             tech.isCancelDuplication = false
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         }
     },
     {
@@ -3909,14 +3934,14 @@ const tech = {
         requires: "below 100% duplication chance",
         effect() {
             tech.duplicateChance += 0.1
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.11);
             this.refundAmount += tech.addJunkTechToPool(0.33)
         },
         refundAmount: 0,
         remove() {
             tech.duplicateChance = 0
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             if (this.count > 0 && this.refundAmount > 0) {
                 tech.removeJunkTechFromPool(this.refundAmount)
                 this.refundAmount = 0
@@ -3936,12 +3961,12 @@ const tech = {
         requires: "below 1% duplication chance",
         effect() {
             tech.isStimulatedEmission = true
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.15);
         },
         remove() {
             tech.isStimulatedEmission = false
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         }
     },
     {
@@ -3957,12 +3982,12 @@ const tech = {
         requires: "below 100% duplication chance",
         effect() {
             tech.isPowerUpsVanish = true
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.11);
         },
         remove() {
             tech.isPowerUpsVanish = false
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         }
     },
     {
@@ -7466,26 +7491,6 @@ const tech = {
         }
     },
     {
-        name: "accretion",
-        description: `${powerUps.orb.heal(1)} follow you, even between levels<br>spawn ${powerUps.orb.heal(6)}`,
-        isFieldTech: true,
-        maxCount: 1,
-        count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
-        allowed() {
-            return (m.fieldMode === 3 || m.fieldMode === 5) && !tech.isOverHeal
-        },
-        requires: "negative mass, plasma torch, not quenching",
-        effect() {
-            tech.isHealAttract = true
-            for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
-        },
-        remove() {
-            tech.isHealAttract = false
-        },
-    },
-    {
         name: "aerostat",
         description: `<strong>+88%</strong> <strong class='color-d'>damage</strong> while <strong>off</strong> the <strong>ground</strong><br><strong>-22%</strong> <strong class='color-d'>damage</strong> while <strong>on</strong> the <strong>ground</strong>`,
         isFieldTech: true,
@@ -8042,9 +8047,9 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (m.fieldMode === 6) && (build.isExperimentSelection || powerUps.research.count > 2)
+            return (m.fieldMode === 6 || m.fieldMode === 8) && (build.isExperimentSelection || powerUps.research.count > 2)
         },
-        requires: "time dilation",
+        requires: "time dilation or pilot wave",
         effect() {
             tech.isFastTime = true
             m.setMovement();
@@ -8096,12 +8101,12 @@ const tech = {
         requires: "cloaking, time dilation, not quantum eraser",
         effect() {
             tech.cloakDuplication = 0.45
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.4);
         },
         remove() {
             tech.cloakDuplication = 0
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         }
     },
     {
@@ -8296,7 +8301,7 @@ const tech = {
         requires: "wormhole, time dilation, negative mass, pilot wave",
         effect() {
             tech.fieldDuplicate = 0.11
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.11);
             for (let i = 0; i < 4; i++) {
                 if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
@@ -8304,7 +8309,7 @@ const tech = {
         },
         remove() {
             tech.fieldDuplicate = 0
-            powerUps.setDupChance(); //needed after adjusting duplication chance
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             if (this.count > 0) powerUps.research.changeRerolls(4)
         }
     },
