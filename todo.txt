@@ -1,25 +1,11 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new favicon
-heal power up overheals don't consume the entire heal power up
+some new images
 
-accretion works with all fields except wormhole
-  (only because wormhole eat up heals so it's bad)
-  spawns 6 -> 3 heals
-
-pilot wave 1 -> 2 extra power up choices
-standing wave 66 -> 150 max energy
-electronegativity  0.1% -> 0.15% energy per energy  (10->15% damage at 100 energy)
-
-a few more images
 bug fixes
 
+
 *********************************************************** TODO *****************************************************
-
-tech: thorns?
-
-extend accretion to all fields
-  run the code in power ups
 
 tech: using research spawns a heal and ammo
 
@@ -1211,7 +1197,8 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   field emitter - bipedal white robot spherical gun turret on bird legs
       damaged dirty white robot spherical gun turret on bird legs in the style of Solarpunk
       a white spherical bipedal mech standing motionless while black lines travel quickly in the background, minimalist style --no arms --v5
-  standing wave - concentric transparent blue geometric circles science  
+  standing wave - a 3-D cyan transparent nested concentric aligned centered sphere with rings
+    by Philippe Starck 
   perfect diamagnetism - physics magnetic field chalk diagram 
   time dilation - graphic of a hyperbolic equation Luminogram
   negative mass - Blacklight painting by Moebius

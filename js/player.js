@@ -2474,6 +2474,7 @@ const m = {
                 return `gain the <strong class='color-coupling'>coupling</strong> effects of <strong>all</strong> <strong class='color-f'>fields</strong>`
             case 1: //standing wave
                 return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
+            // return `+${couple.toFixed(1)} <strong class='color-d'>damage</strong> per max <strong class='color-f'>energy</strong>`
             case 2: //perfect diamagnetism
                 return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
             // return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${2*couple}</strong> seconds post collision</span>`

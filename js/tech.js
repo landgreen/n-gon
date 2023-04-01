@@ -3045,7 +3045,7 @@ const tech = {
         effect() {
             tech.isHealAttract = true
             powerUps.setPowerUpMode();
-            for (let i = 0; i < 6; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "heal");
+            for (let i = 0; i < 3; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal");
         },
         remove() {
             tech.isHealAttract = false
@@ -3089,7 +3089,7 @@ const tech = {
         },
         requires: "",
         effect() {
-            tech.healthDrain += 0.019;
+            tech.healthDrain += 0.02;
         },
         remove() {
             tech.healthDrain = 0;
