@@ -455,6 +455,7 @@ const m = {
             m.alive = false;
             simulation.paused = true;
             m.health = 0;
+            simulation.ephemera = []
             document.getElementById("defense-bar").style.display = "none"; //hide defense
             document.getElementById("damage-bar").style.display = "none"
             m.displayHealth();
@@ -468,7 +469,7 @@ const m = {
             }, 5000);
         }
     },
-    storeTech() { //store a copy of your tech,  it will show up at your location next run
+    storeTech() { //store a copy of your tech,  it will show up at your location next run in the entanglement power up
         if (localSettings.isAllowed && !simulation.isCheating) {
             const gunList = [] //store gun names
             for (i = 0, len = b.inventory.length; i < len; i++) gunList.push(b.inventory[i])
@@ -1950,7 +1951,6 @@ const m = {
             m.fieldRegen = 0.001 //6 energy per second
         }
         if (m.fieldMode === 0 || m.fieldMode === 4) m.fieldRegen += 0.00133 * m.coupling //return `generate <strong>${(6*couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong> per second`
-
         if (tech.isTimeCrystals) {
             m.fieldRegen *= 3
         } else if (tech.isGroundState) {
@@ -1958,11 +1958,11 @@ const m = {
         }
     },
     regenEnergy: function () { //used in drawRegenEnergy  // rewritten by some tech
-        if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
+        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen;
         if (m.energy < 0) m.energy = 0
     },
     regenEnergyDefault: function () {
-        if (m.immuneCycle < m.cycle) m.energy += m.fieldRegen;
+        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen;
         if (m.energy < 0) m.energy = 0
     },
     lookingAt(who) {
@@ -2271,8 +2271,27 @@ const m = {
     pushMass(who, fieldBlockCost = (0.025 + Math.sqrt(who.mass) * Vector.magnitude(Vector.sub(who.velocity, player.velocity)) * 0.002) * m.fieldShieldingScale) {
         if (m.energy > fieldBlockCost * 0.2) { //shield needs at least some of the cost to block
             m.energy -= fieldBlockCost
-            if (m.energy < 0) m.energy = 0;
-            m.fieldCDcycle = m.cycle + m.fieldBlockCD;
+            if (m.energy < 0) {
+                m.energy = 0;
+                m.fieldCDcycle = m.cycle + Math.max(m.fieldBlockCD, 60);
+                if (tech.isLaserField) {
+                    simulation.ephemera.push({
+                        name: "laser field", //used to find this array element in simulation.removeEphemera()
+                        // tech.laserDrain = 0.0018;
+                        count: Math.floor(m.maxEnergy * 30) * 0.0018 / tech.laserDrain, //how many cycles the ephemera lasts, scales with max energy
+                        do() {
+                            this.count--
+                            if (this.count < 0) simulation.removeEphemera(this.name)
+                            for (let i = 0, num = 12; i < num; i++) { //draw random lasers
+                                const angle = 6.28 * i / num + m.cycle * 0.04
+                                b.laser({ x: m.pos.x + 30 * Math.cos(angle), y: m.pos.y + 30 * Math.sin(angle) }, { x: m.pos.x + 3000 * Math.cos(angle), y: m.pos.y + 3000 * Math.sin(angle) })//dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1
+                            }
+                        },
+                    })
+                }
+            } else {
+                m.fieldCDcycle = m.cycle + m.fieldBlockCD;
+            }
             if (!who.isInvulnerable && (m.coupling && m.fieldMode < 3) && bullet.length < 250) { //for standing wave mostly
                 for (let i = 0; i < m.coupling; i++) {
                     if (m.coupling - i > Math.random()) {
@@ -2282,24 +2301,10 @@ const m = {
                         b.iceIX(6 + 6 * Math.random(), angle + 3 * (Math.random() - 0.5), Vector.add(m.pos, rad))
                     }
                 }
-
-                // let count = 0
-                // for(let j=0; j<100;j++){
-                //     const len = m.coupling + 0.5 * (Math.random() - 0.5)
-                //     for (let i = 0; i < len; i++) {
-                //         count++
-                //     }
-                // }
-                // console.log(count)
-
             }
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
-                Matter.Body.setVelocity(who, {
-                    x: 0.5 * who.velocity.x,
-                    y: 0.5 * who.velocity.y
-                });
-
+                Matter.Body.setVelocity(who, { x: 0.5 * who.velocity.x, y: 0.5 * who.velocity.y });
                 if (who.isShielded) {
                     for (let i = 0, len = mob.length; i < len; i++) {
                         if (mob[i].id === who.shieldID) mob[i].damage(tech.blockDmg * m.dmgScale * (tech.isBlockRadiation ? 6 : 2), true)
@@ -2313,10 +2318,8 @@ const m = {
                 } else {
                     who.damage(tech.blockDmg * m.dmgScale, true)
                 }
-
-                //draw electricity
                 const step = 40
-                ctx.beginPath();
+                ctx.beginPath(); //draw electricity
                 for (let i = 0, len = 0.8 * tech.blockDmg; i < len; i++) {
                     let x = m.pos.x - 20 * unit.x;
                     let y = m.pos.y - 20 * unit.y;
@@ -2333,30 +2336,18 @@ const m = {
             } else {
                 m.drawHold(who);
             }
-            // if (tech.isFreezeMobs) mobs.statusSlow(who, 60) //this works but doesn't have a fun effect
             if (tech.isStunField) mobs.statusStun(who, tech.isStunField)
-            // m.holdingTarget = null
             //knock backs
             const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
-            Matter.Body.setVelocity(who, {
-                x: player.velocity.x - (15 * unit.x) / massRoot,
-                y: player.velocity.y - (15 * unit.y) / massRoot
-            });
+            Matter.Body.setVelocity(who, { x: player.velocity.x - (15 * unit.x) / massRoot, y: player.velocity.y - (15 * unit.y) / massRoot });
             if (who.isUnstable) {
                 if (m.fieldCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 10
                 who.death();
             }
-
             if (m.crouch) {
-                Matter.Body.setVelocity(player, {
-                    x: player.velocity.x + 0.1 * m.blockingRecoil * unit.x * massRoot,
-                    y: player.velocity.y + 0.1 * m.blockingRecoil * unit.y * massRoot
-                });
+                Matter.Body.setVelocity(player, { x: player.velocity.x + 0.1 * m.blockingRecoil * unit.x * massRoot, y: player.velocity.y + 0.1 * m.blockingRecoil * unit.y * massRoot });
             } else {
-                Matter.Body.setVelocity(player, {
-                    x: player.velocity.x + m.blockingRecoil * unit.x * massRoot,
-                    y: player.velocity.y + m.blockingRecoil * unit.y * massRoot
-                });
+                Matter.Body.setVelocity(player, { x: player.velocity.x + m.blockingRecoil * unit.x * massRoot, y: player.velocity.y + m.blockingRecoil * unit.y * massRoot });
             }
         }
     },
@@ -2371,7 +2362,7 @@ const m = {
                 mob[i].locatePlayer();
                 m.pushMass(mob[i]);
                 if (mob[i].isShielded) {
-                    m.fieldCDcycle = m.cycle + 60
+                    m.fieldCDcycle = m.cycle + 30
                 } else if (tech.deflectEnergy && !mob[i].isInvulnerable) {
                     m.energy += tech.deflectEnergy
                 }
@@ -2577,7 +2568,7 @@ const m = {
                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                     m.grabPowerUp();
                     m.lookForPickUp();
-                    if (m.energy > 0.05) {
+                    if (m.energy > 0) {
                         m.drawField();
                         m.pushMobsFacing();
                     }
@@ -2601,7 +2592,7 @@ const m = {
             m.fieldBlockCD = 0;
             m.blockingRecoil = 2 //4 is normal
             m.fieldRange = 185
-            m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.6) * Math.pow(0.6, (tech.harmonics - 2))
+            m.fieldShieldingScale = 1.6 * Math.pow(0.6, (tech.harmonics - 2))
             // m.fieldHarmReduction = 0.66; //33% reduction
 
             m.harmonic3Phase = () => { //normal standard 3 different 2-d circles
@@ -2629,7 +2620,7 @@ const m = {
                             m.pushMass(mob[i]);
                             this.drainCD = m.cycle + 15
                         }
-                        if (mob[i].isShielded || mob[i].shield) m.fieldCDcycle = m.cycle + 20
+                        if (mob[i].isShielded || mob[i].shield) m.fieldCDcycle = m.cycle + 10
                     }
                 }
             }
@@ -2680,7 +2671,7 @@ const m = {
                 } else {
                     m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                 }
-                if (m.energy > 0.1 && m.fieldCDcycle < m.cycle) {
+                if (m.energy > 0 && m.fieldCDcycle < m.cycle) {
                     if (tech.isStandingWaveExpand) {
                         if (input.field) {
                             // const oldHarmonicRadius = m.harmonicRadius
@@ -2728,7 +2719,7 @@ const m = {
                         ) {
                             mob[i].locatePlayer();
                             const unit = Vector.normalise(Vector.sub(m.fieldPosition, mob[i].position))
-                            m.fieldCDcycle = m.cycle + m.fieldBlockCD + (mob[i].isShielded ? 15 : 0);
+                            m.fieldCDcycle = m.cycle + m.fieldBlockCD + (mob[i].isShielded ? 18 : 0);
                             if (!mob[i].isInvulnerable && bullet.length < 250) {
                                 for (let i = 0; i < m.coupling; i++) {
                                     if (m.coupling - i > Math.random()) {
@@ -3208,7 +3199,6 @@ const m = {
                         }
                     }
                 }
-
                 if (m.isHolding) {
                     m.drawHold(m.holdingTarget);
                     m.holding();
@@ -3217,7 +3207,7 @@ const m = {
                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                     m.grabPowerUp();
                     m.lookForPickUp();
-                    if (m.energy > 0.05) {
+                    if (m.energy > 0) {
                         m.drawField();
                         m.pushMobsFacing();
                     }
@@ -3736,13 +3726,24 @@ const m = {
                         m.throwBlock();
                         m.wakeCheck();
                     } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
-                        const drain = 0.002 / (1 + 0.5 * m.coupling)
+                        const drain = 0.0014 / (1 + 0.5 * m.coupling)
                         if (m.energy > drain) m.energy -= drain
-
                         m.grabPowerUp();
-                        if (this.rewindCount === 0) m.lookForPickUp();
+                        if (this.rewindCount === 0) {
+                            m.lookForPickUp();
+                        }
 
                         if (!m.holdingTarget) {
+                            if (this.rewindCount === 0) { //large upfront energy cost to enter rewind mode
+                                if (m.energy > 0.3) {
+                                    m.energy -= 0.3
+                                } else {
+                                    this.rewindCount = 0;
+                                    m.resetHistory();
+                                    if (m.fireCDcycle < m.cycle + 60) m.fieldCDcycle = m.cycle + 60
+                                    m.immuneCycle = m.cycle //if you reach the end of the history disable harm immunity
+                                }
+                            }
                             this.rewindCount += 6;
                             const DRAIN = 0.003
                             let history = m.history[(m.cycle - this.rewindCount) % 600]
@@ -3759,7 +3760,7 @@ const m = {
                                 ctx.globalCompositeOperation = "source-over"
                                 // m.grabPowerUp(); //a second grab power up to make the power ups easier to grab, and they more fast which matches the time theme
                                 m.energy -= DRAIN
-                                if (m.immuneCycle < m.cycle + 60) m.immuneCycle = m.cycle + 60; //player is immune to damage for __ cycles
+                                if (m.immuneCycle < m.cycle + 5) m.immuneCycle = m.cycle + 5; //player is immune to damage for 5 cycles
                                 Matter.Body.setPosition(player, history.position);
                                 Matter.Body.setVelocity(player, {
                                     x: history.velocity.x,
@@ -3776,18 +3777,16 @@ const m = {
                                 } else {
                                     m.undoCrouch()
                                 }
-                                if (!(this.rewindCount % 30)) {
-                                    if (tech.isRewindBot) {
-                                        for (let i = 0; i < tech.isRewindBot; i++) {
-                                            b.randomBot(m.pos, false, false)
-                                            bullet[bullet.length - 1].endCycle = simulation.cycle + 480 + Math.floor(120 * Math.random()) //8-9 seconds
-                                        }
+                                if (tech.isRewindBot && !(this.rewindCount % 60)) {
+                                    for (let i = 0; i < tech.isRewindBot; i++) {
+                                        b.randomBot(m.pos, false, false)
+                                        bullet[bullet.length - 1].endCycle = simulation.cycle + 300 + Math.floor(180 * Math.random()) //8-9 seconds
                                     }
-                                    if (tech.isRewindGrenade) {
-                                        b.grenade(m.pos, this.rewindCount) //Math.PI / 2
-                                        const who = bullet[bullet.length - 1]
-                                        who.endCycle = simulation.cycle + 60
-                                    }
+                                }
+                                if (tech.isRewindGrenade && !(this.rewindCount % 30)) {
+                                    b.grenade(m.pos, this.rewindCount) //Math.PI / 2
+                                    const who = bullet[bullet.length - 1]
+                                    who.endCycle = simulation.cycle + 120
                                 }
                             }
                         }

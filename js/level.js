@@ -18,7 +18,7 @@ const level = {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // tech.giveTech("performance")
-            // level.difficultyIncrease(4 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(12 * 4) //30 is near max on hard  //60 is near max on why
             // spawn.setSpawnList();
             // spawn.setSpawnList();
             // m.maxHealth = m.health = 100
@@ -28,16 +28,17 @@ const level = {
             // tech.tech[297].frequency = 100
             // m.couplingChange(5)
             // m.setField("standing wave") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole
+            // m.energy = 0
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("foam") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[3].ammo = 100000000
-            // tech.giveTech("recycling")
-            // tech.giveTech("fine-structure constant")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("bot fabrication")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("accretion")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("superdeterminism")
+            // tech.giveTech("surface plasmons")
+            // tech.giveTech("relativistic momentum")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("dye laser")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("free-electron laser")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("causality bots")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("foam-bot") });
             // for (let i = 0; i < 1; i++) tech.giveTech("foam-bot upgrade")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
@@ -48,8 +49,8 @@ const level = {
             // spawn.nodeGroup(2200, -300, "sniper")
             // spawn.nodeGroup(2200, -300, "sniper")
             // spawn.mantisBoss(1900, -500)
-            // spawn.sneakBoss(1900, -500)
-            // spawn.starter(1900, -500, 250)
+            // spawn.cellBoss(1900, -500)
+            // for (let i = 0; i < 5; ++i) spawn.sneaker(1900, -500, 50)
             // spawn.sneaker(1900, -500, 25)
             // spawn.sniper(2000, -450)
             // spawn.zombie(1000 + 1000 * Math.random(), -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)
@@ -16587,8 +16588,8 @@ const level = {
 
 
 
-        spawn.randomLevelBoss(17902, -1689, ["blinkBoss", "shooterBoss", "launcherBoss", "pulsarBoss", "blockBoss", "bladeBoss", "revolutionBoss", "spawnerBossCulture", "spiderBoss", "sneakBoss", "snakeSpitBoss"])
-
+        // spawn.randomLevelBoss(17902, -1689, ["blinkBoss", "shooterBoss", "launcherBoss", "pulsarBoss", "blockBoss", "bladeBoss", "revolutionBoss", "spawnerBossCulture", "spiderBoss", "sneakBoss", "snakeSpitBoss"])
+        spawn.randomLevelBoss(17902, -1689, ["launcherBoss", "laserTargetingBoss", "blinkBoss", "streamBoss", "historyBoss", "grenadierBoss", "blockBoss", "revolutionBoss", "slashBoss"]);
 
         // powerUps.spawnStartingPowerUps(1475, -1175);
         // spawn.debris(750, -2200, 3700, 16); //16 debris per level

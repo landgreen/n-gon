@@ -1,20 +1,55 @@
 ******************************************************** NEXT PATCH **************************************************
 
-some new images
+tech - after deflecting drains all your energy, shoot lasers in every direction
+  is it too hard to safely lose all energy after deflecting
+    add in some mob knock back or damage immunity?
+      make this a tech?
+  balance damage
+  download image
+  sometimes the field goes on CD after deflection but when energy isn't 0
+    fixed?
+    look at side effects of setting standing wave, molecular assembler, emitter to not disable at 0 energy, not 0.05 or 0.1
+      might allow repeated deflection with no CD?
+      energy regen is disable when deflection is on CD
+        m.fieldCDcycle < m.cycle
+
+tech expansion no long gives deflection efficiency
+
+retrocausality drains 30% less energy as time rewinds, but each time you start to rewind you drain 30 energy
+  no longer provides immunity for 1 second after on ending rewind
+  also spawns 20% fewer bots and grenades
 
 bug fixes
 
+added a generic system to add code that loops for a set time
+Example code:
+simulation.ephemera.push({
+    name: "uniqueName",
+    count: 60, //cycles before it self removes
+    do() {
+        this.count--
+        if (this.count < 0) simulation.removeEphemera(this.name)
+        //run code here
+    },
+})
 
 *********************************************************** TODO *****************************************************
 
-tech: using research spawns a heal and ammo
+tech: choose next map by name after exiting current map
+  use modified tech selection code?
+  this might be too much work without much reward
+  JUNK only?
+
+
+build a system to add in methods to an array that runs these objects in the game loop
+  method to run the code
+    condition to remove from array should be inside the method
 
 Tech: relativity
   Simulation speed scales with movement speed. When still, time moves at 0.4 speed, at full walking speed it’s 1. (So if you’re falling or something and you move faster the simulation will be faster than usual)
   Also a damage and/or defense boost to make it worth using
 
 Tech: Turbine - Energy generation is proportional to your speed up to +X% energy generation at 40 speed 
-Tech: "Electric Reactive Armor": Defense increases by 2% for each 1 energy generation you have
 
 wormhole tech - teleport away mobs with mass below 3 when they get too near the player
     short CD, small energy cost, only mobs below a mass
@@ -1155,6 +1190,10 @@ possible names for tech
   nuclear pasta - hard matter in neutron star
   nonlocal
   fine-tuned universe
+  nonperturbative
+  D-branes
+  instanton or pseudoparticle
+  soliton  (wave packet)
   hall effect thrusters
   spaghettification
   particle accelerator

@@ -1908,8 +1908,9 @@ const spawn = {
 
         const k = 642 //k=r^2/m
         me.split = function () {
-            Matter.Body.scale(this, 0.45, 0.45);
-            this.radius = Math.sqrt(this.mass * k / Math.PI)
+            const scale = 0.45
+            Matter.Body.scale(this, scale, scale);
+            this.radius *= scale;
             spawn.cellBoss(this.position.x, this.position.y, this.radius, this.cellID);
             mob[mob.length - 1].health = this.health
         }
@@ -1928,7 +1929,7 @@ const spawn = {
             if (this.seePlayer.recall && this.mass < this.cellMassMax) { //grow cell radius
                 const scale = 1 + 0.0002 * this.cellMassMax / this.mass;
                 Matter.Body.scale(this, scale, scale);
-                this.radius = Math.sqrt(this.mass * k / Math.PI)
+                this.radius *= scale;
             }
             if (!(simulation.cycle % this.seePlayerFreq)) { //move away from other mobs
                 const repelRange = 150

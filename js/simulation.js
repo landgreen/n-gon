@@ -33,6 +33,7 @@ const simulation = {
         b.bulletDraw();
         if (!m.isBodiesAsleep) b.bulletDo();
         simulation.drawCircle();
+        simulation.runEphemera();
         // simulation.clip();
         ctx.restore();
         simulation.drawCursor();
@@ -68,6 +69,7 @@ const simulation = {
         simulation.draw.cons();
         simulation.draw.testing();
         simulation.drawCircle();
+        simulation.runEphemera();
         simulation.constructCycle()
         ctx.restore();
         simulation.testingOutput();
@@ -96,6 +98,7 @@ const simulation = {
             b.fire();
             b.bulletRemove();
             b.bulletDo();
+            simulation.runEphemera();
         }
         simulation.isTimeSkipping = false;
     },
@@ -113,8 +116,23 @@ const simulation = {
             if (m.fieldMode !== 7) m.hold();
             b.bulletRemove();
             if (!m.isBodiesAsleep) b.bulletDo();
+            simulation.runEphemera();
         }
         simulation.isTimeSkipping = false;
+    },
+    ephemera: [], //array that is used to store ephemera objects
+    removeEphemera: function (name) {
+        for (let i = 0, len = simulation.ephemera.length; i < len; i++) {
+            if (simulation.ephemera[i].name === name) {
+                simulation.ephemera.splice(i, 1);
+                break;
+            }
+        }
+    },
+    runEphemera() {
+        for (let i = 0; i < simulation.ephemera.length; i++) {
+            simulation.ephemera[i].do();
+        }
     },
     // timeMobSkip() {
     //     simulation.gravity();
@@ -745,6 +763,7 @@ const simulation = {
         level.populateLevels()
 
         input.endKeySensing();
+        simulation.ephemera = []
         b.removeAllGuns();
         tech.setupAllTech(); //sets tech to default values
         tech.cancelCount = 0;
