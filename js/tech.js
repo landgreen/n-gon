@@ -246,7 +246,7 @@ const tech = {
         if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
         if (tech.isLowEnergyDamage) dmg *= 1 + 0.7 * Math.max(0, 1 - m.energy)
-        if (tech.energyDamage) dmg *= 1 + m.energy * 0.15 * tech.energyDamage;
+        if (tech.energyDamage) dmg *= 1 + m.energy * 0.22 * tech.energyDamage;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
@@ -2554,27 +2554,6 @@ const tech = {
         }
     },
     {
-        name: "electronegativity",
-        descriptionFunction() {
-            return `<strong>+0.15%</strong> <strong class='color-d'>damage</strong> per current stored <strong class='color-f'>energy</strong><br><em>(+${(15 * m.energy).toFixed(0)}%)</em>`
-        },
-        // description: "<strong>+1%</strong> <strong class='color-d'>damage</strong> per <strong>8</strong> stored <strong class='color-f'>energy</strong>",
-        maxCount: 9,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        allowed() {
-            return true
-        },
-        requires: "",
-        effect() {
-            tech.energyDamage++
-        },
-        remove() {
-            tech.energyDamage = 0;
-        }
-    },
-    {
         name: "ground state",
         description: "<strong>+200</strong> maximum <strong class='color-f'>energy</strong><br><strong>–40%</strong> passive <strong class='color-f'>energy</strong> generation",
         // description: "reduce <strong class='color-defense'>defense</strong> by <strong>66%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
@@ -4761,7 +4740,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)
+            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0))
         },
         requires: "a freeze effect",
         effect() {
@@ -4780,7 +4759,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)
+            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0))
         },
         requires: "a freeze effect",
         effect() {
@@ -4799,7 +4778,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3)) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
+            return (tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0))) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
         },
         requires: "a localized freeze effect, no other mob death tech",
         effect() {
@@ -4818,7 +4797,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3) || tech.iceIXOnDeath || tech.isIceShot
+            return (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0)) || tech.iceIXOnDeath || tech.isIceShot
         },
         requires: "ice IX",
         effect() {
@@ -4837,7 +4816,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && m.fieldMode < 3) || tech.iceIXOnDeath || tech.isIceShot
+            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0)) || tech.iceIXOnDeath || tech.isIceShot
         },
         requires: "a localized freeze effect",
         effect() {
@@ -7209,6 +7188,48 @@ const tech = {
     //************************************************** tech
     //**************************************************
     {
+        name: "spherical harmonics",
+        description: "<strong>+50%</strong> <strong>standing wave</strong> deflection efficiency", //<strong>standing wave</strong> oscillates in a 3rd dimension<br>
+        isFieldTech: true,
+        maxCount: 9,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 1 && !tech.isLaserField
+        },
+        requires: "standing wave, not surface plasmons",
+        effect() {
+            tech.harmonics++
+            m.fieldShieldingScale = 1.6 * Math.pow(0.5, (tech.harmonics - 2))
+            m.harmonicShield = m.harmonicAtomic
+        },
+        remove() {
+            tech.harmonics = 2
+            m.fieldShieldingScale = 1.6 * Math.pow(0.5, (tech.harmonics - 2))
+            m.harmonicShield = m.harmonic3Phase
+        }
+    },
+    {
+        name: "surface plasmons",
+        description: "if <strong>deflecting</strong> drains all your <strong class='color-f'>energy</strong><br>emit <strong class='color-laser'>laser</strong> beams that scale with max <strong class='color-f'>energy</strong>",
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return (m.fieldMode === 4 && tech.deflectEnergy === 0) || (m.fieldMode === 1 && tech.harmonics === 2) || m.fieldMode === 0
+        },
+        requires: "molecular assembler, standing wave, field emitter, not electric generator",
+        effect() {
+            tech.isLaserField = true
+        },
+        remove() {
+            tech.isLaserField = false
+        }
+    },
+    {
         name: "zero point energy",
         description: `use ${powerUps.orb.research(2)}<br><strong>+100</strong> maximum <strong class='color-f'>energy</strong>`,
         isFieldTech: true,
@@ -7234,50 +7255,8 @@ const tech = {
         }
     },
     {
-        name: "surface plasmons",
-        description: "if <strong>deflecting</strong> a mob drains all your energy<br>emit <strong class='color-laser'>laser</strong> beams in every direction",
-        isFieldTech: true,
-        maxCount: 1,
-        count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
-        allowed() {
-            return m.fieldMode === 4 || m.fieldMode === 1 || m.fieldMode === 0
-        },
-        requires: "molecular assembler, standing wave, field emitter",
-        effect() {
-            tech.isLaserField = true
-        },
-        remove() {
-            tech.isLaserField = false
-        }
-    },
-    {
-        name: "spherical harmonics",
-        description: "<strong>+40%</strong> <strong>standing wave</strong> deflection efficiency<br>no longer deactivates on mob <strong>shields</strong>", //<strong>standing wave</strong> oscillates in a 3rd dimension<br>
-        isFieldTech: true,
-        maxCount: 9,
-        count: 0,
-        frequency: 3,
-        frequencyDefault: 3,
-        allowed() {
-            return m.fieldMode === 1
-        },
-        requires: "standing wave",
-        effect() {
-            tech.harmonics++
-            m.fieldShieldingScale = 1.6 * Math.pow(0.6, (tech.harmonics - 2))
-            m.harmonicShield = m.harmonicAtomic
-        },
-        remove() {
-            tech.harmonics = 2
-            m.fieldShieldingScale = 1.6 * Math.pow(0.6, (tech.harmonics - 2))
-            m.harmonicShield = m.harmonic3Phase
-        }
-    },
-    {
         name: "expansion",
-        description: "using <strong>standing wave</strong> field <strong>expands</strong> its <strong>radius</strong>",
+        description: "using <strong>standing wave</strong> field <strong>expands</strong> its <strong>radius</strong><br><strong>+40</strong> maximum <strong class='color-f'>energy</strong>",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -7289,37 +7268,36 @@ const tech = {
         requires: "standing wave",
         effect() {
             tech.isStandingWaveExpand = true
+            m.setMaxEnergy()
             // m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.6) * Math.pow(0.6, (tech.harmonics - 2))
         },
         remove() {
             tech.isStandingWaveExpand = false
+            m.setMaxEnergy()
             // m.fieldShieldingScale = (tech.isStandingWaveExpand ? 0.9 : 1.6) * Math.pow(0.6, (tech.harmonics - 2))
             m.harmonicRadius = 1
         }
     },
     {
-        name: "triple point",
+        name: "electronegativity",
         descriptionFunction() {
-            return `<strong>+1.5</strong> second <strong class='color-s'>ice IX</strong> freeze effect<br>spawn ${powerUps.orb.coupling(10)} that each give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong>` //<br>${m.couplingDescription(1)} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}
+            return `<strong>+0.22%</strong> <strong class='color-d'>damage</strong> per current stored <strong class='color-f'>energy</strong><br><em>(up to +${(22 * m.maxEnergy).toFixed(0)}% damage at max energy)</em>`
         },
+        // description: "<strong>+1%</strong> <strong class='color-d'>damage</strong> per <strong>8</strong> stored <strong class='color-f'>energy</strong>",
         isFieldTech: true,
-        maxCount: 3,
+        maxCount: 9,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 1 || m.fieldMode === 2
+            return m.fieldMode === 1 || m.fieldMode === 9 || m.fieldMode === 8
         },
-        requires: "standing wave, perfect diamagnetism",
+        requires: "standing wave, wormhole, pilot wave",
         effect() {
-            tech.iceIXFreezeTime += 90
-            powerUps.spawnDelay("coupling", 10)
+            tech.energyDamage++
         },
         remove() {
-            tech.iceIXFreezeTime = 150
-            if (this.count) {
-                m.couplingChange(-this.count)
-            }
+            tech.energyDamage = 0;
         }
     },
     {
@@ -7377,6 +7355,29 @@ const tech = {
         },
         remove() {
             tech.isStunField = 0;
+        }
+    },
+    {
+        name: "triple point",
+        descriptionFunction() {
+            return `<strong>+1.5</strong> second <strong class='color-s'>ice IX</strong> freeze effect<br>spawn ${powerUps.orb.coupling(10)} that each give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong>` //<br>${m.couplingDescription(1)} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}
+        },
+        isFieldTech: true,
+        maxCount: 3,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 2
+        },
+        requires: "perfect diamagnetism",
+        effect() {
+            tech.iceIXFreezeTime += 90
+            powerUps.spawnDelay("coupling", 10)
+        },
+        remove() {
+            tech.iceIXFreezeTime = 150
+            if (this.count) m.couplingChange(-this.count)
         }
     },
     {
@@ -7472,9 +7473,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldMode === 8 || m.fieldMode === 3 || m.fieldMode === 1) && !tech.isCloakHealLastHit
+            return (m.fieldMode === 8 || m.fieldMode === 3) && !tech.isCloakHealLastHit
         },
-        requires: "negative mass, pilot wave, standing wave, not patch",
+        requires: "negative mass, pilot wave, not patch",
         effect() {
             tech.lastHitDamage += 5;
         },
@@ -7796,9 +7797,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 4
+            return m.fieldMode === 4 && !tech.isLaserField
         },
-        requires: "molecular assembler",
+        requires: "molecular assembler, not surface plasmon",
         effect() {
             tech.deflectEnergy += 0.5;
         },

@@ -1896,9 +1896,7 @@ const m = {
         }
     },
     setMaxEnergy() {
-        // (m.fieldMode === 0 || m.fieldMode === 1) * 0.4 * m.coupling +
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 1.5 * (m.fieldMode === 1)
-        // if (tech.isEnergyHealth) m.maxEnergy *= Math.sqrt(m.defense())
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.5 * m.coupling + 0.4 * tech.isStandingWaveExpand
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
@@ -2268,21 +2266,22 @@ const m = {
             }
         }
     },
+    minEnergyToDeflect: 0.05,
     pushMass(who, fieldBlockCost = (0.025 + Math.sqrt(who.mass) * Vector.magnitude(Vector.sub(who.velocity, player.velocity)) * 0.002) * m.fieldShieldingScale) {
-        if (m.energy > fieldBlockCost * 0.2) { //shield needs at least some of the cost to block
+        if (m.energy > m.minEnergyToDeflect) { //shield needs at least some of the cost to block
+            if (who.isShielded) fieldBlockCost *= 1.5; //shielded mobs take more energy to block
             m.energy -= fieldBlockCost
-            if (m.energy < 0) {
+            if (m.energy < m.minEnergyToDeflect) {
                 m.energy = 0;
                 m.fieldCDcycle = m.cycle + Math.max(m.fieldBlockCD, 60);
                 if (tech.isLaserField) {
                     simulation.ephemera.push({
                         name: "laser field", //used to find this array element in simulation.removeEphemera()
-                        // tech.laserDrain = 0.0018;
-                        count: Math.floor(m.maxEnergy * 30) * 0.0018 / tech.laserDrain, //how many cycles the ephemera lasts, scales with max energy
+                        count: 15 + Math.floor(m.maxEnergy * 30 * 0.0018 / tech.laserDrain), //how many cycles the ephemera lasts, scales with max energy
                         do() {
                             this.count--
                             if (this.count < 0) simulation.removeEphemera(this.name)
-                            for (let i = 0, num = 12; i < num; i++) { //draw random lasers
+                            for (let i = 0, num = 20; i < num; i++) { //draw random lasers
                                 const angle = 6.28 * i / num + m.cycle * 0.04
                                 b.laser({ x: m.pos.x + 30 * Math.cos(angle), y: m.pos.y + 30 * Math.sin(angle) }, { x: m.pos.x + 3000 * Math.cos(angle), y: m.pos.y + 3000 * Math.sin(angle) })//dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1
                             }
@@ -2292,9 +2291,9 @@ const m = {
             } else {
                 m.fieldCDcycle = m.cycle + m.fieldBlockCD;
             }
-            if (!who.isInvulnerable && (m.coupling && m.fieldMode < 3) && bullet.length < 250) { //for standing wave mostly
+            if (!who.isInvulnerable && (m.coupling && m.fieldMode === 0) && bullet.length < 200) { //for field emitter iceIX
                 for (let i = 0; i < m.coupling; i++) {
-                    if (m.coupling - i > Math.random()) {
+                    if (m.coupling - i > 1.25 * Math.random()) {
                         const sub = Vector.mult(Vector.normalise(Vector.sub(who.position, m.pos)), (m.fieldRange * m.harmonicRadius) * (0.4 + 0.3 * Math.random())) //m.harmonicRadius should be 1 unless you are standing wave expansion
                         const rad = Vector.rotate(sub, 1 * (Math.random() - 0.5))
                         const angle = Math.atan2(sub.y, sub.x)
@@ -2361,9 +2360,8 @@ const m = {
             ) {
                 mob[i].locatePlayer();
                 m.pushMass(mob[i]);
-                if (mob[i].isShielded) {
-                    m.fieldCDcycle = m.cycle + 30
-                } else if (tech.deflectEnergy && !mob[i].isInvulnerable) {
+
+                if (tech.deflectEnergy && !mob[i].isInvulnerable && !mob[i].isShielded) {
                     m.energy += tech.deflectEnergy
                 }
             }
@@ -2464,8 +2462,9 @@ const m = {
             case 0: //field emitter
                 return `gain the <strong class='color-coupling'>coupling</strong> effects of <strong>all</strong> <strong class='color-f'>fields</strong>`
             case 1: //standing wave
-                return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
-            // return `+${couple.toFixed(1)} <strong class='color-d'>damage</strong> per max <strong class='color-f'>energy</strong>`
+                // return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
+                // return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
+                return `+${(couple * 50).toFixed(0)} maximum <strong class='color-f'>energy</strong>`
             case 2: //perfect diamagnetism
                 return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
             // return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${2*couple}</strong> seconds post collision</span>`
@@ -2501,7 +2500,7 @@ const m = {
 
             m.coupling = 0 //can't go negative
         }
-        // m.setMaxEnergy();
+        m.setMaxEnergy();
         // m.setMaxHealth();
         m.setFieldRegen()
         mobs.setMobSpawnHealth();
@@ -2568,7 +2567,7 @@ const m = {
                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                     m.grabPowerUp();
                     m.lookForPickUp();
-                    if (m.energy > 0) {
+                    if (m.energy > m.minEnergyToDeflect) {
                         m.drawField();
                         m.pushMobsFacing();
                     }
@@ -2592,7 +2591,7 @@ const m = {
             m.fieldBlockCD = 0;
             m.blockingRecoil = 2 //4 is normal
             m.fieldRange = 185
-            m.fieldShieldingScale = 1.6 * Math.pow(0.6, (tech.harmonics - 2))
+            m.fieldShieldingScale = 1.6 * Math.pow(0.5, (tech.harmonics - 2))
             // m.fieldHarmReduction = 0.66; //33% reduction
 
             m.harmonic3Phase = () => { //normal standard 3 different 2-d circles
@@ -2620,7 +2619,6 @@ const m = {
                             m.pushMass(mob[i]);
                             this.drainCD = m.cycle + 15
                         }
-                        if (mob[i].isShielded || mob[i].shield) m.fieldCDcycle = m.cycle + 10
                     }
                 }
             }
@@ -2671,7 +2669,7 @@ const m = {
                 } else {
                     m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                 }
-                if (m.energy > 0 && m.fieldCDcycle < m.cycle) {
+                if (m.energy > m.minEnergyToDeflect && m.fieldCDcycle < m.cycle) {
                     if (tech.isStandingWaveExpand) {
                         if (input.field) {
                             // const oldHarmonicRadius = m.harmonicRadius
@@ -2719,7 +2717,7 @@ const m = {
                         ) {
                             mob[i].locatePlayer();
                             const unit = Vector.normalise(Vector.sub(m.fieldPosition, mob[i].position))
-                            m.fieldCDcycle = m.cycle + m.fieldBlockCD + (mob[i].isShielded ? 18 : 0);
+                            m.fieldCDcycle = m.cycle + m.fieldBlockCD + (mob[i].isShielded ? 10 : 0);
                             if (!mob[i].isInvulnerable && bullet.length < 250) {
                                 for (let i = 0; i < m.coupling; i++) {
                                     if (m.coupling - i > Math.random()) {
@@ -3207,7 +3205,7 @@ const m = {
                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                     m.grabPowerUp();
                     m.lookForPickUp();
-                    if (m.energy > 0) {
+                    if (m.energy > m.minEnergyToDeflect) {
                         m.drawField();
                         m.pushMobsFacing();
                     }

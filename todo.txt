@@ -1,25 +1,24 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech - after deflecting drains all your energy, shoot lasers in every direction
-  is it too hard to safely lose all energy after deflecting
-    add in some mob knock back or damage immunity?
-      make this a tech?
-  balance damage
-  download image
-  sometimes the field goes on CD after deflection but when energy isn't 0
-    fixed?
-    look at side effects of setting standing wave, molecular assembler, emitter to not disable at 0 energy, not 0.05 or 0.1
-      might allow repeated deflection with no CD?
-      energy regen is disable when deflection is on CD
-        m.fieldCDcycle < m.cycle
-
-tech expansion no long gives deflection efficiency
-
 retrocausality drains 30% less energy as time rewinds, but each time you start to rewind you drain 30 energy
-  no longer provides immunity for 1 second after on ending rewind
-  also spawns 20% fewer bots and grenades
+  no longer provides immunity for 1 second after exiting rewind
+  spawns 20% fewer bots
 
-bug fixes
+deflecting changes
+  shielded mobs take 50% more energy to deflect
+  deflecting shielded mobs now only disables your shield for perfect diamagnetism and not for very long
+  you can deflect any mob if you have at least 5% energy, but if deflecting brings you below that your shield is disabled for 1 second
+    also you can't passively regen energy while shield is disabled
+
+standing wave rework
+  coupling gives iceIX -> max energy
+  expansion gives deflection efficiency -> +50 max energy
+  spherical harmonics gives 40 -> 50% deflection efficiency
+  electronegativity is a fieldTech for standing wave, wormhole, and pilot wave
+    also  0.15 -> 0.22% damage per energy
+  dynamic equilibrium is no longer unlocked by standing wave
+
+tech: surface plasmons - after deflecting drains all your energy, shoot lasers in every direction
 
 added a generic system to add code that loops for a set time
 Example code:
@@ -33,17 +32,19 @@ simulation.ephemera.push({
     },
 })
 
+some bug fixes
+also new bugs probably
+
 *********************************************************** TODO *****************************************************
+
+use ephemera to replace things
+  JUNK?
+  request animation stuff
 
 tech: choose next map by name after exiting current map
   use modified tech selection code?
   this might be too much work without much reward
-  JUNK only?
-
-
-build a system to add in methods to an array that runs these objects in the game loop
-  method to run the code
-    condition to remove from array should be inside the method
+  JUNK only? or maybe combine with other buff
 
 Tech: relativity
   Simulation speed scales with movement speed. When still, time moves at 0.4 speed, at full walking speed it’s 1. (So if you’re falling or something and you move faster the simulation will be faster than usual)
@@ -1278,4 +1279,6 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   time, CPT, pause -  by Lee Bontecou
   boost, coupling power ups tech - cyan electron orbiting a black nucleus electric field as bas-relief   //(by Kazumasa Nagai)
   radioactive - volumetric atomic nucleus diagram by Paul Catherall
+
+
 

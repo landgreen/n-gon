@@ -4988,7 +4988,7 @@ const b = {
             cd: 0,
             fireCount: 0,
             fireLimit: 5 + 2 * tech.isFoamBotUpgrade,
-            delay: Math.floor((175 + (tech.isFoamBotUpgrade ? 0 : 250)) * b.fireCDscale),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
+            delay: Math.floor((150 + (tech.isFoamBotUpgrade ? 0 : 250)) * b.fireCDscale),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
             acceleration: 0.005 * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(), //how far from the player the bot will move
             endCycle: Infinity,
