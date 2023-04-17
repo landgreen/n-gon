@@ -1738,7 +1738,7 @@ const b = {
                                 // m.fireCDcycle = m.cycle + 30; // cool down if out of energy
                                 m.fireCDcycle = m.cycle + 5 + 40 * b.fireCDscale + 60 * (m.energy < 0.05)
                                 this.endCycle = simulation.cycle + 10
-                                if (m.crouch) { //down
+                                if (input.down) { //down
                                     dist = 0
                                     player.force.y += 5 * player.mass * simulation.g;
                                 }

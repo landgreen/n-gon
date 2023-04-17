@@ -97,8 +97,6 @@ const spawn = {
                 }
             }
 
-
-
             // for (let i = 0, len = mob.length; i < len; i++) {
             //     if (mob[i].isDropPowerUp && mob[i].alive) { //&& !mob[i].isBoss
             //         if (mob[i].isFinalBoss) {
@@ -414,7 +412,7 @@ const spawn = {
             }
         }
         me.damageReductionDecay = function () { //slowly make the boss take more damage over time  //damageReduction resets with each invulnerability phase
-            if (!(me.cycle % 60) && this.lastDamageCycle + 240 > this.cycle) this.damageReduction *= 1.02 //only decay once a second   //only decay if the player has done damage in the last 4 seconds
+            if (!(me.cycle % 60) && this.lastDamageCycle + 240 > this.cycle) this.damageReduction *= 1.04 //only decay once a second   //only decay if the player has done damage in the last 4 seconds
         }
         me.mobType = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]
         me.spawnMobs = function (index = 0) {
