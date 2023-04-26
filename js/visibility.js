@@ -19,8 +19,8 @@ const v = {
                     visibilityVertices.push({ x: endPoint.x, y: endPoint.y })
                     if (Matter.Query.point([obj], queryPoint).length == 0) {
                         endPoint = {
-                            x: Math.cos(angle) * 100000 + pos.x,
-                            y: Math.sin(angle) * 100000 + pos.y
+                            x: Math.cos(angle) * 1000000 + pos.x,
+                            y: Math.sin(angle) * 1000000 + pos.y
                         }
 
                         outerRays.push({
