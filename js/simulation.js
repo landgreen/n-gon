@@ -766,7 +766,7 @@ const simulation = {
         simulation.ephemera = []
         b.removeAllGuns();
         tech.setupAllTech(); //sets tech to default values
-        tech.cancelCount = 0;
+        tech.duplication = 0;
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
             if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
@@ -1181,7 +1181,7 @@ const simulation = {
             }
             const damage = tech.damageFromTech()             //update damage bar
             if (m.lastCalculatedDamage !== damage) {
-                document.getElementById("damage-bar").style.height = Math.floor(Math.atan(0.25 * damage - 0.25) / 1.65 * canvas.height) + "px";
+                document.getElementById("damage-bar").style.height = Math.floor((Math.atan(0.25 * damage - 0.25) + 0.25) * 0.53 * canvas.height) + "px";
                 m.lastCalculatedDamage = damage
             }
         }
@@ -1232,7 +1232,16 @@ const simulation = {
             }
             if (isNaN(player.position.x)) m.death();
             if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
-                if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) m.energy += m.maxEnergy * 0.05
+                if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) {
+                    m.energy += m.maxEnergy * 0.05
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: m.pos.x,
+                        y: m.pos.y - 45,
+                        radius: Math.sqrt(m.maxEnergy * 0.05) * 60,
+                        color: "rgba(0, 204, 255,0.4)", //#0cf
+                        time: 4
+                    });
+                }
                 if (tech.isHealthRecovery) {
                     const heal = 0.005 * m.maxHealth
                     m.addHealth(heal)
@@ -1240,8 +1249,8 @@ const simulation = {
                         x: m.pos.x,
                         y: m.pos.y,
                         radius: Math.sqrt(heal) * 150,
-                        color: "rgba(0,255,200,0.6)",
-                        time: 8
+                        color: "rgba(0,255,200,0.5)",
+                        time: 4
                     });
                 }
             }

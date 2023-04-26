@@ -335,10 +335,7 @@ const m = {
                 if (
                     !tech.tech[i].isNonRefundable &&
                     !tech.tech[i].isFromAppliedScience &&
-                    tech.tech[i].name !== "many-worlds" &&
-                    tech.tech[i].name !== "Ψ(t) collapse" &&
-                    tech.tech[i].name !== "Hilbert space" &&
-                    tech.tech[i].name !== "-quantum leap-"
+                    !tech.tech[i].isAltRealityTech
                 ) {
                     totalTech += tech.tech[i].count
                     tech.tech[i].remove();
@@ -351,7 +348,7 @@ const m = {
         // tech.removeLoreTechFromPool();
         // tech.addLoreTechToPool();
         // tech.removeJunkTechFromPool();
-        tech.cancelCount = 0;
+        tech.duplication = 0;
         tech.extraMaxHealth = 0;
         tech.totalCount = 0;
         tech.countJunkTech();
@@ -528,7 +525,7 @@ const m = {
     },
     baseHealth: 1,
     setMaxHealth() {
-        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 2 * tech.isFallingDamage + 4 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth //+ (m.fieldMode === 0 || m.fieldMode === 5) * 0.5 * m.coupling
+        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 2.22 * tech.isFallingDamage + 4 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth //+ (m.fieldMode === 0 || m.fieldMode === 5) * 0.5 * m.coupling
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
@@ -544,7 +541,7 @@ const m = {
         dmg *= m.fieldHarmReduction
         // if (!tech.isFlipFlopOn && tech.isFlipFlopHealth) dmg *= 0.5
         // 1.25 + Math.sin(m.cycle * 0.01)
-        if (tech.isDiaphragm) dmg *= 0.66 + 0.66 * Math.sin(m.cycle * 0.0075);
+        if (tech.isDiaphragm) dmg *= 0.56 + 0.36 * Math.sin(m.cycle * 0.0075);
         if (tech.isZeno) dmg *= 0.15
         if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.4
@@ -641,7 +638,7 @@ const m = {
                 });
             }
         }
-        m.energy = Math.max(m.energy - steps / 250, 0.01)
+        m.energy = Math.max(m.energy - steps / 330, 0.01)
         if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
 
         let isDrawPlayer = true
@@ -1895,9 +1892,9 @@ const m = {
             },
         }
     },
-    setMaxEnergy() {
+    setMaxEnergy(isMessage = true) {
         m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.5 * m.coupling + 0.4 * tech.isStandingWaveExpand
-        simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
+        if (isMessage) simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
     drawRegenEnergy(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {
@@ -1950,7 +1947,7 @@ const m = {
         }
         if (m.fieldMode === 0 || m.fieldMode === 4) m.fieldRegen += 0.00133 * m.coupling //return `generate <strong>${(6*couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong> per second`
         if (tech.isTimeCrystals) {
-            m.fieldRegen *= 3
+            m.fieldRegen *= 2.5
         } else if (tech.isGroundState) {
             m.fieldRegen *= 0.6
         }
@@ -2269,7 +2266,7 @@ const m = {
     minEnergyToDeflect: 0.05,
     pushMass(who, fieldBlockCost = (0.025 + Math.sqrt(who.mass) * Vector.magnitude(Vector.sub(who.velocity, player.velocity)) * 0.002) * m.fieldShieldingScale) {
         if (m.energy > m.minEnergyToDeflect) { //shield needs at least some of the cost to block
-            if (who.isShielded) fieldBlockCost *= 1.5; //shielded mobs take more energy to block
+            if (who.isShielded) fieldBlockCost *= 2; //shielded mobs take more energy to block
             m.energy -= fieldBlockCost
             if (m.energy < m.minEnergyToDeflect) {
                 m.energy = 0;
@@ -2319,7 +2316,7 @@ const m = {
                 }
                 const step = 40
                 ctx.beginPath(); //draw electricity
-                for (let i = 0, len = 0.8 * tech.blockDmg; i < len; i++) {
+                for (let i = 0, len = 0.5 * tech.blockDmg; i < len; i++) {
                     let x = m.pos.x - 20 * unit.x;
                     let y = m.pos.y - 20 * unit.y;
                     ctx.moveTo(x, y);
@@ -2500,7 +2497,7 @@ const m = {
 
             m.coupling = 0 //can't go negative
         }
-        m.setMaxEnergy();
+        m.setMaxEnergy(false);
         // m.setMaxHealth();
         m.setFieldRegen()
         mobs.setMobSpawnHealth();
@@ -2599,7 +2596,7 @@ const m = {
                 const fieldRange2 = (0.68 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange * m.harmonicRadius
                 const fieldRange3 = (0.7 + 0.35 * Math.sin(m.cycle / 47)) * m.fieldRange * m.harmonicRadius
                 const netFieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
-                ctx.fillStyle = "rgba(110,170,200," + Math.min(0.6, (0.04 + m.energy * (0.1 + 0.11 * Math.random()))) + ")";
+                ctx.fillStyle = "rgba(110,170,200," + Math.min(0.6, (0.04 + 0.7 * m.energy * (0.1 + 0.11 * Math.random()))) + ")";
                 ctx.beginPath();
                 ctx.arc(m.pos.x, m.pos.y, fieldRange1, 0, 2 * Math.PI);
                 ctx.fill();
@@ -2629,7 +2626,7 @@ const m = {
                 const radius = m.fieldRange * m.harmonicRadius
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = "rgba(110,170,200,0.8)"
-                ctx.fillStyle = "rgba(110,170,200," + Math.min(0.6, m.energy * (0.11 + 0.1 * Math.random()) * (3 / tech.harmonics)) + ")";
+                ctx.fillStyle = "rgba(110,170,200," + Math.min(0.6, 0.7 * m.energy * (0.11 + 0.1 * Math.random()) * (3 / tech.harmonics)) + ")";
                 // ctx.fillStyle = "rgba(110,170,200," + Math.min(0.7, m.energy * (0.22 - 0.01 * tech.harmonics) * (0.5 + 0.5 * Math.random())) + ")";
                 for (let i = 0; i < tech.harmonics; i++) {
                     ctx.beginPath();
@@ -2762,7 +2759,7 @@ const m = {
                                 // }
                                 const step = 40
                                 ctx.beginPath();
-                                for (let i = 0, len = 0.8 * tech.blockDmg; i < len; i++) {
+                                for (let i = 0, len = 0.5 * tech.blockDmg; i < len; i++) {
                                     let x = m.fieldPosition.x - 20 * unit.x;
                                     let y = m.fieldPosition.y - 20 * unit.y;
                                     ctx.moveTo(x, y);

@@ -3,10 +3,10 @@ const tech = {
     setupAllTech() {
         tech.damage = 1
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            tech.tech[i].count = 0
             tech.tech[i].isLost = false
             tech.tech[i].isBanished = false
             tech.tech[i].remove();
+            tech.tech[i].count = 0
             if (tech.tech[i].isJunk) {
                 tech.tech[i].frequency = 0
             } else if (tech.tech[i].frequencyDefault) {
@@ -223,13 +223,13 @@ const tech = {
         if (tech.isDivisor) {
             for (let i = 0; i < b.inventory.length; i++) {
                 if (b.guns[b.inventory[i]].ammo % 3 === 0) {
-                    dmg *= 1.4
+                    dmg *= 1.44
                     break
                 }
             }
         }
         if (tech.isNoGroundDamage) dmg *= m.onGround ? 0.78 : 1.88
-        if (tech.isDilate) dmg *= 1.5 + Math.sin(m.cycle * 0.0075)
+        if (tech.isDilate) dmg *= 1.5 + 0.6 * Math.sin(m.cycle * 0.0075)
         if (tech.isGunChoice && tech.buffedGun === b.inventoryGun) dmg *= 1 + 0.31 * b.inventory.length
         if (powerUps.boost.endCycle > m.cycle) dmg *= 1 + powerUps.boost.damage
         if (m.coupling && (m.fieldMode === 0 || m.fieldMode === 5)) dmg *= 1 + 0.15 * m.coupling
@@ -258,7 +258,7 @@ const tech = {
         return dmg
     },
     duplicationChance() {
-        return Math.min(1, Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.cancelCount * 0.043 + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication * (1 - 0.016 * (simulation.difficultyMode ** 2)))) // + (m.fieldMode === 0 || m.fieldMode === 9) * 0.03 * m.coupling)
+        return Math.min(1, Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.duplication + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication * (1 - 0.016 * (simulation.difficultyMode ** 2)))) // + (m.fieldMode === 0 || m.fieldMode === 9) * 0.03 * m.coupling)
     },
     isScaleMobsWithDuplication: false,
     maxDuplicationEvent() {
@@ -309,7 +309,7 @@ const tech = {
     },
     tech: [{
         name: "tungsten carbide",
-        description: "<strong>+200</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
+        description: "<strong>+222</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -362,7 +362,7 @@ const tech = {
     },
     {
         name: "aperture",
-        description: "every <strong>6</strong> seconds your <strong class='color-d'>damage</strong> cycles<br>between <strong>-50%</strong> and <strong>+150%</strong> <strong class='color-d'>damage</strong>",
+        description: "every <strong>6</strong> seconds your <strong class='color-d'>damage</strong> cycles<br>between <strong>-10%</strong> and <strong>+110%</strong> <strong class='color-d'>damage</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -383,7 +383,7 @@ const tech = {
     },
     {
         name: "diaphragm",
-        description: "every <strong>6</strong> seconds your <strong class='color-defense'>defense</strong> cycles<br>between <strong>+100%</strong> and <strong>-33%</strong> <strong class='color-defense'>defense</strong>",
+        description: "every <strong>6</strong> seconds your <strong class='color-defense'>defense</strong> cycles<br>between <strong>+8%</strong> and <strong>+80%</strong> <strong class='color-defense'>defense</strong>",
         maxCount: 1,
         count: 0,
         frequency: 2,
@@ -452,8 +452,8 @@ const tech = {
         },
         maxCount: 1,
         count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
+        frequency: 3,
+        frequencyDefault: 3,
         allowed() {
             return tech.isEnergyHealth
         },
@@ -479,7 +479,7 @@ const tech = {
         // description: "<strong>charge</strong>, <strong>parity</strong>, and <strong>time</strong> invert to undo <strong class='color-defense'>defense</strong><br><strong class='color-rewind'>rewind</strong> <strong>(1.5—5)</strong> seconds for <strong>(66—220)</strong> <strong class='color-f'>energy</strong>",
         // description: "after losing <strong class='color-h'>health</strong>, if you have <strong>full</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>44</strong> <strong class='color-f'>energy</strong> per second",
         descriptionFunction() {
-            return `after losing <strong class='color-h'>health</strong>, if you have <strong>${(100 * Math.min(100, m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>40</strong> <strong class='color-f'>energy</strong> per second`
+            return `after losing <strong class='color-h'>health</strong>, if you have <strong>${(100 * Math.min(100, m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>20</strong> <strong class='color-f'>energy</strong> per second`
         },
         maxCount: 1,
         count: 0,
@@ -541,7 +541,7 @@ const tech = {
     {
         name: "ternary", //"divisor",
         descriptionFunction() {
-            return `<strong>+40%</strong> <strong class='color-d'>damage</strong> while one of your <strong class='color-g'>guns</strong><br>has <strong class='color-ammo'>ammo</strong> divisible by <strong>3</strong>`
+            return `<strong>+44%</strong> <strong class='color-d'>damage</strong> while one of your <strong class='color-g'>guns</strong><br>has <strong class='color-ammo'>ammo</strong> divisible by <strong>3</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -1247,18 +1247,18 @@ const tech = {
     {
         name: "collider",
         descriptionFunction() {
-            return `after mobs <strong>die</strong> there is a <strong>+33%</strong> chance to<br>collide <strong>power ups</strong> to form different <strong>power ups</strong>`
+            return `after mobs <strong>die</strong> there is a <strong>+50%</strong> chance to<br>collide <strong>power ups</strong> to form different <strong>power ups</strong>`
             // return `after mobs <strong>die</strong> there is a <strong>+33%</strong> chance to convert<br>${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, ${powerUps.orb.research(1)}, <strong class='color-m'>tech</strong>, <strong class='color-f'>field</strong>, <strong class='color-g'>gun</strong> into other types`
         },
 
-        maxCount: 3,
+        maxCount: 2,
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
         allowed: () => true,
         requires: "",
         effect() {
-            tech.collidePowerUps += 0.33333
+            tech.collidePowerUps += 0.5
         },
         remove() {
             tech.collidePowerUps = 0
@@ -2462,7 +2462,7 @@ const tech = {
     },
     {
         name: "Pauli exclusion",
-        description: `after mob collisions<br>become <strong>invulnerable</strong> for <strong>+3</strong> seconds`,
+        description: `after mob collisions<br>become <strong>invulnerable</strong> for <strong>+3.5</strong> seconds`,
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -2472,7 +2472,7 @@ const tech = {
         },
         requires: "",
         effect() {
-            m.collisionImmuneCycles += 180;
+            m.collisionImmuneCycles += 210;
             if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
         },
         remove() {
@@ -2481,7 +2481,7 @@ const tech = {
     },
     {
         name: "spin–statistics theorem",
-        description: `every <strong>7</strong> seconds<br>become <strong>invulnerable</strong> for <strong>+1.8</strong> seconds`,
+        description: `every <strong>7</strong> seconds<br>become <strong>invulnerable</strong> for <strong>+1.9</strong> seconds`,
         maxCount: 3,
         count: 0,
         frequency: 1,
@@ -2491,7 +2491,7 @@ const tech = {
         },
         requires: "",
         effect() {
-            tech.cyclicImmunity += 108;
+            tech.cyclicImmunity += 114;
         },
         remove() {
             tech.cyclicImmunity = 0;
@@ -2946,7 +2946,25 @@ const tech = {
             tech.isAcidDmg = false;
         }
     },
-
+    {
+        name: "induction brake",
+        description: `after using ${powerUps.orb.heal()} <strong class='color-s'>slow</strong> nearby mobs for <strong>15</strong> seconds<br>spawn ${powerUps.orb.heal(3)}`,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return !tech.isPerfectBrake
+        },
+        requires: "not eddy current brake",
+        effect() {
+            tech.isHealBrake = true;
+            for (let i = 0; i < 3; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal");
+        },
+        remove() {
+            tech.isHealBrake = false;
+        }
+    },
     {
         name: "adiabatic healing",
         descriptionFunction() {
@@ -3070,7 +3088,7 @@ const tech = {
         },
         requires: "",
         effect() {
-            tech.healthDrain += 0.02;
+            tech.healthDrain += 0.023;
         },
         remove() {
             tech.healthDrain = 0;
@@ -3193,6 +3211,7 @@ const tech = {
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
+        isAltRealityTech: true,
         allowed() {
             return !tech.isResearchReality && !tech.isSwitchReality
         },
@@ -3215,6 +3234,7 @@ const tech = {
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
+        isAltRealityTech: true,
         allowed() {
             return !tech.isResearchReality && !tech.isCollisionRealitySwitch
         },
@@ -3234,6 +3254,7 @@ const tech = {
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
+        isAltRealityTech: true,
         allowed() {
             return !tech.isSwitchReality && !tech.isCollisionRealitySwitch && !tech.isJunkResearch
         },
@@ -3894,7 +3915,7 @@ const tech = {
         },
         requires: "below 100% duplication chance, not superdeterminism",
         effect() {
-            tech.isCancelDuplication = true //search for tech.cancelCount  to balance
+            tech.isCancelDuplication = true //search for tech.duplication  to balance
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         },
         remove() {
@@ -4028,6 +4049,57 @@ const tech = {
         }
     },
     {
+        name: "strange attractor",
+        descriptionFunction() {
+            return `<strong>+7%</strong> <strong class='color-d'>damage</strong><br><strong>removing</strong> this increases <strong class='color-dup'>duplication</strong> by <strong>+10%</strong>`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        isBadRandomOption: true,
+        allowed() {
+            return true
+        },
+        requires: "",
+        damage: 1.07,
+        effect() {
+            tech.damage *= this.damage
+        },
+        remove() {
+            if (this.count > 0) {
+                tech.duplication += 0.1
+                powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+                tech.damage /= this.damage
+                this.frequency = 0
+            }
+        }
+    },
+    {
+        name: "null hypothesis",
+        description: `<strong>+9%</strong> <strong class='color-d'>damage</strong><br><strong>removing</strong> this spawns ${powerUps.orb.research(15)}`,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        isBadRandomOption: true,
+        allowed() {
+            return true
+        },
+        requires: "",
+        damage: 1.09,
+        effect() {
+            tech.damage *= this.damage
+        },
+        remove() {
+            if (this.count > 0) {
+                tech.damage /= this.damage
+                powerUps.spawnDelay("research", 15)
+                this.frequency = 0
+            }
+        }
+    },
+    {
         name: "Born rule",
         description: "<strong>remove</strong> all current <strong class='color-m'>tech</strong><br>spawn new <strong class='color-m'>tech</strong> to replace them",
         maxCount: 1,
@@ -4142,30 +4214,6 @@ const tech = {
         effect() {
             const removeTotal = tech.removeTech()
             for (let i = 0; i < removeTotal + 1; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
-        },
-        remove() { }
-    },
-    {
-        name: "strange attractor",
-        descriptionFunction() {
-            return `use ${powerUps.orb.research(2)} to spawn <strong>1</strong> <strong class='color-m'>tech</strong> with<br><strong>double</strong> your <strong class='color-dup'>duplication</strong> chance <em>(${(2 * tech.duplicationChance() * 100).toFixed(0)}%)</em>`
-        },
-        // description: `use ${powerUps.orb.research(2)} to spawn <strong>1</strong> <strong class='color-m'>tech</strong> with <strong>double</strong><br>your <strong class='color-dup'>duplication</strong> chance <em>(${(2*tech.duplicationChance()*100).toFixed(0)}%)</em>`,
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        isNonRefundable: true,
-        isBadRandomOption: true,
-        allowed() {
-            return !tech.isSuperDeterminism && tech.duplicationChance() > 0 && powerUps.research.count > 1
-        },
-        requires: "some duplication, not superdeterminism",
-        effect() {
-            powerUps.research.changeRerolls(-2)
-            simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 2`)
-            powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
-            if (Math.random() < tech.duplicationChance() * 2) powerUps.directSpawn(m.pos.x + 10, m.pos.y + 5, "tech");
         },
         remove() { }
     },
@@ -7189,7 +7237,7 @@ const tech = {
     //**************************************************
     {
         name: "spherical harmonics",
-        description: "<strong>+50%</strong> <strong>standing wave</strong> deflection efficiency", //<strong>standing wave</strong> oscillates in a 3rd dimension<br>
+        description: "<strong>+50%</strong> <strong>standing wave</strong> deflection efficiency<br>shield deflection radius maintains it's maximum range", //<strong>standing wave</strong> oscillates in a 3rd dimension<br>
         isFieldTech: true,
         maxCount: 9,
         count: 0,
@@ -7281,7 +7329,7 @@ const tech = {
     {
         name: "electronegativity",
         descriptionFunction() {
-            return `<strong>+0.22%</strong> <strong class='color-d'>damage</strong> per current stored <strong class='color-f'>energy</strong><br><em>(up to +${(22 * m.maxEnergy).toFixed(0)}% damage at max energy)</em>`
+            return `<strong>+0.22%</strong> <strong class='color-d'>damage</strong> per current stored <strong class='color-f'>energy</strong><br><em>(+${(22 * m.maxEnergy).toFixed(0)}% damage at max energy)</em>`
         },
         // description: "<strong>+1%</strong> <strong class='color-d'>damage</strong> per <strong>8</strong> stored <strong class='color-f'>energy</strong>",
         isFieldTech: true,
@@ -7313,7 +7361,7 @@ const tech = {
         },
         requires: "standing wave, perfect diamagnetism, pilot wave",
         effect() {
-            tech.blockDmg += 3 //if you change this value also update the for loop in the electricity graphics in m.pushMass
+            tech.blockDmg += 5 //if you change this value also update the for loop in the electricity graphics in m.pushMass
         },
         remove() {
             tech.blockDmg = 0;
@@ -7389,9 +7437,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 2
+            return m.fieldMode === 2 && !tech.isHealBrake
         },
-        requires: "perfect diamagnetism",
+        requires: "perfect diamagnetism, not induction brake",
         effect() {
             tech.isPerfectBrake = true;
         },
@@ -8030,12 +8078,12 @@ const tech = {
         requires: "time dilation, not CPT symmetry",
         effect() {
             tech.isRewindField = true;
-            m.fieldUpgrades[m.fieldMode].set()
+            m.fieldUpgrades[6].set()
             m.wakeCheck();
         },
         remove() {
             tech.isRewindField = false;
-            if (this.count) m.fieldUpgrades[m.fieldMode].set()
+            if (this.count) m.fieldUpgrades[6].set()
         }
     },
     {
@@ -8088,7 +8136,10 @@ const tech = {
     },
     {
         name: "time crystals",
-        description: "<strong>+200%</strong> passive <strong class='color-f'>energy</strong> generation",
+        // description: "<strong>+150%</strong> passive <strong class='color-f'>energy</strong> generation<br>${}",
+        descriptionFunction() {
+            return `<strong>+150%</strong> passive <strong class='color-f'>energy</strong> generation<br><em>(+${(150 * m.fieldRegen * 60).toFixed(1)} energy per second)</em>`
+        },
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -8101,10 +8152,16 @@ const tech = {
         effect() {
             tech.isTimeCrystals = true
             m.setFieldRegen()
+            this.descriptionFunction = function () {
+                return `<strong>+150%</strong> passive <strong class='color-f'>energy</strong> generation<br><em>(+${(60 * m.fieldRegen * 60).toFixed(1)} energy per second)</em>`
+            }
         },
         remove() {
             tech.isTimeCrystals = false
             m.setFieldRegen()
+            this.descriptionFunction = function () {
+                return `<strong>+150%</strong> passive <strong class='color-f'>energy</strong> generation<br><em>(+${(150 * m.fieldRegen * 60).toFixed(1)} energy per second)</em>`
+            }
         }
     },
     {
@@ -8133,18 +8190,20 @@ const tech = {
     {
         name: "quantum eraser",
         descriptionFunction() {
-            return `<span style = 'font-size:90%;'>for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br><strong>kill</strong> a mob as they spawn at <strong>+${100 - 1.6 * simulation.difficultyMode ** 2}%</strong> <strong class='color-dup'>duplication</strong></span>`
+            return `<span style = 'font-size:90%;'>for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br><strong>kill</strong> a mob as they spawn at <strong>+${(100 - 1.1 * simulation.difficultyMode ** 2).toFixed(0)}%</strong> <strong class='color-dup'>duplication</strong></span>`
         },
-        // description: `<span style = 'font-size:90%;'>for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br><strong>kill</strong> a mob as they spawn at <strong>100%</strong> <strong class='color-dup'>duplication</strong></span>`,
+        // descriptionFunction() {
+        //     return `for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br>`
+        // },
         isFieldTech: true,
         maxCount: 1,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldMode === 7 || m.fieldMode === 6) && !tech.cloakDuplication
+            return (m.fieldMode === 7) && !tech.cloakDuplication
         },
-        requires: "cloaking or time dilation",
+        requires: "cloaking",
         effect() {
             tech.quantumEraserCount = 0
             tech.isQuantumEraserDuplication = 0
@@ -11292,7 +11351,7 @@ const tech = {
     isSpeedDamage: null,
     isTimeSkip: null,
     isCancelDuplication: null,
-    cancelCount: null,
+    duplication: null,
     isCancelRerolls: null,
     isCancelTech: null,
     isBotDamage: null,
@@ -11484,4 +11543,5 @@ const tech = {
     isFoamCavitation: null,
     isHealAttract: null,
     isLaserField: null,
+    isHealBrake: null
 }

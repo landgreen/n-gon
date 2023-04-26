@@ -1,41 +1,34 @@
 ******************************************************** NEXT PATCH **************************************************
 
-retrocausality drains 30% less energy as time rewinds, but each time you start to rewind you drain 30 energy
-  no longer provides immunity for 1 second after exiting rewind
-  spawns 20% fewer bots
+new community level - superNgonBros by DesBoot
 
-deflecting changes
-  shielded mobs take 50% more energy to deflect
-  deflecting shielded mobs now only disables your shield for perfect diamagnetism and not for very long
-  you can deflect any mob if you have at least 5% energy, but if deflecting brings you below that your shield is disabled for 1 second
-    also you can't passively regen energy while shield is disabled
+tech: induction brake - after using a heal slow nearby mobs for 15 seconds
+tech: null hypothesis - +9 damage, spawn several research after removing
+reworked: strange attractor - +7% damage, +10% duplication after removing
 
-standing wave rework
-  coupling gives iceIX -> max energy
-  expansion gives deflection efficiency -> +50 max energy
-  spherical harmonics gives 40 -> 50% deflection efficiency
-  electronegativity is a fieldTech for standing wave, wormhole, and pilot wave
-    also  0.15 -> 0.22% damage per energy
-  dynamic equilibrium is no longer unlocked by standing wave
+bremsstrahlung does 50% more damage
+time crystals 200 -> 150% passive energy regen
+  it also tells you how much energy regen you will get
+aperture (-50 to +150) -> (-10 to +110) damage
+diaphragm (-33 to +100) -> (+8 to +80) defense
+tungsten carbide 200 -> 222 health
+CPT symmetry 30 -> 20 energy per second of rewind
+quenching gives more max health, but also does more damage per over heal
 
-tech: surface plasmons - after deflecting drains all your energy, shoot lasers in every direction
+final boss has 50% faster armor decay
+  so it takes even more damage the longer you fight it
 
-added a generic system to add code that loops for a set time
-Example code:
-simulation.ephemera.push({
-    name: "uniqueName",
-    count: 60, //cycles before it self removes
-    do() {
-        this.count--
-        if (this.count < 0) simulation.removeEphemera(this.name)
-        //run code here
-    },
-})
-
+a few more images
 some bug fixes
-also new bugs probably
 
 *********************************************************** TODO *****************************************************
+maybe use ⚆ in game text?
+  increase font?
+  
+rework quantum eraser
+
+test bremsstrahlung damage
+  and make sure it actually does more damage with the dot tech
 
 use ephemera to replace things
   JUNK?
@@ -221,12 +214,6 @@ try again - line of sight  https://ncase.me/sight-and-light/
 for tech power ups no tech options are displayed until you research once
   or display only JUNK until you research once
   increase the number of options after each research
-
-Tech: Grandfather Paradox - After rewinding, +300 damage during rewinded time
-  maybe instead of +damage spawn a copy of player that shoots at things?
-    how...  there is no way to reproduce firing
-  Requires: CPT symmetry, retrocausality
-  CPT adjacent tech is actually a bit too strong right now, maybe nerf a bit after testing
 
 When receiving damage, in addition to becoming invulnerable to attacks, also become intangible for the set period of time
 
@@ -1170,7 +1157,6 @@ add sounds
 
 possible names for tech
   strange loop
-  homeostasis
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   swarm intelligence - for a drone tech
@@ -1201,7 +1187,6 @@ possible names for tech
   superluminal signalling
   NP-complete
   lenticular lens:  is an array of lenses, designed so that when viewed from slightly different angles, different parts of the image underneath are shown.
-  p-zombie
   p-hacking JUNK tech
   https://en.wikipedia.org/wiki/High-entropy_alloys  high yield strength and low ductility, high temp resistance
   https://en.wikipedia.org/wiki/Refractory_metals  hard, high temp resistance
@@ -1260,6 +1245,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   harpoon - iron harpoon on a rope weapon art white background by Eiichiro Oda --no fish --ar 3:2 --v 5 --s 750
   mine - by Dan McPharlin
   laser - complex optical scientific equipment
+    knolling photography
 
   guns, ammo - isometric clean pixel art image cutaway of , style of tekkonkinkreet
   defensive - Paper cutout

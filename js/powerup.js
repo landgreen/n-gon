@@ -168,7 +168,11 @@ const powerUps = {
     setPowerUpMode() {
         if (tech.duplicationChance() > 0 || tech.isAnthropicTech) {
             if (tech.isPowerUpsVanish) {
-                powerUps.do = powerUps.doDuplicatesVanish
+                if (this.tech.isHealAttract) {
+                    powerUps.do = powerUps.doAttractDuplicatesVanish
+                } else {
+                    powerUps.do = powerUps.doDuplicatesVanish
+                }
             } else if (tech.isHealAttract) {
                 powerUps.do = powerUps.doAttractDuplicates
             } else {
@@ -211,6 +215,18 @@ const powerUps = {
     },
     doAttractDuplicates() {
         powerUps.doDuplicates();
+        for (let i = 0; i < powerUp.length; i++) { //attract heal power ups to player
+            if (powerUp[i].name === "heal") {
+                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
+                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.015 * powerUp[i].mass)
+                powerUp[i].force.x += attract.x;
+                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
+                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
+            }
+        }
+    },
+    doAttractDuplicatesVanish() {
+        powerUps.doDuplicatesVanish();
         for (let i = 0; i < powerUp.length; i++) { //attract heal power ups to player
             if (powerUp[i].name === "heal") {
                 //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
@@ -355,7 +371,7 @@ const powerUps = {
                 return
             }
             if (tech.isCancelDuplication) {
-                tech.cancelCount++
+                tech.duplication += 0.043
                 tech.maxDuplicationEvent()
                 simulation.makeTextLog(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${0.043}`)
                 simulation.circleFlare(0.043);
@@ -547,8 +563,8 @@ const powerUps = {
                     m.addHealth(heal);
                     simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
                     if (tech.isOverHeal && overHeal > 0) { //tech quenching
-                        const scaledOverHeal = overHeal * 0.7
-                        m.damage(scaledOverHeal*0.9);
+                        const scaledOverHeal = overHeal * 0.9
+                        m.damage(scaledOverHeal);
                         simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>-=</span> ${(scaledOverHeal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
                         simulation.drawList.push({ //add dmg to draw queue
                             x: m.pos.x,
@@ -564,12 +580,54 @@ const powerUps = {
                             powerUps.directSpawn(this.position.x, this.position.y, "heal", true, null, overHeal * 40 * (simulation.healScale ** 0.25))//    directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
                         });
                     }
+                    if (tech.isHealBrake) {
+                        const totalTime = 900
+                        //check if you already have this effect
+                        let foundActiveEffect = false
+                        for (let i = 0; i < simulation.ephemera.length; i++) {
+                            if (simulation.ephemera[i].name === "healPush") {
+                                foundActiveEffect = true
+                                simulation.ephemera[i].count = 0.5 * simulation.ephemera[i].count + totalTime //add time
+                                simulation.ephemera[i].scale = 0.5 * (simulation.ephemera[i].scale + Math.min(Math.max(0.6, heal * 6), 2.3)) //take average of scale
+                            }
+                        }
+                        if (!foundActiveEffect) {
+                            simulation.ephemera.push({
+                                name: "healPush",
+                                count: totalTime, //cycles before it self removes
+                                range: 0,
+                                scale: Math.min(Math.max(0.7, heal * 4), 2.2), //typically heal is 0.35
+                                do() {
+                                    this.count--
+                                    if (this.count < 0) simulation.removeEphemera(this.name)
+                                    this.range = this.range * 0.99 + 0.01 * (300 * this.scale + 100 * Math.sin(m.cycle * 0.022))
+                                    if (this.count < 120) this.range -= 5 * this.scale
+                                    this.range = Math.max(this.range, 1) //don't go negative
+                                    // const range = 300 + 100 * Math.sin(m.cycle * 0.022)
+                                    for (let i = 0; i < mob.length; i++) {
+                                        const distance = Vector.magnitude(Vector.sub(m.pos, mob[i].position))
+                                        if (distance < this.range) {
+                                            const cap = mob[i].isShielded ? 3 : 1
+                                            if (mob[i].speed > cap && Vector.dot(mob[i].velocity, Vector.sub(m.pos, mob[i].position)) > 0) { // if velocity is directed towards player
+                                                Matter.Body.setVelocity(mob[i], Vector.mult(Vector.normalise(mob[i].velocity), cap)); //set velocity to cap, but keep the direction
+                                            }
+                                        }
+                                    }
+                                    ctx.beginPath();
+                                    ctx.arc(m.pos.x, m.pos.y, this.range, 0, 2 * Math.PI);
+                                    ctx.fillStyle = "hsla(200,50%,61%,0.18)";
+                                    ctx.fill();
+                                },
+                            })
+                        }
+                    }
                 }
             }
             if (powerUps.healGiveMaxEnergy) {
                 tech.healMaxEnergyBonus += 0.08 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)
                 m.setMaxEnergy();
             }
+
         },
         spawn(x, y, size) { //used to spawn a heal with a specific size / heal amount, not normally used
             powerUps.directSpawn(x, y, "heal", false, null, size)
