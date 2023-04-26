@@ -25,8 +25,8 @@ const simulation = {
         mobs.healthBar();
         m.draw();
         m.hold();
-        // v.draw(); //working on visibility work in progress
         level.customTopLayer();
+        v.draw(); // visibility
         simulation.draw.drawMapPath();
         b.fire();
         b.bulletRemove();
