@@ -102,8 +102,12 @@ const level = {
 
         const oldCustomTopLayer = level.customTopLayer;
         level.customTopLayer = () => {
-            var visibilityVertices = [];
+            oldCustomTopLayer();
+
             for (const obj of map) {
+                const obj = map[9];
+                var visibilityVertices = [];
+                var outerRays = [];
                 for (var i = 0; i < obj.vertices.length; i++) {
                     const pos = obj.vertices[i];
                     const angle = Math.atan2(pos.y - m.pos.y, pos.x - m.pos.x);
@@ -115,80 +119,62 @@ const level = {
                         x: Math.cos(angle) + pos.x,
                         y: Math.sin(angle) + pos.y
                     }
-                    var outsideCount = 0;
-                    var collisions = Matter.Query.ray(map, m.pos, Matter.Vector.create(endPoint.x, endPoint.y));
-                    if (collisions.length == 0 && Matter.Query.point(map, queryPoint).length == 0) {
-                        outsideCount++;
-                        const vertexCollision = function (v1, v1End, domain) {
-                            var best = {
-                                x: 0,
-                                y: 0,
-                                distance: Infinity
-                            };
-
-                            for (let i = 0; i < domain.length; ++i) {
-                                let vertices = domain[i].vertices;
-                                const len = vertices.length - 1;
-                                for (let j = 0; j < len; j++) {
-                                    results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-                                    if (results.onLine1 && results.onLine2) {
-                                        const dx = v1.x - results.x;
-                                        const dy = v1.y - results.y;
-                                        const distance = dx * dx + dy * dy;
-                                        if (distance < best.distance && (!domain[i].mob || domain[i].alive)) {
-                                            best = {
-                                                x: results.x,
-                                                y: results.y,
-                                                distance: distance,
-                                                who: domain[i],
-                                                v1: vertices[j],
-                                                v2: vertices[j + 1]
-                                            };
-                                        }
-                                    }
-                                }
-                                results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-                                if (results.onLine1 && results.onLine2) {
-                                    const dx = v1.x - results.x;
-                                    const dy = v1.y - results.y;
-                                    const dist2 = dx * dx + dy * dy;
-                                    if (dist2 < best.distance && (!domain[i].mob || domain[i].alive)) {
-                                        best = {
-                                            x: results.x,
-                                            y: results.y,
-                                            distance: dist2,
-                                            who: domain[i],
-                                            v1: vertices[0],
-                                            v2: vertices[len]
-                                        };
-                                    }
-                                }
+                    var collisions = Matter.Query.ray([obj], m.pos, Matter.Vector.create(endPoint.x, endPoint.y));
+                    if (collisions.length == 0) {
+                        visibilityVertices.push({ x: endPoint.x, y: endPoint.y })
+                        if (Matter.Query.point([obj], queryPoint).length == 0) {
+                            endPoint = {
+                                x: Math.cos(angle) * 100000 + pos.x,
+                                y: Math.sin(angle) * 100000 + pos.y
                             }
 
-                            return best.distance != Infinity? best : null;
-                        };
-                        
-                        endPoint = {
-                            x: Math.cos(angle) * 3000 + pos.x,
-                            y: Math.sin(angle) * 3000 + pos.y
+                            outerRays.push({
+                                x1: queryPoint.x,
+                                y1: queryPoint.y,
+                                x2: endPoint.x,
+                                y2: endPoint.y,
+                                index: visibilityVertices.length - 1
+                            })
                         }
-                        collision = vertexCollision(queryPoint, endPoint, map);
-                        if (collision) endPoint = { x: collision.x, y: collision.y }
-
-                        
-                        ctx.beginPath();
-                        ctx.moveTo(m.pos.x, m.pos.y);
-                        ctx.lineTo(endPoint.x, endPoint.y);
-                        ctx.strokeStyle = '#000';
-                        ctx.lineWidth = 1.5;
-                        ctx.stroke();
                     }
                 }
 
-                
+                if (outerRays.length == 2) {
+                    var leftLine;
+                    var rightLine;
+                    if (outerRays[0].x1 > outerRays[1].x1) {
+                        rightLine = outerRays[0];
+                        leftLine = outerRays[1];
+                    } else {
+                        rightLine = outerRays[1];
+                        leftLine = outerRays[0];
+                    }
+                    function subArray(array, start, end) {
+                        if (!end) end = array.length + 1;
+                        var newArray = [...array];
+                        return newArray.splice(start, end);
+                    }
+                    
+                    var newVertices;
+                    if (m.pos.y >= obj.position.y) {
+                        visibilityVertices = subArray(visibilityVertices, 0, leftLine.index + 1).concat({ x: leftLine.x2, y: leftLine.y2 }, subArray(visibilityVertices, leftLine.index + 1));
+                        if (rightLine.index > leftLine.index) rightLine.index++;
+                        newVertices = ([{ x: rightLine.x2, y: rightLine.y2 }]).concat(subArray(visibilityVertices, rightLine.index), subArray(visibilityVertices, 0, rightLine.index));
+                    } else {
+                        visibilityVertices = subArray(visibilityVertices, 0, rightLine.index + 1).concat({ x: rightLine.x2, y: rightLine.y2 }, subArray(visibilityVertices, rightLine.index + 1));
+                        if (leftLine.index > rightLine.index) leftLine.index++;
+                        newVertices = ([{ x: leftLine.x2, y: leftLine.y2 }]).concat(subArray(visibilityVertices, leftLine.index), subArray(visibilityVertices, 0, leftLine.index));
+                    }
+                    ctx.beginPath();
+                    ctx.moveTo(newVertices[0].x, newVertices[0].y);
+                    for (const vertex of newVertices) {
+                        ctx.lineTo(vertex.x, vertex.y);
+                    }
+                    ctx.lineTo(newVertices[0].x, newVertices[0].y);
+                    ctx.fillStyle = '#000';
+                    ctx.fill();
+                }
             }
-
-            oldCustomTopLayer();
         }
 
         if (!simulation.isTraining) level.levelAnnounce();
