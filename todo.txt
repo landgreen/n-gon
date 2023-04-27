@@ -1,27 +1,40 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community level - superNgonBros by DesBoot
+setting - minimal HUD
+  remove: defense bar, damage bar, tech, in game console
 
-tech: induction brake - after using a heal slow nearby mobs for 15 seconds
-tech: null hypothesis - +9 damage, spawn several research after removing
-reworked: strange attractor - +7% damage, +10% duplication after removing
+improved text clarity on coupling
+removed tech decoupling
 
-bremsstrahlung does 50% more damage
-time crystals 200 -> 150% passive energy regen
-  it also tells you how much energy regen you will get
-aperture (-50 to +150) -> (-10 to +110) damage
-diaphragm (-33 to +100) -> (+8 to +80) defense
-tungsten carbide 200 -> 222 health
-CPT symmetry 30 -> 20 energy per second of rewind
-quenching gives more max health, but also does more damage per over heal
+added cloaking and sneak attack graphics
+  also, the 50% defense when cloaked is now clear from the defense bar
+ternary 44->83% damage but requires current gun to have ammo/3 (was any gun)
+wormhole invariant: uses much less energy to pause time
+standing wave has less recoil when blocking
 
-final boss has 50% faster armor decay
-  so it takes even more damage the longer you fight it
-
-a few more images
-some bug fixes
+new images
+bug fixes
 
 *********************************************************** TODO *****************************************************
+
+ use ephemera to replace things
+  JUNK?
+  request animation stuff
+  simulation checks
+    damage and defense bars
+      disable and enable ephemera with settings
+
+drones target anything that moves: speed > 1
+  including player, blocks?, mobs, power ups
+  maybe target the fastest mobs?
+
+perfect diamagnatism - invulnerable while field is active?
+  also drain energy while field is active?
+
+mobs attack mines
+  mines periodically set all mobs to have player location to be the mine
+    is this going to work with all mob vision types?
+
 maybe use ⚆ in game text?
   increase font?
   
@@ -29,10 +42,6 @@ rework quantum eraser
 
 test bremsstrahlung damage
   and make sure it actually does more damage with the dot tech
-
-use ephemera to replace things
-  JUNK?
-  request animation stuff
 
 tech: choose next map by name after exiting current map
   use modified tech selection code?
@@ -1228,6 +1237,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   time dilation - graphic of a hyperbolic equation Luminogram
   negative mass - Blacklight painting by Moebius
   plasma torch - by Dan Mumford
+
   metamaterial cloaking - Scientific photography by Miki Asai,   by Bruce Munro
   molecular assembler - by Laurie Greasley 16-bit Isometric 
   wormhole - by Tim White

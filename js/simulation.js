@@ -20,7 +20,6 @@ const simulation = {
         mobs.draw();
         simulation.draw.cons();
         simulation.draw.body();
-        simulation.checks();
         if (!m.isBodiesAsleep) mobs.loop();
         mobs.healthBar();
         m.draw();
@@ -51,7 +50,6 @@ const simulation = {
         }
         m.move();
         m.look();
-        simulation.checks();
         simulation.camera();
         level.custom();
         m.draw();
@@ -90,7 +88,6 @@ const simulation = {
             }
             m.move();
             level.custom();
-            simulation.checks();
             mobs.loop();
             m.walk_cycle += m.flipLegs * m.Vx;
             m.hold();
@@ -111,7 +108,6 @@ const simulation = {
             Engine.update(engine, simulation.delta);
             // level.custom();
             // level.customTopLayer();
-            simulation.checks();
             if (!m.isBodiesAsleep) mobs.loop();
             if (m.fieldMode !== 7) m.hold();
             b.bulletRemove();
@@ -153,7 +149,6 @@ const simulation = {
     //     simulation.draw.cons();
     //     simulation.draw.body();
     //     if (!m.isBodiesAsleep) {
-    //         simulation.checks();
     //         // mobs.loop();
     //     }
     //     mobs.healthBar();
@@ -464,7 +459,7 @@ const simulation = {
     // SVGleftMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#149" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
     // SVGrightMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#0cf" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
     makeTextLog(text, time = 240) {
-        if (simulation.isTextLogOpen && !build.isExperimentSelection) {
+        if (!localSettings.isHideHUD && simulation.isTextLogOpen && !build.isExperimentSelection) {
             if (simulation.lastLogTime > m.cycle) { //if there is an older message
                 document.getElementById("text-log").innerHTML = document.getElementById("text-log").innerHTML + '<br>' + text;
                 simulation.lastLogTime = m.cycle + time;
@@ -735,12 +730,18 @@ const simulation = {
         document.getElementById("dmg").style.display = "inline";
         document.getElementById("health").style.display = "inline"
         document.getElementById("health-bg").style.display = "inline";
-        document.getElementById("defense-bar").style.display = "inline"
-        document.getElementById("damage-bar").style.display = "inline"
-
-        document.getElementById("tech").style.display = "inline"
+        if (!localSettings.isHideHUD) {
+            document.getElementById("tech").style.display = "inline"
+            document.getElementById("defense-bar").style.display = "inline"
+            document.getElementById("damage-bar").style.display = "inline"
+        } else {
+            document.getElementById("tech").style.display = "none"
+            document.getElementById("defense-bar").style.display = "none"
+            document.getElementById("damage-bar").style.display = "none"
+        }
         document.getElementById("guns").style.display = "inline"
         document.getElementById("field").style.display = "inline"
+
         // document.body.style.overflow = "hidden"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"
@@ -877,6 +878,138 @@ const simulation = {
         build.hasExperimentalMode = false
         build.isExperimentSelection = false;
         build.isExperimentRun = false;
+
+
+        //setup checks
+        if (!localSettings.isHideHUD) {
+            simulation.ephemera.push({
+                name: "dmgDefBars", count: 0, do() {
+                    if (!(m.cycle % 15)) { //4 times a second
+                        const defense = m.defense()             //update defense bar
+                        if (m.lastCalculatedDefense !== defense) {
+                            document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
+                            m.lastCalculatedDefense = defense
+                        }
+                        const damage = tech.damageFromTech()             //update damage bar
+                        if (m.lastCalculatedDamage !== damage) {
+                            document.getElementById("damage-bar").style.height = Math.floor((Math.atan(0.25 * damage - 0.25) + 0.25) * 0.53 * canvas.height) + "px";
+                            m.lastCalculatedDamage = damage
+                        }
+                    }
+                },
+            })
+        }
+        simulation.ephemera.push({
+            name: "uniqueName", count: 0, do() {
+                if (!(m.cycle % 60)) { //once a second
+                    //energy overfill 
+                    if (m.energy > m.maxEnergy) {
+                        m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
+                        if (m.energy > 1000000) m.energy = 1000000
+                    }
+                    if (tech.isFlipFlopEnergy && m.immuneCycle < m.cycle) {
+                        if (tech.isFlipFlopOn) {
+                            if (m.immuneCycle < m.cycle) m.energy += 0.2;
+                        } else {
+                            m.energy -= 0.01;
+                            if (m.energy < 0) m.energy = 0
+                        }
+                    }
+                    if (tech.relayIce && tech.isFlipFlopOn) {
+                        for (let j = 0; j < tech.relayIce; j++) {
+                            for (let i = 0, len = 3 + Math.ceil(9 * Math.random()); i < len; i++) b.iceIX(2)
+                        }
+                    }
+
+                    if (m.pos.y > simulation.fallHeight) { // if 4000px deep
+                        Matter.Body.setVelocity(player, {
+                            x: 0,
+                            y: 0
+                        });
+                        Matter.Body.setPosition(player, {
+                            x: level.enter.x + 50,
+                            y: level.enter.y - 20
+                        });
+                        // move bots
+                        for (let i = 0; i < bullet.length; i++) {
+                            if (bullet[i].botType) {
+                                Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
+                                    x: 250 * (Math.random() - 0.5),
+                                    y: 250 * (Math.random() - 0.5)
+                                }));
+                                Matter.Body.setVelocity(bullet[i], {
+                                    x: 0,
+                                    y: 0
+                                });
+                            }
+                        }
+                        m.damage(0.1 * simulation.difficultyMode);
+                        m.energy -= 0.1 * simulation.difficultyMode
+                    }
+                    if (isNaN(player.position.x)) m.death();
+                    if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
+                        if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) {
+                            m.energy += m.maxEnergy * 0.05
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: m.pos.x,
+                                y: m.pos.y - 45,
+                                radius: Math.sqrt(m.maxEnergy * 0.05) * 60,
+                                color: "rgba(0, 204, 255,0.4)", //#0cf
+                                time: 4
+                            });
+                        }
+                        if (tech.isHealthRecovery) {
+                            const heal = 0.005 * m.maxHealth
+                            m.addHealth(heal)
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: m.pos.x,
+                                y: m.pos.y,
+                                radius: Math.sqrt(heal) * 150,
+                                color: "rgba(0,255,200,0.5)",
+                                time: 4
+                            });
+                        }
+                    }
+
+                    if (!(m.cycle % 420)) { //once every 7 seconds
+                        if (tech.isZeno) {
+                            if (tech.isEnergyHealth) {
+                                m.energy *= 0.95
+                            } else {
+                                m.health *= 0.95 //remove 5%
+                                m.displayHealth();
+                            }
+
+                        }
+                        if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
+
+                        fallCheck = function (who, save = false) {
+                            let i = who.length;
+                            while (i--) {
+                                if (who[i].position.y > simulation.fallHeight) {
+                                    if (save) {
+                                        Matter.Body.setVelocity(who[i], {
+                                            x: 0,
+                                            y: 0
+                                        });
+                                        Matter.Body.setPosition(who[i], {
+                                            x: level.exit.x + 30 * (Math.random() - 0.5),
+                                            y: level.exit.y + 30 * (Math.random() - 0.5)
+                                        });
+                                    } else {
+                                        Matter.Composite.remove(engine.world, who[i]);
+                                        who.splice(i, 1);
+                                    }
+                                }
+                            }
+                        };
+                        fallCheck(mob);
+                        fallCheck(body);
+                        fallCheck(powerUp, true);
+                    }
+                }
+            },
+        })
 
         //setup FPS cap
         simulation.fpsInterval = 1000 / simulation.fpsCap;
@@ -1172,127 +1305,6 @@ const simulation = {
     //     }
     //   }
     // },
-    checks() {
-        if (!(m.cycle % 15)) { //4 times a second
-            const defense = m.defense()             //update defense bar
-            if (m.lastCalculatedDefense !== defense) {
-                document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
-                m.lastCalculatedDefense = defense
-            }
-            const damage = tech.damageFromTech()             //update damage bar
-            if (m.lastCalculatedDamage !== damage) {
-                document.getElementById("damage-bar").style.height = Math.floor((Math.atan(0.25 * damage - 0.25) + 0.25) * 0.53 * canvas.height) + "px";
-                m.lastCalculatedDamage = damage
-            }
-        }
-        if (!(m.cycle % 60)) { //once a second
-            //energy overfill 
-            if (m.energy > m.maxEnergy) {
-                m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
-                if (m.energy > 1000000) m.energy = 1000000
-            }
-            if (tech.isFlipFlopEnergy && m.immuneCycle < m.cycle) {
-                if (tech.isFlipFlopOn) {
-                    if (m.immuneCycle < m.cycle) m.energy += 0.2;
-                } else {
-                    m.energy -= 0.01;
-                    if (m.energy < 0) m.energy = 0
-                }
-            }
-            if (tech.relayIce && tech.isFlipFlopOn) {
-                for (let j = 0; j < tech.relayIce; j++) {
-                    for (let i = 0, len = 3 + Math.ceil(9 * Math.random()); i < len; i++) b.iceIX(2)
-                }
-            }
-
-            if (m.pos.y > simulation.fallHeight) { // if 4000px deep
-                Matter.Body.setVelocity(player, {
-                    x: 0,
-                    y: 0
-                });
-                Matter.Body.setPosition(player, {
-                    x: level.enter.x + 50,
-                    y: level.enter.y - 20
-                });
-                // move bots
-                for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType) {
-                        Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
-                            x: 250 * (Math.random() - 0.5),
-                            y: 250 * (Math.random() - 0.5)
-                        }));
-                        Matter.Body.setVelocity(bullet[i], {
-                            x: 0,
-                            y: 0
-                        });
-                    }
-                }
-                m.damage(0.1 * simulation.difficultyMode);
-                m.energy -= 0.1 * simulation.difficultyMode
-            }
-            if (isNaN(player.position.x)) m.death();
-            if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
-                if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) {
-                    m.energy += m.maxEnergy * 0.05
-                    simulation.drawList.push({ //add dmg to draw queue
-                        x: m.pos.x,
-                        y: m.pos.y - 45,
-                        radius: Math.sqrt(m.maxEnergy * 0.05) * 60,
-                        color: "rgba(0, 204, 255,0.4)", //#0cf
-                        time: 4
-                    });
-                }
-                if (tech.isHealthRecovery) {
-                    const heal = 0.005 * m.maxHealth
-                    m.addHealth(heal)
-                    simulation.drawList.push({ //add dmg to draw queue
-                        x: m.pos.x,
-                        y: m.pos.y,
-                        radius: Math.sqrt(heal) * 150,
-                        color: "rgba(0,255,200,0.5)",
-                        time: 4
-                    });
-                }
-            }
-
-            if (!(m.cycle % 420)) { //once every 7 seconds
-                if (tech.isZeno) {
-                    if (tech.isEnergyHealth) {
-                        m.energy *= 0.95
-                    } else {
-                        m.health *= 0.95 //remove 5%
-                        m.displayHealth();
-                    }
-
-                }
-                if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
-
-                fallCheck = function (who, save = false) {
-                    let i = who.length;
-                    while (i--) {
-                        if (who[i].position.y > simulation.fallHeight) {
-                            if (save) {
-                                Matter.Body.setVelocity(who[i], {
-                                    x: 0,
-                                    y: 0
-                                });
-                                Matter.Body.setPosition(who[i], {
-                                    x: level.exit.x + 30 * (Math.random() - 0.5),
-                                    y: level.exit.y + 30 * (Math.random() - 0.5)
-                                });
-                            } else {
-                                Matter.Composite.remove(engine.world, who[i]);
-                                who.splice(i, 1);
-                            }
-                        }
-                    }
-                };
-                fallCheck(mob);
-                fallCheck(body);
-                fallCheck(powerUp, true);
-            }
-        }
-    },
     testingOutput() {
         ctx.fillStyle = "#000";
         ctx.textAlign = "center";

@@ -525,7 +525,7 @@ const m = {
     },
     baseHealth: 1,
     setMaxHealth() {
-        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 2.22 * tech.isFallingDamage + 4 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth //+ (m.fieldMode === 0 || m.fieldMode === 5) * 0.5 * m.coupling
+        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 2.22 * tech.isFallingDamage + 4 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
@@ -549,7 +549,7 @@ const m = {
         if (tech.isSlowFPS) dmg *= 0.8
         if (tech.energyRegen === 0) dmg *= 0.34
         // if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
-        if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.73 ** m.coupling
+        if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.73 ** (0.1 * m.coupling)
         if (tech.isLowHealthDefense) dmg *= 1 - Math.max(0, 1 - m.health) * 0.8
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.33
         if (tech.squirrelFx !== 1) dmg *= Math.pow(0.7, (tech.squirrelFx - 1) / 0.4) //cause more damage
@@ -1893,7 +1893,7 @@ const m = {
         }
     },
     setMaxEnergy(isMessage = true) {
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.5 * m.coupling + 0.4 * tech.isStandingWaveExpand
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.05 * m.coupling + 0.4 * tech.isStandingWaveExpand
         if (isMessage) simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
@@ -1945,7 +1945,7 @@ const m = {
         } else {
             m.fieldRegen = 0.001 //6 energy per second
         }
-        if (m.fieldMode === 0 || m.fieldMode === 4) m.fieldRegen += 0.00133 * m.coupling //return `generate <strong>${(6*couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong> per second`
+        if (m.fieldMode === 0 || m.fieldMode === 4) m.fieldRegen += 0.000133 * m.coupling //return `generate <strong>${(6*couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong> per second`
         if (tech.isTimeCrystals) {
             m.fieldRegen *= 2.5
         } else if (tech.isGroundState) {
@@ -2290,7 +2290,7 @@ const m = {
             }
             if (!who.isInvulnerable && (m.coupling && m.fieldMode === 0) && bullet.length < 200) { //for field emitter iceIX
                 for (let i = 0; i < m.coupling; i++) {
-                    if (m.coupling - i > 1.25 * Math.random()) {
+                    if (0.1 * m.coupling - i > 1.25 * Math.random()) {
                         const sub = Vector.mult(Vector.normalise(Vector.sub(who.position, m.pos)), (m.fieldRange * m.harmonicRadius) * (0.4 + 0.3 * Math.random())) //m.harmonicRadius should be 1 unless you are standing wave expansion
                         const rad = Vector.rotate(sub, 1 * (Math.random() - 0.5))
                         const angle = Math.atan2(sub.y, sub.x)
@@ -2457,28 +2457,27 @@ const m = {
     couplingDescription(couple = m.coupling) {
         switch (m.fieldMode) {
             case 0: //field emitter
-                return `gain the <strong class='color-coupling'>coupling</strong> effects of <strong>all</strong> <strong class='color-f'>fields</strong>`
+                return `<strong>all</strong> other <strong class='color-f'>field</strong> effects`
             case 1: //standing wave
                 // return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
-                // return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
-                return `+${(couple * 50).toFixed(0)} maximum <strong class='color-f'>energy</strong>`
+                return `+${(couple * 5).toFixed(0)} maximum <strong class='color-f'>energy</strong>`
             case 2: //perfect diamagnetism
-                return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
+                return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses ${0.1 * couple.toFixed(2)} <strong class='color-s'>ice IX</strong></span>`
             // return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${2*couple}</strong> seconds post collision</span>`
             case 3: //negative mass
-                return `<strong>+${((1 - 0.73 ** couple) * 100).toFixed(1)}%</strong> <strong class='color-defense'>defense</strong>`
+                return `<strong>+${((1 - 0.73 ** couple) * 10).toFixed(1)}%</strong> <strong class='color-defense'>defense</strong>`
             case 4: //assembler
-                return `generate <strong>${(8 * couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong> per second`
+                return `generate <strong>${(0.8 * couple).toFixed(1)}</strong> <strong class='color-f'>energy</strong> per second`
             case 5: //plasma
-                return `<strong>+${(15 * couple).toFixed(0)}%</strong> <strong class='color-d'>damage</strong>`
+                return `<strong>+${(1.5 * couple).toFixed(1)}%</strong> <strong class='color-d'>damage</strong>`
             case 6: //time dilation
-                return `<strong>+${(50 * couple).toFixed(0)}%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
+                return `<strong>+${(5 * couple).toFixed(0)}%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
             case 7: //cloaking
-                return `<strong>+${(33 * couple).toFixed(0)}%</strong> ambush <strong class='color-d'>damage</strong>`
+                return `<strong>+${(3.3 * couple).toFixed(1)}%</strong> ambush <strong class='color-d'>damage</strong>`
             case 8: //pilot wave
-                return `<strong>+${(40 * couple).toFixed(0)}%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>`
+                return `<strong>+${(4 * couple).toFixed(0)}%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>`
             case 9: //wormhole
-                return `<span style = 'font-size:89%;'>after eating <strong class='color-block'>blocks</strong> <strong>+${(20 * couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong></span>`
+                return `<span style = 'font-size:89%;'>after eating <strong class='color-block'>blocks</strong> <strong>+${(2 * couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong></span>`
         }
     },
     couplingChange(change = 0) {
@@ -2490,11 +2489,10 @@ const m = {
                 if (powerUp[i].name === "coupling") {
                     Matter.Composite.remove(engine.world, powerUp[i]);
                     powerUp.splice(i, 1);
-                    m.coupling += 0.1
+                    m.coupling += 1
                     if (!(m.coupling < 0)) break
                 }
             }
-
             m.coupling = 0 //can't go negative
         }
         m.setMaxEnergy(false);
@@ -2503,33 +2501,7 @@ const m = {
         mobs.setMobSpawnHealth();
         powerUps.setPowerUpMode();
 
-        if ((m.fieldMode === 0 || m.fieldMode === 9) && !build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.4);
-        // m.collisionImmuneCycles = 30 + m.coupling * 120 //2 seconds
-        // switch (m.fieldMode) {
-        //     case 0: //field emitter
-        //         // m.fieldFireRate = 0.8 ** (m.coupling)
-        //         // b.setFireCD();
-        //         break
-        //         // case 1: //standing wave
-        //         //     break
-        //         // case 2: //perfect diamagnetism
-        //         //     break
-        //         // case 3: //negative mass
-        //         //     break
-        //         // case 4: //assembler
-        //         //     break
-        //         // case 5: //plasma
-        //         //     break
-        //     case 6: //time dilation
-        //         // m.fieldFireRate = 0.75 * 0.8 ** (m.coupling)
-        //         break
-        //         // case 7: //cloaking
-        //         //     break
-        //         // case 8: //pilot wave
-        //         //     break
-        //         // case 9: //wormhole
-        //         //     break
-        // }
+        // if ((m.fieldMode === 0 || m.fieldMode === 9) && !build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.4);
     },
     setField(index) {
         if (isNaN(index)) { //find index by name
@@ -2577,6 +2549,12 @@ const m = {
             }
         }
     },
+    // <div id="cube" style="width: 4em; height: 8em;">
+    //     <div style="transform: translate3d(1em, 0em, 0em)">1</div>
+    //     <div style="transform: translate3d(2em, 0em, 0em)">2</div>
+    //     <div style="transform: translate3d(3em, 0em, 0em)">3</div>
+    //     <div style="transform: translate3d(4em, 0em, 0em)">4</div>
+    // </div>
     {
         name: "standing wave",
         //<strong>deflecting</strong> protects you in every <strong>direction</strong>
@@ -2586,7 +2564,7 @@ const m = {
         drainCD: 0,
         effect: () => {
             m.fieldBlockCD = 0;
-            m.blockingRecoil = 2 //4 is normal
+            m.blockingRecoil = 1.5 //4 is normal
             m.fieldRange = 185
             m.fieldShieldingScale = 1.6 * Math.pow(0.5, (tech.harmonics - 2))
             // m.fieldHarmReduction = 0.66; //33% reduction
@@ -2717,7 +2695,7 @@ const m = {
                             m.fieldCDcycle = m.cycle + m.fieldBlockCD + (mob[i].isShielded ? 10 : 0);
                             if (!mob[i].isInvulnerable && bullet.length < 250) {
                                 for (let i = 0; i < m.coupling; i++) {
-                                    if (m.coupling - i > Math.random()) {
+                                    if (0.1 * m.coupling - i > Math.random()) {
                                         const angle = m.fieldAngle + 4 * m.fieldArc * (Math.random() - 0.5)
                                         const radius = m.fieldRange * (0.6 + 0.3 * Math.random())
                                         b.iceIX(6 + 6 * Math.random(), angle, Vector.add(m.fieldPosition, {
@@ -2853,16 +2831,18 @@ const m = {
                         }); //set velocity to cap, but keep the direction
                     }
 
-
+                    // go invulnerable while field is active, but also drain energy
+                    // if (true && m.energy > 2 * m.fieldRegen && m.immuneCycle < m.cycle + tech.cyclicImmunity) {
+                    //     m.immuneCycle = m.cycle + 1; //player is immune to damage for 60 cycles
+                    //     m.energy -= 2 * m.fieldRegen
+                    //     if (m.energy < m.fieldRegen) m.fieldCDcycle = m.cycle + 90;
+                    // }
 
 
                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                     m.grabPowerUp();
                     m.lookForPickUp();
-                    m.fieldPosition = {
-                        x: m.pos.x,
-                        y: m.pos.y
-                    }
+                    m.fieldPosition = { x: m.pos.x, y: m.pos.y }
                     m.fieldAngle = m.angle
                     //draw field attached to player
                     if (m.holdingTarget) {
@@ -3215,61 +3195,6 @@ const m = {
             }
         }
     },
-    // {
-    //     name: "plasma torch",
-    //     description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away",
-    //     effect() {
-    //         m.fieldMeterColor = "#f0f"
-    //         m.eyeFillColor = m.fieldMeterColor
-    //         m.hold = function() {
-    //             b.isExtruderOn = false
-    //             if (m.isHolding) {
-    //                 m.drawHold(m.holdingTarget);
-    //                 m.holding();
-    //                 m.throwBlock();
-    //             } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
-    //                 m.grabPowerUp();
-    //                 m.lookForPickUp();
-    //                 if (tech.isExtruder) {
-    //                     b.extruder();
-    //                 } else {
-    //                     b.plasma();
-    //                 }
-    //             } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
-    //                 m.pickUp();
-    //             } else {
-    //                 m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-    //             }
-    //             m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
-
-    //             if (tech.isExtruder) {
-    //                 if (input.field) {
-    //                     b.wasExtruderOn = true
-    //                 } else {
-    //                     b.wasExtruderOn = false
-    //                     b.canExtruderFire = true
-    //                 }
-    //                 ctx.beginPath(); //draw all the wave bullets
-    //                 for (let i = 0, len = bullet.length; i < len; i++) {
-    //                     if (bullet[i].isWave) {
-    //                         if (bullet[i].isBranch) {
-    //                             ctx.moveTo(bullet[i].position.x, bullet[i].position.y)
-    //                         } else {
-    //                             ctx.lineTo(bullet[i].position.x, bullet[i].position.y)
-    //                         }
-    //                     }
-    //                 }
-    //                 if (b.wasExtruderOn && b.isExtruderOn) ctx.lineTo(m.pos.x + 15 * Math.cos(m.angle), m.pos.y + 15 * Math.sin(m.angle))
-    //                 ctx.lineWidth = 4;
-    //                 ctx.strokeStyle = "#f07"
-    //                 ctx.stroke();
-    //                 ctx.lineWidth = tech.extruderRange;
-    //                 ctx.strokeStyle = "rgba(255,0,110,0.05)"
-    //                 ctx.stroke();
-    //             }
-    //         }
-    //     }
-    // },
     {
         name: "plasma torch",
         description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong class='color-d'>damages</strong> and <strong>pushes</strong> mobs away<br>generate <strong>10</strong> <strong class='color-f'>energy</strong> per second",
@@ -3721,7 +3646,7 @@ const m = {
                         m.throwBlock();
                         m.wakeCheck();
                     } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
-                        const drain = 0.0014 / (1 + 0.5 * m.coupling)
+                        const drain = 0.0014 / (1 + 0.05 * m.coupling)
                         if (m.energy > drain) m.energy -= drain
                         m.grabPowerUp();
                         if (this.rewindCount === 0) {
@@ -3810,7 +3735,7 @@ const m = {
                         m.holding();
                         m.throwBlock();
                     } else if (input.field && m.fieldCDcycle < m.cycle) {
-                        const drain = 0.0026 / (1 + 0.3 * m.coupling)
+                        const drain = 0.0026 / (1 + 0.03 * m.coupling)
                         if (m.energy > drain) m.energy -= drain
                         m.grabPowerUp();
                         m.lookForPickUp(); //this drains energy 0.001
@@ -3870,6 +3795,33 @@ const m = {
             m.isSneakAttack = true;
             m.sneakAttackCycle = 0;
             m.enterCloakCycle = 0;
+            m.drawCloakedM = function () {
+                m.walk_cycle -= m.flipLegs * m.Vx;
+                m.draw();
+
+                // let history = m.history[(m.cycle - 1) % 600]
+                // m.pos.x = history.position.x
+                // m.pos.y = history.position.y + m.yPosDifference - history.yOff
+
+                // m.pos.x += 4
+                // ctx.fillStyle = m.fillColor;
+                // ctx.save();
+                // ctx.translate(m.pos.x, m.pos.y);
+                // m.calcLeg(Math.PI, -3);
+                // m.drawLeg("#ccc");
+                // m.calcLeg(0, 0);
+                // m.drawLeg("#ccc");
+                // ctx.rotate(m.angle);
+                // ctx.beginPath();
+                // ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                // ctx.fillStyle = "#fff"
+                // ctx.fill();
+                // ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                // ctx.strokeStyle = "#333";
+                // ctx.lineWidth = 2;
+                // ctx.stroke();
+                // ctx.restore()
+            }
             m.drawCloak = function () {
                 m.fieldPhase += 0.007
                 const wiggle = 0.15 * Math.sin(m.fieldPhase * 0.5)
@@ -3905,6 +3857,7 @@ const m = {
                     if (!m.isCloak && m.energy > drain + 0.03) {
                         m.energy -= drain
                         m.isCloak = true //enter cloak
+                        m.fieldHarmReduction = 0.5;
                         m.enterCloakCycle = m.cycle
                         if (tech.isCloakHealLastHit && m.lastHit > 0) {
                             const heal = Math.min(0.75 * m.lastHit, m.energy)
@@ -3930,6 +3883,8 @@ const m = {
                 } else if (m.isCloak) { //exit cloak
                     m.sneakAttackCycle = m.cycle
                     m.isCloak = false
+                    m.fieldHarmReduction = 1
+
                     if (tech.isIntangible) {
                         for (let i = 0; i < bullet.length; i++) {
                             if (bullet[i].botType && bullet[i].botType !== "orbit") bullet[i].collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
@@ -3963,6 +3918,9 @@ const m = {
                     m.fieldRange = m.fieldRange * 0.85 + 130
                     m.fieldDrawRadius = m.fieldRange * 1.1 //* 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                     m.drawCloak()
+                    ctx.globalCompositeOperation = "lighter";
+                    m.drawCloakedM()
+                    ctx.globalCompositeOperation = "source-over";
                 } else if (m.fieldRange < 4000) {
                     m.fieldRange += 90
                     m.fieldDrawRadius = m.fieldRange //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
@@ -3985,153 +3943,14 @@ const m = {
                     }
                 }
                 this.drawRegenEnergyCloaking()
-                //show sneak attack status
-                // if (m.cycle > m.lastKillCycle + 240) {
-                // if (m.sneakAttackCharge > 0) {
-                // if (m.sneakAttackCycle + Math.min(120, 0.7 * (m.cycle - m.enterCloakCycle)) > m.cycle) {
-                //     ctx.strokeStyle = "rgba(0,0,0,0.5)" //m.fieldMeterColor; //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
-                //     ctx.beginPath();
-                //     ctx.arc(simulation.mouseInGame.x, simulation.mouseInGame.y, 16, 0, 2 * Math.PI);
-                //     ctx.fillStyle = "rgba(0,0,0,0.2)"
-                //     ctx.fill();
-                // }
+                if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) { //show sneak attack status
+                    ctx.globalCompositeOperation = "multiply";
+                    m.drawCloakedM()
+                    ctx.globalCompositeOperation = "source-over";
+                }
             }
         }
     },
-    // {
-    //   name: "phase decoherence field",
-    //   description: "use <strong class='color-f'>energy</strong> to become <strong>intangible</strong><br><strong>firing</strong> and touching <strong>shields</strong> <strong>drains</strong> <strong class='color-f'>energy</strong><br>unable to <strong>see</strong> and be <strong>seen</strong> by mobs",
-    //   effect: () => {
-    //     m.fieldFire = true;
-    //     m.fieldMeterColor = "#fff";
-    //     m.fieldPhase = 0;
-
-    //     m.hold = function () {
-    //       function drawField(radius) {
-    //         radius *= Math.min(4, 0.9 + 2.2 * m.energy * m.energy);
-    //         const rotate = m.cycle * 0.005;
-    //         m.fieldPhase += 0.5 - 0.5 * Math.sqrt(Math.max(0.01, Math.min(m.energy, 1)));
-    //         const off1 = 1 + 0.06 * Math.sin(m.fieldPhase);
-    //         const off2 = 1 - 0.06 * Math.sin(m.fieldPhase);
-    //         ctx.beginPath();
-    //         ctx.ellipse(m.pos.x, m.pos.y, radius * off1, radius * off2, rotate, 0, 2 * Math.PI);
-    //         if (m.fireCDcycle > m.cycle && (input.field)) {
-    //           ctx.lineWidth = 5;
-    //           ctx.strokeStyle = `rgba(0, 204, 255,1)`
-    //           ctx.stroke()
-    //         }
-    //         ctx.fillStyle = "#fff" //`rgba(0,0,0,${0.5+0.5*m.energy})`;
-    //         ctx.globalCompositeOperation = "destination-in"; //in or atop
-    //         ctx.fill();
-    //         ctx.globalCompositeOperation = "source-over";
-    //         ctx.clip();
-    //       }
-
-    //       m.isCloak = false //isCloak disables most uses of foundPlayer() 
-    //       player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
-    //       if (m.isHolding) {
-    //         if (this.fieldRange < 2000) {
-    //           this.fieldRange += 100
-    //           drawField(this.fieldRange)
-    //         }
-    //         m.drawHold(m.holdingTarget);
-    //         m.holding();
-    //         m.throwBlock();
-    //       } else if (input.field) {
-    //         m.grabPowerUp();
-    //         m.lookForPickUp();
-
-    //         if (m.fieldCDcycle < m.cycle) {
-    //           // simulation.draw.bodyFill = "transparent"
-    //           // simulation.draw.bodyStroke = "transparent"
-
-    //           const DRAIN = 0.00013 + (m.fireCDcycle > m.cycle ? 0.005 : 0)
-    //           if (m.energy > DRAIN) {
-    //             m.energy -= DRAIN;
-    //             // if (m.energy < 0.001) {
-    //             //   m.fieldCDcycle = m.cycle + 120;
-    //             //   m.energy = 0;
-    //             //   m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-    //             // }
-    //             this.fieldRange = this.fieldRange * 0.8 + 0.2 * 160
-    //             drawField(this.fieldRange)
-
-    //             m.isCloak = true //isCloak disables most uses of foundPlayer() 
-    //             player.collisionFilter.mask = cat.map
-
-
-    //             let inPlayer = Matter.Query.region(mob, player.bounds)
-    //             if (inPlayer.length > 0) {
-    //               for (let i = 0; i < inPlayer.length; i++) {
-    //                 if (inPlayer[i].shield) {
-    //                   m.energy -= 0.005; //shields drain player energy
-    //                   //draw outline of shield
-    //                   ctx.fillStyle = `rgba(140,217,255,0.5)`
-    //                   ctx.fill()
-    //                 } else if (tech.superposition && inPlayer[i].isDropPowerUp) {
-    //                   // inPlayer[i].damage(0.4 * m.dmgScale); //damage mobs inside the player
-    //                   // m.energy += 0.005;
-
-    //                   mobs.statusStun(inPlayer[i], 300)
-    //                   //draw outline of mob in a few random locations to show blurriness
-    //                   const vertices = inPlayer[i].vertices;
-    //                   const off = 30
-    //                   for (let k = 0; k < 3; k++) {
-    //                     const xOff = off * (Math.random() - 0.5)
-    //                     const yOff = off * (Math.random() - 0.5)
-    //                     ctx.beginPath();
-    //                     ctx.moveTo(xOff + vertices[0].x, yOff + vertices[0].y);
-    //                     for (let j = 1, len = vertices.length; j < len; ++j) {
-    //                       ctx.lineTo(xOff + vertices[j].x, yOff + vertices[j].y);
-    //                     }
-    //                     ctx.lineTo(xOff + vertices[0].x, yOff + vertices[0].y);
-    //                     ctx.fillStyle = "rgba(0,0,0,0.1)"
-    //                     ctx.fill()
-    //                   }
-    //                   break;
-    //                 }
-    //               }
-    //             }
-    //           } else {
-    //             m.fieldCDcycle = m.cycle + 120;
-    //             m.energy = 0;
-    //             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-    //             drawField(this.fieldRange)
-    //           }
-    //         }
-    //       } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
-    //         m.pickUp();
-    //         if (this.fieldRange < 2000) {
-    //           this.fieldRange += 100
-    //           drawField(this.fieldRange)
-    //         }
-    //       } else {
-    //         // this.fieldRange = 3000
-    //         if (this.fieldRange < 2000 && m.holdingTarget === null) {
-    //           this.fieldRange += 100
-    //           drawField(this.fieldRange)
-    //         }
-    //         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-    //       }
-
-    //       if (m.energy < m.maxEnergy) {
-    //         m.energy += m.fieldRegen;
-    //         const xOff = m.pos.x - m.radius * m.maxEnergy
-    //         const yOff = m.pos.y - 50
-    //         ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
-    //         ctx.fillRect(xOff, yOff, 60 * m.maxEnergy, 10);
-    //         ctx.fillStyle = m.fieldMeterColor;
-    //         ctx.fillRect(xOff, yOff, 60 * m.energy, 10);
-    //         ctx.beginPath()
-    //         ctx.rect(xOff, yOff, 60 * m.maxEnergy, 10);
-    //         ctx.strokeStyle = "rgb(0, 0, 0)";
-    //         ctx.lineWidth = 1;
-    //         ctx.stroke();
-    //       }
-    //       if (m.energy < 0) m.energy = 0
-    //     }
-    //   }
-    // },
     {
         name: "pilot wave",
         //<br><strong class='color-block'>blocks</strong> can't <strong>collide</strong> with <strong>intangible</strong> mobs
@@ -4450,7 +4269,7 @@ const m = {
                                             Matter.Composite.remove(engine.world, body[i]);
                                             body.splice(i, 1);
                                             m.fieldRange *= 0.8
-                                            if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.2 * m.coupling
+                                            if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling
                                             if (tech.isWormholeWorms) { //pandimensional spermia
                                                 b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                                 Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
@@ -4474,8 +4293,8 @@ const m = {
                                         m.fieldRange *= 0.8
                                         // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
                                         // if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.5
-                                        if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.2 * m.coupling
-                                        if (m.fieldMode === 0 || m.fieldMode === 9) m.energy += 0.2 * m.coupling
+                                        if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling
+                                        if (m.fieldMode === 0 || m.fieldMode === 9) m.energy += 0.02 * m.coupling
                                         if (tech.isWormholeWorms) { //pandimensional spermia
                                             b.worm(Vector.add(m.hole.pos1, Vector.rotate({
                                                 x: m.fieldRange * 0.4,
@@ -4528,7 +4347,7 @@ const m = {
 
                     if (input.field) {
                         if (tech.isWormHolePause) {
-                            const drain = m.fieldRegen + 0.0002
+                            const drain = m.fieldRegen + 0.00004
                             if (m.energy > drain) {
                                 m.energy -= drain
                                 if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage for 1 cycle

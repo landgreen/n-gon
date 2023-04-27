@@ -351,7 +351,7 @@ const powerUps = {
                 simulation.paused = true;
                 document.getElementById("choose-grid").style.opacity = "1"
             }
-            document.getElementById("choose-grid").style.transitionDuration = "0.25s"; //how long is the fade in on
+            document.getElementById("choose-grid").style.transitionDuration = "0.5s"; //how long is the fade in on
             document.getElementById("choose-grid").style.visibility = "visible"
 
             requestAnimationFrame(() => {
@@ -429,7 +429,7 @@ const powerUps = {
             return 13;
         },
         effect() {
-            m.couplingChange(0.1)
+            m.couplingChange(1)
         },
         // spawnDelay(num) {
         //     let count = num
@@ -1069,7 +1069,6 @@ const powerUps = {
                         for (let j = 0, len = tech.tech[i].frequency; j < len; j++) options.push(i);
                     }
                 }
-
                 function removeOption(index) {
                     for (let i = options.length - 1; i > -1; i--) {
                         if (index === options[i]) {
@@ -1321,24 +1320,10 @@ const powerUps = {
                 tech.isFlipFlopOn = false
                 if (document.getElementById("tech-switch")) document.getElementById("tech-switch").innerHTML = ` = <strong>OFF</strong>`
                 m.eyeFillColor = 'transparent'
-                if (tech.isFlipFlopCoupling) {
-                    m.couplingChange(-5)
-                    for (let i = 0; i < mob.length; i++) {
-                        if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
-                    }
-                    spawn.WIMP()
-                    mob[mob.length - 1].isDecoupling = true //so you can find it to remove
-                }
             } else {
                 tech.isFlipFlopOn = true //immune to damage this hit, lose immunity for next hit
                 if (document.getElementById("tech-switch")) document.getElementById("tech-switch").innerHTML = ` = <strong>ON</strong>`
                 m.eyeFillColor = m.fieldMeterColor //'#0cf'
-                if (tech.isFlipFlopCoupling) {
-                    m.couplingChange(5)
-                    for (let i = 0; i < mob.length; i++) {
-                        if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
-                    }
-                }
             }
             if (tech.isRelayEnergy) m.setMaxEnergy();
         }

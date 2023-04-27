@@ -26,31 +26,31 @@ const level = {
             // powerUps.research.changeRerolls(11)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
-            // m.couplingChange(5)
-            // m.setField("standing wave") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole
+            // m.couplingChange(10)
+            // m.setField("metamaterial cloaking") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("foam") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[3].ammo = 100000000
-            // tech.giveTech("induction brake")
+            // tech.giveTech("grappling hook")
             // tech.giveTech("null hypothesis")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("dye laser")
             // for (let i = 0; i < 1; ++i) tech.giveTech("free-electron laser")
             // for (let i = 0; i < 1; ++i) tech.giveTech("waste heat recovery")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("foam-bot") });
             // for (let i = 0; i < 1; i++) tech.giveTech("foam-bot upgrade")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Occams razor")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.superNgonBros();
+            // level.testing();
             // spawn.nodeGroup(3200, -300, "sniper")
             // spawn.nodeGroup(2200, -300, "sniper")
             // spawn.nodeGroup(2200, -300, "sniper")
             // spawn.mantisBoss(1900, -500)
             // spawn.cellBoss(1900, -500)
-            // for (let i = 0; i < 5; ++i) spawn.starter(1900, -500, 50)
+            // for (let i = 0; i < 2; ++i) spawn.starter(1900, -500, 50)
             // spawn.sneaker(1900, -500, 25)
             // spawn.sniper(2000, -450)
             // spawn.zombie(1000 + 1000 * Math.random(), -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)
@@ -139,12 +139,6 @@ const level = {
             tech.isFlipFlopOn = true
             if (tech.isFlipFlopHealth) m.setMaxHealth()
             if (tech.isRelayEnergy) m.setMaxEnergy()
-            if (tech.isFlipFlopCoupling) {
-                m.couplingChange(5)
-                for (let i = 0; i < mob.length; i++) {
-                    if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
-                }
-            }
             m.eyeFillColor = m.fieldMeterColor
             simulation.makeTextLog(`tech.isFlipFlopOn <span class='color-symbol'>=</span> true`);
         }
@@ -1192,7 +1186,7 @@ const level = {
         y = y + height / 2
         const doorBlock = body[body.length] = Bodies.rectangle(x, y, width, height, {
             collisionFilter: {
-                category: cat.map,
+                category: cat.body,//cat.map,
                 mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
             },
             isNoSetCollision: true,
@@ -1252,7 +1246,7 @@ const level = {
                 return this.position.y > y - 1
             },
             draw() {
-                ctx.fillStyle = "#555"
+                ctx.fillStyle = "#666"
                 ctx.beginPath();
                 const v = this.vertices;
                 ctx.moveTo(v[0].x, v[0].y);
@@ -3175,6 +3169,8 @@ const level = {
 
         const doorIn = level.door(-313, -950, 525, 200, 190, 2) //x, y, width, height, distance, speed = 1
         const doorOut = level.door(2762, -175, 525, 200, 190, 2) //x, y, width, height, distance, speed = 1
+        doorIn.collisionFilter.category = cat.map;
+        doorOut.collisionFilter.category = cat.map; // to prevent boson composite from letting the player skip the level
         // doorOut.isClosing = true
         let isDoorsLocked = false
         let isFightOver = false
@@ -5186,6 +5182,10 @@ const level = {
             portal[3].query()
         };
         level.customTopLayer = () => {
+            doorButtonRight.draw();
+            doorCenterRight.draw();
+            doorCenterLeft.draw();
+            doorLeft.draw();
             hazardSlimeLeft.query();
             hazardSlimeRight.query();
             portal[0].draw();
@@ -22147,8 +22147,10 @@ const level = {
         m.addHealth(0.25)
         document.getElementById("health").style.display = "inline" //show your health bar
         document.getElementById("health-bg").style.display = "inline"
-        document.getElementById("defense-bar").style.display = "inline"
-        document.getElementById("damage-bar").style.display = "inline"
+        if (!localSettings.isHideHUD) {
+            document.getElementById("defense-bar").style.display = "inline"
+            document.getElementById("damage-bar").style.display = "inline"
+        }
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;

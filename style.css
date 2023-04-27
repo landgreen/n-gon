@@ -9,6 +9,7 @@ body {
     margin: 0;
     overflow: hidden;
     cursor: auto;
+    transition: background-color 0.2s ease-in-out;
 }
 
 canvas {
@@ -183,6 +184,9 @@ summary {
     scrollbar-width: none;
 }
 
+
+
+
 .choose-grid-no-images {
     border-radius: 8px;
     border: 10px solid #444;
@@ -219,6 +223,9 @@ summary {
     line-height: 160%;
     background-color: var(--card-color);
     font-size: 0.75em;
+    /* transform-style: preserve-3d;
+    transition: transform 2s;
+    transform: rotateX(180deg); */
 }
 
 .choose-grid-module:hover {
