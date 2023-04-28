@@ -1,0 +1,22 @@
+{
+    "name": "n-gon",
+    "short_name": "n-gon",
+    "theme_color": "#444",
+    "background_color": "#8c8c8c",
+    "display": "fullscreen",
+    "scope": "/",
+    "start_url": "/",
+    "description": "2-d physics rogue-lite platformer shooter",
+    "icons": [
+        {
+            "src": "/icons/headshadow512.webp",
+            "type": "image/webp",
+            "sizes": "512x512"
+        },
+        {
+            "src": "/icons/headshadow192.webp",
+            "type": "image/webp",
+            "sizes": "192x192"
+        }
+    ]
+}
