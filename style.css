@@ -9,7 +9,7 @@ body {
     margin: 0;
     overflow: hidden;
     cursor: auto;
-    transition: background-color 0.2s ease-in-out;
+    /* transition: background-color 0.2s ease-in-out; */
 }
 
 canvas {

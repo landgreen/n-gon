@@ -1,23 +1,22 @@
 ******************************************************** NEXT PATCH **************************************************
 
-setting - minimal HUD
-  remove: defense bar, damage bar, tech, in game console
+new community map!! underpass by Richard0820
 
-improved text clarity on coupling
-removed tech decoupling
+duplicated power ups aren't circles
+metastability makes power ups triangles instead of circles
+  3->4 seconds of half life before exploding
+  only metastability duplicated power ups have the lighting graphic
 
-added cloaking and sneak attack graphics
-  also, the 50% defense when cloaked is now clear from the defense bar
-ternary 44->83% damage but requires current gun to have ammo/3 (was any gun)
-wormhole invariant: uses much less energy to pause time
-standing wave has less recoil when blocking
-
-new images
-bug fixes
+mob's that fall off the map now die instead of just being removed
+  so they can still spawn power ups
+you can pick up power ups from slightly farther away (450)
+  but less far away when not facing the power up (100)
+  accretion has less lag at high amounts of heal power ups following you
+several other bug fixes
 
 *********************************************************** TODO *****************************************************
 
- use ephemera to replace things
+use ephemera to replace things
   JUNK?
   request animation stuff
   simulation checks

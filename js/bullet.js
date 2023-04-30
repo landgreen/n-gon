@@ -1750,11 +1750,11 @@ const b = {
 
 
                                     //need to scale the friction differently based on distance?
-                                    if (dist > 500) {
-                                        const pull = Vector.mult(Vector.normalise(sub), 0.0008 * Math.min(Math.max(15, dist), 200))
-                                        player.force.x += pull.x
-                                        player.force.y += pull.y
-                                    }
+                                    // if (dist > 500) {
+                                    const pull = Vector.mult(Vector.normalise(sub), 0.0008 * Math.min(Math.max(15, dist), 200))
+                                    player.force.x += pull.x
+                                    player.force.y += pull.y
+                                    // }
 
                                     if (dist > 500) {
                                         m.energy -= this.drain

@@ -1003,9 +1003,13 @@ const simulation = {
                                 }
                             }
                         };
-                        fallCheck(mob);
                         fallCheck(body);
                         fallCheck(powerUp, true);
+                        let i = mob.length;
+                        while (i--) {
+                            if (mob[i].position.y > simulation.fallHeight) mob[i].death();
+                        }
+
                     }
                 }
             },

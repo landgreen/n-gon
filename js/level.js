@@ -10,7 +10,7 @@ const level = {
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     //see level.populateLevels:   (intro, ... , reservoir or factory, reactor, ... , gauntlet, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
-    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros"],
+    communityLevels: ["stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
@@ -23,7 +23,7 @@ const level = {
             // spawn.setSpawnList();
             // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(11)
+            // powerUps.research.changeRerolls(7)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(10)
@@ -34,9 +34,9 @@ const level = {
             // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[3].ammo = 100000000
-            // tech.giveTech("grappling hook")
-            // tech.giveTech("null hypothesis")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("free-electron laser")
+            // tech.giveTech("accretion")
+            // tech.giveTech("metastability")
+            // for (let i = 0; i < 6; ++i) tech.giveTech("replication")
             // for (let i = 0; i < 1; ++i) tech.giveTech("waste heat recovery")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("foam-bot") });
             // for (let i = 0; i < 1; i++) tech.giveTech("foam-bot upgrade")
@@ -44,7 +44,7 @@ const level = {
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.testing();
+            // level.underpass();
             // spawn.nodeGroup(3200, -300, "sniper")
             // spawn.nodeGroup(2200, -300, "sniper")
             // spawn.nodeGroup(2200, -300, "sniper")
@@ -66,8 +66,8 @@ const level = {
             // simulation.zoomScale *= 0.5;
             // simulation.setZoom();
             // for (let i = 0; i < 4; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
-            // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "gun");
-            // for (let i = 0; i < 3; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "heal");
+            // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "boost");
+            // for (let i = 0; i < 100; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "heal");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             //lore testing
             // for (let i = 0; i < 5; i++) tech.giveTech("undefined")
@@ -15624,7 +15624,7 @@ const level = {
             y: 2625
         }, -Math.PI)
         document.body.style.transition = '0ms'
-        document.body.style.backgroundColor = "#313d54" //"#061026";
+        document.body.style.backgroundColor = "#061026" //"#061026";
 
         var yy = new Image();
         yy.src = 'https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/Hotpot6.png';
@@ -21565,6 +21565,2609 @@ const level = {
         // if (simulation.difficulty > 1) spawn.randomLevelBoss(2200, -1300);
         // spawn.secondaryBossChance(100, -1500)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
+    },
+    underpass() {
+        simulation.makeTextLog(`<strong>underpass</strong> by <span class='color-var'>Richard0820</span>`);
+
+        let key = false;
+        const door = level.door(2650, -825, 50, 250, 250, 10);
+        const elevator = level.elevator(-11050, -650, 450, 75, -2975, 0.003, { up: 0.1, down: 0.1 })
+        const slimePit = level.hazard(-4775, -350, 1975, 175);
+        const boost = level.boost(137.5, -600, 75, 25);
+        let base = Matter.Bodies.rectangle(-4375, -1000, 100, 100, {
+            density: 0.05,
+            isNotHoldable: true,
+            restitution: 1.05,
+            isStatic: false
+        }, true, [true], 0);
+        let left = Matter.Bodies.rectangle(-4375 + 50, -1000 - 50, 50, 50, {//not actually left/right
+            density: 0.05,
+            isNotHoldable: true,
+            isStatic: false
+        });
+        let right = Matter.Bodies.rectangle(-4375 - 50, -1000 - 50, 50, 50, {
+            density: 0.05,
+            isNotHoldable: true,
+            isStatic: false
+        });
+        let left2 = Matter.Bodies.rectangle(-4375 - 50, -1000 + 50, 50, 50, {
+            density: 0.05,
+            isNotHoldable: true,
+            isStatic: false
+        });
+        let right2 = Matter.Bodies.rectangle(-4375 + 50, -1000 + 50, 50, 50, {
+            density: 0.05,
+            isNotHoldable: true,
+            isStatic: false
+        });
+        dong = Matter.Body.create({
+            parts: [base, left, right, left2, right2]
+        });
+        body[body.length] = base;
+        body[body.length] = left;
+        body[body.length] = right;
+        body[body.length] = left2;
+        body[body.length] = right2;
+        Matter.Composite.add(engine.world, dong)
+        Matter.Composite.add(engine.world, Constraint.create({
+            pointA: { x: -3825, y: -975 },
+            bodyB: dong,
+            stiffness: 0.2,
+            damping: 0.1
+        }));
+        composite[composite.length] = dong;
+        setTimeout(function () {
+            dong.collisionFilter.category = cat.body;
+            dong.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mobBullet | cat.mob //| cat.map 
+        }, 1000);
+        level.custom = () => {
+            ctx.save()
+            ctx.beginPath()
+            ctx.fillStyle = "#80808077";
+            ctx.strokeStyle = "#80808022";
+            ctx.fillRect(225, -1025, 2400, 450);
+            ctx.fillRect(-2950, -1025, 3100, 450);
+            ctx.fillRect(-7050, -1025, 2400, 450);
+            ctx.fillRect(-10575, -3975, 4525, 1025);
+            ctx.fillRect(-4650, -1700, 1700, 1100);
+            ctx.fillRect(-11150, -3575, 575, 3050);
+            ctx.fillRect(-11900, -1000, 750, 475);
+            ctx.fill()
+            ctx.stroke()
+            ctx.restore()
+            ctx.save()
+            ctx.beginPath()
+            ctx.fillStyle = "#d8dadf";
+            ctx.strokeStyle = "#d8dadf";
+            ctx.moveTo(-2950, -600);
+            ctx.lineTo(-3730, -1725);
+            ctx.lineTo(-3730, -600);
+
+            ctx.moveTo(-4650, -600);
+            ctx.lineTo(-3925, -1725);
+            ctx.lineTo(-3925, -575);
+
+            ctx.moveTo(-10575, -3425); //NE section
+            ctx.lineTo(-10100, -2975);
+            ctx.lineTo(-10575, -2975);
+
+            // ctx.moveTo(-7625, -3800);
+            // ctx.lineTo(-6750, -2975);
+            // ctx.lineTo(-7625, -2975);
+
+            ctx.moveTo(-7975, -2975);
+            ctx.lineTo(-7625, -3800);
+            ctx.lineTo(-7350, -2950);
+
+            ctx.moveTo(-6750, -2975);
+            ctx.lineTo(-7075, -3800);
+            ctx.lineTo(-7350, -2950);
+
+            // ctx.moveTo(-7975, -2975);
+            // ctx.lineTo(-7075, -3800);
+            // ctx.lineTo(-7075, -2975);
+
+            ctx.moveTo(-11900, -950);
+            ctx.lineTo(-11900, -550);
+            ctx.lineTo(-11500, -550);
+
+            ctx.fillRect(-3925, -1675, 200, 1075);
+            ctx.fillRect(-7625, -3800, 550, 875);
+            ctx.clearRect(-10600, -4000, 525, 475);
+            ctx.clearRect(-10100, -4000, 500, 300);
+            ctx.clearRect(-9625, -4000, 500, 175);
+            ctx.fillRect(-11125, -3600, 550, 50);
+            ctx.fillRect(-10600, -3400, 50, 425);
+            ctx.fillRect(-11925, -925, 45, 375);
+            ctx.fillRect(-3950, -1675, 75, 1100);
+            ctx.fillRect(-3925, -625, 950, 50);
+            ctx.fillRect(-4650, -600, 1700, 375);
+            ctx.fillRect(-14550, -2400, 2650, 2050);
+            //ctx.clearRect(-11050, -3000, 475, 50);
+
+            ctx.moveTo(-11150, -3575);
+            ctx.lineTo(-10575, -2150);
+            ctx.lineTo(-10575, -3575);
+
+            ctx.stroke()
+            ctx.fill()
+            ctx.restore()
+            boost.query()
+            slimePit.query()
+            if (Matter.Query.collides(dong, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
+                m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
+                const dmg = 0.05 * Math.min(simulation.dmgScale, simulation.difficulty);
+                m.damage(dmg);
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: dong.position.x,
+                    y: dong.position.y,
+                    radius: Math.sqrt(dmg) * 200,
+                    color: simulation.mobDmgColor,
+                    time: simulation.drawTime
+                });
+            }
+            for (let i = 0; i < mob.length; i++) {
+                if (Matter.Query.collides(dong, [mob[i]]).length > 0) {
+                    const dmg = 1;
+                    mob[i].damage(dmg, true);
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: dong.position.x,
+                        y: dong.position.y,
+                        radius: Math.sqrt(dmg) * 50,
+                        color: simulation.mobDmgColor,
+                        time: simulation.drawTime
+                    });
+                    break
+                }
+            }
+            level.exit.drawAndCheck();
+            ctx.beginPath()
+            ctx.fillStyle = '#68686822';
+            ctx.fillRect(-25, -2175, 100, 200);
+            ctx.fill()
+            ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
+            ctx.moveTo(-3825, -975)
+            ctx.lineTo(dong.position.x, dong.position.y)
+            ctx.stroke();
+            ctx.setLineDash([]);
+            simulation.drawList.push({ //add dmg to draw queue
+                x: dong.position.x,
+                y: dong.position.y,
+                radius: 10,
+                color: color.block,
+                time: 20
+            });
+            ctx.beginPath()
+            ctx.fillStyle = `rgba(68,68,68, ${3 * Math.sin(simulation.cycle * 0.015)})`
+            ctx.fillRect(-3000, -2175, 175, 25);
+            ctx.fillRect(-2850, -2300, 25, 150);
+            ctx.fillRect(-3000, -2300, 175, 25);
+            ctx.fillRect(-3000, -2425, 25, 150);
+            ctx.fillRect(-3000, -2425, 175, 25);
+            ctx.fill()
+            ctx.fillStyle = `rgba(68,68,68, ${5 * Math.sin(simulation.cycle * 0.015)})`
+            ctx.fillRect(-2725, -2425, 25, 275);
+            ctx.fillRect(-2725, -2425, 175, 25);
+            ctx.fillRect(-2575, -2425, 25, 275);
+            ctx.fillRect(-2725, -2300, 175, 25);
+            ctx.fill()
+            ctx.fillStyle = `rgba(68,68,68, ${7 * Math.sin(simulation.cycle * 0.015)})`
+            ctx.fillRect(-2450, -2425, 25, 275);
+            ctx.fillRect(-2450, -2175, 175, 25);
+            ctx.fill()
+            ctx.stroke();
+            ctx.fillStyle = `#00FFFF22`;
+            ctx.fillRect(-7650, -2975 - 100, 600, 2375 + 100)
+            ctx.fill()
+            ctx.fillStyle = `#00FFFF66`
+            ctx.fillRect(-7650 + Math.floor(Math.random() * 600), -2975 - 100, 5, 2375 + 100)
+            ctx.fillRect(-7650 + Math.floor(Math.random() * 600), -2975 - 100, 5, 2375 + 100)
+            ctx.fillStyle = `rgba(68, 68, 68)`
+            ctx.fillRect(-7675, -3075, 50, 125);
+            ctx.fillRect(-7075, -3075, 50, 125);
+            ctx.fillRect(-7725, -3025, 75, 75);
+            ctx.fillRect(-7050, -3025, 75, 75);
+            ctx.fill()
+            for (let i = 0, len = body.length; i < len; ++i) { //push blocks away vertically
+                if (body[i].position.x > -7625 && body[i].position.x < -7075 && body[i].position.y > -2975 - 100 && body[i].position.y < -625) {
+                    body[i].force.y -= simulation.g * body[i].mass + 0.012;
+                }
+            }
+            for (let i = 0, len = bullet.length; i < len; ++i) { //push bullets away vertically
+                if (bullet[i].position.x > -7625 && bullet[i].position.x < -7075 && bullet[i].position.y > -2975 - 100 && bullet[i].position.y < -625) {
+                    bullet[i].force.y -= simulation.g * bullet[i].mass;
+                }
+            }
+            for (let i = 0, len = powerUp.length; i < len; ++i) { //push powerups away vertically
+                if (powerUp[i].position.x > -7625 && powerUp[i].position.x < -7075 && powerUp[i].position.y > -2975 - 100 && powerUp[i].position.y < -625) {
+                    powerUp[i].force.y -= simulation.g * powerUp[i].mass + 0.12;
+                }
+            }
+            for (let i = 0, len = mob.length; i < len; ++i) { //push mobs away vertically
+                if (mob[i].position.x > -7625 && mob[i].position.x < -7075 && mob[i].position.y > -2975 - 100 && mob[i].position.y < -625) {
+                    mob[i].force.y -= simulation.g * mob[i].mass + 0.0012;
+                }
+            }
+            if (m.pos.x > -7625 && m.pos.x < -7075 && m.pos.y > -2975 - 100 && m.pos.y < -625) {
+                player.force.y -= m.mass * simulation.g + (input.down ? 0 : 0.012 * 2);
+
+            }
+            ctx.save()
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(0,250,250, 0.05)`;
+            ctx.fillRect(2625, -1000, 350, 450);
+            ctx.fill()
+            ctx.restore()
+            elevator.move()
+            if (mob.length <= 5) {
+                key = true;
+            }
+            if (key) {
+                level.exit.x = 2775;
+                level.exit.y = -650;
+            } else {
+
+                ctx.save()
+                ctx.beginPath();
+                ctx.moveTo(2775, -650 + 30);
+                ctx.lineTo(2775, -650 - 80);
+                ctx.bezierCurveTo(2775, -650 - 170, 2775 + 100, -650 - 170, 2775 + 100, -650 - 80);
+                ctx.lineTo(2775 + 100, -650 + 30);
+                ctx.lineTo(2775, -650 + 30);
+                ctx.fillStyle = "#00ffff";
+                ctx.fill();
+                ctx.restore()
+
+                const omega = new Image(); //the seal hehe
+                let width = Math.random() * 40; //Math.max(Math.sin(m.cycle * 0.05), Math.cos(m.cycle * 0.05)) * 
+                let length = Math.random() * 40; //Math.max(Math.sin(m.cycle * 0.05), Math.cos(m.cycle * 0.05)) * 
+                omega.src = "https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/MOSHED-2023-4-20-12-55-58-removebg-preview.png"; //"https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/omegafr.png";
+                ctx.drawImage(omega, 2775 + 50 - width, -650 - 50 - length, width * 2, length * 2)
+                ctx.save()
+                ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+                ctx.beginPath()
+                // ctx.font = "80px monospace";
+                // ctx.fillText("Ω", 2775 + 50, -650 - 50);
+                ctx.strokeStyle = "gray";
+                ctx.arc(2775 + 50, -650 - 50, 100 * Math.abs(Math.sin(m.cycle * 0.07)) + 10, 0 + Math.sin(m.cycle * 0.1 * Math.PI), 0 + Math.cos(m.cycle * 0.1 + Math.PI))
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "black";
+                ctx.stroke()
+                //ctx.fill()
+                ctx.restore()
+                ctx.save()
+                ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+                ctx.beginPath()
+                // ctx.font = "80px monospace";
+                // ctx.fillText("Ω", 2775 + 50, -650 - 50);
+                ctx.strokeStyle = "gray";
+                ctx.arc(2775 + 50, -650 - 50, 90 * Math.abs(Math.sin(m.cycle * 0.08)) + 10, 0 + Math.cos(m.cycle * 0.1 * Math.PI), 0 + Math.sin(m.cycle * 0.1 + Math.PI))
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "black";
+                ctx.stroke()
+                //ctx.fill()
+                ctx.restore()
+                ctx.save()
+                ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+                ctx.beginPath()
+                // ctx.font = "80px monospace";
+                // ctx.fillText("Ω", 2775 + 50, -650 - 50);
+                ctx.strokeStyle = "gray";
+                ctx.arc(2775 + 50, -650 - 50, 80 * Math.abs(Math.sin(m.cycle * 0.09)) + 10, 0 + Math.tan(m.cycle * 0.1 * Math.PI), 0 + Math.tan(m.cycle * 0.1 + Math.PI))
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "black";
+                ctx.stroke()
+                //ctx.fill()
+                ctx.setLineDash([]);
+                ctx.restore()
+            }
+        };
+        level.setPosToSpawn(30, -2000); //normal spawn
+        level.exit.x = 1375;
+        level.exit.y = -1500;
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom + 800)
+        document.body.style.backgroundColor = "#d8dadf";
+        spawn.mapRect(-225, -1950, 350, 75);
+        spawn.mapRect(225, -1950, 50, 75);
+        spawn.mapRect(-250, -2025, 50, 150);
+        spawn.mapRect(250, -2025, 50, 150);
+        spawn.mapRect(-250, -2250, 50, 125);
+        spawn.mapRect(-225, -2325, 500, 100);
+        spawn.mapRect(250, -2250, 50, 125);
+        spawn.mapRect(-100, -2400, 250, 100);
+        spawn.mapRect(-25, -2475, 100, 100);
+        spawn.mapRect(125, -2350, 50, 50);
+        spawn.mapRect(-125, -2350, 50, 50);
+        spawn.mapRect(-50, -2425, 50, 50);
+        spawn.mapRect(50, -2425, 50, 50);
+        spawn.mapRect(-250, -2350, 50, 50);
+        spawn.mapRect(250, -2350, 50, 50);
+        spawn.mapRect(-75, -1975, 200, 50);
+        spawn.mapRect(-50, -2000, 150, 50);
+        spawn.mapRect(100, -1950, 50, 75);
+        spawn.mapRect(-75, -2250, 200, 50);
+        spawn.mapRect(-50, -2225, 150, 50);
+        spawn.mapRect(-2950, -1900, 3100, 900);
+        spawn.mapRect(225, -1900, 2875, 900);
+        spawn.mapRect(-2950, -600, 6050, 450);
+        spawn.mapRect(-3050, -500, 200, 350);
+        spawn.mapRect(-3150, -400, 200, 250);
+        spawn.mapRect(-3250, -300, 200, 150);
+        spawn.mapRect(2950, -1050, 150, 500);
+        spawn.mapRect(-4675, -1900, 1825, 200);
+        spawn.mapRect(-5325, -1900, 675, 900);
+        spawn.mapRect(-5325, -250, 2100, 100);
+        spawn.mapRect(-5325, -600, 675, 450); // -
+        spawn.mapRect(-4700, -500, 150, 350);
+        spawn.mapRect(-4650, -400, 200, 250);
+        spawn.mapRect(-4550, -300, 200, 150);
+        spawn.mapRect(-3875, -1025, 100, 100);
+        spawn.mapRect(-3800, -1050, 50, 50);
+        spawn.mapRect(-3900, -1050, 50, 50);
+        spawn.mapRect(-3800, -950, 50, 50);
+        spawn.mapRect(-3900, -950, 50, 50);
+        spawn.mapRect(-6925, -1175, 1700, 175);
+        spawn.mapRect(-6925, -600, 1725, 175);
+        spawn.mapRect(-7700, -600, 800, 425);// -
+        spawn.mapRect(-7800, -2950, 175, 2775);
+        spawn.mapRect(-7075, -2950, 175, 1950);
+        spawn.mapRect(-9150, -2975, 1525, 175);
+        spawn.mapRect(-7075, -2975, 1150, 175);
+        spawn.mapRect(-6100, -3900, 175, 1100);
+        spawn.mapRect(-9150, -3975, 3225, 175);
+        spawn.mapRect(-9175, -3850, 75, 75);
+        spawn.mapRect(-9625, -3825, 500, 150);
+        spawn.mapRect(-9650, -3725, 75, 75);
+        spawn.mapRect(-10100, -3700, 500, 150);
+        spawn.mapRect(-10100, -2975, 975, 175);
+        spawn.mapRect(-10125, -3600, 75, 75);
+        spawn.mapRect(-10575, -3575, 500, 150);
+        spawn.mapRect(-10575, -2975, 500, 175);
+        spawn.mapRect(-11325, -2975, 250, 175);
+        spawn.mapRect(-11325, -3575, 175, 775);
+        // spawn.mapRect(-11325, -3575, 800, 150);
+        spawn.mapRect(-11225, -2975, 150, 2000);
+        spawn.mapRect(-10575, -2975, 150, 2500);
+        spawn.mapRect(-11650, -550, 1225, 150);
+        spawn.mapRect(-11650, -1100, 575, 150);
+        spawn.mapRect(-14675, -2525, 2925, 150);
+        spawn.mapRect(-11900, -2525, 150, 1575);
+        spawn.mapRect(-11850, -1100, 250, 150);
+        spawn.mapRect(-11875, -550, 275, 150);
+        spawn.mapRect(-11900, -550, 150, 350);
+        spawn.mapRect(-14675, -2525, 150, 2300);
+        spawn.mapRect(-14675, -375, 2925, 175);
+        spawn.mapRect(2725, -625, 250, 50);
+        spawn.mapRect(2625, -1025, 100, 225);
+        spawn.mapRect(2700, -1025, 300, 125);
+        spawn.mapRect(2625, -612.5, 125, 50);
+        spawn.mapRect(-3950, -1725, 250, 50);
+        spawn.mapRect(-7650, -3825, 600, 50);
+        spawn.mapRect(-13900, -2400, 200, 50);
+        spawn.mapVertex(-11957, -430, '-175 175 0 175 0 0');
+        spawn.mapVertex(-14470, -430, '175 175 0 175 0 0');
+        spawn.mapVertex(-11957, -2319, '-175 -175 0 -175 0 0');
+        spawn.mapVertex(-14470, -2319, '0 0 0 -175 175 -175');
+        //spawn.mapRect(-13900, -2150, 1375, 125);
+        // const sword = function() { //the ultimate blade of las destruction // NO SWORD NO DROPS >:(
+        // mobs.spawn(player.position.x, player.position.y, 5, 30, "transparent");
+        // let me = mob[mob.length - 1];
+        // Matter.Body.setDensity(me, 1);
+        // me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position);
+        // me.collisionFilter.category = cat.bullet;
+        // me.collisionFilter.mask = cat.mob | cat.mobBullet;
+        // me.isDropPowerUp = false;
+        // me.isShielded = true;
+        // me.showHealthBar = false;
+        // me.isUnblockable = true;
+        // me.leaveBody = false;
+        // me.isBadTarget = true;
+        // me.stroke = "transparent";
+        // me.isSword = true;
+        // let index = 0;
+        // let radius = 50;
+        // // const len = cons.length;
+        // // cons[len] = Constraint.create({
+        // // pointA: player.position,
+        // // bodyB: me,
+        // // stiffness: 0.14,
+        // // damping: 0.5
+        // // });
+        // // setTimeout(function(){
+        // // Composite.add(engine.world, cons[cons.length - 1]);
+        // // }, 1)
+        // // cons[len].length = 100 + 1.5 * radius;
+        // me.do = function() {
+        // // this.health = Infinity;//just in case
+        // // for(let i = 0; i < mob.length; i++) {
+        // // if(Matter.Query.collides(this, [mob[i]]).length > 0 && !mob[i].isSword) {
+        // // const dmg = 0.25;//do not nerf
+        // // mob[i].damage(dmg, true);
+        // // simulation.drawList.push({ //add dmg to draw queue
+        // // x: mob[i].position.x,
+        // // y: mob[i].position.y,
+        // // radius: Math.sqrt(dmg) * 50,
+        // // color: simulation.mobDmgColor,
+        // // time: simulation.drawTime
+        // // });
+        // // break
+        // // }
+        // // }
+        // Matter.Body.setPosition(this, {
+        // x: player.position.x + Math.cos(m.angle) * 100,
+        // y: player.position.y - (input.down ? 0 : 30) + Math.sin(m.angle) * 100
+        // })
+        // // this.force.x = Math.cos(m.angle) * 350;
+        // // this.force.y = Math.sin(m.angle) * 350;
+        // Matter.Body.setAngle(this, m.angle + Math.PI * 2);
+        // const setNoseShape = () => {
+        // const mag = radius + radius * 10;
+        // this.vertices[2].x = this.position.x + Math.cos(this.angle) * mag;
+        // this.vertices[2].y = this.position.y + Math.sin(this.angle) * mag;							
+        // this.vertices[4].x = this.position.x + Math.cos(this.angle) * mag;
+        // this.vertices[4].y = this.position.y + Math.sin(this.angle) * mag;							
+        // this.vertices[0].x = this.position.x + Math.cos(this.angle) * mag;
+        // this.vertices[0].y = this.position.y + Math.sin(this.angle) * mag;
+        // };
+        // const spike = Vector.mult(Vector.normalise(Vector.sub(this.vertices[2], this.position)), radius * 100)
+        // const spike2 = Vector.mult(Vector.normalise(Vector.sub(this.vertices[4], this.position)), radius * 500)
+        // const spike3 = Vector.mult(Vector.normalise(Vector.sub(this.vertices[0], this.position)), radius * 500)
+        // this.vertices[2].x = this.position.x + spike.x / 100
+        // this.vertices[2].y = this.position.y + spike.y / 100							
+        // this.vertices[4].x = this.position.x + spike2.x / 75
+        // this.vertices[4].y = this.position.y + spike2.y / 75							
+        // this.vertices[0].x = this.position.x + spike3.x / 75
+        // this.vertices[0].y = this.position.y + spike3.y / 75						
+        // if(index == 0) {
+        // setNoseShape();
+        // index++;
+        // }
+        // ctx.save()
+        // ctx.beginPath();
+        // const vertices = this.vertices;
+        // ctx.lineWidth = 100;
+        // ctx.moveTo(vertices[0].x, vertices[0].y);
+        // for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+        // ctx.lineTo(vertices[0].x, vertices[0].y);
+        // const gradient = ctx.createRadialGradient(this.position.x, this.position.y, 15, this.position.x, this.position.y, Math.abs(275 * Math.sin(simulation.cycle / 50)) + 15);
+        // // Add three color stops
+        // gradient.addColorStop(0, m.eyeFillColor);
+        // gradient.addColorStop(0.9, "white");
+        // gradient.addColorStop(1, "darkgray");
+        // ctx.fillStyle = gradient;
+        // ctx.strokeStyle = "transparent";
+        // ctx.shadowBlur = 10;
+        // ctx.shadowColor = m.eyeFillColor;
+        // ctx.fill();
+        // ctx.stroke();
+        // ctx.restore()
+
+        // const Dx = Math.cos(m.angle);
+        // const Dy = Math.sin(m.angle);
+        // let xElec = this.position.x + 10 * Dx;
+        // let yElec = this.position.y + 10 * Dy;
+        // ctx.beginPath();
+        // ctx.moveTo(xElec, yElec);
+        // const step = 40
+        // for (let i = 0; i < 6; i++) {
+        // xElec += step * (Dx + 1.5 * (Math.random() - 0.5))
+        // yElec += step * (Dy + 1.5 * (Math.random() - 0.5))
+        // ctx.lineTo(xElec, yElec);
+        // }
+        // ctx.strokeStyle = m.eyeFillColor;
+        // ctx.lineWidth = 1.5;
+        // ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+        // ctx.stroke(); // Draw it
+        // ctx.setLineDash([]);
+        // if(this.alive && m.energy > 0) {
+        // const gradient = ctx.createRadialGradient(this.position.x, this.position.y, 0, this.position.x, this.position.y, Math.abs(20 * Math.cos(simulation.cycle / 50)));
+        // // Add three color stops
+        // gradient.addColorStop(0, m.eyeFillColor);
+        // gradient.addColorStop(0.9, "white");
+        // gradient.addColorStop(1, "gray");
+        // ctx.save()
+        // ctx.beginPath()
+        // ctx.moveTo(this.position.x, this.position.y)
+        // ctx.arc(this.position.x, this.position.y, 20, 0, 2 * Math.PI)
+        // ctx.fillStyle = gradient;
+        // ctx.strokeStyle = "transparent";
+        // ctx.shadowBlur = 10;
+        // ctx.shadowColor = m.eyeFillColor;
+        // ctx.fill()
+        // ctx.stroke()
+        // ctx.restore()
+        // m.energy -= 0.002;
+
+        // ctx.save()
+        // ctx.translate(this.vertices[2].x, this.vertices[2].y)
+        // ctx.rotate(m.angle + Math.PI / 2)
+        // ctx.beginPath()
+        // ctx.font = "16px Arial";
+        // ctx.fillStyle = "black";
+        // ctx.strokeStyle = "black";
+        // // ctx.fillText("Θ", 0,0 - 110)
+        // // ctx.fillText("ά", 0,15 - 110)
+        // // ctx.fillText("ν", 0,30 - 110)
+        // // ctx.fillText("α", 0,45 - 110)
+        // // ctx.fillText("τ", 0,60 - 110)
+        // // ctx.fillText("ο", 0,75 - 110)
+        // // ctx.fillText("ς", 0,90 - 110)
+        // ctx.fillText("Ω", 0,55)
+        // ctx.fill()
+        // ctx.stroke()
+        // ctx.restore()
+
+        // simulation.drawList.push({
+        // x: this.position.x + Math.floor(Math.random() * 300 - Math.random() * 300),
+        // y: this.position.y + Math.floor(Math.random() * 300 - Math.random() * 300),
+        // radius: 2,
+        // color: m.eyeFillColor,
+        // time: simulation.drawTime
+        // });
+        // } else {
+        // this.death()
+        // powerUps.activated = false
+        // }
+        // // me.onDeath = function() {
+        // // this.removeCons();
+        // // };					
+        // }
+        // }
+        //setTimeout(function() {sword();}, 100);
+        const wire = function () {
+            const breakingPoint = -1600;
+            const spawnx = -13800 + Math.floor(Math.random() * 100 - Math.random() * 100);
+            mobs.spawn(spawnx, -2375, 0, 2, "transparent");
+            let me = mob[mob.length - 1];
+            let boss = mob[0];
+            me.collisionFilter.category = cat.body;
+            me.collisionFilter.mask = cat.map;
+            me.g = 0.0003; //required for gravity
+            me.restitution = 0;
+            me.stroke = "transparent"
+            me.freeOfWires = false;
+            me.frictionAir = 0.01;
+            me.isDropPowerUp = false;
+            me.showHealthBar = false;
+            me.isBadTarget = true;
+            me.isUnblockable = true;
+            const wireX = spawnx;
+            const wireY = -2375;
+            //const randomw = Math.floor(Math.random() * 100 - Math.random() * 100);
+            const width = Math.abs(10 + Math.floor(Math.random() * 10 - Math.random() * 10));
+            const randomx = Math.floor(30 * Math.random() - 30 * Math.random());
+            const randomy = Math.floor(10 * Math.random() - 10 * Math.random())
+            me.do = function () {
+                if (this.freeOfWires) {
+                    this.gravity();
+                } else {
+                    if (boss.position.y > breakingPoint) {
+                        this.freeOfWires = true;
+                        this.force.y -= -0.0006;
+                        this.force.x += Math.random() * boss.velocity.x / 10000;
+                        this.fill = "#111";
+                    }
+                    //move mob to mob
+                    Matter.Body.setPosition(this, {
+                        x: boss.position.x + randomx,
+                        y: boss.position.y + randomy
+                    })
+                }
+                //draw wire
+                ctx.beginPath();
+                ctx.moveTo(wireX, wireY);
+                ctx.quadraticCurveTo(wireX, -100, this.position.x, this.position.y);
+                ctx.lineWidth = width;
+                ctx.lineCap = "butt";
+                ctx.strokeStyle = "#111";
+                ctx.stroke();
+                ctx.lineCap = "round";
+            };
+        }
+
+        const ball = function (x, y, radius = 11 * tech.bulletSize, sides = 70) {//superball //also, why is it called superballs?
+            mobs.spawn(x, y, sides, radius, "rgba(0,0,0)");
+            let me = mob[mob.length - 1];
+            me.stroke = "transparent";
+            me.onHit = function () {
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: 20,
+                    color: simulation.mobDmgColor,
+                    time: simulation.drawTime
+                });
+            };
+            Matter.Body.setDensity(me, 0.00001); //normal is 0.001
+            me.timeLeft = 500;
+            me.friction = 0;
+            me.restitution = 1;
+            me.leaveBody = false;
+            me.isDropPowerUp = false;
+            //me.inertia = Infinity;
+            me.isBadTarget = true;
+            me.isMobBullet = true;
+            me.showHealthBar = false;
+            me.collisionFilter.category = cat.mobBullet;
+            me.collisionFilter.mask = cat.bullet | cat.player | cat.map | cat.body;
+            let index = 0;
+            me.do = function () {
+                this.timeLimit();
+                this.alwaysSeePlayer()
+                this.force.y += this.mass * 0.0012;
+            }
+        }
+        const normalBullet = function (x, y, radius = 9, sides = 3) {
+            //bullets
+            mobs.spawn(x, y, sides, radius, "rgba(0,0,0)");
+            let me = mob[mob.length - 1];
+            me.stroke = "transparent";
+            me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position);
+            me.onHit = function () {
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: 20,
+                    color: simulation.mobDmgColor,
+                    time: simulation.drawTime
+                });
+            };
+            Matter.Body.setDensity(me, 0.00004); //normal is 0.001
+            me.timeLeft = 220;
+            me.frictionAir = -0.01;
+            me.restitution = -1;
+            me.leaveBody = false;
+            me.isDropPowerUp = false;
+            //me.inertia = Infinity;
+            me.isBadTarget = true;
+            me.isMobBullet = true;
+            me.showHealthBar = false;
+            me.collisionFilter.category = cat.mobBullet;
+            me.collisionFilter.mask = null;
+            me.boss = null;
+            for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].restoreBoss) {
+                    me.boss = mob[i];
+                }
+            }
+            let index = 0;
+            me.do = function () {
+                this.timeLimit();
+                this.alwaysSeePlayer()
+                const setNoseShape = () => {
+                    const mag = this.radius + this.radius * 10;
+                    this.vertices[1].x = this.position.x + Math.cos(this.angle) * mag;
+                    this.vertices[1].y = this.position.y + Math.sin(this.angle) * mag;
+                    const angle = Math.atan2(this.position.y - me.boss.position.y, this.position.x - me.boss.position.x);
+                    Matter.Body.setAngle(this, angle);
+                };
+                const spike = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), radius * 1000)
+                this.vertices[1].x = this.position.x + spike.x / 100
+                this.vertices[1].y = this.position.y + spike.y / 100
+                if (index == 0) {
+                    setNoseShape();
+                    index++;
+                }
+                if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0) {
+                    const slow = 0.69 //im sorry it looks cool though
+                    Matter.Body.setVelocity(this, {
+                        x: this.velocity.x * slow,
+                        y: this.velocity.y * slow
+                    });
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: 10,
+                        color: '#000000',
+                        time: simulation.drawTime
+                    });
+                    if (this.velocity.x == 0 && this.velocity.y == 0) {
+                        this.death();
+                    }
+                    this.frictionAir += 0.0001;
+                    Matter.Body.setAngularVelocity(this, 0)
+                }
+                if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles // I wasnt gonna add this but since ya'll would have killed me if I didn't I added this
+                    const dmg = 0.013 * simulation.dmgScale;
+                    m.damage(dmg);
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: Math.sqrt(dmg) * 200,
+                        color: '#000000',
+                        time: simulation.drawTime
+                    });
+                }
+            };
+        }
+        const foamBullet = function (x, y, radius = 9, sides = 70) { //bullets
+            mobs.spawn(x, y, sides, radius, "rgb(0,0,0)");
+            let me = mob[mob.length - 1];
+            me.stroke = "transparent";
+            Matter.Body.setDensity(me, 0.00005); //normal is 0.001
+            me.timeLeft = 120;
+            // me.g = 0.0005; //required if using this.gravity
+            me.accelMag = 0.00006;
+            me.isVerticesChange = true
+            me.delay = 360 * simulation.CDScale;
+            me.spikeVertex = 0;
+            me.spikeLength = 0;
+            me.isSpikeGrowing = false;
+            me.spikeGrowth = 0;
+            me.isSpikeReset = false;
+            me.frictionAir = 0;
+            me.restitution = 0;
+            me.leaveBody = false;
+            me.isDropPowerUp = false;
+            me.isBadTarget = true;
+            me.isMobBullet = true;
+            me.showHealthBar = false;
+            me.isUnblockable = true;
+            me.collisionFilter.category = cat.mobBullet;
+            me.collisionFilter.mask = cat.body //| cat.bullet;// | cat.player;
+            me.do = function () {
+                if (this.distanceToPlayer2() < 40000) {
+                    this.force = Vector.mult(Vector.normalise(Vector.sub(player.position, this.position)), this.mass * 0.004)
+                    const slow = 0.99999999999999999;
+                    Matter.Body.setVelocity(this, {
+                        x: this.velocity.x * slow,
+                        y: this.velocity.y * slow
+                    });
+                }
+                // this.gravity();
+                this.timeLimit();
+                // for (let i = 0, len = this.vertices.length; i < len; i++) {
+                // const dist = Vector.sub(this.seePlayer.position, this.vertices[i]);
+                // const distMag = Vector.magnitude(dist);
+                // const spike = Vector.mult(Vector.normalise(Vector.sub(this.vertices[i], this.position)), radius * distMag)
+                // this.vertices[i].x = this.position.x + spike.x / 100
+                // this.vertices[i].y = this.position.y + spike.y / 100
+                // }
+                if (this.radius < 50) {
+                    const scale = 1.05;
+                    Matter.Body.scale(this, scale, scale);
+                    this.radius *= scale;
+                }
+                if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0 && this.speed < 10) {
+                    const slow = 0.97
+                    Matter.Body.setVelocity(this, {
+                        x: this.velocity.x * slow,
+                        y: this.velocity.y * slow
+                    });
+                    const SCALE = 0.9
+                    Matter.Body.scale(this, SCALE, SCALE);
+                    this.radius *= SCALE;
+                    if (this.radius < 1) {
+                        this.death()
+                    }
+                } else {
+                    this.attach();
+                }
+
+            };
+            me.attach = function () {
+                if (Matter.Query.collides(this, [player]).length > 0) {
+                    Matter.Body.setPosition(this, player.position)
+                    if (player.speed > 2.5) Matter.Body.setVelocity(player, Vector.mult(player.velocity, 0.94))
+                    Matter.Body.setAngularVelocity(player, player.angularVelocity * 0.9);
+                    m.damage(0.00003); //balanced? not sure
+                }
+            }
+        };
+
+        const orbital = function (who, radius, phase, speed, radius2) {//basically orbitBot
+            mobs.spawn(who.position.x, who.position.y, 8, 12, "rgba(0,0,0, 1)");
+            let me = mob[mob.length - 1];
+            me.stroke = "transparent";
+            Matter.Body.setDensity(me, 0.01); //normal is 0.001
+            me.leaveBody = false;
+            me.isDropPowerUp = false;
+            me.isBadTarget = true;
+            me.showHealthBar = false;
+            me.isOrbital = true;
+            me.isShielded = true
+            me.collisionFilter.category = cat.mobBullet;
+            me.collisionFilter.mask = cat.bullet; //cat.player | cat.map | cat.body
+            me.do = function () {
+                //if host is gone
+                if (!who || !who.alive) {
+                    this.death();
+                    return
+                }
+                //set orbit
+                const time = simulation.cycle * speed + phase
+                const orbit = {
+                    x: Math.cos(time),
+                    y: Math.sin(time)
+                }
+                Matter.Body.setPosition(this, Vector.add(Vector.add(who.position, who.velocity), Vector.mult(orbit, radius + radius2)))
+                //damage player
+                if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
+                    const dmg = 0.013 * simulation.dmgScale
+                    m.damage(dmg);
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: Math.sqrt(dmg) * 200,
+                        color: simulation.mobDmgColor,
+                        time: simulation.drawTime
+                    });
+                    //this.death();
+                }
+            };
+        }
+        const missile = function (where, speed = 0.007, size = 1) {
+            mobs.spawn(where.x, where.y, 3, 20, '#000000');
+            let me = mob[mob.length - 1];
+            me.accelMag = speed;
+            Matter.Body.setDensity(me, 0.0000000000001);
+            me.stroke = 'transparent';
+            me.showHealthBar = false;
+            me.collisionFilter.category = cat.mobBullet;
+            me.collisionFilter.mask = cat.bullet | cat.player | cat.map | cat.body;
+            me.leaveBody = false;
+            me.isDropPowerUp = false;
+            me.onHit = function () {
+                b.explosion(this.position, (tech.isMissileBig ? 230 : 180) + 60 * Math.random())
+                this.death()
+            }
+            me.do = function () {
+                this.seePlayerByHistory();
+                this.alwaysSeePlayer();
+                this.attraction();
+                const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                Matter.Body.setAngle(this, angle);
+                // ctx.beginPath()
+                // ctx.strokeStyle = "rgba(255,155,0,0.5)";
+                // ctx.lineWidth = 15;
+                // ctx.arc(this.vertices[0].x, this.vertices[0].x, 15, 0, 2 * Math.PI);
+                // ctx.stroke()
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: 10,
+                    color: `rgba(255,155,0,${Math.random()})`,
+                    time: simulation.drawTime
+                });
+            }
+        }
+        const railBullet = function (x, y) {
+            mobs.spawn(x, y, 5, 20, "black");
+            let me = mob[mob.length - 1];
+            me.stroke = "black";
+            me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position);
+            me.onHit = function () {
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: 20,
+                    color: simulation.mobDmgColor,
+                    time: simulation.drawTime
+                });
+            };
+            Matter.Body.setDensity(me, 0.00004); //normal is 0.001
+            me.timeLeft = 220;
+            me.frictionAir = -0.01;
+            me.restitution = -1;
+            me.leaveBody = false;
+            me.isDropPowerUp = false;
+            //me.inertia = Infinity;
+            me.isBadTarget = true;
+            me.isMobBullet = true;
+            me.showHealthBar = false;
+            me.collisionFilter.category = cat.mobBullet;
+            me.collisionFilter.mask = cat.player;
+            const radius = 30;
+            let index = 0;
+            me.do = function () {
+                this.timeLimit();
+                this.alwaysSeePlayer()
+                const setNoseShape = () => {
+                    const mag = me.radius + me.radius * 10;
+                    const angle = Math.atan2(me.seePlayer.position.y - this.position.y, me.seePlayer.position.x - this.position.x);
+                    me.vertices[2].x = this.position.x + Math.cos(this.angle) * mag;
+                    me.vertices[2].y = this.position.y + Math.sin(this.angle) * mag;
+                    me.vertices[4].x = this.position.x + Math.cos(this.angle) * mag;
+                    me.vertices[4].y = this.position.y + Math.sin(this.angle) * mag;
+                    me.vertices[0].x = this.position.x + Math.cos(this.angle) * mag;
+                    me.vertices[0].y = this.position.y + Math.sin(this.angle) * mag;
+                    Matter.Body.setAngle(this, angle);
+                };
+                const spike = Vector.mult(Vector.normalise(Vector.sub(this.vertices[2], me.position)), radius * 1000)
+                const spike2 = Vector.mult(Vector.normalise(Vector.sub(this.vertices[4], me.position)), radius * 1000)
+                const spike3 = Vector.mult(Vector.normalise(Vector.sub(this.vertices[0], me.position)), radius * 1000)
+                me.vertices[2].x = this.position.x + spike.x / 100
+                me.vertices[2].y = this.position.y + spike.y / 100
+                me.vertices[4].x = this.position.x + spike2.x / 75
+                me.vertices[4].y = this.position.y + spike2.y / 75
+                me.vertices[0].x = this.position.x + spike3.x / 75
+                me.vertices[0].y = this.position.y + spike3.y / 75
+                if (index == 0) {
+                    setNoseShape();
+                    index++;
+                }
+                if (Matter.Query.collides(this, map).length > 0 || Matter.Query.collides(this, body).length > 0) {
+                    const slow = 0.69 //im sorry it looks cool though
+                    Matter.Body.setVelocity(this, {
+                        x: this.velocity.x * slow,
+                        y: this.velocity.y * slow
+                    });
+                    // simulation.drawList.push({ //add dmg to draw queue
+                    // x: this.position.x,
+                    // y: this.position.y,
+                    // radius: 10,
+                    // color: '#000000',
+                    // time: simulation.drawTime
+                    // });					
+                    if (this.velocity.x == 0 && this.velocity.y == 0) {
+                        this.death();
+                    }
+                    this.frictionAir += 0.0001;
+                    Matter.Body.setAngularVelocity(this, 0)
+                }
+                if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles // I wasnt gonna add this but since ya'll would have killed me if I didn't I added this
+                    const dmg = 0.013 * simulation.dmgScale;
+                    m.damage(dmg);
+                    // simulation.drawList.push({ //add dmg to draw queue
+                    // x: this.position.x,
+                    // y: this.position.y,
+                    // radius: Math.sqrt(dmg) * 200,
+                    // color: '#000000',
+                    // time: simulation.drawTime
+                    // });
+                }
+            };
+        }
+        const grenade = function (x, y, lifeSpan = 90 + Math.ceil(60 / simulation.accelScale), pulseRadius = Math.min(550, 250 + simulation.difficulty * 3), size = 3) {
+            mobs.spawn(x, y, 4, size, "rgb(0,0,0)"); //rgb(215,80,190)
+            let me = mob[mob.length - 1];
+            me.stroke = "transparent";
+            me.onHit = function () {
+                this.explode(this.mass);
+            };
+            Matter.Body.setDensity(me, 0.00004); //normal is 0.001
+
+            me.lifeSpan = lifeSpan;
+            me.timeLeft = me.lifeSpan;
+            // me.g = 0.0002; //required if using this.gravity 
+            me.frictionAir = 0;
+            me.restitution = 0.8;
+            me.leaveBody = false;
+            me.isDropPowerUp = false;
+            me.isBadTarget = true;
+            me.isMobBullet = true;
+            me.onDeath = function () {
+                //damage player if in range
+                if (Vector.magnitude(Vector.sub(player.position, this.position)) < pulseRadius && m.immuneCycle < m.cycle) {
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
+                    m.damage(0.015 * simulation.dmgScale);
+                }
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: pulseRadius,
+                    color: "rgba(0,0,0,0.3)",
+                    time: simulation.drawTime
+                });
+            };
+            me.showHealthBar = false;
+            me.collisionFilter.category = cat.mobBullet;
+            me.collisionFilter.mask = cat.map | cat.body | cat.player
+            // me.collisionFilter.mask = 0
+            me.do = function () {
+                this.timeLimit();
+                ctx.save()
+                ctx.beginPath(); //draw explosion outline
+                ctx.arc(this.position.x, this.position.y, pulseRadius * (1.01 - this.timeLeft / this.lifeSpan), 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
+                ctx.fillStyle = "rgba(0,0,0,0.05)";
+                ctx.fill();
+                ctx.restore()
+            };
+        }
+        const sniper = function (x, y, radius = 30) {
+            mobs.spawn(x, y, 8, radius, '#00000000');
+            let me = mob[mob.length - 1];
+            me.accelMag = 0.0003
+            me.stroke = 'transparent';
+            //me.isBoss = true;
+            me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position;
+            me.frictionStatic = 0;
+            me.friction = 0;
+            me.seeAtDistance2 = 20000000 //14000 vision range
+            me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position);
+            Matter.Body.rotate(me, Math.random() * Math.PI * 2);
+            me.showHealthBar = false
+            Matter.Body.setDensity(me, 0.01)
+            me.fireDir = { x: 0, y: 0 }
+            me.seePlayerFreq = 0
+            me.repulsionRange = 400000 + radius * radius;
+            me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob | cat.mobBullet
+            me.do = function () {
+                this.seePlayerCheck();
+                this.attraction();
+                this.repulsion();
+                this.search()
+                if (this.seePlayer.recall) {
+                    const h = this.radius * 0.3;
+                    const w = this.radius * 2;
+                    const x = this.position.x - w / 2;
+                    const y = this.position.y - w * 0.7;
+                    ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                    ctx.fillRect(x, y, w, h);
+                    ctx.fillStyle = "rgba(0,255,255,0.7)";
+                    ctx.fillRect(x, y, w * this.health, h);
+                }
+                if (this.health < 1) {
+                    this.health += 0.0005; //regen
+                }
+                ctx.save()
+                ctx.translate(this.position.x, this.position.y)
+                ctx.rotate(Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x))
+                if (this.seePlayer.recall > 0 && this.distanceToPlayer2() > this.repulsionRange) {
+                    var grd2 = ctx.createLinearGradient(0, 0, -150, 0);
+                    // grd2.addColorStop(0, 'rgba(255, 255, 155, 0.8)');
+                    // grd2.addColorStop(1, 'rgba(255, 200, 0, 0.1)');
+                    grd2.addColorStop(0, 'rgba(150, 200, 255, 0.7)');
+                    grd2.addColorStop(1, 'rgba(150, 200, 255, 0)');
+                    ctx.fillStyle = grd2;
+                    ctx.beginPath();
+                    ctx.moveTo(-18, -25);
+                    //10 * (Math.random() - 0.5), 10 * (Math.random() - 0.5)
+                    ctx.lineTo(-18, 25);
+                    ctx.lineTo(-50 - 100 * Math.random(), 0);
+                    ctx.fill();
+                } else if (this.distanceToPlayer2() < this.repulsionRange) {
+                    var grd2 = ctx.createLinearGradient(0, 0, 80, 0);
+                    grd2.addColorStop(0, 'rgba(150, 200, 255, 0.7)');
+                    grd2.addColorStop(1, 'rgba(150, 200, 255, 0)');
+                    ctx.fillStyle = grd2;
+                    ctx.beginPath();
+                    ctx.moveTo(20, -16);
+                    //10 * (Math.random() - 0.5), 10 * (Math.random() - 0.5)
+                    ctx.lineTo(20, 16);
+                    ctx.lineTo(35 + 43 * Math.random(), 0);
+                    ctx.fill();
+                }
+                ctx.restore()
+                ctx.save()
+                ctx.translate(this.position.x, this.position.y)
+                ctx.rotate(Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x))
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                ctx.fillStyle = m.bodyGradient
+                ctx.fill();
+                ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.beginPath(); //eye
+                ctx.arc(15, 0, 3.5, 0, 2 * Math.PI);
+                ctx.fillStyle = `rgba(255, 0, 0, ${this.health * this.health})`;
+                ctx.fill()
+                ctx.restore()
+                //set direction to turn to fire
+                if (this.seePlayer.recall && !(simulation.cycle % 30)) {
+                    this.seePlayer.recall -= 10;
+                    this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                    spawn.sniperBullet(this.position.x, this.position.y, 7 + Math.ceil(this.radius / 15), 5);
+                    const v = 10 + 8 * simulation.accelScale;
+                    Matter.Body.setVelocity(mob[mob.length - 1], {
+                        x: this.velocity.x + this.fireDir.x * v,
+                        y: this.velocity.y + this.fireDir.y * v
+                    });
+                }
+            };
+        }
+        const laserEM = function (x, y, radius = 30) {
+            mobs.spawn(x, y, 8, radius, '#00000000');
+            let me = mob[mob.length - 1];
+            me.accelMag = 0.0003
+            me.stroke = 'transparent';
+            //me.isBoss = true;
+            me.frictionStatic = 0;
+            me.friction = 0;
+            me.seeAtDistance2 = 20000000 //14000 vision range
+            me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position);
+            Matter.Body.rotate(me, Math.random() * Math.PI * 2);
+            me.showHealthBar = false
+            Matter.Body.setDensity(me, 0.01)
+            me.seePlayerFreq = 0
+            me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position;
+            me.swordDamage = 0.025 * simulation.dmgScale
+            me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob | cat.mobBullet
+            me.repulsionRange = 50000;
+            me.do = function () {
+                this.repulsion();
+                this.search()
+                if (this.seePlayer.recall) {
+                    const h = this.radius * 0.3;
+                    const w = this.radius * 2;
+                    const x = this.position.x - w / 2;
+                    const y = this.position.y - w * 0.7;
+                    ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                    ctx.fillRect(x, y, w, h);
+                    ctx.fillStyle = "rgba(0,255,255,0.7)";
+                    ctx.fillRect(x, y, w * this.health, h);
+                }
+                if (this.health < 1) {
+                    this.health += 0.0005; //regen
+                }
+                if (this.seePlayer.recall) {
+                    this.laserSword(this.position, Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x), 500 * Math.random());
+                }
+                ctx.save()
+                ctx.translate(this.position.x, this.position.y)
+                ctx.rotate(Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x))
+                if (this.seePlayer.recall > 0 && this.distanceToPlayer2() > this.repulsionRange) {
+                    var grd2 = ctx.createLinearGradient(0, 0, -150, 0);
+                    // grd2.addColorStop(0, 'rgba(255, 255, 155, 0.8)');
+                    // grd2.addColorStop(1, 'rgba(255, 200, 0, 0.1)');
+                    grd2.addColorStop(0, 'rgba(150, 200, 255, 0.7)');
+                    grd2.addColorStop(1, 'rgba(150, 200, 255, 0)');
+                    ctx.fillStyle = grd2;
+                    ctx.beginPath();
+                    ctx.moveTo(-18, -25);
+                    //10 * (Math.random() - 0.5), 10 * (Math.random() - 0.5)
+                    ctx.lineTo(-18, 25);
+                    ctx.lineTo(-50 - 100 * Math.random(), 0);
+                    ctx.fill();
+                } else if (this.distanceToPlayer2() < this.repulsionRange) {
+                    var grd2 = ctx.createLinearGradient(0, 0, 80, 0);
+                    grd2.addColorStop(0, 'rgba(150, 200, 255, 0.7)');
+                    grd2.addColorStop(1, 'rgba(150, 200, 255, 0)');
+                    ctx.fillStyle = grd2;
+                    ctx.beginPath();
+                    ctx.moveTo(20, -16);
+                    //10 * (Math.random() - 0.5), 10 * (Math.random() - 0.5)
+                    ctx.lineTo(20, 16);
+                    ctx.lineTo(35 + 43 * Math.random(), 0);
+                    ctx.fill();
+                }
+                ctx.restore()
+                ctx.save()
+                ctx.translate(this.position.x, this.position.y)
+                ctx.rotate(Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x))
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                ctx.fillStyle = m.bodyGradient
+                ctx.fill();
+                ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.beginPath(); //eye
+                ctx.arc(15, 0, 3.5, 0, 2 * Math.PI);
+                ctx.fillStyle = `rgba(255, 0, 0, ${this.health * this.health})`;
+                ctx.fill()
+                ctx.restore()
+                this.seePlayerCheck();
+                this.attraction();
+            }
+            me.laserSword = function (where, angle, length) {
+                const sub = Vector.sub(this.seePlayer.position, this.position)
+                const unit = Vector.normalise(sub)
+                const path = [{
+                    x: this.position.x + 20 * Math.cos(this.angle),
+                    y: this.position.y + 20 * Math.sin(this.angle)
+                },
+                {
+                    x: this.position.x + (120 + 400) * Math.sqrt(Math.random()) * Math.cos(this.angle),
+                    y: this.position.y + (120 + 400) * Math.sqrt(Math.random()) * Math.sin(this.angle)
+                }
+                ];
+                this.seePlayer.recall -= 3;
+                const vertexCollision = function (v1, v1End, domain) {
+                    for (let i = 0; i < domain.length; ++i) {
+                        let vertices = domain[i].vertices;
+                        const len = vertices.length - 1;
+                        for (let j = 0; j < len; j++) {
+                            results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                            if (results.onLine1 && results.onLine2) {
+                                const dx = v1.x - results.x;
+                                const dy = v1.y - results.y;
+                                const dist2 = dx * dx + dy * dy;
+                                if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: vertices[j], v2: vertices[j + 1] };
+                            }
+                        }
+                        results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                        if (results.onLine1 && results.onLine2) {
+                            const dx = v1.x - results.x;
+                            const dy = v1.y - results.y;
+                            const dist2 = dx * dx + dy * dy;
+                            if (dist2 < best.dist2) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: vertices[0], v2: vertices[len] };
+                        }
+                    }
+                };
+                best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
+                const look = { x: where.x + length * Math.cos(angle), y: where.y + length * Math.sin(angle) };
+                // vertexCollision(where, look, body); // vertexCollision(where, look, mob);
+                vertexCollision(where, look, map);
+                if (!m.isCloak) vertexCollision(where, look, [player]);
+                if (best.who && (best.who === player) && m.immuneCycle < m.cycle) {
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for an extra second
+                    m.damage(this.swordDamage);
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: best.x,
+                        y: best.y,
+                        radius: this.swordDamage * 1500,
+                        color: "rgba(80,0,255,0.5)",
+                        time: 20
+                    });
+                }
+                if (best.dist2 === Infinity) best = look;
+                ctx.beginPath(); //draw beam
+                ctx.moveTo(where.x, where.y);
+                ctx.lineTo(best.x, best.y);
+                ctx.strokeStyle = "#50f";
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+                ctx.stroke(); // Draw it
+                ctx.setLineDash([]);
+                ctx.lineWidth = 20;
+                ctx.strokeStyle = "rgba(80,0,255,0.07)";
+                ctx.stroke(); // Draw it
+
+                const Dx = Math.cos(Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x));
+                const Dy = Math.sin(Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x));
+                let xElec = this.position.x + 40 * Dx;
+                let yElec = this.position.y + 40 * Dy;
+                ctx.beginPath();
+                ctx.moveTo(xElec, yElec);
+                const step = 40
+                for (let i = 0; i < 6; i++) {
+                    xElec += step * (Dx + 1.5 * (Math.random() - 0.5))
+                    yElec += step * (Dy + 1.5 * (Math.random() - 0.5))
+                    ctx.lineTo(xElec, yElec);
+                }
+                ctx.strokeStyle = "#50f";
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+                ctx.stroke(); // Draw it
+                ctx.setLineDash([]);
+            }
+        };
+        // if(powerUps.pass == undefined) {
+        // let pass = {pass:true, activated:false};
+        // Object.assign(powerUps, pass)
+        // }
+        // const loadOut = {
+        // loadOut: {
+        // name: "loadOut",
+        // color: "#000000", //"hsl(248,100%,65%)",
+        // size() { return 40 },
+        // effect() {
+        // if(m.alive) {
+        // // tech.damage *= 2;
+        // let text = "";
+        // if (!tech.isSuperDeterminism) { text += `<div class='cancel' onclick='powerUps.endDraft("buff",true)'>${tech.isCancelTech ? "?":"✕"}</div>`; };
+        // text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>Blessing Of Sal</h3>`;
+        // text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(1)"><div class="grid-title"><div class="circle-grid tech" style="background-image: linear-gradient(lightyellow, yellow);"></div> &nbsp; Speed Boost</div>Increase speed by 5%</div>`;
+        // text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(2)"><div class="grid-title"><div class="circle-grid tech" style="background-image: linear-gradient(gray, lightgray);"></div> &nbsp; Defense Boost</div>Reduce damage by 5%</div>`;
+        // text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(3)"><div class="grid-title"><div class="circle-grid tech" style="background-image: linear-gradient(red, orange);"></div> &nbsp; Damage Boost</div>Increase damage by 10%</div>`;
+        // if(powerUps.pass == true) {
+        // text += `<div disabled class="choose-grid-module" onclick="powerUps.loadOut.choose(4)"><div class="grid-title"><div class="circle-grid tech" style="background-image: radial-gradient(black, gray);"></div> &nbsp; Blade of Sal</div>Press Shift to summon the <b style="color: ${m.eyeFillColor};">Mythical</b> <em style="color: lightblue; text-shadow: ${m.eyeFillColor} 0px 0 5px;">Las Slayer</em><div>Drains <strong class='color-f'>Energy</strong></div></div>`;
+        // }
+        // document.getElementById("choose-grid").innerHTML = text;
+        // powerUps.showDraft();//no known bugs ig idk, im keep this as it is
+        // }
+        // }, 
+        // choose(index) {
+        // if(index == 1) {
+        // tech.squirrelFx += 0.25; 
+        // tech.squirrelJump += 0.1; 
+        // m.setMovement(); 
+        // powerUps.endDraft("buff");
+        // } else if(index == 2) {
+        // simulation.dmgScale *= 0.95; 
+        // powerUps.endDraft("buff");
+        // } else if(index == 3) {
+        // m.dmgScale *= 1.1;
+        // powerUps.endDraft("buff");
+        // } else if(index == 4) { //sword!
+        // powerUps.pass = false;
+        // addEventListener("keydown", function(event) {
+        // if(event.key == "Shift" && powerUps.activated == false) {
+        // sword()
+        // powerUps.activated = true;
+        // } else if(event.key == "Shift" && powerUps.activated == true) {
+        // for(let i = 0; i < mob.length; i++) {
+        // if(mob[i].isSword) {
+        // mob[i].death()
+        // }
+        // powerUps.activated = false;
+        // }
+        // }
+        // })
+        // powerUps.endDraft("buff");
+        // }
+        // }
+        // }
+        // }
+        // Object.assign(powerUps, loadOut)
+        const restoreBoss = function (x, y, radius = 30) { //ATTENTION LANDGREEN: RESTOREBOSS WILL NOT DROP ANY TECH, NOR WILL THERE BE ANY IN THE MAP. DO NOT ADD ANY TECH TO MY MAP
+            mobs.spawn(x, y, 8, radius, 'transparent');
+            let me = mob[mob.length - 1];
+            me.stroke = 'transparent';
+            let aim = '#FFFFFF';
+            me.accelMag = 0.0006
+            me.isBoss = true;
+            me.restoreBoss = true;
+            me.frictionStatic = 0;
+            me.friction = 0;
+            me.seeAtDistance2 = 20000000 //14000 vision range
+            me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
+            Matter.Body.rotate(me, Math.random() * Math.PI * 2);
+            me.showHealthBar = false
+            Matter.Body.setDensity(me, m.maxHealth / (simulation.difficulty < 5 ? 0.5 : simulation.difficulty / simulation.difficultyMode))
+            me.seePlayerFreq = 0
+            me.swordDamage = 0.025 * simulation.dmgScale
+            me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob | cat.mobBullet
+            me.repulsionRange = 500000;
+            me.isDropPowerUp = false;
+            //Matter.Body.setVelocity(me, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) });
+            let index = 0;
+            me.curlRange = 10000; //xd
+            me.fieldPhase = 0;
+            me.energy = 1;
+            me.maxEnergy = 1;
+            me.immuneCycle = 0;
+            me.cycle = 0;
+            // me.onDeath = function() {
+            // powerUps.spawn(this.position.x, this.position.y, "loadOut");
+            // }
+            for (let i = 0; i < b.totalBots(); i++) { //normal orbitals look too boring, so...
+                orbital(me, 190 + 130 * tech.isOrbitBotUpgrade, (index / b.totalBots()) * 2 * Math.PI, 0.05, Math.floor(Math.sin(simulation.cycle / 10) * 100)); //who, radius, phase, speed
+                index++;
+            }
+            me.do = function () {
+                if (this.position.x > -11500 && this.position.x < 10510) {// doesn't get one tapped by the elevator
+                    me.collisionFilter.mask = cat.bullet | cat.player | cat.map | cat.mob | cat.mobBullet;
+                } else {
+                    me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob | cat.mobBullet;
+                }
+                this.cycle++;
+                if ((Matter.Query.ray(map, player.position, this.position).length === 0) == false) {
+                    this.seePlayer.recall = null;
+                }
+                if (this.seePlayer.recall) { //fields
+                    if (m.fieldMode == 0 && this.distanceToPlayer2() < 200000) {
+                        if (Vector.magnitude(Vector.sub(m.pos, this.position)) - this.radius < m.fieldRange) {
+                            this.pushM();
+                        }
+                        this.drawField();
+                        // this.repel(); 
+                    }
+                    if (m.fieldMode == 2) {
+                        if (this.distanceToPlayer2() < 200000) {
+                            if (Vector.magnitude(Vector.sub(m.pos, this.position)) - this.radius < m.fieldRange) {
+                                this.pushM();
+                            }
+                            this.drawField()
+                        }
+                        if (tech.isPerfectBrake) { //cap player and bullet speed around restoreBoss //mobs basically can't hit you when you have this, so to make it fair...
+                            const wave = Math.cos(m.cycle * 0.022);
+                            const range = 200 + 140 * wave + 150 * m.energy
+                            const distance = Vector.magnitude(Vector.sub(this.position, m.pos))
+                            const cap = this.immuneCycle > this.cycle ? 8 : 4
+                            if (distance < range) {
+                                if (player.speed > cap && Vector.dot(player.velocity, Vector.sub(this.position, m.pos)) > 0) { // if velocity is directed towards player
+                                    Matter.Body.setVelocity(player, Vector.mult(Vector.normalise(player.velocity), cap)); //set velocity to cap, but keep the direction
+                                }
+                            }
+                            for (let i = 0; i < bullet.length; i++) {
+                                const distance2 = Vector.magnitude(Vector.sub(this.position, bullet[i].position))
+                                if (distance2 < range) {
+                                    if (bullet[i].speed > cap && Vector.dot(bullet[i].velocity, Vector.sub(this.position, bullet[i].position)) > 0) { // if velocity is directed towards player
+                                        Matter.Body.setVelocity(bullet[i], Vector.mult(Vector.normalise(bullet[i].velocity), cap)); //set velocity to cap, but keep the direction
+                                    }
+                                }
+                            }
+                            ctx.beginPath();
+                            ctx.arc(this.position.x, this.position.y, range, 0, 2 * Math.PI);
+                            ctx.fillStyle = "rgba(0,0,0,0.08)";
+                            ctx.fill();
+                        }
+                    }
+                    if (m.fieldMode == 5 && this.distanceToPlayer2() < 200000) {
+                        this.laserSword(this.position, Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x), 500 * Math.random());
+                    }
+                    if (m.fieldMode == 9) {
+                        if (this.distanceToPlayer2() < 300000) {
+                            this.teleportAway() //blink but reversed 
+                        }
+                    }
+                }
+                if (m.immuneCycle > m.cycle) {
+                    me.damageReduction = 0;
+                } else {
+                    me.damageReduction = 1;
+                }
+                this.repulsion();
+                this.seePlayerCheck();
+                this.attraction();
+                this.lostPlayer();
+                if (this.speed > 10) { // speed cap
+                    Matter.Body.setVelocity(this, {
+                        x: this.velocity.x * 0.99,
+                        y: this.velocity.y * 0.99
+                    });
+                }
+                if (this.seePlayer.recall) {
+                    const angle = Math.atan2(this.position.y - player.position.y, this.position.x - player.position.x);
+                    let positionR = { x: 500 * Math.cos(angle) + mob[0].position.x, y: 500 * Math.sin(angle) + mob[0].position.y };
+                    let isWall = (Matter.Query.ray(map, mob[0].position, positionR).length === 0);
+                    let isBlock = (Matter.Query.ray(body, mob[0].position, positionR).length === 0);
+                    if (isWall == false || isBlock == false) {
+                        this.force.x -= Math.cos(angle) * 10;
+                        this.force.y -= Math.sin(angle) * 10;
+                    }
+                }
+                if (this.seePlayer.recall) {
+                    const angle = Math.atan2(this.position.y - player.position.y, this.position.x - player.position.x) - Math.PI * 1.5;
+                    let positionR = { x: 5000 * Math.cos(angle) + mob[0].position.x, y: 5000 * Math.sin(angle) + mob[0].position.y };
+                    let isBullet = (Matter.Query.ray(bullet, mob[0].position, positionR).length === 0);
+                    if (isBullet == false) {
+                        this.force.x -= Math.cos(angle) * 30;
+                        this.force.y -= Math.sin(angle) * 30;
+                    }
+                }
+                if (this.seePlayer.recall) {
+                    const angle = Math.atan2(this.position.y - player.position.y, this.position.x - player.position.x) - Math.PI * 2.5;
+                    let positionR = { x: 5000 * Math.cos(angle) + mob[0].position.x, y: 5000 * Math.sin(angle) + mob[0].position.y };
+                    let isBullet = (Matter.Query.ray(bullet, mob[0].position, positionR).length === 0);
+                    if (isBullet == false) {
+                        this.force.x -= Math.cos(angle) * 30;
+                        this.force.y -= Math.sin(angle) * 30;
+                    }
+                }
+                if (this.seePlayer.recall) {
+                    const h = this.radius * 0.3;
+                    const w = this.radius * 2;
+                    const x = this.position.x - w / 2;
+                    const y = this.position.y - w * 0.7;
+                    ctx.fillStyle = "rgba(10, 10, 10, 0.3)";
+                    ctx.fillRect(x, y, w, h);
+                    ctx.fillStyle = "rgba(0,0,0,0.7)";
+                    ctx.fillRect(x, y, w * this.energy, h);
+                }
+                if (this.health < 1) {
+                    this.health += 0.0001; //regen
+                } else if (this.health < 1) {
+                    this.health += 0.00005; //reduced regen
+                }
+                if (this.energy < 0) {//energy thingy
+                    this.energy = 0;
+                } else if (this.energy > this.maxEnergy) {
+                    this.energy = this.maxEnergy;
+                } else if (this.energy < this.maxEnergy) {
+                    this.energy += 0.001;
+                }
+                ctx.save()
+                ctx.translate(this.position.x, this.position.y)
+                ctx.rotate(Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x))
+                if (this.seePlayer.recall > 0 && this.distanceToPlayer2() > this.repulsionRange) {
+                    ctx.globalAlpha = (this.immuneCycle < this.cycle) ? 1 : 0.5
+                    var grd2 = ctx.createLinearGradient(0, 0, -150, 0);
+                    // grd2.addColorStop(0, 'rgba(255, 255, 155, 0.8)');
+                    // grd2.addColorStop(1, 'rgba(255, 200, 0, 0.1)');
+                    grd2.addColorStop(0, 'rgba(150, 200, 255, 0.7)');
+                    grd2.addColorStop(1, 'rgba(150, 200, 255, 0)');
+                    ctx.fillStyle = grd2;
+                    ctx.beginPath();
+                    ctx.moveTo(-18, -25);
+                    //10 * (Math.random() - 0.5), 10 * (Math.random() - 0.5)
+                    ctx.lineTo(-18, 25);
+                    ctx.lineTo(-50 - 100 * Math.random(), 0);
+                    ctx.fill();
+                } else if (this.distanceToPlayer2() < this.repulsionRange) {
+                    ctx.globalAlpha = (this.immuneCycle < this.cycle) ? 1 : 0.5
+                    var grd2 = ctx.createLinearGradient(0, 0, 80, 0);
+                    grd2.addColorStop(0, 'rgba(150, 200, 255, 0.7)');
+                    grd2.addColorStop(1, 'rgba(150, 200, 255, 0)');
+                    ctx.fillStyle = grd2;
+                    ctx.beginPath();
+                    ctx.moveTo(20, -16);
+                    //10 * (Math.random() - 0.5), 10 * (Math.random() - 0.5)
+                    ctx.lineTo(20, 16);
+                    ctx.lineTo(35 + 43 * Math.random(), 0);
+                    ctx.fill();
+                }
+                ctx.restore()
+                ctx.save()
+                ctx.globalAlpha = (this.immuneCycle < this.cycle) ? 1 : 0.5
+                ctx.translate(this.position.x, this.position.y)
+                ctx.rotate(Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x))
+                if (this.health > 0.5) {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                    ctx.fillStyle = m.bodyGradient
+                    ctx.fill();
+                    ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                    ctx.strokeStyle = "#333";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.beginPath(); //eye
+                    ctx.arc(15, 0, 3.5, 0, 2 * Math.PI);
+                    ctx.fillStyle = `rgba(255, 0, 0, ${this.health * this.health})`;
+                    ctx.fill()
+                    ctx.restore()
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                    ctx.fillStyle = m.bodyGradient
+                    ctx.fill();
+                    ctx.strokeStyle = "#333";
+                    ctx.lineWidth = 2;
+                    if (!(Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x) > -Math.PI / 2 && Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x) < Math.PI / 2)) ctx.scale(1, -1); //here is the flip
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(2, -6, 7, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(25, -6, 7, 0.25 * Math.PI, 1.6 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(2, -10, 9, 1.25 * Math.PI, 1.75 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(25, -10, 9, 1.25 * Math.PI, 1.4 * Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(18, 13, 10, 0, 2 * Math.PI);
+                    ctx.fillStyle = m.bodyGradient;
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(18, 13, 6, 0, 2 * Math.PI);
+                    ctx.fillStyle = "#555";
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(3, -6, 3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(26, -6, 3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                }
+                if (m.fieldMode == 1) { //render over I think
+                    if (this.energy > 0.1) {
+                        this.harmonic3Phase();
+                    }
+                }
+                if (m.fieldMode == 7) {
+                    this.locatePlayer();
+                }
+                if (m.fieldMode == 8) {
+                    me.pilotWave()
+                }
+                if (m.fieldMode == 3) {
+                    const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                    me.damageReduction = 0.5;
+                    me.accelMag = 0.0012;
+                    if (!(simulation.cycle % Math.floor(100 + 90 * Math.random() * simulation.CDScale))) {
+                        this.diveAttack()
+                    }
+                    ctx.beginPath();
+                    ctx.arc(this.position.x, this.position.y, 1000, 0, 2 * Math.PI);
+                    ctx.fillStyle = "#f5f5ff";
+                    ctx.strokeStyle = "#f5f5ff55";
+                    ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
+                    ctx.globalCompositeOperation = "difference";
+                    ctx.fill();
+                    ctx.globalCompositeOperation = "source-over";
+                    ctx.stroke()
+                    ctx.setLineDash([]);
+                } else {
+                    me.accelMag = 0.0006;
+                }
+                if (this.immuneCycle > this.cycle) {
+                    this.damageReduction = 0;
+                } else {
+                    if (m.fieldMode == 3) {
+                        this.damageReduction = 0.5;
+                    } else {
+                        this.damageReduction = 1;
+                    }
+                }
+                if (m.fieldMode == 6) {
+                    this.timeAttack();
+                    ctx.globalCompositeOperation = "saturation"
+                    ctx.fillStyle = "#ccc";
+                    ctx.fillRect(-50000, -50000, 100000, 100000)
+                    ctx.globalCompositeOperation = "source-over"
+                    // stop time
+                    // m.isBodiesAsleep = true;
+                    // function sleep(who) {
+                    // for (let i = 0, len = who.length; i < len; ++i) {
+                    // if (!who[i].isSleeping) {
+                    // who[i].storeVelocity = who[i].velocity
+                    // who[i].storeAngularVelocity = who[i].angularVelocity
+                    // }
+                    // Matter.Sleeping.set(who[i], true)
+                    // }
+                    // }
+                    // sleep(mob);
+                    // sleep(body);
+                    // sleep(bullet);
+                    // sleep([player]);
+                    // simulation.cycle--;
+                }
+                if (this.seePlayer.recall) { //fields
+                    this.gun()
+                }
+            }
+            me.laserSword = function (where, angle, length) {
+                const sub = Vector.sub(this.seePlayer.position, this.position)
+                const unit = Vector.normalise(sub)
+                const path = [{
+                    x: this.position.x + 20 * Math.cos(this.angle),
+                    y: this.position.y + 20 * Math.sin(this.angle)
+                },
+                {
+                    x: this.position.x + (120 + 400) * Math.sqrt(Math.random()) * Math.cos(this.angle),
+                    y: this.position.y + (120 + 400) * Math.sqrt(Math.random()) * Math.sin(this.angle)
+                }
+                ];
+                const vertexCollision = function (v1, v1End, domain) {
+                    for (let i = 0; i < domain.length; ++i) {
+                        let vertices = domain[i].vertices;
+                        const len = vertices.length - 1;
+                        for (let j = 0; j < len; j++) {
+                            results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                            if (results.onLine1 && results.onLine2) {
+                                const dx = v1.x - results.x;
+                                const dy = v1.y - results.y;
+                                const dist2 = dx * dx + dy * dy;
+                                if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: vertices[j], v2: vertices[j + 1] };
+                            }
+                        }
+                        results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                        if (results.onLine1 && results.onLine2) {
+                            const dx = v1.x - results.x;
+                            const dy = v1.y - results.y;
+                            const dist2 = dx * dx + dy * dy;
+                            if (dist2 < best.dist2) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: vertices[0], v2: vertices[len] };
+                        }
+                    }
+                };
+                best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
+                const look = { x: where.x + length * Math.cos(angle), y: where.y + length * Math.sin(angle) };
+                // vertexCollision(where, look, body); // vertexCollision(where, look, mob);
+                vertexCollision(where, look, map);
+                if (!m.isCloak) vertexCollision(where, look, [player]);
+                if (best.who && (best.who === player) && m.immuneCycle < m.cycle) {
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for an extra second
+                    m.damage(this.swordDamage);
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: best.x,
+                        y: best.y,
+                        radius: this.swordDamage * 1500,
+                        color: "rgba(0,0,0,0.5)",
+                        time: 20
+                    });
+                }
+                if (best.dist2 === Infinity) best = look;
+                ctx.beginPath(); //draw beam
+                ctx.moveTo(where.x, where.y);
+                ctx.lineTo(best.x, best.y);
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+                ctx.stroke(); // Draw it
+                ctx.setLineDash([]);
+                ctx.lineWidth = 20;
+                ctx.strokeStyle = "rgba(0,0,0,0.07)";
+                ctx.stroke(); // Draw it
+
+                const Dx = Math.cos(Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x));
+                const Dy = Math.sin(Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x));
+                let xElec = this.position.x + 40 * Dx;
+                let yElec = this.position.y + 40 * Dy;
+                ctx.beginPath();
+                ctx.moveTo(xElec, yElec);
+                const step = 40
+                for (let i = 0; i < 6; i++) {
+                    xElec += step * (Dx + 1.5 * (Math.random() - 0.5))
+                    yElec += step * (Dy + 1.5 * (Math.random() - 0.5))
+                    ctx.lineTo(xElec, yElec);
+                }
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+                ctx.stroke(); // Draw it
+                ctx.setLineDash([]);
+            }
+            me.drawField = function () {
+                if (m.fieldMode != 2) {
+                    const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x)
+                    const range = m.fieldRange;
+                    ctx.save()
+                    ctx.beginPath();
+                    ctx.fillStyle = "rgba(0,0,0," + Math.min(0.6, (0.04 + m.energy * (0.1 + 0.11 * Math.random()))) + ")";
+                    ctx.arc(this.position.x, this.position.y, range, angle - Math.PI * m.fieldArc, angle + Math.PI * m.fieldArc, false);
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    let eye = 13;
+                    if (m.fieldMode == 2) {
+                        eye = 30
+                    }
+                    let aMag = 0.75 * Math.PI * m.fieldArc
+                    let a = angle + aMag
+                    let cp1x = this.position.x + 0.6 * range * Math.cos(a)
+                    let cp1y = this.position.y + 0.6 * range * Math.sin(a)
+                    ctx.quadraticCurveTo(cp1x, cp1y, this.position.x + eye * Math.cos(angle), this.position.y + eye * Math.sin(angle))
+                    a = angle - aMag
+                    cp1x = this.position.x + 0.6 * range * Math.cos(a)
+                    cp1y = this.position.y + 0.6 * range * Math.sin(a)
+                    ctx.quadraticCurveTo(cp1x, cp1y, this.position.x + 1 * range * Math.cos(angle - Math.PI * m.fieldArc), this.position.y + 1 * range * Math.sin(angle - Math.PI * m.fieldArc))
+                    ctx.fill();
+                    // ctx.lineTo(this.position.x + eye * Math.cos(angle), this.position.y + eye * Math.sin(angle));
+
+                    //draw random lines in field for cool effect
+                    let offAngle = angle + 1.7 * Math.PI * m.fieldArc * (Math.random() - 0.5);
+                    ctx.beginPath();
+                    eye = 15;
+                    ctx.moveTo(this.position.x + eye * Math.cos(angle), this.position.y + eye * Math.sin(angle));
+                    ctx.lineTo(this.position.x + range * Math.cos(offAngle), this.position.y + range * Math.sin(offAngle));
+                    ctx.strokeStyle = "rgba(0,0,0,0.6)";
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    ctx.restore()
+                } else {
+                    ctx.save()
+                    ctx.beginPath();
+                    const wave = Math.cos(m.cycle * 0.022);
+                    const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x)
+                    ctx.arc(this.position.x, this.position.y, m.fieldRange, angle - Math.PI * m.fieldArc, angle + Math.PI * m.fieldArc, false);
+                    ctx.lineWidth = 2.5 - 1.5 * wave;
+                    ctx.stroke();
+                    const curve = 0.57 + 0.04 * wave
+                    const aMag = (1 - curve * 1.2) * Math.PI * m.fieldArc
+                    let a = angle + aMag
+                    let cp1x = this.position.x + curve * m.fieldRange * Math.cos(a)
+                    let cp1y = this.position.y + curve * m.fieldRange * Math.sin(a)
+                    ctx.quadraticCurveTo(cp1x, cp1y, this.position.x + 30 * Math.cos(angle), this.position.y + 30 * Math.sin(angle))
+                    a = angle - aMag
+                    cp1x = this.position.x + curve * m.fieldRange * Math.cos(a)
+                    cp1y = this.position.y + curve * m.fieldRange * Math.sin(a)
+                    ctx.quadraticCurveTo(cp1x, cp1y, this.position.x + 1 * m.fieldRange * Math.cos(angle - Math.PI * m.fieldArc), this.position.y + 1 * m.fieldRange * Math.sin(angle - Math.PI * m.fieldArc))
+                    ctx.fill();
+                    ctx.restore()
+                }
+            }
+            me.pushM = function () {
+                const unit = Vector.normalise(Vector.sub(this.position, player.position))
+                if (tech.blockDmg) {
+                    Matter.Body.setVelocity(player, { x: 0.5 * player.velocity.x, y: 0.5 * player.velocity.y });
+                    //draw electricity
+                    const step = 40
+                    ctx.beginPath();
+                    for (let i = 0, len = 0.8 * tech.blockDmg; i < len; i++) {
+                        let x = this.position.x - 20 * unit.x;
+                        let y = this.position.y - 20 * unit.y;
+                        ctx.moveTo(x, y);
+                        for (let i = 0; i < 8; i++) {
+                            x += step * (-unit.x + 1.5 * (Math.random() - 0.5))
+                            y += step * (-unit.y + 1.5 * (Math.random() - 0.5))
+                            ctx.lineTo(x, y);
+                        }
+                    }
+                    if (m.immuneCycle < m.cycle) {
+                        m.immuneCycle = m.cycle + m.collisionImmuneCycles
+                        m.damage(0.025 * simulation.dmgScale)
+                    }
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = "#000";
+                    ctx.stroke();
+                }
+                const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, player.mass))); // masses above 12 can start to overcome the push back //idk
+                Matter.Body.setVelocity(player, {
+                    x: this.velocity.x - (15 * unit.x) / massRoot,
+                    y: this.velocity.y - (15 * unit.y) / massRoot
+                });
+            }
+            me.diveAttack = function () {
+                const forceMag = this.accelMag * this.mass;
+                const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                this.force.x += 150 * forceMag * Math.cos(angle);
+                this.force.y += 150 * forceMag * Math.sin(angle);
+                ctx.beginPath()
+                ctx.moveTo(this.position.x + Math.sin(angle), this.position.y + Math.cos(angle))
+                ctx.lineTo(this.seePlayer.position.x, this.seePlayer.position.y)
+                aim = '#000000';
+                ctx.stroke()
+            }
+            me.phase = 2 * Math.PI * Math.random();
+            me.index2 = 0;
+            me.pilotWave = function () {
+                const rotate = this.cycle * 0.008;
+                this.fieldPhase += 0.002;
+                const off1 = 1 + 0.01 * Math.sin(this.fieldPhase);
+                const off2 = 1 - 0.01 * Math.cos(this.fieldPhase);
+                ctx.save()
+                ctx.beginPath();
+                ctx.ellipse(player.position.x, player.position.y, 1.2 * 200 * off1, 1.2 * 150 * off2, rotate, 0, 2 * Math.PI);
+                ctx.globalCompositeOperation = "exclusion"; //"exclusion" "difference";
+                ctx.fillStyle = "#ffffff"; //"#eef";
+                ctx.fill();
+                ctx.globalCompositeOperation = "source-over";
+                ctx.beginPath();
+                ctx.ellipse(player.position.x, player.position.y, 1.2 * 200 * off1, 1.2 * 150 * off2, rotate, 0, 2 * Math.PI * m.energy / m.maxEnergy);
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.restore()
+                const range = this.curlRange / 15, mag = -50;
+                const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                const applyCurl = function (center, array, isAntiGravity = true) {
+                    for (let i = 0; i < array.length; ++i) {
+                        if (!array[i].isNotHoldable) {
+                            const sub = Vector.sub(center, array[i].position)
+                            const radius2 = Vector.magnitudeSquared(sub);
+
+                            //if too close, like center mob or shield, don't curl   // if too far don't curl
+                            if (radius2 < range * range && radius2 > 10000) {
+                                const curlVector = Vector.mult(Vector.perp(Vector.normalise(sub)), mag)
+                                //apply curl force
+                                if (array[i].isMobBullet) {
+                                    Matter.Body.setVelocity(array[i], {
+                                        x: array[i].velocity.x * 0.97 + curlVector.x * 0.06 - (Math.cos(angle) * 5),
+                                        y: array[i].velocity.y * 0.97 + curlVector.y * 0.06 - (Math.sin(angle) * 5)
+                                    })
+                                } else {
+                                    Matter.Body.setVelocity(array[i], {
+                                        x: array[i].velocity.x * 0.94 + curlVector.x * 0.06 - (Math.cos(angle) * 5),
+                                        y: array[i].velocity.y * 0.94 + curlVector.y * 0.06 - (Math.sin(angle) * 5)
+                                    })
+                                }
+                                if (isAntiGravity) array[i].force.y -= 0.8 * simulation.g * array[i].mass
+                            }
+                        }
+                    }
+                }
+                applyCurl(this.position, [player]);
+            }
+            me.teleportAway = function () {//hehe
+                ctx.beginPath();
+                ctx.moveTo(this.position.x, this.position.y);
+                if (this.seePlayer.recall && !(simulation.cycle % 17)) {
+                    const dist = Vector.sub(this.position, this.seePlayer.position);
+                    const distMag = Vector.magnitude(dist);
+                    const unitVector = Vector.normalise(dist);
+                    const rando = (Math.random() - 0.5) * 50;
+                    if (distMag < 20000) {
+                        Matter.Body.translate(this, Vector.mult(unitVector, distMag + rando));
+                    } else {
+                        Matter.Body.translate(this, Vector.mult(unitVector, 20000 + rando));
+                    }
+                }
+                ctx.lineTo(this.position.x, this.position.y);
+                ctx.lineWidth = radius * 2;
+                ctx.strokeStyle = "rgba(0,0,0,0.08)";
+                ctx.stroke();
+                if (!this.seePlayer.yes) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.position.x, this.position.y);
+                    if (this.seePlayer.recall && !(simulation.cycle % 17)) {
+                        const dist = Vector.sub(this.seePlayer.position, this.position);
+                        const distMag = Vector.magnitude(dist);
+                        const unitVector = Vector.normalise(dist);
+                        const rando = (Math.random() - 0.5) * 50;
+                        if (distMag < 200000) {
+                            Matter.Body.translate(this, Vector.mult(unitVector, distMag + rando));
+                        } else {
+                            Matter.Body.translate(this, Vector.mult(unitVector, 200000 + rando));
+                        }
+                    }
+                    ctx.lineTo(this.position.x, this.position.y);
+                    ctx.lineWidth = radius * 2;
+                    ctx.strokeStyle = "rgba(0,0,0,0.08)";
+                    ctx.stroke();
+                }
+            }
+            me.timeAttack = function () {
+                if (this.seePlayer.recall && !(simulation.cycle % 30) || this.distanceToPlayer2() < 300) {
+                    requestAnimationFrame(() => {
+                        simulation.timePlayerSkip(45)
+                        simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
+                    }); //wrapping in animation frame prevents errors, probably
+                }
+            }
+            me.harmonic3Phase = function () { //normal standard 3 different 2-d circles
+                if (tech.harmonics === 2) {
+                    const fieldRange1 = (0.75 + 0.3 * Math.cos(m.cycle / 23)) * m.fieldRange * m.harmonicRadius
+                    const fieldRange2 = (0.68 + 0.37 * Math.cos(m.cycle / 37)) * m.fieldRange * m.harmonicRadius
+                    const fieldRange3 = (0.7 + 0.35 * Math.cos(m.cycle / 47)) * m.fieldRange * m.harmonicRadius
+                    const netfieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
+                    ctx.fillStyle = "rgba(0,0,0," + Math.min(0.6, (0.04 + m.energy * (0.1 + 0.11 * Math.random()))) + ")";
+                    ctx.beginPath();
+                    ctx.arc(this.position.x, this.position.y, fieldRange1, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(this.position.x, this.position.y, fieldRange2, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(this.position.x, this.position.y, fieldRange3, 0, 2 * Math.PI);
+                    ctx.fill();
+                    //360 block
+                    if (Vector.magnitude(Vector.sub(player.position, this.position)) - this.radius < netfieldRange) {
+                        me.pushM();
+                    }
+                    for (let i = 0; i < bullet.length; i++) {
+                        if (Vector.magnitude(Vector.sub(bullet[i].position, this.position)) - this.radius < netfieldRange) {
+                            const dx = bullet[i].position.x - this.position.x;
+                            const dy = bullet[i].position.y - this.position.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < m.fieldRange) {
+                                const angle = Math.atan2(dy, dx);
+                                const mag = (1500 * bullet[i].mass * simulation.g) / dist;
+                                bullet[i].force.x += mag * Math.cos(angle);
+                                bullet[i].force.y += mag * Math.sin(angle);
+                            }
+                            this.energy -= 0.0012;
+                        }
+                    }
+                } else {
+                    const rotation = simulation.cycle * 0.0031
+                    const phase = simulation.cycle * 0.023
+                    const radius = m.fieldRange * m.harmonicRadius
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "rgba(0,0,0,0.5)"
+                    ctx.fillStyle = `rgba(0,0,0,${Math.min(0.6, m.energy * (0.11 + 0.1 * Math.random()) * (3 / tech.harmonics))})`;
+                    // ctx.fillStyle = "rgba(0,0,0," + Math.min(0.7, m.energy * (0.22 - 0.01 * tech.harmonics) * (0.5 + 0.5 * Math.random())) + ")";
+                    for (let i = 0; i < tech.harmonics; i++) {
+                        ctx.beginPath();
+                        ctx.ellipse(this.position.x, this.position.y, radius * Math.abs(Math.sin(phase + i / tech.harmonics * Math.PI)), radius, rotation + i / tech.harmonics * Math.PI, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                    //360 block
+                    if (Vector.magnitude(Vector.sub(player.position, this.position)) - this.radius < radius) {
+                        me.pushM();
+                    }
+                    for (let i = 0; i < bullet.length; i++) {
+                        if (Vector.magnitude(Vector.sub(bullet[i].position, this.position)) - this.radius < radius) {
+                            const dx = bullet[i].position.x - this.position.x;
+                            const dy = bullet[i].position.y - this.position.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < m.fieldRange) {
+                                const angle = Math.atan2(dy, dx);
+                                const mag = (1500 * bullet[i].mass * simulation.g) / dist;
+                                bullet[i].force.x += mag * Math.cos(angle);
+                                bullet[i].force.y += mag * Math.sin(angle);
+                            }
+                            this.energy -= 0.0012;
+                        }
+                    }
+                }
+            }
+            me.railGun = function () {
+                const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                const X = this.position.x
+                const Y = this.position.y
+                const unitVector = { x: Math.cos(angle), y: Math.sin(angle) }
+                const unitVectorPerp = Vector.perp(unitVector)
+
+                function magField(mag, arc) {
+                    ctx.moveTo(X, Y);
+                    ctx.bezierCurveTo(
+                        X + unitVector.x * mag, Y + unitVector.y * mag,
+                        X + unitVector.x * mag + unitVectorPerp.x * arc, Y + unitVector.y * mag + unitVectorPerp.y * arc,
+                        X + unitVectorPerp.x * arc, Y + unitVectorPerp.y * arc)
+                    ctx.bezierCurveTo(
+                        X - unitVector.x * mag + unitVectorPerp.x * arc, Y - unitVector.y * mag + unitVectorPerp.y * arc,
+                        X - unitVector.x * mag, Y - unitVector.y * mag,
+                        X, Y)
+                }
+                ctx.fillStyle = `rgba(50,20,100,0.05)`;
+                const magSize = 8 * c * tech.railChargeRate ** 3
+                const arcSize = 6 * c * tech.railChargeRate ** 3
+                for (let i = 3; i < 7; i++) {
+                    const MAG = magSize * i * i * (0.93 + 0.07 * Math.random())
+                    const ARC = arcSize * i * i * (0.93 + 0.07 * Math.random())
+                    ctx.beginPath();
+                    magField(MAG, ARC)
+                    magField(MAG, -ARC)
+                    ctx.fill();
+                }
+            }
+            me.waves = [];
+            me.doLongitudinal = function () {
+                if (!m.isBodiesAsleep) {
+                    ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
+                    ctx.lineWidth = 2 * tech.wavePacketDamage
+                    ctx.beginPath();
+                    // const end = 1100 * tech.isBulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
+                    const end = 1100 * tech.isBulletsLastLonger * Math.pow(0.93, tech.waveReflections) //should equal about  1767
+                    const damage = 0.0005 * simulation.dmgScale//normal damage for m basically shreds m, so had to nerf this
+                    for (let i = this.waves.length - 1; i > -1; i--) {
+                        const v1 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit1, this.waves[i].radius))
+                        const v2 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit2, this.waves[i].radius))
+                        //draw wave
+                        ctx.moveTo(v1.x, v1.y)
+                        ctx.arc(this.waves[i].position.x, this.waves[i].position.y, this.waves[i].radius, this.waves[i].angle, this.waves[i].angle + this.waves[i].arc);
+                        //using small angle linear approximation of circle arc, this will not work if the arc gets large   // https://stackoverflow.com/questions/13652518/efficiently-find-points-inside-a-circle-sector
+                        let hits = Matter.Query.ray([player], v1, v2, 50) //Matter.Query.ray(bodies, startPoint, endPoint, [rayWidth])
+                        for (let j = 0, len = Math.min(30, hits.length); j < len; j++) {
+                            player.force.x += 0.01 * (Math.random() - 0.5) * player.mass
+                            player.force.y += (0.01 * (Math.random() - 0.5) - simulation.g * 0.25) * player.mass //remove force of gravity
+                            Matter.Body.setVelocity(player, { //friction
+                                x: player.velocity.x * 0.95,
+                                y: player.velocity.y * 0.95
+                            });
+                            m.damage(damage)
+                        }
+                        hits = Matter.Query.ray(body, v1, v2, 50)
+                        for (let j = 0, len = Math.min(30, hits.length); j < len; j++) {
+                            const who = hits[j].body
+                            //make them shake around
+                            who.force.x += 0.01 * (Math.random() - 0.5) * who.mass
+                            who.force.y += (0.01 * (Math.random() - 0.5) - simulation.g * 0.25) * who.mass //remove force of gravity
+
+                            let vertices = who.vertices;
+                            const vibe = 25
+                            ctx.moveTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+                            for (let j = 1; j < vertices.length; j++) {
+                                ctx.lineTo(vertices[j].x + vibe * (Math.random() - 0.5), vertices[j].y + vibe * (Math.random() - 0.5));
+                            }
+                            ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
+
+                            if (tech.isPhononBlock && !who.isNotHoldable && who.speed < 5 && who.angularSpeed < 0.1) {
+                                if (Math.random() < 0.5) b.targetedBlock(who, 50 - Math.min(25, who.mass * 3)) //    targetedBlock(who, speed = 50 - Math.min(20, who.mass * 2), range = 1600) {
+                                // Matter.Body.setAngularVelocity(who, (0.25 + 0.12 * Math.random()) * (Math.random() < 0.5 ? -1 : 1));
+                                who.torque += who.inertia * 0.001 * (Math.random() - 0.5)
+                            }
+                        }
+                        // ctx.stroke(); //draw vibes
+                        this.waves[i].radius += tech.waveBeamSpeed * 1.8 * this.waves[i].expanding //expand / move
+                        if (this.waves[i].radius > end - 30) {
+                            this.waves[i].expanding = -1
+                            if (this.waves[i].reflection < 1) this.waves.splice(i, 1) //end
+                        } else if (this.waves[i].radius < 25) {
+                            this.waves[i].expanding = 1
+                            if (this.waves[i].reflection < 1) this.waves.splice(i, 1) //end
+                        }
+                    }
+                    ctx.stroke();
+                }
+            }
+            me.lasers = function (where, angle) {
+                const vertexCollision = function (v1, v1End, domain) {
+                    for (let i = 0; i < domain.length; ++i) {
+                        let vertices = domain[i].vertices;
+                        const len = vertices.length - 1;
+                        for (let j = 0; j < len; j++) {
+                            results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                            if (results.onLine1 && results.onLine2) {
+                                const dx = v1.x - results.x;
+                                const dy = v1.y - results.y;
+                                const dist2 = dx * dx + dy * dy;
+                                if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = {
+                                    x: results.x,
+                                    y: results.y,
+                                    dist2: dist2,
+                                    who: domain[i],
+                                    v1: vertices[j],
+                                    v2: vertices[j + 1]
+                                };
+                            }
+                        }
+                        results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                        if (results.onLine1 && results.onLine2) {
+                            const dx = v1.x - results.x;
+                            const dy = v1.y - results.y;
+                            const dist2 = dx * dx + dy * dy;
+                            if (dist2 < best.dist2) best = {
+                                x: results.x,
+                                y: results.y,
+                                dist2: dist2,
+                                who: domain[i],
+                                v1: vertices[0],
+                                v2: vertices[len]
+                            };
+                        }
+                    }
+                };
+
+                const seeRange = 7000;
+                best = {
+                    x: null,
+                    y: null,
+                    dist2: Infinity,
+                    who: null,
+                    v1: null,
+                    v2: null
+                };
+                const look = {
+                    x: where.x + seeRange * Math.cos(angle),
+                    y: where.y + seeRange * Math.sin(angle)
+                };
+                // vertexCollision(where, look, mob);
+                vertexCollision(where, look, map);
+                vertexCollision(where, look, body);
+                if (!m.isCloak) vertexCollision(where, look, [player]);
+                if (best.who && (best.who === player) && m.immuneCycle < m.cycle) {
+                    const dmg = 0.0011 * simulation.dmgScale;
+                    m.damage(dmg);
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: best.x,
+                        y: best.y,
+                        radius: dmg * 1500,
+                        color: "rgba(80,0,255,0.5)",
+                        time: 20
+                    });
+                }
+                //draw beam
+                if (best.dist2 === Infinity) best = look;
+                ctx.moveTo(where.x, where.y);
+                ctx.lineTo(best.x, best.y);
+                ctx.lineWidth = 10;
+                ctx.stroke();
+            }
+            me.pulse = function (charge, angle, where = this.position) {
+                let best;
+                angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x)
+                let explosionRadius = 5.5 * charge
+                let range = 5000
+                const path = [{
+                    x: where.x + 20 * Math.cos(angle),
+                    y: where.y + 20 * Math.sin(angle)
+                },
+                {
+                    x: where.x + range * Math.cos(angle),
+                    y: where.y + range * Math.sin(angle)
+                }
+                ];
+                const vertexCollision = function (v1, v1End, domain) {
+                    for (let i = 0; i < domain.length; ++i) {
+                        let vertices = domain[i].vertices;
+                        const len = vertices.length - 1;
+                        for (let j = 0; j < len; j++) {
+                            results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                            if (results.onLine1 && results.onLine2) {
+                                const dx = v1.x - results.x;
+                                const dy = v1.y - results.y;
+                                const dist2 = dx * dx + dy * dy;
+                                if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = {
+                                    x: results.x,
+                                    y: results.y,
+                                    dist2: dist2,
+                                    who: domain[i],
+                                    v1: vertices[j],
+                                    v2: vertices[j + 1]
+                                };
+                            }
+                        }
+                        results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                        if (results.onLine1 && results.onLine2) {
+                            const dx = v1.x - results.x;
+                            const dy = v1.y - results.y;
+                            const dist2 = dx * dx + dy * dy;
+                            if (dist2 < best.dist2) best = {
+                                x: results.x,
+                                y: results.y,
+                                dist2: dist2,
+                                who: domain[i],
+                                v1: vertices[0],
+                                v2: vertices[len]
+                            };
+                        }
+                    }
+                };
+                //check for collisions
+                best = {
+                    x: null,
+                    y: null,
+                    dist2: Infinity,
+                    who: null,
+                    v1: null,
+                    v2: null
+                };
+                if (!best.who) {
+                    vertexCollision(path[0], path[1], body);
+                    vertexCollision(path[0], path[1], [player]);
+                    vertexCollision(path[0], path[1], map);
+                    if (best.dist2 != Infinity) { //if hitting something
+                        path[path.length - 1] = {
+                            x: best.x,
+                            y: best.y
+                        };
+                    }
+                }
+                if (best.who) {
+                    b.explosion(path[1], explosionRadius, "rgba(0,0,0,0)")
+                    const off = explosionRadius * 1.2
+                    b.explosion({ x: path[1].x + off * (Math.random() - 0.5), y: path[1].y + off * (Math.random() - 0.5) }, explosionRadius, "rgba(0,0,0,0.7)")
+                    b.explosion({ x: path[1].x + off * (Math.random() - 0.5), y: path[1].y + off * (Math.random() - 0.5) }, explosionRadius, "rgba(0,0,0,0.7)")
+                }
+                //draw laser beam
+                ctx.beginPath();
+                ctx.moveTo(path[0].x, path[0].y);
+                ctx.lineTo(path[1].x, path[1].y);
+                if (charge > 50) {
+                    ctx.strokeStyle = "rgba(0,0,0,0.10)"
+                    ctx.lineWidth = 70
+                    ctx.stroke();
+                }
+                ctx.strokeStyle = "rgba(0,0,0,0.25)"
+                ctx.lineWidth = 20
+                ctx.stroke();
+                ctx.strokeStyle = "#f00";
+                ctx.lineWidth = 4
+                ctx.stroke();
+
+                //draw little dots along the laser path
+                const sub = Vector.sub(path[1], path[0])
+                const mag = Vector.magnitude(sub)
+                for (let i = 0, len = Math.floor(mag * 0.0005 * charge); i < len; i++) {
+                    const dist = Math.random()
+                    simulation.drawList.push({
+                        x: path[0].x + sub.x * dist + 10 * (Math.random() - 0.5),
+                        y: path[0].y + sub.y * dist + 10 * (Math.random() - 0.5),
+                        radius: 1.5 + 5 * Math.random(),
+                        color: "rgba(0,0,0,0.5)",
+                        time: Math.floor(9 + 25 * Math.random() * Math.random())
+                    });
+                }
+            }
+            let c = 0
+            me.gun = function () {
+                if (b.activeGun == 0) {// nailgun
+                    if (this.seePlayer.recall && !(simulation.cycle % 20)) {
+                        this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                        const dist = Vector.magnitudeSquared(Vector.sub(this.position, player.position));
+                        const unit = Vector.normalise(Vector.sub(Vector.add(player.position, Vector.mult(player.velocity, Math.sqrt(dist) / 60)), this.position))
+                        normalBullet(this.position.x, this.position.y);
+                        const v = 10 + 8 * simulation.accelScale;
+                        Matter.Body.setVelocity(mob[mob.length - 1], Vector.mult(unit, 0.009 * this.mass))
+                        // Matter.Body.setVelocity(mob[mob.length - 1], {
+                        // x: this.velocity.x + this.fireDir.x * v,
+                        // y: this.velocity.y + this.fireDir.y * v
+                        // });
+                    }
+                }
+                if (b.activeGun == 1) {// shotgun
+                    if (this.seePlayer.recall && !(simulation.cycle % 90)) {
+                        const side = 22
+                        for (let i = 0; i < 12; i++) {
+                            const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                            const dir = angle + (Math.random() - 0.5) * 1
+                            const SPEED = 52 + Math.random() * 8
+                            normalBullet(this.position.x + 35 * Math.cos(angle) + 15 * (Math.random() - 0.5), this.position.y + 35 * Math.sin(angle) + 15 * (Math.random() - 0.5))
+                            Matter.Body.setVelocity(mob[mob.length - 1], {
+                                x: SPEED * Math.cos(dir),
+                                y: SPEED * Math.sin(dir)
+                            });
+                        }
+                    }
+                } else if (b.activeGun == 2) { // super balls
+                    if (this.seePlayer.recall && !(simulation.cycle % 20)) {
+                        const num = 3;
+                        const SPREAD = 0.13;
+                        const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                        let dir = angle - SPREAD * (num - 1) / 2;
+                        const SPEED = 33
+                        for (let i = 0; i < num; i++) {
+                            ball(this.position.x + 30 * Math.cos(angle), this.position.y + 30 * Math.sin(angle))
+                            Matter.Body.setVelocity(mob[mob.length - 1], {
+                                x: SPEED * Math.cos(dir),
+                                y: SPEED * Math.sin(dir)
+                            });
+                            dir += SPREAD
+                        }
+                    }
+                } else if (b.activeGun == 3) { // wave
+                    this.doLongitudinal()
+                    const halfArc = 0.275
+                    const anglex = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                    const angle = anglex + 0.3 * (Math.random() - 0.5)
+                    this.waves.push({
+                        position: {
+                            x: this.position.x + 25 * Math.cos(anglex),
+                            y: this.position.y + 25 * Math.sin(anglex),
+                        },
+                        angle: angle - halfArc, //used in drawing ctx.arc
+                        unit1: { x: Math.cos(angle - halfArc), y: Math.sin(angle - halfArc) }, //used for collision
+                        unit2: { x: Math.cos(angle + halfArc), y: Math.sin(angle + halfArc) }, //used for collision
+                        arc: halfArc * 2,
+                        radius: 25,
+                        reflection: 0,
+                        expanding: 1,
+                        resonanceCount: 0
+                    })
+                } else if (b.activeGun == 4) { // missiles
+                    if (this.seePlayer.recall && !(simulation.cycle % 30)) {
+                        this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                        missile(this.position);
+                        const v = 10 + 8 * simulation.accelScale + (Math.random() * 20 - Math.random() * 20);
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: this.velocity.x + this.fireDir.x * v,
+                            y: this.velocity.y + this.fireDir.y * v
+                        });
+                    }
+                } else if (b.activeGun == 5) { // grenades
+                    if (this.seePlayer.recall && !(simulation.cycle % 30)) {
+                        this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                        grenade(this.position.x, this.position.y)
+                        const v = 10 + 8 * simulation.accelScale + (Math.random() * 20 - Math.random() * 20);
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: this.velocity.x + this.fireDir.x * v,
+                            y: this.velocity.y + this.fireDir.y * v
+                        });
+                    }
+                } else if (b.activeGun == 6) { // spores
+                    if (this.seePlayer.recall && !(simulation.cycle % 30)) {
+                        this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                        me.drop(this.position.x, this.position.y)
+                        const v = 10 + 8 * simulation.accelScale + (Math.random() * 20 - Math.random() * 20);
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: this.velocity.x + this.fireDir.x * v,
+                            y: this.velocity.y + this.fireDir.y * v
+                        });
+                    }
+                } else if (b.activeGun == 7) { // drones
+                    ctx.save()
+                    ctx.lineWidth = "8";
+                    ctx.strokeStyle = "rgba(100, 0, 150, 0.1)";
+                    ctx.beginPath();
+                    for (let i = 0, len = bullet.length; i < len; ++i) {
+                        const dx = bullet[i].position.x - this.position.x;
+                        const dy = bullet[i].position.y - this.position.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 500) {
+                            ctx.moveTo(this.position.x + dist, this.position.y);
+                            ctx.arc(this.position.x, this.position.y, dist, 0, 2 * Math.PI)
+                            //ctx.lineTo(bullet[i].position.x, bullet[i].position.y);
+                            const angle = Math.atan2(dy, dx);
+                            const mag = (1500 * bullet[i].mass * simulation.g) / (dist * 0.05);
+                            bullet[i].force.x += mag * Math.cos(angle);
+                            bullet[i].force.y += mag * Math.sin(angle);
+                        }
+                    }
+                    ctx.stroke();
+                    ctx.restore()
+                } else if (b.activeGun == 8) { // foam
+                    if (this.seePlayer.recall && !(simulation.cycle % 1)) {
+                        this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                        foamBullet(this.position.x, this.position.y, 7 + Math.ceil(this.radius / 15), 69);
+                        const v = 10 + 8 * simulation.accelScale + (Math.random() * 20 - Math.random() * 20);
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: this.velocity.x + this.fireDir.x * v,
+                            y: this.velocity.y + this.fireDir.y * v
+                        });
+                    }
+                } else if (b.activeGun == 9) { // harpoon - railgun
+                    if (c > 1) {
+                        this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                        railBullet(this.position.x, this.position.y);
+                        const v = 10 + 80 * simulation.accelScale;
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: this.velocity.x + this.fireDir.x * v,
+                            y: this.velocity.y + this.fireDir.y * v
+                        });
+                        c = 0;
+                    } else {
+                        c += 0.02;
+                        this.railGun();
+                    }
+                } else if (b.activeGun == 10) { // laserMines
+                    if (this.seePlayer.recall && !(simulation.cycle % 100)) {
+                        this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                        me.laserMine(this.position.x, this.position.y)
+                        const v = 10 + 8 * simulation.accelScale + (Math.random() * 20 - Math.random() * 20);
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: this.velocity.x + this.fireDir.x * v,
+                            y: this.velocity.y + this.fireDir.y * v
+                        });
+                    }
+                } else if (b.activeGun == 11) { // laser - pulse
+                    //this.lasers(this.position, Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x))
+                    //if (this.seePlayer.recall && !(simulation.cycle % 20)) {
+                    if (c > 1) {
+                        this.pulse(c * 100)
+                        c = 0;
+                    } else {
+                        if (this.energy < 1 || this.energy > 0.5) {
+                            c += 0.01;
+                            ctx.beginPath();
+                            const mag = Math.sqrt(c)
+                            ctx.arc(this.position.x, this.position.y, c * 30, 0, 2 * Math.PI)
+                            ctx.fillStyle = '#000000'
+                            ctx.strokeStyle = 'transparent'
+                            ctx.fill();
+                            ctx.stroke();
+                            this.energy -= 0.01;
+                            ctx.strokeStyle = "#000000";
+                            ctx.lineWidth = 1.5
+                            // ctx.globalAlpha = 1;
+                        } else {
+                            c = 0;
+                            this.energy += 0.1
+                        }
+                    }
+                    //}
+                }
+            }
+            me.laserMine = function (x, y) {
+                mobs.spawn(x, y, 3, 20, "#000000");
+                let xx = mob[mob.length - 1];
+                xx.stroke = "#00000000";
+                Matter.Body.setDensity(xx, 0.000005) //one tap
+                xx.isUnstable = true;
+                xx.timeLeft = 40 + Math.floor(180 * Math.random())
+                xx.leaveBody = false;
+                xx.isDropPowerUp = false;
+                xx.collisionFilter.mask = cat.bullet | cat.player | cat.map
+                xx.showHealthBar = false;
+                //xx.vertices = Matter.Vertices.rotate(xx.vertices, Math.PI, xx.position);
+                me.onHit = function () {
+                    this.death();
+                };
+                xx.do = function () {
+                    this.timeLimit();
+                    Matter.Body.setAngularVelocity(this, 0.01)
+                    ctx.beginPath();
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "#00000000"
+                    for (let i = 0; i < this.vertices.length; i++) {
+                        const where = this.vertices[i]
+                        const endPoint = Vector.add(where, Vector.mult(Vector.normalise(Vector.sub(where, this.position)), 2500))
+                        me.lasers(this.vertices[0], this.angle + Math.PI / 3);
+                        me.lasers(this.vertices[1], this.angle + Math.PI);
+                        me.lasers(this.vertices[2], this.angle - Math.PI / 3);
+                    }
+                    ctx.strokeStyle = "black";
+                    ctx.stroke();
+                    ctx.save()
+                    ctx.beginPath();
+                    ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                    ctx.lineTo(this.vertices[1].x, this.vertices[1].y);
+                    ctx.lineTo(this.vertices[2].x, this.vertices[2].y);
+                    ctx.fillStyle = "#000000";
+                    ctx.strokeStyle = "transparent";
+                    ctx.fill();
+                    ctx.closePath();
+                    ctx.stroke();
+                    ctx.restore()
+                }
+            }
+            me.seeker = function (x, y) {
+                mobs.spawn(x, y, sides = 5, radius = 5, "rgb(0,0,0)");
+                let yy = mob[mob.length - 1];
+                yy.stroke = "transparent";
+                yy.onHit = function () {
+                    this.explode(this.mass * 20);
+                };
+                Matter.Body.setDensity(yy, 0.000015); //normal is 0.001
+                yy.timeLeft = 420 //* (0.8 + 0.4 * Math.random());
+                yy.accelMag = 0.00017 * simulation.accelScale; //* (0.8 + 0.4 * Math.random())
+                yy.frictionAir = 0.01 //* (0.8 + 0.4 * Math.random());
+                yy.restitution = 0.5;
+                yy.leaveBody = false;
+                yy.isDropPowerUp = false;
+                yy.isBadTarget = true;
+                yy.isMobBullet = true;
+                yy.showHealthBar = false;
+                yy.collisionFilter.category = cat.mobBullet;
+                yy.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
+                let index = 0;
+                yy.do = function () {
+                    this.alwaysSeePlayer()
+                    this.timeLimit();
+                    this.attraction();
+                };
+            }
+            me.drop = function (x, y) {
+                mobs.spawn(x, y, sides = 90, radius = 30, "rgb(0,255,100,0.7)");
+                let yyy = mob[mob.length - 1];
+                yyy.stroke = "transparent";
+                yyy.onDeath = function () {
+                    for (let i = 0, len = 5; i < len; i++) {
+                        me.seeker(this.position.x, this.position.y)
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: Math.random() * 30 - Math.random() * 30,
+                            y: Math.random() * 30 - Math.random() * 30
+                        });
+                    }
+                };
+                Matter.Body.setDensity(yyy, 0.000015); //normal is 0.001
+                yyy.timeLeft = 60 //* (0.8 + 0.4 * Math.random());
+                yyy.frictionAir = 0.01 //* (0.8 + 0.4 * Math.random());
+                yyy.restitution = 0.5;
+                yyy.leaveBody = false;
+                yyy.isDropPowerUp = false;
+                yyy.isBadTarget = true;
+                yyy.isMobBullet = true;
+                yyy.showHealthBar = false;
+                yyy.collisionFilter.category = cat.mobBullet;
+                yyy.collisionFilter.mask = null;
+                yyy.maxRadius = 30;
+                let index = 0;
+                yyy.do = function () {
+                    if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
+                        Matter.Body.setPosition(this, player.position)
+                        if (player.speed > 2.5) Matter.Body.setVelocity(player, Vector.mult(player.velocity, 0.94))
+                    }
+                    if (Matter.Query.collides(this, map).length > 0) {
+                        Matter.Body.setVelocity(this, Vector.mult(this.velocity, 0.1))
+                    }
+                    this.alwaysSeePlayer()
+                    this.timeLimit();
+                    ctx.save()
+                    ctx.beginPath();
+                    ctx.moveTo(this.position.x, this.position.y)
+                    ctx.fillStyle = "black";
+                    ctx.arc(this.position.x, this.position.y, this.maxRadius, 0, 2 * Math.PI)
+                    ctx.stroke()
+                    ctx.fill()
+                    ctx.restore()
+                    if (this.maxRadius > 0) {
+                        this.maxRadius -= 0.5;
+                    }
+                };
+            }
+        };
+        restoreBoss(-13350, -1800);
+        laserEM(-6500 + Math.floor(Math.random() * 200) - Math.floor(Math.random() * 200), -3400 + Math.floor(Math.random() * 200) - Math.floor(Math.random() * 200));
+        sniper(-9275 + Math.floor(Math.random() * 200) - Math.floor(Math.random() * 200), -3325 + Math.floor(Math.random() * 200) - Math.floor(Math.random() * 200));
+        laserEM(-5750 + Math.floor(Math.random() * 200) - Math.floor(Math.random() * 200), -850 + Math.floor(Math.random() * 200) - Math.floor(Math.random() * 200));
+        sniper(-3600 + Math.floor(Math.random() * 200) - Math.floor(Math.random() * 200), -1325 + Math.floor(Math.random() * 200) - Math.floor(Math.random() * 200));
+        laserEM(1425 + Math.floor(Math.random() * 200) - Math.floor(Math.random() * 200), -800 + Math.floor(Math.random() * 200) - Math.floor(Math.random() * 200));
+        //restoreBoss(-350, -3225);
+        wire();
+        wire();
+        wire();
+        wire();
+        wire();
+        color.map = '#00000000';
+        level.customTopLayer = () => {
+            if (dong.position.x > -3825) {
+                dong.force.y -= dong.mass * simulation.g;
+            } else {
+                dong.force.y += dong.mass * simulation.g;
+            }
+            Matter.Body.setAngularVelocity(dong, -0.5)
+            if (key == true) {
+                door.isClosing = false;
+            } else {
+                door.isClosing = true;
+            }
+            door.openClose();
+            door.draw()
+            for (let i = 0, len = map.length; i < len; i++) { //so boss bar renders over the map
+                ctx.beginPath();
+                ctx.moveTo(map[i].vertices[0].x, map[i].vertices[0].y);
+                for (let j = 0, length = map[i].vertices.length; j < length; j++) {
+                    ctx.lineTo(map[i].vertices[j].x, map[i].vertices[j].y);
+                }
+                ctx.lineTo(map[i].vertices[0].x, map[i].vertices[0].y);
+                ctx.fillStyle = "rgba(68,68,68)";
+                ctx.strokeStyle = "transparent";
+                ctx.fill();
+                ctx.stroke();
+                // ctx.setLineDash([]);
+            }
+            for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].restoreBoss) {
+                    ctx.save();
+                    ctx.setTransform(1, 0, 0.5, 1, 0, 0); //slanted
+                    ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                    ctx.fillRect(canvas.width2 / 2, canvas.height2 / 10, canvas.width2, 30);
+                    ctx.fillStyle = "rgba(0,0,0,0.7)";
+                    ctx.fillRect(canvas.width2 / 2, canvas.height2 / 10, canvas.width2 * mob[i].health, 30);
+                    ctx.restore();
+                }
+            }
+        };
+        const obj = { restoreBoss };
+        Object.assign(spawn, obj); //for next map, gonna be a rpg-like thingy I think
     },
     // ********************************************************************************************************
     // ********************************************************************************************************

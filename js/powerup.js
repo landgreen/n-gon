@@ -167,26 +167,43 @@ const powerUps = {
     do() { },
     setPowerUpMode() {
         if (tech.duplicationChance() > 0 || tech.isAnthropicTech) {
+            powerUps.draw = powerUps.drawDup
             if (tech.isPowerUpsVanish) {
-                if (this.tech.isHealAttract) {
-                    powerUps.do = powerUps.doAttractDuplicatesVanish
+                if (tech.isHealAttract) {
+                    powerUps.do = () => {
+                        powerUps.dupExplode();
+                        powerUps.draw();
+                        powerUps.attractHeal();
+                    }
                 } else {
-                    powerUps.do = powerUps.doDuplicatesVanish
+                    powerUps.do = () => {
+                        powerUps.dupExplode();
+                        powerUps.draw();
+                    }
                 }
             } else if (tech.isHealAttract) {
-                powerUps.do = powerUps.doAttractDuplicates
+                powerUps.do = () => {
+                    powerUps.draw();
+                    powerUps.attractHeal();
+                }
             } else {
-                powerUps.do = powerUps.doDuplicates
+                powerUps.do = () => powerUps.draw();
             }
             tech.maxDuplicationEvent() //check to see if hitting 100% duplication
-        } else if (tech.isHealAttract) {
-            powerUps.do = powerUps.doAttract
         } else {
-            powerUps.do = powerUps.doDefault
+            powerUps.draw = powerUps.drawCircle
+            if (tech.isHealAttract) {
+                powerUps.do = () => {
+                    powerUps.draw();
+                    powerUps.attractHeal();
+                }
+            } else {
+                powerUps.do = powerUps.draw
+            }
         }
     },
-    doDefault() {
-        //draw power ups
+    draw() { },
+    drawCircle() {
         ctx.globalAlpha = 0.4 * Math.sin(simulation.cycle * 0.15) + 0.6;
         for (let i = 0, len = powerUp.length; i < len; ++i) {
             ctx.beginPath();
@@ -196,121 +213,59 @@ const powerUps = {
         }
         ctx.globalAlpha = 1;
     },
-    doAttract() {
-        powerUps.doDefault();
-        for (let i = 0; i < powerUp.length; i++) {  //attract heal power ups to player
-            if (powerUp[i].name === "heal") {
-                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
-                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.015 * powerUp[i].mass)
-                powerUp[i].force.x += attract.x;
-                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
-                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
-            }
-        }
-        // for (let i = 0, len = powerUp.length; i < len; ++i) {
-        //     const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.0015 * powerUp[i].mass)
-        //     powerUp[i].force.x += force.x
-        //     powerUp[i].force.y = force.y - simulation.g
-        // }
-    },
-    doAttractDuplicates() {
-        powerUps.doDuplicates();
-        for (let i = 0; i < powerUp.length; i++) { //attract heal power ups to player
-            if (powerUp[i].name === "heal") {
-                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
-                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.015 * powerUp[i].mass)
-                powerUp[i].force.x += attract.x;
-                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
-                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
-            }
-        }
-    },
-    doAttractDuplicatesVanish() {
-        powerUps.doDuplicatesVanish();
-        for (let i = 0; i < powerUp.length; i++) { //attract heal power ups to player
-            if (powerUp[i].name === "heal") {
-                //&& Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 500000
-                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.015 * powerUp[i].mass)
-                powerUp[i].force.x += attract.x;
-                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
-                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
-            }
-        }
-    },
-    doDuplicates() { //draw power ups but give duplicates some electricity
-        ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
+    drawDup() {
+        ctx.globalAlpha = 0.4 * Math.sin(simulation.cycle * 0.15) + 0.6;
         for (let i = 0, len = powerUp.length; i < len; ++i) {
             ctx.beginPath();
-            ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+            if (powerUp[i].isDuplicated) {
+                let vertices = powerUp[i].vertices;
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let j = 1; j < vertices.length; j++) {
+                    ctx.lineTo(vertices[j].x, vertices[j].y);
+                }
+                ctx.lineTo(vertices[0].x, vertices[0].y);
+            } else {
+                ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
+            }
             ctx.fillStyle = powerUp[i].color;
             ctx.fill();
         }
         ctx.globalAlpha = 1;
-        for (let i = 0, len = powerUp.length; i < len; ++i) {
-            if (powerUp[i].isDuplicated && Math.random() < 0.1) {
-                //draw electricity
-                const mag = 5 + powerUp[i].size / 5
-                let unit = Vector.rotate({
-                    x: mag,
-                    y: mag
-                }, 2 * Math.PI * Math.random())
-                let path = {
-                    x: powerUp[i].position.x + unit.x,
-                    y: powerUp[i].position.y + unit.y
-                }
-                ctx.beginPath();
-                ctx.moveTo(path.x, path.y);
-                for (let i = 0; i < 6; i++) {
-                    unit = Vector.rotate(unit, 3 * (Math.random() - 0.5))
-                    path = Vector.add(path, unit)
-                    ctx.lineTo(path.x, path.y);
-                }
-                ctx.lineWidth = 0.5 + 2 * Math.random();
-                ctx.strokeStyle = "#000"
-                ctx.stroke();
+    },
+    attractHeal() {
+        for (let i = 0; i < powerUp.length; i++) { //attract heal power ups to player
+            if (powerUp[i].name === "heal") {
+                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, powerUp[i].position)), 0.015 * powerUp[i].mass)
+                powerUp[i].force.x += attract.x;
+                powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
+                Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
             }
         }
     },
-    doDuplicatesVanish() { //draw power ups but give duplicates some electricity
-        //remove power ups after 3 seconds
+    dupExplode() {
         for (let i = 0, len = powerUp.length; i < len; ++i) {
-            if (powerUp[i].isDuplicated && Math.random() < 0.004) { //  (1-0.004)^150 = chance to be removed after 3 seconds
-                b.explosion(powerUp[i].position, 150 + (10 + 3 * Math.random()) * powerUp[i].size);
-                Matter.Composite.remove(engine.world, powerUp[i]);
-                powerUp.splice(i, 1);
-                break
-            }
-        }
-        ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.25) + 0.6
-        for (let i = 0, len = powerUp.length; i < len; ++i) {
-            ctx.beginPath();
-            ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
-            ctx.fillStyle = powerUp[i].color;
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-        for (let i = 0, len = powerUp.length; i < len; ++i) {
-            if (powerUp[i].isDuplicated && Math.random() < 0.3) {
-                //draw electricity
-                const mag = 5 + powerUp[i].size / 5
-                let unit = Vector.rotate({
-                    x: mag,
-                    y: mag
-                }, 2 * Math.PI * Math.random())
-                let path = {
-                    x: powerUp[i].position.x + unit.x,
-                    y: powerUp[i].position.y + unit.y
+            if (powerUp[i].isDuplicated) {
+                if (Math.random() < 0.003) { //  (1-0.003)^240 = chance to be removed after 4 seconds,   240 = 4 seconds * 60 cycles per second
+                    b.explosion(powerUp[i].position, 175 + (11 + 3 * Math.random()) * powerUp[i].size);
+                    Matter.Composite.remove(engine.world, powerUp[i]);
+                    powerUp.splice(i, 1);
+                    break
                 }
-                ctx.beginPath();
-                ctx.moveTo(path.x, path.y);
-                for (let i = 0; i < 6; i++) {
-                    unit = Vector.rotate(unit, 3 * (Math.random() - 0.5))
-                    path = Vector.add(path, unit)
-                    ctx.lineTo(path.x, path.y);
+                if (Math.random() < 0.3) {  //draw electricity
+                    const mag = 4 + powerUp[i].size / 5
+                    let unit = Vector.rotate({ x: mag, y: mag }, 2 * Math.PI * Math.random())
+                    let path = { x: powerUp[i].position.x + unit.x, y: powerUp[i].position.y + unit.y }
+                    ctx.beginPath();
+                    ctx.moveTo(path.x, path.y);
+                    for (let i = 0; i < 6; i++) {
+                        unit = Vector.rotate(unit, 4 * (Math.random() - 0.5))
+                        path = Vector.add(path, unit)
+                        ctx.lineTo(path.x, path.y);
+                    }
+                    ctx.lineWidth = 0.5 + 2 * Math.random();
+                    ctx.strokeStyle = "#000"
+                    ctx.stroke();
                 }
-                ctx.lineWidth = 0.5 + 2 * Math.random();
-                ctx.strokeStyle = "#000"
-                ctx.stroke();
             }
         }
     },
@@ -371,7 +326,7 @@ const powerUps = {
                 return
             }
             if (tech.isCancelDuplication) {
-                tech.duplication += 0.043
+                tech.duplication += 0.041
                 tech.maxDuplicationEvent()
                 simulation.makeTextLog(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${0.043}`)
                 simulation.circleFlare(0.043);
@@ -1255,6 +1210,10 @@ const powerUps = {
                     const choose = localSettings.entanglement.gunIndexes[i]
                     // text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${gun})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[gun].name}</div> ${b.guns[gun].description}</div>`
                     text += powerUps.gunText(choose, `powerUps.choose('gun',${choose})`)
+
+                    //consider not adding guns the player currently has?
+
+
                 }
                 for (let i = 0; i < localSettings.entanglement.techIndexes.length; i++) { //add tech
                     let choose = localSettings.entanglement.techIndexes[i]
@@ -1566,32 +1525,34 @@ const powerUps = {
             powerUp.splice(index, 1);
         }
     },
-    directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
+    directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size(), isDuplicated = false) {
         let index = powerUp.length;
-        target = powerUps[target];
-        powerUp[index] = Matter.Bodies.polygon(x, y, 0, size, {
+        let properties = {
             density: 0.001,
             frictionAir: 0.03,
             restitution: 0.85,
-            inertia: Infinity, //prevents rotation
             collisionFilter: {
                 group: 0,
                 category: cat.powerUp,
                 mask: cat.map | cat.powerUp
             },
-            color: target.color,
-            effect: target.effect,
-            name: target.name,
+            color: powerUps[target].color,
+            effect: powerUps[target].effect,
+            name: powerUps[target].name,
             size: size
-        });
-        if (mode) powerUp[index].mode = mode
-        if (moving) {
-            Matter.Body.setVelocity(powerUp[index], {
-                x: (Math.random() - 0.5) * 15,
-                y: Math.random() * -9 - 3
-            });
         }
-        Composite.add(engine.world, powerUp[index]); //add to world
+        let polygonSides
+        if (isDuplicated) {
+            polygonSides = tech.isPowerUpsVanish ? 3 : Math.floor(4 + 2 * Math.random())
+            properties.isDuplicated = true
+        } else {
+            properties.inertia = Infinity //prevents rotation for circles only
+            polygonSides = 0
+        }
+        powerUp[index] = Matter.Bodies.polygon(x, y, polygonSides, size, properties);
+        if (mode) powerUp[index].mode = mode
+        if (moving) Matter.Body.setVelocity(powerUp[index], { x: (Math.random() - 0.5) * 15, y: Math.random() * -9 - 3 });
+        Composite.add(engine.world, powerUp[index]);
     },
     spawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
         if (
@@ -1601,7 +1562,7 @@ const powerUps = {
             if (tech.isBoostReplaceAmmo && target === 'ammo') target = 'boost'
             powerUps.directSpawn(x, y, target, moving, mode, size)
             if (Math.random() < tech.duplicationChance()) {
-                powerUps.directSpawn(x, y, target, moving, mode, size)
+                powerUps.directSpawn(x, y, target, moving, mode, size, true)
                 powerUp[powerUp.length - 1].isDuplicated = true
                 // if (tech.isPowerUpsVanish) powerUp[powerUp.length - 1].endCycle = simulation.cycle + 300
             }

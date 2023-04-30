@@ -549,7 +549,7 @@ const m = {
         if (tech.isSlowFPS) dmg *= 0.8
         if (tech.energyRegen === 0) dmg *= 0.34
         // if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
-        if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.73 ** (0.1 * m.coupling)
+        if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.973 ** m.coupling
         if (tech.isLowHealthDefense) dmg *= 1 - Math.max(0, 1 - m.health) * 0.8
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.33
         if (tech.squirrelFx !== 1) dmg *= Math.pow(0.7, (tech.squirrelFx - 1) / 0.4) //cause more damage
@@ -1858,7 +1858,7 @@ const m = {
         m.lastHit = 0
         m.isSneakAttack = false
         m.duplicateChance = 0
-        m.grabPowerUpRange2 = 156000;
+        m.grabPowerUpRange2 = 200000;
         m.blockingRecoil = 4;
         m.fieldRange = 155;
         m.fieldFire = false;
@@ -2235,11 +2235,11 @@ const m = {
             // float towards player  if looking at and in range  or  if very close to player
             if (
                 dist2 < m.grabPowerUpRange2 &&
-                (m.lookingAt(powerUp[i]) || dist2 < 16000) &&
+                (m.lookingAt(powerUp[i]) || dist2 < 1000) &&
                 Matter.Query.ray(map, powerUp[i].position, m.pos).length === 0
             ) {
-                powerUp[i].force.x += 0.05 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
-                powerUp[i].force.y += 0.05 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
+                powerUp[i].force.x += 0.04 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
+                powerUp[i].force.y += 0.04 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
                 //extra friction
                 Matter.Body.setVelocity(powerUp[i], {
                     x: powerUp[i].velocity.x * 0.11,
@@ -2465,7 +2465,7 @@ const m = {
                 return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses ${0.1 * couple.toFixed(2)} <strong class='color-s'>ice IX</strong></span>`
             // return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${2*couple}</strong> seconds post collision</span>`
             case 3: //negative mass
-                return `<strong>+${((1 - 0.73 ** couple) * 10).toFixed(1)}%</strong> <strong class='color-defense'>defense</strong>`
+                return `<strong>+${(100 * (1 - 0.973 ** couple)).toFixed(1)}%</strong> <strong class='color-defense'>defense</strong>`
             case 4: //assembler
                 return `generate <strong>${(0.8 * couple).toFixed(1)}</strong> <strong class='color-f'>energy</strong> per second`
             case 5: //plasma
@@ -3797,6 +3797,7 @@ const m = {
             m.enterCloakCycle = 0;
             m.drawCloakedM = function () {
                 m.walk_cycle -= m.flipLegs * m.Vx;
+                m.pos.x += 4
                 m.draw();
 
                 // let history = m.history[(m.cycle - 1) % 600]
@@ -4155,13 +4156,13 @@ const m = {
     {
         name: "wormhole",
         //<strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br>
-        description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+3%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+        description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+4%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
         drain: 0,
         effect: function () {
             m.fieldMeterColor = "#bbf" //"#0c5"
             m.eyeFillColor = m.fieldMeterColor
 
-            m.duplicateChance = 0.03
+            m.duplicateChance = 0.04
             m.fieldRange = 0
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
 

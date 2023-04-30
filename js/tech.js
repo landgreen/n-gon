@@ -236,7 +236,7 @@ const tech = {
         if (m.coupling && (m.fieldMode === 0 || m.fieldMode === 5)) dmg *= 1 + 0.015 * m.coupling
         if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= 4.33 * (1 + 0.033 * m.coupling)
         if (tech.deathSkipTime) dmg *= 1 + 0.6 * tech.deathSkipTime
-        if (tech.isTechDebt) dmg *= tech.totalCount > 2 ? Math.pow(0.85, tech.totalCount - 20) : 4 - 0.15 * tech.totalCount // if (tech.isTechDebt) dmg *= Math.min(Math.pow(0.85, tech.totalCount - 20), 4 - 0.15 * tech.totalCount)
+        if (tech.isTechDebt) dmg *= tech.totalCount > 20 ? Math.pow(0.85, tech.totalCount - 20) : 4 - 0.15 * tech.totalCount // if (tech.isTechDebt) dmg *= Math.min(Math.pow(0.85, tech.totalCount - 20), 4 - 0.15 * tech.totalCount)
         if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
         if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.3703599
         if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
@@ -259,7 +259,7 @@ const tech = {
         return dmg
     },
     duplicationChance() {
-        return Math.min(1, Math.max(0, (tech.isPowerUpsVanish ? 0.12 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.duplication + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication * (1 - 0.016 * (simulation.difficultyMode ** 2))))
+        return Math.min(1, Math.max(0, (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.15 : 0) + tech.duplication + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0) + tech.isQuantumEraserDuplication * (1 - 0.016 * (simulation.difficultyMode ** 2))))
     },
     isScaleMobsWithDuplication: false,
     maxDuplicationEvent() {
@@ -3517,7 +3517,8 @@ const tech = {
     {
         name: "technical debt",
         descriptionFunction() {
-            return `<strong>+300%</strong> <strong class='color-d'>damage</strong> <strong>–15%</strong> <strong class='color-d'>damage</strong><br>for each <strong class='color-m'>tech</strong> you have learned <em>(${(Math.floor(100 * (Math.min(Math.pow(0.85, tech.totalCount - 20), 4 - 0.15 * tech.totalCount))) - 100)}%)</em>`
+            // return `<strong>+300%</strong> <strong class='color-d'>damage</strong> <strong>–15%</strong> <strong class='color-d'>damage</strong><br>for each <strong class='color-m'>tech</strong> you have learned <em>(+${(Math.floor(100 * (Math.min(Math.pow(0.85, tech.totalCount - 20), 4 - 0.15 * tech.totalCount))) - 100)}%)</em>`
+            return `<strong>+300%</strong> <strong class='color-d'>damage</strong> <strong>–15%</strong> <strong class='color-d'>damage</strong><br>for each <strong class='color-m'>tech</strong> you have learned <em>(${(tech.totalCount > 20 ? 100 * (Math.pow(0.85, tech.totalCount - 20) - 1) : 100 * (3 - 0.15 * tech.totalCount)).toFixed(0)}%)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -3658,7 +3659,7 @@ const tech = {
     },
     {
         name: "paradigm shift",
-        description: `<strong>clicking</strong> <strong class='color-m'>tech</strong> while paused <strong>ejects</strong> them<br><strong>20%</strong> chance to remove without <strong>ejecting</strong>`,
+        description: `when <strong>paused</strong> clicking a <strong class='color-m'>tech</strong> <strong>ejects</strong> it<br>with a <strong>20%</strong> chance to remove without <strong>ejecting</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3676,7 +3677,7 @@ const tech = {
     },
     {
         name: "unified field theory",
-        description: `<span style = 'font-size:90%;'><strong>clicking</strong> the <strong class='color-f'>field</strong> box when <strong>paused</strong> cycles your <strong class='color-f'>field</strong><br><strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong><strong class='color-m'>tech</strong></span>`,
+        description: `when <strong>paused</strong> clicking your <strong class='color-f'>field</strong> <strong>cycles</strong> it<br><strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong><strong class='color-m'>tech</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3724,17 +3725,27 @@ const tech = {
     {
         name: "quintessence",
         descriptionFunction() {
-            let converted = powerUps.research.count * this.couplingToResearch * 10
-            if (this.count) converted = this.researchUsed * this.couplingToResearch * 10
+            if (this.count) {
+                converted = this.researchUsed * this.couplingToResearch
+                let orbText
+                if (converted > 15) {
+                    orbText = `${converted} ${powerUps.orb.coupling()}`
+                } else {
+                    orbText = powerUps.orb.coupling(converted)
+                }
+                return `convert ${this.researchUsed} ${powerUps.orb.research(1)} into <strong>${orbText}</strong><br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
 
-            let orbText
-            if (converted > 15) {
-                orbText = `${converted} ${powerUps.orb.coupling()}`
             } else {
-                orbText = powerUps.orb.coupling(converted)
+                let converted = powerUps.research.count * this.couplingToResearch
+                let orbText
+                if (converted > 15) {
+                    orbText = `${converted} ${powerUps.orb.coupling()}`
+                } else {
+                    orbText = powerUps.orb.coupling(converted)
+                }
+                return `convert ${powerUps.research.count} ${powerUps.orb.research(1)} into <strong>${orbText}</strong><br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
             }
-            // return `use all your ${powerUps.orb.research(1)} to spawn <strong>${orbText}</strong><br>that each give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong>`//<br>${m.couplingDescription(1)} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}
-            return `use all your ${powerUps.orb.research(1)} to spawn <strong>${orbText}</strong><br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
+
 
         },
         maxCount: 1,
@@ -3762,10 +3773,10 @@ const tech = {
                     if (!simulation.paused && !simulation.isChoosing) { //&& !(simulation.cycle % 2)
                         powerUps.research.changeRerolls(-1)
                         this.researchUsed++
-                        powerUps.spawn(m.pos.x + 50 * (Math.random() - 0.5), m.pos.y + 50 * (Math.random() - 0.5), "coupling");
+                        powerUps.spawnDelay("coupling", this.couplingToResearch)
                     }
-                } else { //exit delay loop
-                }
+                }  // else exit delay loop
+
             }
             requestAnimationFrame(cycle);
         },
@@ -3881,7 +3892,7 @@ const tech = {
     },
     {
         name: "futures exchange",
-        description: "clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>gives <strong>+4.3%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+        description: "clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>gives <strong>+4.1%</strong> power up <strong class='color-dup'>duplication</strong> chance",
         // descriptionFunction() {
         //     return `clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>gives <strong>+${4.9 - 0.15*simulation.difficultyMode}%</strong> power up <strong class='color-dup'>duplication</strong> chance`
         // },
@@ -3904,7 +3915,7 @@ const tech = {
     },
     {
         name: "replication",
-        description: "<strong>+10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+33%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
+        description: "<strong>+9%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+33%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -3914,7 +3925,7 @@ const tech = {
         },
         requires: "below 100% duplication chance",
         effect() {
-            tech.duplicateChance += 0.1
+            tech.duplicateChance += 0.09
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.11);
             this.refundAmount += tech.addJunkTechToPool(0.33)
@@ -3952,7 +3963,7 @@ const tech = {
     },
     {
         name: "metastability",
-        description: "<strong>+12%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>3</strong> second <strong>half-life</strong>",
+        description: "<strong>+13%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplicates</strong> <strong class='color-e'>explode</strong> with a <strong>4</strong> second <strong>half-life</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -4046,7 +4057,7 @@ const tech = {
             tech.damage *= this.damage
         },
         remove() {
-            if (this.count > 0) {
+            if (this.count > 0 && m.alive) {
                 tech.duplication += 0.1
                 powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                 tech.damage /= this.damage
@@ -4138,11 +4149,11 @@ const tech = {
             pool = shuffle(pool); //shuffles order of maps
             let removeCount = 0
             for (let i = 0, len = pool.length * this.damagePerRemoved; i < len; i++) removeCount += tech.removeTech(pool[i])
-            this.damage = 1 + this.damagePerRemoved * removeCount
-            tech.damage *= this.damage
+            this.damage = this.damagePerRemoved * removeCount
+            tech.damage *= (1 + this.damage)
         },
         remove() {
-            if (this.count) tech.damage /= this.damage
+            if (this.count) tech.damage /= (1 + this.damage)
         }
     },
     {
