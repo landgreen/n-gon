@@ -1,18 +1,18 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community map!! underpass by Richard0820
+factory: rewrote the end
 
-duplicated power ups aren't circles
-metastability makes power ups triangles instead of circles
-  3->4 seconds of half life before exploding
-  only metastability duplicated power ups have the lighting graphic
+clock gating was removed because it's annoying
+liquid cooling -> refrigerant - freezes mobs after losing at least 5% health
+mass-energy gets more effect from defense (0.13 -> 0.19)
+ternary 84 -> 77% damage
+dark patterns 15 -> 17% damage and JUNK
+Maxwell's demon 3% -> 1% energy loss above max
+exciton 16 -> 14% chance to drop
 
-mob's that fall off the map now die instead of just being removed
-  so they can still spawn power ups
-you can pick up power ups from slightly farther away (450)
-  but less far away when not facing the power up (100)
-  accretion has less lag at high amounts of heal power ups following you
-several other bug fixes
+10% increase in overall mob health
+new images
+bug fixes
 
 *********************************************************** TODO *****************************************************
 
@@ -33,9 +33,6 @@ perfect diamagnatism - invulnerable while field is active?
 mobs attack mines
   mines periodically set all mobs to have player location to be the mine
     is this going to work with all mob vision types?
-
-maybe use ⚆ in game text?
-  increase font?
   
 rework quantum eraser
 
@@ -1229,7 +1226,6 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
 ***past style themes***
   field emitter - bipedal white robot spherical gun turret on bird legs
       damaged dirty white robot spherical gun turret on bird legs in the style of Solarpunk
-      a white spherical bipedal mech standing motionless while black lines travel quickly in the background, minimalist style --no arms --v5
   standing wave - a 3-D cyan transparent nested concentric aligned centered sphere with rings
     by Philippe Starck 
   perfect diamagnetism - physics magnetic field chalk diagram 

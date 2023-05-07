@@ -516,7 +516,7 @@ const powerUps = {
                     const overHeal = m.health + heal * simulation.healScale - m.maxHealth //used with tech.isOverHeal
                     const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
                     m.addHealth(heal);
-                    simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+                    if (healOutput > 0) simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
                     if (tech.isOverHeal && overHeal > 0) { //tech quenching
                         const scaledOverHeal = overHeal * 0.9
                         m.damage(scaledOverHeal);
@@ -582,7 +582,6 @@ const powerUps = {
                 tech.healMaxEnergyBonus += 0.08 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)
                 m.setMaxEnergy();
             }
-
         },
         spawn(x, y, size) { //used to spawn a heal with a specific size / heal amount, not normally used
             powerUps.directSpawn(x, y, "heal", false, null, size)
@@ -1313,7 +1312,7 @@ const powerUps = {
             powerUps.spawn(x, y, "coupling");
             return;
         }
-        if (tech.isBoostPowerUps && Math.random() < 0.16) {
+        if (tech.isBoostPowerUps && Math.random() < 0.14) {
             powerUps.spawn(x, y, "boost");
             return;
         }

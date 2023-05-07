@@ -546,7 +546,6 @@ const m = {
         if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.4
         if (tech.isImmortal) dmg *= 0.67
-        if (tech.isSlowFPS) dmg *= 0.8
         if (tech.energyRegen === 0) dmg *= 0.34
         // if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.973 ** m.coupling
@@ -563,7 +562,7 @@ const m = {
         if (tech.isTurret && m.crouch) dmg *= 0.34;
         if (tech.isFirstDer && b.inventory[0] === b.activeGun) dmg *= 0.85 ** b.inventory.length
         if (tech.isEnergyHealth) {
-            return Math.pow(dmg, 0.13) //defense has less effect
+            return Math.pow(dmg, 0.19) //defense has less effect
         } else {
             return dmg
         }
@@ -782,26 +781,37 @@ const m = {
         };
 
         if (m.defaultFPSCycle < m.cycle) requestAnimationFrame(normalFPS);
-        if (tech.isSlowFPS) { // slow game 
-            simulation.fpsCap = 30 //new fps
+        if (dmg > 0.05) { // freeze game for high damage hits
+            simulation.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
             simulation.fpsInterval = 1000 / simulation.fpsCap;
-            //how long to wait to return to normal fps
-            m.defaultFPSCycle = m.cycle + 20 + Math.min(90, Math.floor(200 * dmg))
-            if (tech.isHarmFreeze) { //freeze all mobs
-                for (let i = 0, len = mob.length; i < len; i++) {
-                    mobs.statusSlow(mob[i], 450)
-                }
+            if (tech.isHarmFreeze) {
+                for (let i = 0, len = mob.length; i < len; i++) mobs.statusSlow(mob[i], 480) //freeze all mobs
             }
         } else {
-            if (dmg > 0.05) { // freeze game for high damage hits
-                simulation.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
-                simulation.fpsInterval = 1000 / simulation.fpsCap;
-            } else {
-                simulation.fpsCap = simulation.fpsCapDefault
-                simulation.fpsInterval = 1000 / simulation.fpsCap;
-            }
-            m.defaultFPSCycle = m.cycle
+            simulation.fpsCap = simulation.fpsCapDefault
+            simulation.fpsInterval = 1000 / simulation.fpsCap;
         }
+        m.defaultFPSCycle = m.cycle
+        // if (tech.isSlowFPS) { // slow game 
+        //     simulation.fpsCap = 30 //new fps
+        //     simulation.fpsInterval = 1000 / simulation.fpsCap;
+        //     //how long to wait to return to normal fps
+        //     m.defaultFPSCycle = m.cycle + 20 + Math.min(90, Math.floor(200 * dmg))
+        //     if (tech.isHarmFreeze) { //freeze all mobs
+        //         for (let i = 0, len = mob.length; i < len; i++) {
+        //             mobs.statusSlow(mob[i], 450)
+        //         }
+        //     }
+        // } else {
+        //     if (dmg > 0.05) { // freeze game for high damage hits
+        //         simulation.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
+        //         simulation.fpsInterval = 1000 / simulation.fpsCap;
+        //     } else {
+        //         simulation.fpsCap = simulation.fpsCapDefault
+        //         simulation.fpsInterval = 1000 / simulation.fpsCap;
+        //     }
+        //     m.defaultFPSCycle = m.cycle
+        // }
         // if (!noTransition) {
         //   document.getElementById("health").style.transition = "width 0s ease-out"
         // } else {
@@ -2235,16 +2245,14 @@ const m = {
             // float towards player  if looking at and in range  or  if very close to player
             if (
                 dist2 < m.grabPowerUpRange2 &&
-                (m.lookingAt(powerUp[i]) || dist2 < 1000) &&
+                (m.lookingAt(powerUp[i]) || dist2 < 10000) &&
                 Matter.Query.ray(map, powerUp[i].position, m.pos).length === 0
             ) {
-                powerUp[i].force.x += 0.04 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
-                powerUp[i].force.y += 0.04 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
-                //extra friction
-                Matter.Body.setVelocity(powerUp[i], {
-                    x: powerUp[i].velocity.x * 0.11,
-                    y: powerUp[i].velocity.y * 0.11
-                });
+                if (!tech.isHealAttract || powerUp[i].name !== "heal") { //if you have accretion heals are already pulled in a different way
+                    powerUp[i].force.x += 0.04 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
+                    powerUp[i].force.y += 0.04 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
+                    Matter.Body.setVelocity(powerUp[i], { x: powerUp[i].velocity.x * 0.11, y: powerUp[i].velocity.y * 0.11 }); //extra friction
+                }
                 if ( //use power up if it is close enough
                     dist2 < 5000 &&
                     !simulation.isChoosing &&
@@ -3784,7 +3792,7 @@ const m = {
     },
     {
         name: "metamaterial cloaking",
-        description: "when not firing activate <strong class='color-cloaked'>cloaking</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>+333%</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
+        description: "<strong>+50%</strong> <strong class='color-defense'>defense</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>+333%</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
         effect: () => {
             m.fieldFire = true;
             m.fieldMeterColor = "#333";
@@ -3957,7 +3965,7 @@ const m = {
         //<br><strong class='color-block'>blocks</strong> can't <strong>collide</strong> with <strong>intangible</strong> mobs
         //field <strong>radius</strong> decreases out of <strong>line of sight</strong>
         //<strong>unlock</strong> <strong class='color-m'>tech</strong> from other <strong class='color-f'>fields</strong>
-        description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+2</strong> <strong>choice</strong><br>generate <strong>10</strong> <strong class='color-f'>energy</strong> per second",
+        description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+2</strong> <strong>choices</strong><br>generate <strong>10</strong> <strong class='color-f'>energy</strong> per second",
         effect: () => {
             m.fieldMeterColor = "#333"
             m.eyeFillColor = m.fieldMeterColor

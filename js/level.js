@@ -27,15 +27,15 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(10)
-            // m.setField("metamaterial cloaking") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole
+            // m.setField("time dilation") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[3].ammo = 100000000
-            // tech.giveTech("accretion")
-            // tech.giveTech("metastability")
+            // tech.giveTech("Maxwells demon")
+            // tech.giveTech("missile-bot")
             // for (let i = 0; i < 6; ++i) tech.giveTech("replication")
             // for (let i = 0; i < 1; ++i) tech.giveTech("waste heat recovery")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("foam-bot") });
@@ -44,11 +44,11 @@ const level = {
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.underpass();
+            // level.factory();
             // spawn.nodeGroup(3200, -300, "sniper")
             // spawn.nodeGroup(2200, -300, "sniper")
             // spawn.nodeGroup(2200, -300, "sniper")
-            // spawn.mantisBoss(1900, -500)
+            // spawn.shareBoss(1900, -500)
             // spawn.cellBoss(1900, -500)
             // for (let i = 0; i < 2; ++i) spawn.starter(1900, -500, 50)
             // spawn.sneaker(1900, -500, 25)
@@ -198,7 +198,7 @@ const level = {
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
-            m.dmgScale *= 0.922; //damage done by player decreases each level
+            m.dmgScale *= 0.9; //damage done by player decreases each level
             if (simulation.accelScale < 6) simulation.accelScale *= 1.024 //mob acceleration increases each level
             if (simulation.CDScale > 0.15) simulation.CDScale *= 0.964 //mob CD time decreases each level
         }
@@ -209,7 +209,7 @@ const level = {
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
-            m.dmgScale /= 0.922; //damage done by player decreases each level
+            m.dmgScale /= 0.9; //damage done by player decreases each level
             if (simulation.accelScale > 1) simulation.accelScale /= 1.024 //mob acceleration increases each level
             if (simulation.CDScale < 1) simulation.CDScale /= 0.964 //mob CD time decreases each level
         }
@@ -292,20 +292,28 @@ const level = {
         if (document.getElementById("banned").value) { //remove levels from ban list in settings
             const banList = document.getElementById("banned").value.replace(/,/g, ' ').replace(/\s\s+/g, ' ').replace(/[^\w\s]/g, '') //replace commas with spaces, replace double spaces with single, remove strange symbols
             const remove = banList.split(" ");
-            console.log('remove these', remove)
-            console.log('community levels before', level.communityLevels)
+            // console.log('remove these', remove)
+            // console.log('community levels before', level.communityLevels)
             for (let i = 0; i < remove.length; i++) {
                 const index = level.communityLevels.indexOf(remove[i])
-                if (index !== -1) level.communityLevels.splice(index, 1);
+                if (index !== -1) {
+                    level.communityLevels.splice(index, 1);
+                    // console.log('removed level:', remove[i])
+                    requestAnimationFrame(() => { simulation.makeTextLog(`banned level: <strong style="color: '#f00';">${remove[i]}</strong>`); });
+                }
             }
-            console.log('community levels after', level.communityLevels)
-            console.log('Landgreen levels before', level.playableLevels)
+            // console.log('community levels after', level.communityLevels)
+            // console.log('Landgreen levels before', level.playableLevels)
             for (let i = 0; i < remove.length; i++) {
                 if (level.playableLevels.length + level.communityLevels.length * simulation.isCommunityMaps < 10) break //can't remove too many levels
                 const index = level.playableLevels.indexOf(remove[i])
-                if (index !== -1) level.playableLevels.splice(index, 1);
+                if (index !== -1) {
+                    level.playableLevels.splice(index, 1);
+                    // console.log('removed level:', remove[i])
+                    requestAnimationFrame(() => { simulation.makeTextLog(`banned level: <strong style="color: '#f00';">${remove[i]}</strong>`); });
+                }
             }
-            console.log('Landgreen levels after', level.playableLevels)
+            // console.log('Landgreen levels after', level.playableLevels)
         }
 
         if (document.getElementById("seed").value) { //check for player entered seed in settings
@@ -1607,15 +1615,11 @@ const level = {
                         pushBlock(blocks[i].bodyA)
                         pushBlock(blocks[i].bodyB)
                     }
-
                     const mobTargets = Matter.Query.collides(this, mob)
                     for (let i = 0; i < mobTargets.length; i++) {
                         pushBlock(mobTargets[i].bodyA)
                         pushBlock(mobTargets[i].bodyB)
                     }
-
-
-
                     let pushPowerUp = (who) => {
                         if (!who.isMover) {
                             if ((this.VxGoal > 0 && who.velocity.x < this.VxGoal) || (this.VxGoal < 0 && who.velocity.x > this.VxGoal)) {
@@ -3398,34 +3402,45 @@ const level = {
 
         level.setPosToSpawn(2235, -1375); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
-        level.exit.x = 5150;
-        level.exit.y = -2705;
+        level.exit.x = 7875;
+        level.exit.y = -2480;
+
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
-        level.defaultZoom = 1800
+        level.defaultZoom = 1500
         simulation.zoomTransition(level.defaultZoom)
-        document.body.style.backgroundColor = "#d8d9dc";
-        color.map = "#262a2f"
+        document.body.style.backgroundColor = "#d0d2d4s";
+        // color.map = "#262a2f"
 
         let isPowerLeft = true
 
         const movers = []
-        const moveSpeed = -5
-        movers.push(level.mover(125, -140, 925, 35, moveSpeed))
-        movers.push(level.mover(1100, -437, 1100, 35, moveSpeed))
-        movers.push(level.mover(2000, -600, 850, 35, moveSpeed))
+        //left side
+        movers.push(level.mover(125, -140, 925, 35, -5))
+        movers.push(level.mover(1100, -437, 1100, 35, -5))
+        movers.push(level.mover(2000, -600, 850, 35, -5))
+        //right side
         const moveSpeedStopGo = 8
         movers.push(level.mover(2700, -200, 3600, 35, 0))
-        const leftMoverSpeed = 6
-        movers.push(level.mover(6750, -450, 425, 350, leftMoverSpeed))
-        movers.push(level.mover(7675, -725, 500, 410, -leftMoverSpeed))
-        movers.push(level.mover(6750, -1075, 425, 50, -leftMoverSpeed))
-        movers.push(level.mover(5525, -1075, 450, 50, leftMoverSpeed))
         movers.push(level.mover(7175, -215, 2275, 50, 3))
         movers.push(level.mover(6475, -215, 275, 100, -3))
+        movers.push(level.mover(6725, -500, 500, 375, 3))
 
-        const trains = []
-        trains.push(level.transport(6275, -2100, 600, 50, 8 + simulation.difficultyMode))
-        trains.push(level.transport(6275, -2425, 600, 50, -8 - simulation.difficultyMode))
+        movers.push(level.mover(7675, -725, 500, 410, 0))
+        movers.push(level.mover(6775, -1075, 375, 50, 0))
+        movers.push(level.mover(5525, -1075, 450, 50, 0))
+        movers.push(level.mover(6775, -2100, 375, 50, 0))
+        movers.push(level.mover(5450, -1900, 525, 50, 0))
+
+        function setMoverDirection(VxGoal) {
+            for (let i = 7; i < movers.length; i++) {
+                movers[i].VxGoal = VxGoal
+            }
+        }
+        setMoverDirection(0)
+
+        const buttonRight = level.button(7735, -1825)
+        buttonRight.isUp = true
+        const buttonLeft = level.button(5275, -1900)
 
         const lasers = []
         const laserX = 3390 //3882 - 1130 / 2
@@ -3454,15 +3469,15 @@ const level = {
             if (isPowerLeft) {
                 if (!(simulation.cycle % 90)) spawnBlock(2730, -1600);
             } else {
-                for (let i = 0; i < trains.length; i++) {
-                    //oscillate back and forth
-                    if (trains[i].position.x < 5275) {
-                        trains[i].changeDirection(true) //go right
-                    } else if (trains[i].position.x > 7875) {
-                        trains[i].changeDirection(false) //go left
-                    }
-                    trains[i].move();
-                }
+                // for (let i = 0; i < trains.length; i++) {
+                //     //oscillate back and forth
+                //     if (trains[i].position.x < 5275) {
+                //         trains[i].changeDirection(true) //go right
+                //     } else if (trains[i].position.x > 7875) {
+                //         trains[i].changeDirection(false) //go left
+                //     }
+                //     trains[i].move();
+                // }
 
                 const rate = 160 //multiples of 32!
                 if ((simulation.cycle % rate) === 80) {
@@ -3513,6 +3528,20 @@ const level = {
                     }
                 }
             }
+            if (buttonRight.isUp) {
+                buttonRight.query();
+                if (!buttonRight.isUp) {
+                    buttonLeft.isUp = true //flip the other button up
+                    setMoverDirection(-7)
+                }
+            }
+            if (buttonLeft.isUp) {
+                buttonLeft.query();
+                if (!buttonLeft.isUp) {
+                    buttonRight.isUp = true //flip the other button up
+                    setMoverDirection(7)
+                }
+            }
 
             if (button1.isUp) {
                 button1.query();
@@ -3544,19 +3573,20 @@ const level = {
                     powerUps.addResearchToLevel() //needs to run after mobs are spawned
                 }
             }
+            buttonRight.draw();
+            buttonLeft.draw();
             button1.draw();
             for (let i = 0; i < movers.length; i++) movers[i].push();
             level.exit.drawAndCheck();
             level.enter.draw();
             ctx.fillStyle = "rgba(0,0,0,0.1)"
-            ctx.fillRect(6937, -1050, 50, 675);
+            ctx.fillRect(6937, -2075, 50, 1775); //6937, -1050, 50, 675);
             ctx.fillStyle = "rgba(0,255,255,0.15)" //            ctx.fillStyle = "#f2f2f2"
-            ctx.fillRect(4975, -3050, 475, 375); //exit room
-
+            ctx.fillRect(7675, -2875, 500, 425); //exit room
         };
         level.customTopLayer = () => {
             if (isPowerLeft) {
-                ctx.fillStyle = "rgba(0,0,0,0.1)"
+                ctx.fillStyle = "rgba(0,0,0,0.2)"
                 ctx.fillRect(2400, -1650, 7050, 2750) //right side
                 ctx.fillRect(4950, -3075, 3225, 1425);
                 ctx.beginPath()
@@ -3572,7 +3602,7 @@ const level = {
                 ctx.lineTo(2452, 65)
                 ctx.fill();
             } else {
-                for (let i = 0; i < trains.length; i++) trains[i].draw()
+                // for (let i = 0; i < trains.length; i++) trains[i].draw()
                 ctx.beginPath()
                 ctx.moveTo(2526, -589);
                 ctx.lineTo(2531, -597)
@@ -3583,14 +3613,14 @@ const level = {
                 ctx.lineTo(6618, 857)
                 ctx.lineTo(6622, 1100)
                 ctx.lineTo(2521, 1100)
-                ctx.fillStyle = "rgba(0,0,0,0.1)"
+                ctx.fillStyle = "rgba(0,0,0,0.2)"
                 ctx.fill();
                 ctx.fillRect(-100, -1650, 2625, 2750) //left side
                 for (let i = 0; i < lasers.length; i++) lasers[i].opticalQuery()
             }
             ctx.fillStyle = "rgba(0,0,0,0.07)"
-            ctx.fillRect(7675, -1825, 1775, 1650);
-            ctx.fillRect(4975, -1900, 475, 825);
+            ctx.fillRect(7675, -2200, 1775, 2025);
+            ctx.fillRect(4950, -2075, 500, 1000);
             ctx.fillRect(2050, -1650, 350, 325) //entrance room
             for (let i = 0; i < movers.length; i++) movers[i].draw();
         };
@@ -3609,8 +3639,6 @@ const level = {
         spawn.mapRect(4975, -1087, 550, 62);
         spawn.mapRect(4975, -1100, 500, 75);
 
-
-
         spawn.mapRect(7875, -1100, 175, 25); //right 3 hop stairs
         spawn.mapRect(8075, -1450, 200, 25);
         spawn.mapRect(7675, -1825, 375, 25);
@@ -3620,9 +3648,13 @@ const level = {
         spawn.mapRect(4900, -1575, 175, 25);
         spawn.mapRect(5125, -1900, 325, 25);
         spawn.mapRect(5225, -1875, 225, 625);
+        spawn.mapRect(4950, -3075, 500, 1000);
 
-        spawn.mapRect(5400, -3100, 50, 250); //exit
-        spawn.mapRect(4875, -2675, 675, 50); //exit
+        //exit
+        spawn.mapRect(7675, -2450, 525, 250);
+        spawn.mapRect(7675, -3050, 550, 175);
+        spawn.mapRect(7675, -2925, 50, 175);
+
         spawn.mapRect(1925, -1325, 550, 50); //entrance
         spawn.mapRect(2050, -1675, 50, 175); //entrance
         spawn.mapRect(1700, -200, 750, 275); //button shelf

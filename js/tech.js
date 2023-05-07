@@ -228,7 +228,7 @@ const tech = {
         //         }
         //     }
         // }
-        if (tech.isDivisor && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.83
+        if (tech.isDivisor && b.activeGun && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.77
         if (tech.isNoGroundDamage) dmg *= m.onGround ? 0.78 : 1.88
         if (tech.isDilate) dmg *= 1.5 + 0.6 * Math.sin(m.cycle * 0.0075)
         if (tech.isGunChoice && tech.buffedGun === b.inventoryGun) dmg *= 1 + 0.31 * b.inventory.length
@@ -407,7 +407,7 @@ const tech = {
     {
         name: "mass-energy equivalence",
         // description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>√ of <strong class='color-defense'>defense</strong> <strong>reduction</strong> reduces max <strong class='color-f'>energy</strong>",
-        description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>exponentially <strong>reduced</strong> <strong class='color-defense'>defense</strong> <em>(~ x^0.13)</em>",
+        description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>exponentially <strong>reduced</strong> <strong class='color-defense'>defense</strong> <em>(~ x^0.19)</em>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -542,7 +542,7 @@ const tech = {
     {
         name: "ternary", //"divisor",
         descriptionFunction() {
-            return `<strong>+83%</strong> <strong class='color-d'>damage</strong> while your current <strong class='color-g'>gun</strong><br>has <strong class='color-ammo'>ammo</strong> divisible by <strong>3</strong>`
+            return `<strong>+77%</strong> <strong class='color-d'>damage</strong> while your current <strong class='color-g'>gun</strong><br>has <strong class='color-ammo'>ammo</strong> divisible by <strong>3</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -2475,16 +2475,16 @@ const tech = {
         }
     },
     {
-        name: "liquid cooling",
-        description: `after losing <strong class='color-h'>health</strong><br><strong class='color-s'>freeze</strong> all mobs for <strong>7</strong> seconds`,
+        name: "refrigerant",
+        description: `after losing at least <strong>5%</strong> <strong class='color-h'>health</strong><br><strong class='color-s'>freeze</strong> all mobs for <strong>7</strong> seconds`,
         maxCount: 1,
         count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
+        frequency: 1,
+        frequencyDefault: 1,
         allowed() {
-            return tech.isSlowFPS
+            return true
         },
-        requires: "clock gating",
+        requires: "",
         effect() {
             tech.isHarmFreeze = true;
         },
@@ -2492,24 +2492,24 @@ const tech = {
             tech.isHarmFreeze = false;
         }
     },
-    {
-        name: "clock gating",
-        description: `after losing <strong class='color-h'>health</strong> <strong>slow</strong> <strong>time</strong> by <strong>50%</strong><br><strong>+20%</strong> <strong class='color-defense'>defense</strong>`,
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        allowed() {
-            return simulation.fpsCapDefault > 45
-        },
-        requires: "FPS above 45",
-        effect() {
-            tech.isSlowFPS = true;
-        },
-        remove() {
-            tech.isSlowFPS = false;
-        }
-    },
+    // {
+    //     name: "clock gating",
+    //     description: `after losing <strong class='color-h'>health</strong> <strong>slow</strong> <strong>time</strong> by <strong>50%</strong><br><strong>+20%</strong> <strong class='color-defense'>defense</strong>`,
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 1,
+    //     frequencyDefault: 1,
+    //     allowed() {
+    //         return simulation.fpsCapDefault > 45
+    //     },
+    //     requires: "FPS above 45",
+    //     effect() {
+    //         tech.isSlowFPS = true;
+    //     },
+    //     remove() {
+    //         tech.isSlowFPS = false;
+    //     }
+    // },
 
     {
         name: "piezoelectricity",
@@ -2639,7 +2639,7 @@ const tech = {
     },
     {
         name: "Maxwells demon",
-        description: "<strong class='color-f'>energy</strong> above your max decays <strong>96%</strong> slower<br><strong>+5%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
+        description: "<strong class='color-f'>energy</strong> above max decays by <strong style = 'text-decoration: line-through;'>30%</strong> <strong>1%</strong> per second<br><strong>+5%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
         maxCount: 1,
         count: 0,
         frequency: 2,
@@ -2649,7 +2649,7 @@ const tech = {
         },
         requires: "energy above your max",
         effect() {
-            tech.overfillDrain = 0.94 //70% = 1-(1-0.75)/(1-0.15) //92% = 1-(1-0.75)/(1-0.87)
+            tech.overfillDrain = 0.99 //70% = 1-(1-0.75)/(1-0.15) //92% = 1-(1-0.75)/(1-0.87)
             this.refundAmount += tech.addJunkTechToPool(0.05)
         },
         refundAmount: 0,
@@ -3574,7 +3574,7 @@ const tech = {
     },
     {
         name: "dark patterns",
-        description: "<strong>+15%</strong> <strong class='color-d'>damage</strong><br><strong>+15%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
+        description: "<strong>+17%</strong> <strong class='color-d'>damage</strong><br><strong>+17%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -3583,10 +3583,10 @@ const tech = {
             return true
         },
         requires: "",
-        damage: 1.15,
+        damage: 1.17,
         effect() {
             tech.damage *= this.damage
-            this.refundAmount += tech.addJunkTechToPool(0.15)
+            this.refundAmount += tech.addJunkTechToPool(0.17)
         },
         refundAmount: 0,
         remove() {
@@ -3599,7 +3599,7 @@ const tech = {
     {
         name: "exciton",
         descriptionFunction() {
-            return `<span style = 'font-size:94%;'>after mobs <strong>die</strong> they have a <strong>16%</strong> chance to<br>spawn ${powerUps.orb.boost(1)} that give <strong>+${(powerUps.boost.damage * 100).toFixed(0)}%</strong> <strong class='color-d'>damage</strong> for <strong>${(powerUps.boost.duration / 60).toFixed(0)}</strong> seconds</span>`
+            return `<span style = 'font-size:94%;'>after mobs <strong>die</strong> they have a <strong>14%</strong> chance to<br>spawn ${powerUps.orb.boost(1)} that give <strong>+${(powerUps.boost.damage * 100).toFixed(0)}%</strong> <strong class='color-d'>damage</strong> for <strong>${(powerUps.boost.duration / 60).toFixed(0)}</strong> seconds</span>`
         },
         maxCount: 1,
         count: 0,
@@ -4181,8 +4181,8 @@ const tech = {
             }
             powerUps.spawn(m.pos.x, m.pos.y, "gun");
             // powerUps.spawn(m.pos.x, m.pos.y, "gun");
-            tech.tech[choose].count = 0;
             tech.tech[choose].remove(); // remove a random tech form the list of tech you have
+            // tech.tech[choose].count = 0;
             tech.tech[choose].isLost = true
             simulation.updateTechHUD();
         },
@@ -7502,7 +7502,8 @@ const tech = {
     {
         name: "dynamic equilibrium",
         descriptionFunction() {
-            return `increase <strong class='color-d'>damage</strong> by your <strong class='color-defense'>defense</strong> and<br><strong>5%</strong> of your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss &nbsp; <em style = 'font-size:94%;'>(+${(100 * Math.max(5, tech.lastHitDamage) * m.lastHit * (2 - m.defense())).toFixed(0)}% damage)</em>`
+            // return `increase <strong class='color-d'>damage</strong> by your <strong class='color-defense'>defense</strong> and<br><strong>5%</strong> of your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss &nbsp; <em style = 'font-size:94%;'>(+${(100 * Math.max(5, tech.lastHitDamage) * m.lastHit * (2 - m.defense())).toFixed(0)}% damage)</em>`
+            return `increase <strong class='color-d'>damage</strong> by your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss<br> scales with <strong class='color-defense'>defense</strong> &nbsp; <em style = 'font-size:94%;'>(+${(100 * Math.max(5, tech.lastHitDamage) * m.lastHit * (2 - m.defense())).toFixed(0)}% damage)</em>`
         }, // = <strong>+${10*m.defense()}%</strong>
         // descriptionFunction() { return `increase <strong class='color-d'>damage</strong> by your last ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} loss<br><strong style = 'font-size:90%;'>(${(tech.lastHitDamage).toFixed(0)}%)(${(100*m.lastHit).toFixed(0)} ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"})(${2 - m.defense()} <strong class='color-defense'>defense</strong>) = ${(100*tech.lastHitDamage * m.lastHit * (2 - m.defense())).toFixed(0)}% <strong class='color-d'>damage</strong></strong> ` }, // = <strong>+${10*m.defense()}%</strong>
         isFieldTech: true,
@@ -7515,7 +7516,7 @@ const tech = {
         },
         requires: "negative mass, pilot wave, not patch",
         effect() {
-            tech.lastHitDamage += 5;
+            tech.lastHitDamage += 4;
         },
         remove() {
             tech.lastHitDamage = 0;

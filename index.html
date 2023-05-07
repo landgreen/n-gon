@@ -52,10 +52,10 @@
                 <div style="line-height: 150%;" class="details-div">
                     <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">combat difficulty:</label>
                     <select name="difficulty-select" id="difficulty-select" style="background-color: #fff">
-                        <option value="1">easy</option>
-                        <option value="2" selected>normal</option>
-                        <option value="4">hard</option>
-                        <option value="6">why?</option>
+                        <option value="1">easy ⚆</option>
+                        <option value="2" selected>normal ⚆</option>
+                        <option value="4">hard ⚇</option>
+                        <option value="6">why ⚉</option>
                     </select>
                     <br>
                     <label for="fps-select" title="use this to slow the game down">limit frames per second:</label>
@@ -65,6 +65,24 @@
                         <option value="60">60 fps</option>
                         <option value="45">45 fps</option>
                         <option value="30">30 fps</option>
+                    </select>
+                    <br>
+                    <label for="classic-select" title="play older versions of n-gon">classic n-gon:</label>
+                    <select name="classic-select" id="classic-select" onChange="window.location.href=this.value">
+                        <option value="https://scratch.mit.edu/projects/14005697/fullscreen/">mech: 2014</option>
+                        <option value="https://scratch.mit.edu/projects/22573757/fullscreen/">spacetime: 2015</option>
+                        <option value="https://scratch.mit.edu/projects/41429974/fullscreen/">ballistics: 2015</option>
+                        <option value="https://scratch.mit.edu/projects/43690666/fullscreen/">portal: 2016</option>
+                        <option value="https://codepen.io/lilgreenland/full/ozXNWZ">side scroller: 2016</option>
+                        <option value="https://codepen.io/lilgreenland/full/wzARJY">side scroller: 2016</option>
+                        <option value="classic/7-1-2017/">LandGame: 2017</option>
+                        <option value="classic/4-15-2018/">n-gon: 2018</option>
+                        <option value="classic/7-11-2019/">n-gon: summer-2019</option>
+                        <option value="classic/9-8-2019/">n-gon: fall-2019</option>
+                        <option value="classic/7-15-2020/">n-gon: summer-2020</option>
+                        <option value="classic/6-1-2021/">n-gon: spring-2021</option>
+                        <option value="classic/11-1-2022/">n-gon: fall-2022</option>
+                        <option value="" selected>current version</option>
                     </select>
                     <br>
                     <label for="seed" title="the randoms seed determines level order, tech choices, and mob types">randomization seed:</label>
@@ -79,13 +97,15 @@
                     <br>
                     <input type="checkbox" id="community-maps" name="community-maps" style="width:17px; height:17px;">
                     <label for="community-maps" title="add about 12 player made levels the random n-gon level pool">community maps</label>
+                    <!-- style="font-size: 1.5em; color: #058;" -->
 
                     <!-- <br>
 					<label for="body-damage" title="allow damage from the ground and large fast moving blocks">collision damage from blocks:</label>
 					<input type="checkbox" id="body-damage" name="body-damage" checked style="width:17px; height:17px;"> -->
                     <br>
                     <label for="banned" title="type banned levels with a space between them.  Example:  run temple biohazard">banned levels:</label>
-                    <input list="ban-suggest" id="banned" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="false" style="width: 182px;" />
+                    <input id="banned" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="false" style="width: 182px;" />
+                    <!-- <input list="ban-suggest" id="banned" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="false" style="width: 182px;" />
                     <datalist id="ban-suggest">
                         <option value="testChamber">
                         <option value="lock">
@@ -124,49 +144,7 @@
                         <option value="crossfire">
                         <option value="temple">
                         <option value="run">
-                            <!-- 
-                            fortress
-                            biohazard
-                            islands
-                            tunnel
-                            clock
-                            coliseum
-                            staircase
-                            perplex
-                            n-gon
-                            vats
-                            yingYang
-                            basement
-                            stronghold
-                            commandeer
-                            stereoMadness
-                            buttonbutton
-                            downpour
-                            house
-                            dripp
-                            crossfire
-                            temple
-                            run
-                         -->
-                    </datalist>
-                    <br>
-                    <label for="classic-select" title="play older versions of n-gon">classic n-gon:</label>
-                    <select name="classic-select" id="classic-select" onChange="window.location.href=this.value">
-                        <option value="https://scratch.mit.edu/projects/14005697/fullscreen/">mech: 2014</option>
-                        <option value="https://scratch.mit.edu/projects/22573757/fullscreen/">spacetime: 2015</option>
-                        <option value="https://scratch.mit.edu/projects/41429974/fullscreen/">ballistics: 2015</option>
-                        <option value="https://scratch.mit.edu/projects/43690666/fullscreen/">portal: 2016</option>
-                        <option value="https://codepen.io/lilgreenland/full/ozXNWZ">side scroller: 2016</option>
-                        <option value="https://codepen.io/lilgreenland/full/wzARJY">side scroller: 2016</option>
-                        <option value="classic/7-1-2017/">LandGame: 2017</option>
-                        <option value="classic/4-15-2018/">n-gon: 2018</option>
-                        <option value="classic/7-11-2019/">n-gon: summer-2019</option>
-                        <option value="classic/9-8-2019/">n-gon: fall-2019</option>
-                        <option value="classic/7-15-2020/">n-gon: summer-2020</option>
-                        <option value="classic/6-1-2021/">n-gon: spring-2021</option>
-                        <option value="classic/11-1-2022/">n-gon: fall-2022</option>
-                        <option value="" selected>current version</option>
-                    </select>
+                    </datalist> -->
                 </div>
             </details>
         </div>
