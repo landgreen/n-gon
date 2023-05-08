@@ -25,7 +25,7 @@ const simulation = {
         m.draw();
         m.hold();
         level.customTopLayer();
-        v.draw(); // visibility
+        v.draw(m.pos, 400, '#f00', false); // visibility
         simulation.draw.drawMapPath();
         b.fire();
         b.bulletRemove();

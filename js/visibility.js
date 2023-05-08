@@ -1,8 +1,6 @@
 const v = {
-    draw() {
-        const pos = m.pos;
-        const radius = 400;
-        const vertices = v.circleCollisions(pos, radius);
+    draw(pos, radius, color, fill = true, lineWidth = 10) {
+        const vertices = v.circleLoS(pos, radius);
         ctx.beginPath();
         ctx.moveTo(vertices[0].x, vertices[0].y);
         for (var i = 1; i < vertices.length; i++) {
@@ -25,12 +23,17 @@ const v = {
         } else {
             ctx.lineTo(vertices[0].x, vertices[0].y)
         }
-        ctx.strokeStyle = "#ff0000";
-        ctx.lineWidth = 10;
-        ctx.stroke();
+        if (fill) {
+            ctx.fillStyle = color;
+            ctx.fill;
+        } else {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+        }
     },
 
-    circleCollisions(pos, radius) {
+    circleLoS(pos, radius) {
         function getIntersection(v1, v1End, domain) {
             const intersections = getIntersections(v1, v1End, domain);
 
