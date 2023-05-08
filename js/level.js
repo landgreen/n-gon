@@ -4160,6 +4160,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     intro() {
+        spawn.mapRect(1600, -350, 100, 100); // DELETE THIS!!!
         // console.log(level.levelsCleared)
         if (level.levelsCleared === 0) { //if this is the 1st level of the game
             //wait to spawn power ups until unpaused
@@ -4383,7 +4384,6 @@ const level = {
             ctx.fillStyle = "rgba(68, 68, 68,0.95)"
             ctx.fillRect(2030, 0, 150, 1800);
         };
-
 
 
         level.setPosToSpawn(460, -100); //normal spawn
