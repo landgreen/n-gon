@@ -31,45 +31,41 @@ const v = {
     },
 
     circleCollisions(pos, radius) {
-        function getIntersections(v1, v1End, domain) {
+        function getIntersection(v1, v1End, domain) {
+            const intersections = getIntersections(v1, v1End, domain);
+
             var best = {
                 x: v1End.x,
                 y: v1End.y,
                 dist: Math.sqrt((v1End.x - v1.x)**2 + (v1End.y - v1.y)**2)
             }
-
-            for (const obj of domain) {
-                for (var i = 0; i < obj.vertices.length - 1; i++) {
-                    results = simulation.checkLineIntersection(v1, v1End, obj.vertices[i], obj.vertices[i + 1]);
-                    if (results.onLine1 && results.onLine2) {
-                        const dx = results.x - v1.x;
-                        const dy = results.y - v1.y;
-                        const dist = Math.sqrt(dx**2 + dy**2);
-                        if (dist < best.dist) {
-                            best = {
-                                x: results.x,
-                                y: results.y,
-                                dist: dist
-                            };
-                        }
-                    }
-                }
-                results = simulation.checkLineIntersection(v1, v1End, obj.vertices[obj.vertices.length - 1], obj.vertices[0]);
-                if (results.onLine1 && results.onLine2) {
-                    const dx = results.x - v1.x;
-                    const dy = results.y - v1.y;
-                    const dist = Math.sqrt(dx**2 + dy**2);
-                    if (dist < best.dist) {
-                        best = {
-                            x: results.x,
-                            y: results.y,
-                            dist: dist
-                        };
-                    }
+            for (const intersection of intersections) {
+                const dist = Math.sqrt((intersection.x - v1.x)**2 + (intersection.y - v1.y)**2);
+                if (dist < best.dist) {
+                    best = {
+                        x: intersection.x,
+                        y: intersection.y,
+                        dist: dist
+                    };
                 }
             }
 
             return best;
+        }
+
+        function getIntersections(v1, v1End, domain) {
+            const intersections = [];
+
+            for (const obj of domain) {
+                for (var i = 0; i < obj.vertices.length - 1; i++) {
+                    results = simulation.checkLineIntersection(v1, v1End, obj.vertices[i], obj.vertices[i + 1]);
+                    if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
+                }
+                results = simulation.checkLineIntersection(v1, v1End, obj.vertices[obj.vertices.length - 1], obj.vertices[0]);
+                if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
+            }
+
+            return intersections;
         }
 
         function allCircleLineCollisions(c, radius, domain) {
@@ -173,32 +169,36 @@ const v = {
         }
 
         // include intersections in map elements to avoid issues with overlapping
-        var intersectMap1 = [...map];
-        for (var i = 0; i < intersectMap1.length; i++) {
-            const obj = intersectMap1[i];
+        const intersectMap = [];
+        for (var i = 0; i < map.length; i++) {
+            const obj = map[i];
             const newVertices = [];
             const restOfMap = [...map].slice(0, i).concat([...map].slice(i + 1))
             for (var j = 0; j < obj.vertices.length - 1; j++) {
-                var best = getIntersections(obj.vertices[j], obj.vertices[j + 1], restOfMap);
+                var intersections = getIntersections(obj.vertices[j], obj.vertices[j + 1], restOfMap);
                 newVertices.push(obj.vertices[j]);
                 const distance = Math.sqrt((obj.vertices[j + 1].x - obj.vertices[j].x)**2 + (obj.vertices[j + 1].y - obj.vertices[j].y)**2);
-                if (best.dist < distance) {
-                    newVertices.push({ x: best.x, y: best.y });
+                for (const vertex of intersections) {
+                    newVertices.push({ x: vertex.x, y: vertex.y });
                 }
             }
-            var best = getIntersections(obj.vertices[obj.vertices.length - 1], obj.vertices[0], restOfMap);
-            newVertices.push(obj.vertices[j]);
-            const distance = Math.sqrt((obj.vertices[obj.vertices.length - 1].x - obj.vertices[0].x)**2 + (obj.vertices[obj.vertices.length - 1].y - obj.vertices[0].y)**2);
-            if (best.dist < distance) newVertices.push({ x: best.x, y: best.y })
+            intersections = getIntersections(obj.vertices[obj.vertices.length - 1], obj.vertices[0], restOfMap);
+            newVertices.push(obj.vertices[obj.vertices.length - 1]);
+            const distance = Math.sqrt((obj.vertices[0].x - obj.vertices[obj.vertices.length - 1].x)**2 + (obj.vertices[0].y - obj.vertices[obj.vertices.length - 1].y)**2);
+            for (const vertex of intersections) {
+                newVertices.push({ x: vertex.x, y: vertex.y });
+            }
 
-            intersectMap1[i].vertices = newVertices;
+            for (const vertex of newVertices) {
+                ctx.beginPath();
+                ctx.moveTo(vertex.x, vertex.y);
+                ctx.arc(vertex.x, vertex.y, 10, 0, 2 * Math.PI);
+                ctx.fillStyle = '#000';
+                ctx.fill()
+            }
+            
+            intersectMap.push({ vertices: newVertices });
         }
-
-        const intersectMap = [];
-        for (const obj of intersectMap1) {
-            intersectMap.push({ vertices: obj.vertices })
-        }
-        intersectMap1 = [];
 
         var vertices = [];
         for (const obj of intersectMap) {
@@ -228,7 +228,7 @@ const v = {
                         distance = radius
                     }
 
-                    var best = getIntersections(pos, endPoint, map);
+                    var best = getIntersection(pos, endPoint, map);
 
                     if (best.dist >= distance) {
                         best = {
@@ -246,7 +246,7 @@ const v = {
                         y: Math.sin(angle + 0.001) * radius + pos.y
                     }
 
-                    best = getIntersections(pos, endPoint, map);
+                    best = getIntersection(pos, endPoint, map);
 
                     if (best.dist >= radius) {
                         best = {
@@ -264,7 +264,7 @@ const v = {
                         y: Math.sin(angle - 0.001) * radius + pos.y
                     }
 
-                    best = getIntersections(pos, endPoint, map);
+                    best = getIntersection(pos, endPoint, map);
 
                     if (best.dist >= radius) {
                         best = {
@@ -323,7 +323,7 @@ const v = {
                 y: Math.sin(newAngle) * radius + pos.y
             }
 
-            var best = getIntersections(pos, endPoint, map);
+            var best = getIntersection(pos, endPoint, map);
 
             vertices.push(vertex);
 
