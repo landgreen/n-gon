@@ -1,20 +1,47 @@
 ******************************************************** NEXT PATCH **************************************************
 
-factory: rewrote the end
+JUNK tech: flatland - draw line of sight
+  credit to Cornbread for line of sight algorithm
+  a preview of future line of site content
+  try it out in console:  tech.giveTech("flatland")
 
-clock gating was removed because it's annoying
-liquid cooling -> refrigerant - freezes mobs after losing at least 5% health
-mass-energy gets more effect from defense (0.13 -> 0.19)
-ternary 84 -> 77% damage
-dark patterns 15 -> 17% damage and JUNK
-Maxwell's demon 3% -> 1% energy loss above max
-exciton 16 -> 14% chance to drop
-
-10% increase in overall mob health
 new images
 bug fixes
 
 *********************************************************** TODO *****************************************************
+
+LoS
+  LoS clipping
+    performance
+      calculate things that don't change when the map ctx is done
+        like the intersections?
+    rewrite code for infinite range
+    how to use this?
+      JUNK tech?
+      custom level?
+        give it a dark back ground for contrast?
+      game setting?
+  boss that you need to avoid,  probably requires a custom level
+    boss is a source of light
+  level that is dark, and you can only see LoS
+LoS with limited radius
+  explosion graphic
+  mobs area of effect damage
+    maybe make a shared mob AoE damage function
+  standing wave graphic
+
+Also another thing I made that could fit in-game: https://kgurchiek.github.io/universal-n-gon-loader/
+by default it just plays a random version of n-gon downloaded from past github commits
+maybe the "snapshots" could work like this rather than downloading 8 versions of the game?
+also you can play any version with https://kgurchiek.github.io/universal-n-gon-loader/?commitIndex=NUM
+where setting "NUM" to 0 is the very first commit
+here's the code if you want to check it out: https://github.com/kgurchiek/universal-n-gon-loader/blob/main/script.js
+
+level - funicular
+  The system is characterized by two counterbalanced carriages (also called cars or trains) permanently attached to opposite ends of a haulage cable, which is looped over a pulley at the upper end of the track.[2][3] The result of such a configuration is that the two carriages move synchronously: as one ascends, the other descends at an equal speed.
+
+missile bot and plasma bot don't get converted by bot upgrade tech?
+  is this more confusing because it contradicts text?
 
 use ephemera to replace things
   JUNK?

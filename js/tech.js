@@ -523,7 +523,7 @@ const tech = {
     {
         name: "causality bombs",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Causality' class="link">causality bombs</a>`,
-        description: "when you <strong class='color-rewind'>rewind</strong> drop several <strong>grenades</strong><br>become <strong>invulnerable</strong> until they <strong class='color-e'>explode</strong>",
+        description: "when you <strong class='color-rewind'>rewind</strong> drop several <strong>grenades</strong>", //<br>become <strong>invulnerable</strong> until they <strong class='color-e'>explode</strong>
         maxCount: 1,
         count: 0,
         frequency: 2,
@@ -7257,9 +7257,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldMode === 4 && tech.deflectEnergy === 0) || (m.fieldMode === 1 && tech.harmonics === 2)
+            return m.fieldMode === 1 && tech.harmonics === 2
         },
-        requires: "molecular assembler, standing wave, not electric generator",
+        requires: "standing wave",
         effect() {
             tech.isLaserField = true
         },
@@ -7836,9 +7836,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 4 && !tech.isLaserField
+            return m.fieldMode === 4
         },
-        requires: "molecular assembler, not surface plasmon",
+        requires: "molecular assembler",
         effect() {
             tech.deflectEnergy += 0.5;
         },
@@ -8360,7 +8360,7 @@ const tech = {
     },
     {
         name: "vacuum fluctuation",
-        description: `use ${powerUps.orb.research(3)}to exploit your <strong class='color-f'>field</strong> for a<br><strong>+11%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
+        description: `use ${powerUps.orb.research(3)}<br><strong>+11%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -10078,6 +10078,66 @@ const tech = {
             setInterval(() => {
                 if (!simulation.paused) ctx.rotate(0.001 * Math.sin(simulation.cycle * 0.01))
             }, 16);
+        },
+        remove() { }
+    },
+    {
+        name: "flatland",
+        description: "map blocks line of sight",
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isNonRefundable: true,
+        isJunk: true,
+        allowed() { return true },
+        requires: "",
+        effect() {
+            simulation.ephemera.push({
+                name: "LoS", count: 0, do() {
+                    const pos = m.pos
+                    const radius = 5000
+                    if (!simulation.isTimeSkipping) {
+                        const vertices = simulation.sight.circleLoS(pos, radius);
+                        if (vertices.length) {
+                            ctx.beginPath();
+                            ctx.moveTo(vertices[0].x, vertices[0].y);
+                            for (var i = 1; i < vertices.length; i++) {
+                                var currentDistance = Math.sqrt((vertices[i - 1].x - pos.x) ** 2 + (vertices[i - 1].y - pos.y) ** 2);
+                                var newDistance = Math.sqrt((vertices[i].x - pos.x) ** 2 + (vertices[i].y - pos.y) ** 2);
+                                if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
+                                    const currentAngle = Math.atan2(vertices[i - 1].y - pos.y, vertices[i - 1].x - pos.x);
+                                    const newAngle = Math.atan2(vertices[i].y - pos.y, vertices[i].x - pos.x);
+                                    ctx.arc(pos.x, pos.y, radius, currentAngle, newAngle);
+                                } else {
+                                    ctx.lineTo(vertices[i].x, vertices[i].y)
+                                }
+                            }
+                            newDistance = Math.sqrt((vertices[0].x - pos.x) ** 2 + (vertices[0].y - pos.y) ** 2);
+                            currentDistance = Math.sqrt((vertices[vertices.length - 1].x - pos.x) ** 2 + (vertices[vertices.length - 1].y - pos.y) ** 2);
+                            if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
+                                const currentAngle = Math.atan2(vertices[vertices.length - 1].y - pos.y, vertices[vertices.length - 1].x - pos.x);
+                                const newAngle = Math.atan2(vertices[0].y - pos.y, vertices[0].x - pos.x);
+                                ctx.arc(pos.x, pos.y, radius, currentAngle, newAngle);
+                            } else {
+                                ctx.lineTo(vertices[0].x, vertices[0].y)
+                            }
+                            //stroke the map, so it looks different form the line of sight 
+                            ctx.strokeStyle = "#234";
+                            ctx.lineWidth = 9;
+                            ctx.stroke(simulation.draw.mapPath);
+
+                            ctx.globalCompositeOperation = "destination-in";
+                            ctx.fillStyle = "#000";
+                            ctx.fill();
+                            ctx.globalCompositeOperation = "source-over";
+                            // also see the map
+                            // ctx.fill(simulation.draw.mapPath);
+                            // ctx.fillStyle = "#000";
+                            ctx.clip();
+                        }
+                    }
+                },
+            })
         },
         remove() { }
     },

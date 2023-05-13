@@ -6751,7 +6751,7 @@ const b = {
     },
     {
         name: "wave", //3
-        description: "emit a <strong>wave packet</strong> of oscillating particles<br>that propagates through <strong>solids</strong>",
+        description: "emit <strong>wave packets</strong> that propagate through <strong>solids</strong><br>waves <strong class='color-s'>slow</strong> mobs", // of oscillating particles<br>
         ammo: 0,
         ammoPack: 115,
         defaultAmmoPack: 115,
