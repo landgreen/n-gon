@@ -11,20 +11,20 @@ bug fixes
 *********************************************************** TODO *****************************************************
 
 LoS
-  LoS clipping
-    performance
-      calculate things that don't change when the map ctx is done
-        like the intersections?
-    rewrite code for infinite range
-    how to use this?
-      JUNK tech?
-      custom level?
-        give it a dark back ground for contrast?
-      game setting?
+  performance
+    calculate things that don't change when the map ctx is done
+      like the intersections?
+  rewrite code for infinite range
+  how to use this?
+    JUNK tech?
+    custom level?
+      give it a dark back ground for contrast?
+    game setting?
+applications
+  level that is dark, and you can only see LoS
   boss that you need to avoid,  probably requires a custom level
     boss is a source of light
-  level that is dark, and you can only see LoS
-LoS with limited radius
+  cloaking tech, or just replace cloaking effect
   explosion graphic
   mobs area of effect damage
     maybe make a shared mob AoE damage function

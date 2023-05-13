@@ -40,7 +40,7 @@ const level = {
             // for (let i = 0; i < 1; ++i) tech.giveTech("waste heat recovery")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("foam-bot") });
             // for (let i = 0; i < 1; i++) tech.giveTech("foam-bot upgrade")
-            for (let i = 0; i < 1; ++i) tech.giveTech("flatland")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("flatland")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
