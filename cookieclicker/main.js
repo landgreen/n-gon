@@ -1241,7 +1241,7 @@ if (App) Game.local=true;
 Game.resPath='';
 if (!App && !Game.local && window.location.href.indexOf('orteil.dashnet.org')!=-1)
 {
-	Game.resPath=('//'+location.host+location.pathname).replace('orteil.dashnet.org','cdn.dashnet.org');
+	Game.resPath='https://cdn.dashnet.org';
 	if (Game.resPath.substr(-1)!='/') Game.resPath+='/';
 }
 
