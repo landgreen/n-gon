@@ -302,6 +302,32 @@ const build = {
         document.getElementById("hide-images").checked = localSettings.isHideImages
         // console.log(localSettings.isHideImages, from)
     },
+    hideHUD() {
+        localSettings.isHideHUD = !localSettings.isHideHUD
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        document.getElementById("hide-hud").checked = localSettings.isHideHUD
+        document.getElementById("hide-hud").classList.toggle("ticked")
+
+        simulation.removeEphemera("dmgDefBars")
+        if (!localSettings.isHideHUD) {
+            simulation.ephemera.push({
+                name: "dmgDefBars", count: 0, do() {
+                    if (!(m.cycle % 15)) { //4 times a second
+                        const defense = m.defense()             //update defense bar
+                        if (m.lastCalculatedDefense !== defense) {
+                            document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
+                            m.lastCalculatedDefense = defense
+                        }
+                        const damage = tech.damageFromTech()             //update damage bar
+                        if (m.lastCalculatedDamage !== damage) {
+                            document.getElementById("damage-bar").style.height = Math.floor((Math.atan(0.25 * damage - 0.25) + 0.25) * 0.53 * canvas.height) + "px";
+                            m.lastCalculatedDamage = damage
+                        }
+                    }
+                },
+            })
+        }
+    },
     pauseGrid() {
         // build.pixelDraw();
         //used for junk estimation
@@ -330,15 +356,18 @@ const build = {
     <g stroke='none' fill='#333' stroke-width="2" font-size="14px" font-family="Ariel, sans-serif"> <text x="5" y="15">copy build url</text></g>
 </svg><span style="font-size:1.5em;font-weight: 600; float: right;">PAUSED</span> 
 <br>
-<label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.3em;" >hide images:</label>
 <input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages ? "checked" : ""}>
-<span style="float: right;">press ${input.key.pause} to resume</span> 
+<label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.3em;" >hide images</label>
+<span style="float: right;">press ${input.key.pause} to resume</span>
+<br>
+<input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
+<label for="hide-hud" title="hide: tech, defense, damage, in game console" style="font-size:1.3em;">minimal HUD</label>
 <br>
 <br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)} &nbsp; &nbsp; difficulty: ${((m.dmgScale)).toPrecision(4)}
 <br><strong class='color-defense'>defense</strong>: ${tech.isEnergyHealth ? (1 - Math.pow(m.defense(), 0.13)).toPrecision(5) : (1 - m.defense()).toPrecision(5)} &nbsp; &nbsp; difficulty: ${(1 / simulation.dmgScale).toPrecision(4)}
 <br><strong><em>fire rate</em></strong>: ${((1 - b.fireCDscale) * 100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
 ${tech.duplicationChance() ? `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance() * 100).toFixed(0)}%` : ""}
-${m.coupling ? `<br><strong class='color-coupling'>coupling</strong>: ${(m.coupling).toFixed(2)} &nbsp; <span style = 'font-size:90%;'>` + m.couplingDescription() + "</span>" : ""}
+${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
 ${botText}
 <br>
 <br><strong class='color-h'>health</strong>: (${(m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
@@ -380,7 +409,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                     <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div>
                     ${b.guns[b.inventory[i]].description}</div> </div>`
         }
-        text += `<div class="pause-grid-module pause-console" style = "background-color: rgba(255,255,255,0.3);">${document.getElementById("text-log").innerHTML}</div>` //show last in game console message
+        if (!localSettings.isHideHUD) text += `<div class="pause-grid-module pause-console" style = "background-color: rgba(255,255,255,0.3);">${document.getElementById("text-log").innerHTML}</div>` //show last in game console message
         let el = document.getElementById("pause-grid-left")
         el.style.display = "grid"
         el.innerHTML = text
@@ -432,7 +461,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                     text += build.techText(i) + "</div>"
                 }
             } else if (tech.tech[i].isLost) {
-                text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].link}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`
+                text += `<div class="pause-grid-module" style="text-decoration: line-through; padding-left: 8px; opacity: 0.4;"><div class="grid-title">${tech.tech[i].link}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`
             }
         }
         el = document.getElementById("pause-grid-right")
@@ -454,7 +483,6 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 
     },
     unPauseGrid() {
-        document.getElementById("tech").style.display = "inline"
         document.getElementById("guns").style.display = "inline"
         document.getElementById("field").style.display = "inline"
         if (tech.isEnergyHealth) {
@@ -464,8 +492,11 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             document.getElementById("health").style.display = "inline"
             document.getElementById("health-bg").style.display = "inline"
         }
-        document.getElementById("defense-bar").style.display = "inline"
-        document.getElementById("damage-bar").style.display = "inline"
+        if (!localSettings.isHideHUD) {
+            document.getElementById("tech").style.display = "inline"
+            document.getElementById("defense-bar").style.display = "inline"
+            document.getElementById("damage-bar").style.display = "inline"
+        }
         // document.body.style.overflow = "hidden"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"
@@ -1494,6 +1525,10 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     }
     if (localSettings.isHideImages === undefined) localSettings.isHideImages = true //default to hide images
     document.getElementById("hide-images").checked = localSettings.isHideImages
+
+    if (localSettings.isHideHUD === undefined) localSettings.isHideHUD = false
+    document.getElementById("hide-hud").checked = localSettings.isHideHUD
+
 } else {
     console.log('setting default localSettings')
     const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
@@ -1513,6 +1548,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         isHuman: false,
         key: undefined,
         isHideImages: true, //default to hide images
+        isHideHUD: false,
     };
     input.setDefault()
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage

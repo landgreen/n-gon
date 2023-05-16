@@ -1,38 +1,70 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community level - superNgonBros by DesBoot
+JUNK tech: flatland - draw line of sight
+  credit to Cornbread for line of sight algorithm
+  a preview of future line of site content
+  try it out in console:  tech.giveTech("flatland")
 
-tech: induction brake - after using a heal slow nearby mobs for 15 seconds
-tech: null hypothesis - +9 damage, spawn several research after removing
-reworked: strange attractor - +7% damage, +10% duplication after removing
-
-bremsstrahlung does 50% more damage
-time crystals 200 -> 150% passive energy regen
-  it also tells you how much energy regen you will get
-aperture (-50 to +150) -> (-10 to +110) damage
-diaphragm (-33 to +100) -> (+8 to +80) defense
-tungsten carbide 200 -> 222 health
-CPT symmetry 30 -> 20 energy per second of rewind
-quenching gives more max health, but also does more damage per over heal
-
-final boss has 50% faster armor decay
-  so it takes even more damage the longer you fight it
-
-a few more images
-some bug fixes
+new images
+bug fixes
 
 *********************************************************** TODO *****************************************************
-maybe use ⚆ in game text?
-  increase font?
+
+LoS
+  performance
+    calculate things that don't change when the map ctx is done
+      like the intersections?
+  rewrite code for infinite range
+  how to use this?
+    JUNK tech?
+    custom level?
+      give it a dark back ground for contrast?
+    game setting?
+applications
+  level that is dark, and you can only see LoS
+  boss that you need to avoid,  probably requires a custom level
+    boss is a source of light
+  cloaking tech, or just replace cloaking effect
+  explosion graphic
+  mobs area of effect damage
+    maybe make a shared mob AoE damage function
+  standing wave graphic
+
+Also another thing I made that could fit in-game: https://kgurchiek.github.io/universal-n-gon-loader/
+by default it just plays a random version of n-gon downloaded from past github commits
+maybe the "snapshots" could work like this rather than downloading 8 versions of the game?
+also you can play any version with https://kgurchiek.github.io/universal-n-gon-loader/?commitIndex=NUM
+where setting "NUM" to 0 is the very first commit
+here's the code if you want to check it out: https://github.com/kgurchiek/universal-n-gon-loader/blob/main/script.js
+
+level - funicular
+  The system is characterized by two counterbalanced carriages (also called cars or trains) permanently attached to opposite ends of a haulage cable, which is looped over a pulley at the upper end of the track.[2][3] The result of such a configuration is that the two carriages move synchronously: as one ascends, the other descends at an equal speed.
+
+missile bot and plasma bot don't get converted by bot upgrade tech?
+  is this more confusing because it contradicts text?
+
+use ephemera to replace things
+  JUNK?
+  request animation stuff
+  simulation checks
+    damage and defense bars
+      disable and enable ephemera with settings
+
+drones target anything that moves: speed > 1
+  including player, blocks?, mobs, power ups
+  maybe target the fastest mobs?
+
+perfect diamagnatism - invulnerable while field is active?
+  also drain energy while field is active?
+
+mobs attack mines
+  mines periodically set all mobs to have player location to be the mine
+    is this going to work with all mob vision types?
   
 rework quantum eraser
 
 test bremsstrahlung damage
   and make sure it actually does more damage with the dot tech
-
-use ephemera to replace things
-  JUNK?
-  request animation stuff
 
 tech: choose next map by name after exiting current map
   use modified tech selection code?
@@ -1221,13 +1253,13 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
 ***past style themes***
   field emitter - bipedal white robot spherical gun turret on bird legs
       damaged dirty white robot spherical gun turret on bird legs in the style of Solarpunk
-      a white spherical bipedal mech standing motionless while black lines travel quickly in the background, minimalist style --no arms --v5
   standing wave - a 3-D cyan transparent nested concentric aligned centered sphere with rings
     by Philippe Starck 
   perfect diamagnetism - physics magnetic field chalk diagram 
   time dilation - graphic of a hyperbolic equation Luminogram
   negative mass - Blacklight painting by Moebius
   plasma torch - by Dan Mumford
+
   metamaterial cloaking - Scientific photography by Miki Asai,   by Bruce Munro
   molecular assembler - by Laurie Greasley 16-bit Isometric 
   wormhole - by Tim White

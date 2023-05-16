@@ -60,7 +60,7 @@ const mobs = {
 
         function applySlow(whom) {
             if (!whom.shield && !whom.isShielded && whom.alive) {
-                if (tech.isIceMaxHealthLoss && whom.health > 0.65 && whom.damageReduction > 0) whom.health = 0.66
+                if (tech.isIceMaxHealthLoss && whom.health > 0.66 && whom.damageReduction > 0) whom.health = 0.66
                 if (tech.isIceKill && whom.health < 0.34 && whom.damageReduction > 0 && whom.alive) {
                     // whom.death();
                     whom.damage(Infinity);
@@ -239,7 +239,7 @@ const mobs = {
     deathCount: 0,
     mobSpawnWithHealth: 1,
     setMobSpawnHealth() {
-        mobs.mobSpawnWithHealth = 0.88 ** (tech.mobSpawnWithHealth) //+ (m.fieldMode === 0 || m.fieldMode === 7) * m.coupling
+        mobs.mobSpawnWithHealth = 0.88 ** (tech.mobSpawnWithHealth)
     },
     //**********************************************************************************************
     //**********************************************************************************************
@@ -337,7 +337,7 @@ const mobs = {
             },
             alwaysSeePlayer() {
                 if (!m.isCloak) {
-                    this.seePlayer.recall = true;
+                    this.seePlayer.recall = 1;
                     this.seePlayer.position.x = player.position.x;
                     this.seePlayer.position.y = player.position.y;
                 }
@@ -1228,15 +1228,6 @@ const mobs = {
                             simulation.timePlayerSkip((this.isBoss ? 45 : 25) * tech.deathSkipTime)
                             simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
                         }); //wrapping in animation frame prevents errors, probably
-
-                        // if (tech.isFlipFlopOn) {
-                        //     m.rewind(this.isBoss ? 45 : 25)
-                        // } else {
-                        //     requestAnimationFrame(() => {
-                        //         simulation.timePlayerSkip(this.isBoss ? 45 : 25)
-                        //         simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
-                        //     }); //wrapping in animation frame prevents errors, probably
-                        // }
                     }
                     if (tech.isEnergyLoss) m.energy *= 0.8;
                     powerUps.spawnRandomPowerUp(this.position.x, this.position.y);
