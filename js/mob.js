@@ -239,7 +239,7 @@ const mobs = {
     deathCount: 0,
     mobSpawnWithHealth: 1,
     setMobSpawnHealth() {
-        mobs.mobSpawnWithHealth = 0.88 ** (tech.mobSpawnWithHealth)
+        mobs.mobSpawnWithHealth = 0.89 ** (tech.mobSpawnWithHealth)
     },
     //**********************************************************************************************
     //**********************************************************************************************
@@ -1397,9 +1397,6 @@ const mobs = {
                         Matter.Body.setAngularVelocity(body[len2], this.angularVelocity);
                         body[len2].collisionFilter.category = cat.body;
                         body[len2].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
-                        // if (body[len].mass > 10 || 45 + 10 * Math.random() < body.length) {
-                        //   body[len].collisionFilter.mask = cat.player | cat.bullet | cat.mob | cat.mobBullet;
-                        // }
                         body[len2].classType = "body";
                         Composite.add(engine.world, body[len2]); //add to world
 

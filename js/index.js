@@ -303,7 +303,13 @@ const build = {
         // console.log(localSettings.isHideImages, from)
     },
     hideHUD() {
-        localSettings.isHideHUD = !localSettings.isHideHUD
+
+        if (simulation.isTraining) {
+            localSettings.isHideHUD = false
+        } else {
+            localSettings.isHideHUD = !localSettings.isHideHUD
+        }
+
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         document.getElementById("hide-hud").checked = localSettings.isHideHUD
         document.getElementById("hide-hud").classList.toggle("ticked")
@@ -1299,12 +1305,7 @@ window.addEventListener("keydown", function (event) {
                 powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "tech");
                 break
             case "6":
-                const index = body.length
                 spawn.bodyRect(simulation.mouseInGame.x, simulation.mouseInGame.y, 50, 50);
-                body[index].collisionFilter.category = cat.body;
-                body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-                body[index].classType = "body";
-                Composite.add(engine.world, body[index]); //add to world
                 break
             case "7":
                 const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
@@ -1452,7 +1453,7 @@ document.body.addEventListener("wheel", (e) => {
 //**********************************************************************
 let localSettings
 
-function localstorageCheck() {
+function localStorageCheck() {
     try {
         return 'localStorage' in window && window['localStorage'] !== null;
     } catch (e) {
@@ -1460,7 +1461,7 @@ function localstorageCheck() {
     }
 
 }
-if (localstorageCheck()) {
+if (localStorageCheck()) {
     localSettings = JSON.parse(localStorage.getItem("localSettings"))
     if (localSettings) {
         console.log('localStorage is enabled')

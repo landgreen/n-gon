@@ -33,6 +33,7 @@ const tech = {
         tech.totalCount = 0;
         tech.junkCount = 0 //tech.countJunkTech();
         simulation.updateTechHUD();
+        simulation.updateGunHUD();
     },
     removeTech(index = 'random') {
         if (index === 'random') {
@@ -335,7 +336,7 @@ const tech = {
         }
     },
     {
-        name: "elasticity",
+        name: "nitinol",
         description: "<strong>+33%</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>+30%</strong> <strong class='color-defense'>defense</strong>",
         maxCount: 3,
         count: 0,
@@ -1288,7 +1289,7 @@ const tech = {
     },
     {
         name: "reaction inhibitor",
-        description: "<strong>-12%</strong> maximum mob <strong>health</strong>", //<strong class='color-h'>health</strong>
+        description: "<strong>-11%</strong> maximum mob <strong>health</strong>", //<strong class='color-h'>health</strong>
         maxCount: 3,
         count: 0,
         frequency: 1,
@@ -3489,7 +3490,7 @@ const tech = {
             for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
         },
         remove() {
-            if (!this.count) tech.isDeterminism = false;
+            tech.isDeterminism = false;
         }
     },
     {
@@ -8936,10 +8937,6 @@ const tech = {
                         y: 10 * (Math.random() - 0.5)
                     });
                     bodyBullet.isAboutToBeRemoved = true
-                    bodyBullet.collisionFilter.category = cat.body;
-                    bodyBullet.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-                    bodyBullet.classType = "body";
-                    Composite.add(engine.world, bodyBullet); //add to world
                     setTimeout(() => { //remove block
                         for (let i = 0; i < body.length; i++) {
                             if (body[i] === bodyBullet) {
@@ -10095,7 +10092,7 @@ const tech = {
             simulation.ephemera.push({
                 name: "LoS", count: 0, do() {
                     const pos = m.pos
-                    const radius = 5000
+                    const radius = 3000
                     if (!simulation.isTimeSkipping) {
                         const vertices = simulation.sight.circleLoS(pos, radius);
                         if (vertices.length) {
@@ -10121,10 +10118,11 @@ const tech = {
                             } else {
                                 ctx.lineTo(vertices[0].x, vertices[0].y)
                             }
+
                             //stroke the map, so it looks different form the line of sight 
                             ctx.strokeStyle = "#234";
                             ctx.lineWidth = 9;
-                            ctx.stroke(simulation.draw.mapPath);
+                            ctx.stroke(simulation.draw.mapPath); //this has a pretty large impact on performance, maybe 5% worse performance
 
                             ctx.globalCompositeOperation = "destination-in";
                             ctx.fillStyle = "#000";
@@ -10235,16 +10233,8 @@ const tech = {
             for (let i = 0, len = 40; i < len; i++) {
                 setTimeout(() => {
                     m.energy -= 1 / len
-                    const index = body.length
-                    where = Vector.add(m.pos, {
-                        x: 400 * (Math.random() - 0.5),
-                        y: 400 * (Math.random() - 0.5)
-                    })
+                    where = Vector.add(m.pos, { x: 400 * (Math.random() - 0.5), y: 400 * (Math.random() - 0.5) })
                     spawn.bodyRect(where.x, where.y, Math.floor(15 + 100 * Math.random()), Math.floor(15 + 100 * Math.random()));
-                    body[index].collisionFilter.category = cat.body;
-                    body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-                    body[index].classType = "body";
-                    Composite.add(engine.world, body[index]); //add to world
                 }, i * 100);
             }
 

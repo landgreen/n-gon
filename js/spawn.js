@@ -32,8 +32,7 @@ const spawn = {
         "laser", "laser",
         "pulsar", "pulsar",
         "sneaker", "sneaker",
-        "launcher", "launcherOne", "exploder", "sucker", "sniper", "spinner", "grower", "beamer", "spawner", "ghoster",
-        //, "focuser"
+        "launcher", "launcherOne", "exploder", "sucker", "sniper", "spinner", "grower", "beamer", "spawner", "ghoster", "focuser"
     ],
     mobTypeSpawnOrder: [], //preset list of mob names calculated at the start of a run by the randomSeed
     mobTypeSpawnIndex: 0, //increases as the mob type cycles
@@ -5883,9 +5882,10 @@ const spawn = {
         mobs.spawn(x, y, 7, radius, "transparent");
         let me = mob[mob.length - 1];
         me.seeAtDistance2 = 300000;
-        me.accelMag = 0.00015 * simulation.accelScale;
+        me.accelMag = 0.00004 + 0.00015 * simulation.accelScale;
         if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
-        Matter.Body.setDensity(me, 0.0015); //normal is 0.001 //makes effective life much lower
+        // Matter.Body.setDensity(me, 0.0015); //normal is 0.001
+        me.damageReduction = 0.5
         me.stroke = "transparent"; //used for drawGhost
         me.alpha = 1; //used in drawGhost
         me.isNotCloaked = false; //used in drawGhost
@@ -5893,9 +5893,9 @@ const spawn = {
         // me.leaveBody = false;
         me.collisionFilter.mask = cat.bullet //| cat.body
         me.showHealthBar = false;
-        me.memory = 480;
+        me.memory = 600;
         me.do = function () {
-            //cap max speed
+            //cap max speed to avoid getting launched by deflection, explosion
             if (this.speed > 7) {
                 Matter.Body.setVelocity(this, {
                     x: this.velocity.x * 0.8,
@@ -5908,12 +5908,12 @@ const spawn = {
             this.search();
             //draw
             if (this.distanceToPlayer2() < this.seeAtDistance2) {
-                if (this.alpha < 1) this.alpha += 0.01 * simulation.CDScale; //near player go solid
+                if (this.alpha < 1) this.alpha += 0.011 * simulation.CDScale; //near player go solid
             } else {
                 if (this.alpha > 0) this.alpha -= 0.05; ///away from player, hide
             }
             if (this.alpha > 0) {
-                if (this.alpha > 0.8 && this.seePlayer.recall) {
+                if (this.alpha > 0.7 && this.seePlayer.recall) {
                     this.healthBar();
                     if (!this.isNotCloaked) {
                         this.isNotCloaked = true;
@@ -8165,20 +8165,53 @@ const spawn = {
             }
         }
     },
-    bodyRect(x, y, width, height, chance = 1, properties = {
-        friction: 0.05,
-        frictionAir: 0.001,
-    }) {
-        if (Math.random() < chance) body[body.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
+    // bodyRect(x, y, width, height, chance = 1, properties = { friction: 0.05, frictionAir: 0.001 }) {
+    //     if (Math.random() < chance) body[body.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
+    // },
+    // bodyVertex(x, y, vector, properties) { //adds shape to body array
+    //     body[body.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
+    // },
+    bodyRect(x, y, width, height, chance = 1, properties = { friction: 0.05, frictionAir: 0.001 }) { //this is the command that adds blocks to the world in the middle of a level
+        if (Math.random() < chance) {
+            body[body.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
+            const who = body[body.length - 1]
+            who.collisionFilter.category = cat.body;
+            who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+            Composite.add(engine.world, who); //add to world
+            who.classType = "body"
+        }
     },
-    bodyVertex(x, y, vector, properties) { //adds shape to body array
+    bodyVertex(x, y, vector, properties) { //this is the command that adds blocks to the world in the middle of a level
         body[body.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
+        const who = body[body.length - 1]
+        who.collisionFilter.category = cat.body;
+        who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+        Composite.add(engine.world, who); //add to world
+        who.classType = "body"
     },
     mapRect(x, y, width, height, properties) { //adds rectangle to map array
         map[map.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
     },
     mapVertex(x, y, vector, properties) { //adds shape to map array
         map[map.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
+    },
+    mapRectNow(x, y, width, height, properties, isRedrawMap = true) { //adds rectangle to map array in the middle of a level
+        map[map.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
+        const who = map[map.length - 1]
+        who.collisionFilter.category = cat.map;
+        who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+        Matter.Body.setStatic(who, true); //make static
+        Composite.add(engine.world, who); //add to world
+        if (isRedrawMap) simulation.draw.setPaths()
+    },
+    mapVertexNow(x, y, vector, properties) { //adds shape to map array in the middle of a level
+        map[map.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
+        const who = map[map.length - 1]
+        who.collisionFilter.category = cat.map;
+        who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+        Matter.Body.setStatic(who, true); //make static
+        Composite.add(engine.world, who); //add to world
+        if (isRedrawMap) simulation.draw.setPaths() //this is a bit slow on processing so maybe it's better to run after you spawn several different shapes
     },
     //complex map templates
     spawnBuilding(x, y, w, h, leftDoor, rightDoor, walledSide) {

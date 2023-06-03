@@ -1,34 +1,65 @@
 ******************************************************** NEXT PATCH **************************************************
 
-JUNK tech: flatland - draw line of sight
-  credit to Cornbread for line of sight algorithm
-  a preview of future line of site content
-  try it out in console:  tech.giveTech("flatland")
+level: subway
+  replaces gauntlet just before the final boss
+    gauntlet moved to community map pool
+  subway todo:
+    add a few more stations
+    balance difficulty
+    find bugs
 
-new images
-bug fixes
+surface plasmons does 50% more damage
+elasticity renamed nitinol because I bought some nitinol wire and it's neat
+entanglement power up no longer shows guns or fields you already have
+disabled minimal HUD for training levels
+reaction inhibitor 12->11% mob max health reduction
+
+spawn.bodyRect() now can add blocks mid level without any extra code
+  I think I found all the bugs this causes, but let me know if any blocks added mid game aren't colliding
+
+community map - clock update:
+  visual overhaul,live lighting, remove pendulum overlap, move with pendulum if you stand in it, debris, trap exit only opens after completing the fight, moving elements now freeze while using time dilation
 
 *********************************************************** TODO *****************************************************
 
-LoS
-  performance
-    calculate things that don't change when the map ctx is done
-      like the intersections?
-  rewrite code for infinite range
-  how to use this?
-    JUNK tech?
-    custom level?
-      give it a dark back ground for contrast?
-    game setting?
-applications
-  level that is dark, and you can only see LoS
-  boss that you need to avoid,  probably requires a custom level
-    boss is a source of light
-  cloaking tech, or just replace cloaking effect
-  explosion graphic
-  mobs area of effect damage
-    maybe make a shared mob AoE damage function
-  standing wave graphic
+consider increasing the base player horizontal movement
+  maybe only increase ground movement, air control seems fine
+
+level: subway - a map that uses the train level element and line of sight graphics
+  stations
+    station theme ideas:
+      portals
+        teleport to far away rooms
+      slime
+      map elements that alternate between positions
+      buttons and doors
+  boss
+    spawn at the exit station? or at a random station? or at the station before the exit?
+    spawn on the station after enough mobs have been killed?
+    type of boss?
+      might need to make a new boss designed for this map: los and stations
+        small, quick, sneaky
+      do random bosses work?
+        I think 
+  looks good with line of sight
+    background lighting for each room drawn in level.custom
+    no outdoors, no fall off the edge
+    slime
+    no small bumps
+    starting in a small room with a hole to the right with a short drop, like highrise or aerie
+    floating hexagons, like in reservoir, labs
+    ramping walls to jump over, like satellite
+
+tech stubs should be a tech unlocked by skins
+  nitinol, tungsten?
+  maybe give another benefit?
+    defense?
+    make a shared variable for skin defense, since you can only have one skin
+
+make a lemming that walks until it hits a wall and then turns around robotically
+  body or mob?
+  can't be killed?
+
 
 Also another thing I made that could fit in-game: https://kgurchiek.github.io/universal-n-gon-loader/
 by default it just plays a random version of n-gon downloaded from past github commits
@@ -36,9 +67,6 @@ maybe the "snapshots" could work like this rather than downloading 8 versions of
 also you can play any version with https://kgurchiek.github.io/universal-n-gon-loader/?commitIndex=NUM
 where setting "NUM" to 0 is the very first commit
 here's the code if you want to check it out: https://github.com/kgurchiek/universal-n-gon-loader/blob/main/script.js
-
-level - funicular
-  The system is characterized by two counterbalanced carriages (also called cars or trains) permanently attached to opposite ends of a haulage cable, which is looped over a pulley at the upper end of the track.[2][3] The result of such a configuration is that the two carriages move synchronously: as one ascends, the other descends at an equal speed.
 
 missile bot and plasma bot don't get converted by bot upgrade tech?
   is this more confusing because it contradicts text?
@@ -65,6 +93,8 @@ rework quantum eraser
 
 test bremsstrahlung damage
   and make sure it actually does more damage with the dot tech
+
+tech circular polarization - wave gun bullets move in a circle
 
 tech: choose next map by name after exiting current map
   use modified tech selection code?
