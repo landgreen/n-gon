@@ -1,26 +1,24 @@
 ******************************************************** NEXT PATCH **************************************************
 
-level: subway
-  replaces gauntlet just before the final boss
-    gauntlet moved to community map pool
-  subway todo:
-    add a few more stations
-    balance difficulty
-    find bugs
-
-surface plasmons does 50% more damage
-elasticity renamed nitinol because I bought some nitinol wire and it's neat
-entanglement power up no longer shows guns or fields you already have
-disabled minimal HUD for training levels
-reaction inhibitor 12->11% mob max health reduction
-
-spawn.bodyRect() now can add blocks mid level without any extra code
-  I think I found all the bugs this causes, but let me know if any blocks added mid game aren't colliding
-
-community map - clock update:
-  visual overhaul,live lighting, remove pendulum overlap, move with pendulum if you stand in it, debris, trap exit only opens after completing the fight, moving elements now freeze while using time dilation
+added a random station in subway
+a few bug fixes
 
 *********************************************************** TODO *****************************************************
+
+mob non-combat behaviors, like Rain World
+  gathering
+    blocks
+      eating blocks to heal?
+    power ups
+      eating power ups and ejecting them on death
+  flocking
+    grouping near mobs
+    keeping distance from mobs
+    sharing velocity with other mobs: boids
+  wander
+    random walk with a bias towards the player
+  play
+  fight other mobs
 
 consider increasing the base player horizontal movement
   maybe only increase ground movement, air control seems fine
@@ -30,7 +28,6 @@ level: subway - a map that uses the train level element and line of sight graphi
     station theme ideas:
       portals
         teleport to far away rooms
-      slime
       map elements that alternate between positions
       buttons and doors
   boss
@@ -1151,14 +1148,6 @@ level Boss: fractal Sierpiński triangle
   spawns a 1/2 size version of the boss, this version can also spawn a smaller version, but it is capped at some size level
     they spawn once at the start of the level
     if a version dies, one can be replaced every ten seconds by the largest version
-
-give mobs more animal-like behaviors like rain world
-  mobs play, look for food, explore
-  mobs some times aren't aggressive
-    when low on life or after taking a large hit
-  mobs can fight each other
-    this might be hard to code
-  isolated mobs try to group up
 
 mob: wall mounted guns / lasers
   not part of randomized mob pool, customized to each level

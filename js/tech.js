@@ -2533,7 +2533,7 @@ const tech = {
     },
     {
         name: "ground state",
-        description: "<strong>+200</strong> maximum <strong class='color-f'>energy</strong><br><strong>–40%</strong> passive <strong class='color-f'>energy</strong> generation",
+        description: "<strong>+200</strong> maximum <strong class='color-f'>energy</strong><br><strong>–33%</strong> passive <strong class='color-f'>energy</strong> generation",
         // description: "reduce <strong class='color-defense'>defense</strong> by <strong>66%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
         maxCount: 1,
         count: 0,

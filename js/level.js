@@ -34,7 +34,7 @@ const level = {
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[3].ammo = 100000000
-            // tech.giveTech("nitinol")
+            // tech.giveTech("accretion")
             // tech.giveTech("surface plasmons")
             // for (let i = 0; i < 6; ++i) tech.giveTech("Lorentz transformation")
             // for (let i = 0; i < 1; ++i) tech.giveTech("waste heat recovery")
@@ -1521,10 +1521,10 @@ const level = {
                     for (let i = 0, len = powerUpCollide.length; i < len; i++) {
                         const diameter = 2 * powerUpCollide[i].size
                         const buoyancy = 1 - 0.2 * Math.max(0, Math.min(diameter, this.min.y - powerUpCollide[i].position.y + powerUpCollide[i].size)) / diameter
-                        powerUpCollide[i].force.y -= buoyancy * 1.14 * powerUpCollide[i].mass * simulation.g;
+                        powerUpCollide[i].force.y -= buoyancy * 1.24 * powerUpCollide[i].mass * simulation.g;
                         Matter.Body.setVelocity(powerUpCollide[i], {
                             x: powerUpCollide[i].velocity.x,
-                            y: 0.96 * powerUpCollide[i].velocity.y
+                            y: 0.97 * powerUpCollide[i].velocity.y
                         });
                     }
                 }
@@ -2629,8 +2629,8 @@ const level = {
     subway() {
         // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
         // level.difficultyIncrease(10 * 4);
-        // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
-        m.maxHealth = m.health = 100
+        // m.maxHealth = m.health = 100
+
 
         const mobSpawnCap = mobs.mobDeaths + 100
         level.isProcedural = true //used in generating text for the level builder
@@ -2660,7 +2660,7 @@ const level = {
         train[train.length - 1].stops = { left: -7225, right: -1725 }
 
         const stationList = [] //organize the possible stations into a random order, with one station removed
-        for (let i = 0, totalNumberOfStations = 4; i < totalNumberOfStations; ++i) stationList.push(i)
+        for (let i = 0, totalNumberOfStations = 5; i < totalNumberOfStations; ++i) stationList.push(i) //!!!! update station number when you add a new station
         shuffle(stationList);
         stationList.splice(Math.floor(Math.random() * stationList.length), 1); //remove one random element from array
         let isExitOpen = false
@@ -2689,13 +2689,20 @@ const level = {
                 // bullet = [];
                 // removeAll(composite);
                 // composite = [];
-                removeAll(powerUp);
-                powerUp = [];
                 // removeAll(cons); // don't allow constraints that don't come from a mob (like elevators, rotors?)
                 // cons = [];
                 // removeAll(consBB); // don't allow constraints that don't come from a mob (like elevators, rotors?)
                 // consBB = [];
+                // removeAll(powerUp);
+                // powerUp = [];
 
+                //remove any powerUp that is too far from player
+                for (let i = 0; i < powerUp.length; ++i) {
+                    if (Vector.magnitudeSquared(Vector.sub(player.position, powerUp[i].position)) > 9000000) { //remove any powerUp farther then 3000 pixels from player
+                        Matter.Composite.remove(engine.world, powerUp[i]);
+                        powerUp.splice(i--, 1)
+                    }
+                }
                 //remove any mob that is too far from player
                 for (let i = 0; i < mob.length; ++i) {
                     if (Vector.magnitudeSquared(Vector.sub(player.position, mob[i].position)) > 4000000) { //remove any mob farther then 2000 pixels from player
@@ -2710,7 +2717,91 @@ const level = {
             } else {
                 for (let i = 0; i < 8; ++i) powerUps.chooseRandomPowerUp(100 * (Math.random() - 0.5), -200 - 100 * Math.random())//only spawn heal or ammo once at the first station
             }
-            const stations = [ //update totalNumberOfStations as you add move stations
+            const stations = [ //update totalNumberOfStations as you add more stations 
+                () => { //slime
+                    if (isExitOpen) {
+                        level.exit.x = x - 665;
+                        level.exit.y = -920;
+                    }
+                    spawn.mapRect(x + -1575, -2000, 3025, 100); //roof
+                    // spawn.mapRect(x + -1575, -2200, 3025, 300); //roof
+                    // spawn.mapRect(x + -1500, -210, 3000, 400);//station floor
+                    spawn.mapRect(x + -1500, -210, 500, 350); //station floor left
+                    spawn.mapRect(x + 1000, -210, 500, 350); //station floor right
+                    spawn.mapRect(x + 900, -1250, 125, 1250);
+                    spawn.mapRect(x - 1025, -1550, 125, 1625);
+                    spawn.mapRect(x - 50, -1900, 100, 1500);
+                    spawn.mapRect(x + -975, -1250, 200, 25);
+                    spawn.mapRect(x + -950, -625, 150, 25);
+                    spawn.mapRect(x - 925, -400, 250, 175);
+                    spawn.mapRect(x - 725, -900, 225, 300);
+                    spawn.mapRect(x + 325, -225, 325, 75);
+                    spawn.mapRect(x + 400, -950, 275, 25);
+                    spawn.mapRect(x + 775, -575, 200, 25);
+                    spawn.mapRect(x + 0, -1225, 125, 25);
+                    spawn.mapRect(x + 0, -575, 225, 175);
+                    spawn.mapRect(x - 925, -75, 875, 150);
+                    spawn.mapRect(x + 475, -1400, 75, 1250);
+
+                    if (mobs.mobDeaths < mobSpawnCap) {
+                        if (Math.random() < 0.5) {
+                            spawn.randomMob(x + -850, -450, 0);
+                            spawn.randomMob(x + -850, -125, 0);
+                            spawn.randomMob(x + -725, -100, 0);
+                            spawn.randomMob(x + 0, -100, 0);
+                            spawn.randomMob(x + 800, -50, 0);
+                            spawn.randomMob(x + 50, -275, 0);
+                            spawn.randomMob(x + -300, -425, 0);
+                            spawn.randomMob(x + -750, -475, 0);
+                            spawn.randomMob(x + -850, -775, 0);
+                            spawn.randomMob(x + -650, -1000, 0);
+                            spawn.randomMob(x + -150, -1325, 0);
+                            spawn.randomMob(x + -825, -1350, 0);
+                            spawn.randomMob(x + -375, -150, 0);
+                        } else {
+                            spawn.randomMob(x + 350, -350, 0);
+                            spawn.randomMob(x + 175, -700, 0);
+                            spawn.randomMob(x + 350, -1175, 0);
+                            spawn.randomMob(x + 200, -1600, 0);
+                            spawn.randomMob(x + 500, -1675, 0);
+                            spawn.randomMob(x + 425, -50, 0);
+                            spawn.randomMob(x + 725, -75, 0);
+                            spawn.randomMob(x + 650, -700, 0);
+                            spawn.randomMob(x + 775, -1150, 0);
+                            spawn.randomMob(x + 500, -1675, 0);
+                            spawn.randomMob(x + -150, -175, 0);
+                            spawn.randomMob(x + -800, -150, 0);
+                        }
+                    }
+
+                    const boost1 = level.boost(x - 1185, -225, 1400)
+                    const boost2 = level.boost(x + 1100, -225, 1100)
+                    const hazard1 = level.hazard(x - 900, -1225, 1800, 1225)
+                    let isSlimeRiseUp = false
+                    const drip = []
+                    drip.push(level.drip(x - 900 + 1800 * Math.random(), -1900, 0, 100)) // drip(x, yMin, yMax, period = 100, color = "hsla(160, 100%, 35%, 0.5)") {
+                    drip.push(level.drip(x - 900 + 1800 * Math.random(), -1900, 0, 150))
+                    drip.push(level.drip(x - 900 + 1800 * Math.random(), -1900, 0, 70))
+                    // drip.push(level.drip(x - 900 + 1800 * Math.random(), -1900, 0, 210))
+                    // drip.push(level.drip(x - 900 + 1800 * Math.random(), -1900, 0, 67))
+                    stationCustom = () => {
+                        for (let i = 0; i < drip.length; i++) drip[i].draw()
+                        // drip1.draw();
+                        // drip2.draw();
+                        // drip3.draw();
+                    }
+                    stationCustomTopLayer = () => {
+                        hazard1.query();
+                        hazard1.level(isSlimeRiseUp, 1.5)
+                        if (!(hazard1.height < hazard1.maxHeight)) {
+                            isSlimeRiseUp = false
+                        } else if (!(hazard1.height > 0)) {
+                            isSlimeRiseUp = true
+                        }
+                        boost1.query();
+                        boost2.query();
+                    }
+                },
                 () => { //portals
                     if (isExitOpen) {
                         level.exit.x = x + 950;
@@ -2748,9 +2839,6 @@ const level = {
                         spawn.randomMob(x + 17150, -3150, 0);
                         spawn.randomMob(x + 17700, -3300, 0);
                     }
-
-                    if (!isInProgress) spawn.secondaryBossChance(420, -2200)     // spawn.randomLevelBoss(5750, -600);
-
                     const portal1 = level.portal({
                         x: x + 0,
                         y: -200
@@ -2879,7 +2967,6 @@ const level = {
                         },
                     ]
                     if (mobs.mobDeaths < mobSpawnCap) mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
-                    if (!isInProgress) spawn.secondaryBossChance(900, -2700)     // spawn.randomLevelBoss(5750, -600);
                     stationCustom = () => { }
                     stationCustomTopLayer = () => { }
                 },
@@ -2963,7 +3050,6 @@ const level = {
                         },
                     ]
                     if (mobs.mobDeaths < mobSpawnCap) mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
-                    if (!isInProgress) spawn.secondaryBossChance(600, -2500)     // spawn.randomLevelBoss(5750, -600);
                     const boost1 = level.boost(x - 50, -225, 790)
                     const boost2 = level.boost(x + 550, -985, 900)
                     const boost3 = level.boost(x + -850, -835, 1900)
@@ -3015,7 +3101,6 @@ const level = {
                         spawn.randomMob(x + 75, -1750, 0);
                         spawn.randomMob(x + 1000, -375, 0);
                     }
-                    if (!isInProgress) spawn.secondaryBossChance(100, -850)     // spawn.randomLevelBoss(5750, -600);
                     stationCustom = () => { }
                     stationCustomTopLayer = () => {
                         ctx.fillStyle = "rgba(0,0,0,0.08)"
@@ -3025,7 +3110,7 @@ const level = {
                     }
                 },
             ]
-            // stations[3]() //for testing a specific station
+            // stations[0]() //for testing a specific station
             stations[stationList[Math.abs((stationNumber + Math.floor(stationList.length / 2)) % stationList.length)]]() //*************** run this one when uploading
             //add in standard station map infrastructure
             spawn.mapRect(x + -8000, 0, 16000, 800);//tunnel floor

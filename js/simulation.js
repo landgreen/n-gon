@@ -1262,6 +1262,8 @@ const simulation = {
             m.holdingTarget.collisionFilter.category = 0;
             m.holdingTarget.collisionFilter.mask = 0;
             m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+            Composite.add(engine.world, m.holdingTarget); //add to world
+            m.holdingTarget.classType = "body"
         }
         //set fps back to default
         simulation.fpsCap = simulation.fpsCapDefault
