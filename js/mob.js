@@ -188,7 +188,8 @@ const mobs = {
             who.status.push({
                 effect() {
                     if ((simulation.cycle - this.startCycle) % 30 === 0) {
-                        let dmg = m.dmgScale * this.dmg * tech.radioactiveDamage
+                        let dmg = m.dmgScale * tech.radioactiveDamage * this.dmg
+                        console.log(dmg)
                         who.damage(dmg);
                         if (who.damageReduction) {
                             simulation.drawList.push({ //add dmg to draw queue

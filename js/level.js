@@ -27,24 +27,26 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(10)
-            // m.setField("negative mass") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole
+            // m.setField("standing wave") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[3].ammo = 100000000
-            // tech.giveTech("accretion")
-            // tech.giveTech("surface plasmons")
+            // tech.giveTech("bremsstrahlung")
+            // tech.giveTech("cherenkov radiation")
+            // tech.giveTech("irradiated nails")
             // for (let i = 0; i < 6; ++i) tech.giveTech("Lorentz transformation")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("waste heat recovery")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("rivet gun")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("foam-bot") });
             // for (let i = 0; i < 1; i++) tech.giveTech("foam-bot upgrade")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("flatland")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("ternary")
+            // for (let i = 0; i < 3; ++i) tech.giveTech("mechatronics")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.subway();
+            // level.testing();
             // spawn.nodeGroup(3200, -300, "sniper")
             // spawn.nodeGroup(2200, -300, "sniper")
             // spawn.nodeGroup(2200, -300, "sniper")
@@ -1850,100 +1852,6 @@ const level = {
     testing() {
         simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
 
-        //clipping everything except LoS
-        //stroke around map
-        // simulation.ephemera.push({
-        //     name: "LoS", count: 0, do() {
-        //         const pos = m.pos
-        //         const radius = 5000
-        //         if (!simulation.isTimeSkipping) {
-        //             const vertices = simulation.sight.circleLoS(pos, radius);
-        //             if (vertices.length) {
-        //                 ctx.beginPath();
-        //                 ctx.moveTo(vertices[0].x, vertices[0].y);
-        //                 for (var i = 1; i < vertices.length; i++) {
-        //                     var currentDistance = Math.sqrt((vertices[i - 1].x - pos.x) ** 2 + (vertices[i - 1].y - pos.y) ** 2);
-        //                     var newDistance = Math.sqrt((vertices[i].x - pos.x) ** 2 + (vertices[i].y - pos.y) ** 2);
-        //                     if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
-        //                         const currentAngle = Math.atan2(vertices[i - 1].y - pos.y, vertices[i - 1].x - pos.x);
-        //                         const newAngle = Math.atan2(vertices[i].y - pos.y, vertices[i].x - pos.x);
-        //                         ctx.arc(pos.x, pos.y, radius, currentAngle, newAngle);
-        //                     } else {
-        //                         ctx.lineTo(vertices[i].x, vertices[i].y)
-        //                     }
-        //                 }
-        //                 newDistance = Math.sqrt((vertices[0].x - pos.x) ** 2 + (vertices[0].y - pos.y) ** 2);
-        //                 currentDistance = Math.sqrt((vertices[vertices.length - 1].x - pos.x) ** 2 + (vertices[vertices.length - 1].y - pos.y) ** 2);
-        //                 if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
-        //                     const currentAngle = Math.atan2(vertices[vertices.length - 1].y - pos.y, vertices[vertices.length - 1].x - pos.x);
-        //                     const newAngle = Math.atan2(vertices[0].y - pos.y, vertices[0].x - pos.x);
-        //                     ctx.arc(pos.x, pos.y, radius, currentAngle, newAngle);
-        //                 } else {
-        //                     ctx.lineTo(vertices[0].x, vertices[0].y)
-        //                 }
-        //                 ctx.strokeStyle = "#000";
-        //                 ctx.lineWidth = 20;
-        //                 ctx.stroke(simulation.draw.mapPath);
-        //                 ctx.globalCompositeOperation = "destination-in";
-        //                 ctx.fillStyle = "#000";
-        //                 ctx.fill();
-        //                 ctx.globalCompositeOperation = "source-over";
-        //                 ctx.clip();
-        //             }
-        //         }
-        //     },
-        // })
-
-        //clipping everything except LoS
-        //redrawing map, so it's still visible
-        // simulation.ephemera.push({
-        //     name: "LoS", count: 0, do() {
-        //         const pos = m.pos
-        //         const radius = 3000
-        //         if (!simulation.isTimeSkipping) {
-        //             const vertices = simulation.sight.circleLoS(pos, radius);
-        //             if (vertices.length) {
-        //                 ctx.beginPath();
-        //                 ctx.moveTo(vertices[0].x, vertices[0].y);
-        //                 for (var i = 1; i < vertices.length; i++) {
-        //                     var currentDistance = Math.sqrt((vertices[i - 1].x - pos.x) ** 2 + (vertices[i - 1].y - pos.y) ** 2);
-        //                     var newDistance = Math.sqrt((vertices[i].x - pos.x) ** 2 + (vertices[i].y - pos.y) ** 2);
-        //                     if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
-        //                         const currentAngle = Math.atan2(vertices[i - 1].y - pos.y, vertices[i - 1].x - pos.x);
-        //                         const newAngle = Math.atan2(vertices[i].y - pos.y, vertices[i].x - pos.x);
-        //                         ctx.arc(pos.x, pos.y, radius, currentAngle, newAngle);
-        //                     } else {
-        //                         ctx.lineTo(vertices[i].x, vertices[i].y)
-        //                     }
-        //                 }
-        //                 newDistance = Math.sqrt((vertices[0].x - pos.x) ** 2 + (vertices[0].y - pos.y) ** 2);
-        //                 currentDistance = Math.sqrt((vertices[vertices.length - 1].x - pos.x) ** 2 + (vertices[vertices.length - 1].y - pos.y) ** 2);
-        //                 if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
-        //                     const currentAngle = Math.atan2(vertices[vertices.length - 1].y - pos.y, vertices[vertices.length - 1].x - pos.x);
-        //                     const newAngle = Math.atan2(vertices[0].y - pos.y, vertices[0].x - pos.x);
-        //                     ctx.arc(pos.x, pos.y, radius, currentAngle, newAngle);
-        //                 } else {
-        //                     ctx.lineTo(vertices[0].x, vertices[0].y)
-        //                 }
-
-        //                 ctx.strokeStyle = "#234";
-        //                 ctx.lineWidth = 9;
-        //                 ctx.stroke(simulation.draw.mapPath);
-
-        //                 ctx.globalCompositeOperation = "destination-in";
-        //                 ctx.fillStyle = "#000";
-        //                 ctx.fill();
-        //                 ctx.globalCompositeOperation = "source-over";
-
-        //                 // ctx.fill(simulation.draw.mapPath);
-        //                 // ctx.fillStyle = "#000";
-
-        //                 ctx.clip();
-        //             }
-        //         }
-        //     },
-        // })
-
         document.body.style.backgroundColor = "#fff";
         // color.map = "#444" //custom map color
         // level.difficultyIncrease(14); //hard mode level 7
@@ -2033,10 +1941,10 @@ const level = {
 
 
         //???
-        // level.difficultyIncrease(30) //30 is near max on hard  //60 is near max on why
+        level.difficultyIncrease(3 * 4) //30 is near max on hard  //60 is near max on why
         // m.addHealth(Infinity)
 
-        // spawn.starter(1900, -500, 200) //big boy
+        spawn.starter(1900, -500, 200) //big boy
         // for (let i = 0; i < 10; ++i) spawn.launcher(1900, -500)
         // spawn.suckerBoss(1900, -500)
         // spawn.launcherBoss(3200, -500)

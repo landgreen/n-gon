@@ -1,9 +1,20 @@
 ******************************************************** NEXT PATCH **************************************************
 
-added a random station in subway
-a few bug fixes
+pause menu can sort tech by keywords
+
+tech: mechatronics - randomly add +(7 to 13)% damage
+
+a few new images
+bug fixes
+  cherenkov radiation damage bug fixed it does much more damage and matches the description
+
 
 *********************************************************** TODO *****************************************************
+
+extend sort to experiments
+
+aperture also increases and decreases vision range
+  I think messing with vision range causes problems with the start of level vision code
 
 mob non-combat behaviors, like Rain World
   gathering
@@ -20,6 +31,8 @@ mob non-combat behaviors, like Rain World
   play
   fight other mobs
 
+maybe reduce the fps on the line of sight graphics to make it look more like a sensor?
+
 consider increasing the base player horizontal movement
   maybe only increase ground movement, air control seems fine
 
@@ -30,6 +43,7 @@ level: subway - a map that uses the train level element and line of sight graphi
         teleport to far away rooms
       map elements that alternate between positions
       buttons and doors
+  maybe add mob mobs to each station?  this makes it faster to clear the level
   boss
     spawn at the exit station? or at a random station? or at the station before the exit?
     spawn on the station after enough mobs have been killed?
@@ -87,9 +101,6 @@ mobs attack mines
     is this going to work with all mob vision types?
   
 rework quantum eraser
-
-test bremsstrahlung damage
-  and make sure it actually does more damage with the dot tech
 
 tech circular polarization - wave gun bullets move in a circle
 
@@ -162,8 +173,6 @@ tech: if you die inside MACHO, heal to full and delete the MACHO for the rest of
 tech: after bosses die<br>they spawn a research
 
 tech: +8% damage each time you kill a boss
-
-tech:  maybe missiles explode when they hit walls, but explosions only drain energy
 
 tech: sticky grenades
   needs another effect to be good enough
@@ -268,8 +277,6 @@ mob status effect - emit - mobs fire lasers for a few seconds
 Tech: "Solid rocket motor": Missiles would start at 300% speed and 200% missile damage upon explosion, but the speed and damage would decrease to 40% speed and damage as time goes on
 tech: every time shotgun fires it's a different shotgun mode:  nails, ice, needles, worms, fleas, rivets, ...  but you get more ammo
 
-try again - line of sight  https://ncase.me/sight-and-light/
-
 for tech power ups no tech options are displayed until you research once
   or display only JUNK until you research once
   increase the number of options after each research
@@ -280,8 +287,6 @@ tech increase max energy and energy to 5000, but you can no longer regen energy 
 
 it would be nice if there was incentive to go slow when choosing tech so n-gon is more relaxing
   add some css based visual effects for opening up a tech,gun,field
-
-make freeze and __  not cause death at 50% health, but just 600% extra damage for that bullet 
 
 make a new coupling effect for perfect diamagnetism or standing wave
 
@@ -340,8 +345,6 @@ replace field descriptions with a function call so they can have dynamic text
   add in dynamic coupling text as a 4th line
 
 Boss that shoots out a ring of bullets, then after a few seconds it gravitates the bullets back
-
-JUNK: Placebo: double the power up spawn rate but make half of them do nothing
 
 coupling
   put coupling description as 4th line on field description
@@ -656,10 +659,6 @@ a mine tech that makes mines you can stand on
     or 3 seconds after you touch them
   benefits from all block tech
 
-setting to remove UI, except health bar
-  except active gun? to see ammo
-  checkbox in pause and in settings
-
 go non-collide with mobs when immune to damage?
 
 mobs that are invulnerable from the front
@@ -673,8 +672,6 @@ add anticipation to more mob attacks
 
 can mob bullets damage other mob?
   maybe if they switch collisions and classType === "body" or obj.classType === "bullet"
-
-path finding system
 
 figure out how to get friction effects on map/body to apply to player
 also horizontal moving platform?
@@ -748,9 +745,6 @@ training
 balance time dilation with bose einstein  (you can freeze everything and take no damage)
   code is still there, need to balance
   balance with energy drain?
-
-overflowing energy does harm?
-  or just reduces harm reduction?
 
 make a line of constrained mobs move like a snake 
   apply forces with directions determined by time and position on the snake
@@ -882,18 +876,6 @@ look into improving mouse lag with pointer lock?
 https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
 https://www.vsynctester.com/game.html
 https://news.ycombinator.com/item?id=26530272
-
-mobile requirements:
-  detect mobile, flip to landscape
-  detect no keyboard, no mouse
-    auto aim?
-    limit items to ones that don't require aiming?
-    tap screen regions to move (WASD)
-    reduce font size
-    
-add back in gamepad support?
-  but does anyone care?
-  https://github.com/landgreen/landgreen.github.io/search?q=gamepadconnected
 
 tech: time dilation - when you exit time dilation rewind to the state you entered
   position, velocity, and health

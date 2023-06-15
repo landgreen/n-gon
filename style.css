@@ -298,6 +298,27 @@ summary {
     font-size: 0.75em;
 }
 
+.sort {
+    padding: 0.1em 0.3em;
+    border: 1px solid #444;
+    /* min-height: 88px; */
+    line-height: 100%;
+    background-color: #fff;
+}
+
+.sort-button {
+    border: 1px #333 solid;
+    border-radius: 0.5em;
+    background-color: #fff;
+    font-size: 0.5em;
+    /* padding: 0.3em; */
+
+}
+
+.sort-button:hover {
+    background-color: #eee;
+}
+
 .pause-eject .card-text {
     animation: techColorCycle 1s linear infinite alternate;
 }

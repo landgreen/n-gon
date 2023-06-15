@@ -377,9 +377,9 @@ const m = {
 
         //randomize ammo based on ammo/ammoPack count
         for (let i = 0, len = b.inventory.length; i < len; i++) {
-            if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (1.05 + 0.3 * (Math.random() - 0.5))))
+            if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (1.15 + 0.3 * (Math.random() - 0.5))))
         }
-
+        console.log(b.activeGun)
         //randomize tech
         for (let i = 0; i < totalTech; i++) {
             //find what tech I could get
@@ -545,7 +545,7 @@ const m = {
         if (tech.isZeno) dmg *= 0.15
         if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.4
-        if (tech.isImmortal) dmg *= 0.67
+        if (tech.isImmortal) dmg *= 0.7
         if (tech.energyRegen === 0) dmg *= 0.34
         // if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.973 ** m.coupling
@@ -2317,7 +2317,7 @@ const m = {
                     if (who.isMobBullet) {
                         who.damage(tech.blockDmg * m.dmgScale * 3, true)
                     } else {
-                        mobs.statusDoT(who, tech.blockDmg * m.dmgScale * 4 / 12, 360) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
+                        mobs.statusDoT(who, tech.blockDmg * 0.42, 180) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
                     }
                 } else {
                     who.damage(tech.blockDmg * m.dmgScale, true)
@@ -2531,7 +2531,7 @@ const m = {
     },
     fieldUpgrades: [{
         name: "field emitter",
-        imageNumber: Math.floor(Math.random() * 20),
+        imageNumber: Math.floor(Math.random() * 23),
         description: `use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs
             <br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`, //            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
         effect: () => {
@@ -2727,7 +2727,7 @@ const m = {
                                     if (mob[i].isMobBullet) {
                                         mob[i].damage(tech.blockDmg * m.dmgScale * 3, true)
                                     } else {
-                                        mobs.statusDoT(mob[i], tech.blockDmg * m.dmgScale * 4 / 12, 360) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
+                                        mobs.statusDoT(mob[i], tech.blockDmg * m.dmgScale * 0.42, 180) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
                                     }
                                 } else {
                                     mob[i].damage(tech.blockDmg * m.dmgScale, true)

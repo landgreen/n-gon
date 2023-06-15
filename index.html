@@ -58,6 +58,12 @@
                         <option value="6">why ⚇</option>
                     </select>
                     <br>
+                    <input onclick="build.showImages('settings')" type="checkbox" id="hide-images" name="hide-images" style="width:17px; height:17px;">
+                    <label for="hide-images" title="hide images for fields, guns, and tech">hide images</label>
+                    <br>
+                    <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" style="width:17px; height:17px;">
+                    <label for="hide-hud" title="hide: tech, defense, damage, in game console">minimal HUD</label>
+                    <br>
                     <label for="fps-select" title="use this to slow the game down">limit frames per second:</label>
                     <select name="fps-select" id="fps-select">
                         <option value="max" selected>no cap</option>
@@ -67,33 +73,6 @@
                         <option value="30">30 fps</option>
                     </select>
                     <br>
-                    <label for="classic-select" title="play older versions of n-gon">classic n-gon:</label>
-                    <select name="classic-select" id="classic-select" onChange="window.location.href=this.value">
-                        <option value="https://scratch.mit.edu/projects/14005697/fullscreen/">mech: 2014</option>
-                        <option value="https://scratch.mit.edu/projects/22573757/fullscreen/">spacetime: 2015</option>
-                        <option value="https://scratch.mit.edu/projects/41429974/fullscreen/">ballistics: 2015</option>
-                        <option value="https://scratch.mit.edu/projects/43690666/fullscreen/">portal: 2016</option>
-                        <option value="https://codepen.io/lilgreenland/full/ozXNWZ">side scroller: 2016</option>
-                        <option value="https://codepen.io/lilgreenland/full/wzARJY">side scroller: 2016</option>
-                        <option value="classic/7-1-2017/">LandGame: 2017</option>
-                        <option value="classic/4-15-2018/">n-gon: 2018</option>
-                        <option value="classic/7-11-2019/">n-gon: summer-2019</option>
-                        <option value="classic/9-8-2019/">n-gon: fall-2019</option>
-                        <option value="classic/7-15-2020/">n-gon: summer-2020</option>
-                        <option value="classic/6-1-2021/">n-gon: spring-2021</option>
-                        <option value="classic/11-1-2022/">n-gon: fall-2022</option>
-                        <option value="" selected>current version</option>
-                    </select>
-                    <br>
-                    <label for="seed" title="the randoms seed determines level order, tech choices, and mob types">randomization seed:</label>
-                    <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" style="width: 120px;">
-                    <br>
-                    <span id="previous-seed" style="color:#bbb"></span>
-                    <input onclick="build.showImages('settings')" type="checkbox" id="hide-images" name="hide-images" style="width:17px; height:17px;">
-                    <label for="hide-images" title="hide images for fields, guns, and tech">hide images</label>
-                    <br>
-                    <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" style="width:17px; height:17px;">
-                    <label for="hide-hud" title="hide: tech, defense, damage, in game console">minimal HUD</label>
                     <br>
                     <input type="checkbox" id="community-maps" name="community-maps" style="width:17px; height:17px;">
                     <label for="community-maps" title="add about 12 player made levels the random n-gon level pool">community maps</label>
@@ -145,6 +124,28 @@
                         <option value="temple">
                         <option value="run">
                     </datalist> -->
+                    <br>
+                    <label for="classic-select" title="play older versions of n-gon">classic n-gon:</label>
+                    <select name="classic-select" id="classic-select" onChange="window.location.href=this.value">
+                        <option value="https://scratch.mit.edu/projects/14005697/fullscreen/">mech: 2014</option>
+                        <option value="https://scratch.mit.edu/projects/22573757/fullscreen/">spacetime: 2015</option>
+                        <option value="https://scratch.mit.edu/projects/41429974/fullscreen/">ballistics: 2015</option>
+                        <option value="https://scratch.mit.edu/projects/43690666/fullscreen/">portal: 2016</option>
+                        <option value="https://codepen.io/lilgreenland/full/ozXNWZ">side scroller: 2016</option>
+                        <option value="https://codepen.io/lilgreenland/full/wzARJY">side scroller: 2016</option>
+                        <option value="classic/7-1-2017/">LandGame: 2017</option>
+                        <option value="classic/4-15-2018/">n-gon: 2018</option>
+                        <option value="classic/7-11-2019/">n-gon: summer-2019</option>
+                        <option value="classic/9-8-2019/">n-gon: fall-2019</option>
+                        <option value="classic/7-15-2020/">n-gon: summer-2020</option>
+                        <option value="classic/6-1-2021/">n-gon: spring-2021</option>
+                        <option value="classic/11-1-2022/">n-gon: fall-2022</option>
+                        <option value="" selected>current version</option>
+                    </select>
+                    <br>
+                    <label for="seed" title="the randoms seed determines level order, tech choices, and mob types">randomization seed:</label>
+                    <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" style="width: 120px;">
+                    <br><span id="previous-seed" style="color:#bbb"></span>
                 </div>
             </details>
         </div>

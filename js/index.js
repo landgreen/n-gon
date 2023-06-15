@@ -336,6 +336,25 @@ const build = {
     },
     pauseGrid() {
         // build.pixelDraw();
+
+        build.generatePauseLeft() //makes the left side of the pause menu with the tech
+        build.generatePauseRight() //makes the right side of the pause menu with the tech
+
+        document.getElementById("tech").style.display = "none"
+        document.getElementById("guns").style.display = "none"
+        document.getElementById("field").style.display = "none"
+        document.getElementById("health").style.display = "none"
+        document.getElementById("health-bg").style.display = "none"
+        document.getElementById("defense-bar").style.display = "none"
+        document.getElementById("damage-bar").style.display = "none"
+
+
+        //show in game console
+        // document.getElementById("text-log").style.display = "inline"
+        simulation.lastLogTime = m.cycle //hide in game console
+
+    },
+    generatePauseLeft() {
         //used for junk estimation
         let junkCount = 0
         let totalCount = 1 //start at one to avoid NaN issues
@@ -358,17 +377,19 @@ const build = {
 
         let text = `<div class="pause-grid-module" style = "padding: 10px; line-height: 110%;">
 <span style = "font-size: 0.87em;">
-<svg class="SVG-button" onclick="build.shareURL(false)" width="92" height="20" style="padding:0px; margin: 1px;">
-    <g stroke='none' fill='#333' stroke-width="2" font-size="14px" font-family="Ariel, sans-serif"> <text x="5" y="15">copy build url</text></g>
-</svg><span style="font-size:1.5em;font-weight: 600; float: right;">PAUSED</span> 
-<br>
-<input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages ? "checked" : ""}>
-<label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.3em;" >hide images</label>
+<span style="font-size:1.5em;font-weight: 600; float: left;">PAUSED</span> 
 <span style="float: right;">press ${input.key.pause} to resume</span>
 <br>
-<input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
-<label for="hide-hud" title="hide: tech, defense, damage, in game console" style="font-size:1.3em;">minimal HUD</label>
 <br>
+<button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build url</button>
+
+<input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages ? "checked" : ""}>
+<label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.15em;" >hide images</label>
+<br>
+<input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
+<label for="hide-hud" title="hide: tech, defense, damage, in game console" style="font-size:1.15em;">minimal HUD</label>
+<br>
+
 <br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)} &nbsp; &nbsp; difficulty: ${((m.dmgScale)).toPrecision(4)}
 <br><strong class='color-defense'>defense</strong>: ${tech.isEnergyHealth ? (1 - Math.pow(m.defense(), 0.13)).toPrecision(5) : (1 - m.defense()).toPrecision(5)} &nbsp; &nbsp; difficulty: ${(1 / simulation.dmgScale).toPrecision(4)}
 <br><strong><em>fire rate</em></strong>: ${((1 - b.fireCDscale) * 100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
@@ -395,15 +416,15 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         if (tech.isPauseSwitchField && !simulation.isChoosing) {
             const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
             text += `<div class="pause-grid-module card-background" id ="pause-field" ${style} >
-                    <div class="card-text" style = "animation: fieldColorCycle 1s linear infinite alternate;">
-                    <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
-                    ${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
+                           <div class="card-text" style = "animation: fieldColorCycle 1s linear infinite alternate;">
+                           <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
+                           ${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
         } else {
             const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
             text += `<div class="pause-grid-module card-background" id ="pause-field" ${style} >
-                    <div class="card-text">
-                    <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
-                    ${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
+                           <div class="card-text">
+                           <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
+                           ${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
         }
         // for (let i = 0, len = b.inventory.length; i < len; i++) {
         //     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div> ${b.guns[b.inventory[i]].description}</div>`
@@ -411,16 +432,34 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         for (let i = 0, len = b.inventory.length; i < len; i++) {
             const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/gun/${b.guns[b.inventory[i]].name}.webp');"`
             text += `<div class="pause-grid-module card-background" ${style} >
-                    <div class="card-text">
-                    <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div>
-                    ${b.guns[b.inventory[i]].description}</div> </div>`
+                           <div class="card-text">
+                           <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div>
+                           ${b.guns[b.inventory[i]].description}</div> </div>`
         }
         if (!localSettings.isHideHUD) text += `<div class="pause-grid-module pause-console" style = "background-color: rgba(255,255,255,0.3);">${document.getElementById("text-log").innerHTML}</div>` //show last in game console message
         let el = document.getElementById("pause-grid-left")
         el.style.display = "grid"
         el.innerHTML = text
+    },
+    generatePauseRight() {
         //right side
-        text = "";
+        // <input onclick="" type="checkbox" id="sort-damage" name="sort-damage" style="width:1em; height:1em;">
+        //       <label for="sort-damage" title="sort tech by damage"><strong class='color-d'>damage</strong></label>
+
+        //       <input onclick="build.sortTech('guntech')" type="checkbox" id="sort-guntech" name="sort-guntech" style="width:1em; height:1em;">
+        //       <label for="sort-guntech" title="sort guntech"> <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></label>
+
+        // <button onclick="build.sortTech('bot')" class='sort-button'><strong class='color-bot'>bot</strong></button>
+        let text = `<div class="sort">
+<button onclick="build.sortTech('damage')" class='sort-button'><strong class='color-d'>damage</strong></button>
+<button onclick="build.sortTech('guntech')" class='sort-button'><strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></button>
+<button onclick="build.sortTech('fieldtech')" class='sort-button'><strong class='color-f'>field</strong><strong class='color-m'>tech</strong></button>
+<button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
+<button onclick="build.sortTech('defense')" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">defense</strong></button>
+<button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
+<input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#888;" placeholder="sort by"/>
+<button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
+</div>`;
         // const style = (tech.isPauseEjectTech && !simulation.isChoosing) ? 'style="animation: techColorCycle 1s linear infinite alternate;"' : ''
         const ejectClass = (tech.isPauseEjectTech && !simulation.isChoosing) ? 'pause-eject' : ''
         for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -470,23 +509,55 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                 text += `<div class="pause-grid-module" style="text-decoration: line-through; padding-left: 8px; opacity: 0.4;"><div class="grid-title">${tech.tech[i].link}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`
             }
         }
-        el = document.getElementById("pause-grid-right")
+        const el = document.getElementById("pause-grid-right")
         el.style.display = "grid"
         el.innerHTML = text
+    },
+    sortTech(find) {
+        const sortKeyword = (a, b) => {
+            let aHasKeyword = (a.descriptionFunction ? a.descriptionFunction() : a.description).includes(find) || a.name.includes(find)
+            let bHasKeyword = (b.descriptionFunction ? b.descriptionFunction() : b.description).includes(find) || b.name.includes(find)
+            if ((aHasKeyword) && !bHasKeyword) return -1;
+            if (!aHasKeyword && bHasKeyword) return 1;
+            return 0;
+        }
 
-        document.getElementById("tech").style.display = "none"
-        document.getElementById("guns").style.display = "none"
-        document.getElementById("field").style.display = "none"
-        document.getElementById("health").style.display = "none"
-        document.getElementById("health-bg").style.display = "none"
-        document.getElementById("defense-bar").style.display = "none"
-        document.getElementById("damage-bar").style.display = "none"
-
-
-        //show in game console
-        // document.getElementById("text-log").style.display = "inline"
-        simulation.lastLogTime = m.cycle //hide in game console
-
+        if (find === 'guntech') {
+            tech.tech.sort((a, b) => {
+                if (a.isGunTech && !b.isGunTech) return -1; //sort to the top
+                if (!a.isGunTech && b.isGunTech) return 1; //sort to the bottom
+                return 0;
+            });
+        } else if (find === 'fieldtech') {
+            tech.tech.sort((a, b) => {
+                if (a.isFieldTech && !b.isFieldTech) return -1; //sort to the top
+                if (!a.isFieldTech && b.isFieldTech) return 1; //sort to the bottom
+                return 0;
+            });
+        } else if (find === 'damage') {
+            tech.tech.sort(sortKeyword);
+        } else if (find === 'defense') {
+            tech.tech.sort(sortKeyword);
+        } else if (find === 'energy') {
+            tech.tech.sort(sortKeyword);
+        } else if (find === 'heal') {
+            tech.tech.sort((a, b) => {
+                if (a.isHealTech && !b.isHealTech) return -1; //sort to the top
+                if (!a.isHealTech && b.isHealTech) return 1; //sort to the bottom
+                return 0;
+            });
+        } else if (find === 'bot') {
+            tech.tech.sort((a, b) => {
+                if (a.isBotTech && !b.isBotTech) return -1; //sort to the top
+                if (!a.isBotTech && b.isBotTech) return 1; //sort to the bottom
+                return 0;
+            });
+        } else if (find === 'input') {
+            find = document.getElementById("sort-input").value;
+            tech.tech.sort(sortKeyword);
+        }
+        build.generatePauseRight() //makes the right side of the pause menu with the tech
+        document.getElementById("sort-input").value = find; //make the sorted string display in the keyword search input field
     },
     unPauseGrid() {
         document.getElementById("guns").style.display = "inline"
@@ -1158,7 +1229,7 @@ window.addEventListener("keydown", function (event) {
             }
             break
         case input.key.testing:
-            if (m.alive && localSettings.loreCount > 0) {
+            if (m.alive && localSettings.loreCount > 0 && !simulation.paused) {
                 if (simulation.difficultyMode > 4) {
                     simulation.makeTextLog("<em>testing mode disabled for this difficulty</em>");
                     break
