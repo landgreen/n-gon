@@ -108,7 +108,7 @@ function getUrlVars() {
 window.addEventListener('load', () => {
     const set = getUrlVars()
     if (Object.keys(set).length !== 0) {
-        build.populateGrid() //trying to solve a bug with this, but maybe it doesn't help
+        // build.populateGrid() //trying to solve a bug with this, but maybe it doesn't help
         openExperimentMenu();
         //add experimental selections based on url
         for (const property in set) {
@@ -166,6 +166,8 @@ window.addEventListener('load', () => {
             //     Math.seed = Math.abs(Math.hash(Math.initialSeed))
             //     level.populateLevels()
             // }
+            requestAnimationFrame(() => { build.sortTech('have', true) });
+
         }
     } else if (localSettings.isTrainingNotAttempted && localSettings.runCount < 30) { //make training button more obvious for new players
         // document.getElementById("training-button").style.border = "0px #333 solid";
@@ -457,7 +459,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
 <button onclick="build.sortTech('defense')" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">defense</strong></button>
 <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
-<input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#888;" placeholder="sort by"/>
+<input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#000;" placeholder="sort by"/>
 <button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
 </div>`;
         // const style = (tech.isPauseEjectTech && !simulation.isChoosing) ? 'style="animation: techColorCycle 1s linear infinite alternate;"' : ''
@@ -513,7 +515,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         el.style.display = "grid"
         el.innerHTML = text
     },
-    sortTech(find) {
+    sortTech(find, isExperiment = false) {
         const sortKeyword = (a, b) => {
             let aHasKeyword = (a.descriptionFunction ? a.descriptionFunction() : a.description).includes(find) || a.name.includes(find)
             let bHasKeyword = (b.descriptionFunction ? b.descriptionFunction() : b.description).includes(find) || b.name.includes(find)
@@ -524,14 +526,70 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 
         if (find === 'guntech') {
             tech.tech.sort((a, b) => {
+                if (a.isGunTech && b.isGunTech) {
+                    if (a.allowed() > b.allowed()) return -1; //sort to the top
+                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                }
                 if (a.isGunTech && !b.isGunTech) return -1; //sort to the top
                 if (!a.isGunTech && b.isGunTech) return 1; //sort to the bottom
                 return 0;
             });
         } else if (find === 'fieldtech') {
             tech.tech.sort((a, b) => {
+                if (a.isFieldTech && b.isFieldTech) {
+                    if (a.allowed() > b.allowed()) return -1; //sort to the top
+                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                }
                 if (a.isFieldTech && !b.isFieldTech) return -1; //sort to the top
                 if (!a.isFieldTech && b.isFieldTech) return 1; //sort to the bottom
+                return 0;
+            });
+        } else if (find === 'allowed') {
+            tech.tech.sort((a, b) => {
+                if (a.allowed() > b.allowed()) return -1; //sort to the top
+                if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                return 0;
+            });
+        } else if (find === 'have') {
+            tech.tech.sort((a, b) => {
+                if (a.count > b.count) return -1; //sort to the top
+                if (!a.count < b.count) return 1; //sort to the bottom
+                return 0;
+            });
+        } else if (find === 'heal') {
+            tech.tech.sort((a, b) => {
+                if (a.isHealTech && b.isHealTech) {
+                    if (a.allowed() > b.allowed()) return -1; //sort to the top
+                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                }
+                if (a.isHealTech && !b.isHealTech) return -1; //sort to the top
+                if (!a.isHealTech && b.isHealTech) return 1; //sort to the bottom
+                return 0;
+            });
+        } else if (find === 'bot') {
+            tech.tech.sort((a, b) => {
+                if (a.isBotTech && b.isBotTech) {
+                    if (a.allowed() > b.allowed()) return -1; //sort to the top
+                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                }
+                if (a.isBotTech && !b.isBotTech) return -1; //sort to the top
+                if (!a.isBotTech && b.isBotTech) return 1; //sort to the bottom
+                return 0;
+            });
+        } else if (document.getElementById("sort-input").value === 'skin') {
+            tech.tech.sort((a, b) => {
+                if (a.isSkin && b.isSkin) {
+                    if (a.allowed() > b.allowed()) return -1; //sort to the top
+                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                }
+                if (a.isSkin && !b.isSkin) return -1; //sort to the top
+                if (!a.isSkin && b.isSkin) return 1; //sort to the bottom
+                return 0;
+            });
+        } else if (document.getElementById("sort-input").value === 'junk') {
+            tech.tech.sort((a, b) => {
+                if (a.isJunk && !b.isJunk) return -1; //sort to the top
+                if (!a.isJunk && b.isJunk) return 1; //sort to the bottom
                 return 0;
             });
         } else if (find === 'damage') {
@@ -540,23 +598,17 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             tech.tech.sort(sortKeyword);
         } else if (find === 'energy') {
             tech.tech.sort(sortKeyword);
-        } else if (find === 'heal') {
-            tech.tech.sort((a, b) => {
-                if (a.isHealTech && !b.isHealTech) return -1; //sort to the top
-                if (!a.isHealTech && b.isHealTech) return 1; //sort to the bottom
-                return 0;
-            });
-        } else if (find === 'bot') {
-            tech.tech.sort((a, b) => {
-                if (a.isBotTech && !b.isBotTech) return -1; //sort to the top
-                if (!a.isBotTech && b.isBotTech) return 1; //sort to the bottom
-                return 0;
-            });
         } else if (find === 'input') {
             find = document.getElementById("sort-input").value;
             tech.tech.sort(sortKeyword);
         }
-        build.generatePauseRight() //makes the right side of the pause menu with the tech
+        if (isExperiment) {
+            build.populateGrid()
+            // build.updateExperimentText()
+            document.getElementById("tech-0").scrollIntoView(); //scroll to the first tech after sorting
+        } else {
+            build.generatePauseRight() //makes the right side of the pause menu with the tech            
+        }
         document.getElementById("sort-input").value = find; //make the sorted string display in the keyword search input field
     },
     unPauseGrid() {
@@ -675,7 +727,9 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                 }, 50);
             }
         }
-        //update tech text
+        build.updateExperimentText(isAllowed)
+    },
+    updateExperimentText(isAllowed = false) {
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             const techID = document.getElementById("tech-" + i)
             if ((!tech.tech[i].isJunk || localSettings.isJunkExperiment) && !tech.tech[i].isLore) {
@@ -726,69 +780,76 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
     },
     populateGrid() { //background-color:var(--build-bg-color);
         let text = `
-  <div class="experiment-start-box">  
-  <div>
-  <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">difficulty:</label>
-  <select name="difficulty-select" id="difficulty-select-experiment">
-      <option value="1">easy</option>
-      <option value="2" selected>normal</option>
-      <option value="4">hard</option>
-      <option value="6">why?</option>
-  </select>
-</div>
+<div class="experiment-start-box">  
+    <div class="sort" style="border: 0px;">
+        <button onclick="build.sortTech('guntech', true)" class='sort-button'><strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></button>
+        <button onclick="build.sortTech('fieldtech', true)" class='sort-button'><strong class='color-f'>field</strong><strong class='color-m'>tech</strong></button>
+        <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d'>damage</strong></button>
+        <button onclick="build.sortTech('defense', true)" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">defense</strong></button>
+        <button onclick="build.sortTech('have', true)" class='sort-button' style="letter-spacing: 1px;font-weight: 800;">have</button>
+        <button onclick="build.sortTech('allowed', true)" class='sort-button' style="letter-spacing: 1px;font-weight: 400;">allowed</button>
+        <input type="search" id="sort-input" style="width: 8.7em;font-size: 0.6em;color:#000;" placeholder="sort by"/>
+        <button onclick="build.sortTech('input', true)" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
+    </div>
 <div>
-<label for="hide-images-experiment" title="reload experiment with no images for fields, guns, and tech">hide images:</label>
-<input onclick="build.showImages('experiment')" type="checkbox" id="hide-images-experiment" name="hide-images-experiment" style="width:17px; height:17px; margin-bottom: 15px;" ${localSettings.isHideImages ? "checked" : ""}>
-</div>
+    <select name="difficulty-select" id="difficulty-select-experiment">
+    <option value="1">easy</option>
+    <option value="2" selected>normal</option>
+    <option value="4">hard</option>
+    <option value="6">why</option>
+    </select>
+    &nbsp; &nbsp;
+        <label for="hide-images-experiment" title="reload experiment with no images for fields, guns, and tech" style="font-size: 0.85em;">hide images</label>
+        <input onclick="build.showImages('experiment')" type="checkbox" id="hide-images-experiment" name="hide-images-experiment" style="width:13px; height:13px;" ${localSettings.isHideImages ? "checked" : ""}>
+    </div>
 <div>
-    <svg class="SVG-button" onclick="build.reset()" width="50" height="25">
-        <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
-        <text x="5" y="18">reset</text>
-        </g>
-    </svg>
-    &nbsp; &nbsp; 
-    <svg class="SVG-button" onclick="build.shareURL(true)" width="52" height="25">
-        <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
-        <text x="5" y="18">share</text>
-        </g>
-    </svg>
-</div>
-<div>
-    <svg class="SVG-button" onclick="build.startExperiment()" width="165" height="70" >
-        <g stroke='none' fill='#333' stroke-width="2" font-size="65px" font-family="Ariel, sans-serif">
-        <text x="17" y="57">start</text>
-        </g>
-    </svg>
+    <div style="display: grid;grid-template-columns: repeat(3, 1fr);row-gap: 10px;column-gap: 25px;grid-auto-rows: minmax(5px, auto);margin:-5px 0px 10px 25px;line-height: 100%;">
+    <div style="grid-column: 1;grid-row: 2 / 4;">
+        <svg class="SVG-button" onclick="build.startExperiment()" width="150" height="70" >
+            <g stroke='none' fill='#333' stroke-width="2" font-size="65px" font-family="Ariel, sans-serif">
+            <text x="10" y="57">start</text>
+            </g>
+        </svg>
+    </div>
+    <div style="grid-column: 2;grid-row: 2;">
+        <svg class="SVG-button" onclick="build.reset()" width="50" height="25">
+            <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
+            <text x="5" y="18">reset</text>
+            </g>
+        </svg>
+    </div>
+    <div style="grid-column: 2;grid-row: 3/4;">
+        <svg class="SVG-button" onclick="build.shareURL(true)" width="52" height="25">
+            <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
+            <text x="5" y="18">share</text>
+            </g>
+        </svg>
+    </div>
+    </div>
 </div>
 </div>`
         const hideStyle = `style="height:auto; border: none; background-color: transparent;"`
         for (let i = 0, len = m.fieldUpgrades.length; i < len; i++) {
             const style = localSettings.isHideImages ? hideStyle : `style="background-image: url('img/field/${m.fieldUpgrades[i].name}${i === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
-            //original
-            // text += powerUps.fieldText(i, `build.choosePowerUp(this,${i},'field')`)
-            // text += `<div id ="field-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'field')"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div> ${m.fieldUpgrades[i].description}</div>`
-            text += `<div id="field-${i}" class="experiment-grid-module card-background" onclick="build.choosePowerUp(${i},'field')" ${style} >
+            text += `<div id="field-${i}" class="experiment-grid-module card-background ${m.fieldMode === i ? "build-field-selected" : ""}" onclick="build.choosePowerUp(${i},'field')" ${style} >
                     <div class="card-text">
                     <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
                     ${m.fieldUpgrades[i].description}</div> </div>`
         }
         for (let i = 0, len = b.guns.length; i < len; i++) {
             const style = localSettings.isHideImages ? hideStyle : `style="background-image: url('img/gun/${b.guns[i].name}.webp');"`
-            text += `<div id="gun-${i}" class="experiment-grid-module card-background" onclick="build.choosePowerUp(${i},'gun')" ${style} >
+            text += `<div id="gun-${i}" class="experiment-grid-module card-background ${b.guns[i].have ? "build-gun-selected" : ""}" onclick="build.choosePowerUp(${i},'gun')" ${style} >
                     <div class="card-text">
                     <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div>
                     ${b.guns[i].description}</div> </div>`
-            //original
-            // text += `<div id = "gun-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div> ${b.guns[i].description}</div>`
         }
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if ((!tech.tech[i].isJunk || localSettings.isJunkExperiment) && !tech.tech[i].isLore) {
                 const style = (localSettings.isHideImages || tech.tech[i].isJunk) ? hideStyle : `style="background-image: url('img/${tech.tech[i].name}.webp');"`
-                if (tech.tech[i].allowed() && (!tech.tech[i].isNonRefundable || localSettings.isJunkExperiment)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
-                    text += `<div id="tech-${i}" class="experiment-grid-module card-background" onclick="build.choosePowerUp(${i},'tech')" ${style}>`
+                if ((tech.tech[i].allowed() || tech.tech[i].count > 0) && (!tech.tech[i].isNonRefundable || localSettings.isJunkExperiment)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
+                    text += `<div id="tech-${i}" class="experiment-grid-module card-background ${tech.tech[i].count ? "build-tech-selected" : ""}" onclick="build.choosePowerUp(${i},'tech')" ${style}>`
                 } else { //disabled
                     text += `<div id="tech-${i}" class="experiment-grid-module card-background experiment-grid-disabled" ${style}>`
-                    // text += `<div id="tech-${i}" class="experiment-grid-module card-background experiment-grid-disabled" onclick="build.choosePowerUp(${i},'tech')" ${style}>`
                 }
 
                 if (tech.tech[i].isFieldTech) {
@@ -806,6 +867,11 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             }
         }
         document.getElementById("experiment-grid").innerHTML = text
+        // for (let i = 0, len = tech.tech.length; i < len; i++) {
+        // if (tech.tech[i].count)
+        // document.getElementById("tech-" + i).classList.add("build-tech-selected")
+        // }
+
         document.getElementById("difficulty-select-experiment").value = document.getElementById("difficulty-select").value
         document.getElementById("difficulty-select-experiment").addEventListener("input", () => {
             simulation.difficultyMode = Number(document.getElementById("difficulty-select-experiment").value)
@@ -821,6 +887,8 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                 // document.getElementById(`tech-${i}`).setAttribute('title', tech.tech[i].requires); //add tooltip
             }
         }
+        //highlight selected
+
     },
     nameLink(text) { //converts text into a clickable wikipedia search
         return `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(text).replace(/'/g, '%27')}&title=Special:Search' class="link">${text}</a>`

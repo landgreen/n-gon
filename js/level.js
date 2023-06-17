@@ -10,7 +10,7 @@ const level = {
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     //see level.populateLevels:   (intro, ... , reservoir or factory, reactor, ... , gauntlet, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
-    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass"],
+    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
@@ -46,12 +46,7 @@ const level = {
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.testing();
-            // spawn.nodeGroup(3200, -300, "sniper")
-            // spawn.nodeGroup(2200, -300, "sniper")
-            // spawn.nodeGroup(2200, -300, "sniper")
-            // spawn.shareBoss(1900, -500)
-            // spawn.cellBoss(1900, -500)
+            // level.subway();
             // for (let i = 0; i < 2; ++i) spawn.starter(1900, -500, 50)
             // spawn.sneaker(1900, -500, 25)
             // spawn.sniper(2000, -450)
@@ -25186,6 +25181,70 @@ const level = {
         // if (simulation.difficulty > 1) spawn.randomLevelBoss(2200, -1300);
         // spawn.secondaryBossChance(100, -1500)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
+    },
+    cantilever() { // made by Eclipse#7932 on discord, (TheSpudguy)(@PurpleSunsetGames on github)
+        // simulation.enableConstructMode();
+        simulation.makeTextLog(`<strong>underpass</strong> by <span class='color-var'>Eclipse#7932</span>`);
+
+        level.setPosToSpawn(0, -50); //normal spawn
+        level.exit.x = 5500;
+        level.exit.y = 950;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
+        spawn.mapRect(level.exit.x - 50, level.exit.y + 30, 200, 100); // exit platform
+        spawn.mapRect(level.exit.x - 50, level.exit.y - 300, 200, 100); // exit platform roof
+        const endElevator = level.elevator(level.exit.x - 150, level.exit.y - 300, 100, 425, level.exit.y - 300); // end access door
+
+        spawn.randomMob(-200, 350, Infinity); // random mob at the beginning
+
+        spawn.mapRect(-100, 0, 600, 100); // main platform at start
+        spawn.bodyRect(0, 300, 50, 50); // little squares at start (one of these should be taken while crossing the cantilever to complete the level more easily)
+        spawn.bodyRect(100, 200, 50, 50);
+        spawn.bodyRect(50, 250, 50, 50);
+        spawn.mapRect(450, -20, 50, 20); // main platform ledge
+        spawn.mapRect(-200, 500, 2200, 100); // lower platform
+        spawn.mapRect(1850, 380, 100, 50); // cantilever block
+        spawn.bodyRect(80, -1300, 70, 1300, 1, { friction: .03, frictionAir: .001 }); // cantilever
+
+        spawn.mapRect(3400, 500, 300, 100); // lever platform
+        spawn.mapRect(3650, 500, 100, 800); // pit
+        spawn.mapRect(3650, 1300, 2600, 100);
+        spawn.mapRect(6150, 600, 100, 800);
+        spawn.mapRect(5650, 600, 100, 650);
+        spawn.randomMob(4700, 550, Infinity);
+        spawn.randomMob(4700, 450, Infinity);
+        spawn.randomMob(4600, 550, Infinity);
+
+        const toggle = level.toggle(3500, 500, false); // first lever
+        const button = level.button(5900, 1300);
+        const slidingWall = level.elevator(3750, -1200, 100, 1800, -1200); // first sliding wall
+
+        level.defaultZoom = 1500;
+        simulation.zoomTransition(level.defaultZoom);
+        document.body.style.backgroundColor = "#d8badf";
+        // color.map = "#444" //custom map color
+
+        level.custom = () => {
+            level.exit.drawAndCheck();
+
+            level.enter.draw();
+        };
+
+        level.customTopLayer = () => {
+            toggle.query();
+            button.query();
+            button.draw();
+
+            if (toggle.isOn) {
+                slidingWall.force.y -= 400;
+            }
+            if (!button.isUp) {
+                endElevator.force.y -= 100;
+            }
+            slidingWall.move();
+            endElevator.move()
+        };
+        powerUps.addResearchToLevel(); //needs to run after mobs are spawned
     },
     // ********************************************************************************************************
     // ********************************************************************************************************

@@ -5432,7 +5432,7 @@ const tech = {
     },
     {
         name: "acetone peroxide",
-        description: "<strong>+70%</strong> <strong class='color-e'>explosive</strong> <strong>radius</strong><br><strong>–40%</strong> <strong class='color-e'>explosive</strong> <strong class='color-defense'>defense</strong>",
+        description: "<strong>+70%</strong> <strong class='color-e'>explosive</strong> <strong>radius</strong><br><strong>–33%</strong> <strong class='color-e'>explosive</strong> <strong class='color-defense'>defense</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -10413,7 +10413,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isJunk: true,
         isNonRefundable: true,
         allowed() {
@@ -10434,7 +10433,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isJunk: true,
         allowed() {
             return !m.isShipMode
@@ -10453,7 +10451,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isJunk: true,
         allowed() {
             return !m.isShipMode
@@ -10472,7 +10469,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isJunk: true,
         allowed() {
             return !m.isShipMode
@@ -10491,7 +10487,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isJunk: true,
         allowed() {
             return true
@@ -10510,7 +10505,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isNonRefundable: true,
         isJunk: true,
         allowed() {

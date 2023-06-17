@@ -397,7 +397,7 @@ const b = {
 
             //player damage
             if (Vector.magnitude(Vector.sub(where, player.position)) < radius) {
-                const DRAIN = (tech.isExplosionHarm ? 0.63 : 0.45) * (tech.isRadioactiveResistance ? 0.25 : 1)
+                const DRAIN = (tech.isExplosionHarm ? 0.6 : 0.45) * (tech.isRadioactiveResistance ? 0.25 : 1)
                 if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 if (m.energy < 0) {
                     m.energy = 0
@@ -446,7 +446,7 @@ const b = {
 
                 if (dist < radius) {
                     if (simulation.dmgScale) {
-                        const harm = tech.isExplosionHarm ? 0.07 : 0.05
+                        const harm = tech.isExplosionHarm ? 0.067 : 0.05
                         if (tech.isImmuneExplosion && m.energy > 0.25) {
                             // const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
                             m.energy -= 0.25
@@ -3534,7 +3534,7 @@ const b = {
             restitution: 0,
             density: 0.0005, //  0.001 is normal density
             lookFrequency: 19 + Math.floor(7 * Math.random()),
-            endCycle: simulation.cycle + Math.floor((900 * tech.isBulletsLastLonger + 360 * Math.random()) + Math.max(0, 150 - bullet.length)), // 13 - 19s
+            endCycle: simulation.cycle + Math.floor((900 * tech.isBulletsLastLonger + 420 * Math.random()) + Math.max(0, 150 - bullet.length)), // 13 - 19s
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -3550,7 +3550,7 @@ const b = {
             },
             beforeDmg(who) {
                 Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), 10 + 10 * Math.random())); //push away from target
-                this.endCycle -= 180
+                this.endCycle -= 130
                 this.cd = simulation.cycle + this.delay;
                 if (tech.isSporeFreeze) mobs.statusSlow(who, 90)
                 if (tech.isSpawnBulletsOnDeath && who.alive && who.isDropPowerUp) {

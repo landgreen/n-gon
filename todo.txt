@@ -1,17 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
-pause menu can sort tech by keywords
+new community level cantilever
 
-tech: mechatronics - randomly add +(7 to 13)% damage
+extended tech sorting to experiment
 
-a few new images
-bug fixes
-  cherenkov radiation damage bug fixed it does much more damage and matches the description
-
+acetone peroxide does 40->33% more explosion harm to player
+fleas can do up to 30% more damage before they despawn
 
 *********************************************************** TODO *****************************************************
 
-extend sort to experiments
+maybe reduce the fps on the line of sight graphics to make it look more like a sensor?
+make a bot the follows the player the pov for line of sight levels, not the player
+  also need to make the vision a slice of a circle, not a full circle
 
 aperture also increases and decreases vision range
   I think messing with vision range causes problems with the start of level vision code
@@ -31,10 +31,9 @@ mob non-combat behaviors, like Rain World
   play
   fight other mobs
 
-maybe reduce the fps on the line of sight graphics to make it look more like a sensor?
-
 consider increasing the base player horizontal movement
   maybe only increase ground movement, air control seems fine
+  would this unbalance any maps?
 
 level: subway - a map that uses the train level element and line of sight graphics
   stations
