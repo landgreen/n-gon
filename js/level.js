@@ -17943,7 +17943,7 @@ const level = {
         }
 
         var circleHead = Matter.Bodies.polygon(m.pos.x, m.pos.y, 0, 31);
-        var losDomain = generateIntersectMap().concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, player, circleHead]);
+        var losDomain = generateIntersectMap().concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, piston1, player, circleHead]);
         var oldMap = [...map];
         var oldMob = [...mob];
         var spawnGearMobCycle = 0;
@@ -17959,7 +17959,7 @@ const level = {
         level.custom = () => {
             Matter.Body.setPosition(circleHead, m.pos)
             if (!(compareArrays(oldMap, map) && compareArrays(oldMob, mob))) {
-                losDomain = generateIntersectMap().concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, player, circleHead]);
+                losDomain = generateIntersectMap().concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, piston1, player, circleHead]);
             }
             oldMap = [...map];
             oldMob = [...mob];
@@ -17976,7 +17976,7 @@ const level = {
             // light
             var lightPos = { x: 400, y: -2775 };
             var lightRadius = 2950;
-            const vertices = circleLoS(lightPos, lightRadius, map.concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, player, circleHead]));
+            const vertices = circleLoS(lightPos, lightRadius, map.concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, piston1, player, circleHead]));
             if (vertices.length > 0 && vertices[0].x) {
                 ctx.beginPath();
                 ctx.moveTo(vertices[0].x, vertices[0].y);
