@@ -1,34 +1,75 @@
 ******************************************************** NEXT PATCH **************************************************
 
-JUNK tech: flatland - draw line of sight
-  credit to Cornbread for line of sight algorithm
-  a preview of future line of site content
-  try it out in console:  tech.giveTech("flatland")
+new community level cantilever
 
-new images
-bug fixes
+extended tech sorting to experiment
+
+acetone peroxide does 40->33% more explosion harm to player
+fleas can do up to 30% more damage before they despawn
 
 *********************************************************** TODO *****************************************************
 
-LoS
-  performance
-    calculate things that don't change when the map ctx is done
-      like the intersections?
-  rewrite code for infinite range
-  how to use this?
-    JUNK tech?
-    custom level?
-      give it a dark back ground for contrast?
-    game setting?
-applications
-  level that is dark, and you can only see LoS
-  boss that you need to avoid,  probably requires a custom level
-    boss is a source of light
-  cloaking tech, or just replace cloaking effect
-  explosion graphic
-  mobs area of effect damage
-    maybe make a shared mob AoE damage function
-  standing wave graphic
+maybe reduce the fps on the line of sight graphics to make it look more like a sensor?
+make a bot the follows the player the pov for line of sight levels, not the player
+  also need to make the vision a slice of a circle, not a full circle
+
+aperture also increases and decreases vision range
+  I think messing with vision range causes problems with the start of level vision code
+
+mob non-combat behaviors, like Rain World
+  gathering
+    blocks
+      eating blocks to heal?
+    power ups
+      eating power ups and ejecting them on death
+  flocking
+    grouping near mobs
+    keeping distance from mobs
+    sharing velocity with other mobs: boids
+  wander
+    random walk with a bias towards the player
+  play
+  fight other mobs
+
+consider increasing the base player horizontal movement
+  maybe only increase ground movement, air control seems fine
+  would this unbalance any maps?
+
+level: subway - a map that uses the train level element and line of sight graphics
+  stations
+    station theme ideas:
+      portals
+        teleport to far away rooms
+      map elements that alternate between positions
+      buttons and doors
+  maybe add mob mobs to each station?  this makes it faster to clear the level
+  boss
+    spawn at the exit station? or at a random station? or at the station before the exit?
+    spawn on the station after enough mobs have been killed?
+    type of boss?
+      might need to make a new boss designed for this map: los and stations
+        small, quick, sneaky
+      do random bosses work?
+        I think 
+  looks good with line of sight
+    background lighting for each room drawn in level.custom
+    no outdoors, no fall off the edge
+    slime
+    no small bumps
+    starting in a small room with a hole to the right with a short drop, like highrise or aerie
+    floating hexagons, like in reservoir, labs
+    ramping walls to jump over, like satellite
+
+tech stubs should be a tech unlocked by skins
+  nitinol, tungsten?
+  maybe give another benefit?
+    defense?
+    make a shared variable for skin defense, since you can only have one skin
+
+make a lemming that walks until it hits a wall and then turns around robotically
+  body or mob?
+  can't be killed?
+
 
 Also another thing I made that could fit in-game: https://kgurchiek.github.io/universal-n-gon-loader/
 by default it just plays a random version of n-gon downloaded from past github commits
@@ -36,9 +77,6 @@ maybe the "snapshots" could work like this rather than downloading 8 versions of
 also you can play any version with https://kgurchiek.github.io/universal-n-gon-loader/?commitIndex=NUM
 where setting "NUM" to 0 is the very first commit
 here's the code if you want to check it out: https://github.com/kgurchiek/universal-n-gon-loader/blob/main/script.js
-
-level - funicular
-  The system is characterized by two counterbalanced carriages (also called cars or trains) permanently attached to opposite ends of a haulage cable, which is looped over a pulley at the upper end of the track.[2][3] The result of such a configuration is that the two carriages move synchronously: as one ascends, the other descends at an equal speed.
 
 missile bot and plasma bot don't get converted by bot upgrade tech?
   is this more confusing because it contradicts text?
@@ -63,8 +101,7 @@ mobs attack mines
   
 rework quantum eraser
 
-test bremsstrahlung damage
-  and make sure it actually does more damage with the dot tech
+tech circular polarization - wave gun bullets move in a circle
 
 tech: choose next map by name after exiting current map
   use modified tech selection code?
@@ -135,8 +172,6 @@ tech: if you die inside MACHO, heal to full and delete the MACHO for the rest of
 tech: after bosses die<br>they spawn a research
 
 tech: +8% damage each time you kill a boss
-
-tech:  maybe missiles explode when they hit walls, but explosions only drain energy
 
 tech: sticky grenades
   needs another effect to be good enough
@@ -241,8 +276,6 @@ mob status effect - emit - mobs fire lasers for a few seconds
 Tech: "Solid rocket motor": Missiles would start at 300% speed and 200% missile damage upon explosion, but the speed and damage would decrease to 40% speed and damage as time goes on
 tech: every time shotgun fires it's a different shotgun mode:  nails, ice, needles, worms, fleas, rivets, ...  but you get more ammo
 
-try again - line of sight  https://ncase.me/sight-and-light/
-
 for tech power ups no tech options are displayed until you research once
   or display only JUNK until you research once
   increase the number of options after each research
@@ -253,8 +286,6 @@ tech increase max energy and energy to 5000, but you can no longer regen energy 
 
 it would be nice if there was incentive to go slow when choosing tech so n-gon is more relaxing
   add some css based visual effects for opening up a tech,gun,field
-
-make freeze and __  not cause death at 50% health, but just 600% extra damage for that bullet 
 
 make a new coupling effect for perfect diamagnetism or standing wave
 
@@ -313,8 +344,6 @@ replace field descriptions with a function call so they can have dynamic text
   add in dynamic coupling text as a 4th line
 
 Boss that shoots out a ring of bullets, then after a few seconds it gravitates the bullets back
-
-JUNK: Placebo: double the power up spawn rate but make half of them do nothing
 
 coupling
   put coupling description as 4th line on field description
@@ -629,10 +658,6 @@ a mine tech that makes mines you can stand on
     or 3 seconds after you touch them
   benefits from all block tech
 
-setting to remove UI, except health bar
-  except active gun? to see ammo
-  checkbox in pause and in settings
-
 go non-collide with mobs when immune to damage?
 
 mobs that are invulnerable from the front
@@ -646,8 +671,6 @@ add anticipation to more mob attacks
 
 can mob bullets damage other mob?
   maybe if they switch collisions and classType === "body" or obj.classType === "bullet"
-
-path finding system
 
 figure out how to get friction effects on map/body to apply to player
 also horizontal moving platform?
@@ -721,9 +744,6 @@ training
 balance time dilation with bose einstein  (you can freeze everything and take no damage)
   code is still there, need to balance
   balance with energy drain?
-
-overflowing energy does harm?
-  or just reduces harm reduction?
 
 make a line of constrained mobs move like a snake 
   apply forces with directions determined by time and position on the snake
@@ -855,18 +875,6 @@ look into improving mouse lag with pointer lock?
 https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
 https://www.vsynctester.com/game.html
 https://news.ycombinator.com/item?id=26530272
-
-mobile requirements:
-  detect mobile, flip to landscape
-  detect no keyboard, no mouse
-    auto aim?
-    limit items to ones that don't require aiming?
-    tap screen regions to move (WASD)
-    reduce font size
-    
-add back in gamepad support?
-  but does anyone care?
-  https://github.com/landgreen/landgreen.github.io/search?q=gamepadconnected
 
 tech: time dilation - when you exit time dilation rewind to the state you entered
   position, velocity, and health
@@ -1121,14 +1129,6 @@ level Boss: fractal Sierpiński triangle
   spawns a 1/2 size version of the boss, this version can also spawn a smaller version, but it is capped at some size level
     they spawn once at the start of the level
     if a version dies, one can be replaced every ten seconds by the largest version
-
-give mobs more animal-like behaviors like rain world
-  mobs play, look for food, explore
-  mobs some times aren't aggressive
-    when low on life or after taking a large hit
-  mobs can fight each other
-    this might be hard to code
-  isolated mobs try to group up
 
 mob: wall mounted guns / lasers
   not part of randomized mob pool, customized to each level

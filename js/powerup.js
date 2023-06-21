@@ -664,7 +664,7 @@ const powerUps = {
     researchText(type) {
         let text = ""
         if (type === "entanglement") {
-            text += `<div class='choose-grid-module entanglement flipX'>entanglement</div>`
+            text += `<div class='choose-grid-module entanglement flipX' onclick='powerUps.endDraft("${type}",true)'>entanglement</div>`
         } else if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
             text += `<div onclick="powerUps.research.use('${type}')" class='research-card'>` // style = "margin-left: 192px; margin-right: -192px;"
             tech.junkResearchNumber = Math.ceil(4 * Math.random())
@@ -686,7 +686,7 @@ const powerUps = {
     researchAndCancelText(type) {
         let text = `<div class='research-cancel'>`
         if (type === "entanglement") {
-            text += `<span class='research-card entanglement flipX' style="width: 275px;"><span style="letter-spacing: 6px;">entanglement</span></span>`  //&zwnj;
+            text += `<span class='research-card entanglement flipX' style="width: 275px;" onclick='powerUps.endDraft("${type}",true)'><span style="letter-spacing: 6px;">entanglement</span></span>`  //&zwnj;
         } else if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
             text += `<span onclick="powerUps.research.use('${type}')" class='research-card' style="width: 275px;float: left;">` // style = "margin-left: 192px; margin-right: -192px;"
             tech.junkResearchNumber = Math.ceil(4 * Math.random())
@@ -1140,7 +1140,7 @@ const powerUps = {
                         const cycle = (timestamp) => {
                             // if (timeStart === undefined) timeStart = timestamp
                             // console.log(timestamp, timeStart)
-                            if (timestamp - timeStart > tech.brainStormDelay * count) {
+                            if (timestamp - timeStart > tech.brainStormDelay * count && simulation.isChoosing) {
                                 count++
                                 powerUps.tech.effect();
                                 document.getElementById("choose-grid").style.pointerEvents = "auto"; //turn off the normal 500ms delay
@@ -1201,18 +1201,19 @@ const powerUps = {
                 // text += "<div></div>"
                 // text += "<div class='choose-grid-module entanglement flipX'>entanglement</div>"
                 // text += `<div class='choose-grid-module' onclick='powerUps.endDraft("tech",true)' style="width: 82px; text-align: center;font-size: 1.1em;font-weight: 100;justify-self: end;">cancel</div>` //powerUps.cancelText('tech')
-                if (localSettings.entanglement.fieldIndex) {
+                if (localSettings.entanglement.fieldIndex && localSettings.entanglement.fieldIndex !== m.fieldMode) {
                     const choose = localSettings.entanglement.fieldIndex //add field
                     text += powerUps.fieldText(choose, `powerUps.choose('field',${choose})`)
                 }
                 for (let i = 0; i < localSettings.entanglement.gunIndexes.length; i++) { //add guns
                     const choose = localSettings.entanglement.gunIndexes[i]
+                    //check if you always have this gun
+                    let alreadyHasGun = false
+                    for (let j = 0; j < b.inventory.length; j++) {
+                        if (b.inventory[j] === choose) alreadyHasGun = true
+                    }
                     // text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${gun})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[gun].name}</div> ${b.guns[gun].description}</div>`
-                    text += powerUps.gunText(choose, `powerUps.choose('gun',${choose})`)
-
-                    //consider not adding guns the player currently has?
-
-
+                    if (!alreadyHasGun) text += powerUps.gunText(choose, `powerUps.choose('gun',${choose})`)
                 }
                 for (let i = 0; i < localSettings.entanglement.techIndexes.length; i++) { //add tech
                     let choose = localSettings.entanglement.techIndexes[i]

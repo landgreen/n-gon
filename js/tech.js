@@ -33,6 +33,7 @@ const tech = {
         tech.totalCount = 0;
         tech.junkCount = 0 //tech.countJunkTech();
         simulation.updateTechHUD();
+        simulation.updateGunHUD();
     },
     removeTech(index = 'random') {
         if (index === 'random') {
@@ -253,7 +254,7 @@ const tech = {
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.6
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.defense()
-        if (tech.isHarmDamage && m.lastHarmCycle + 600 > m.cycle) dmg *= 3;
+        if (tech.isHarmDamage && m.lastHarmCycle + 480 > m.cycle) dmg *= 3;
         if (tech.lastHitDamage && m.lastHit) dmg *= 1 + tech.lastHitDamage * m.lastHit * (2 - m.defense()) // if (!simulation.paused) m.lastHit = 0
         if (tech.isLowHealthDmg) dmg *= 1 + 0.7 * Math.max(0, 1 - (tech.isEnergyHealth ? m.energy : m.health))
         return dmg
@@ -335,7 +336,7 @@ const tech = {
         }
     },
     {
-        name: "elasticity",
+        name: "nitinol",
         description: "<strong>+33%</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>+30%</strong> <strong class='color-defense'>defense</strong>",
         maxCount: 3,
         count: 0,
@@ -757,25 +758,6 @@ const tech = {
         }
     },
     {
-        name: "integrated armament",
-        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Weapon' class="link">integrated armament</a>`,
-        description: `<span style = 'font-size:95%;'>+<strong>25%</strong> <strong class='color-d'>damage</strong>, but new <strong class='color-g'>guns</strong><br>replace your current <strong class='color-g'>gun</strong> and convert <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></span>`,
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        allowed() {
-            return b.inventory.length === 1
-        },
-        requires: "only 1 gun",
-        effect() {
-            tech.isOneGun = true;
-        },
-        remove() {
-            tech.isOneGun = false;
-        }
-    },
-    {
         name: "supply chain",
         descriptionFunction() {
             return `double your current <strong class='color-ammo'>ammo</strong><br><strong>+4%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool`
@@ -986,7 +968,52 @@ const tech = {
             }
         }
     },
-
+    {
+        name: "integrated armament",
+        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Weapon' class="link">integrated armament</a>`,
+        description: `<span style = 'font-size:95%;'>+<strong>25%</strong> <strong class='color-d'>damage</strong>, but new <strong class='color-g'>guns</strong> replace<br>your current <strong class='color-g'>gun</strong> and convert <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></span>`,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return b.inventory.length === 1
+        },
+        requires: "only 1 gun",
+        effect() {
+            tech.isOneGun = true;
+        },
+        remove() {
+            tech.isOneGun = false;
+        }
+    },
+    {
+        name: "mechatronics",
+        descriptionFunction() {
+            let damageTotal = 1
+            for (let i = 0; i < this.damageSoFar.length; i++) damageTotal *= this.damageSoFar[i]
+            let currentDamage = ""
+            if (this.count) currentDamage = `<br><em>(+${(100 * (damageTotal - 1)).toFixed(0)}%)</em>`
+            return `gain between <strong>+7%</strong> and <strong>+13%</strong> <strong class='color-d'>damage</strong>` + currentDamage
+        },
+        maxCount: 9,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() { return true },
+        requires: "",
+        damage: 1.1,
+        damageSoFar: [], //tracks the random damage upgrades so it can be removed and in descriptionFunction
+        effect() {
+            const damage = (Math.floor((Math.random() * 0.07 + 0.07 + 1) * 100)) / 100
+            tech.damage *= damage
+            this.damageSoFar.push(damage)
+        },
+        remove() {
+            for (let i = 0; i < this.damageSoFar.length; i++) tech.damage /= this.damageSoFar[i]
+            this.damageSoFar.length = 0
+        }
+    },
     // {
     //     name: "coyote",
     //     description: "",
@@ -1054,7 +1081,7 @@ const tech = {
     {
         name: "microstates",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Microstate_(statistical_mechanics)' class="link">microstates</a>`,
-        description: "for each active <strong>bullet / bot</strong><br><strong>+0.7%</strong> <strong class='color-d'>damage</strong>",
+        description: "for each active <strong>bullet</strong> or <strong>bot</strong><br><strong>+0.7%</strong> <strong class='color-d'>damage</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -1288,7 +1315,7 @@ const tech = {
     },
     {
         name: "reaction inhibitor",
-        description: "<strong>-12%</strong> maximum mob <strong>health</strong>", //<strong class='color-h'>health</strong>
+        description: "<strong>-11%</strong> maximum mob <strong>health</strong>", //<strong class='color-h'>health</strong>
         maxCount: 3,
         count: 0,
         frequency: 1,
@@ -2532,7 +2559,7 @@ const tech = {
     },
     {
         name: "ground state",
-        description: "<strong>+200</strong> maximum <strong class='color-f'>energy</strong><br><strong>–40%</strong> passive <strong class='color-f'>energy</strong> generation",
+        description: "<strong>+200</strong> maximum <strong class='color-f'>energy</strong><br><strong>–33%</strong> passive <strong class='color-f'>energy</strong> generation",
         // description: "reduce <strong class='color-defense'>defense</strong> by <strong>66%</strong><br>you <strong>no longer</strong> passively regenerate <strong class='color-f'>energy</strong>",
         maxCount: 1,
         count: 0,
@@ -3165,7 +3192,7 @@ const tech = {
     },
     {
         name: "quantum immortality",
-        description: "<strong>+33%</strong> <strong class='color-defense'>defense</strong><br>after <strong>dying</strong>, continue in an <strong class='alt'>alternate reality</strong>",
+        description: "<strong>+30%</strong> <strong class='color-defense'>defense</strong><br>after <strong>dying</strong>, continue in an <strong class='alt'>alternate reality</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3489,7 +3516,7 @@ const tech = {
             for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
         },
         remove() {
-            if (!this.count) tech.isDeterminism = false;
+            tech.isDeterminism = false;
         }
     },
     {
@@ -4067,7 +4094,7 @@ const tech = {
     },
     {
         name: "null hypothesis",
-        description: `<strong>+9%</strong> <strong class='color-d'>damage</strong><br><strong>removing</strong> this spawns ${powerUps.orb.research(15)}`,
+        description: `<strong>+8%</strong> <strong class='color-d'>damage</strong><br><strong>removing</strong> this spawns ${powerUps.orb.research(15)}`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -4077,7 +4104,7 @@ const tech = {
             return true
         },
         requires: "",
-        damage: 1.09,
+        damage: 1.08,
         effect() {
             tech.damage *= this.damage
         },
@@ -5405,7 +5432,7 @@ const tech = {
     },
     {
         name: "acetone peroxide",
-        description: "<strong>+70%</strong> <strong class='color-e'>explosive</strong> <strong>radius</strong><br><strong>–40%</strong> <strong class='color-e'>explosive</strong> <strong class='color-defense'>defense</strong>",
+        description: "<strong>+70%</strong> <strong class='color-e'>explosive</strong> <strong>radius</strong><br><strong>–33%</strong> <strong class='color-e'>explosive</strong> <strong class='color-defense'>defense</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -7359,7 +7386,7 @@ const tech = {
     },
     {
         name: "cherenkov radiation", //<strong>deflecting</strong> and <strong class='color-block'>blocks</strong>
-        description: "bremsstrahlung's effects are <strong class='color-p'>radioactive</strong><br><strong>+300%</strong> <strong class='color-d'>damage</strong> over <strong>6</strong> seconds",
+        description: "bremsstrahlung's effects are <strong class='color-p'>radioactive</strong><br><strong>+250%</strong> <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -7482,7 +7509,7 @@ const tech = {
     },
     {
         name: "radiative equilibrium",
-        description: "after losing <strong class='color-h'>health</strong><br><strong>+200%</strong> <strong class='color-d'>damage</strong> for <strong>10</strong> seconds",
+        description: "after losing <strong class='color-h'>health</strong><br><strong>+200%</strong> <strong class='color-d'>damage</strong> for <strong>8</strong> seconds",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -8936,10 +8963,6 @@ const tech = {
                         y: 10 * (Math.random() - 0.5)
                     });
                     bodyBullet.isAboutToBeRemoved = true
-                    bodyBullet.collisionFilter.category = cat.body;
-                    bodyBullet.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-                    bodyBullet.classType = "body";
-                    Composite.add(engine.world, bodyBullet); //add to world
                     setTimeout(() => { //remove block
                         for (let i = 0; i < body.length; i++) {
                             if (body[i] === bodyBullet) {
@@ -10095,7 +10118,7 @@ const tech = {
             simulation.ephemera.push({
                 name: "LoS", count: 0, do() {
                     const pos = m.pos
-                    const radius = 5000
+                    const radius = 3000
                     if (!simulation.isTimeSkipping) {
                         const vertices = simulation.sight.circleLoS(pos, radius);
                         if (vertices.length) {
@@ -10121,10 +10144,11 @@ const tech = {
                             } else {
                                 ctx.lineTo(vertices[0].x, vertices[0].y)
                             }
+
                             //stroke the map, so it looks different form the line of sight 
                             ctx.strokeStyle = "#234";
                             ctx.lineWidth = 9;
-                            ctx.stroke(simulation.draw.mapPath);
+                            ctx.stroke(simulation.draw.mapPath); //this has a pretty large impact on performance, maybe 5% worse performance
 
                             ctx.globalCompositeOperation = "destination-in";
                             ctx.fillStyle = "#000";
@@ -10235,16 +10259,8 @@ const tech = {
             for (let i = 0, len = 40; i < len; i++) {
                 setTimeout(() => {
                     m.energy -= 1 / len
-                    const index = body.length
-                    where = Vector.add(m.pos, {
-                        x: 400 * (Math.random() - 0.5),
-                        y: 400 * (Math.random() - 0.5)
-                    })
+                    where = Vector.add(m.pos, { x: 400 * (Math.random() - 0.5), y: 400 * (Math.random() - 0.5) })
                     spawn.bodyRect(where.x, where.y, Math.floor(15 + 100 * Math.random()), Math.floor(15 + 100 * Math.random()));
-                    body[index].collisionFilter.category = cat.body;
-                    body[index].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
-                    body[index].classType = "body";
-                    Composite.add(engine.world, body[index]); //add to world
                 }, i * 100);
             }
 
@@ -10397,7 +10413,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isJunk: true,
         isNonRefundable: true,
         allowed() {
@@ -10418,7 +10433,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isJunk: true,
         allowed() {
             return !m.isShipMode
@@ -10437,7 +10451,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isJunk: true,
         allowed() {
             return !m.isShipMode
@@ -10456,7 +10469,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isJunk: true,
         allowed() {
             return !m.isShipMode
@@ -10475,7 +10487,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isJunk: true,
         allowed() {
             return true
@@ -10494,7 +10505,6 @@ const tech = {
         maxCount: 1,
         count: 0,
         frequency: 0,
-        isSkin: true,
         isNonRefundable: true,
         isJunk: true,
         allowed() {
