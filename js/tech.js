@@ -6103,7 +6103,7 @@ const tech = {
     },
     {
         name: "siphonaptera",
-        description: "<strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> and <strong>shotgun</strong> hatch <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>",
+        description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> metamorphose into <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -6123,7 +6123,7 @@ const tech = {
     },
     {
         name: "nematodes",
-        description: "<strong>shotgun</strong> and <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> hatch <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong>",
+        description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> metamorphose into <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,

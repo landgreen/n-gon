@@ -5500,21 +5500,10 @@ const b = {
                 const push = 0.4
                 const reflectivity = 1 - 1 / (tech.laserReflections * 3)
                 let damage = m.dmgScale * this.laserDamage * tech.laserDamage
-                let best = {
-                    x: 1,
-                    y: 1,
-                    dist2: Infinity,
-                    who: null,
-                    v1: 1,
-                    v2: 1
-                };
-                const path = [{
-                    x: this.vertices[0].x,
-                    y: this.vertices[0].y
-                }, {
-                    x: this.lockedOn.position.x,
-                    y: this.lockedOn.position.y
-                }];
+                //make the laser wiggle as it aims at the target
+                let best = { x: 1, y: 1, dist2: Infinity, who: null, v1: 1, v2: 1 };
+                const perp2 = Vector.mult(Vector.rotate({ x: 1, y: 0 }, m.angle + Math.PI / 2), 0.6 * this.lockedOn.radius * Math.sin(simulation.cycle / this.lookFrequency))
+                const path = [{ x: this.vertices[0].x, y: this.vertices[0].y }, Vector.add(this.lockedOn.position, perp2)];
 
                 const vertexCollision = function (v1, v1End, domain) {
                     for (let i = 0; i < domain.length; ++i) {

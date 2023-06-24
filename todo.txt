@@ -1,13 +1,25 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community level cantilever
+subway
+  start in an empty station
+  station exits are blocked by a gate that opens when you press a button
+  level exit spawns after you clear 4 stations
+  added 2 new stations (7 possible stations)
 
-extended tech sorting to experiment
+laser-bots lasers wiggle as it aims at the target
+  this is a nerf to iridescence and it looks cool
 
-acetone peroxide does 40->33% more explosion harm to player
-fleas can do up to 30% more damage before they despawn
+bug fixes
 
 *********************************************************** TODO *****************************************************
+
+only calculate setPaths  on subway level?
+  does this mess with flatland, no
+
+improve flatland performance?
+
+get rid of the word permanent in bot tech
+  ersatz bots,  perimeter defense, network effect
 
 maybe reduce the fps on the line of sight graphics to make it look more like a sensor?
 make a bot the follows the player the pov for line of sight levels, not the player
@@ -1228,6 +1240,7 @@ possible names for tech
     this is violated by expansion of the universe
   https://en.wikipedia.org/wiki/Cosmic_censorship_hypothesis - black holes can't leak
   Alcubierre warp drive (FTL with negative mass)
+  Spherules - A spherule is a small sphere or spherical body. It can also refer to a thick-walled spherical structure that contains endospores and occurs in the parasitic form of fungi
 
 ******************************************************** CARS IMAGES ********************************************************
 
