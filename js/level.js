@@ -10,7 +10,7 @@ const level = {
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     //see level.populateLevels:   (intro, ... , reservoir or factory, reactor, ... , gauntlet, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
-    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever"],
+    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever","tlinat"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
@@ -22070,6 +22070,388 @@ const level = {
         }
         const obj = { restoreBoss };
         Object.assign(spawn, obj); //ez
+    },
+    tlinat() { // _Destined_ formerly Richard0820#2652
+        simulation.fallHeight = Infinity;
+        level.setPosToSpawn(0, -1000); //normal spawn
+        level.exit.x = 14675;
+        level.exit.y = 3675 + 20;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); 
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); 
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d8dadf";
+        let teleportIndex = 0;
+        simulation.makeTextLog(`<em>Walk right to tp to maze</em><br><b>Exit is at bottom right</b>`)
+        level.custom = () => {
+            level.exit.drawAndCheck();
+
+            level.enter.draw();
+
+            if(player.position.y > 100000) {
+                Matter.Body.setPosition(player, {x:5100, y:-5925})
+            }
+            if(player.position.x > 2500 && teleportIndex == 0) {
+                Matter.Body.setPosition(player, {x:5100, y:-5925})
+                teleportIndex++;
+                for(let i = 0; i < map.length; i++) {
+                    if(Math.random() < 0.01) { //1% chance
+                        spawn.ghoster(map[i].position.x, map[i].position.y)
+                    }
+                }
+                simulation.makeTextLog(`Watch out for <b>ghosters</b><br>Peace ✌️`)
+            }
+        };
+
+        level.customTopLayer = () => { 
+            drawText(2000, -3000, "JOIN OUR DISCORD SERVER");  
+            ctx.fillStyle = "black"
+            ctx.fillRect(-1000, -2750, 5700, 25);
+        }; 
+
+        spawn.mapRect(-1000, -950, 5950, 100);
+        spawn.mapRect(1725, -2450, 175, 25);
+        spawn.mapRect(1725, -2450, 25, 175);
+        spawn.mapRect(1875, -2450, 25, 175);
+        spawn.mapRect(1725, -2300, 175, 25);
+        spawn.mapRect(1775, -2400, 75, 75);
+        spawn.mapRect(1925, -2325, 25, 50);
+        spawn.mapRect(1975, -2350, 25, 75);
+        spawn.mapRect(1925, -2375, 50, 25);
+        spawn.mapRect(1950, -2450, 25, 100);
+        spawn.mapRect(1925, -2425, 50, 25);
+        spawn.mapRect(1950, -2400, 75, 25);
+        spawn.mapRect(2000, -2425, 25, 75);
+        spawn.mapRect(2025, -2350, 25, 25);
+        spawn.mapRect(2050, -2375, 25, 25);
+        spawn.mapRect(2000, -2425, 100, 25);
+        spawn.mapRect(2075, -2450, 25, 50);
+        spawn.mapRect(2125, -2450, 25, 25);
+        spawn.mapRect(2100, -2375, 50, 50);
+        spawn.mapRect(2050, -2325, 75, 25);
+        spawn.mapRect(2075, -2325, 25, 50);
+        spawn.mapRect(2025, -2300, 25, 75);
+        spawn.mapRect(2175, -2450, 25, 175);
+        spawn.mapRect(2175, -2450, 175, 25);
+        spawn.mapRect(2325, -2450, 25, 175);
+        spawn.mapRect(2175, -2300, 175, 25);
+        spawn.mapRect(2225, -2400, 75, 75);
+        spawn.mapRect(2125, -2300, 25, 50);
+        spawn.mapRect(1725, -2250, 25, 50);
+        spawn.mapRect(1725, -2175, 25, 150);
+        spawn.mapRect(1725, -2000, 175, 25);
+        spawn.mapRect(1725, -2000, 25, 175);
+        spawn.mapRect(1725, -1850, 175, 25);
+        spawn.mapRect(1875, -2000, 25, 175);
+        spawn.mapRect(1775, -1950, 75, 75);
+        spawn.mapRect(1750, -2250, 25, 125);
+        spawn.mapRect(1750, -2250, 100, 25);
+        spawn.mapRect(1825, -2250, 25, 75);
+        spawn.mapRect(1800, -2175, 25, 50);
+        spawn.mapRect(1750, -2150, 75, 25);
+        spawn.mapRect(1775, -2075, 25, 25);
+        spawn.mapRect(1800, -2050, 25, 25);
+        spawn.mapRect(1825, -2100, 25, 25);
+        spawn.mapRect(1850, -2125, 25, 25);
+        spawn.mapRect(1875, -2150, 50, 25);
+        spawn.mapRect(1900, -2150, 25, 125);
+        spawn.mapRect(1875, -2100, 50, 25);
+        spawn.mapRect(1850, -2050, 75, 25);
+        spawn.mapRect(1925, -2050, 25, 75);
+        spawn.mapRect(1925, -2025, 50, 25);
+        spawn.mapRect(1875, -2250, 125, 25);
+        spawn.mapRect(1900, -2250, 25, 75);
+        spawn.mapRect(1875, -2200, 100, 25);
+        spawn.mapRect(1950, -2250, 25, 125);
+        spawn.mapRect(1925, -2175, 100, 25);
+        spawn.mapRect(2000, -2200, 25, 75);
+        spawn.mapRect(2000, -2200, 75, 25);
+        spawn.mapRect(1975, -2125, 25, 100);
+        spawn.mapRect(1925, -1950, 25, 125);
+        spawn.mapRect(1925, -1850, 75, 25);
+        spawn.mapRect(1975, -1925, 25, 100);
+        spawn.mapRect(1950, -1975, 25, 100);
+        spawn.mapRect(2025, -1925, 25, 100);
+        spawn.mapRect(2050, -1900, 25, 75);
+        spawn.mapRect(2075, -1925, 25, 75);
+        spawn.mapRect(2100, -1850, 25, 25);
+        spawn.mapRect(2300, -2250, 25, 25);
+        spawn.mapRect(2325, -2225, 25, 25);
+        spawn.mapRect(2250, -2250, 25, 25);
+        spawn.mapRect(2200, -2250, 25, 50);
+        spawn.mapRect(2225, -2225, 25, 50);
+        spawn.mapRect(2275, -2200, 25, 25);
+        spawn.mapRect(2150, -2250, 25, 100);
+        spawn.mapRect(2150, -2200, 50, 25);
+        spawn.mapRect(2125, -2175, 50, 25);
+        spawn.mapRect(2075, -2250, 50, 50);
+        spawn.mapRect(2100, -2225, 75, 25);
+        spawn.mapRect(2100, -2225, 25, 50);
+        spawn.mapRect(2050, -2150, 75, 25);
+        spawn.mapRect(2075, -2175, 25, 150);
+        spawn.mapRect(2025, -2125, 25, 25);
+        spawn.mapRect(2025, -2075, 25, 50);
+        spawn.mapRect(2025, -2050, 250, 25);
+        spawn.mapRect(2125, -2125, 50, 25);
+        spawn.mapRect(2150, -2125, 25, 100);
+        spawn.mapRect(2175, -2150, 25, 75);
+        spawn.mapRect(2175, -2150, 100, 25);
+        spawn.mapRect(2200, -2150, 25, 50);
+        spawn.mapRect(2225, -2150, 25, 75);
+        spawn.mapRect(2300, -2150, 50, 25);
+        spawn.mapRect(2275, -2100, 75, 25);
+        spawn.mapRect(2300, -2075, 50, 25);
+        spawn.mapRect(2325, -2100, 25, 125);
+        spawn.mapRect(2275, -2000, 75, 25);
+        spawn.mapRect(2225, -2050, 25, 125);
+        spawn.mapRect(2125, -1950, 125, 25);
+        spawn.mapRect(2125, -2050, 25, 125);
+        spawn.mapRect(2175, -2000, 25, 25);
+        spawn.mapRect(2000, -1950, 75, 25);
+        spawn.mapRect(2000, -2000, 25, 75);
+        spawn.mapRect(2000, -2000, 100, 25);
+        spawn.mapRect(2075, -1925, 75, 25);
+        spawn.mapRect(2175, -1925, 25, 25);
+        spawn.mapRect(2125, -1875, 150, 25);
+        spawn.mapRect(2275, -1850, 75, 25);
+        spawn.mapRect(2300, -1875, 25, 50);
+        spawn.mapRect(2275, -1900, 25, 25);
+        spawn.mapRect(2300, -1925, 50, 25);
+        spawn.mapRect(2325, -1925, 25, 50);
+        spawn.mapRect(2225, -1975, 50, 50);
+        spawn.mapRect(2225, -1950, 25, 100);
+        spawn.mapRect(-1325, -3450, 100, 2575);
+        spawn.mapRect(-1325, -950, 350, 100);
+        spawn.mapRect(4850, -3400, 100, 2550);
+        spawn.mapRect(-1325, -3450, 6275, 100);
+        maze(10000, -1000, 10000, 10000, 50);
+        function maze(x, y, width, height, cells) {
+            const cellWidth = width / cells;
+            const cellHeight = height / cells;
+
+            const startX = x - (width / 2);
+            const startY = y - (height / 2);
+
+            const matrix = [];
+            for (let i = 0; i < cells; i++) {
+                matrix[i] = [];
+                for (let j = 0; j < cells; j++) {
+                    matrix[i][j] = 1; 
+                }
+            }
+
+            const stack = []; 
+
+            function carveMaze(x, y) {
+                    matrix[x][y] = 0; 
+
+                    const directions = [
+                        { dx: 0, dy: -1 }, // Up
+                        { dx: 1, dy: 0 },  // Right
+                        { dx: 0, dy: 1 },  // Down
+                        { dx: -1, dy: 0 }  // Left
+                    ];
+
+                    directions.sort(() => Math.random() - 0.5);
+
+                    for (const direction of directions) {
+                        const nextX = x + direction.dx * 2; 
+                        const nextY = y + direction.dy * 2; 
+
+                        if (nextX >= 0 && nextX < cells && nextY >= 0 && nextY < cells && matrix[nextX][nextY] === 1) {
+                            matrix[x + direction.dx][y + direction.dy] = 0; 
+                            matrix[nextX][nextY] = 0; 
+
+                            stack.push({ x: x + direction.dx, y: y + direction.dy });
+
+                            carveMaze(nextX, nextY); 
+                        }
+                    }
+                }
+                carveMaze(0, 0);
+                matrix[cells - 1][cells - 1] = 1;
+                Matter.Body.scale(player.parts[3], 2, 2);
+                for (let i = -1; i < cells; i++) {
+                    for (let j = -1; j < cells; j++) {
+                        const cellX = startX + i * cellWidth;
+                        const cellY = startY + j * cellHeight;
+
+                        if (i < 0 || i >= cells || j < 0 || j >= cells || matrix[i][j] === 1) {
+                            spawn.mapRect(cellX, cellY, cellWidth, cellHeight);
+                        }
+                    }
+                }
+                return matrix;
+            }
+
+            function countAdjacentWalls(matrix, x, y) {
+                let count = 0;
+
+                const directions = [
+                    { dx: 0, dy: -1 }, // Up
+                    { dx: 1, dy: 0 },  // Right
+                    { dx: 0, dy: 1 },  // Down
+                    { dx: -1, dy: 0 }  // Left
+                ];
+
+                for (const direction of directions) {
+                    const neighborX = x + direction.dx;
+                    const neighborY = y + direction.dy;
+
+                    if (neighborX >= 0 && neighborX < matrix.length && neighborY >= 0 && neighborY < matrix[0].length && matrix[neighborX][neighborY] === 1) {
+                        count++;
+                    }
+                }
+
+                return count;
+            }
+          
+        function drawText(x, y, letters) {
+            const blockSize = 50; 
+            const padding = -30; 
+          
+            const lettersData = {
+              'J': [
+                ' #### ',
+                '    # ',
+                '    # ',
+                '    # ',
+                ' #  # ',
+                ' #  # ',
+                '  ##  ',
+              ],
+              'I': [
+                '  #  ',
+                '  #  ',
+                '  #  ',
+                '  #  ',
+                '  #  ',
+                '  #  ',
+                '  #  ',
+              ],
+              'N': [
+                ' #  # ',
+                ' ## # ',
+                ' ## # ',
+                ' # ## ',
+                ' # ## ',
+                ' #  # ',
+                ' #  # ',
+              ],
+              ' ': [
+                '      ',
+                '      ',
+                '      ',
+                '      ',
+                '      ',
+                '      ',
+                '      ',
+              ],
+              'O': [
+                '   ##   ',
+                '  #  #  ',
+                ' #    # ',
+                ' #    # ',
+                ' #    # ',
+                '  #  #  ',
+                '   ##   ',
+              ],
+              'U': [
+                ' #   # ',
+                ' #   # ',
+                ' #   # ',
+                ' #   # ',
+                ' #   # ',
+                ' #   # ',
+                '  ###  ',
+              ],
+              'R': [
+                ' #### ',
+                ' #   #',
+                ' #### ',
+                ' # #  ',
+                ' #  # ',
+                ' #   #',
+                ' #   #',
+              ],
+              'D': [
+                ' ###   ',
+                ' #  ## ',
+                ' #   # ',
+                ' #   # ',
+                ' #   # ',
+                ' #  ## ',
+                ' ###   ',
+              ],
+              'S': [
+                '  #### ',
+                ' #     ',
+                ' #     ',
+                '  ###  ',
+                '    ## ',
+                '     # ',
+                ' ##### ',
+              ],
+              'C': [
+                ' ##### ',
+                ' #     ',
+                ' #     ',
+                ' #     ',
+                ' #     ',
+                ' #     ',
+                ' ##### ',
+              ],
+                'V': [
+                ' #   # ',
+                ' #   # ',
+                ' #   # ',
+                ' #   # ',
+                ' #   # ',
+                '  # #  ',
+                '   #   ',
+              ],
+              'E': [
+                ' ##### ',
+                ' #     ',
+                ' #     ',
+                ' ##### ',
+                ' #     ',
+                ' #     ',
+                ' ##### ',
+              ],
+            };
+
+            const drawBlock = (x, y) => {
+              ctx.fillStyle = "black"
+              ctx.fillRect(x, y, blockSize, blockSize);
+            };
+          
+            const drawLetter = (letter, x, y) => {
+              const letterData = lettersData[letter];
+              if (letterData) {
+                for (let row = 0; row < letterData.length; row++) {
+                  const rowData = letterData[row];
+                  for (let col = 0; col < rowData.length; col++) {
+                    const char = rowData[col];
+                    if (char === '#') {
+                      const blockX = x + (col * (blockSize + padding));
+                      const blockY = y + (row * (blockSize + padding));
+                      drawBlock(blockX, blockY);
+                    }
+                  }
+                }
+              }
+            };
+          
+            for (let i = 0; i < letters.length; i++) {
+              const char = letters[i];
+          
+              const letterX = x + (i * (blockSize * 5)) - Math.abs(x * 1.5); // Adjust spacing between letters
+              const letterY = y;
+          
+              drawLetter(char, letterX, letterY);
+            }
+          }
     },
     superNgonBros() {
         simulation.makeTextLog(`<strong>Super N-gon Bros</strong> by <span class='color-var'>DesBoot</span>`);
