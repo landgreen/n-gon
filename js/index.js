@@ -373,6 +373,7 @@ const build = {
         if (tech.boomBotCount) botText += `<br>boom-bots: ${tech.boomBotCount}`
         if (tech.laserBotCount) botText += `<br>laser-bots: ${tech.laserBotCount}`
         if (tech.foamBotCount) botText += `<br>foam-bots: ${tech.foamBotCount}`
+        if (tech.soundBotCount) botText += `<br>sound-bots: ${tech.soundBotCount}`
         if (tech.dynamoBotCount) botText += `<br>dynamo-bots: ${tech.dynamoBotCount}`
         if (tech.plasmaBotCount) botText += `<br>plasma-bots: ${tech.plasmaBotCount}`
         if (tech.missileBotCount) botText += `<br>missile-bots: ${tech.missileBotCount}`

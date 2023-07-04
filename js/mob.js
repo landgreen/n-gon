@@ -189,7 +189,6 @@ const mobs = {
                 effect() {
                     if ((simulation.cycle - this.startCycle) % 30 === 0) {
                         let dmg = m.dmgScale * tech.radioactiveDamage * this.dmg
-                        console.log(dmg)
                         who.damage(dmg);
                         if (who.damageReduction) {
                             simulation.drawList.push({ //add dmg to draw queue
@@ -409,10 +408,7 @@ const mobs = {
             isLookingAtPlayer(threshold) {
                 const diff = Vector.normalise(Vector.sub(player.position, this.position));
                 //make a vector for the mob's direction of length 1
-                const dir = {
-                    x: Math.cos(this.angle),
-                    y: Math.sin(this.angle)
-                };
+                const dir = { x: Math.cos(this.angle), y: Math.sin(this.angle) };
                 //the dot product of diff and dir will return how much over lap between the vectors
                 const dot = Vector.dot(dir, diff);
                 // console.log(Math.cos(dot)*180/Math.PI)

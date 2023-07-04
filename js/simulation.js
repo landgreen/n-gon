@@ -766,6 +766,7 @@ const simulation = {
         tech.laserBotCount = 0;
         tech.orbitBotCount = 0;
         tech.foamBotCount = 0;
+        tech.soundBotCount = 0;
         tech.boomBotCount = 0;
         tech.plasmaBotCount = 0;
         tech.missileBotCount = 0;
@@ -1014,6 +1015,7 @@ const simulation = {
     },
     clearNow: false,
     clearMap() {
+        level.isProcedural = false;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (m.alive) {
             if (tech.isLongitudinal) b.guns[3].waves = []; //empty array of wave bullets
@@ -1103,7 +1105,6 @@ const simulation = {
             }
             requestAnimationFrame(respawnHeal);
         }
-
         if (tech.isDronesTravel && m.alive) {
             //count drones
             let droneCount = 0
@@ -1125,39 +1126,7 @@ const simulation = {
             }
 
             //respawn drones in animation frame
-            let respawnDrones = () => {
-                if (droneCount > 0) {
-                    requestAnimationFrame(respawnDrones);
-                    if (!simulation.paused && !simulation.isChoosing && m.alive) {
-                        const where = {
-                            x: level.enter.x + 50,
-                            y: level.enter.y - 60
-                        }
-                        droneCount--
-                        if (tech.isDroneRadioactive) {
-                            b.droneRadioactive({
-                                x: where.x + 100 * (Math.random() - 0.5),
-                                y: where.y + 100 * (Math.random() - 0.5)
-                            }, 0)
-                        } else {
-                            b.drone({
-                                x: where.x + 100 * (Math.random() - 0.5),
-                                y: where.y + 120 * (Math.random() - 0.5)
-                            }, 0)
-                            if (tech.isDroneGrab && deliveryCount > 0) {
-                                const who = bullet[bullet.length - 1]
-                                who.isImproved = true;
-                                const SCALE = 2.25
-                                Matter.Body.scale(who, SCALE, SCALE);
-                                who.lookFrequency = 30 + Math.floor(11 * Math.random());
-                                who.endCycle += 3000 * tech.droneCycleReduction * tech.isBulletsLastLonger
-                                deliveryCount--
-                            }
-                        }
-                    }
-                }
-            }
-            requestAnimationFrame(respawnDrones);
+            requestAnimationFrame(() => { b.delayDrones({ x: level.enter.x + 50, y: level.enter.y - 60 }, droneCount) });
 
             //respawn spores in animation frame
             let respawnSpores = () => {
@@ -1221,11 +1190,17 @@ const simulation = {
             }
             requestAnimationFrame(respawnFleas);
         }
-
         if (tech.isQuantumEraser) {
+            let count = 0
             for (let i = 0, len = mob.length; i < len; i++) {
-                if (mob[i].isDropPowerUp && mob[i].alive) tech.quantumEraserCount++
+                if (mob[i].isDropPowerUp && mob[i].alive) count++
             }
+            count *= 0.17 //to fake the chance, this makes it not random, and maybe less confusing
+            let cycle = () => { //run after waiting a cycle for the map to be cleared
+                const types = ["heal", "ammo", "heal", "ammo", "research", "coupling", "boost", "tech", "gun", "field"]
+                for (let i = 0; i < count; i++) powerUps.spawnDelay(types[Math.floor(Math.random() * types.length)], 1)
+            }
+            requestAnimationFrame(cycle);
         }
 
         function removeAll(array) {
@@ -1305,7 +1280,7 @@ const simulation = {
     },
     sight: { //credit to Cornbread for adding this algorithm to n-gon
         // square: 0,
-        intersectMap: [], //this is precalculated in simulation.draw.setPaths() when the map changes
+        intersectMap: [], //this is precalculated in simulation.draw.lineOfSightPrecalculation()
         getIntersection(v1, v1End, domain) {
             const intersections = simulation.sight.getIntersections(v1, v1End, domain);
             var best = { x: v1End.x, y: v1End.y, dist: (v1End.x - v1.x) ** 2 + (v1End.y - v1.y) ** 2 }
@@ -1596,9 +1571,8 @@ const simulation = {
                 }
                 simulation.draw.mapPath.lineTo(vertices[0].x, vertices[0].y);
             }
-
-
-            //store data for line of sight precalculation
+        },
+        lineOfSightPrecalculation() {
             simulation.sight.intersectMap = [];
             for (var i = 0; i < map.length; i++) {
                 const obj = map[i];

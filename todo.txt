@@ -1,32 +1,76 @@
 ******************************************************** NEXT PATCH **************************************************
 
-subway
-  start in an empty station
-  station exits are blocked by a gate that opens when you press a button
-  level exit spawns after you clear 4 stations
-  added 2 new stations (7 possible stations)
+new community level: dojo by weird_pusheen
 
-laser-bots lasers wiggle as it aims at the target
-  this is a nerf to iridescence and it looks cool
+sound-bot: makes phonon waves
+
+  updated tech
+drone repair -> von Neumann probe - if a drones ends near a block it will use that block to repair
+quantum eraser -> metamaterial absorber: for each mob left alive after you exit a level there is a 17% chance to spawn a power up
+uncertainty principle: extended to super balls
+aperture: camera zooms in and out along with the skin animation
+
+  balanced tech:
+cordyceps: zombies are much smarter, faster, do more damage, and last longer
+negative entropy -> self-assembly: 1 heal per 33->25% missing health on each new level
+renormalization: 44 -> 46% and +3% JUNK tech to pool
+parasitism: 60 -> 83% damage
+non-renewables: 67 -> 78% damage
+ground state: 200 -> 266 max energy
+dark patterns: 17 -> 22% damage and JUNK
+eternalism: 30 -> 24% damage
+stimulated emission 15 -> 17% duplication
+nitinol 30 -> 22% defense
 
 bug fixes
 
 *********************************************************** TODO *****************************************************
 
-only calculate setPaths  on subway level?
-  does this mess with flatland, no
+make a mob similar to slasher
+  because it's just a very well made mob.
+
+sound-bot: makes phonon waves
+  works with
+    other bot tech - done?
+    phonon - no
+    frequency - no
+    bound state - no
+    phase velocity - no
+    isotropic - no
+      maybe, but reduce fire rate?
+
+    uncertainty principle - done
+    propagation - done
+    amplitude - done
+    sympathetic resonance - done
+    mechanical resonance - done
+
+remove reflection from phonon?
+  but return it with isotropic?
+
+super-bot:  fires super balls
+
+tech - only allow 1,2 turrets at time.  spawning a new mine removes the oldest mine
+  turrets never run out of ammo
+    or turrets automatically use one of your mine ammos when they run out?
+    good with multi gun builds
+  conflict with booby trap?
+
+tech: after a needle hits a mobs
+  the needle splits into 3 needles?
+  reset your fire CD?
+  2x damage for each consecutive mob hit?
+
+tech: mass production - add a few selection options to all tech, gun, fields to do something:
+  this would work similar to the tech that adds a bot themed tech to every tech choice
+    options
+      spawn: ammo, heals, research, coupling?
+        random amounts?
+        make each option a full tech with images?
+
+
 
 improve flatland performance?
-
-get rid of the word permanent in bot tech
-  ersatz bots,  perimeter defense, network effect
-
-maybe reduce the fps on the line of sight graphics to make it look more like a sensor?
-make a bot the follows the player the pov for line of sight levels, not the player
-  also need to make the vision a slice of a circle, not a full circle
-
-aperture also increases and decreases vision range
-  I think messing with vision range causes problems with the start of level vision code
 
 mob non-combat behaviors, like Rain World
   gathering
@@ -47,31 +91,6 @@ consider increasing the base player horizontal movement
   maybe only increase ground movement, air control seems fine
   would this unbalance any maps?
 
-level: subway - a map that uses the train level element and line of sight graphics
-  stations
-    station theme ideas:
-      portals
-        teleport to far away rooms
-      map elements that alternate between positions
-      buttons and doors
-  maybe add mob mobs to each station?  this makes it faster to clear the level
-  boss
-    spawn at the exit station? or at a random station? or at the station before the exit?
-    spawn on the station after enough mobs have been killed?
-    type of boss?
-      might need to make a new boss designed for this map: los and stations
-        small, quick, sneaky
-      do random bosses work?
-        I think 
-  looks good with line of sight
-    background lighting for each room drawn in level.custom
-    no outdoors, no fall off the edge
-    slime
-    no small bumps
-    starting in a small room with a hole to the right with a short drop, like highrise or aerie
-    floating hexagons, like in reservoir, labs
-    ramping walls to jump over, like satellite
-
 tech stubs should be a tech unlocked by skins
   nitinol, tungsten?
   maybe give another benefit?
@@ -82,18 +101,7 @@ make a lemming that walks until it hits a wall and then turns around robotically
   body or mob?
   can't be killed?
 
-
-Also another thing I made that could fit in-game: https://kgurchiek.github.io/universal-n-gon-loader/
-by default it just plays a random version of n-gon downloaded from past github commits
-maybe the "snapshots" could work like this rather than downloading 8 versions of the game?
-also you can play any version with https://kgurchiek.github.io/universal-n-gon-loader/?commitIndex=NUM
-where setting "NUM" to 0 is the very first commit
-here's the code if you want to check it out: https://github.com/kgurchiek/universal-n-gon-loader/blob/main/script.js
-
-missile bot and plasma bot don't get converted by bot upgrade tech?
-  is this more confusing because it contradicts text?
-
-use ephemera to replace things
+use ephemera to replace some bad code
   JUNK?
   request animation stuff
   simulation checks
@@ -111,8 +119,6 @@ mobs attack mines
   mines periodically set all mobs to have player location to be the mine
     is this going to work with all mob vision types?
   
-rework quantum eraser
-
 tech circular polarization - wave gun bullets move in a circle
 
 tech: choose next map by name after exiting current map
@@ -124,8 +130,6 @@ Tech: relativity
   Simulation speed scales with movement speed. When still, time moves at 0.4 speed, at full walking speed it’s 1. (So if you’re falling or something and you move faster the simulation will be faster than usual)
   Also a damage and/or defense boost to make it worth using
 
-Tech: Turbine - Energy generation is proportional to your speed up to +X% energy generation at 40 speed 
-
 wormhole tech - teleport away mobs with mass below 3 when they get too near the player
     short CD, small energy cost, only mobs below a mass
 
@@ -133,74 +137,11 @@ extend brainstorming animation timers to fps cap?
   will it be smoother or choppier?
   anything else needs to hit limited fps on a high fps monitor?
 
-level element - mover, transport
-  test effect of changing m.Vx on things like:  shooting bullets?
-  extend the recentered friction zero to other things
-    like blocks the player stands on?
-    maybe zero on the horizontal velocity of whatever the player is standing on
-
-extend uncertainty to superballs
-  maybe make aiming them more random?
-
 perfect diamagnatism could bounce on mobs, or even map elements?
   could work like a rocket jump?
 
-Tech: Von Neuman probes - Drones will consume blocks to replicate themselves
-  it's a little too similar to the drone repair tech, but I kinda like it better.  drones that eat blocks and spit out more drones is cool 
-
-tech: parry - immune to harm for 0.25-0.5 seconds after pressing field button
-  needs a 5 second CD?
-
-tech: if a needle hits 2 mobs reset your fire CD
-  maybe to 2x damage for each consecutive mob hit?
-  maybe after a needle hits a mob the needle splits into 3 needles
-
-tech for lens - you can only fire through the lens and some buff? damage or energy?
-  this was in todo.txt on GitHub. I think it should be 'laser never drains energy, but you can only fire through lens and +90° lens arc, +100% damage (also you can not gain compound lens with this upgrade)
-
-new boss level like reactor with a very very big boss
-  mechanics around a very big boss?
-    maybe the boss moves into rooms so you have to do platforming to clear the room before the boss enters the room
-    boss can destroy blocks and smaller map elements
-    
-tech - after standing wave runs out of energy from blocking, gain a buff
-  buff: defense, damage?
-  aoe damage like railgun
-    push mobs away
-
-level: lock
-  should there be something in the top part of the map?
-  add alt versions of left and right sides
-  make flipped L/R version (after everything else is done)
-
-tech: add an selection option to all tech, gun, fields to do something
-  set all mobs to 30% health, and stun all mobs
-  50% chance to convert all power ups into research
-  heal to full
-
-tech: if you die inside MACHO, heal to full and delete the MACHO for the rest of the Level
-  MACHO gives less defense
-
-tech: after bosses die<br>they spawn a research
-
-tech: +8% damage each time you kill a boss
-
-tech: sticky grenades
-  needs another effect to be good enough
-  stick to mobs?
-
-make a mob similar to slasher
-  because it's just a very well made mob.
-
-tech - only allow 1,2 turrets at time?
-  turrets never run out of ammo
-    or turrets automatically use one of your mine ammos when they run out?
-    good with multi gun builds
-  conflict with booby trap?
 
 tech: Bose Einstein condensate - freezes enemies in pilot wave, and drains some energy?
-
-super-bot
 
 make super balls with Zectron deflectable with field
   but is there a simple way to do this?
@@ -234,27 +175,12 @@ tech: sporangium that grow little trees
   the trees have an area of effect damage for about 6-10 seconds
   maybe something similar to radioactive drones, but maybe a few smaller shapes
 
-new bot type that makes phonon waves
-  name: phono-bot?
-  each bot has to generate it themselves, can't run code in gun.do
-  synergy with 2 resonance tech
-    not isotropic?  I think no
-  synergy with bound? phase velocity, amplitude, propagation
-
 harpoon tech that makes auto aim work much better
-
-tech - super balls gain 20 seconds of time and are reset to original launch speed after hitting a mob
-
-railgun
-  magnetic pinch: harpoon does damage to nearby mobs
-    draw charge graphic on harpoon
-    use same code as the damage when fire effect
 
 hookBoss fires a hook that pulls player towards it
   hook does a bit of damage
   player targeted unless cloaking
   also add effect to finalBoss
-
 
 finalBoss
   add synergies between modes:
@@ -1219,7 +1145,7 @@ possible names for tech
   hypergraph
   SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
   nuclear pasta - hard matter in neutron star
-  nonlocal
+  nonlocal:  maybe use for pilot wave 
   fine-tuned universe
   nonperturbative
   D-branes
@@ -1241,6 +1167,9 @@ possible names for tech
   https://en.wikipedia.org/wiki/Cosmic_censorship_hypothesis - black holes can't leak
   Alcubierre warp drive (FTL with negative mass)
   Spherules - A spherule is a small sphere or spherical body. It can also refer to a thick-walled spherical structure that contains endospores and occurs in the parasitic form of fungi
+  negative entropy
+  memetics
+  magnetorquers - produce spin by pushing on earth's magnetic field
 
 ******************************************************** CARS IMAGES ********************************************************
 
@@ -1264,8 +1193,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   laser
   supercritical fission
 ***past style themes***
-  field emitter - bipedal white robot spherical gun turret on bird legs
-      damaged dirty white robot spherical gun turret on bird legs in the style of Solarpunk
+  base prompt for player on 5.2:  clean white robot spherical turret on bird legs test chamber
   standing wave - a 3-D cyan transparent nested concentric aligned centered sphere with rings
     by Philippe Starck 
   perfect diamagnetism - physics magnetic field chalk diagram 
@@ -1276,13 +1204,13 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   metamaterial cloaking - Scientific photography by Miki Asai,   by Bruce Munro
   molecular assembler - by Laurie Greasley 16-bit Isometric 
   wormhole - by Tim White
-  pilot wave - 
+  pilot wave - none
 
   nail gun - Screenprint
   shotgun - blueprint by Dan McPharlin
   grenades, missiles, explosions - vibrant fireball explosion sonic shockwave ring art by Victo Ngai --ar 3:2 --v 5 --s 750
   spores - turquoise black spores on a white background full color scientific anatomy by Ernst Haeckel
-  drones - tilt-shift photography
+  drones - insect quadcopter tilt-shift photography
   super balls - By Akari Toriyama
   wave - sound wave oscilloscope by Paul Catherall,   concentric circles by Paul Catherall 
     Barbara Takenaga's painting depicting a clean sound wave on aoscilloscope device --ar 3:2 --v 5
@@ -1306,7 +1234,6 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   invulnerable - by Nick Veasey (photos that look like x-rays)
   alternate reality -  Fractal art 
   tech choice -  mandala tile Mosaic 
-  tech that spawns heal power ups -  green Quilling 
   time, CPT, pause -  by Lee Bontecou
   boost, coupling power ups tech - cyan electron orbiting a black nucleus electric field as bas-relief   //(by Kazumasa Nagai)
   radioactive - volumetric atomic nucleus diagram by Paul Catherall
