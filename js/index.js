@@ -373,6 +373,7 @@ const build = {
         if (tech.boomBotCount) botText += `<br>boom-bots: ${tech.boomBotCount}`
         if (tech.laserBotCount) botText += `<br>laser-bots: ${tech.laserBotCount}`
         if (tech.foamBotCount) botText += `<br>foam-bots: ${tech.foamBotCount}`
+        if (tech.soundBotCount) botText += `<br>sound-bots: ${tech.soundBotCount}`
         if (tech.dynamoBotCount) botText += `<br>dynamo-bots: ${tech.dynamoBotCount}`
         if (tech.plasmaBotCount) botText += `<br>plasma-bots: ${tech.plasmaBotCount}`
         if (tech.missileBotCount) botText += `<br>missile-bots: ${tech.missileBotCount}`
@@ -786,7 +787,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         <button onclick="build.sortTech('fieldtech', true)" class='sort-button'><strong class='color-f'>field</strong><strong class='color-m'>tech</strong></button>
         <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d'>damage</strong></button>
         <button onclick="build.sortTech('defense', true)" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">defense</strong></button>
-        <button onclick="build.sortTech('have', true)" class='sort-button' style="letter-spacing: 1px;font-weight: 800;">have</button>
+        <button onclick="build.sortTech('have', true)" class='sort-button color-m' style="letter-spacing: 1px;font-weight: 800;">have</button>
         <button onclick="build.sortTech('allowed', true)" class='sort-button' style="letter-spacing: 1px;font-weight: 400;">allowed</button>
         <input type="search" id="sort-input" style="width: 8.7em;font-size: 0.6em;color:#000;" placeholder="sort by"/>
         <button onclick="build.sortTech('input', true)" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>

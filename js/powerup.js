@@ -452,7 +452,7 @@ const powerUps = {
                         b.randomBot()
                         if (tech.renormalization) {
                             for (let i = 0; i < cost; i++) {
-                                if (Math.random() < 0.44) {
+                                if (Math.random() < 0.46) {
                                     m.fieldCDcycle = m.cycle + 20;
                                     powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
                                 }
@@ -465,7 +465,7 @@ const powerUps = {
             if (tech.isDeathAvoid && document.getElementById("tech-anthropic")) {
                 document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.count}`
             }
-            if (tech.renormalization && Math.random() < 0.44 && amount < 0) {
+            if (tech.renormalization && Math.random() < 0.46 && amount < 0) {
                 for (let i = 0, len = -amount; i < len; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
             }
             if (tech.isRerollHaste) {

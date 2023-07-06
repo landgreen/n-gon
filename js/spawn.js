@@ -17,7 +17,6 @@ const spawn = {
         } else {
             spawn[options[Math.floor(Math.random() * options.length)]](x, y)
         }
-        spawn.quantumEraserCheck(); //remove mobs from tech: quantum eraser
     },
     pickList: ["starter", "starter"],
     fullPickList: [
@@ -49,93 +48,6 @@ const spawn = {
     spawnChance(chance) {
         return Math.random() < chance + 0.07 * simulation.difficulty && mob.length < -1 + 16 * Math.log10(simulation.difficulty + 1)
     },
-    quantumEraserCheck() { //remove mobs from tech: quantum eraser
-        if (tech.isQuantumEraser && tech.quantumEraserCount > 0) {
-
-            //start at a random location in array
-            const randomMiddle = Math.floor(mob.length * Math.random())
-            let i = randomMiddle
-            for (let j = 0; j < mob.length; j++) {
-                i++
-                if (i > mob.length - 1) i = 0
-                if (mob[i].isDropPowerUp && mob[i].alive) { //&& !mob[i].isBoss
-                    if (mob[i].isFinalBoss) {
-                        tech.quantumEraserCount = 0;
-                        return
-                    } else {
-                        tech.isQuantumEraserDuplication = true
-                        mob[i].death()
-                        tech.isQuantumEraserDuplication = false
-                    }
-                    //graphics
-                    const color = 'rgba(255,255,255, 0.8)'
-                    simulation.drawList.push({
-                        x: mob[i].position.x,
-                        y: mob[i].position.y,
-                        radius: mob[i].radius * 2,
-                        color: color, //"rgba(0,0,0,0.6)",
-                        time: 60
-                    });
-                    simulation.drawList.push({
-                        x: mob[i].position.x,
-                        y: mob[i].position.y,
-                        radius: mob[i].radius * 1,
-                        color: color, //"rgba(0,0,0,0.85)",
-                        time: 90
-                    });
-                    simulation.drawList.push({
-                        x: mob[i].position.x,
-                        y: mob[i].position.y,
-                        radius: mob[i].radius * 0.5,
-                        color: color, //"rgb(0,0,0)",
-                        time: 120
-                    });
-                    tech.quantumEraserCount--
-                    simulation.makeTextLog(`<span class='color-var'>tech</span>.quantumEraserCount <span class='color-symbol'>=</span> ${tech.quantumEraserCount}`)
-                    if (tech.quantumEraserCount < 1) break
-                }
-            }
-
-            // for (let i = 0, len = mob.length; i < len; i++) {
-            //     if (mob[i].isDropPowerUp && mob[i].alive) { //&& !mob[i].isBoss
-            //         if (mob[i].isFinalBoss) {
-            //             tech.quantumEraserCount = 0;
-            //             return
-            //         } else {
-            //             tech.isQuantumEraserDuplication = true
-            //             mob[i].death()
-            //             tech.isQuantumEraserDuplication = false
-            //         }
-            //         //graphics
-            //         const color = 'rgba(255,255,255, 0.8)'
-            //         simulation.drawList.push({
-            //             x: mob[i].position.x,
-            //             y: mob[i].position.y,
-            //             radius: mob[i].radius * 2,
-            //             color: color, //"rgba(0,0,0,0.6)",
-            //             time: 60
-            //         });
-            //         simulation.drawList.push({
-            //             x: mob[i].position.x,
-            //             y: mob[i].position.y,
-            //             radius: mob[i].radius * 1,
-            //             color: color, //"rgba(0,0,0,0.85)",
-            //             time: 90
-            //         });
-            //         simulation.drawList.push({
-            //             x: mob[i].position.x,
-            //             y: mob[i].position.y,
-            //             radius: mob[i].radius * 0.5,
-            //             color: color, //"rgb(0,0,0)",
-            //             time: 120
-            //         });
-            //         tech.quantumEraserCount--
-            //         simulation.makeTextLog(`<span class='color-var'>tech</span>.quantumEraserCount <span class='color-symbol'>=</span> ${tech.quantumEraserCount}`)
-            //         if (tech.quantumEraserCount < 1) break
-            //     }
-            // }
-        }
-    },
     randomMob(x, y, chance = 1) {
         if (spawn.spawnChance(chance) || chance === Infinity) {
             const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
@@ -145,7 +57,6 @@ const spawn = {
             const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
             spawn[pick](x, y);
         }
-        spawn.quantumEraserCheck(); //remove mobs from tech: quantum eraser
     },
     randomSmallMob(x, y,
         num = Math.max(Math.min(Math.round(Math.random() * simulation.difficulty * 0.2), 4), 0),
@@ -163,7 +74,6 @@ const spawn = {
                 spawn[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
             }
         }
-        spawn.quantumEraserCheck(); //remove mobs from tech: quantum eraser
     },
     randomGroup(x, y, chance = 1) {
         if (spawn.spawnChance(chance) && simulation.difficulty > 2 || chance === Infinity) {
@@ -198,7 +108,6 @@ const spawn = {
                     }
                 }
             }
-            spawn.quantumEraserCheck(); //remove mobs from tech: quantum eraser
         }
     },
     secondaryBossChance(x, y) {
@@ -588,7 +497,7 @@ const spawn = {
                     ctx.beginPath();
                     if (this.fadeCycle < 120) { //damage scales up over 2 seconds to give player time to move as it fades in
                         const scale = this.fadeCycle / 120
-                        const dmg = this.fadeCycle < 60 ? 0 : 0.13 * simulation.dmgScale * scale
+                        const dmg = this.fadeCycle < 60 ? 0 : 0.1 * simulation.dmgScale * scale
                         me.lasers(me.vertices[0], me.angle + Math.PI / 6, dmg);
                         me.lasers(me.vertices[1], me.angle + 3 * Math.PI / 6, dmg);
                         me.lasers(me.vertices[2], me.angle + 5 * Math.PI / 6, dmg);
@@ -1548,7 +1457,7 @@ const spawn = {
         me.isDropPowerUp = false;
         me.showHealthBar = false;
         me.stroke = "#83a"
-        me.accelMag = 0.001
+        me.accelMag = 0.003
         me.frictionAir = 0.005
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.mob
         me.seeAtDistance2 = 1000000 //1000 vision range
@@ -1583,6 +1492,7 @@ const spawn = {
                     if (
                         !mob[i].isZombie &&
                         !mob[i].isUnblockable &&
+                        !mob[i].isMobBullet &&
                         Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                         Matter.Query.ray(body, this.position, mob[i].position).length === 0
                         // !mob[i].isBadTarget &&
@@ -1605,7 +1515,7 @@ const spawn = {
             }
         }
         me.zombieHealthBar = function () {
-            this.health -= 0.0004 //decay
+            this.health -= 0.0003 //decay
             if ((this.health < 0.01 || isNaN(this.health)) && this.alive) this.death();
             const h = this.radius * 0.3;
             const w = this.radius * 2;
@@ -1623,15 +1533,16 @@ const spawn = {
                     this.force = Vector.mult(Vector.normalise(Vector.sub(this.target.position, this.position)), this.accelMag * this.mass)
                 } else { //wonder around
                     this.torque += 0.0000003 * this.inertia;
-                    const mag = 0.00015 * this.mass
+                    const mag = 0.0003 * this.mass
                     this.force.x += mag * Math.cos(this.angle)
                     this.force.y += mag * Math.sin(this.angle)
                 }
-                if (this.speed > 6) { // speed cap instead of friction to give more agility
-                    Matter.Body.setVelocity(this, {
-                        x: this.velocity.x * 0.93,
-                        y: this.velocity.y * 0.93
-                    });
+                if (this.speed > 15) { // speed cap instead of friction to give more agility
+                    Matter.Body.setVelocity(this, { x: this.velocity.x * 0.96, y: this.velocity.y * 0.96 });
+                } else if (this.speed < 10) {
+                    Matter.Body.setVelocity(this, { x: this.velocity.x * 0.98, y: this.velocity.y * 0.98 });
+                } else if (this.speed < 8) {
+                    Matter.Body.setVelocity(this, { x: this.velocity.x * 0.99, y: this.velocity.y * 0.99 });
                 }
                 const hit = (who) => {
                     if (!who.isZombie && who.damageReduction) {
@@ -1642,9 +1553,14 @@ const spawn = {
                         this.force.y -= force.y;
                         this.target = null //look for a new target
 
-                        const dmg = 1.3 * m.dmgScale
-                        who.damage(dmg);
+                        // who.damage(dmg);
+                        //by pass normal damage method
+                        const dmg = 1.5 * who.damageReduction / Math.sqrt(who.mass)
+                        who.health -= dmg
+                        who.onDamage(dmg); //custom damage effects
                         who.locatePlayer();
+                        if ((who.health < 0.01 || isNaN(who.health)) && who.alive) who.death();
+
                         simulation.drawList.push({
                             x: this.position.x,
                             y: this.position.y,

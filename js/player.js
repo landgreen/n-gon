@@ -551,7 +551,7 @@ const m = {
         if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.973 ** m.coupling
         if (tech.isLowHealthDefense) dmg *= 1 - Math.max(0, 1 - m.health) * 0.8
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.33
-        if (tech.squirrelFx !== 1) dmg *= Math.pow(0.7, (tech.squirrelFx - 1) / 0.4) //cause more damage
+        if (tech.squirrelFx !== 1) dmg *= 0.78//Math.pow(0.78, (tech.squirrelFx - 1) / 0.4)
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.15
         if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.25
@@ -845,6 +845,7 @@ const m = {
     draw() { },
     isAltSkin: false,
     resetSkin() {
+        simulation.isAutoZoom = true;
         m.yOffWhen.jump = 70
         m.yOffWhen.stand = 49
         m.yOffWhen.crouch = 22
@@ -1352,6 +1353,7 @@ const m = {
         },
         dilate() {
             m.isAltSkin = true
+            simulation.isAutoZoom = false;
             m.draw = function () {
                 const amplitude = 8 + 4 * Math.sin(m.cycle * 0.0075)
                 ctx.fillStyle = m.fillColor;
@@ -1380,6 +1382,13 @@ const m = {
                 ctx.restore();
                 m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
                 powerUps.boost.draw()
+
+                //zoom camera in and out
+
+                // console.log(simulation.zoomScale)
+                simulation.setZoom(1800 + 400 * Math.sin(m.cycle * 0.0075))
+
+
             }
         },
         dilate2() {
@@ -1415,6 +1424,7 @@ const m = {
                 ctx.restore();
                 m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
                 powerUps.boost.draw()
+                simulation.setZoom(1800 + 400 * Math.sin(m.cycle * 0.0075))
             }
             m.drawLeg = function (stroke) {
                 // if (simulation.mouseInGame.x > m.pos.x) {
@@ -1903,7 +1913,7 @@ const m = {
         }
     },
     setMaxEnergy(isMessage = true) {
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.05 * m.coupling + 0.4 * tech.isStandingWaveExpand
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2.66 * tech.isGroundState + 3 * tech.isRelay * tech.isFlipFlopOn * tech.isRelayEnergy + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.05 * m.coupling + 0.4 * tech.isStandingWaveExpand
         if (isMessage) simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
