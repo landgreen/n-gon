@@ -922,13 +922,13 @@ const powerUps = {
                         if (botTech.length > 0) { //pick random bot tech
                             // const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             // const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
-                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"> <span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"> <span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
                             const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
                             text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
                                     <div class="card-text">
-                                    <div class="grid-title"><span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
+                                    <div class="grid-title"><span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                                     ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
                         }
                     }
@@ -987,13 +987,13 @@ const powerUps = {
                         if (botTech.length > 0) { //pick random bot tech
                             // const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             // const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
-                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"> <span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"> <span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
                             const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
                             text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
                                     <div class="card-text">
-                                    <div class="grid-title"><span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
+                                    <div class="grid-title"><span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                                     ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
                         }
                     }
@@ -1093,17 +1093,39 @@ const powerUps = {
                         if (botTech.length > 0) { //pick random bot tech
                             // const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             // const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
-                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title">          <span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>          ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title">          <span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>          ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
                             const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
                             text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
                                     <div class="card-text">
-                                    <div class="grid-title"><span id = "cellular-rule-id${this.id}" style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
+                                    <div class="grid-title"><span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                                     ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
                         }
                     }
-
+                    if (tech.isMassProduction) {
+                        // const techOptions = [] //make an array of bot options
+                        // for (let i = 0, len = tech.tech.length; i < len; i++) {
+                        //     if (tech.tech[i].isMassProduction) techOptions.push(i)
+                        // }
+                        // if (techOptions.length > 0) { //pick random bot tech
+                        //     const choose = techOptions[Math.floor(Math.random() * techOptions.length)];
+                        //     const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
+                        //     text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
+                        //             <div class="card-text">
+                        //             <div class="grid-title">${tech.tech[choose].name}</div>
+                        //             ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
+                        // }
+                        for (let i = 0, len = tech.tech.length; i < len; i++) {
+                            if (tech.tech[i].isMassProduction) {
+                                const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[i].name}.webp');"`
+                                text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${i})" ${style}>
+                                        <div class="card-text">
+                                        <div class="grid-title">${tech.tech[i].name}</div>
+                                        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`
+                            }
+                        }
+                    }
                     if (tech.isExtraGunField) {
                         if (Math.random() > 0.5 && b.inventory.length < b.guns.length) {
                             let gunOptions = [];

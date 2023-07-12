@@ -117,9 +117,9 @@ const spawn = {
             tech.isScaleMobsWithDuplication = false
             return true
         } else if (tech.isResearchBoss) {
-            if (powerUps.research.count > 3) {
-                powerUps.research.changeRerolls(-4)
-                simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 4<br>${powerUps.research.count}`)
+            if (powerUps.research.count > 2) {
+                powerUps.research.changeRerolls(-3)
+                simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 3<br>${powerUps.research.count}`)
             } else {
                 tech.addJunkTechToPool(0.49)
             }

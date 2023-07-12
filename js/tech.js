@@ -1169,10 +1169,10 @@ const tech = {
         allowed: () => true,
         requires: "",
         effect() {
-            tech.isBulletsLastLonger += 0.3
+            tech.bulletsLastLonger += 0.3
         },
         remove() {
-            tech.isBulletsLastLonger = 1;
+            tech.bulletsLastLonger = 1;
         }
     },
     {
@@ -1520,7 +1520,7 @@ const tech = {
     {
         name: "sound-bot upgrade",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">sound-bot upgrade</a>`,
-        description: "<strong>convert</strong> your bots to <strong>sound-bots</strong><br><strong>+200%</strong> wave <strong>fire rate</strong> and <strong>+100%</strong> <strong class='color-d'>damage</strong>",
+        description: "<strong>convert</strong> your bots to <strong>sound-bots</strong><br><strong>+150%</strong> wave <strong>fire rate</strong> and <strong>+150%</strong> <strong class='color-d'>damage</strong>",
         maxCount: 1,
         count: 0,
         frequency: 3,
@@ -3453,6 +3453,70 @@ const tech = {
         }
     },
     {
+        name: "mass production",
+        description: `<strong class='color-m'>tech</strong> always have <strong>+3</strong> choices to spawn<br>${powerUps.orb.research(5)} ${powerUps.orb.ammo(8)} or &nbsp; ${powerUps.orb.heal(8)}`,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() { return true },
+        requires: "",
+        effect() {
+            tech.isMassProduction = true
+        },
+        remove() {
+            tech.isMassProduction = false
+        }
+    },
+    {
+        name: "research",
+        description: `spawn ${powerUps.orb.research(5)}`,
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        frequencyDefault: 0,
+        isNonRefundable: true,
+        isMassProduction: true,
+        allowed() { return true },
+        requires: "",
+        effect() {
+            powerUps.spawnDelay("research", 5);
+        },
+        remove() { }
+    },
+    {
+        name: "ammo",
+        description: `spawn ${powerUps.orb.ammo(8)}`,
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        frequencyDefault: 0,
+        isNonRefundable: true,
+        isMassProduction: true,
+        allowed() { return true },
+        requires: "",
+        effect() {
+            powerUps.spawnDelay("ammo", 8);
+        },
+        remove() { }
+    },
+    {
+        name: "heals",
+        description: `spawn ${powerUps.orb.heal(8)}`,
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        frequencyDefault: 0,
+        isNonRefundable: true,
+        isMassProduction: true,
+        allowed() { return true },
+        requires: "mass production",
+        effect() {
+            powerUps.spawnDelay("heal", 8);
+        },
+        remove() { }
+    },
+    {
         name: "pseudoscience",
         description: "<span style = 'font-size:94%;'>when <strong>selecting</strong> a power up, <strong class='color-r'>research</strong> <strong>3</strong> times</span><br>for <strong>free</strong>, but add <strong>1-4%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
         maxCount: 1,
@@ -3632,15 +3696,15 @@ const tech = {
     {
         name: "abiogenesis",
         // description: `use ${powerUps.orb.research(4)}(or <strong>49%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool if you can't) to add a 2nd <strong>boss</strong> to each level`,
-        description: `<span style = 'font-size:94%;'>as a level begins spawn a 2nd <strong>boss</strong> using ${powerUps.orb.research(4)}<br>(<strong>+49%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool if you can't pay)</span>`,
+        description: `<span style = 'font-size:94%;'>as a level begins spawn a 2nd <strong>boss</strong> using ${powerUps.orb.research(3)}<br>(<strong>+49%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool if you can't pay)</span>`,
         maxCount: 1,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (build.isExperimentSelection || powerUps.research.count > 3) && !tech.isDuplicateBoss
+            return (build.isExperimentSelection || powerUps.research.count > 2) && !tech.isDuplicateBoss
         },
-        requires: "at least 4 research, not parthenogenesis",
+        requires: "at least 3 research, not parthenogenesis",
         effect() {
             tech.isResearchBoss = true;
         },
@@ -6440,7 +6504,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return tech.haveGunCheck("drones", false) && !tech.isDroneRespawn && tech.isBulletsLastLonger === 1 && !tech.isDronesTravel && (build.isExperimentSelection || powerUps.research.count > 1)
+            return tech.haveGunCheck("drones", false) && !tech.isDroneRespawn && tech.bulletsLastLonger === 1 && !tech.isDronesTravel && (build.isExperimentSelection || powerUps.research.count > 1)
         },
         requires: "drones, not drone repair, anti-shear topology, autonomous navigation",
         effect() {
@@ -11244,9 +11308,7 @@ const tech = {
         frequencyDefault: 2,
         isLore: true,
         // isExperimentHide: true,
-        allowed() {
-            return !build.isExperimentSelection
-        },
+        allowed() { return !build.isExperimentSelection },
         requires: "NOT EXPERIMENT MODE",
         effect() {
             if (localSettings.loreCount > lore.conversation.length - 1) { //reward for people done with lore chapters (or on the final chapter)
@@ -11341,7 +11403,7 @@ const tech = {
     energySiphon: null,
     healthDrain: null,
     crouchAmmoCount: null,
-    isBulletsLastLonger: null,
+    bulletsLastLonger: null,
     isImmortal: null,
     sporesOnDeath: null,
     isImmuneExplosion: null,
@@ -11677,5 +11739,6 @@ const tech = {
     isFoamCavitation: null,
     isHealAttract: null,
     isLaserField: null,
-    isHealBrake: null
+    isHealBrake: null,
+    isMassProduction: null,
 }
