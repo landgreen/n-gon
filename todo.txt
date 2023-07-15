@@ -1,52 +1,15 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community level: dojo by weird_pusheen
+new community levels:
+  tlinat by Richard0820
+  ruins by SiddhUPe
 
-sound-bot: makes phonon waves
-
-  updated tech
-drone repair -> von Neumann probe - if a drones ends near a block it will use that block to repair
-quantum eraser -> metamaterial absorber: for each mob left alive after you exit a level there is a 17% chance to spawn a power up
-uncertainty principle: extended to super balls
-aperture: camera zooms in and out along with the skin animation
-
-  balanced tech:
-cordyceps: zombies are much smarter, faster, do more damage, and last longer
-negative entropy -> self-assembly: 1 heal per 33->25% missing health on each new level
-renormalization: 44 -> 46% and +3% JUNK tech to pool
-parasitism: 60 -> 83% damage
-non-renewables: 67 -> 78% damage
-ground state: 200 -> 266 max energy
-dark patterns: 17 -> 22% damage and JUNK
-eternalism: 30 -> 24% damage
-stimulated emission 15 -> 17% duplication
-nitinol 30 -> 22% defense
-
-bug fixes
+tech: mass production - tech have +3 choices to spawn ammo, research, or heals
 
 *********************************************************** TODO *****************************************************
 
 make a mob similar to slasher
   because it's just a very well made mob.
-
-sound-bot: makes phonon waves
-  works with
-    other bot tech - done?
-    phonon - no
-    frequency - no
-    bound state - no
-    phase velocity - no
-    isotropic - no
-      maybe, but reduce fire rate?
-
-    uncertainty principle - done
-    propagation - done
-    amplitude - done
-    sympathetic resonance - done
-    mechanical resonance - done
-
-remove reflection from phonon?
-  but return it with isotropic?
 
 super-bot:  fires super balls
 
@@ -60,15 +23,6 @@ tech: after a needle hits a mobs
   the needle splits into 3 needles?
   reset your fire CD?
   2x damage for each consecutive mob hit?
-
-tech: mass production - add a few selection options to all tech, gun, fields to do something:
-  this would work similar to the tech that adds a bot themed tech to every tech choice
-    options
-      spawn: ammo, heals, research, coupling?
-        random amounts?
-        make each option a full tech with images?
-
-
 
 improve flatland performance?
 
@@ -1145,7 +1099,7 @@ possible names for tech
   hypergraph
   SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
   nuclear pasta - hard matter in neutron star
-  nonlocal:  maybe use for pilot wave 
+  nonlocal, nonlocality:  maybe use for pilot wave 
   fine-tuned universe
   nonperturbative
   D-branes
@@ -1170,6 +1124,7 @@ possible names for tech
   negative entropy
   memetics
   magnetorquers - produce spin by pushing on earth's magnetic field
+  
 
 ******************************************************** CARS IMAGES ********************************************************
 
