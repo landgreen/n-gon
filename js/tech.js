@@ -325,7 +325,7 @@ const tech = {
             tech.hardLanding = 70
             tech.isFallingDamage = true;
             m.setMaxHealth();
-            m.addHealth(1 / simulation.healScale)
+            m.addHealth(2.22 / simulation.healScale)
             m.skin.tungsten()
         },
         remove() {
@@ -3013,7 +3013,10 @@ const tech = {
     },
     {
         name: "induction brake",
-        description: `after using ${powerUps.orb.heal()} <strong class='color-s'>slow</strong> nearby mobs for <strong>15</strong> seconds<br>spawn ${powerUps.orb.heal(4)}`,
+        descriptionFunction() {
+            return `after using ${powerUps.orb.heal()} <strong class='color-s'>slow</strong> nearby mobs for <strong>15</strong> seconds<br>spawn ${powerUps.orb.heal(4)}`
+        },
+        // description: `after using ${powerUps.orb.heal()} <strong class='color-s'>slow</strong> nearby mobs for <strong>15</strong> seconds<br>spawn ${powerUps.orb.heal(4)}`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3096,7 +3099,10 @@ const tech = {
     },
     {
         name: "accretion",
-        description: `${powerUps.orb.heal(1)} follow you, even between levels<br>spawn ${powerUps.orb.heal(5)}`,
+        descriptionFunction() {
+            return `${powerUps.orb.heal(1)} follow you, even between levels<br>spawn ${powerUps.orb.heal(5)}`
+        },
+        // description: `${powerUps.orb.heal(1)} follow you, even between levels<br>spawn ${powerUps.orb.heal(5)}`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3270,7 +3276,7 @@ const tech = {
     },
     {
         name: "Hilbert space",
-        description: "<strong>+91%</strong> <strong class='color-d'>damage</strong><br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
+        description: "<strong>+99%</strong> <strong class='color-d'>damage</strong><br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3280,7 +3286,7 @@ const tech = {
             return !tech.isResearchReality && !tech.isSwitchReality
         },
         requires: "not Ψ(t) collapse, many-worlds",
-        damage: 1.91,
+        damage: 1.99,
         effect() {
             tech.damage *= this.damage
             tech.isCollisionRealitySwitch = true;
@@ -3454,7 +3460,10 @@ const tech = {
     },
     {
         name: "mass production",
-        description: `<strong class='color-m'>tech</strong> always have <strong>+3</strong> choices to spawn<br>${powerUps.orb.research(5)} ${powerUps.orb.ammo(8)} or &nbsp; ${powerUps.orb.heal(8)}`,
+        descriptionFunction() {
+            return `<strong class='color-m'>tech</strong> always have <strong>+3</strong> choices to spawn<br>${powerUps.orb.ammo(8)} ${powerUps.orb.heal(8)} &nbsp;&nbsp; or ${powerUps.orb.research(5)}`
+        },
+        // description: `<strong class='color-m'>tech</strong> always have <strong>+3</strong> choices to spawn<br>${powerUps.orb.ammo(8)} ${powerUps.orb.heal(8)} &nbsp;&nbsp; or ${powerUps.orb.research(5)}`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3502,7 +3511,9 @@ const tech = {
     },
     {
         name: "heals",
-        description: `spawn ${powerUps.orb.heal(8)}`,
+        descriptionFunction() {
+            return `spawn ${powerUps.orb.heal(8)}`
+        },
         maxCount: 1,
         count: 0,
         frequency: 0,
@@ -9036,7 +9047,7 @@ const tech = {
     // },
     {
         name: "return",
-        description: "return to the introduction level<br>reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>",
+        description: "return to the start of the game<br>reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>",
         maxCount: 1,
         count: 0,
         frequency: 0,
@@ -9500,21 +9511,7 @@ const tech = {
             }
         },
         remove() {
-            mobs.draw = () => {
-                ctx.lineWidth = 2;
-                let i = mob.length;
-                while (i--) {
-                    ctx.beginPath();
-                    const vertices = mob[i].vertices;
-                    ctx.moveTo(vertices[0].x, vertices[0].y);
-                    for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
-                    ctx.lineTo(vertices[0].x, vertices[0].y);
-                    ctx.fillStyle = mob[i].fill;
-                    ctx.strokeStyle = mob[i].stroke;
-                    ctx.fill();
-                    ctx.stroke();
-                }
-            }
+            mobs.draw = mobs.drawDefault
         }
     },
     {
@@ -9546,21 +9543,7 @@ const tech = {
             }
         },
         remove() {
-            mobs.draw = () => {
-                ctx.lineWidth = 2;
-                let i = mob.length;
-                while (i--) {
-                    ctx.beginPath();
-                    const vertices = mob[i].vertices;
-                    ctx.moveTo(vertices[0].x, vertices[0].y);
-                    for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
-                    ctx.lineTo(vertices[0].x, vertices[0].y);
-                    ctx.fillStyle = mob[i].fill;
-                    ctx.strokeStyle = mob[i].stroke;
-                    ctx.fill();
-                    ctx.stroke();
-                }
-            }
+            mobs.draw = mobs.drawDefault
         }
     },
     // draw() {

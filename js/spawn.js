@@ -20,9 +20,9 @@ const spawn = {
     },
     pickList: ["starter", "starter"],
     fullPickList: [
+        "slasher", "slasher", "slasher2", "slasher3",
         "flutter", "flutter", "flutter",
         "hopper", "hopper", "hopper",
-        "slasher", "slasher", "slasher",
         "stabber", "stabber", "stabber",
         "springer", "springer", "springer",
         "shooter", "shooter",
@@ -30,8 +30,7 @@ const spawn = {
         "striker", "striker",
         "laser", "laser",
         "pulsar", "pulsar",
-        "sneaker", "sneaker",
-        "launcher", "launcherOne", "exploder", "sucker", "sniper", "spinner", "grower", "beamer", "spawner", "ghoster", "focuser"
+        "sneaker", "launcher", "launcherOne", "exploder", "sucker", "sniper", "spinner", "grower", "beamer", "spawner", "ghoster", "focuser"
     ],
     mobTypeSpawnOrder: [], //preset list of mob names calculated at the start of a run by the randomSeed
     mobTypeSpawnIndex: 0, //increases as the mob type cycles
@@ -2437,7 +2436,7 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.damageReduction = 0.06 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.08 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.accelMag = 0.05; //jump height
         me.g = 0.003; //required if using this.gravity
         me.frictionAir = 0.01;
@@ -2736,7 +2735,7 @@ const spawn = {
 
         me.stroke = "transparent"; //used for drawSneaker
         me.eventHorizon = 1100; //required for black hole
-        me.seeAtDistance2 = (me.eventHorizon + 1200) * (me.eventHorizon + 1200); //vision limit is event horizon
+        me.seeAtDistance2 = (me.eventHorizon + 3000) * (me.eventHorizon + 3000); //vision limit is event horizon
         me.accelMag = 0.00004 * simulation.accelScale;
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         // me.frictionAir = 0.005;
@@ -2848,6 +2847,15 @@ const spawn = {
                     ctx.fill();
                 }
                 this.curl(eventHorizon);
+                //attract other power ups
+                for (let i = 0; i < powerUp.length; i++) { //attract heal power ups
+                    const sub = Vector.sub(this.position, powerUp[i].position)
+                    const mag = 0.0015 * Math.min(1, (Vector.magnitude(sub) - 200) / this.eventHorizon)
+                    const attract = Vector.mult(Vector.normalise(sub), mag * powerUp[i].mass)
+                    powerUp[i].force.x += attract.x;
+                    powerUp[i].force.y += attract.y - powerUp[i].mass * simulation.g; //negate gravity
+                    // Matter.Body.setVelocity(powerUp[i], Vector.mult(powerUp[i].velocity, 0.7));
+                }
             }
         }
     },
@@ -5493,7 +5501,7 @@ const spawn = {
             ctx.setLineDash([]);
         }
     },
-    slasher(x, y, radius = 36 + Math.ceil(Math.random() * 25)) {
+    slasher(x, y, radius = 33 + Math.ceil(Math.random() * 30)) {
         mobs.spawn(x, y, 5, radius, "rgb(201,202,225)");
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
@@ -5537,10 +5545,8 @@ const spawn = {
                         this.swordVertex = i
                     }
                 }
-                // this.laserAngle = 7 / 10 * Math.PI + this.swordVertex / 5 * 2 * Math.PI - Math.PI / 2
                 this.laserAngle = this.swordVertex / 5 * 2 * Math.PI + 0.6283
                 this.sword = this.swordGrow
-                // Matter.Body.setVelocity(this, { x: 0, y: 0 });
                 this.accelMag = 0
             }
         }
@@ -5602,6 +5608,260 @@ const spawn = {
                     color: "rgba(80,0,255,0.5)",
                     time: 20
                 });
+            }
+            if (best.dist2 === Infinity) best = look;
+            ctx.beginPath(); //draw beam
+            ctx.moveTo(where.x, where.y);
+            ctx.lineTo(best.x, best.y);
+            ctx.strokeStyle = "rgba(100,100,255,0.1)"; // Purple path
+            ctx.lineWidth = 15;
+            ctx.stroke();
+            ctx.strokeStyle = "rgba(100,100,255,0.5)"; // Purple path
+            ctx.lineWidth = 4;
+            ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+            ctx.stroke(); // Draw it
+            ctx.setLineDash([]);
+        }
+    },
+    slasher2(x, y, radius = 33 + Math.ceil(Math.random() * 30)) {
+        mobs.spawn(x, y, 6, radius, "rgb(180,199,245)");
+        let me = mob[mob.length - 1];
+        Matter.Body.rotate(me, 2 * Math.PI * Math.random());
+        me.accelMag = 0.0009 * simulation.accelScale;
+        me.torqueMagnitude = -0.000012 * me.inertia //* (Math.random() > 0.5 ? -1 : 1);
+        me.frictionStatic = 0;
+        me.friction = 0;
+        me.frictionAir = 0.035;
+        me.delay = 140 * simulation.CDScale;
+        me.cd = 0;
+        me.swordRadius = 0;
+        me.swordVertex = 1
+        me.swordRadiusMax = 275 + 3.5 * simulation.difficulty;
+        me.swordRadiusGrowRate = me.swordRadiusMax * (0.011 + 0.0002 * simulation.difficulty)
+        me.isSlashing = false;
+        me.swordDamage = 0.03 * simulation.dmgScale
+        me.laserAngle = 3 * Math.PI / 5
+        const seeDistance2 = 200000
+        spawn.shield(me, x, y);
+        me.onDamage = function () { };
+        me.do = function () {
+            this.checkStatus();
+            this.seePlayerByHistory(15);
+            this.attraction();
+            this.sword() //does various things depending on what stage of the sword swing
+        };
+        me.swordWaiting = function () {
+            if (
+                this.seePlayer.recall &&
+                this.cd < simulation.cycle &&
+                this.distanceToPlayer2() < seeDistance2 &&
+                Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
+                Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
+            ) {
+                this.laserAngle = -Math.PI / 6
+                this.sword = this.swordGrow
+                this.accelMag = 0
+            }
+        }
+        me.sword = me.swordWaiting //base function that changes during different aspects of the sword swing
+        me.swordGrow = function () {
+            this.laserSword(this.vertices[0], this.angle + this.laserAngle);
+            this.laserSword(this.vertices[3], this.angle + this.laserAngle + Math.PI);
+            this.swordRadius += this.swordRadiusGrowRate
+            if (this.swordRadius > this.swordRadiusMax || this.isStunned) {
+                this.sword = this.swordSlash
+                this.spinCount = 0
+            }
+        }
+        me.swordSlash = function () {
+            this.laserSword(this.vertices[0], this.angle + this.laserAngle);
+            this.laserSword(this.vertices[3], this.angle + this.laserAngle + Math.PI);
+
+            this.torque += this.torqueMagnitude;
+            this.spinCount++
+            if (this.spinCount > 100 || this.isStunned) {
+                this.sword = this.swordWaiting
+                this.swordRadius = 0
+                this.accelMag = 0.001 * simulation.accelScale;
+                this.cd = simulation.cycle + this.delay;
+            }
+        }
+        me.laserSword = function (where, angle) {
+            const vertexCollision = function (v1, v1End, domain) {
+                for (let i = 0; i < domain.length; ++i) {
+                    let v = domain[i].vertices;
+                    const len = v.length - 1;
+                    for (let j = 0; j < len; j++) {
+                        results = simulation.checkLineIntersection(v1, v1End, v[j], v[j + 1]);
+                        if (results.onLine1 && results.onLine2) {
+                            const dx = v1.x - results.x;
+                            const dy = v1.y - results.y;
+                            const dist2 = dx * dx + dy * dy;
+                            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: v[j], v2: v[j + 1] };
+                        }
+                    }
+                    results = simulation.checkLineIntersection(v1, v1End, v[0], v[len]);
+                    if (results.onLine1 && results.onLine2) {
+                        const dx = v1.x - results.x;
+                        const dy = v1.y - results.y;
+                        const dist2 = dx * dx + dy * dy;
+                        if (dist2 < best.dist2) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: v[0], v2: v[len] };
+                    }
+                }
+            };
+            best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
+            const look = { x: where.x + this.swordRadius * Math.cos(angle), y: where.y + this.swordRadius * Math.sin(angle) };
+            vertexCollision(where, look, body); // vertexCollision(where, look, mob);
+            vertexCollision(where, look, map);
+            if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
+            if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
+                m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
+                m.damage(this.swordDamage);
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: best.x,
+                    y: best.y,
+                    radius: this.swordDamage * 1500,
+                    color: "rgba(80,0,255,0.5)",
+                    time: 20
+                });
+            }
+            if (best.dist2 === Infinity) best = look;
+            ctx.beginPath(); //draw beam
+            ctx.moveTo(where.x, where.y);
+            ctx.lineTo(best.x, best.y);
+            ctx.strokeStyle = "rgba(100,100,255,0.1)"; // Purple path
+            ctx.lineWidth = 15;
+            ctx.stroke();
+            ctx.strokeStyle = "rgba(100,100,255,0.5)"; // Purple path
+            ctx.lineWidth = 4;
+            ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+            ctx.stroke(); // Draw it
+            ctx.setLineDash([]);
+        }
+    },
+    slasher3(x, y, radius = 33 + Math.ceil(Math.random() * 30)) {
+        const sides = 6
+        mobs.spawn(x, y, sides, radius, "rgb(180,215,235)");
+        let me = mob[mob.length - 1];
+        Matter.Body.rotate(me, 2 * Math.PI * Math.random());
+        me.accelMag = 0.0005 * simulation.accelScale;
+        me.frictionStatic = 0;
+        me.friction = 0;
+        me.frictionAir = 0.02;
+        me.delay = 150 * simulation.CDScale;
+        me.cd = 0;
+        me.cycle = 0;
+        me.swordVertex = 1
+        me.swordRadiusInitial = radius / 2;
+        me.swordRadius = me.swordRadiusInitial;
+        me.swordRadiusMax = 750 + 6 * simulation.difficulty;
+        me.swordRadiusGrowRateInitial = 1.08
+        me.swordRadiusGrowRate = me.swordRadiusGrowRateInitial//me.swordRadiusMax * (0.009 + 0.0002 * simulation.difficulty)
+        me.isSlashing = false;
+        me.swordDamage = 0.04 * simulation.dmgScale
+        me.laserAngle = 3 * Math.PI / 5
+        const seeDistance2 = me.swordRadiusMax * me.swordRadiusMax
+        spawn.shield(me, x, y);
+        me.onDamage = function () { };
+        me.do = function () {
+            this.checkStatus();
+            this.seePlayerByHistory(15);
+            this.sword() //does various things depending on what stage of the sword swing
+        };
+        me.swordWaiting = function () {
+            this.attraction();
+            if (
+                this.seePlayer.recall &&
+                this.cd < simulation.cycle &&
+                this.distanceToPlayer2() < seeDistance2 &&
+                Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
+                Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
+            ) {
+                //find vertex closest to the player
+                let dist = Infinity
+                for (let i = 0, len = this.vertices.length; i < len; i++) {
+                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
+                    if (D < dist) {
+                        dist = D
+                        this.swordVertex = i
+                    }
+                }
+                this.laserAngle = this.swordVertex / sides * 2 * Math.PI + Math.PI / sides
+                this.sword = this.swordGrow
+                this.cycle = 0
+                this.swordRadius = this.swordRadiusInitial
+                //slow velocity but don't stop
+                Matter.Body.setVelocity(this, Vector.mult(this.velocity, 0.5))
+                //set angular velocity to 50%
+                // Matter.Body.setAngularVelocity(this, this.angularVelocity * 0.5)
+                //gently rotate towards the player with a torque, use cross product to decided clockwise or counterclockwise
+                const laserStartVector = Vector.sub(this.position, this.vertices[this.swordVertex])
+                const playerVector = Vector.sub(this.position, m.pos)
+                const cross = Matter.Vector.cross(laserStartVector, playerVector)
+                this.torque = 0.00002 * this.inertia * (cross > 0 ? 1 : -1)
+            }
+        }
+        me.sword = me.swordWaiting //base function that changes during different aspects of the sword swing
+        me.swordGrow = function () {
+            this.laserSpear(this.vertices[this.swordVertex], this.angle + this.laserAngle);
+            Matter.Body.setVelocity(this, Vector.mult(this.velocity, 0.9))
+            // this.swordRadius += this.swordRadiusGrowRate
+            this.cycle++
+            // this.swordRadius = this.swordRadiusMax * Math.sin(this.cycle * 0.03)
+            this.swordRadius *= this.swordRadiusGrowRate
+
+            if (this.swordRadius > this.swordRadiusMax) this.swordRadiusGrowRate = 1 / this.swordRadiusGrowRateInitial
+            // if (this.swordRadius > this.swordRadiusMax) this.swordRadiusGrowRate = -Math.abs(this.swordRadiusGrowRate)
+            if (this.swordRadius < this.swordRadiusInitial || this.isStunned) {
+                // this.swordRadiusGrowRate = Math.abs(this.swordRadiusGrowRate)
+                this.swordRadiusGrowRate = this.swordRadiusGrowRateInitial
+                this.sword = this.swordWaiting
+                this.swordRadius = 0
+                this.cd = simulation.cycle + this.delay;
+            }
+        }
+        me.laserSpear = function (where, angle) {
+            const vertexCollision = function (v1, v1End, domain) {
+                for (let i = 0; i < domain.length; ++i) {
+                    let v = domain[i].vertices;
+                    const len = v.length - 1;
+                    for (let j = 0; j < len; j++) {
+                        results = simulation.checkLineIntersection(v1, v1End, v[j], v[j + 1]);
+                        if (results.onLine1 && results.onLine2) {
+                            const dx = v1.x - results.x;
+                            const dy = v1.y - results.y;
+                            const dist2 = dx * dx + dy * dy;
+                            if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: v[j], v2: v[j + 1] };
+                        }
+                    }
+                    results = simulation.checkLineIntersection(v1, v1End, v[0], v[len]);
+                    if (results.onLine1 && results.onLine2) {
+                        const dx = v1.x - results.x;
+                        const dy = v1.y - results.y;
+                        const dist2 = dx * dx + dy * dy;
+                        if (dist2 < best.dist2) best = { x: results.x, y: results.y, dist2: dist2, who: domain[i], v1: v[0], v2: v[len] };
+                    }
+                }
+            };
+            best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
+            const look = { x: where.x + this.swordRadius * Math.cos(angle), y: where.y + this.swordRadius * Math.sin(angle) };
+            vertexCollision(where, look, body); // vertexCollision(where, look, mob);
+            vertexCollision(where, look, map);
+            if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
+            if (best.who && (best.who === playerBody || best.who === playerHead)) {
+                this.swordRadiusGrowRate = 1 / this.swordRadiusGrowRateInitial //!!!! this retracts the sword if it hits the player
+
+                if (m.immuneCycle < m.cycle) {
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
+                    m.damage(this.swordDamage);
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: best.x,
+                        y: best.y,
+                        radius: this.swordDamage * 1500,
+                        color: "rgba(80,0,255,0.5)",
+                        time: 20
+                    });
+                }
             }
             if (best.dist2 === Infinity) best = look;
             ctx.beginPath(); //draw beam
@@ -5961,10 +6221,7 @@ const spawn = {
         me.friction = 0;
         me.frictionAir = 0.05;
         me.lookTorque = 0.0000025 * (Math.random() > 0.5 ? -1 : 1);
-        me.fireDir = {
-            x: 0,
-            y: 0
-        };
+        me.fireDir = { x: 0, y: 0 };
         me.onDeath = function () { //helps collisions functions work better after vertex have been changed
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
         }
@@ -5998,7 +6255,7 @@ const spawn = {
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         me.isVerticesChange = true
         me.memory = 240;
-        me.fireFreq = 0.009 + 0.0004 * Math.min(40, simulation.difficulty); //bigger number means more shots per second
+        me.fireFreq = 0.01 + 0.0005 * Math.min(40, simulation.difficulty); //bigger number means more shots per second
         me.noseLength = 0;
         me.fireAngle = 0;
         me.accelMag = 0.005 * simulation.accelScale;
@@ -6027,14 +6284,11 @@ const spawn = {
                 //set direction to turn to fire
                 if (!(simulation.cycle % this.seePlayerFreq)) {
                     this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
-                    this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 2500; //gives the bullet an arc  //was    / 1600
+                    this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 5000; //gives the bullet an arc  //was    / 1600
                 }
                 //rotate towards fireAngle
                 const angle = this.angle + Math.PI / 2;
-                const dot = Vector.dot({
-                    x: Math.cos(angle),
-                    y: Math.sin(angle)
-                }, this.fireDir)
+                const dot = Vector.dot({ x: Math.cos(angle), y: Math.sin(angle) }, this.fireDir)
                 // c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
                 const threshold = 0.1;
                 if (dot > threshold) {
@@ -6044,12 +6298,9 @@ const spawn = {
                 } else if (this.noseLength > 1.5 && dot > -0.2 && dot < 0.2) {
                     //fire
                     for (let i = 0, len = 2 + 0.07 * simulation.difficulty; i < len; i++) {
-                        spawn.bullet(this.vertices[1].x, this.vertices[1].y, 7 + Math.ceil(this.radius / 25));
-                        const spread = Vector.rotate({
-                            x: Math.sqrt(len) + 4,
-                            y: 0
-                        }, 2 * Math.PI * Math.random())
-                        const dir = Vector.add(Vector.mult(this.fireDir, 15), spread)
+                        spawn.bullet(this.vertices[1].x, this.vertices[1].y, 10 + Math.ceil(this.radius / 25));
+                        const spread = Vector.rotate({ x: Math.sqrt(len) + 4, y: 0 }, 2 * Math.PI * Math.random())
+                        const dir = Vector.add(Vector.mult(this.fireDir, 25), spread)
                         Matter.Body.setVelocity(mob[mob.length - 1], dir);
                     }
                     this.noseLength = 0;
@@ -7326,7 +7577,7 @@ const spawn = {
         mobs.spawn(x, y, 8, radius, "rgba(0,180,180,0.4)");
         let me = mob[mob.length - 1];
         me.collisionFilter.mask = cat.bullet | cat.player //| cat.mob //| cat.body
-        me.damageReduction = 0.024
+        me.damageReduction = 0.028
         Matter.Body.setDensity(me, 0.0001); //normal is 0.001
 
         // me.accelMag = 0.0007 * simulation.accelScale;

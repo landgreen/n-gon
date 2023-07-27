@@ -12,10 +12,12 @@ const mobs = {
             }
         }
     },
-    draw() {
+    draw() { },
+    drawDefault() {
         ctx.lineWidth = 2;
         let i = mob.length;
         while (i--) {
+            // if (Matter.Query.ray(map, mob[i].position, m.pos).length === 0) { //check if there is a ray between the mob and the player
             ctx.beginPath();
             const vertices = mob[i].vertices;
             ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -25,6 +27,7 @@ const mobs = {
             ctx.strokeStyle = mob[i].stroke;
             ctx.fill();
             ctx.stroke();
+            // }
         }
     },
     healthBar() {
@@ -770,8 +773,8 @@ const mobs = {
                                     })
                                 } else {
                                     Matter.Body.setVelocity(array[i], {
-                                        x: array[i].velocity.x * 0.94 + curlVector.x * 0.06,
-                                        y: array[i].velocity.y * 0.94 + curlVector.y * 0.06
+                                        x: array[i].velocity.x * 0.95 + curlVector.x * 0.06,
+                                        y: array[i].velocity.y * 0.95 + curlVector.y * 0.06
                                     })
                                 }
                                 if (isAntiGravity) array[i].force.y -= 0.8 * simulation.g * array[i].mass

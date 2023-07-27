@@ -2832,19 +2832,13 @@ const b = {
                 }
                 if (tech.isLaserPush) { //push mobs away
                     const index = path.length - 1
-                    Matter.Body.setVelocity(best.who, {
-                        x: best.who.velocity.x * 0.97,
-                        y: best.who.velocity.y * 0.97
-                    });
+                    Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.97, y: best.who.velocity.y * 0.97 });
                     const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.003 * push * Math.min(6, best.who.mass))
                     Matter.Body.applyForce(best.who, path[index], force)
                 }
             } else if (tech.isLaserPush && best.who.classType === "body") {
                 const index = path.length - 1
-                Matter.Body.setVelocity(best.who, {
-                    x: best.who.velocity.x * 0.97,
-                    y: best.who.velocity.y * 0.97
-                });
+                Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.97, y: best.who.velocity.y * 0.97 });
                 const force = Vector.mult(Vector.normalise(Vector.sub(path[index], path[Math.max(0, index - 1)])), 0.003 * push * Math.min(6, best.who.mass))
                 Matter.Body.applyForce(best.who, path[index], force)
             }
@@ -3679,7 +3673,7 @@ const b = {
     }, speed = 1) {
         const me = bullet.length;
         const THRUST = 0.0015
-        const dir = m.angle + 0.4 * (Math.random() - 0.5);
+        const dir = m.angle + 0.2 * (Math.random() - 0.5);
         const RADIUS = (4.5 + 3 * Math.random())
         bullet[me] = Bodies.polygon(where.x, where.y, 8, RADIUS, {
             angle: dir,
@@ -3822,7 +3816,7 @@ const b = {
                             !mob[i].isInvulnerable
                         ) {
                             const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
-                            const DIST = Vector.magnitude(TARGET_VECTOR);
+                            const DIST = Vector.magnitude(TARGET_VECTOR)
                             if (DIST < closeDist) {
                                 closeDist = DIST;
                                 this.lockedOn = mob[i]
@@ -3931,18 +3925,12 @@ const b = {
                 }
                 // speed cap instead of friction to give more agility
                 if (this.speed > 6) {
-                    Matter.Body.setVelocity(this, {
-                        x: this.velocity.x * 0.97,
-                        y: this.velocity.y * 0.97
-                    });
+                    Matter.Body.setVelocity(this, { x: this.velocity.x * 0.97, y: this.velocity.y * 0.97 });
                 }
             }
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
-        Matter.Body.setVelocity(bullet[me], {
-            x: speed * Math.cos(dir),
-            y: speed * Math.sin(dir)
-        });
+        Matter.Body.setVelocity(bullet[me], { x: speed * Math.cos(dir), y: speed * Math.sin(dir) });
     },
     droneRadioactive(where = {
         x: m.pos.x + 30 * Math.cos(m.angle) + 20 * (Math.random() - 0.5),
@@ -7732,7 +7720,7 @@ const b = {
                         x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5),
                         y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5)
                     }, 45)
-                    m.fireCDcycle = m.cycle + Math.floor(50 * b.fireCDscale); // cool down
+                    m.fireCDcycle = m.cycle + Math.floor(45 * b.fireCDscale); // cool down
                 } else {
                     b.droneRadioactive({
                         x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5),
@@ -7743,16 +7731,16 @@ const b = {
             } else {
                 if (m.crouch) {
                     b.drone({
-                        x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5),
-                        y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5)
-                    }, 55)
-                    m.fireCDcycle = m.cycle + Math.floor(10 * b.fireCDscale); // cool down
+                        x: m.pos.x + 30 * Math.cos(m.angle) + 5 * (Math.random() - 0.5),
+                        y: m.pos.y + 30 * Math.sin(m.angle) + 5 * (Math.random() - 0.5)
+                    }, 50)
+                    m.fireCDcycle = m.cycle + Math.floor(7 * b.fireCDscale); // cool down
                 } else {
                     b.drone({
                         x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5),
                         y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5)
-                    }, 20)
-                    m.fireCDcycle = m.cycle + Math.floor(5 * b.fireCDscale); // cool down
+                    }, 15)
+                    m.fireCDcycle = m.cycle + Math.floor(4 * b.fireCDscale); // cool down
                 }
             }
         }
@@ -7788,14 +7776,8 @@ const b = {
             const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
             const SPEED = (m.crouch ? 1.2 : 1) * Math.max(2, 14 - radius * 0.25)
             const dir = m.angle + 0.15 * (Math.random() - 0.5)
-            const velocity = {
-                x: SPEED * Math.cos(dir),
-                y: SPEED * Math.sin(dir)
-            }
-            const position = {
-                x: m.pos.x + 30 * Math.cos(m.angle),
-                y: m.pos.y + 30 * Math.sin(m.angle)
-            }
+            const velocity = { x: SPEED * Math.cos(dir), y: SPEED * Math.sin(dir) }
+            const position = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
             b.foam(position, Vector.rotate(velocity, spread), radius)
             this.applyKnock(velocity)
             m.fireCDcycle = m.cycle + Math.floor(1.5 * b.fireCDscale);

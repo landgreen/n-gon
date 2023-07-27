@@ -2542,8 +2542,8 @@ const m = {
     fieldUpgrades: [{
         name: "field emitter",
         imageNumber: Math.floor(Math.random() * 23),
-        description: `use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs
-            <br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`, //            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
+        description: `<em>initial field</em><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs and <strong>throw</strong> <strong class='color-block'>blocks</strong>
+        <br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`, //            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
         effect: () => {
             m.hold = function () {
                 if (m.isHolding) {
@@ -4174,13 +4174,13 @@ const m = {
     {
         name: "wormhole",
         //<strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br>
-        description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+4%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+        description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+5%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
         drain: 0,
         effect: function () {
             m.fieldMeterColor = "#bbf" //"#0c5"
             m.eyeFillColor = m.fieldMeterColor
 
-            m.duplicateChance = 0.04
+            m.duplicateChance = 0.05
             m.fieldRange = 0
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
 
@@ -4366,7 +4366,7 @@ const m = {
 
                     if (input.field) {
                         if (tech.isWormHolePause) {
-                            const drain = m.fieldRegen + 0.00004
+                            const drain = m.fieldRegen + 0.000035
                             if (m.energy > drain) {
                                 m.energy -= drain
                                 if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage for 1 cycle
@@ -4400,9 +4400,9 @@ const m = {
                         m.grabPowerUp();
                         //draw possible wormhole
                         if (tech.isWormholeMapIgnore && Matter.Query.ray(map, m.pos, justPastMouse).length !== 0) {
-                            this.drain = (0.06 + 0.006 * Math.sqrt(mag)) * 2
+                            this.drain = (0.05 + 0.005 * Math.sqrt(mag)) * 2
                         } else {
-                            this.drain = tech.isFreeWormHole ? 0 : 0.06 + 0.006 * Math.sqrt(mag)
+                            this.drain = tech.isFreeWormHole ? 0 : 0.05 + 0.005 * Math.sqrt(mag)
                         }
                         const unit = Vector.perp(Vector.normalise(sub))
                         const where = {

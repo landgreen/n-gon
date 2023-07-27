@@ -1,15 +1,33 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community levels:
-  tlinat by Richard0820
-  ruins by SiddhUPe
+new community training level diamagnetism by Richard0820
+  it's at the end of the training levels
+  start training by click the top right button at the load screen
 
-tech: mass production - tech have +3 choices to spawn ammo, research, or heals
+slasher mob variant with 2 laser swords
+slasher mob variant with a laser spear
+
+suckerBoss pulls in powerUps and makes them orbit better
+shooterBoss fires faster and larger bullets
+
+wormhole 4 -> 5% duplication, and a 10% reduction in energy cost
+drones fire faster and aim more accurately
+quenching gives 10% more max health and harm
+snake tail mobs have 15% less health
+tungsten carbide properly gives 222 health in addition to the bonus max health
 
 *********************************************************** TODO *****************************************************
 
-make a mob similar to slasher
-  because it's just a very well made mob.
+use cross product rotation for other mobs?
+  snipers, shooters?
+    //gently rotate towards the player with a torque, use cross product to decided clockwise or counterclockwise
+    const laserStartVector = Vector.sub(this.position, this.vertices[this.swordVertex])
+    const playerVector = Vector.sub(this.position, m.pos)
+    const cross = Matter.Vector.cross(laserStartVector, playerVector)
+    this.torque = 0.00002 * this.inertia * (cross > 0 ? 1 : -1)
+
+block manufacturing - molecular assembler tech
+Holding r-click will create a slowly increasing in size block, which will be thrown on release
 
 super-bot:  fires super balls
 
@@ -23,8 +41,6 @@ tech: after a needle hits a mobs
   the needle splits into 3 needles?
   reset your fire CD?
   2x damage for each consecutive mob hit?
-
-improve flatland performance?
 
 mob non-combat behaviors, like Rain World
   gathering
@@ -62,10 +78,6 @@ use ephemera to replace some bad code
     damage and defense bars
       disable and enable ephemera with settings
 
-drones target anything that moves: speed > 1
-  including player, blocks?, mobs, power ups
-  maybe target the fastest mobs?
-
 perfect diamagnatism - invulnerable while field is active?
   also drain energy while field is active?
 
@@ -74,11 +86,6 @@ mobs attack mines
     is this going to work with all mob vision types?
   
 tech circular polarization - wave gun bullets move in a circle
-
-tech: choose next map by name after exiting current map
-  use modified tech selection code?
-  this might be too much work without much reward
-  JUNK only? or maybe combine with other buff
 
 Tech: relativity
   Simulation speed scales with movement speed. When still, time moves at 0.4 speed, at full walking speed it’s 1. (So if you’re falling or something and you move faster the simulation will be faster than usual)
@@ -94,7 +101,6 @@ extend brainstorming animation timers to fps cap?
 perfect diamagnatism could bounce on mobs, or even map elements?
   could work like a rocket jump?
 
-
 tech: Bose Einstein condensate - freezes enemies in pilot wave, and drains some energy?
 
 make super balls with Zectron deflectable with field
@@ -103,16 +109,7 @@ make super balls with Zectron deflectable with field
 set mob health bar colors based on status effects?
   make mob damage immunity a mob status effect?
   
-physics notes: add link to double slit content
-  https://www.youtube.com/watch?v=v_uBaBuarEM
-
 tech: rail gun area damage effect, but for all harpoon mode
-
-laser momentum pushed back on player?
-  might just be annoying
-
-JUNK - overwrite mob draw function so mobs only draw if they can connect a ray from player to mob
-  gonna cause lag?
 
 mob status effect - vulnerability
   mobs take 4x damage for __ time
@@ -128,8 +125,6 @@ mob status effect - vulnerability
 tech: sporangium that grow little trees
   the trees have an area of effect damage for about 6-10 seconds
   maybe something similar to radioactive drones, but maybe a few smaller shapes
-
-harpoon tech that makes auto aim work much better
 
 hookBoss fires a hook that pulls player towards it
   hook does a bit of damage
@@ -213,12 +208,8 @@ Tech:when relay switch/flip flop is on, turn ammo powerups into boosts, when rel
 JUNK: what the golf?
   trying to throw a block throws you instead
 
-look for other tech that would benefit from a 3rd line of description text
-
 tech for lens - you can only fire through the lens
   and some buff?  damage or energy?
-
-hopMom fight make platforming with hop bullets harder?
 
 complete blowSuckBoss...  or don't
 
@@ -226,14 +217,6 @@ tech: laser reflections increase damage
 
 JUNK tech different effects based on night or day
   use system time
-
-buffing your deflecting for 1 second after pressing the field button
-  2 second cooldown on the effect to prevent spamming it
-  buff:  giving energy or doing damage makes sense
-    maybe this could be a rework for bremstralung
-
-replace field descriptions with a function call so they can have dynamic text
-  add in dynamic coupling text as a 4th line
 
 Boss that shoots out a ring of bullets, then after a few seconds it gravitates the bullets back
 
@@ -404,12 +387,6 @@ super balls do more damage after bouncing?
   how to check for bounce?
   maybe just increases damage after hitting a mob
 
-Make environmental damages also damage mobs
-So if a mob passes through laser, it gets damaged
-
-dark mode:
-  look at Tinyfolks, 20 minutes till dawn
-
 super short range foam that acts like flame thrower
   high fire rate
   short life spawn
@@ -428,8 +405,7 @@ laser tech where bots move around and follow you while firing lasers in the dire
   beam is similar to diffuse beam
 
 
-block manufacturing - molecular assembler tech
-Holding r-click will create a slowly increasing in size block, which will be thrown on release
+
 
 double research
 
