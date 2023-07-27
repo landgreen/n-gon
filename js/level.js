@@ -48,7 +48,7 @@ const level = {
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-            level.diamagnetism();
+            // level.diamagnetism();
             // for (let i = 0; i < 1; ++i) spawn.slasher(1900, -500)
             // for (let i = 0; i < 1; ++i) spawn.slasher2(1900, -500)
             // for (let i = 0; i < 1; ++i) spawn.shooterBoss(1900, -2500)
@@ -61,7 +61,7 @@ const level = {
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
 
-            // level[simulation.isTraining ? "walk" : "intro"]() //normal starting level **************************************************
+            level[simulation.isTraining ? "walk" : "intro"]() //normal starting level **************************************************
 
             // simulation.isAutoZoom = false; //look in close
             // simulation.zoomScale *= 0.5;
