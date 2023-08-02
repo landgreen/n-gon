@@ -1,22 +1,20 @@
 ******************************************************** NEXT PATCH **************************************************
+community map ace by Richard0820
 
-new community training level diamagnetism by Richard0820
-  it's at the end of the training levels
-  start training by click the top right button at the load screen
+field tech: additive manufacturing - crouch while activating your field to print a throwable block
+  blocks 80% faster and 80% more dense/more damage
+  molecular assembler, pilot wave
 
-slasher mob variant with 2 laser swords
-slasher mob variant with a laser spear
-
-suckerBoss pulls in powerUps and makes them orbit better
-shooterBoss fires faster and larger bullets
-
-wormhole 4 -> 5% duplication, and a 10% reduction in energy cost
-drones fire faster and aim more accurately
-quenching gives 10% more max health and harm
-snake tail mobs have 15% less health
-tungsten carbide properly gives 222 health in addition to the bonus max health
+inflation: 85->90% defense, 300->200% larger blocks
+buckling: can spawn boosts or coupling in addition to heals, ammo, and research
 
 *********************************************************** TODO *****************************************************
+
+add a player to the load screen
+  static SVG image of player
+  canvas image
+    interactable?
+    full matter.js level?
 
 use cross product rotation for other mobs?
   snipers, shooters?
@@ -25,9 +23,6 @@ use cross product rotation for other mobs?
     const playerVector = Vector.sub(this.position, m.pos)
     const cross = Matter.Vector.cross(laserStartVector, playerVector)
     this.torque = 0.00002 * this.inertia * (cross > 0 ? 1 : -1)
-
-block manufacturing - molecular assembler tech
-Holding r-click will create a slowly increasing in size block, which will be thrown on release
 
 super-bot:  fires super balls
 
@@ -1074,6 +1069,7 @@ possible names for tech
   eternal inflation
   hypergraph
   SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
+  Josephson junction - superconducting junction used in SQUIDS and quantum computers
   nuclear pasta - hard matter in neutron star
   nonlocal, nonlocality:  maybe use for pilot wave 
   fine-tuned universe
@@ -1100,6 +1096,7 @@ possible names for tech
   negative entropy
   memetics
   magnetorquers - produce spin by pushing on earth's magnetic field
+  Josephson junction - superconducting junction
   
 
 ******************************************************** CARS IMAGES ********************************************************

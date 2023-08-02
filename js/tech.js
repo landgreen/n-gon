@@ -2044,9 +2044,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return m.fieldMode !== 9
+            return m.fieldMode !== 9 && !tech.isTokamak
         },
-        requires: "not wormhole",
+        requires: "not wormhole, tokamak",
         effect() {
             tech.blockDamage = 0.3
         },
@@ -2057,13 +2057,13 @@ const tech = {
     {
         name: "inflation",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Inflation_(cosmology)' class="link">inflation</a>`,
-        description: "if <strong>holding</strong> a <strong class='color-block'>block</strong> <strong>+85%</strong> <strong class='color-defense'>defense</strong><br>after <strong>throwing</strong> a <strong class='color-block'>block</strong> it expands <strong>300%</strong>",
+        description: "if <strong>holding</strong> a <strong class='color-block'>block</strong> <strong>+90%</strong> <strong class='color-defense'>defense</strong><br>after <strong>throwing</strong> a <strong class='color-block'>block</strong> it expands <strong>200%</strong>",
         maxCount: 1,
         count: 0,
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return tech.blockDamage > 0.075 && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
         },
         requires: "mass driver, not pilot wave, tokamak, wormhole",
         effect() {
@@ -2081,7 +2081,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return tech.blockDamage > 0.075 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
         },
         requires: "mass driver, not pilot wave, tokamak, wormhole",
         effect() {
@@ -2099,7 +2099,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return tech.blockDamage > 0.075 && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.iceIXOnDeath
+            return (tech.blockDamage > 0.075 || tech.isPrinter) && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.iceIXOnDeath
         },
         requires: "mass driver, no other mob death tech",
         effect() {
@@ -2130,14 +2130,14 @@ const tech = {
     {
         name: "buckling",
         descriptionFunction() {
-            return `if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn either ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
+            return `if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn either ${powerUps.orb.coupling(1)}, ${powerUps.orb.boost(1)}, ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
         },
         maxCount: 1,
         count: 0,
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return tech.blockDamage > 0.075 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && !tech.isTokamak
         },
         requires: "mass driver, not pilot wave, tokamak",
         effect() {
@@ -7796,32 +7796,7 @@ const tech = {
     // },
     {
         name: "bot manufacturing",
-        description: `use ${powerUps.orb.research(1)} to build<br><strong>3</strong> random <strong class='color-bot'>bots</strong>`,
-        isFieldTech: true,
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        isBotTech: true,
-        isNonRefundable: true,
-        allowed() {
-            return powerUps.research.count > 0 && (m.fieldMode === 4 || m.fieldMode === 8)
-        },
-        requires: "molecular assembler, pilot wave",
-        effect() {
-            for (let i = 0; i < 1; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
-            m.energy = 0.01;
-            b.randomBot()
-            b.randomBot()
-            b.randomBot()
-        },
-        remove() { }
-    },
-    {
-        name: "bot prototypes",
-        description: `use ${powerUps.orb.research(2)}to build <strong>2</strong> random <strong class='color-bot'>bots</strong><br>and <strong>upgrade</strong> all <strong class='color-bot'>bots</strong> to that type`,
+        description: `use ${powerUps.orb.research(2)} to build<br><strong>3</strong> random <strong class='color-bot'>bots</strong>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -7835,6 +7810,31 @@ const tech = {
         requires: "molecular assembler, pilot wave",
         effect() {
             for (let i = 0; i < 2; i++) {
+                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+            }
+            m.energy = 0.01;
+            b.randomBot()
+            b.randomBot()
+            b.randomBot()
+        },
+        remove() { }
+    },
+    {
+        name: "bot prototypes",
+        description: `use ${powerUps.orb.research(3)}to build <strong>2</strong> random <strong class='color-bot'>bots</strong><br>and <strong>upgrade</strong> all <strong class='color-bot'>bots</strong> to that type`,
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        isBotTech: true,
+        isNonRefundable: true,
+        allowed() {
+            return powerUps.research.count > 2 && (m.fieldMode === 4 || m.fieldMode === 8)
+        },
+        requires: "molecular assembler, pilot wave",
+        effect() {
+            for (let i = 0; i < 3; i++) {
                 if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
             }
             //fill array of available bots
@@ -7984,6 +7984,27 @@ const tech = {
     //     }
     // },
     {
+        name: "additive manufacturing",
+        description: "hold <strong>crouch</strong> and use your <strong class='color-f'>field</strong> to <strong>print</strong> a <strong class='color-block'>block</strong><br> with <strong>+80%</strong> density, <strong class='color-d'>damage</strong>, and launch speed",
+        // description: "simultaneously <strong>fire</strong> and activate your <strong class='color-f'>field</strong> to make<br>molecular assembler <strong>print</strong> a throwable <strong class='color-block'>block</strong><br><strong>+80%</strong> <strong class='color-block'>block</strong> throwing speed",
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return (m.fieldMode === 4 || m.fieldMode === 8) && !tech.isTokamak
+        },
+        requires: "molecular assembler, pilot wave, not tokamak",
+        effect() {
+            tech.isPrinter = true;
+        },
+        remove() {
+            if (this.count > 0) m.holdingTarget = null;
+            tech.isPrinter = false;
+        }
+    },
+    {
         name: "pair production",
         description: "after picking up a <strong>power up</strong><br><strong>+200</strong> <strong class='color-f'>energy</strong>",
         isFieldTech: true,
@@ -8055,9 +8076,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 5 || m.fieldMode === 4
+            return (m.fieldMode === 5 || m.fieldMode === 4) && !tech.isPrinter
         },
-        requires: "plasma torch, molecular assembler",
+        requires: "plasma torch, molecular assembler, not printer",
         effect() {
             tech.isTokamak = true;
         },
@@ -11724,4 +11745,5 @@ const tech = {
     isLaserField: null,
     isHealBrake: null,
     isMassProduction: null,
+    isPrinter: null,
 }

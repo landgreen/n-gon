@@ -8371,7 +8371,7 @@ const spawn = {
         Composite.add(engine.world, who); //add to world
         if (isRedrawMap) simulation.draw.setPaths()
     },
-    mapVertexNow(x, y, vector, properties) { //adds shape to map array in the middle of a level
+    mapVertexNow(x, y, vector, properties, isRedrawMap = true) { //adds shape to map array in the middle of a level
         map[map.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
         const who = map[map.length - 1]
         who.collisionFilter.category = cat.map;

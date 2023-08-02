@@ -286,13 +286,9 @@ function collisionChecks(event) {
 
                                 mob[k].damage(dmg, true);
                                 if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && m.throwCycle > m.cycle) {
-                                    let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
-                                    if (Math.random() < 0.4) {
-                                        type = "heal"
-                                    } else if (Math.random() < 0.4 && !tech.isSuperDeterminism) {
-                                        type = "research"
-                                    }
-                                    powerUps.spawn(mob[k].position.x, mob[k].position.y, type);
+                                    options = ["coupling", "boost", "heal", "research"]
+                                    if (!tech.isEnergyNoAmmo) options.push("ammo")
+                                    powerUps.spawn(mob[k].position.x, mob[k].position.y, options[Math.floor(Math.random() * options.length)]);
                                 }
 
                                 const stunTime = dmg / Math.sqrt(obj.mass)

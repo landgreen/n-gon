@@ -307,6 +307,23 @@ const m = {
             if (player.velocity.x < m.airSpeedLimit / player.mass / player.mass) player.force.x += m.FxAir; //move player  right / d
         }
     },
+    printBlock() {
+        const sides = Math.floor(4 + 6 * Math.random() * Math.random())
+        body[body.length] = Matter.Bodies.polygon(m.pos.x, m.pos.y, sides, 8, {
+            friction: 0.05,
+            frictionAir: 0.001,
+            collisionFilter: { category: 0, mask: 0 }, //no collision because player is holding
+            classType: "body",
+            isPrinted: true,
+            radius: 10, //used to grow and warp the shape of the block
+            density: 0.002, //double density for 2x damage
+        });
+        const who = body[body.length - 1]
+        Composite.add(engine.world, who); //add to world
+        m.throwCharge = 4;
+        m.holdingTarget = who
+        m.isHolding = true;
+    },
     alive: false,
     switchWorlds() {
         powerUps.boost.endCycle = 0
@@ -552,7 +569,7 @@ const m = {
         if (tech.isLowHealthDefense) dmg *= 1 - Math.max(0, 1 - m.health) * 0.8
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.33
         if (tech.squirrelFx !== 1) dmg *= 0.78//Math.pow(0.78, (tech.squirrelFx - 1) / 0.4)
-        if (tech.isAddBlockMass && m.isHolding) dmg *= 0.15
+        if (tech.isAddBlockMass && m.isHolding) dmg *= 0.1
         if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.25
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.1
@@ -1972,11 +1989,11 @@ const m = {
             m.fieldRegen *= 0.66
         }
     },
-    regenEnergy: function () { //used in drawRegenEnergy  // rewritten by some tech
+    regenEnergy() { //used in drawRegenEnergy  // rewritten by some tech
         if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen;
         if (m.energy < 0) m.energy = 0
     },
-    regenEnergyDefault: function () {
+    regenEnergyDefault() {
         if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen;
         if (m.energy < 0) m.energy = 0
     },
@@ -2068,7 +2085,6 @@ const m = {
                     if (m.fireCDcycle < m.cycle) m.fireCDcycle = m.cycle
                     if (tech.isCapacitor && m.throwCharge < 4) m.throwCharge = 4
                     m.throwCharge += 0.5 / m.holdingTarget.mass / b.fireCDscale
-
                     if (m.throwCharge < 6) m.energy -= 0.001 / b.fireCDscale; // m.throwCharge caps at 5 
 
                     //trajectory path prediction
@@ -2116,11 +2132,8 @@ const m = {
                         //trajectory prediction
                         const cycles = 30
                         const charge = Math.min(m.throwCharge / 5, 1)
-                        const speed = 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
-                        const v = {
-                            x: speed * Math.cos(m.angle),
-                            y: speed * Math.sin(m.angle)
-                        } //m.Vy / 2 + removed to make the path less jerky
+                        const speed = (tech.isPrinter ? 15 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
+                        const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
                         ctx.beginPath()
                         for (let i = 1, len = 10; i < len + 1; i++) {
                             const time = cycles * i / len
@@ -2134,8 +2147,11 @@ const m = {
                     m.drop()
                 }
             } else if (m.throwCharge > 0) { //Matter.Query.region(mob, player.bounds)
+                if (m.holdingTarget.isPrinted) m.holdingTarget.isPrinted = undefined
                 //throw the body
-                m.fieldCDcycle = m.cycle + 15;
+                m.fieldCDcycle = m.cycle + 20;
+                m.fireCDcycle = m.cycle + 20;
+
                 m.isHolding = false;
 
                 if (tech.isTokamak && m.throwCharge > 4) { //remove the block body and pulse  in the direction you are facing
@@ -2176,7 +2192,9 @@ const m = {
 
                     const charge = Math.min(m.throwCharge / 5, 1)
                     //***** scale throw speed with the first number, 80 *****
-                    let speed = 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
+                    // let speed = 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
+                    let speed = (tech.isPrinter ? 15 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
+
                     if (Matter.Query.collides(m.holdingTarget, map).length !== 0) {
                         speed *= 0.7 //drop speed by 30% if touching map
                         if (Matter.Query.ray(map, m.holdingTarget.position, m.pos).length !== 0) speed = 0 //drop to zero if the center of the block can't see the center of the player through the map
@@ -2196,7 +2214,7 @@ const m = {
                     if (tech.isAddBlockMass) {
                         const expand = function (that, massLimit) {
                             if (that.mass < massLimit) {
-                                const scale = 1.05;
+                                const scale = 1.04;
                                 Matter.Body.scale(that, scale, scale);
                                 setTimeout(expand, 20, that, massLimit);
                             }
@@ -3105,10 +3123,10 @@ const m = {
     },
     {
         name: "molecular assembler",
-        description: `excess <strong class='color-f'>energy</strong> used to build ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong> per second`,
+        description: `excess <strong class='color-f'>energy</strong> used to print ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong> per second`,
         //   simulation.molecularMode: Math.floor(4 * Math.random()), //0 spores, 1 missile, 2 ice IX, 3 drones
         setDescription() {
-            return `excess <strong class='color-f'>energy</strong> used to build ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong> per second`
+            return `excess <strong class='color-f'>energy</strong> used to print ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>generate <strong>12</strong> <strong class='color-f'>energy</strong> per second`
         },
         effect: () => {
             m.fieldMeterColor = "#ff0"
@@ -3195,12 +3213,28 @@ const m = {
                 if (m.isHolding) {
                     m.drawHold(m.holdingTarget);
                     m.holding();
+                    if (tech.isPrinter && m.holdingTarget.isPrinted && input.field) {
+                        // if (Math.random() < 0.004 && m.holdingTarget.vertices.length < 12) m.holdingTarget.vertices.push({ x: 0, y: 0 }) //small chance to increase the number of vertices
+                        m.holdingTarget.radius += Math.min(1.1, 1.3 / m.holdingTarget.mass) //grow up to a limit
+                        const r1 = m.holdingTarget.radius * (1 + 0.12 * Math.sin(m.cycle * 0.11))
+                        const r2 = m.holdingTarget.radius * (1 + 0.12 * Math.cos(m.cycle * 0.11))
+                        let angle = (m.cycle * 0.01) % (2 * Math.PI) //rotate the object 
+                        let vertices = []
+                        for (let i = 0, len = m.holdingTarget.vertices.length; i < len; i++) {
+                            angle += 2 * Math.PI / len
+                            vertices.push({ x: m.holdingTarget.position.x + r1 * Math.cos(angle), y: m.holdingTarget.position.y + r2 * Math.sin(angle) })
+                        }
+                        Matter.Body.setVertices(m.holdingTarget, vertices)
+                        m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+                    }
                     m.throwBlock();
                 } else if ((input.field && m.fieldCDcycle < m.cycle)) { //not hold but field button is pressed
                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                     m.grabPowerUp();
                     m.lookForPickUp();
-                    if (m.energy > m.minEnergyToDeflect) {
+                    if (tech.isPrinter && input.down) {
+                        m.printBlock();
+                    } else if (m.energy > m.minEnergyToDeflect) {
                         m.drawField();
                         m.pushMobsFacing();
                     }
@@ -3993,6 +4027,36 @@ const m = {
             m.fieldRadius = 0;
             m.drop();
             m.hold = function () {
+                if (tech.isPrinter) {
+                    //spawn blocks if field and crouch
+                    if (input.field && m.fieldCDcycle < m.cycle && input.down && !m.isHolding) {
+                        m.printBlock()
+                    }
+                    //if holding block grow it
+                    if (m.isHolding) {
+                        m.drawHold(m.holdingTarget);
+                        m.holding();
+                        if (tech.isPrinter && m.holdingTarget.isPrinted && input.field) {
+                            // if (Math.random() < 0.004 && m.holdingTarget.vertices.length < 12) m.holdingTarget.vertices.push({ x: 0, y: 0 }) //small chance to increase the number of vertices
+                            m.holdingTarget.radius += Math.min(1.1, 1.3 / m.holdingTarget.mass) //grow up to a limit
+                            const r1 = m.holdingTarget.radius * (1 + 0.12 * Math.sin(m.cycle * 0.11))
+                            const r2 = m.holdingTarget.radius * (1 + 0.12 * Math.cos(m.cycle * 0.11))
+                            let angle = (m.cycle * 0.01) % (2 * Math.PI) //rotate the object 
+                            let vertices = []
+                            for (let i = 0, len = m.holdingTarget.vertices.length; i < len; i++) {
+                                angle += 2 * Math.PI / len
+                                vertices.push({ x: m.holdingTarget.position.x + r1 * Math.cos(angle), y: m.holdingTarget.position.y + r2 * Math.sin(angle) })
+                            }
+                            Matter.Body.setVertices(m.holdingTarget, vertices)
+                            m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+                        }
+                        m.throwBlock()
+                    } else {
+                        m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                    }
+                    //if releasing field throw it
+
+                }
                 if (input.field) {
                     if (m.fieldCDcycle < m.cycle) {
                         const scale = 25
