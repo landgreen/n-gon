@@ -1518,10 +1518,11 @@ const level = {
     isHazardRise: false,
     hazard(x, y, width, height, damage = 0.002) {
         const sins = [];
-        for (var i = 0; i < 10; i++) {
+        for (var i = 0; i < 5; i++) {
             sins.push({
-                a: Math.random() * 20,
-                b: Math.random() * 30
+                a: 10 + Math.random() * 20,
+                b: 4 + Math.random() * 20,
+                c: 10 + Math.random() * 10
             })
         }
         return {
@@ -1559,13 +1560,13 @@ const level = {
                     var sum = 0;
                     for (var i = 0; i < this.width; i++) {
                         sum = 0;
-                        for (const sin of sins) sum += Math.sin(i / sin.a + simulation.cycle / 5) * sin.b
+                        for (const sin of sins) sum += Math.sin(i / sin.a + simulation.cycle / sin.b) * sin.c
                         ctx.lineTo(this.min.x + i, this.min.y + sum / sins.length);
                     }
                     ctx.lineTo(this.min.x + this.width, this.min.y + this.height);
                     ctx.lineTo(this.min.x, this.min.y + this.height);
                     sum = 0;
-                    for (const sin of sins) sum += Math.sin(simulation.cycle / 5) * sin.b
+                    for (const sin of sins) sum += Math.sin(simulation.cycle / sin.b) * sin.c
                     ctx.lineTo(this.min.x, this.min.y + sum / sins.length);
                     ctx.fillStyle = "hsla(160, 100%, 35%,0.75)"
                     ctx.fill();
