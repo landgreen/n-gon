@@ -1517,10 +1517,10 @@ const level = {
     },
     isHazardRise: false,
     hazard(x, y, width, height, damage = 0.002) {
-        const sins = [];
+        const sines = [];
         const direction = (Math.random() < 0.5 ? -1 : 1);
-        for (var i = 0; i < 5; i++) {
-            sins.push({
+        for (var i = 0; i < 10; i++) {
+            sines.push({
                 a: 10 + Math.random() * 20,
                 b: (4 + Math.random() * 20) * direction,
                 c: 10 + Math.random() * 10
@@ -1561,14 +1561,14 @@ const level = {
                     var sum = 0;
                     for (var i = 0; i < this.width; i++) {
                         sum = 0;
-                        for (const sin of sins) sum += Math.sin(i / sin.a + simulation.cycle / sin.b) * sin.c
-                        ctx.lineTo(this.min.x + i, this.min.y + sum / sins.length);
+                        for (const sine of sines) sum += Math.sin(i / sine.a + simulation.cycle / sine.b) * sine.c
+                        ctx.lineTo(this.min.x + i, this.min.y + sum / sines.length);
                     }
                     ctx.lineTo(this.min.x + this.width, this.min.y + this.height);
                     ctx.lineTo(this.min.x, this.min.y + this.height);
                     sum = 0;
-                    for (const sin of sins) sum += Math.sin(simulation.cycle / sin.b) * sin.c
-                    ctx.lineTo(this.min.x, this.min.y + sum / sins.length);
+                    for (const sine of sines) sum += Math.sin(simulation.cycle / sine.b) * sine.c
+                    ctx.lineTo(this.min.x, this.min.y + sum / sines.length);
                     ctx.fillStyle = "hsla(160, 100%, 35%,0.75)"
                     ctx.fill();
 
