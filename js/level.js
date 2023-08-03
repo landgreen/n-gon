@@ -1517,6 +1517,13 @@ const level = {
     },
     isHazardRise: false,
     hazard(x, y, width, height, damage = 0.002) {
+        const sins = [];
+        for (var i = 0; i < 10; i++) {
+            sins.push({
+                a: Math.random() * 20,
+                b: Math.random() * 30
+            })
+        }
         return {
             min: { x: x, y: y },
             max: { x: x + width, y: y + height },
@@ -1547,9 +1554,21 @@ const level = {
             },
             query() {
                 if (this.isOn) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.min.x, this.min.y);
+                    var sum = 0;
+                    for (var i = 0; i < this.width; i++) {
+                        sum = 0;
+                        for (const sin of sins) sum += Math.sin(i / sin.a + simulation.cycle / 5) * sin.b
+                        ctx.lineTo(this.min.x + i, this.min.y + sum / sins.length);
+                    }
+                    ctx.lineTo(this.min.x + this.width, this.min.y + this.height);
+                    ctx.lineTo(this.min.x, this.min.y + this.height);
+                    sum = 0;
+                    for (const sin of sins) sum += Math.sin(simulation.cycle / 5) * sin.b
+                    ctx.lineTo(this.min.x, this.min.y + sum / sins.length);
                     ctx.fillStyle = "hsla(160, 100%, 35%,0.75)"
-                    const offset = 5 * Math.sin(simulation.cycle * 0.015)
-                    ctx.fillRect(this.min.x, this.min.y + offset, this.width, this.height - offset)
+                    ctx.fill();
 
                     if (this.height > 0 && Matter.Query.region([player], this).length) {
                         if (m.immuneCycle < m.cycle) {
