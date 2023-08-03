@@ -1518,10 +1518,11 @@ const level = {
     isHazardRise: false,
     hazard(x, y, width, height, damage = 0.002) {
         const sins = [];
+        const direction = (Math.random() < 0.5 ? -1 : 1);
         for (var i = 0; i < 5; i++) {
             sins.push({
                 a: 10 + Math.random() * 20,
-                b: 4 + Math.random() * 20,
+                b: (4 + Math.random() * 20) * direction,
                 c: 10 + Math.random() * 10
             })
         }
@@ -5264,11 +5265,11 @@ const level = {
         rooms = shuffle(rooms); //shuffles array order
         //look... you and I both know there is a better way to do this, but it works so I'm gonna focus on other things
         while ( //makes sure that the exit and entrance aren't both on the same floor
-            (rooms[0] === "enter" && rooms[2] === "exit") ||
-            (rooms[2] === "enter" && rooms[0] === "exit") ||
-            (rooms[1] === "enter" && rooms[3] === "exit") ||
-            (rooms[3] === "enter" && rooms[1] === "exit")
-        ) rooms = shuffle(rooms); //shuffles array order
+        (rooms[0] === "enter" && rooms[2] === "exit") ||
+        (rooms[2] === "enter" && rooms[0] === "exit") ||
+        (rooms[1] === "enter" && rooms[3] === "exit") ||
+        (rooms[3] === "enter" && rooms[1] === "exit")
+            ) rooms = shuffle(rooms); //shuffles array order
         for (let i = 0; i < rooms.length; i++) {
             if (rooms[i] === "enter") rooms[i] = enter
             if (rooms[i] === "exit") rooms[i] = exit
@@ -11376,25 +11377,25 @@ const level = {
         //      2.5 * Math.PI
         //    ); //right
         portal2 = level.portal({
-            x: 61920,
-            y: -16525,
-        },
+                x: 61920,
+                y: -16525,
+            },
             1.5 * Math.PI, {
-            //right
-            x: 58400,
-            y: -17325,
-        },
+                //right
+                x: 58400,
+                y: -17325,
+            },
             2 * Math.PI
         );
         portal3 = level.portal({
-            x: 59865,
-            y: -17300,
-        },
+                x: 59865,
+                y: -17300,
+            },
             3 * Math.PI, {
-            //right
-            x: 60820,
-            y: -31130,
-        },
+                //right
+                x: 60820,
+                y: -31130,
+            },
             2.5 * Math.PI
         );
 
@@ -11523,9 +11524,9 @@ const level = {
                 this.height = h;
             }
             Rect.prototype.has = function ({
-                x,
-                y
-            }) {
+                                               x,
+                                               y
+                                           }) {
                 return x >= this.pos.x && x <= this.pos.x + this.width &&
                     y >= this.pos.y && y <= this.pos.y + this.height;
             }
@@ -13027,16 +13028,16 @@ const level = {
                     x: x - size,
                     y
                 },
-                {
-                    x,
-                    y: y + size
-                }, {
-                    x: x + size,
-                    y
-                }, {
-                    x,
-                    y: y - size
-                }
+                    {
+                        x,
+                        y: y + size
+                    }, {
+                        x: x + size,
+                        y
+                    }, {
+                        x,
+                        y: y - size
+                    }
                 ]);
             }
         };
@@ -20747,10 +20748,10 @@ const level = {
                     x: this.position.x + 20 * Math.cos(this.angle),
                     y: this.position.y + 20 * Math.sin(this.angle)
                 },
-                {
-                    x: this.position.x + (120 + 400) * Math.sqrt(Math.random()) * Math.cos(this.angle),
-                    y: this.position.y + (120 + 400) * Math.sqrt(Math.random()) * Math.sin(this.angle)
-                }
+                    {
+                        x: this.position.x + (120 + 400) * Math.sqrt(Math.random()) * Math.cos(this.angle),
+                        y: this.position.y + (120 + 400) * Math.sqrt(Math.random()) * Math.sin(this.angle)
+                    }
                 ];
                 this.seePlayer.recall -= 3;
                 const vertexCollision = function (v1, v1End, domain) {
@@ -21133,10 +21134,10 @@ const level = {
                     x: this.position.x + 20 * Math.cos(this.angle),
                     y: this.position.y + 20 * Math.sin(this.angle)
                 },
-                {
-                    x: this.position.x + (120 + 400) * Math.sqrt(Math.random()) * Math.cos(this.angle),
-                    y: this.position.y + (120 + 400) * Math.sqrt(Math.random()) * Math.sin(this.angle)
-                }
+                    {
+                        x: this.position.x + (120 + 400) * Math.sqrt(Math.random()) * Math.cos(this.angle),
+                        y: this.position.y + (120 + 400) * Math.sqrt(Math.random()) * Math.sin(this.angle)
+                    }
                 ];
                 this.seePlayer.recall -= 3;
                 const vertexCollision = function (v1, v1End, domain) {
@@ -21589,10 +21590,10 @@ const level = {
                     x: where.x + 20 * Math.cos(angle),
                     y: where.y + 20 * Math.sin(angle)
                 },
-                {
-                    x: where.x + range * Math.cos(angle),
-                    y: where.y + range * Math.sin(angle)
-                }
+                    {
+                        x: where.x + range * Math.cos(angle),
+                        y: where.y + range * Math.sin(angle)
+                    }
                 ];
                 const vertexCollision = function (v1, v1End, domain) {
                     for (let i = 0; i < domain.length; ++i) {
@@ -23805,10 +23806,10 @@ const level = {
                     x: this.position.x + 20 * Math.cos(this.angle),
                     y: this.position.y + 20 * Math.sin(this.angle)
                 },
-                {
-                    x: this.position.x + (120 + 400) * Math.sqrt(Math.random()) * Math.cos(this.angle),
-                    y: this.position.y + (120 + 400) * Math.sqrt(Math.random()) * Math.sin(this.angle)
-                }
+                    {
+                        x: this.position.x + (120 + 400) * Math.sqrt(Math.random()) * Math.cos(this.angle),
+                        y: this.position.y + (120 + 400) * Math.sqrt(Math.random()) * Math.sin(this.angle)
+                    }
                 ];
                 this.seePlayer.recall -= 3;
                 const vertexCollision = function (v1, v1End, domain) {
@@ -24261,10 +24262,10 @@ const level = {
                     x: this.position.x + 20 * Math.cos(this.angle),
                     y: this.position.y + 20 * Math.sin(this.angle)
                 },
-                {
-                    x: this.position.x + (120 + 400) * Math.sqrt(Math.random()) * Math.cos(this.angle),
-                    y: this.position.y + (120 + 400) * Math.sqrt(Math.random()) * Math.sin(this.angle)
-                }
+                    {
+                        x: this.position.x + (120 + 400) * Math.sqrt(Math.random()) * Math.cos(this.angle),
+                        y: this.position.y + (120 + 400) * Math.sqrt(Math.random()) * Math.sin(this.angle)
+                    }
                 ];
                 const vertexCollision = function (v1, v1End, domain) {
                     for (let i = 0; i < domain.length; ++i) {
@@ -24771,10 +24772,10 @@ const level = {
                     x: where.x + 20 * Math.cos(angle),
                     y: where.y + 20 * Math.sin(angle)
                 },
-                {
-                    x: where.x + range * Math.cos(angle),
-                    y: where.y + range * Math.sin(angle)
-                }
+                    {
+                        x: where.x + range * Math.cos(angle),
+                        y: where.y + range * Math.sin(angle)
+                    }
                 ];
                 const vertexCollision = function (v1, v1End, domain) {
                     for (let i = 0; i < domain.length; ++i) {
@@ -26165,31 +26166,31 @@ const level = {
         }
         function o(e, t, o) {
             const l = {
-                J: [" #### ", "    # ", "    # ", "    # ", " #  # ", " #  # ", "  ##  "],
-                I: ["  #  ", "  #  ", "  #  ", "  #  ", "  #  ", "  #  ", "  #  "],
-                N: [" #  # ", " ## # ", " ## # ", " # ## ", " # ## ", " #  # ", " #  # "],
-                " ": ["      ", "      ", "      ", "      ", "      ", "      ", "      "],
-                O: ["   ##   ", "  #  #  ", " #    # ", " #    # ", " #    # ", "  #  #  ", "   ##   "],
-                U: [" #   # ", " #   # ", " #   # ", " #   # ", " #   # ", " #   # ", "  ###  "],
-                R: [" #### ", " #   #", " #### ", " # #  ", " #  # ", " #   #", " #   #"],
-                D: [" ###   ", " #  ## ", " #   # ", " #   # ", " #   # ", " #  ## ", " ###   "],
-                S: ["  #### ", " #     ", " #     ", "  ###  ", "    ## ", "     # ", " ##### "],
-                C: [" ##### ", " #     ", " #     ", " #     ", " #     ", " #     ", " ##### "],
-                V: [" #   # ", " #   # ", " #   # ", " #   # ", " #   # ", "  # #  ", "   #   "],
-                E: [" ##### ", " #     ", " #     ", " ##### ", " #     ", " #     ", " ##### "],
-                ".": ["       ", "       ", "       ", "       ", "       ", "   ##  ", "   ##  "],
-                "/": ["      #", "     # ", "    #  ", "   #   ", "  #    ", " #     ", "#      "],
-                G: [" ###### ", " #      ", " #      ", " #  ### ", " #    # ", " #    # ", " ###### "],
-                Q: ["  ######   ", " #      #  ", " #      #  ", " #      #  ", " #    # #  ", "  #    #   ", "   #### #  ", "         # "],
-                8: ["  #####  ", " #     # ", " #     # ", "  #####  ", " #     # ", " #     # ", "  #####  "],
-                g: ["  #####  ", " #     # ", " #     # ", "  #####  ", "       # ", "       # ", " ######  "],
-                Y: [" #     # ", "  #   #  ", "   # #   ", "    #    ", "    #    ", "    #    ", "    #    "],
-                4: [" #       ", " #    #  ", " #    #  ", " #    #  ", "  ###### ", "      #  ", "      #  "],
-                W: [" #     # ", " #     # ", " #     # ", " #  #  # ", " # # # # ", " ##   ## ", " #     # "],
-                e: ["  ######  ", " #      # ", " #      # ", " #######  ", " #        ", "  #       ", "  ######  "],
-                c: [" ###### ", "#       ", "#       ", "#       ", "#       ", "#       ", " ###### ", "        "],
-                m: [" #       ", " ### ### ", " #  #  # ", " #  #  # ", " #  #  # ", " #  #  # ", " #  #  # "]
-            },
+                    J: [" #### ", "    # ", "    # ", "    # ", " #  # ", " #  # ", "  ##  "],
+                    I: ["  #  ", "  #  ", "  #  ", "  #  ", "  #  ", "  #  ", "  #  "],
+                    N: [" #  # ", " ## # ", " ## # ", " # ## ", " # ## ", " #  # ", " #  # "],
+                    " ": ["      ", "      ", "      ", "      ", "      ", "      ", "      "],
+                    O: ["   ##   ", "  #  #  ", " #    # ", " #    # ", " #    # ", "  #  #  ", "   ##   "],
+                    U: [" #   # ", " #   # ", " #   # ", " #   # ", " #   # ", " #   # ", "  ###  "],
+                    R: [" #### ", " #   #", " #### ", " # #  ", " #  # ", " #   #", " #   #"],
+                    D: [" ###   ", " #  ## ", " #   # ", " #   # ", " #   # ", " #  ## ", " ###   "],
+                    S: ["  #### ", " #     ", " #     ", "  ###  ", "    ## ", "     # ", " ##### "],
+                    C: [" ##### ", " #     ", " #     ", " #     ", " #     ", " #     ", " ##### "],
+                    V: [" #   # ", " #   # ", " #   # ", " #   # ", " #   # ", "  # #  ", "   #   "],
+                    E: [" ##### ", " #     ", " #     ", " ##### ", " #     ", " #     ", " ##### "],
+                    ".": ["       ", "       ", "       ", "       ", "       ", "   ##  ", "   ##  "],
+                    "/": ["      #", "     # ", "    #  ", "   #   ", "  #    ", " #     ", "#      "],
+                    G: [" ###### ", " #      ", " #      ", " #  ### ", " #    # ", " #    # ", " ###### "],
+                    Q: ["  ######   ", " #      #  ", " #      #  ", " #      #  ", " #    # #  ", "  #    #   ", "   #### #  ", "         # "],
+                    8: ["  #####  ", " #     # ", " #     # ", "  #####  ", " #     # ", " #     # ", "  #####  "],
+                    g: ["  #####  ", " #     # ", " #     # ", "  #####  ", "       # ", "       # ", " ######  "],
+                    Y: [" #     # ", "  #   #  ", "   # #   ", "    #    ", "    #    ", "    #    ", "    #    "],
+                    4: [" #       ", " #    #  ", " #    #  ", " #    #  ", "  ###### ", "      #  ", "      #  "],
+                    W: [" #     # ", " #     # ", " #     # ", " #  #  # ", " # # # # ", " ##   ## ", " #     # "],
+                    e: ["  ######  ", " #      # ", " #      # ", " #######  ", " #        ", "  #       ", "  ######  "],
+                    c: [" ###### ", "#       ", "#       ", "#       ", "#       ", "#       ", " ###### ", "        "],
+                    m: [" #       ", " ### ### ", " #  #  # ", " #  #  # ", " #  #  # ", " #  #  # ", " #  #  # "]
+                },
                 a = (e, t) => {
                     ctx.fillStyle = "black", ctx.fillRect(e, t, 50, 50)
                 },
@@ -30116,13 +30117,13 @@ const level = {
         level.chain(-675, 400, -0.4366271598, true, 20)
         level.chain(-1600, 125, 0.5144513131, true, 19)
         const portal = portall({
-            x: 3825,
-            y: -1000,
-        },
+                x: 3825,
+                y: -1000,
+            },
             3 * Math.PI, {
-            x: 550,
-            y: -100,
-        },
+                x: 550,
+                y: -100,
+            },
             3 * Math.PI
         );
         level.custom = () => {
