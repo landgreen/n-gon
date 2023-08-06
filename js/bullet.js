@@ -2241,7 +2241,7 @@ const b = {
                 ctx.stroke();
                 ctx.lineJoin = "round"
                 ctx.miterLimit = 10
-                ctx.sillStyle = "#000"
+                ctx.strokeStyle = "#000"
                 ctx.fill();
             },
             drawString() {

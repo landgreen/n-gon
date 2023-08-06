@@ -10,11 +10,18 @@ buckling: can spawn boosts or coupling in addition to heals, ammo, and research
 
 *********************************************************** TODO *****************************************************
 
-add a player to the load screen
-  static SVG image of player
-  canvas image
-    interactable?
-    full matter.js level?
+more (all) bosses need to be made of parts
+  good examples: spiderBoss, dragonFlyBoss, beetleBoss
+  methods:
+    spawn adds in phases, like beetle and tether
+    constraints, like spider
+      be nice if each constrained part does something different
+    constrained mobs that regen after phases
+    flock, like cellBoss, blockBoss
+  Bosses that could be converted to more parts
+    "orbitalBoss", "shooterBoss", "bomberBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "pulsarBoss", "grenadierBoss", "blinkBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss", "timeSkipBoss", "sneakBoss"
+    "sneakBoss" could get sneaker adds after each hide phase
+    "laserTargetingBoss" could have close range stabbers constrained, a few long range shooters, and a few laser shooters
 
 use cross product rotation for other mobs?
   snipers, shooters?

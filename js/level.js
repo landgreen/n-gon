@@ -48,7 +48,7 @@ const level = {
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.ace();
+            // level.testing();
             // for (let i = 0; i < 1; ++i) spawn.slasher(1900, -500)
             // for (let i = 0; i < 1; ++i) spawn.slasher2(1900, -500)
             // for (let i = 0; i < 1; ++i) spawn.shooterBoss(1900, -2500)
