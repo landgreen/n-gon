@@ -2241,7 +2241,7 @@ const b = {
                 ctx.stroke();
                 ctx.lineJoin = "round"
                 ctx.miterLimit = 10
-                ctx.strokeStyle = "#000"
+                ctx.fillStyle = "#000"
                 ctx.fill();
             },
             drawString() {
@@ -2855,21 +2855,14 @@ const b = {
         let lastBestOdd
         let lastBestEven = best.who //used in hack below
         if (best.dist2 !== Infinity) { //if hitting something
-            path[path.length - 1] = {
-                x: best.x,
-                y: best.y
-            };
+            path[path.length - 1] = { x: best.x, y: best.y };
             laserHitMob();
             for (let i = 0; i < reflections; i++) {
                 reflection();
                 checkForCollisions();
                 if (best.dist2 !== Infinity) { //if hitting something
                     lastReflection = best
-
-                    path[path.length - 1] = {
-                        x: best.x,
-                        y: best.y
-                    };
+                    path[path.length - 1] = { x: best.x, y: best.y };
                     damage *= reflectivity
                     laserHitMob();
                     //I'm not clear on how this works, but it gets rid of a bug where the laser reflects inside a block, often vertically.

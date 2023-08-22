@@ -2488,6 +2488,24 @@ const tech = {
         }
     },
     {
+        name: "dark star",
+        description: "mobs inside the <strong>MACHO</strong> are <strong class='color-d'>damaged</strong><br>increase <strong>MACHO</strong> radius by <strong>15%</strong>",
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return tech.isMACHO
+        },
+        requires: "MACHO",
+        effect() {
+            tech.isDarkStar = true
+        },
+        remove() {
+            tech.isDarkStar = false
+        }
+    },
+    {
         name: "ablative drones",
         description: "after losing <strong class='color-h'>health</strong> there is a chance<br>to rebuild your broken parts as <strong>drones</strong>",
         maxCount: 1,
@@ -11677,6 +11695,7 @@ const tech = {
     isRewindField: null,
     isCrouchRegen: null,
     isAxion: null,
+    isDarkStar: null,
     isWormholeMapIgnore: null,
     isLessDamageReduction: null,
     needleTunnel: null,

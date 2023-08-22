@@ -1,12 +1,10 @@
 ******************************************************** NEXT PATCH **************************************************
-community map ace by Richard0820
 
-field tech: additive manufacturing - crouch while activating your field to print a throwable block
-  blocks 80% faster and 80% more dense/more damage
-  molecular assembler, pilot wave
+community map crimsonTowers by Richard0820
 
-inflation: 85->90% defense, 300->200% larger blocks
-buckling: can spawn boosts or coupling in addition to heals, ammo, and research
+new MACHO animation
+
+tech: dark star - MACHO is bigger and damages mobs
 
 *********************************************************** TODO *****************************************************
 
@@ -22,6 +20,10 @@ more (all) bosses need to be made of parts
     "orbitalBoss", "shooterBoss", "bomberBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "pulsarBoss", "grenadierBoss", "blinkBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss", "timeSkipBoss", "sneakBoss"
     "sneakBoss" could get sneaker adds after each hide phase
     "laserTargetingBoss" could have close range stabbers constrained, a few long range shooters, and a few laser shooters
+
+defense power up - a short term defense boost, like the ones for damage.
+  Or maybe it would last until you take one hit.
+  Or last until you lost a total of 20 health.
 
 use cross product rotation for other mobs?
   snipers, shooters?
@@ -1104,7 +1106,8 @@ possible names for tech
   memetics
   magnetorquers - produce spin by pushing on earth's magnetic field
   Josephson junction - superconducting junction
-  
+  Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity
+  dark star - upgrade to WIMPs
 
 ******************************************************** CARS IMAGES ********************************************************
 

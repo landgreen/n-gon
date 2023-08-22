@@ -150,7 +150,7 @@ const spawn = {
         me.do = function () {
             if (!simulation.isTimeSkipping) {
                 const sine = Math.sin(simulation.cycle * 0.015)
-                this.radius = 370 * (1 + 0.1 * sine)
+                this.radius = 55 * tech.isDarkStar + 370 * (1 + 0.1 * sine)
                 //chase player
                 const sub = Vector.sub(player.position, this.position)
                 const mag = Vector.magnitude(sub)
@@ -187,6 +187,34 @@ const spawn = {
                 ctx.arc(this.position.x, this.position.y, this.radius + 15, 0, 2 * Math.PI);
                 ctx.strokeStyle = "#000"
                 ctx.lineWidth = 1;
+                ctx.stroke();
+                if (tech.isDarkStar && !m.isCloak) { //&& !m.isBodiesAsleep
+                    ctx.fillStyle = "rgba(10,0,40,0.4)"
+                    ctx.fill()
+                    //damage mobs
+                    for (let i = 0, len = mob.length; i < len; ++i) {
+                        if (mob[i].alive && !mob[i].isShielded) {
+                            if (Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius < this.radius) {
+                                mob[i].damage(0.02 * m.dmgScale);
+                                // mob[i].locatePlayer();//
+
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: mob[i].position.x,
+                                    y: mob[i].position.y,
+                                    radius: mob[i].radius + 8,
+                                    color: `rgba(10,0,40,0.1)`, // random hue, but not red
+                                    time: 4
+                                });
+                            }
+                        }
+                    }
+                }
+                //draw growing and fading out ring around the arc
+                ctx.beginPath();
+                const rate = 150
+                const r = simulation.cycle % rate
+                ctx.arc(this.position.x, this.position.y, 15 + this.radius + 0.3 * r, 0, 2 * Math.PI);
+                ctx.strokeStyle = `rgba(0,0,0,${0.5 * Math.max(0, 1 - 1.4 * r / rate)})`
                 ctx.stroke();
             }
         }
@@ -3889,10 +3917,7 @@ const spawn = {
         me.frictionStatic = 0;
         me.friction = 0;
         me.lookTorque = 0.0000055 * (Math.random() > 0.5 ? -1 : 1) * (1 + 0.1 * Math.sqrt(simulation.difficulty))
-        me.fireDir = {
-            x: 0,
-            y: 0
-        }
+        me.fireDir = { x: 0, y: 0 }
         Matter.Body.setDensity(me, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 200 + 300 * Math.random())
@@ -5627,7 +5652,7 @@ const spawn = {
         mobs.spawn(x, y, 6, radius, "rgb(180,199,245)");
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
-        me.accelMag = 0.0009 * simulation.accelScale;
+        me.accelMag = 0.001 * simulation.accelScale;
         me.torqueMagnitude = -0.000012 * me.inertia //* (Math.random() > 0.5 ? -1 : 1);
         me.frictionStatic = 0;
         me.friction = 0;
@@ -5636,7 +5661,7 @@ const spawn = {
         me.cd = 0;
         me.swordRadius = 0;
         me.swordVertex = 1
-        me.swordRadiusMax = 275 + 3.5 * simulation.difficulty;
+        me.swordRadiusMax = 320 + 3.6 * simulation.difficulty;
         me.swordRadiusGrowRate = me.swordRadiusMax * (0.011 + 0.0002 * simulation.difficulty)
         me.isSlashing = false;
         me.swordDamage = 0.03 * simulation.dmgScale
@@ -5744,7 +5769,7 @@ const spawn = {
         mobs.spawn(x, y, sides, radius, "rgb(180,215,235)");
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
-        me.accelMag = 0.0005 * simulation.accelScale;
+        me.accelMag = 0.00055 * simulation.accelScale;
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0.02;
@@ -5754,11 +5779,11 @@ const spawn = {
         me.swordVertex = 1
         me.swordRadiusInitial = radius / 2;
         me.swordRadius = me.swordRadiusInitial;
-        me.swordRadiusMax = 750 + 6 * simulation.difficulty;
+        me.swordRadiusMax = 800 + 6 * simulation.difficulty;
         me.swordRadiusGrowRateInitial = 1.08
         me.swordRadiusGrowRate = me.swordRadiusGrowRateInitial//me.swordRadiusMax * (0.009 + 0.0002 * simulation.difficulty)
         me.isSlashing = false;
-        me.swordDamage = 0.04 * simulation.dmgScale
+        me.swordDamage = 0.03 * simulation.dmgScale
         me.laserAngle = 3 * Math.PI / 5
         const seeDistance2 = me.swordRadiusMax * me.swordRadiusMax
         spawn.shield(me, x, y);
