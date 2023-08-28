@@ -1,0 +1,285 @@
+html {
+        height: 100%;
+}
+
+body {
+        background-color: #fafafa;
+        font-family: Helvetica, Arial, Sans-serif;
+        font-size: 13px;
+        height: 100%;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+}
+
+body.dark {
+        background-color: #222;
+        color: #ddd;
+}
+
+table, tr, td {
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+}
+
+a {
+        text-decoration: none;
+        color: #333;
+}
+
+body.dark a {
+        color: #fff;
+}
+
+a:hover {
+        text-decoration: underline;
+}
+
+.container {
+        width: 800px;
+        overflow: hidden;
+        margin: 0 auto;
+        padding-top: 50px;
+}
+
+.footer {
+        clear: both;
+        width: 800px;
+        margin: 0 auto;
+        border-top: 1px dashed #ccc;
+        padding: 15px 0 20px;
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+        line-height: 1.5;
+}
+
+h1 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+}
+
+.controls {
+        float: left;
+        height: 680px;
+        width: 150px;
+}
+
+.control-group {
+        background-color: #fff;
+        border-bottom: 2px solid #fff;
+        border-radius: 5px;
+        box-shadow: inset 0px 1px 3px #999;
+        color: #333;
+        margin-bottom: 20px;
+        padding: 15px 12px;
+        text-align: center;
+}
+
+body.dark .control-group {
+        background-color: #333;
+        border-bottom: 2px solid #000;
+        box-shadow: none;
+        color: #999;
+}
+
+.control-group h3 {
+        color: #000;
+        font-size: 15px;
+        font-weight: bold;
+        margin-bottom: 10px;
+}
+
+body.dark .control-group h3 {
+        color: #ddd;
+}
+
+.control-group .control-section {
+        padding: 3px 0 7px 3px;
+        text-align: left;
+}
+
+.control-group input[type=checkbox] {
+        vertical-align: middle;
+}
+
+.control-group label {
+        font-size: 12px;
+        vertical-align: middle;
+}
+
+.control-group span {
+        font-size: 12px;
+}
+
+.custom {
+        border-top: 1px dashed #ccc;
+        margin-top: 15px;
+        padding-top: 15px;
+}
+
+.custom h5 {
+        color: #666;
+        font-size: 11px;
+}
+
+body.dark .custom h5 {
+        color: #999;
+}
+
+.custom input[type=text] {
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+        padding: 2px;
+        text-align: center;
+        width: 100px;
+}
+
+#new {
+        font-weight: bold;
+        padding: 5px 10px;
+}
+
+#seed {
+        background-color: #efefef;
+}
+
+#progress {
+        color: #999;
+        font-size: 20px;
+        font-weight: bold;
+}
+
+#progress.done {
+        color: #080;
+}
+
+#mistakes {
+        font-size: 20px;
+        font-weight: bold;
+        color: #999;
+}
+
+#mistakes.error {
+        color: #A00;
+}
+
+body.dark #mistakes.error {
+        color: #C00;
+}
+
+#puzzle {
+        float: right;
+        width: 600px;
+}
+
+#puzzle td {
+        background-color: #fafafa;
+}
+
+body.dark #puzzle td.key {
+        background-color: #222;
+}
+
+#puzzle td:nth-child(5n + 1) {
+        border-right: 1px solid #555;
+}
+
+#puzzle td.cell:nth-child(5n + 1) {
+        border-right: 1px solid #555;
+}
+
+#puzzle tr:nth-child(5n + 1) td {
+        border-bottom: 1px solid #555;
+}
+
+#puzzle tr:nth-child(5n + 2) td {
+        border-top: 1px solid #555;
+}
+
+#puzzle td.key {
+        font-family: Monospace;
+        font-weight: bold;
+}
+
+#puzzle td.key em {
+        color: #ccc;
+        text-decoration: line-through;
+}
+
+body.dark #puzzle td.key em {
+        color: #666;
+}
+
+#puzzle td.key.top {
+        line-height: 1.3;
+        padding-bottom: 5px;
+        text-align: center;
+        vertical-align: bottom;
+}
+
+#puzzle td.key.left {
+        min-width: 25px;
+        padding-right: 10px;
+        text-align: right;
+        vertical-align: middle;
+}
+
+#puzzle td.cell {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        color: #A00;
+        text-align: center;
+        vertical-align: middle;
+}
+
+#puzzle td.cell.hoverLight {
+        background-color: #F7F2E0;
+}
+
+#puzzle td.cell.hover {
+        background-color: #F7D358;
+}
+
+#puzzle td.cell.s1 {
+        background-color: #ddd;
+        box-shadow: 0 0 5px 2px #ccc inset;
+}
+
+#puzzle td.cell.s2 {
+        background-color: #81DAF5;
+        box-shadow: 0 0 5px 2px #01A9DB inset;
+}
+
+#puzzle td.cell.hover {
+        box-shadow: 0 0 5px 2px #FF8000 inset;
+}
+
+#puzzle.complete td.cell {
+        background-color: #fff;
+        box-shadow: none;
+}
+
+#puzzle.complete td.cell.s2 {
+        background-color: #333;
+        box-shadow: 3px 3px 5px #666 inset, -3px -3px 5px #000 inset;
+}
+
+#puzzle.complete.perfect {
+        background-image: url(../images/rainbow.gif);
+}
+
+#puzzle.complete.perfect td {
+        background-color: #fafafa;
+}
+
+#puzzle.complete.perfect td.cell.s2 {
+        background-color: transparent;
+        box-shadow: 1px 1px 5px #fff inset, -1px -1px 5px #666 inset;
+}
