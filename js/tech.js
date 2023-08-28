@@ -325,7 +325,7 @@ const tech = {
             tech.hardLanding = 70
             tech.isFallingDamage = true;
             m.setMaxHealth();
-            m.addHealth(1 / simulation.healScale)
+            m.addHealth(2.22 / simulation.healScale)
             m.skin.tungsten()
         },
         remove() {
@@ -2044,9 +2044,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return m.fieldMode !== 9
+            return m.fieldMode !== 9 && !tech.isTokamak
         },
-        requires: "not wormhole",
+        requires: "not wormhole, tokamak",
         effect() {
             tech.blockDamage = 0.3
         },
@@ -2057,13 +2057,13 @@ const tech = {
     {
         name: "inflation",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Inflation_(cosmology)' class="link">inflation</a>`,
-        description: "if <strong>holding</strong> a <strong class='color-block'>block</strong> <strong>+85%</strong> <strong class='color-defense'>defense</strong><br>after <strong>throwing</strong> a <strong class='color-block'>block</strong> it expands <strong>300%</strong>",
+        description: "if <strong>holding</strong> a <strong class='color-block'>block</strong> <strong>+90%</strong> <strong class='color-defense'>defense</strong><br>after <strong>throwing</strong> a <strong class='color-block'>block</strong> it expands <strong>200%</strong>",
         maxCount: 1,
         count: 0,
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return tech.blockDamage > 0.075 && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
         },
         requires: "mass driver, not pilot wave, tokamak, wormhole",
         effect() {
@@ -2081,7 +2081,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return tech.blockDamage > 0.075 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
         },
         requires: "mass driver, not pilot wave, tokamak, wormhole",
         effect() {
@@ -2099,7 +2099,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return tech.blockDamage > 0.075 && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.iceIXOnDeath
+            return (tech.blockDamage > 0.075 || tech.isPrinter) && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.iceIXOnDeath
         },
         requires: "mass driver, no other mob death tech",
         effect() {
@@ -2130,14 +2130,14 @@ const tech = {
     {
         name: "buckling",
         descriptionFunction() {
-            return `if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn either ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
+            return `if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn either ${powerUps.orb.coupling(1)}, ${powerUps.orb.boost(1)}, ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
         },
         maxCount: 1,
         count: 0,
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return tech.blockDamage > 0.075 && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && !tech.isTokamak
         },
         requires: "mass driver, not pilot wave, tokamak",
         effect() {
@@ -2485,6 +2485,24 @@ const tech = {
         },
         remove() {
             tech.isAxion = false
+        }
+    },
+    {
+        name: "dark star",
+        description: "mobs inside the <strong>MACHO</strong> are <strong class='color-d'>damaged</strong><br>increase <strong>MACHO</strong> radius by <strong>15%</strong>",
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return tech.isMACHO
+        },
+        requires: "MACHO",
+        effect() {
+            tech.isDarkStar = true
+        },
+        remove() {
+            tech.isDarkStar = false
         }
     },
     {
@@ -3013,7 +3031,10 @@ const tech = {
     },
     {
         name: "induction brake",
-        description: `after using ${powerUps.orb.heal()} <strong class='color-s'>slow</strong> nearby mobs for <strong>15</strong> seconds<br>spawn ${powerUps.orb.heal(4)}`,
+        descriptionFunction() {
+            return `after using ${powerUps.orb.heal()} <strong class='color-s'>slow</strong> nearby mobs for <strong>15</strong> seconds<br>spawn ${powerUps.orb.heal(4)}`
+        },
+        // description: `after using ${powerUps.orb.heal()} <strong class='color-s'>slow</strong> nearby mobs for <strong>15</strong> seconds<br>spawn ${powerUps.orb.heal(4)}`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3096,7 +3117,10 @@ const tech = {
     },
     {
         name: "accretion",
-        description: `${powerUps.orb.heal(1)} follow you, even between levels<br>spawn ${powerUps.orb.heal(5)}`,
+        descriptionFunction() {
+            return `${powerUps.orb.heal(1)} follow you, even between levels<br>spawn ${powerUps.orb.heal(5)}`
+        },
+        // description: `${powerUps.orb.heal(1)} follow you, even between levels<br>spawn ${powerUps.orb.heal(5)}`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3270,7 +3294,7 @@ const tech = {
     },
     {
         name: "Hilbert space",
-        description: "<strong>+91%</strong> <strong class='color-d'>damage</strong><br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
+        description: "<strong>+99%</strong> <strong class='color-d'>damage</strong><br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3280,7 +3304,7 @@ const tech = {
             return !tech.isResearchReality && !tech.isSwitchReality
         },
         requires: "not Ψ(t) collapse, many-worlds",
-        damage: 1.91,
+        damage: 1.99,
         effect() {
             tech.damage *= this.damage
             tech.isCollisionRealitySwitch = true;
@@ -3454,7 +3478,10 @@ const tech = {
     },
     {
         name: "mass production",
-        description: `<strong class='color-m'>tech</strong> always have <strong>+3</strong> choices to spawn<br>${powerUps.orb.research(5)} ${powerUps.orb.ammo(8)} or &nbsp; ${powerUps.orb.heal(8)}`,
+        descriptionFunction() {
+            return `<strong class='color-m'>tech</strong> always have <strong>+3</strong> choices to spawn<br>${powerUps.orb.ammo(8)} ${powerUps.orb.heal(8)} &nbsp;&nbsp; or ${powerUps.orb.research(5)}`
+        },
+        // description: `<strong class='color-m'>tech</strong> always have <strong>+3</strong> choices to spawn<br>${powerUps.orb.ammo(8)} ${powerUps.orb.heal(8)} &nbsp;&nbsp; or ${powerUps.orb.research(5)}`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3502,7 +3529,9 @@ const tech = {
     },
     {
         name: "heals",
-        description: `spawn ${powerUps.orb.heal(8)}`,
+        descriptionFunction() {
+            return `spawn ${powerUps.orb.heal(8)}`
+        },
         maxCount: 1,
         count: 0,
         frequency: 0,
@@ -7785,32 +7814,7 @@ const tech = {
     // },
     {
         name: "bot manufacturing",
-        description: `use ${powerUps.orb.research(1)} to build<br><strong>3</strong> random <strong class='color-bot'>bots</strong>`,
-        isFieldTech: true,
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        isBotTech: true,
-        isNonRefundable: true,
-        allowed() {
-            return powerUps.research.count > 0 && (m.fieldMode === 4 || m.fieldMode === 8)
-        },
-        requires: "molecular assembler, pilot wave",
-        effect() {
-            for (let i = 0; i < 1; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
-            m.energy = 0.01;
-            b.randomBot()
-            b.randomBot()
-            b.randomBot()
-        },
-        remove() { }
-    },
-    {
-        name: "bot prototypes",
-        description: `use ${powerUps.orb.research(2)}to build <strong>2</strong> random <strong class='color-bot'>bots</strong><br>and <strong>upgrade</strong> all <strong class='color-bot'>bots</strong> to that type`,
+        description: `use ${powerUps.orb.research(2)} to build<br><strong>3</strong> random <strong class='color-bot'>bots</strong>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -7824,6 +7828,31 @@ const tech = {
         requires: "molecular assembler, pilot wave",
         effect() {
             for (let i = 0; i < 2; i++) {
+                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+            }
+            m.energy = 0.01;
+            b.randomBot()
+            b.randomBot()
+            b.randomBot()
+        },
+        remove() { }
+    },
+    {
+        name: "bot prototypes",
+        description: `use ${powerUps.orb.research(3)}to build <strong>2</strong> random <strong class='color-bot'>bots</strong><br>and <strong>upgrade</strong> all <strong class='color-bot'>bots</strong> to that type`,
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        isBotTech: true,
+        isNonRefundable: true,
+        allowed() {
+            return powerUps.research.count > 2 && (m.fieldMode === 4 || m.fieldMode === 8)
+        },
+        requires: "molecular assembler, pilot wave",
+        effect() {
+            for (let i = 0; i < 3; i++) {
                 if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
             }
             //fill array of available bots
@@ -7973,6 +8002,27 @@ const tech = {
     //     }
     // },
     {
+        name: "additive manufacturing",
+        description: "hold <strong>crouch</strong> and use your <strong class='color-f'>field</strong> to <strong>print</strong> a <strong class='color-block'>block</strong><br> with <strong>+80%</strong> density, <strong class='color-d'>damage</strong>, and launch speed",
+        // description: "simultaneously <strong>fire</strong> and activate your <strong class='color-f'>field</strong> to make<br>molecular assembler <strong>print</strong> a throwable <strong class='color-block'>block</strong><br><strong>+80%</strong> <strong class='color-block'>block</strong> throwing speed",
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return (m.fieldMode === 4 || m.fieldMode === 8) && !tech.isTokamak
+        },
+        requires: "molecular assembler, pilot wave, not tokamak",
+        effect() {
+            tech.isPrinter = true;
+        },
+        remove() {
+            if (this.count > 0) m.holdingTarget = null;
+            tech.isPrinter = false;
+        }
+    },
+    {
         name: "pair production",
         description: "after picking up a <strong>power up</strong><br><strong>+200</strong> <strong class='color-f'>energy</strong>",
         isFieldTech: true,
@@ -8044,9 +8094,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 5 || m.fieldMode === 4
+            return (m.fieldMode === 5 || m.fieldMode === 4) && !tech.isPrinter
         },
-        requires: "plasma torch, molecular assembler",
+        requires: "plasma torch, molecular assembler, not printer",
         effect() {
             tech.isTokamak = true;
         },
@@ -9036,7 +9086,7 @@ const tech = {
     // },
     {
         name: "return",
-        description: "return to the introduction level<br>reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>",
+        description: "return to the start of the game<br>reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>",
         maxCount: 1,
         count: 0,
         frequency: 0,
@@ -9500,21 +9550,7 @@ const tech = {
             }
         },
         remove() {
-            mobs.draw = () => {
-                ctx.lineWidth = 2;
-                let i = mob.length;
-                while (i--) {
-                    ctx.beginPath();
-                    const vertices = mob[i].vertices;
-                    ctx.moveTo(vertices[0].x, vertices[0].y);
-                    for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
-                    ctx.lineTo(vertices[0].x, vertices[0].y);
-                    ctx.fillStyle = mob[i].fill;
-                    ctx.strokeStyle = mob[i].stroke;
-                    ctx.fill();
-                    ctx.stroke();
-                }
-            }
+            mobs.draw = mobs.drawDefault
         }
     },
     {
@@ -9546,21 +9582,7 @@ const tech = {
             }
         },
         remove() {
-            mobs.draw = () => {
-                ctx.lineWidth = 2;
-                let i = mob.length;
-                while (i--) {
-                    ctx.beginPath();
-                    const vertices = mob[i].vertices;
-                    ctx.moveTo(vertices[0].x, vertices[0].y);
-                    for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
-                    ctx.lineTo(vertices[0].x, vertices[0].y);
-                    ctx.fillStyle = mob[i].fill;
-                    ctx.strokeStyle = mob[i].stroke;
-                    ctx.fill();
-                    ctx.stroke();
-                }
-            }
+            mobs.draw = mobs.drawDefault
         }
     },
     // draw() {
@@ -11673,6 +11695,7 @@ const tech = {
     isRewindField: null,
     isCrouchRegen: null,
     isAxion: null,
+    isDarkStar: null,
     isWormholeMapIgnore: null,
     isLessDamageReduction: null,
     needleTunnel: null,
@@ -11741,4 +11764,5 @@ const tech = {
     isLaserField: null,
     isHealBrake: null,
     isMassProduction: null,
+    isPrinter: null,
 }
