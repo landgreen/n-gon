@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+        <head>
+                <title>Picross</title>
+                <meta charset="utf-8">
+                <meta name="description" content="Randomly generated picross puzzles you can solve in your browser. Features 11 difficulty levels, dark mode, local saves, and customizable seeds.">
+                <link rel="stylesheet" type="text/css" href="css/reset.css" />
+                <link rel="stylesheet" type="text/css" href="css/picross.css?20190803" />
+        </head>
+        <body>
+                <div class="container">
+                        <div class="controls">
+                                <h1 class="title">
+                                        PICROSS
+                                </h1>
+                                <div class="control-group">
+                                        <h3>Progress</h3>
+                                        <span id="progress">0.0%</span>
+                                        <div class="custom"></div>
+                                        <h3>Mistakes</h3>
+                                        <span id="mistakes">0</span>
+                                        <div class="custom">
+                                                <h5><a href="http://liouh.com/picross2">Disable live validation</a></h5>
+                                        </div>
+                                </div>
+                                <div class="control-group">
+                                        <h3>Settings</h3>
+                                        <div class="control-section">
+                                                <input type="checkbox" id="dark" /><label for="dark"> Dark Mode</label><br/>
+                                                <input type="checkbox" id="easy" checked /><label for="easy"> Show Crossouts</label>
+                                        </div>
+                                        <select id="dimensions">
+                                                <option value="5x5">5x5</option>
+                                                <option value="10x5">10x5</option>
+                                                <option value="10x10">10x10</option>
+                                                <option value="15x10">15x10</option>
+                                                <option value="15x15">15x15</option>
+                                                <option value="20x15">20x15</option>
+                                                <option value="20x20">20x20</option>
+                                                <option value="25x20">25x20</option>
+                                                <option value="25x25">25x25</option>
+                                                <option value="30x25">30x25</option>
+                                                <option value="30x30">30x30</option>
+                                        </select>
+                                        <span>Grid Size</span>
+                                </div>
+                                <div class="control-group">
+                                        <button id="new">New Game &raquo;</button>
+                                        <div class="custom">
+                                                <h5>Current Seed</h5>
+                                                <input type="text" id="seed" readonly="readonly" />
+                                                <h5>Custom Seed</h5>
+                                                <form id="customForm">
+                                                        <input type="text" id="customSeed" />
+                                                        <button type="submit" id="customGame">Custom Game</button>
+                                                </form>
+                                        </div>
+                                </div>
+                        </div>
+                        <div id="puzzle"></div>
+                </div>
+                <div class="footer">
+                        Tip: Due to the random nature of these boards, you may occasionally find a puzzle with more than one right answer. When this happens, you can either try the same seed and <a href="http://liouh.com/picross2">validate solutions at the end</a> or <a href="http://liouh.com/picross" target="_blank">open this page in a new tab</a> and guess all possibilities.<br/><br/>
+                        Randomly generated <a href="http://en.wikipedia.org/wiki/Nonogram" target="_blank">picross puzzles</a>. Designed and written by <a href="http://liouh.com/home/">Henry Liou</a>.<br/>
+                        Left click tiles to reveal, right click to mark as empty. Drag to select multiple at once.<br/><br/>
+                        Enjoying the game? <a href="https://paypal.me/liouh" target="_blank">Buy me a coffee!</a> â
+                </div>
+                <script type="text/javascript" src="js/jquery-1.8.3.js"></script>
+                <script type="text/javascript" src="js/underscore.js"></script>
+                <script type="text/javascript" src="js/backbone.js"></script>
+                <script type="text/javascript" src="js/seedrandom.js"></script>
+                <script type="text/javascript" src="js/picross.js?20190803"></script>
+                <script type="text/javascript" src="/analytics.js"></script>
+        </body>
+</html>
