@@ -260,7 +260,7 @@ const tech = {
         return dmg
     },
     duplicationChance() {
-        return Math.min(1, Math.max(0, (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.17 : 0) + tech.duplication + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)))
+        return Math.min(1, Math.max(0, (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.17 : 0) + tech.duplication + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + 0.08 * tech.isDuplicateMobs + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.5 : 0)))
     },
     isScaleMobsWithDuplication: false,
     maxDuplicationEvent() {
@@ -3722,25 +3722,25 @@ const tech = {
             tech.isTechDebt = false;
         }
     },
-    {
-        name: "abiogenesis",
-        // description: `use ${powerUps.orb.research(4)}(or <strong>49%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool if you can't) to add a 2nd <strong>boss</strong> to each level`,
-        description: `<span style = 'font-size:94%;'>as a level begins spawn a 2nd <strong>boss</strong> using ${powerUps.orb.research(3)}<br>(<strong>+49%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool if you can't pay)</span>`,
-        maxCount: 1,
-        count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
-        allowed() {
-            return (build.isExperimentSelection || powerUps.research.count > 2) && !tech.isDuplicateBoss
-        },
-        requires: "at least 3 research, not parthenogenesis",
-        effect() {
-            tech.isResearchBoss = true;
-        },
-        remove() {
-            tech.isResearchBoss = false;
-        }
-    },
+    // {
+    //     name: "abiogenesis",
+    //     // description: `use ${powerUps.orb.research(4)}(or <strong>49%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool if you can't) to add a 2nd <strong>boss</strong> to each level`,
+    //     description: `<span style = 'font-size:94%;'>as a level begins spawn a 2nd <strong>boss</strong> using ${powerUps.orb.research(3)}<br>(<strong>+49%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool if you can't pay)</span>`,
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 2,
+    //     frequencyDefault: 2,
+    //     allowed() {
+    //         return (build.isExperimentSelection || powerUps.research.count > 2) && !tech.isDuplicateMobs
+    //     },
+    //     requires: "at least 3 research, not parthenogenesis",
+    //     effect() {
+    //         tech.isResearchBoss = true;
+    //     },
+    //     remove() {
+    //         tech.isResearchBoss = false;
+    //     }
+    // },
     {
         name: "meta-analysis",
         description: `if you choose a <strong class='color-junk'>JUNK</strong><strong class='color-m'>tech</strong> you instead get a<br>random normal <strong class='color-m'>tech</strong> and spawn ${powerUps.orb.research(2)}`,
@@ -4189,20 +4189,21 @@ const tech = {
     },
     {
         name: "parthenogenesis",
-        description: "your <strong class='color-dup'>duplication</strong> has a chance to<br><strong class='color-dup'>duplicate</strong> <strong>mobs</strong> and <strong>bosses</strong>",
+        description: "<strong>+8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong class='color-dup'>duplication</strong> also <strong class='color-dup'>duplicates</strong> <strong>mobs</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return tech.duplicationChance() > 0 && !tech.isResearchBoss
+            return tech.duplicationChance() > 0// && !tech.isResearchBoss
         },
-        requires: "some duplication chance, not abiogenesis",
+        requires: "some duplication chance",
         effect() {
-            tech.isDuplicateBoss = true;
+            tech.isDuplicateMobs = true;
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         },
         remove() {
-            tech.isDuplicateBoss = false;
+            tech.isDuplicateMobs = false;
         }
     },
     {
@@ -11602,7 +11603,7 @@ const tech = {
     isPauseSwitchField: null,
     isPauseEjectTech: null,
     isShieldPierce: null,
-    isDuplicateBoss: null,
+    isDuplicateMobs: null,
     is100Duplicate: null,
     isDynamoBotUpgrade: null,
     isBlockPowerUps: null,
