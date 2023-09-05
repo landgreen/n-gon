@@ -1357,8 +1357,10 @@ const powerUps = {
                 powerUps.randomPowerUpCounter++;
                 powerUpChance(Math.max(level.levelsCleared, 10) * 0.1)
             }
-            powerUps.randomPowerUpCounter += 0.6;
-            powerUpChance(Math.max(level.levelsCleared, 6) * 0.1)
+            if (!(simulation.difficulty > spawn.secondaryBossThreshold)) {
+                powerUps.randomPowerUpCounter += 0.6;
+                powerUpChance(Math.max(level.levelsCleared, 6) * 0.1)
+            }
 
             function powerUpChance(chanceToFail) {
                 if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {

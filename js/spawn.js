@@ -52,7 +52,7 @@ const spawn = {
             const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
             spawn[pick](x, y);
         }
-        if (tech.isDuplicateBoss && Math.random() < tech.duplicationChance()) {
+        if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
             const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
             spawn[pick](x, y);
         }
@@ -67,7 +67,7 @@ const spawn = {
                 spawn[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
             }
         }
-        if (tech.isDuplicateBoss && Math.random() < tech.duplicationChance()) {
+        if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
             for (let i = 0; i < num; ++i) {
                 const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
                 spawn[pick](x + Math.round((Math.random() - 0.5) * 20) + i * size * 2.5, y + Math.round((Math.random() - 0.5) * 20), size);
@@ -109,23 +109,28 @@ const spawn = {
             }
         }
     },
+    secondaryBossThreshold: 22,
     secondaryBossChance(x, y) {
-        if (tech.isDuplicateBoss && Math.random() < tech.duplicationChance()) {
-            tech.isScaleMobsWithDuplication = true
+        // if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
+        //     tech.isScaleMobsWithDuplication = true
+        //     spawn.randomLevelBoss(x, y);
+        //     tech.isScaleMobsWithDuplication = false
+        //     return true
+        // } else if (tech.isResearchBoss) {
+        //     if (powerUps.research.count > 2) {
+        //         powerUps.research.changeRerolls(-3)
+        //         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 3<br>${powerUps.research.count}`)
+        //     } else {
+        //         tech.addJunkTechToPool(0.49)
+        //     }
+        //     spawn.randomLevelBoss(x, y);
+        //     return true
+        // }
+        if (simulation.difficulty > spawn.secondaryBossThreshold) {  //starts on hard mode level 6, level 12 on easy, level 4 on why?
             spawn.randomLevelBoss(x, y);
-            tech.isScaleMobsWithDuplication = false
-            return true
-        } else if (tech.isResearchBoss) {
-            if (powerUps.research.count > 2) {
-                powerUps.research.changeRerolls(-3)
-                simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 3<br>${powerUps.research.count}`)
-            } else {
-                tech.addJunkTechToPool(0.49)
-            }
-            spawn.randomLevelBoss(x, y);
-            return true
+        } else {
+            return false
         }
-        return false
     },
     //mob templates *********************************************************************************************
     //***********************************************************************************************************

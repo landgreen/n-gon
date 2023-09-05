@@ -190,23 +190,23 @@ const level = {
     difficultyIncrease(num = 1) {
         for (let i = 0; i < num; i++) {
             simulation.difficulty++
-            m.dmgScale *= 0.91; //damage done by player decreases each level
+            m.dmgScale *= 0.905; //damage done by player decreases each level
             if (simulation.accelScale < 6) simulation.accelScale *= 1.024 //mob acceleration increases each level
             if (simulation.CDScale > 0.15) simulation.CDScale *= 0.964 //mob CD time decreases each level
         }
-        simulation.dmgScale = Math.max(0.1, 0.29 * simulation.difficulty) //damage done by mobs scales with total levels
+        simulation.dmgScale = Math.max(0.1, 0.285 * simulation.difficulty) //damage done by mobs scales with total levels
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.045) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
         // console.log(`CD = ${simulation.CDScale}`)
     },
     difficultyDecrease(num = 1) { //used in easy mode for simulation.reset()
         for (let i = 0; i < num; i++) {
             simulation.difficulty--
-            m.dmgScale /= 0.91; //damage done by player decreases each level
+            m.dmgScale /= 0.905; //damage done by player decreases each level
             if (simulation.accelScale > 1) simulation.accelScale /= 1.024 //mob acceleration increases each level
             if (simulation.CDScale < 1) simulation.CDScale /= 0.964 //mob CD time decreases each level
         }
         if (simulation.difficulty < 1) simulation.difficulty = 0;
-        simulation.dmgScale = Math.max(0.1, 0.29 * simulation.difficulty) //damage done by mobs scales with total levels
+        simulation.dmgScale = Math.max(0.1, 0.285 * simulation.difficulty) //damage done by mobs scales with total levels
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.045)
     },
     difficultyText() {
@@ -3836,7 +3836,7 @@ const level = {
                                     }
                                 }
                             }
-                            spawn.secondaryBossChance(-2300, -800)
+                            // spawn.secondaryBossChance(-2300, -800)
                         }
                     } else {
                         doorIn.isClosing = false
@@ -3853,8 +3853,10 @@ const level = {
                         isFightOver = true
                         doorIn.isClosing = false
                         doorOut.isClosing = false
-                        powerUps.spawnBossPowerUp(-3600, -100)
-                        powerUps.spawn(-3650, -200, "tech")
+                        // powerUps.spawnBossPowerUp(-3600, -100)
+                        powerUps.spawn(-3650, -50, "tech")
+                        powerUps.spawn(-3650, -150, "tech")
+                        powerUps.spawn(-3650, -300, "tech")
                         // if (player.position.x < 2760 && player.position.x > 210) {}
                     }
                 }
@@ -3926,7 +3928,7 @@ const level = {
                                     }
                                 }
                             }
-                            spawn.secondaryBossChance(2200, -800)
+                            // spawn.secondaryBossChance(2200, -800)
                         }
                     } else {
                         doorIn.isClosing = false
@@ -3943,8 +3945,10 @@ const level = {
                         isFightOver = true
                         doorIn.isClosing = false
                         doorOut.isClosing = false
-                        powerUps.spawnBossPowerUp(3600, -100)
-                        powerUps.spawn(3650, -200, "tech")
+                        // powerUps.spawnBossPowerUp(3600, -100)
+                        powerUps.spawn(3650, -50, "tech")
+                        powerUps.spawn(3650, -150, "tech")
+                        powerUps.spawn(3650, -300, "tech")
                         // if (player.position.x < 2760 && player.position.x > 210) {}
                     }
                 }
@@ -7604,8 +7608,6 @@ const level = {
         });
         Composite.add(engine.world, consBB[consBB.length - 1]);
 
-
-
         spawn.mapRect(-600 + 300, -2000 * 0.75, 1900, 50); //3rd floor
         spawn.mapRect(-600 + 2000 * 0.7, -2000 * 0.74, 50, 375); //center wall
         spawn.bodyRect(-600 + 2000 * 0.7, -2000 * 0.5 - 106, 50, 106); //center block under wall
@@ -10783,7 +10785,7 @@ const level = {
         }
 
         anotherBoss = (x, y) => {
-            if (tech.isDuplicateBoss && Math.random() < tech.duplicationChance()) {
+            if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
                 tech.isScaleMobsWithDuplication = true
                 spawn.randomLevelBoss(x, y, ["historyBoss"]);
                 tech.isScaleMobsWithDuplication = false
@@ -13771,7 +13773,7 @@ const level = {
         } //for dynamic stuff that updates while playing that is one Z layer above the player
 
         const anotherBoss = (x, y) => {
-            if (tech.isDuplicateBoss && Math.random() < tech.duplicationChance()) {
+            if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
                 tech.isScaleMobsWithDuplication = true
                 spawn.historyBoss(x, y)
                 tech.isScaleMobsWithDuplication = false

@@ -1,10 +1,13 @@
 ******************************************************** NEXT PATCH **************************************************
 
-community map crimsonTowers by Richard0820
+on later levels spawn 2 bosses, but 1 power up each
+  starts at simulation.difficulty > 23 //on hard mode level 6, level 12 on easy, level 4 on why?
+  makes combat harder, but also means that you will always get at least 2 drops per level
+    you used to have a chance to only get 1 near the end of the game
+    I'm guessing this will lead to about 3 more total tech by the final boss
+  abiogenesis - removed
+  parthenogenesis - doesn't duplicate bosses anymore, +8% duplication
 
-new MACHO animation
-
-tech: dark star - MACHO is bigger and damages mobs
 
 *********************************************************** TODO *****************************************************
 
