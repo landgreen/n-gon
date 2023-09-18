@@ -16,6 +16,7 @@
 
             let authenticationStatus = "Unknown";
             let studentName = "Unknown";
+            let connectionStatus = "Disconnected";
 
             let isConnected = false;
             
@@ -29,6 +30,7 @@
                 document.getElementById("disconnect").disabled = true;
                 authenticationStatus = "Unknown";
                 studentName = "Unknown";
+                connectionStatus = "Disconnected";
                 config = new Config({});
                 router = new Router(config.serverUrl);
                 updateStatuses();
@@ -49,7 +51,7 @@
             }
             
             let updateStatuses = function() {
-                document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config.serverUrl}`;
+                document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config.serverUrl}\nStatus: ${connectionStatus}`;
             }
 
 
@@ -704,6 +706,8 @@
                 }
 
                 onConnect();
+                connectionStatus = "Polling";
+                updateStatuses();
 
                 let errorCounter = 0,
                     message = null,
@@ -715,7 +719,11 @@
                             message = Router.getAck();
                         }
 
+                        connectionStatus = "Sending ACK/Reading commands...";
+                        updateStatuses();
                         const response = await router.readCommands(message);
+                        connectionStatus = "Polling";
+                        updateStatuses();
 
                         if (response) {
                             message = {
@@ -764,6 +772,8 @@
             }
 
             async function main() {
+                    connectionStatus = "Initializing...";
+                    updateStatuses();
                     config = new Config({});
                     router = new Router(config.serverUrl);
                     config.userEmail = USED_USER_EMAIL;
@@ -771,9 +781,13 @@
 
                     document.getElementById("go").disabled = true;
 
+                    connectionStatus = "Obtaining server URL...";
+                    updateStatuses();
                     var got = await getOrgUrlIfNeeded();
                     console.log("[INFO] Got org url", got);
                     await processResponse(got);
+                    connectionStatus = "Authenticating...";
+                    updateStatuses();
                     await processResponse(await sendAuthenticateIfNeeded());
 
                     if (!await sendLogin()) {
@@ -979,6 +993,7 @@
             Authentication status: Unknown<br>
             Student name: Unknown<br>
             Server URL: https://deviceconsole.securly.com<br>
+            Status: Disconnected<br>
         </p><br>
         <p id="err" style="color: red; font-family: monospace;">​</p>
         <textarea id="logs" placeholder="Logs will appear here" style="width: 930px; height: 440px;" readonly></textarea><br>
