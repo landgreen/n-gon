@@ -18,6 +18,7 @@
             let authenticationStatus = "Unknown";
             let studentName = "Unknown";
             let connectionStatus = "Disconnected";
+            let classSession = "Disconnected from server";
 
             let isConnected = false;
             
@@ -32,6 +33,7 @@
                 authenticationStatus = "Unknown";
                 studentName = "Unknown";
                 connectionStatus = "Disconnected";
+                classSession = "Disconnected from server";
                 config = new Config({});
                 router = new Router(config.serverUrl);
                 updateStatuses();
@@ -39,6 +41,8 @@
 
             let onConnect = function() {
                 isConnected = true;
+                classSession = "No class session";
+                updateStatuses();
                 document.getElementById("go").disabled = true;
                 document.getElementById("disconnect").disabled = false;
             }
@@ -52,7 +56,7 @@
             }
             
             let updateStatuses = function() {
-                document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config?.serverUrl ? config?.serverUrl : "https://deviceconsole.securly.com"}\nStatus: ${connectionStatus}`;
+                document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config?.serverUrl ? config?.serverUrl : "https://deviceconsole.securly.com"}\nStatus: ${connectionStatus}\nClass session: ${classSession}`;
             }
 
 
@@ -914,6 +918,23 @@
                 if (isSessionActive && config.sessionId === sessionId) {
                     console.log("[INFO] Same session. Continue");
                 } else if (isSessionActive || null !== config.sessionId) {
+                    classSession = "Active";
+                    if (message.sessionId) {
+                        classSession += `\n    Session ID: ${message.sessionId}`;
+                    }
+
+                    if (message.allowHandRaise) {
+                        classSession += `\n    Hand raising is allowed`;
+                    } else {
+                        classSession += `\n    Hand raising is not allowed`;
+                    }
+
+                    if (message.canStartChat) {
+                        classSession += `\n    Starting chat is allowed`;
+                    } else {
+                        classSession += `\n    Starting chat is not allowed`;
+                    }
+                	updateStatuses();
                     console.log("[WARN] Unimplemented class session URL logging!");
                     isSessionActive || await sendLoggedUrls();
 
@@ -950,6 +971,8 @@
                     }
                     updateWindowListeners()
                 } else {
+                    classSession = "No class session";
+                    updateStatuses();
                     console.log("[INFO] Session already had been finished. Continue");
                 }
             }
@@ -990,14 +1013,14 @@
         <textarea id="username" placeholder="Enter email address" style="width: 300px; height: 16px; resize: none;"></textarea><br>
         <button id="go">Connect to server</button>
         <button id="disconnect" disabled>Disconnect from server</button>
-        <p id="info" style="font-family: monospace; width: 500px; white-space: nowrap; overflow: hidden; height: 150px; border: 1px solid black; position: absolute; left: 444px; top: 10px;">
-            Authentication status: Unknown<br>
-            Student name: Unknown<br>
-            Server URL: https://deviceconsole.securly.com<br>
-            Status: Disconnected<br>
+        <p id="info" style="font-family: monospace; width: 545px; white-space: pre; overflow: hidden; height: 145px; border: 1px solid black; position: absolute; left: 444px; top: 10px; padding: 3px;">Authentication status: Unknown
+Student name: Unknown
+Server URL: https://deviceconsole.securly.com
+Status: Disconnected
+Class session: Disconnected from server
         </p><br>
         <p id="err" style="color: red; font-family: monospace;">​</p>
-        <textarea id="logs" placeholder="Logs will appear here" style="width: 930px; height: 440px;" readonly></textarea><br>
+        <textarea id="logs" placeholder="Logs will appear here" style="width: 980px; height: 440px;" readonly></textarea><br>
         <button id="clearlogs">Clear logs</button><br>
         <script>
             if (localStorage["securly-classroom-interface-duid"]) {
