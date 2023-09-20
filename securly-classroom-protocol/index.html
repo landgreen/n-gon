@@ -1,3 +1,4 @@
+
 <!DOCTYPE HTML>
 <html>
     <head>
@@ -923,6 +924,10 @@
                         classSession += `\n    Session ID: ${message.sessionId}`;
                     }
 
+                    if (message.premium) {
+                        classSession += "\n    Premium session";
+                    }
+
                     if (message.allowHandRaise) {
                         classSession += `\n    Hand raising is allowed`;
                     } else {
@@ -934,7 +939,8 @@
                     } else {
                         classSession += `\n    Starting chat is not allowed`;
                     }
-                	updateStatuses();
+
+                    updateStatuses();
                     console.log("[WARN] Unimplemented class session URL logging!");
                     isSessionActive || await sendLoggedUrls();
 
