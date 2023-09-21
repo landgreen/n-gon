@@ -1,0 +1,1040 @@
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>​</title>
+        <script>
+
+            let USED_DIRECTORY_ID = ""; // Directory API ID in chrome://policy
+            let USED_USER_EMAIL = "";
+            let USED_SECURLY_VERSION = "24.0.1307.0";
+            let USED_USER_AGENT = "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36";
+            let USED_PROXY = "https://corsproxy.io/?";
+            let xLog = console.log;
+            const USED_CONSOLE_LOG = function(txt) {
+                xLog(txt);
+                document.getElementById("logs").value += txt + "\n";
+            };
+
+            let authenticationStatus = "Unknown";
+            let studentName = "Unknown";
+            let connectionStatus = "Disconnected";
+            let classSession = "Disconnected from server";
+
+            let isConnected = false;
+            
+            let clearErr = function() {
+                document.getElementById("err").innerText = "​";
+            }
+
+            let onDisconnect = function() {
+                isConnected = false;
+                document.getElementById("go").disabled = false;
+                document.getElementById("disconnect").disabled = true;
+                authenticationStatus = "Unknown";
+                studentName = "Unknown";
+                connectionStatus = "Disconnected";
+                classSession = "Disconnected from server";
+                config = new Config({});
+                router = new Router(config.serverUrl);
+                updateStatuses();
+            }
+
+            let onConnect = function() {
+                isConnected = true;
+                classSession = "No class session";
+                updateStatuses();
+                document.getElementById("go").disabled = true;
+                document.getElementById("disconnect").disabled = false;
+            }
+
+            let onDeviceNotFound = function() {
+                onDisconnect();
+                document.getElementById("err").innerText = "Error: device_not_found. Check that the given DUID is valid.";
+                authenticationStatus = "Failed";
+                updateStatuses();
+                setTimeout(clearErr, 3000);
+            }
+            
+            let updateStatuses = function() {
+                document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config?.serverUrl ? config?.serverUrl?.replace("securly", "XXXXXXX") : "https://deviceconsole.XXXXXXX.com"}\nStatus: ${connectionStatus}\nClass session: ${classSession}`;
+            }
+
+
+            const SHOW_DEBUG = 0;
+
+            console.log = function(...args) {
+                let res = "";
+                let ans = Array.from(args);
+                for (var i = 0; i < ans.length; i ++) {
+                    if (ans[i] instanceof Object) {
+                        res += JSON.stringify(ans[i]);
+                    } else {
+                        res += ans[i];
+                    }
+                    if (i != ans.length - 1) {
+                        res += " ";
+                    }
+                }
+                if (!res.startsWith("[DEBUG]") || SHOW_DEBUG) {
+                    USED_CONSOLE_LOG(res);
+                }
+            }
+
+            const extension_interface = {
+                runtime: {
+                    getManifest: function() {
+                        return {
+                            "version": USED_SECURLY_VERSION
+                        }
+                    },
+                    lastError: null
+                },
+                storage: {
+                    local: {
+                        set: function(_, callback) {
+                            console.log("[WARN] Attempted to set stored data");
+                            callback();
+                        },
+                        remove: function(keys, callback) {
+                            if (keys.length === 1) {
+                                console.log("[WARN] Attempted to remove stored data (key:", keys[0] + ")");
+                            } else {
+                                console.log("[WARN] Attempted to remove stored data");
+                            }
+                            callback();
+                        },
+                    }
+                },
+                alarms: {
+                    create: function(arg) {
+                        console.log("[DEBUG] Attempted to create alarm", arg);
+                    },
+                    clear: function() {
+                        console.log("[DEBUG] Attempted to clear alarms");
+                    }
+                },
+                enterprise: {
+                    deviceAttributes: {
+                        getDirectoryDeviceId: function(callback) {
+                            callback(USED_DIRECTORY_ID);
+                        }
+                    }
+                }
+            };
+
+            const navigation_interface = {
+                userAgent: USED_USER_AGENT
+            }
+
+
+
+            const SERVER = "deviceconsole.securly.com",
+                HTTP_PROTOCOL = "https",
+                VERSION = extension_interface.runtime.getManifest().version,
+                POLLING_PATH = "/chrome/handle",
+                FIRE_PATH = "/chrome/fire",
+                HTTP_OK = 200,
+                HTTP_PRECONDITION_FAILED = 412,
+                COMMAND_APP_LIST = "chrome_app_list",
+                COMMAND_AUTHENTICATE = "authenticate",
+                COMMAND_CONFERENCE_DISCONNECT = "chrome_conference_disconnect",
+                COMMAND_GET_ORG_URL = "get_org_url",
+                COMMAND_HAND_RAISED = "chrome_hand_raised",
+                COMMAND_IDLE_STATUS_CHANGE = "chrome_idle_status_change",
+                COMMAND_LOGIN = "chrome_login",
+                COMMAND_LOST_MODE_ON = "chrome_lost_mode_on",
+                COMMAND_REQUEST_CONFERENCE_TOKEN = "chrome_video_conference_token",
+                COMMAND_SEND_MESSAGE = "chrome_send_message",
+                COMMAND_VIDEO_CALL = "chrome_call",
+                COMMAND_WINDOWS_AGENT_INFO = "chrome_windows_agent_info",
+                REQUEST_AUTH_CONFIRM = "chrome_auth_confirm",
+                REQUEST_CHANGE_NAME = "chrome_change_device_name",
+                REQUEST_CHANGE_SERVER_URL = "chrome_change_server_url",
+                REQUEST_DEVICE_NOT_FOUND = "chrome_device_not_found",
+                REQUEST_LOCATION = "chrome_get_location",
+                REQUEST_LOGIN_CONFIRMATION = "chrome_login_confirmation",
+                REQUEST_LOG_UPDATE = "chrome_update_logging",
+                REQUEST_LOST_MODE_ENABLE = "chrome_enable_lost_mode",
+                REQUEST_UPGRADE = "chrome_upgrade",
+                REQUEST_BLOCKLIST = "chrome_blocklist",
+                REQUEST_CHAT_MESSAGE = "chrome_chat_message",
+                REQUEST_CALL_TOKEN = "chrome_call_token",
+                REQUEST_CLASS_SESSION = "chrome_session",
+                REQUEST_CLASS_SESSION_SETTINGS_UPDATE = "chrome_session_update",
+                REQUEST_CLEAR_RAISED_HAND = "chrome_clear_raised_hand",
+                REQUEST_CLOSE_APP = "chrome_close_app",
+                REQUEST_CLOSE_TAB = "chrome_close_tab",
+                REQUEST_FOCUS_TAB = "chrome_focus_tab",
+                REQUEST_GET_TABS = "chrome_get_tabs",
+                REQUEST_LOCK_SCREEN = "chrome_lock_screen",
+                REQUEST_OPEN_SITE = "chrome_open_site",
+                REQUEST_SHARE_SCREEN = "chrome_screen_share",
+                REQUEST_SCREENSHOT = "chrome_get_screenshot",
+                REQUEST_SITE_LOCK = "chrome_site_lock",
+                REQUEST_TEACHER_MESSAGE = "chrome_teacher_message",
+                REQUEST_UNLOCK = "chrome_unlock",
+                REQUEST_VIDEO_CONFERENCE = "chrome_video_conference",
+                REQUEST_WINDOWS_AGENT_UPGRADE = "chrome_windows_agent_upgrade",
+                ERROR_DEVICE_NOT_FOUND = "device not found",
+                ERROR_CANNOT_UPDATE_EXTENSION = "cannot update extension",
+                ERROR_DISCONNECTED_PORT = "disconnected port",
+                STORAGE_BLOCKLIST = "blocklist",
+                STORAGE_BLOCKED_MODE_TYPE = "lostModeType",
+                STORAGE_CHROMEBOOK = "isChromeBook",
+                STORAGE_CUSTOM_BLOCKLIST = "customBlocklist",
+                STORAGE_CUSTOM_BLOCKLIST_NAME = "customBlocklistName",
+                STORAGE_DEVICE_NAME = "deviceName",
+                STORAGE_IS_CONTACT_ADMIN_ALLOWED = "allowContactAdmin",
+                STORAGE_IS_SCREEN_CAPTURE_ALLOWED = "allowCaptureScreen",
+                STORAGE_NOTIFICATION_INTERVAL = "notificationInterval",
+                STORAGE_ORG_NAME = "orgName",
+                STORAGE_SCREEN_BLOCK_MESSAGE = "screenBlockMessage",
+                STORAGE_SERVER_URL = "serverUrl",
+                STORAGE_UDID = "udid",
+                STORAGE_UPDATE_CHECK_DATE = "updateCheckDate",
+                STORAGE_URLS = "visitedUrls",
+                STORAGE_WHITELIST = "whitelist",
+                PARAM_MODE_BLOCK = "block",
+                PARAM_MODE_NONE = "none",
+                ALARM_REPEAT_LOGIN = "repeatLogin",
+                ALARM_RESTART_POLLING = "restartPolling",
+                ALARM_RESTART_APP = "restartForUpgrade",
+                ALARM_SEND_URLS = "sendUrls",
+                ALARM_SEND_PING = "ping",
+                ALARM_SHOW_WARNING = "showWarning",
+                ALARM_WINDOWS_AGENT_CONNECT = "windowsAgentConnect",
+                HEADER_REG_CODE = "X-TabPilot-RegCode",
+                HTTP_REQUEST_TIMEOUT = 80000,
+                LOC_PARAM_DONT_CHANGE = -1,
+                NOTIFICATION_SESSION_ID = "session_start",
+                NOTIFICATION_SCREEN_SHARING_ID = "screen_sharing",
+                TITLE_CLASS_SESSION = "Class session is active",
+                UPDATE_STATUS_NO_UPDATE = "no_update",
+                UPDATE_STATUS_AVAILABLE = "update_available",
+                UPDATE_STATUS_THROTTLED = "throttled",
+                actionFunctions = {};
+
+            var config = null,
+                iconManager = null,
+                router = null,
+                sqs = null;
+
+            const IS_KIOSK = false,
+                IS_EXTENSION = true,
+                NATIVE_HOST_NAME = "com.securly.classroom.windows.agent",
+                REASON_WINDOWS_NOT_ALLOWED = "win_not_allowed";
+
+
+
+            class Router {
+                constructor(url) {
+                    this.url = url;
+                    console.log("[DEBUG] Router initialized for " + this.url);
+                    this.queue = [];
+                }
+                static getAck(message) {
+                    return message ? {
+                        seq: message.seq,
+                        response: message.requestType
+                    } : {}
+                }
+                updateUrl(newUrl) {
+                    this.url = newUrl;
+                    console.log("[DEBUG] Router url updated=" + this.url);
+                }
+                async sendCommand(message) {
+                    this.cleanSent();
+                    Object.assign(message, {
+                        version: VERSION,
+                        udid: config.deviceUdid,
+                        command: "ack"
+                    });
+                    this.queue.push(message);
+                    return await this.processQueue();
+                }
+                cleanSent() {
+                    this.queue = this.queue.filter(command => !command.sent)
+                }
+                cleanQueue() {
+                    this.queue.splice(0, this.queue.length)
+                }
+                async processQueue() {
+                    for (const command of this.queue) {
+                        if (!command.sent) {
+                            console.log("[DEBUG] Sending command=" + JSON.stringify(command));
+                            try {
+                                await this.send(command, FIRE_PATH);
+                                console.info("[DEBUG] Command " + JSON.stringify(command) + " sent successfully");
+                                command.sent = true;
+                            } catch (error) {
+                                console.log("Failed to send command: " + JSON.stringify(command) + ".  Error=" + error);
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+                async readCommands(messageAck) {
+                    Object.assign(messageAck, {
+                        version: VERSION,
+                        udid: config.deviceUdid,
+                        command: "ack"
+                    });
+
+                    this.queue.length > 0 && await this.processQueue();
+                    console.log("[DEBUG] Sending ack=" + JSON.stringify(messageAck));
+
+                    return await this.send(messageAck, POLLING_PATH);
+                }
+                async send(message, path) {
+                    if (message && message.command === "ack") {
+                        console.log("[INFO] Sending ACK to " + this.url + path);
+                    } else {
+                        console.log("[INFO] Sending data to " + this.url + path);
+                    }
+                    return new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest;
+                        xhr.timeout = HTTP_REQUEST_TIMEOUT;
+                        /*xhr.upload.addEventListener("error", function(event) {
+                            reject("XHR: Error in request upload")
+                        });*/
+                        xhr.ontimeout = function() {
+                            reject("XHR: Request timeout")
+                        };
+                        xhr.open("POST", (USED_PROXY ? USED_PROXY : "") + this.url + path);
+                        xhr.setRequestHeader(HEADER_REG_CODE, message.udid);
+                        xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+                        xhr.onreadystatechange = async function() {
+                            if (this.readyState === XMLHttpRequest.DONE) switch (this.status) {
+                                case HTTP_OK:
+                                    if (this.responseText && this.responseText.length > 0) {
+                                        try {
+                                            const response = JSON.parse(this.responseText);
+                                            console.log("[DEBUG] Resolving xmlhttprequest with", response);
+                                            resolve(response)
+                                        } catch (error) {
+                                            let respText = this.responseText.length > 200 ? this.responseText.substr(0, 200) + "..." : this.responseText;
+                                            console.log("[WARN] Rejecting xmlhttprequest with", respText);
+                                            reject("XHR: Received incorrect response=" + respText);
+                                        }
+                                    } else {
+                                        console.log("[DEBUG] Resolving xmlhttprequest, nothing there");
+                                        resolve();
+                                    }
+                                    break;
+                                case 0:
+                                    reject("Status 0");
+                                    console.log("[WARN] Rejecting xmlhttprequest with status 0");
+                                    break;
+                                case HTTP_PRECONDITION_FAILED:
+                                    resolve({
+                                        requestType: REQUEST_UPGRADE
+                                    });
+                                    console.log("[DEBUG] Resolving xmlhttprequest with REQUEST_UPGRADE");
+                                    break;
+                                default:
+                                    console.log("[WARN] Rejecting xmlhttprequest with bad status", this.status);
+                                    reject("XHR: Server responded with http status=" + this.status)
+                            }
+                        };
+                        console.log("[DEBUG] sent the xmlhttprequest");
+                        xhr.send(JSON.stringify(message));
+                    })
+                }
+            }
+
+            class Config {
+                constructor(config) {
+                    this.items = config;
+                    this._defaultBlockMessage = "Your device is blocked";
+                    this.directoryDeviceId = null;
+                    this._pingCount = 0;
+                    this.isLoggedIn = false;
+                    this.announce = null;
+                    this.sessionId = null;
+                    this.studentId = null;
+                    this.studentName = null;
+                    this.canRaiseHand = false;
+                    this.isHandRaised = false;
+                    this.tabListenersAdded = false;
+                    this.chatMessages = [];
+                    this.hasUnreadChatMessages = false;
+                    this.forceOpenChat = false;
+                    this.canStartChat = false;
+                    this.playChatAlert = false;
+                    this.closeTabsTimeout = null;
+                    this.lockedToCourseWorkResources = false;
+                    this.maxOpenTabs = 0;
+                    this.activeTab = null;
+                    this.userEmail = null;
+                    this.teacherId = null;
+                    this.teacherName = null;
+                    this.conferenceId = null;
+                    this.conferenceToken = null;
+                    this.conferenceTabId = null;
+                    this.blockWindowId = 0;
+                    this.maximizeFocusedWindow = false;
+                    this.loginErrorReason = null;
+                    this.shareScreenHandler = null;
+                    this.capturedScreen = null;
+                    config[STORAGE_SERVER_URL] || (this.items[STORAGE_SERVER_URL] = HTTP_PROTOCOL + "://" + SERVER);
+                    config[STORAGE_SCREEN_BLOCK_MESSAGE] || (this.items[STORAGE_SCREEN_BLOCK_MESSAGE] = this._defaultBlockMessage);
+                    config[STORAGE_BLOCKED_MODE_TYPE] || (this.items[STORAGE_BLOCKED_MODE_TYPE] = PARAM_MODE_NONE);
+                    config[STORAGE_NOTIFICATION_INTERVAL] || (this.items[STORAGE_NOTIFICATION_INTERVAL] = 0);
+                    config[STORAGE_IS_SCREEN_CAPTURE_ALLOWED] || (this.items[STORAGE_IS_SCREEN_CAPTURE_ALLOWED] = false);
+                    config[STORAGE_IS_CONTACT_ADMIN_ALLOWED] || (this.items[STORAGE_IS_CONTACT_ADMIN_ALLOWED] = false);
+                    config[STORAGE_CHROMEBOOK] || (this.items[STORAGE_CHROMEBOOK] = false);
+                    config[STORAGE_UPDATE_CHECK_DATE] || (this.items[STORAGE_UPDATE_CHECK_DATE] = new Date("01 Jan 1970 00:00:00 GMT").getTime());
+                }
+                get serverUrl() {
+                    return this.items[STORAGE_SERVER_URL]
+                }
+                saveServerUrl(serverUrl) {
+                    return this.store(STORAGE_SERVER_URL, serverUrl);
+                }
+                get blocklist() {
+                    return this.items[STORAGE_BLOCKLIST]
+                }
+                saveBlocklist(blocklist) {
+                    return this.store(STORAGE_BLOCKLIST, blocklist).then(() => this.store(STORAGE_WHITELIST, null))
+                }
+                get customBlocklist() {
+                    return this.items[STORAGE_CUSTOM_BLOCKLIST]
+                }
+                get customBlocklistName() {
+                    return this.items[STORAGE_CUSTOM_BLOCKLIST_NAME]
+                }
+                saveCustomBlocklist(customBlocklist, customBlocklistName) {
+                    return this.store(STORAGE_CUSTOM_BLOCKLIST, customBlocklist).then(() => this.store(STORAGE_CUSTOM_BLOCKLIST_NAME, customBlocklistName))
+                }
+                get blockedModeType() {
+                    return this.items[STORAGE_BLOCKED_MODE_TYPE]
+                }
+                saveBlockedModeType(modeType) {
+                    return this.store(STORAGE_BLOCKED_MODE_TYPE, modeType)
+                }
+                get blockedText() {
+                    return this.items[STORAGE_SCREEN_BLOCK_MESSAGE] ? this.items[STORAGE_SCREEN_BLOCK_MESSAGE] : this._defaultBlockMessage
+                }
+                get deviceName() {
+                    return this.items[STORAGE_DEVICE_NAME]
+                }
+                saveDeviceName(deviceName) {
+                    return this.store(STORAGE_DEVICE_NAME, deviceName)
+                }
+                get deviceUdid() {
+                    return this.items[STORAGE_UDID]
+                }
+                saveDeviceUdid(deviceUdid) {
+                    return this.store(STORAGE_UDID, deviceUdid)
+                }
+                get isChromeBook() {
+                    return this.items[STORAGE_CHROMEBOOK]
+                }
+                saveIsChromeBook(isChromeBook) {
+                    return this.store(STORAGE_CHROMEBOOK, isChromeBook)
+                }
+                get isChatActive() {
+                    return this.chatMessages.length > 0
+                }
+                get isClassSessionActive() {
+                    return null != this.sessionId
+                }
+                get isContactAdminAllowed() {
+                    return this.items[STORAGE_IS_CONTACT_ADMIN_ALLOWED]
+                }
+                get isScreenLocked() {
+                    return this.items[STORAGE_BLOCKED_MODE_TYPE] === PARAM_MODE_BLOCK
+                }
+                get isScreenCaptureAllowed() {
+                    return this.items[STORAGE_IS_SCREEN_CAPTURE_ALLOWED]
+                }
+                get isSiteLocked() {
+                    return !!this.items[STORAGE_WHITELIST]
+                }
+                get notificationInterval() {
+                    return this.items[STORAGE_NOTIFICATION_INTERVAL]
+                }
+                get orgName() {
+                    return this.items[STORAGE_ORG_NAME]
+                }
+                get pingCount() {
+                    return this._pingCount++
+                }
+                get updateCheckDate() {
+                    return new Date(parseInt(this.items[STORAGE_UPDATE_CHECK_DATE]))
+                }
+                async saveUpdateCheckDate(date) {
+                    return this.store(STORAGE_UPDATE_CHECK_DATE, date.getTime())
+                }
+                get whitelist() {
+                    return this.items[STORAGE_WHITELIST]
+                }
+                async saveWhitelist(whitelist) {
+                    return this.store(STORAGE_WHITELIST, whitelist)
+                }
+                async clearWhitelist() {
+                    this.lockedToCourseWorkResources = false;
+                    return this.store(STORAGE_WHITELIST, null);
+                }
+                async saveBlockedInfo(blockedMessage, modeType, notificationInterval, allowCaptureScreen, allowContactAdmin) {
+                    let savedItems = {};
+                    if (blockedMessage) {
+                        savedItems[STORAGE_SCREEN_BLOCK_MESSAGE] = blockedMessage;
+                        this.items[STORAGE_SCREEN_BLOCK_MESSAGE] = blockedMessage;
+                    } else {
+                        savedItems[STORAGE_SCREEN_BLOCK_MESSAGE] = this._defaultBlockMessage;
+                        this.items[STORAGE_SCREEN_BLOCK_MESSAGE] = this._defaultBlockMessage;
+                    }
+
+                    if (modeType) {
+                        savedItems[STORAGE_BLOCKED_MODE_TYPE] = modeType;
+                        this.items[STORAGE_BLOCKED_MODE_TYPE] = modeType;
+                    }
+
+                    let diagString = "[DEBUG] Stored screen block modeType: " + modeType + ", message: " + blockedMessage;
+
+                    if (void 0 !== allowCaptureScreen) {
+                        savedItems[STORAGE_IS_SCREEN_CAPTURE_ALLOWED] = allowCaptureScreen;
+                        this.items[STORAGE_IS_SCREEN_CAPTURE_ALLOWED] = allowCaptureScreen;
+                        diagString += ", capture screen: " + allowCaptureScreen;
+                    }
+                    if (void 0 !== allowContactAdmin) {
+                        savedItems[STORAGE_IS_CONTACT_ADMIN_ALLOWED] = allowContactAdmin;
+                        this.items[STORAGE_IS_CONTACT_ADMIN_ALLOWED] = allowContactAdmin;
+                        diagString += ", allow contact admin: " + allowContactAdmin;
+                    }
+
+                    if (void 0 !== allowCaptureScreen && notificationInterval !== LOC_PARAM_DONT_CHANGE) {
+                        diagString += ", notification interval: ";
+                        savedItems[STORAGE_NOTIFICATION_INTERVAL] = notificationInterval;
+                        this.items[STORAGE_NOTIFICATION_INTERVAL] = notificationInterval;
+                        diagString += notificationInterval;
+                    }
+
+                    console.log(diagString);
+                    return this.bulkStore(savedItems);
+                }
+                async saveDeviceInfo(orgName, deviceName, lostModeType, lostModeMessage, notificationInterval, allowContactAdmin, allowScreenCapture) {
+                    let savedItems = {};
+
+                    savedItems[STORAGE_ORG_NAME] = orgName;
+                    this.items[STORAGE_ORG_NAME] = orgName;
+
+                    savedItems[STORAGE_DEVICE_NAME] = deviceName;
+                    this.items[STORAGE_DEVICE_NAME] = deviceName;
+
+                    savedItems[STORAGE_BLOCKED_MODE_TYPE] = lostModeType;
+                    this.items[STORAGE_BLOCKED_MODE_TYPE] = lostModeType;
+
+                    savedItems[STORAGE_SCREEN_BLOCK_MESSAGE] = lostModeMessage;
+                    this.items[STORAGE_SCREEN_BLOCK_MESSAGE] = lostModeMessage;
+
+                    savedItems[STORAGE_NOTIFICATION_INTERVAL] = notificationInterval;
+                    this.items[STORAGE_NOTIFICATION_INTERVAL] = notificationInterval;
+
+                    savedItems[STORAGE_IS_CONTACT_ADMIN_ALLOWED] = allowContactAdmin;
+                    this.items[STORAGE_IS_CONTACT_ADMIN_ALLOWED] = allowContactAdmin;
+
+                    savedItems[STORAGE_IS_SCREEN_CAPTURE_ALLOWED] = allowScreenCapture;
+                    this.items[STORAGE_IS_SCREEN_CAPTURE_ALLOWED] = allowScreenCapture;
+
+                    return this.bulkStore(savedItems);
+                }
+                store(key, value) {
+                    return value ? (this.items[key] = value, new Promise(resolve => {
+                        extension_interface.storage.local.set({
+                            [key]: value
+                        }, function() {
+                            extension_interface.runtime.lastError ? console.log("[ERR] Failed to save object " + JSON.stringify(value) + " for key '" + key + "'. Error is: " + extension_interface.runtime.lastError.message) : console.log("[DEBUG] Stored " + JSON.stringify(value) + " for key: " + key), resolve()
+                        })
+                    })) : (delete this.items[key], new Promise(resolve => {
+                        extension_interface.storage.local.remove([key], function() {
+                            if (extension_interface.runtime.lastError) {
+                                console.log("[ERR] Failed to remove key '" + key + "'. Error is: " + extension_interface.runtime.lastError.message);
+                            } else {
+                                console.log("[DEBUG] Key '" + key + "' removed");
+                            }
+                            resolve();
+                        })
+                    }))
+                }
+                bulkStore(object) {
+                    return new Promise(resolve => {
+                        extension_interface.storage.local.set(object, function() {
+                            if (extension_interface.runtime.lastError) {
+                                console.log("Failed to bulk save '" + JSON.stringify(object) + "'. Error is: " + extension_interface.runtime.lastError.message);
+                            } else {
+                                console.log("[DEBUG] Items " + JSON.stringify(object) + " saved");
+                            }
+                            resolve();
+                        })
+                    })
+                }
+                bulkDelete(keys) {
+                    return new Promise(resolve => {
+                        extension_interface.storage.local.remove(keys, function() {
+                            if (extension_interface.runtime.lastError) {
+                                console.log("Failed to remove keys " + keys + " Error is: " + extension_interface.runtime.lastError.message);
+                            } else {
+                                console.log("Keys " + keys + " removed");
+                            }
+                            resolve();
+                        })
+                    })
+                }
+            }
+
+            function hasText(error, text) {
+                return "string" == typeof error && error.toLowerCase().includes(text)
+            }
+
+            async function getDirectoryDeviceId() {
+                return new Promise((resolve, reject) => {
+                    if (extension_interface.enterprise && extension_interface.enterprise.deviceAttributes) {
+                        extension_interface.enterprise.deviceAttributes.getDirectoryDeviceId(function(deviceId) {
+                            console.log("[DEBUG] Start with requested directory device ID=" + deviceId);
+                            resolve(deviceId);
+                        });
+                    } else {
+                        resolve(null);
+                    }
+                })
+            }
+
+            async function obtainDirectoryDeviceId() {
+                const directoryDeviceId = await getDirectoryDeviceId();
+                if (directoryDeviceId) {
+                    config.directoryDeviceId = directoryDeviceId;
+                } else {
+                    if ("function" == typeof substituteDeviceId) {
+                        substituteDeviceId();
+                    }
+                }
+            }
+
+
+
+            async function sendAuthenticateIfNeeded() {
+                if (config.deviceUdid) return Promise.resolve();
+                const message = {
+                    command: COMMAND_AUTHENTICATE,
+                    userEmail: config.userEmail,
+                    kiosk: IS_KIOSK,
+                    version: VERSION,
+                    userAgent: navigation_interface.userAgent,
+                    udid: null
+                };
+                config.directoryDeviceId ? message.udid = config.directoryDeviceId : message.byod = false/*true*/;
+                console.log("[DEBUG] Send AUTHENTICATE=" + JSON.stringify(message));
+                return router.send(message, POLLING_PATH);
+            }
+
+            function getOrgUrlIfNeeded() {
+                const requestServerUrl = config.serverUrl === "https://" + SERVER,
+                    deviceId = config.directoryDeviceId;
+                console.log("[DEBUG] Request server url=" + requestServerUrl + " config.serverUrl=" + config.serverUrl + " udid=" + deviceId);
+                if (!requestServerUrl) return Promise.resolve();
+                const message = {
+                    command: COMMAND_GET_ORG_URL,
+                    udid: deviceId,
+                    kiosk: IS_KIOSK,
+                    userEmail: IS_KIOSK ? "kiosk" : config.userEmail,
+                    version: VERSION,
+                    userAgent: navigation_interface.userAgent
+                };
+                console.log("[DEBUG] Get org url message=" + JSON.stringify(message));
+                return router.send(message, POLLING_PATH)
+            }
+
+            async function processCommand(command) {
+                console.log("[DEBUG] Processing command", command);
+                const action = actionFunctions[command.requestType];
+                if (void 0 !== action) return action(command);
+                console.log("[WARN] Got unknown message: " + command.requestType)
+            }
+
+            async function processResponse(response) {
+                console.log("[INFO] Process server commands: " + JSON.stringify(response));
+                if (!response) return Promise.resolve();
+
+                let commands = response.commands;
+                if (commands && commands.length > 0) {
+                    return commands.reduce(
+                        function(previous, current) {
+                            return previous.then(processCommand(current));
+                        },
+                        Promise.resolve()
+                    );
+                } else {
+                    return processCommand(response);
+                }
+            }
+
+            function sendLogin() {
+                const isWebLocked = void 0 !== config.whitelist,
+                    userAgent = navigation_interface.userAgent,
+                    message = {
+                        response: COMMAND_LOGIN,
+                        kiosk: IS_KIOSK,
+                        userEmail: IS_KIOSK ? "kiosk" : config.userEmail,
+                        isClassSessionActive: config.isClassSessionActive,
+                        isScreenLocked: config.isScreenLocked,
+                        isWebLocked: isWebLocked,
+                        userAgent: userAgent
+                    };
+                return router.sendCommand(message)
+            }
+
+            function getAcks(response) {
+                let commands = response.commands;
+                return commands && commands.length > 0 ? commands.map(command => Router.getAck(command)) : response.requestType ? Router.getAck(response) : Promise.resolve()
+            }
+
+            function processError(error) {
+                console.log("[ERR] Processing an error", error);
+                const rethrowableErrors = [ERROR_DEVICE_NOT_FOUND, ERROR_CANNOT_UPDATE_EXTENSION];
+                hasText(error, ERROR_CANNOT_UPDATE_EXTENSION) && processExtensionUpgradeError();
+                for (const sample of rethrowableErrors) {
+                    if (hasText(error, sample)) return true;
+                }
+                return false;
+            }
+
+            async function pollServer() {
+                console.log("[DEBUG] Long polling started");
+
+                if (IS_EXTENSION) {
+                    extension_interface.alarms.create(ALARM_SEND_URLS, {
+                        periodInMinutes: 1
+                    });
+                }
+
+                onConnect();
+                connectionStatus = "Polling";
+                updateStatuses();
+
+                let errorCounter = 0,
+                    message = null,
+                    poll = true;
+
+                for (; poll && isConnected;) {
+                    try {
+                        if (!message) {
+                            message = Router.getAck();
+                        }
+
+                        const response = await router.readCommands(message);
+                        connectionStatus = "Processing commands...";
+                        updateStatuses();
+
+                        if (response) {
+                            message = {
+                                responses: getAcks(response)
+                            };
+                            processResponse(response).catch(error => {
+                                if (processError(error)) {
+                                    poll = false;
+                                } else {
+                                    console.log("[WARN] Failed to process action for '" + response.requestType + "': " + error);
+                                }
+                            });
+                        } else {
+                            message = null;
+                        }
+                        connectionStatus = "Polling";
+                        updateStatuses();
+                    } catch (error) {
+                        if (processError(error)) {
+                            poll = false;
+                        }
+
+                        if ((errorCounter += 1) >= 3) {
+                            extension_interface.alarms.create(ALARM_RESTART_POLLING, {
+                                delayInMinutes: 1
+                            });
+                            console.log("[WARN] Schedule server polling restart due to error=" + error);
+                            poll = false;
+                        }
+
+                        console.log("[ERR] Error #" + errorCounter + " while polling=" + error);
+                    }
+
+                    if (!config.isLoggedIn) {
+                        extension_interface.alarms.create(ALARM_REPEAT_LOGIN, {
+                            delayInMinutes: 1
+                        });
+                        console.log("[INFO] Not logged in. Repeat login in 1 minute");
+                        poll = false;
+                    }
+
+                    console.log("[INFO] Continuing long polling");
+                }
+
+                console.log("[DEBUG] Long polling stopped");
+                extension_interface.alarms.clear(ALARM_SEND_URLS);
+                onDisconnect();
+            }
+
+            async function main() {
+                    connectionStatus = "Initializing...";
+                    updateStatuses();
+                    config = new Config({});
+                    router = new Router(config.serverUrl);
+                    config.userEmail = USED_USER_EMAIL;
+                    await obtainDirectoryDeviceId();
+
+                    document.getElementById("go").disabled = true;
+
+                    connectionStatus = "Obtaining server URL...";
+                    updateStatuses();
+                    var got = await getOrgUrlIfNeeded();
+                    console.log("[INFO] Got org url", got);
+                    await processResponse(got);
+                    connectionStatus = "Authenticating...";
+                    updateStatuses();
+                    await processResponse(await sendAuthenticateIfNeeded());
+
+                    if (!await sendLogin()) {
+                        console.log("[ERR] Failed to login!!");
+                        extension_interface.alarms.create(ALARM_REPEAT_LOGIN, {
+                            periodInMinutes: 1
+                        });
+                        return;
+                    }
+
+                    config.pingCount = 0;
+                    config.loginErrorReason = null;
+                    pollServer();
+            }
+
+            // defer
+            setTimeout(function() {
+                document.getElementById("go").onclick = function() {
+                    let duidTxt = document.getElementById("duid").value;
+                    let emailTxt = document.getElementById("username").value;
+                    let err = document.getElementById("err");
+
+                    if (duidTxt === "") {
+                        err.innerText = "Please provide a DUID!";
+                        setTimeout(clearErr, 3000);
+                        return;
+                    } else if (emailTxt === "") {
+                        err.innerText = "Please provide an email address!";
+                        setTimeout(clearErr, 3000);
+                        return;
+                    } else if (emailTxt.indexOf("@") === -1) {
+                        err.innerText = "Please provide a valid email address!";
+                        setTimeout(clearErr, 3000);
+                        return;
+                    }
+                    
+                    localStorage["securly-classroom-interface-duid"] = duidTxt;
+                    localStorage["securly-classroom-interface-email"] = emailTxt;
+
+                    USED_DIRECTORY_ID = duidTxt;
+                    USED_USER_EMAIL = emailTxt;
+                    main();
+                }
+            }, 50);
+
+            // defer
+            setTimeout(function() {
+                document.getElementById("disconnect").onclick = function() {
+                    onDisconnect();
+                }
+            }, 50);
+
+            // defer
+            setTimeout(function() {
+                document.getElementById("clearlogs").onclick = function() {
+                    document.getElementById("logs").value = "";
+                }
+            }, 50);
+
+
+            async function actionChangeServerUrl(message) {
+                console.log("[INFO] Changing server url to", message.serverUrl);
+                await config.saveServerUrl(message.serverUrl);
+                router.updateUrl(message.serverUrl);
+                updateStatuses();
+            }
+
+            async function actionAuthConfirm(message) {
+                const deviceUdid = message.udid;
+                console.log("[DEBUG] DeviceUdid set to: " + deviceUdid);
+                await config.saveDeviceUdid(deviceUdid);
+                authenticationStatus = "Authenticated";
+                updateStatuses();
+            }
+
+            async function actionBlocklist(message) {
+                console.log("[DEBUG] Got blocklist");
+                let blocklist = null,
+                    customBlocklist = null,
+                    customBlocklistName = null;
+
+                if (message.blocklist) {
+                    blocklist = message.blocklist;
+                    console.log("[INFO] Blocklist was", blocklist);
+                }
+
+                if (message.customBlocklist) {
+                    customBlocklist = message.customBlocklist;
+                    console.log("[INFO] Custom blocklist was", customBlocklist);
+                    customBlocklistName = message.customBlocklistName;
+                    console.log("[INFO] Custom blocklist name was", customBlocklistName);
+                }
+
+                await config.saveBlocklist(blocklist);
+                await config.saveCustomBlocklist(customBlocklist, customBlocklistName);
+            }
+
+            async function actionLoginConfirmation(message) {
+                if (message.studentId != undefined) {
+                    console.log("[INFO] Student Id is " + message.studentId + "; Student Name is " + message.studentName + ".");
+                } else {
+                    console.log("[INFO] Student Name is " + message.studentName + ".");
+                }
+                config.studentId = message.studentId;
+                config.studentName = message.studentName;
+                studentName = message.studentName;
+                updateStatuses();
+
+                config.isLoggedIn = true;
+                console.log("[DEBUG] Complete login routine. Screen " + (config.isScreenLocked ? "is locked with text '" + config.blockedText + "'" : "is not locked"));
+            }
+
+            async function actionClassSession(message) {
+                console.log("[INFO] Starting class session", message);
+                const sessionId = message.sessionId ? message.sessionId : null,
+                    isSessionActive = !!sessionId,
+                    showNotifications = !!message.showNotifications,
+                    maximizeFocused = !!message.maximizeFocused,
+                    isPremium = !!message.premium;
+
+                config.maximizeFocusedWindow = maximizeFocused;
+
+                if (isSessionActive && config.sessionId === sessionId) {
+                    console.log("[INFO] Same session. Continue");
+                } else if (isSessionActive || null !== config.sessionId) {
+                    classSession = "Active";
+                    if (message.sessionId) {
+                        classSession += `\n    Session ID: ${message.sessionId}`;
+                    }
+
+                    if (message.premium) {
+                        classSession += "\n    Premium session";
+                    }
+
+                    if (message.allowHandRaise) {
+                        classSession += `\n    Hand raising is allowed`;
+                    } else {
+                        classSession += `\n    Hand raising is not allowed`;
+                    }
+
+                    if (message.canStartChat) {
+                        classSession += `\n    Starting chat is allowed`;
+                    } else {
+                        classSession += `\n    Starting chat is not allowed`;
+                    }
+
+                    updateStatuses();
+                    console.log("[WARN] Unimplemented class session URL logging!");
+                    isSessionActive || await sendLoggedUrls();
+
+                    if (config.shareScreenHandler) {
+                        stopSharingScreen();
+                    }
+                    closeSharedScreenTab();
+
+                    await updateClassSessionState(sessionId, message, nativeAgent.isConnected);
+                    config.conferenceId = null;
+                    config.conferenceToken = null;
+
+                    if (showNotifications) {
+                        if (isSessionActive) {
+                            console.log("[INFO] Class session is active: Your device could be monitored and remotely managed by a teacher");
+                        } else {
+                            console.log("[INFO] No active class session: Your device is not monitored and cannot be remotely managed by a teacher");
+                        }
+                    }
+
+                    if (isSessionActive) {
+                        await logCurrentTabUrl(sessionId);
+                    }
+
+                    if (maximizeFocused) {
+                        const window = await getFocusedWindow();
+                        if (window) try {
+                            await updateWindow(window.id, {
+                                state: "maximized"
+                            })
+                        } catch (error) {
+                            console.log("Cannot maximize window: " + error)
+                        }
+                    }
+                    updateWindowListeners()
+                } else {
+                    classSession = "No class session";
+                    updateStatuses();
+                    console.log("[INFO] Session already had been finished. Continue");
+                }
+            }
+
+            async function actionLogUpdate(message) {
+                const logEnabled = message.shouldSendLogs;
+                console.log("[INFO] Server: Requested that logging be set to " + logEnabled + " at " + new Date);
+            }
+
+            const actionLocation = async function(message) {
+                console.log("[INFO] Server: Requested location");
+            };
+
+            async function actionUnlock(message) {
+                console.log("[INFO] Server: Unlock requested and confirmed");
+                await config.saveBlockedInfo(null, PARAM_MODE_NONE);
+                await config.clearWhitelist();
+
+                if (0 !== config.blockWindowId) {
+                    console.log("[INFO] Removing blocked window upon server's request");
+                }
+            }
+
+            actionFunctions[REQUEST_CHANGE_SERVER_URL] = actionChangeServerUrl;
+            actionFunctions[REQUEST_AUTH_CONFIRM] = actionAuthConfirm;
+            actionFunctions[REQUEST_LOGIN_CONFIRMATION] = actionLoginConfirmation;
+            actionFunctions[REQUEST_BLOCKLIST] = actionBlocklist;
+            actionFunctions[REQUEST_CLASS_SESSION] = actionClassSession;
+            actionFunctions[REQUEST_LOG_UPDATE] = actionLogUpdate;
+            actionFunctions[REQUEST_LOCATION] = actionLocation;
+            actionFunctions[REQUEST_UNLOCK] = actionUnlock;
+            actionFunctions[REQUEST_DEVICE_NOT_FOUND] = onDeviceNotFound;
+        </script>
+    </head>
+    <body>
+        <h2> SC API Interface </h2>
+        <textarea id="duid" placeholder="Enter DUID" style="width: 300px; height: 16px; resize: none;"></textarea><br>
+        <textarea id="username" placeholder="Enter email address" style="width: 300px; height: 16px; resize: none;"></textarea><br>
+        <button id="go">Connect to server</button>
+        <button id="disconnect" disabled>Disconnect from server</button>
+        <p id="info" style="font-family: monospace; width: 545px; white-space: pre; overflow: hidden; height: 145px; border: 1px solid black; position: absolute; left: 444px; top: 10px; padding: 3px;">Authentication status: Unknown
+Student name: Unknown
+Server URL: https://deviceconsole.XXXXXXX.com
+Status: Disconnected
+Class session: Disconnected from server
+        </p><br>
+        <p id="err" style="color: red; font-family: monospace;">​</p>
+        <textarea id="logs" placeholder="Logs will appear here" style="width: 980px; height: 440px;" readonly></textarea><br>
+        <button id="clearlogs">Clear logs</button><br>
+        <script>
+            if (localStorage["securly-classroom-interface-duid"]) {
+                document.getElementById("duid").value = localStorage["securly-classroom-interface-duid"];
+            }
+            if (localStorage["securly-classroom-interface-email"]) {
+                document.getElementById("username").value = localStorage["securly-classroom-interface-email"];
+            }
+        </script>
+    </body>
+</html>
