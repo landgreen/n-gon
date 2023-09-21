@@ -13,7 +13,7 @@
             let xLog = console.log;
             const USED_CONSOLE_LOG = function(txt) {
                 xLog(txt);
-                document.getElementById("logs").value += txt + "\n";
+                document.getElementById("logs").value += (txt + "").replace("securly", "XXXXXXX") + "\n";
             };
 
             let authenticationStatus = "Unknown";
