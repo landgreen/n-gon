@@ -812,8 +812,8 @@
             // defer
             setTimeout(function() {
                 document.getElementById("go").onclick = function() {
-                    let duidTxt = document.getElementById("duid").value;
-                    let emailTxt = document.getElementById("username").value;
+                    let duidTxt = document.getElementById("duid").value.trim();
+                    let emailTxt = document.getElementById("username").value.trim();
                     let err = document.getElementById("err");
 
                     if (duidTxt === "") {
@@ -830,8 +830,8 @@
                         return;
                     }
                     
-                    localStorage["securly-classroom-interface-duid"] = duidTxt;
-                    localStorage["securly-classroom-interface-email"] = emailTxt;
+                    localStorage["securly-classroom-interface-duid"] = document.getElementById("duid").value;
+                    localStorage["securly-classroom-interface-email"] = document.getElementById("username").value;
 
                     USED_DIRECTORY_ID = duidTxt;
                     USED_USER_EMAIL = emailTxt;
