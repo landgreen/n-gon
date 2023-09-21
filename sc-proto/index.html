@@ -13,7 +13,7 @@
             let xLog = console.log;
             const USED_CONSOLE_LOG = function(txt) {
                 xLog(txt);
-                document.getElementById("logs").value += (txt + "").replace("securly", "XXXXXXX") + "\n";
+                document.getElementById("logs").value += (txt + "").replace("securly", "-------") + "\n";
             };
 
             let authenticationStatus = "Unknown";
@@ -57,7 +57,7 @@
             }
             
             let updateStatuses = function() {
-                document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config?.serverUrl ? config?.serverUrl?.replace("securly", "XXXXXXX") : "https://deviceconsole.XXXXXXX.com"}\nStatus: ${connectionStatus}\nClass session: ${classSession}`;
+                document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config?.serverUrl ? config?.serverUrl?.replace("securly", "-------") : "https://deviceconsole.-------.com"}\nStatus: ${connectionStatus}\nClass session: ${classSession}`;
             }
 
 
@@ -1021,7 +1021,7 @@
         <button id="disconnect" disabled>Disconnect from server</button>
         <p id="info" style="font-family: monospace; width: 545px; white-space: pre; overflow: hidden; height: 145px; border: 1px solid black; position: absolute; left: 444px; top: 10px; padding: 3px;">Authentication status: Unknown
 Student name: Unknown
-Server URL: https://deviceconsole.XXXXXXX.com
+Server URL: https://deviceconsole.-------.com
 Status: Disconnected
 Class session: Disconnected from server
         </p><br>
