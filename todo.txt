@@ -7,7 +7,7 @@ on later levels spawn 2 bosses, but 1 power up each
     I'm guessing this will lead to about 3 more total tech by the final boss
   abiogenesis - removed
   parthenogenesis - doesn't duplicate bosses anymore, +8% duplication
-
+dasffdas
 
 *********************************************************** TODO *****************************************************
 
