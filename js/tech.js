@@ -83,6 +83,7 @@ const tech = {
     //     }
     // },
     addJunkTechToPool(percent) { //percent is number between 0-1
+        tech.junkPoolPercent += percent
         //make an array for possible junk tech to add
         let options = [];
         for (let i = 0; i < tech.tech.length; i++) {
@@ -110,6 +111,7 @@ const tech = {
                 }
             }
         }
+        tech.junkPoolPercent = 0
     },
     giveRandomJUNK() {
         const list = []
@@ -120,7 +122,6 @@ const tech = {
         tech.giveTech(name)
         simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${name}</span>")<em>`);
     },
-
     giveTech(index = 'random') {
         if (index === 'random') {
             let options = [];
@@ -161,6 +162,7 @@ const tech = {
             simulation.updateTechHUD();
         }
     },
+    junkPoolPercent: 0,
     junkCount: 0,
     countJunkTech() {
         tech.junkCount = 0
@@ -257,6 +259,7 @@ const tech = {
         if (tech.isHarmDamage && m.lastHarmCycle + 480 > m.cycle) dmg *= 3;
         if (tech.lastHitDamage && m.lastHit) dmg *= 1 + tech.lastHitDamage * m.lastHit * (2 - m.defense()) // if (!simulation.paused) m.lastHit = 0
         if (tech.isLowHealthDmg) dmg *= 1 + 0.7 * Math.max(0, 1 - (tech.isEnergyHealth ? m.energy : m.health))
+        if (tech.isJunkDNA) dmg *= 1 + tech.junkPoolPercent
         return dmg
     },
     duplicationChance() {
@@ -408,7 +411,7 @@ const tech = {
     {
         name: "mass-energy equivalence",
         // description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>√ of <strong class='color-defense'>defense</strong> <strong>reduction</strong> reduces max <strong class='color-f'>energy</strong>",
-        description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>exponentially <strong>reduced</strong> <strong class='color-defense'>defense</strong> <em>(~ x^0.19)</em>",
+        description: `<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong class='color-defense'>defensive</strong> upgrades <strong>reduced</strong> by <strong>~66%</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -450,7 +453,7 @@ const tech = {
         // description: `after you collect ${powerUps.orb.heal()}<br><strong>+${0.1 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`,
         // descriptionFunction: `convert current and future ${powerUps.orb.heal()} into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${10 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`,
         descriptionFunction() {
-            return `convert current and future <div class="heal-circle"></div> into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${8 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)}</strong> maximum <strong class='color-f'>energy</strong>`
+            return `convert current and future <div class="heal-circle"></div> into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${11 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)}</strong> maximum <strong class='color-f'>energy</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -854,7 +857,7 @@ const tech = {
     },
     {
         name: "non-renewables",
-        description: `<strong>+78%</strong> <strong class='color-d'>damage</strong><br>${powerUps.orb.ammo()} can't <strong>spawn</strong>`,
+        description: `<strong>+88%</strong> <strong class='color-d'>damage</strong><br>${powerUps.orb.ammo()} can't <strong>spawn</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -863,7 +866,7 @@ const tech = {
             return !tech.isAmmoFromHealth && !tech.isBoostReplaceAmmo
         },
         requires: "not catabolism, quasiparticles",
-        damage: 1.78,
+        damage: 1.88,
         effect() {
             tech.damage *= this.damage
             tech.isEnergyNoAmmo = true;
@@ -875,7 +878,6 @@ const tech = {
     },
     {
         name: "desublimated ammunition",
-        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Deposition_(phase_transition)' class="link">desublimated ammunition</a>`,
         description: `if <strong>crouching</strong><br>alternating shots use no <strong class='color-ammo'>ammo</strong>`,
         maxCount: 1,
         count: 0,
@@ -1406,7 +1408,7 @@ const tech = {
     {
         name: "nail-bot upgrade",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">nail-bot upgrade</a>`,
-        description: "<strong>convert</strong> your bots to <strong>nail-bots</strong><br><strong>+500%</strong> <strong>fire rate</strong> and <strong>+40%</strong> nail <strong>velocity</strong>",
+        description: "<strong>convert</strong> your bots to <strong>nail-bots</strong><br><strong>+500%</strong> <em>fire rate</em> and <strong>+40%</strong> nail <strong>velocity</strong>",
         maxCount: 1,
         count: 0,
         frequency: 3,
@@ -1438,7 +1440,7 @@ const tech = {
     {
         name: "foam-bot",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">foam-bot</a>`,
-        description: "a <strong class='color-bot'>bot</strong> fires <strong>foam</strong> at nearby mobs",
+        description: "a <strong class='color-bot'>bot</strong> sprays sticky <strong>foam</strong> at nearby mobs",
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -3547,7 +3549,7 @@ const tech = {
     },
     {
         name: "pseudoscience",
-        description: "<span style = 'font-size:94%;'>when <strong>selecting</strong> a power up, <strong class='color-r'>research</strong> <strong>3</strong> times</span><br>for <strong>free</strong>, but add <strong>1-4%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
+        description: "<span style = 'font-size:94%;'>when <strong>selecting</strong> a power up, <strong class='color-r'>research</strong> <strong>3</strong> times</span><br>for <strong>free</strong>, but add <strong>1-3%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3781,6 +3783,34 @@ const tech = {
                 tech.damage /= this.damage
                 if (this.refundAmount > 0) tech.removeJunkTechFromPool(this.refundAmount)
             }
+        }
+    },
+    {
+        name: "junk DNA",
+        descriptionFunction() {
+            // return ` <strong>+100%</strong> ${b.guns[6].nameString()} <strong class='color-d'>damage</strong> per <strong class='color-junk'>JUNK</strong><strong class='color-m'>tech</strong> <em>(${(100 * tech.junkCount).toFixed(0)}%)</em><br><strong>+33%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool`
+            return `<strong class='color-d'>damage</strong> scales with <strong class='color-junk'>JUNK</strong> <strong class='color-m'>tech</strong> pool percent`
+        },
+        // isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return tech.junkPoolPercent > 0
+        },
+        requires: "JUNK in tech pool",
+        effect() {
+            tech.isJunkDNA = true
+            // this.refundAmount += tech.addJunkTechToPool(0.20)
+        },
+        // refundAmount: 0,
+        remove() {
+            tech.isJunkDNA = false
+            // if (this.count > 0 && this.refundAmount > 0) {
+            //     tech.removeJunkTechFromPool(this.refundAmount)
+            //     this.refundAmount = 0
+            // }
         }
     },
     {
@@ -4079,7 +4109,7 @@ const tech = {
     },
     {
         name: "futures exchange",
-        description: "clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>gives <strong>+4.1%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+        description: "clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>gives <strong>+4.3%</strong> power up <strong class='color-dup'>duplication</strong> chance",
         // descriptionFunction() {
         //     return `clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>gives <strong>+${4.9 - 0.15*simulation.difficultyMode}%</strong> power up <strong class='color-dup'>duplication</strong> chance`
         // },
@@ -4229,7 +4259,7 @@ const tech = {
     {
         name: "strange attractor",
         descriptionFunction() {
-            return `<strong>+7%</strong> <strong class='color-d'>damage</strong><br><strong>removing</strong> this increases <strong class='color-dup'>duplication</strong> by <strong>+10%</strong>`
+            return `<strong>+7%</strong> <strong class='color-d'>damage</strong><br><strong>removing</strong> this increases <strong class='color-dup'>duplication</strong> by <strong>+11%</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -4246,7 +4276,7 @@ const tech = {
         },
         remove() {
             if (this.count > 0 && m.alive) {
-                tech.duplication += 0.1
+                tech.duplication += 0.11
                 powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                 tech.damage /= this.damage
                 this.frequency = 0
@@ -6168,33 +6198,6 @@ const tech = {
             tech.isSporeFollow = false
         }
     },
-    {
-        name: "junk DNA",
-        descriptionFunction() {
-            return `<strong>+53%</strong> ${b.guns[6].nameString()} <strong class='color-d'>damage</strong> per <strong class='color-junk'>JUNK</strong><strong class='color-m'>tech</strong> <em>(${(53 * tech.junkCount).toFixed(0)}%)</em><br><strong>+50%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool`
-        },
-        isGunTech: true,
-        maxCount: 1,
-        count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
-        allowed() {
-            return tech.haveGunCheck("spores") || tech.sporesOnDeath > 0 || (m.fieldMode === 4 && simulation.molecularMode === 0) || tech.isSporeWorm || tech.isSporeFlea
-        },
-        requires: "spores",
-        effect() {
-            tech.isJunkDNA = true
-            this.refundAmount += tech.addJunkTechToPool(0.5)
-        },
-        refundAmount: 0,
-        remove() {
-            tech.isJunkDNA = false
-            if (this.count > 0 && this.refundAmount > 0) {
-                tech.removeJunkTechFromPool(this.refundAmount)
-                this.refundAmount = 0
-            }
-        }
-    },
     // {
     //     name: "junk DNA",
     //     //increase damage by 10% for each JUNK tech percent in the tech pool, remove all JUNK tech,
@@ -6264,7 +6267,7 @@ const tech = {
     },
     {
         name: "siphonaptera",
-        description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> metamorphose into <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>",
+        description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> metamorphose into <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong><br><strong>shotgun</strong> fires <strong class='color-p' style='letter-spacing: -0.8px;'>fleas</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -6284,7 +6287,7 @@ const tech = {
     },
     {
         name: "nematodes",
-        description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> metamorphose into <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong>",
+        description: "<strong class='color-p' style='letter-spacing: 2px;'>spores</strong> metamorphose into <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong><br><strong>shotgun</strong> fires <strong class='color-p' style='letter-spacing: -0.8px;'>worms</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -7669,7 +7672,10 @@ const tech = {
     },
     {
         name: "radiative equilibrium",
-        description: "after losing <strong class='color-h'>health</strong><br><strong>+200%</strong> <strong class='color-d'>damage</strong> for <strong>8</strong> seconds",
+        descriptionFunction() {
+            return `after losing ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"}<br><strong>+200%</strong> <strong class='color-d'>damage</strong> for <strong>8</strong> seconds`
+        },
+        // description: `after losing ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"}<br><strong>+200%</strong> <strong class='color-d'>damage</strong> for <strong>8</strong> seconds`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -9377,7 +9383,7 @@ const tech = {
         effect() {
             tech.isBrainstorm = true
             tech.isBrainstormActive = false
-            tech.brainStormDelay = 500
+            tech.brainStormDelay = 500 //show each option for 0.5 seconds
         },
         remove() {
             tech.isBrainstorm = false
@@ -10261,67 +10267,70 @@ const tech = {
         },
         remove() { }
     },
-    {
-        name: "flatland",
-        description: "map blocks line of sight",
-        maxCount: 1,
-        count: 0,
-        frequency: 0,
-        isNonRefundable: true,
-        isJunk: true,
-        allowed() { return true },
-        requires: "",
-        effect() {
-            simulation.ephemera.push({
-                name: "LoS", count: 0, do() {
-                    const pos = m.pos
-                    const radius = 3000
-                    if (!simulation.isTimeSkipping) {
-                        const vertices = simulation.sight.circleLoS(pos, radius);
-                        if (vertices.length) {
-                            ctx.beginPath();
-                            ctx.moveTo(vertices[0].x, vertices[0].y);
-                            for (var i = 1; i < vertices.length; i++) {
-                                var currentDistance = Math.sqrt((vertices[i - 1].x - pos.x) ** 2 + (vertices[i - 1].y - pos.y) ** 2);
-                                var newDistance = Math.sqrt((vertices[i].x - pos.x) ** 2 + (vertices[i].y - pos.y) ** 2);
-                                if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
-                                    const currentAngle = Math.atan2(vertices[i - 1].y - pos.y, vertices[i - 1].x - pos.x);
-                                    const newAngle = Math.atan2(vertices[i].y - pos.y, vertices[i].x - pos.x);
-                                    ctx.arc(pos.x, pos.y, radius, currentAngle, newAngle);
-                                } else {
-                                    ctx.lineTo(vertices[i].x, vertices[i].y)
-                                }
-                            }
-                            newDistance = Math.sqrt((vertices[0].x - pos.x) ** 2 + (vertices[0].y - pos.y) ** 2);
-                            currentDistance = Math.sqrt((vertices[vertices.length - 1].x - pos.x) ** 2 + (vertices[vertices.length - 1].y - pos.y) ** 2);
-                            if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
-                                const currentAngle = Math.atan2(vertices[vertices.length - 1].y - pos.y, vertices[vertices.length - 1].x - pos.x);
-                                const newAngle = Math.atan2(vertices[0].y - pos.y, vertices[0].x - pos.x);
-                                ctx.arc(pos.x, pos.y, radius, currentAngle, newAngle);
-                            } else {
-                                ctx.lineTo(vertices[0].x, vertices[0].y)
-                            }
+    // {
+    //     name: "flatland",
+    //     description: "map blocks line of sight",
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 0,
+    //     isNonRefundable: true,
+    //     isJunk: true,
+    //     allowed() { return true },
+    //     requires: "",
+    //     effect() {
+    //         simulation.draw.lineOfSightPrecalculation() //required precalculation for line of sight
+    //         simulation.draw.drawMapPath = simulation.draw.drawMapSight
 
-                            //stroke the map, so it looks different form the line of sight 
-                            ctx.strokeStyle = "#234";
-                            ctx.lineWidth = 9;
-                            ctx.stroke(simulation.draw.mapPath); //this has a pretty large impact on performance, maybe 5% worse performance
+    //         simulation.ephemera.push({
+    //             name: "LoS", count: 0, do() {
+    //                 const pos = m.pos
+    //                 const radius = 3000
+    //                 if (!simulation.isTimeSkipping) {
+    //                     const vertices = simulation.sight.circleLoS(pos, radius);
+    //                     if (vertices.length) {
+    //                         ctx.beginPath();
+    //                         ctx.moveTo(vertices[0].x, vertices[0].y);
+    //                         for (var i = 1; i < vertices.length; i++) {
+    //                             var currentDistance = Math.sqrt((vertices[i - 1].x - pos.x) ** 2 + (vertices[i - 1].y - pos.y) ** 2);
+    //                             var newDistance = Math.sqrt((vertices[i].x - pos.x) ** 2 + (vertices[i].y - pos.y) ** 2);
+    //                             if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
+    //                                 const currentAngle = Math.atan2(vertices[i - 1].y - pos.y, vertices[i - 1].x - pos.x);
+    //                                 const newAngle = Math.atan2(vertices[i].y - pos.y, vertices[i].x - pos.x);
+    //                                 ctx.arc(pos.x, pos.y, radius, currentAngle, newAngle);
+    //                             } else {
+    //                                 ctx.lineTo(vertices[i].x, vertices[i].y)
+    //                             }
+    //                         }
+    //                         newDistance = Math.sqrt((vertices[0].x - pos.x) ** 2 + (vertices[0].y - pos.y) ** 2);
+    //                         currentDistance = Math.sqrt((vertices[vertices.length - 1].x - pos.x) ** 2 + (vertices[vertices.length - 1].y - pos.y) ** 2);
+    //                         if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
+    //                             const currentAngle = Math.atan2(vertices[vertices.length - 1].y - pos.y, vertices[vertices.length - 1].x - pos.x);
+    //                             const newAngle = Math.atan2(vertices[0].y - pos.y, vertices[0].x - pos.x);
+    //                             ctx.arc(pos.x, pos.y, radius, currentAngle, newAngle);
+    //                         } else {
+    //                             ctx.lineTo(vertices[0].x, vertices[0].y)
+    //                         }
 
-                            ctx.globalCompositeOperation = "destination-in";
-                            ctx.fillStyle = "#000";
-                            ctx.fill();
-                            ctx.globalCompositeOperation = "source-over";
-                            // also see the map
-                            // ctx.fill(simulation.draw.mapPath);
-                            // ctx.fillStyle = "#000";
-                            ctx.clip();
-                        }
-                    }
-                },
-            })
-        },
-        remove() { }
-    },
+    //                         //stroke the map, so it looks different form the line of sight 
+    //                         ctx.strokeStyle = "#234";
+    //                         ctx.lineWidth = 9;
+    //                         ctx.stroke(simulation.draw.mapPath); //this has a pretty large impact on performance, maybe 5% worse performance
+
+    //                         ctx.globalCompositeOperation = "destination-in";
+    //                         ctx.fillStyle = "#000";
+    //                         ctx.fill();
+    //                         ctx.globalCompositeOperation = "source-over";
+    //                         // also see the map
+    //                         // ctx.fill(simulation.draw.mapPath);
+    //                         // ctx.fillStyle = "#000";
+    //                         ctx.clip();
+    //                     }
+    //                 }
+    //             },
+    //         })
+    //     },
+    //     remove() { }
+    // },
     {
         name: "umbra",
         description: "produce a blue glow around everything<br>and probably some simulation lag",

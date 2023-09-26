@@ -394,7 +394,7 @@ const build = {
 <br>
 
 <br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)} &nbsp; &nbsp; difficulty: ${((m.dmgScale)).toPrecision(4)}
-<br><strong class='color-defense'>defense</strong>: ${tech.isEnergyHealth ? (1 - Math.pow(m.defense(), 0.13)).toPrecision(5) : (1 - m.defense()).toPrecision(5)} &nbsp; &nbsp; difficulty: ${(1 / simulation.dmgScale).toPrecision(4)}
+<br><strong class='color-defense'>defense</strong>: ${(1 - m.defense()).toPrecision(5)} &nbsp; &nbsp; difficulty: ${(1 / simulation.dmgScale).toPrecision(4)}
 <br><strong><em>fire rate</em></strong>: ${((1 - b.fireCDscale) * 100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
 ${tech.duplicationChance() ? `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance() * 100).toFixed(0)}%` : ""}
 ${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
@@ -437,7 +437,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             text += `<div class="pause-grid-module card-background" ${style} >
                            <div class="card-text">
                            <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div>
-                           ${b.guns[b.inventory[i]].description}</div> </div>`
+                           ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         }
         if (!localSettings.isHideHUD) text += `<div class="pause-grid-module pause-console" style = "background-color: rgba(255,255,255,0.3);">${document.getElementById("text-log").innerHTML}</div>` //show last in game console message
         let el = document.getElementById("pause-grid-left")
@@ -842,7 +842,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             text += `<div id="gun-${i}" class="experiment-grid-module card-background ${b.guns[i].have ? "build-gun-selected" : ""}" onclick="build.choosePowerUp(${i},'gun')" ${style} >
                     <div class="card-text">
                     <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div>
-                    ${b.guns[i].description}</div> </div>`
+                    ${b.guns[i].descriptionFunction()}</div> </div>`
         }
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if ((!tech.tech[i].isJunk || localSettings.isJunkExperiment) && !tech.tech[i].isLore) {
@@ -1667,7 +1667,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     if (localSettings.isHideImages === undefined) localSettings.isHideImages = true //default to hide images
     document.getElementById("hide-images").checked = localSettings.isHideImages
 
-    if (localSettings.isHideHUD === undefined) localSettings.isHideHUD = false
+    if (localSettings.isHideHUD === undefined) localSettings.isHideHUD = true
     document.getElementById("hide-hud").checked = localSettings.isHideHUD
 
 } else {
