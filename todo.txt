@@ -1,12 +1,20 @@
 ******************************************************** NEXT PATCH **************************************************
 
-on later levels spawn 2 bosses, but 1 power up each
-  starts at simulation.difficulty > 23 //on hard mode level 6, level 12 on easy, level 4 on why?
-  makes combat harder, but also means that you will always get at least 2 drops per level
-    you used to have a chance to only get 1 near the end of the game
-    I'm guessing this will lead to about 3 more total tech by the final boss
-  abiogenesis - removed
-  parthenogenesis - doesn't duplicate bosses anymore, +8% duplication
+missile Bot: +10% bigger explosions, +10% damage, +7% fire rate
+plasma Bot: +40% damage, and drains 2% less energy
+1st ionization energy: 8->11 energy per heal
+mass-energy: defense reduction factor 0.13->0.33
+neutron bomb: +25% damage
+non-renewables: 78->88% damage
+junk DNA: applies to all damage, not just spores
+pseudoscience: adds (1-4)->(1-3) JUNK to tech pool per free research
+futures exchange: 4.1->4.3 duplication per cancel
+
+default skin has slightly more narrow legs
+
+added ammo to gun descriptions
+  calculate the ammo drop rate for each gun live based on ammo tech?
+    need to make a generic function 
 
 
 *********************************************************** TODO *****************************************************

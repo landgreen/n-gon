@@ -579,7 +579,7 @@ const m = {
         if (tech.isTurret && m.crouch) dmg *= 0.34;
         if (tech.isFirstDer && b.inventory[0] === b.activeGun) dmg *= 0.85 ** b.inventory.length
         if (tech.isEnergyHealth) {
-            return Math.pow(dmg, 0.19) //defense has less effect
+            return Math.pow(dmg, 0.33) //defense has less effect
         } else {
             return dmg
         }
@@ -729,7 +729,7 @@ const m = {
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
                     for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
-                    m.energy = m.maxEnergy
+                    m.energy = m.maxEnergy + 0.1
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function () { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
@@ -910,27 +910,27 @@ const m = {
             ctx.lineTo(m.knee.x, m.knee.y);
             ctx.lineTo(m.foot.x, m.foot.y);
             ctx.strokeStyle = stroke;
-            ctx.lineWidth = 7;
+            ctx.lineWidth = 6;
             ctx.stroke();
 
             //toe lines
             ctx.beginPath();
             ctx.moveTo(m.foot.x, m.foot.y);
-            ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
+            ctx.lineTo(m.foot.x - 14, m.foot.y + 5);
             ctx.moveTo(m.foot.x, m.foot.y);
-            ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+            ctx.lineTo(m.foot.x + 14, m.foot.y + 5);
             ctx.lineWidth = 4;
             ctx.stroke();
 
             //hip joint
             ctx.beginPath();
-            ctx.arc(m.hip.x, m.hip.y, 11, 0, 2 * Math.PI);
+            ctx.arc(m.hip.x, m.hip.y, 10, 0, 2 * Math.PI);
             //knee joint
-            ctx.moveTo(m.knee.x + 7, m.knee.y);
-            ctx.arc(m.knee.x, m.knee.y, 7, 0, 2 * Math.PI);
+            ctx.moveTo(m.knee.x + 6, m.knee.y);
+            ctx.arc(m.knee.x, m.knee.y, 6, 0, 2 * Math.PI);
             //foot joint
-            ctx.moveTo(m.foot.x + 6, m.foot.y);
-            ctx.arc(m.foot.x, m.foot.y, 6, 0, 2 * Math.PI);
+            ctx.moveTo(m.foot.x + 5, m.foot.y + 1);
+            ctx.arc(m.foot.x, m.foot.y + 1, 5, 0, 2 * Math.PI);
             ctx.fillStyle = m.fillColor;
             ctx.fill();
             ctx.lineWidth = 2;
@@ -938,6 +938,83 @@ const m = {
             ctx.restore();
         }
     },
+    // resetSkin() {
+    //     simulation.isAutoZoom = true;
+    //     m.yOffWhen.jump = 70
+    //     m.yOffWhen.stand = 49
+    //     m.yOffWhen.crouch = 22
+    //     m.isAltSkin = false
+    //     m.color = {
+    //         hue: 0,
+    //         sat: 0,
+    //         light: 100,
+    //     }
+    //     m.setFillColors();
+    //     m.draw = function () {
+    //         ctx.fillStyle = m.fillColor;
+    //         m.walk_cycle += m.flipLegs * m.Vx;
+    //         ctx.save();
+    //         ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
+    //         ctx.translate(m.pos.x, m.pos.y);
+    //         m.calcLeg(Math.PI, -3);
+    //         m.drawLeg("#4a4a4a");
+    //         m.calcLeg(0, 0);
+    //         m.drawLeg("#333");
+    //         ctx.rotate(m.angle);
+    //         ctx.beginPath();
+    //         ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+    //         ctx.fillStyle = m.bodyGradient
+    //         ctx.fill();
+    //         ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+    //         ctx.strokeStyle = "#333";
+    //         ctx.lineWidth = 2;
+    //         ctx.stroke();
+    //         ctx.restore();
+    //         m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+    //         powerUps.boost.draw()
+    //     }
+    //     m.drawLeg = function (stroke) {
+    //         // if (simulation.mouseInGame.x > m.pos.x) {
+    //         if (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2) {
+    //             m.flipLegs = 1;
+    //         } else {
+    //             m.flipLegs = -1;
+    //         }
+    //         ctx.save();
+    //         ctx.scale(m.flipLegs, 1); //leg lines
+    //         ctx.beginPath();
+    //         ctx.moveTo(m.hip.x, m.hip.y);
+    //         ctx.lineTo(m.knee.x, m.knee.y);
+    //         ctx.lineTo(m.foot.x, m.foot.y);
+    //         ctx.strokeStyle = stroke;
+    //         ctx.lineWidth = 7;
+    //         ctx.stroke();
+
+    //         //toe lines
+    //         ctx.beginPath();
+    //         ctx.moveTo(m.foot.x, m.foot.y);
+    //         ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
+    //         ctx.moveTo(m.foot.x, m.foot.y);
+    //         ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+    //         ctx.lineWidth = 4;
+    //         ctx.stroke();
+
+    //         //hip joint
+    //         ctx.beginPath();
+    //         ctx.arc(m.hip.x, m.hip.y, 11, 0, 2 * Math.PI);
+    //         //knee joint
+    //         ctx.moveTo(m.knee.x + 7, m.knee.y);
+    //         ctx.arc(m.knee.x, m.knee.y, 7, 0, 2 * Math.PI);
+    //         //foot joint
+    //         ctx.moveTo(m.foot.x + 6, m.foot.y);
+    //         ctx.arc(m.foot.x, m.foot.y, 6, 0, 2 * Math.PI);
+    //         ctx.fillStyle = m.fillColor;
+    //         ctx.fill();
+    //         ctx.lineWidth = 2;
+    //         ctx.stroke();
+    //         ctx.restore();
+    //     }
+    // },
     skin: {
         none() {
             m.isAltSkin = true
@@ -1122,27 +1199,27 @@ const m = {
                 ctx.lineTo(m.knee.x, m.knee.y);
                 ctx.lineTo(m.foot.x, m.foot.y);
                 ctx.strokeStyle = stroke;
-                ctx.lineWidth = 7;
+                ctx.lineWidth = 6;
                 ctx.stroke();
 
                 //toe lines
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
+                ctx.lineTo(m.foot.x - 14, m.foot.y + 5);
                 ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                ctx.lineTo(m.foot.x + 14, m.foot.y + 5);
                 ctx.lineWidth = 4;
                 ctx.stroke();
 
                 //hip joint
                 ctx.beginPath();
-                ctx.arc(m.hip.x, m.hip.y, 11, 0, 2 * Math.PI);
+                ctx.arc(m.hip.x, m.hip.y, 10, 0, 2 * Math.PI);
                 //knee joint
-                ctx.moveTo(m.knee.x + 7, m.knee.y);
-                ctx.arc(m.knee.x, m.knee.y, 7, 0, 2 * Math.PI);
+                ctx.moveTo(m.knee.x + 6, m.knee.y);
+                ctx.arc(m.knee.x, m.knee.y, 6, 0, 2 * Math.PI);
                 //foot joint
-                ctx.moveTo(m.foot.x + 6, m.foot.y);
-                ctx.arc(m.foot.x, m.foot.y, 6, 0, 2 * Math.PI);
+                ctx.moveTo(m.foot.x + 5, m.foot.y);
+                ctx.arc(m.foot.x, m.foot.y + 1, 5, 0, 2 * Math.PI);
                 ctx.strokeStyle = "rgba(0,255,255,0.25)";
                 ctx.lineWidth = 5;
                 ctx.stroke();

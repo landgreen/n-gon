@@ -8,7 +8,7 @@ const level = {
     onLevel: -1,
     levelsCleared: 0,
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
-    //see level.populateLevels:   (intro, ... , reservoir or factory, reactor, ... , gauntlet, final)    added later
+    //see level.populateLevels:   (intro, ... , reservoir or factory, reactor, ... , subway, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
     communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "dojo", "tlinat", "ruins", "ace", "crimsonTowers"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon", "diamagnetism"],
@@ -36,7 +36,7 @@ const level = {
             // b.guns[3].ammo = 100000000
             // requestAnimationFrame(() => { tech.giveTech("MACHO") });
             // for (let i = 0; i < 1; ++i) tech.giveTech("additive manufacturing")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("dark star")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("flatland")
             // for (let i = 0; i < 1; ++i) tech.giveTech("foam-bot")
             // for (let i = 0; i < 1; ++i) tech.giveTech("nail-bot")
             // for (let i = 0; i < 1; ++i) tech.giveTech("sound-bot upgrade")

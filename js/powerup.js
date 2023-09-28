@@ -326,7 +326,7 @@ const powerUps = {
                 return
             }
             if (tech.isCancelDuplication) {
-                tech.duplication += 0.041
+                tech.duplication += 0.043
                 tech.maxDuplicationEvent()
                 simulation.makeTextLog(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${0.043}`)
                 simulation.circleFlare(0.043);
@@ -579,7 +579,7 @@ const powerUps = {
                 }
             }
             if (powerUps.healGiveMaxEnergy) {
-                tech.healMaxEnergyBonus += 0.08 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)
+                tech.healMaxEnergyBonus += 0.11 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)
                 m.setMaxEnergy();
             }
         },
@@ -667,7 +667,7 @@ const powerUps = {
             text += `<div class='choose-grid-module entanglement flipX' onclick='powerUps.endDraft("${type}",true)'>entanglement</div>`
         } else if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
             text += `<div onclick="powerUps.research.use('${type}')" class='research-card'>` // style = "margin-left: 192px; margin-right: -192px;"
-            tech.junkResearchNumber = Math.ceil(4 * Math.random())
+            tech.junkResearchNumber = Math.ceil(3 * Math.random())
             text += `<div><div> <span style="position:relative;">`
             for (let i = 0; i < tech.junkResearchNumber; i++) {
                 text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15 * i}px ;opacity:0.8; border: 1px #fff solid;width: 1.15em;height: 1.15em;"></div>`
@@ -689,7 +689,7 @@ const powerUps = {
             text += `<span class='research-card entanglement flipX' style="width: 275px;" onclick='powerUps.endDraft("${type}",true)'><span style="letter-spacing: 6px;">entanglement</span></span>`  //&zwnj;
         } else if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
             text += `<span onclick="powerUps.research.use('${type}')" class='research-card' style="width: 275px;float: left;">` // style = "margin-left: 192px; margin-right: -192px;"
-            tech.junkResearchNumber = Math.ceil(4 * Math.random())
+            tech.junkResearchNumber = Math.ceil(3 * Math.random())
             text += `<div><div><span style="position:relative;">`
             for (let i = 0, len = tech.junkResearchNumber; i < len; i++) {
                 text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15 * i}px ;opacity:0.8; border: 1px #fff solid;width: 1.15em;height: 1.15em;"></div>`
@@ -775,7 +775,7 @@ const powerUps = {
         return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}" ${style}>
         <div class="card-text">
         <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choose].name}</div>
-        ${b.guns[choose].description}</div></div>`
+        ${b.guns[choose].descriptionFunction()}</div></div>`
     },
     fieldText(choose, click) {
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/field/${m.fieldUpgrades[choose].name}${choose === 0 ? Math.floor(Math.random() * 10) : ""}.webp');"`
@@ -1169,7 +1169,7 @@ const powerUps = {
                                 document.body.style.cursor = "auto";
                                 document.getElementById("choose-grid").style.transitionDuration = "0s";
                             }
-                            if (count < 5 && simulation.isChoosing) {
+                            if (count < 10 && simulation.isChoosing) {
                                 requestAnimationFrame(cycle);
                             } else {
                                 tech.isBrainstormActive = false
