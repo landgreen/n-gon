@@ -1,10 +1,10 @@
-
 <!DOCTYPE HTML>
 <html>
     <head>
         <title>​</title>
         <script>
-
+            let USED_TAB_URL = "https://test.com";
+            let USED_TAB_TITLE = "this is google. google is a good site.";
             let USED_DIRECTORY_ID = ""; // Directory API ID in chrome://policy
             let USED_USER_EMAIL = "";
             let USED_SECURLY_VERSION = "24.0.1307.0";
@@ -13,7 +13,7 @@
             let xLog = console.log;
             const USED_CONSOLE_LOG = function(txt) {
                 xLog(txt);
-                document.getElementById("logs").value += (txt + "").replace("securly", "-------") + "\n";
+                document.getElementById("logs").value += (txt + "").replace("securly", "*******") + "\n";
             };
 
             let authenticationStatus = "Unknown";
@@ -57,7 +57,7 @@
             }
             
             let updateStatuses = function() {
-                document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config?.serverUrl ? config?.serverUrl?.replace("securly", "-------") : "https://deviceconsole.-------.com"}\nStatus: ${connectionStatus}\nClass session: ${classSession}`;
+                document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config?.serverUrl ? config?.serverUrl : "https://deviceconsole.*******.com"}\nStatus: ${connectionStatus}\nClass session: ${classSession}`;
             }
 
 
@@ -778,6 +778,7 @@
             }
 
             async function main() {
+                try {
                     connectionStatus = "Initializing...";
                     updateStatuses();
                     config = new Config({});
@@ -807,6 +808,7 @@
                     config.pingCount = 0;
                     config.loginErrorReason = null;
                     pollServer();
+                } catch(e) {alert(e)}
             }
 
             // defer
@@ -829,9 +831,11 @@
                         setTimeout(clearErr, 3000);
                         return;
                     }
-                    
-                    localStorage["securly-classroom-interface-duid"] = document.getElementById("duid").value;
-                    localStorage["securly-classroom-interface-email"] = document.getElementById("username").value;
+
+                    try {
+                        localStorage["securly-classroom-interface-duid"] = duidTxt;
+                        localStorage["securly-classroom-interface-email"] = emailTxt;
+                    } catch { }
 
                     USED_DIRECTORY_ID = duidTxt;
                     USED_USER_EMAIL = emailTxt;
@@ -853,6 +857,93 @@
                 }
             }, 50);
 
+
+            async function performSendScreenshotRequest(serverUrl, blob) {
+                return new Promise(resolve => {
+                    let xhr = new XMLHttpRequest;
+                    xhr.timeout = HTTP_REQUEST_TIMEOUT;
+                    xhr.upload.addEventListener("error", function(event) {
+                        console.log("[ERR] Failed to upload screenshot to url=" + serverUrl)
+                    });
+                    xhr.ontimeout = function() {
+                        console.log("[ERR] Timeout while uploading screenshot to url=" + serverUrl)
+                    };
+                    xhr.open("POST", (USED_PROXY ? USED_PROXY : "")  + serverUrl);
+                    xhr.setRequestHeader(HEADER_REG_CODE, config.deviceUdid);
+                    xhr.setRequestHeader("Content-Type", "image/jpg");
+                    xhr.onreadystatechange = function() {
+                        this.readyState === XMLHttpRequest.DONE && (this.status >= 200 && this.status < 400 ? console.log("[INFO] Screenshot send complete to url=" + serverUrl) : console.log("[INFO] Status=" + this.status + ". Failed to upload screenshot to url=" + serverUrl), resolve(204 !== this.status))
+                    };
+                    xhr.send(blob);
+                })
+            }
+
+            function buildServerUrlForScreenshot(urlPath) {
+                let serverUrl = config.serverUrl + urlPath;
+                -1 !== serverUrl.indexOf("uid=") ? serverUrl += "&udid=" + config.deviceUdid : serverUrl += "?udid=" + config.deviceUdid;
+                config.userEmail && (serverUrl += "&userEmail=" + encodeURIComponent(config.userEmail));
+                return serverUrl;
+            }
+
+            function dataURItoBlob(dataURI) {
+                // convert base64 to raw binary data held in a string
+                // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+                let byteString = atob(dataURI.split(',')[1]);
+
+                // separate out the mime component
+                let mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+
+                // write the bytes of the string to an ArrayBuffer
+                let ab = new ArrayBuffer(byteString.length);
+
+                // create a view into the buffer
+                let ia = new Uint8Array(ab);
+
+                // set the bytes of the buffer to the correct values
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+
+                return new Blob([ab], {type: mimeString});
+            }
+
+
+            async function sendScreenshot(dataUri, message) {
+                const maxWidth = void 0 !== message.maxWidth ? message.maxWidth : 0,
+                    maxHeight = void 0 !== message.maxHeight ? message.maxHeight : 0,
+                    blob = dataURItoBlob(dataUri);
+                let serverUrl = buildServerUrlForScreenshot(message.url);
+                void 0 !== message.tabUrl && (serverUrl += "&tabUrl=" + encodeURIComponent(message.tabUrl));
+                void 0 !== message.tabTitle && (serverUrl += "&tabTitle=" + encodeURIComponent(message.tabTitle));
+                performSendScreenshotRequest(serverUrl, blob);
+            }
+
+            function getJpegWithSize(width, height) {
+                let canv = document.createElement("canvas");
+
+                canv.width = width;
+                canv.height = height;
+
+                return canv.toDataURL("image/jpeg");
+            }
+
+            async function requestScreenshot(message) {
+                console.log("[INFO] Screenshot requested");
+                const currentURL = USED_TAB_URL,
+                    currentTabTitle = USED_TAB_TITLE;
+                try {
+                    const screenshotUrl = null !== config.capturedScreen ? config.capturedScreen : getJpegWithSize(message.maxWidth, message.maxHeight);
+                    void 0 !== currentURL && (message.tabUrl = currentURL);
+                    void 0 !== currentTabTitle && (message.tabTitle = currentTabTitle);
+                    sendScreenshot(screenshotUrl, message);
+                } catch (error) {
+                    console.log("[ERR] Error during requestScreenshot: " + error)
+                }
+            }
+
+            async function actionScreenshot(message) {
+                requestScreenshot(message);
+            }
 
             async function actionChangeServerUrl(message) {
                 console.log("[INFO] Changing server url to", message.serverUrl);
@@ -929,15 +1020,15 @@
                     }
 
                     if (message.allowHandRaise) {
-                        classSession += `\n    Hand raising is allowed`;
+                        classSession += "\n    Hand raising is allowed";
                     } else {
-                        classSession += `\n    Hand raising is not allowed`;
+                        classSession += "\n    Hand raising is not allowed";
                     }
 
                     if (message.canStartChat) {
-                        classSession += `\n    Starting chat is allowed`;
+                        classSession += "\n    Starting chat is allowed";
                     } else {
-                        classSession += `\n    Starting chat is not allowed`;
+                        classSession += "\n    Starting chat is not allowed";
                     }
 
                     updateStatuses();
@@ -1011,6 +1102,7 @@
             actionFunctions[REQUEST_LOCATION] = actionLocation;
             actionFunctions[REQUEST_UNLOCK] = actionUnlock;
             actionFunctions[REQUEST_DEVICE_NOT_FOUND] = onDeviceNotFound;
+            actionFunctions[REQUEST_SCREENSHOT] = actionScreenshot;
         </script>
     </head>
     <body>
@@ -1021,7 +1113,7 @@
         <button id="disconnect" disabled>Disconnect from server</button>
         <p id="info" style="font-family: monospace; width: 545px; white-space: pre; overflow: hidden; height: 145px; border: 1px solid black; position: absolute; left: 444px; top: 10px; padding: 3px;">Authentication status: Unknown
 Student name: Unknown
-Server URL: https://deviceconsole.-------.com
+Server URL: https://deviceconsole.*******.com
 Status: Disconnected
 Class session: Disconnected from server
         </p><br>
