@@ -733,6 +733,9 @@ const powerUps = {
         if (localSettings.isHideImages) {
             document.getElementById("choose-grid").style.gridTemplateColumns = width
             text += powerUps.researchAndCancelText(type)
+        } else if (totalChoices === 0) {
+            document.getElementById("choose-grid").style.gridTemplateColumns = width
+            text += powerUps.researchAndCancelText(type)
         } else if (totalChoices === 1 || canvas.width < 1200) {
             document.getElementById("choose-grid").style.gridTemplateColumns = width
             text += powerUps.researchAndCancelText(type)
@@ -903,39 +906,39 @@ const powerUps = {
                     if (b.guns[i].isRecentlyShown) removeOption(i)
                 }
                 for (let i = 0; i < b.guns.length; i++) b.guns[i].isRecentlyShown = false //reset recently shown back to zero
-                if (options.length > 0) {
-                    let text = powerUps.buildColumns(totalChoices, "gun")
-                    for (let i = 0; i < totalChoices; i++) {
-                        const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options                        
-                        // text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choose})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choose].name}</div> ${b.guns[choose].description}</div>`
-                        text += powerUps.gunText(choose, `powerUps.choose('gun',${choose})`)
+                // if (options.length > 0) {
+                let text = powerUps.buildColumns(totalChoices, "gun")
+                for (let i = 0; i < totalChoices; i++) {
+                    const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options                        
+                    // text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choose})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choose].name}</div> ${b.guns[choose].description}</div>`
+                    text += powerUps.gunText(choose, `powerUps.choose('gun',${choose})`)
 
-                        b.guns[choose].isRecentlyShown = true
-                        removeOption(choose)
-                        if (options.length < 1) break
+                    b.guns[choose].isRecentlyShown = true
+                    removeOption(choose)
+                    if (options.length < 1) break
+                }
+                if (tech.isExtraBotOption) {
+                    const botTech = [] //make an array of bot options
+                    for (let i = 0, len = tech.tech.length; i < len; i++) {
+                        if (tech.tech[i].isBotTech && tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed()) botTech.push(i)
                     }
-                    if (tech.isExtraBotOption) {
-                        const botTech = [] //make an array of bot options
-                        for (let i = 0, len = tech.tech.length; i < len; i++) {
-                            if (tech.tech[i].isBotTech && tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed()) botTech.push(i)
-                        }
-                        if (botTech.length > 0) { //pick random bot tech
-                            // const choose = botTech[Math.floor(Math.random() * botTech.length)];
-                            // const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
-                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"> <span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
-                            const choose = botTech[Math.floor(Math.random() * botTech.length)];
-                            const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-                            const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-                            text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
+                    if (botTech.length > 0) { //pick random bot tech
+                        // const choose = botTech[Math.floor(Math.random() * botTech.length)];
+                        // const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count+1}x)` : "";
+                        // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title"> <span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                        const choose = botTech[Math.floor(Math.random() * botTech.length)];
+                        const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
+                        const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
+                        text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
                                     <div class="card-text">
                                     <div class="grid-title"><span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                                     ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
-                        }
                     }
-                    if (tech.isOneGun && b.inventory.length > 0) text += `<div style = "color: #f24">replaces your current gun</div>`
-                    document.getElementById("choose-grid").innerHTML = text
-                    powerUps.showDraft();
                 }
+                if (tech.isOneGun && b.inventory.length > 0) text += `<div style = "color: #f24">replaces your current gun</div>`
+                document.getElementById("choose-grid").innerHTML = text
+                powerUps.showDraft();
+                // }
             }
         },
     },

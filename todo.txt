@@ -1,23 +1,13 @@
 ******************************************************** NEXT PATCH **************************************************
 
-missile Bot: +10% bigger explosions, +10% damage, +7% fire rate
-plasma Bot: +40% damage, and drains 2% less energy
-1st ionization energy: 8->11 energy per heal
-mass-energy: defense reduction factor 0.13->0.33
-neutron bomb: +25% damage
-non-renewables: 78->88% damage
-junk DNA: applies to all damage, not just spores
-pseudoscience: adds (1-4)->(1-3) JUNK to tech pool per free research
-futures exchange: 4.1->4.3 duplication per cancel
+new mob type: hopMother - hoppers that drop eggs that explode on contact and after several seconds they hatch into baby hoppers
+  regular hopper mobs have more life and more damage
 
-default skin has slightly more narrow legs
-
-added ammo to gun descriptions
-  calculate the ammo drop rate for each gun live based on ammo tech?
-    need to make a generic function 
-
+a few bug fixes
 
 *********************************************************** TODO *****************************************************
+
+a mob/boss? that drops the mines from reactor and final boss
 
 more (all) bosses need to be made of parts
   good examples: spiderBoss, dragonFlyBoss, beetleBoss

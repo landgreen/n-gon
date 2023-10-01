@@ -1,7 +1,7 @@
 //main object for spawning things in a level
 const spawn = {
     nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "growBossCulture"],
-    // other bosses: suckerBoss, laserBoss, tetherBoss, bounceBoss, sprayBoss, mineBoss, hopMomBoss    //these need a particular level to work so they are not included in the random pool
+    // other bosses: suckerBoss, laserBoss, tetherBoss, bounceBoss, sprayBoss, mineBoss, hopMotherBoss    //these need a particular level to work so they are not included in the random pool
     randomBossList: [
         "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
         "powerUpBoss", "powerUpBossBaby", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss",
@@ -21,8 +21,8 @@ const spawn = {
     pickList: ["starter", "starter"],
     fullPickList: [
         "slasher", "slasher", "slasher2", "slasher3",
+        "hopper", "hopper", "hopMother", "hopMother",
         "flutter", "flutter", "flutter",
-        "hopper", "hopper", "hopper",
         "stabber", "stabber", "stabber",
         "springer", "springer", "springer",
         "shooter", "shooter",
@@ -2343,10 +2343,7 @@ const spawn = {
         const springStiffness = 0.00014;
         const springDampening = 0.0005;
 
-        me.springTarget = {
-            x: me.position.x,
-            y: me.position.y
-        };
+        me.springTarget = { x: me.position.x, y: me.position.y };
         const len = cons.length;
         cons[len] = Constraint.create({
             pointA: me.springTarget,
@@ -2359,10 +2356,7 @@ const spawn = {
         cons[len].length = 100 + 1.5 * radius;
         me.cons = cons[len];
 
-        me.springTarget2 = {
-            x: me.position.x,
-            y: me.position.y
-        };
+        me.springTarget2 = { x: me.position.x, y: me.position.y };
         const len2 = cons.length;
         cons[len2] = Constraint.create({
             pointA: me.springTarget2,
@@ -2379,15 +2373,15 @@ const spawn = {
             this.checkStatus();
             this.springAttack();
         };
-
         me.onDeath = function () {
             this.removeCons();
         };
         spawn.shield(me, x, y);
     },
-    hopper(x, y, radius = 30 + Math.ceil(Math.random() * 30)) {
+    hopper(x, y, radius = 35 + Math.ceil(Math.random() * 30)) {
         mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
         let me = mob[mob.length - 1];
+        Matter.Body.setDensity(me, 0.0015); //normal is 0.001
         me.accelMag = 0.05;
         me.g = 0.0032; //required if using this.gravity
         me.frictionAir = 0.01;
@@ -2425,6 +2419,116 @@ const spawn = {
             }
         };
     },
+    hopMother(x, y, radius = 20 + Math.ceil(Math.random() * 20)) {
+        mobs.spawn(x, y, 5, radius, "rgb(50,170,200)");
+        let me = mob[mob.length - 1];
+        Matter.Body.setDensity(me, 0.0008); //normal is 0.001
+        me.accelMag = 0.05;
+        me.g = 0.0032; //required if using this.gravity
+        me.frictionAir = 0.01;
+        me.friction = 1
+        me.frictionStatic = 1
+        me.restitution = 0;
+        me.delay = 120 + 110 * simulation.CDScale;
+        me.randomHopFrequency = 300 + Math.floor(Math.random() * 150);
+        me.randomHopCD = simulation.cycle + me.randomHopFrequency;
+        Matter.Body.rotate(me, Math.random());
+        spawn.shield(me, x, y);
+        me.dropEgg = function () {
+            if (mob.length < 360) {
+                let where = { x: this.position.x, y: this.position.y + 0.3 * radius }
+                for (let i = 0; i < 30; i++) { //find the ground
+                    if (Matter.Query.point(map, where).length > 0 || Matter.Query.point(body, where).length > 0) break
+                    where.y += 1
+                }
+                spawn.hopEgg(where.x, where.y - 10)
+            }
+        }
+        me.do = function () {
+            this.gravity();
+            this.seePlayerCheck();
+            this.checkStatus();
+            if (this.seePlayer.recall) {
+                if (this.cd < simulation.cycle && (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length)) {
+                    this.cd = simulation.cycle + this.delay;
+                    const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass;
+                    const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                    this.force.x += forceMag * Math.cos(angle);
+                    this.force.y += forceMag * Math.sin(angle) - (Math.random() * 0.06 + 0.1) * this.mass; //antigravity
+                    this.dropEgg();
+                }
+            } else {
+                //randomly hob if not aware of player
+                if (this.randomHopCD < simulation.cycle && (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length)) {
+                    this.randomHopCD = simulation.cycle + this.randomHopFrequency;
+                    //slowly change randomHopFrequency after each hop
+                    this.randomHopFrequency = Math.max(100, this.randomHopFrequency + (0.5 - Math.random()) * 200);
+                    const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass * (0.1 + Math.random() * 0.3);
+                    const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
+                    this.force.x += forceMag * Math.cos(angle);
+                    this.force.y += forceMag * Math.sin(angle) - 0.07 * this.mass; //antigravity
+                    if (Math.random() < 0.2) this.dropEgg();
+                }
+            }
+        };
+    },
+    hopEgg(x, y) {
+        mobs.spawn(x, y, 10, 9 + Math.floor(3 * Math.random()), "rgba(50, 150, 150,0.3)"); //"rgb(100,170,150)" //"rgb(61, 125, 121)"
+        let me = mob[mob.length - 1];
+        me.stroke = "transparent";
+        Matter.Body.setDensity(me, 0.0001); //normal is 0.001
+        // Matter.Body.setStatic(me, true); //make static  (disables taking damage)
+        me.frictionAir = 1
+        me.damageReduction = 2
+        me.collisionFilter.mask = cat.bullet //| cat.body
+        // me.collisionFilter.category = cat.mobBullet;
+        // me.collisionFilter.mask = cat.bullet | cat.body // | cat.player
+        me.isMine = true
+        me.leaveBody = false;
+        me.isDropPowerUp = false;
+        me.isBadTarget = true;
+        me.isMobBullet = true;
+        me.isUnstable = true; //dies when blocked
+        me.showHealthBar = false;
+        me.explodeRange = 210 + 140 * Math.random()
+        me.isExploding = false
+        me.countDown = Math.ceil(4 * Math.random())
+        me.hatchTimer = 600 + Math.floor(120 * Math.random())
+        me.isInvulnerable = true //not actually invulnerable, just prevents block + ice-9 interaction
+        me.do = function () {
+            this.checkStatus();
+            this.hatchTimer--
+            if (this.hatchTimer < 1) {
+                spawn.hopBullet(this.position.x, this.position.y)
+                this.death();
+            }
+            if (Matter.Query.collides(this, [player]).length > 0) this.isExploding = true
+            if (this.isExploding) {
+                if (this.countDown-- < 0) { //explode
+                    this.death();
+                    //hit player
+                    if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.explodeRange && m.immuneCycle < m.cycle) {
+                        m.damage(0.01 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.25 : 1));
+                        m.energy -= 0.1 * (tech.isRadioactiveResistance ? 0.25 : 1)
+                        if (m.energy < 0) m.energy = 0
+                    }
+                    const range = this.explodeRange + 50 //mines get a slightly larger range to explode
+                    for (let i = 0, len = mob.length; i < len; ++i) {
+                        if (mob[i].alive && Vector.magnitude(Vector.sub(this.position, mob[i].position)) < range && mob[i].isMine) {
+                            mob[i].isExploding = true //explode other mines
+                        }
+                    }
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: this.explodeRange,
+                        color: "rgba(50,180,180,0.45)",
+                        time: 16
+                    });
+                }
+            }
+        };
+    },
     hopBullet(x, y, radius = 10 + Math.ceil(Math.random() * 8)) {
         mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
         let me = mob[mob.length - 1];
@@ -2434,7 +2538,7 @@ const spawn = {
         // me.isBadTarget = true;
         me.isMobBullet = true;
         me.showHealthBar = false;
-        me.timeLeft = 1200 + Math.floor(600 * Math.random());
+        me.timeLeft = 1140 + Math.floor(480 * Math.random());
 
         me.isRandomMove = Math.random() < 0.3 //most chase player, some don't
         me.accelMag = 0.01; //jump height
@@ -2448,7 +2552,7 @@ const spawn = {
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
         me.onHit = function () {
-            this.explode(this.mass);
+            this.explode(0.5 * this.mass);
         };
         me.do = function () {
             this.gravity();
@@ -2465,18 +2569,18 @@ const spawn = {
             this.timeLimit();
         };
     },
-    hopMomBoss(x, y, radius = 120) {
+    hopMotherBoss(x, y, radius = 120) {
         mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.damageReduction = 0.08 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.09 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
         me.accelMag = 0.05; //jump height
         me.g = 0.003; //required if using this.gravity
         me.frictionAir = 0.01;
         me.friction = 1
         me.frictionStatic = 1
         me.restitution = 0;
-        me.delay = 120 + 40 * simulation.CDScale;
+        me.delay = 130 + 40 * simulation.CDScale;
         Matter.Body.rotate(me, Math.random() * Math.PI);
         spawn.shield(me, x, y, 1);
         me.onDeath = function () {

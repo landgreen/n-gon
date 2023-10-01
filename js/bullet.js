@@ -4925,7 +4925,7 @@ const b = {
         return tech.dynamoBotCount + tech.foamBotCount + tech.soundBotCount + tech.nailBotCount + tech.laserBotCount + tech.boomBotCount + tech.orbitBotCount + tech.plasmaBotCount + tech.missileBotCount
     },
     hasBotUpgrade() {
-        return tech.isNailBotUpgrade + tech.isFoamBotUpgrade + tech.isBoomBotUpgrade + tech.isLaserBotUpgrade + tech.isOrbitBotUpgrade + tech.isDynamoBotUpgrade
+        return tech.isNailBotUpgrade + tech.isFoamBotUpgrade + tech.isBoomBotUpgrade + tech.isLaserBotUpgrade + tech.isOrbitBotUpgrade + tech.isDynamoBotUpgrade + tech.isSoundBotUpgrade
     },
     convertBotsTo(type) { //type can be a string like "dynamoBotCount"
         const totalPermanentBots = b.totalBots()
