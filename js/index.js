@@ -1372,7 +1372,7 @@ window.addEventListener("keydown", function (event) {
             }
             break
     }
-    if (b.inventory.length > 1 && !simulation.testing) {
+    if (b.inventory.length > 1 && !simulation.testing && !tech.isGunCycle) {
         switch (event.code) {
             case "Digit1":
                 simulation.switchToGunInInventory(0);
