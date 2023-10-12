@@ -18205,8 +18205,8 @@ const level = {
         spawn.mapRect(1350, -325, 100, 50);
         spawn.mapRect(1400, -1500, 325, 1600);
         spawn.mapRect(1400, -1500, 1550, 50);
-        spawn.mapRect(1400, -1900, 900, 50);
-        spawn.mapRect(1400, -2900, 100, 1050);
+        spawn.mapRect(1250, -1900, 1050, 50);
+        spawn.mapRect(1250, -2900, 100, 1050);
 
         spawn.mapRect(-600, -2900, 3550, 100);
         spawn.mapRect(2850, -2900, 100, 700);
@@ -18243,6 +18243,28 @@ const level = {
         const piston7 = horizontalDoor(-2000, -2600, 300, 100, 300, 20);
         const hand1 = clockHand(400, -3700, 75, 600);
         const elevator1 = level.elevator(3200, 0, 150, 50, -1750, 0.0025, { up: 0.05, down: 0.2 });
+        const lightButton = level.button(1400, -1900);
+        lightButton.isUp = true;
+        var lightOn = false;
+        simulation.ephemera.push({
+            name: "lightWire",
+            do() {
+                if (level.levels[level.onLevel] == "clock") {
+                    // light wire
+                    ctx.beginPath();
+                    ctx.moveTo(1460, -1887);
+                    ctx.lineTo(1300, -1887);
+                    ctx.lineTo(1300, -2860);
+                    ctx.lineTo(400, -2860);
+                    ctx.lineTo(400, -2800);
+                    ctx.lineWidth = 6;
+                    ctx.strokeStyle = lightOn ? "#ffd700" : "000";
+                    ctx.stroke();
+                } else {
+                    simulation.removeEphemera(this.name);
+                }
+            },
+        })
 
         spawn.debris(-300, 0, 1300, 6);
         spawn.debris(0, -2900, 2500, 8);
@@ -18299,7 +18321,7 @@ const level = {
         }
 
         var circleHead = Matter.Bodies.polygon(m.pos.x, m.pos.y, 0, 31);
-        var losDomain = generateIntersectMap().concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, piston1, player, circleHead]);
+        var losDomain = generateIntersectMap().concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, player, circleHead]);
         var oldMap = [...map];
         var oldMob = [...mob];
         var spawnGearMobCycle = 0;
@@ -18313,12 +18335,12 @@ const level = {
         var startCycle = simulation.cycle; // used to offset simulation.cycle to avoid the swing starting halfway through at the start of the level and messing up syncronization
 
         level.custom = () => {
-            Matter.Body.setPosition(circleHead, m.pos)
-            if (!(compareArrays(oldMap, map) && compareArrays(oldMob, mob))) {
-                losDomain = generateIntersectMap().concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, piston1, player, circleHead]);
+            if (lightOn) {
+                Matter.Body.setPosition(circleHead, m.pos)
+                if (!(compareArrays(oldMap, map) && compareArrays(oldMob, mob))) losDomain = generateIntersectMap().concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, player, circleHead]);
+                oldMap = [...map];
+                oldMob = [...mob];
             }
-            oldMap = [...map];
-            oldMob = [...mob];
             ctx.fillStyle = "#b0b0b2";
             ctx.fillRect(-600, -1700, 2000, 1700);
             ctx.fillRect(1350, -1851, 1550, 350);
@@ -18330,39 +18352,41 @@ const level = {
             ctx.fillStyle = "#000";
             ctx.fillRect(350, -2800, 100, 25);
             // light
-            var lightPos = { x: 400, y: -2775 };
-            var lightRadius = 2950;
-            const vertices = circleLoS(lightPos, lightRadius, map.concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, piston1, player, circleHead])); if (vertices.length > 0 && vertices[0].x) {
-                ctx.beginPath();
-                ctx.moveTo(vertices[0].x, vertices[0].y);
-                for (var i = 1; i < vertices.length; i++) {
-                    var currentDistance = Math.sqrt((vertices[i - 1].x - lightPos.x) ** 2 + (vertices[i - 1].y - lightPos.y) ** 2);
-                    var newDistance = Math.sqrt((vertices[i].x - lightPos.x) ** 2 + (vertices[i].y - lightPos.y) ** 2);
+            if (lightOn) {
+                var lightPos = { x: 400, y: -2775 };
+                var lightRadius = 2950;
+                const vertices = circleLoS(lightPos, lightRadius, map.concat(mob.filter((obj) => { return obj.isNotCloaked == null && (obj.isBoss || obj.label != 'Circle Body') }), [pendulum1, gear1, gear2, player, circleHead])); if (vertices.length > 0 && vertices[0].x) {
+                    ctx.beginPath();
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    for (var i = 1; i < vertices.length; i++) {
+                        var currentDistance = Math.sqrt((vertices[i - 1].x - lightPos.x) ** 2 + (vertices[i - 1].y - lightPos.y) ** 2);
+                        var newDistance = Math.sqrt((vertices[i].x - lightPos.x) ** 2 + (vertices[i].y - lightPos.y) ** 2);
+                        if (Math.abs(currentDistance - lightRadius) < 1 && Math.abs(newDistance - lightRadius) < 1) {
+                            const currentAngle = Math.atan2(vertices[i - 1].y - lightPos.y, vertices[i - 1].x - lightPos.x);
+                            const newAngle = Math.atan2(vertices[i].y - lightPos.y, vertices[i].x - lightPos.x);
+                            ctx.arc(lightPos.x, lightPos.y, lightRadius, currentAngle, newAngle);
+                        } else {
+                            ctx.lineTo(vertices[i].x, vertices[i].y)
+                        }
+                    }
+                    newDistance = Math.sqrt((vertices[0].x - lightPos.x) ** 2 + (vertices[0].y - lightPos.y) ** 2);
+                    currentDistance = Math.sqrt((vertices[vertices.length - 1].x - lightPos.x) ** 2 + (vertices[vertices.length - 1].y - lightPos.y) ** 2);
                     if (Math.abs(currentDistance - lightRadius) < 1 && Math.abs(newDistance - lightRadius) < 1) {
-                        const currentAngle = Math.atan2(vertices[i - 1].y - lightPos.y, vertices[i - 1].x - lightPos.x);
-                        const newAngle = Math.atan2(vertices[i].y - lightPos.y, vertices[i].x - lightPos.x);
+                        const currentAngle = Math.atan2(vertices[vertices.length - 1].y - lightPos.y, vertices[vertices.length - 1].x - lightPos.x);
+                        const newAngle = Math.atan2(vertices[0].y - lightPos.y, vertices[0].x - lightPos.x);
                         ctx.arc(lightPos.x, lightPos.y, lightRadius, currentAngle, newAngle);
                     } else {
-                        ctx.lineTo(vertices[i].x, vertices[i].y)
+                        ctx.lineTo(vertices[0].x, vertices[0].y)
                     }
+                    ctx.fillStyle = "rgba(216, 218, 223, 0.5)";
+                    ctx.fill();
                 }
-                newDistance = Math.sqrt((vertices[0].x - lightPos.x) ** 2 + (vertices[0].y - lightPos.y) ** 2);
-                currentDistance = Math.sqrt((vertices[vertices.length - 1].x - lightPos.x) ** 2 + (vertices[vertices.length - 1].y - lightPos.y) ** 2);
-                if (Math.abs(currentDistance - lightRadius) < 1 && Math.abs(newDistance - lightRadius) < 1) {
-                    const currentAngle = Math.atan2(vertices[vertices.length - 1].y - lightPos.y, vertices[vertices.length - 1].x - lightPos.x);
-                    const newAngle = Math.atan2(vertices[0].y - lightPos.y, vertices[0].x - lightPos.x);
-                    ctx.arc(lightPos.x, lightPos.y, lightRadius, currentAngle, newAngle);
-                } else {
-                    ctx.lineTo(vertices[0].x, vertices[0].y)
-                }
-                ctx.fillStyle = "rgba(216, 218, 223, 0.5)";
-                ctx.fill();
             }
 
             ctx.beginPath();
             ctx.moveTo(425, -2775);
             ctx.arc(400, -2775, 25, 0, Math.PI);
-            ctx.fillStyle = "#c6aa12";
+            ctx.fillStyle = lightOn ? "#ffe245" : "transparent";
             ctx.fill();
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 1;
@@ -18473,7 +18497,6 @@ const level = {
 
             if (!finishedGearFight && !pistonsLocked && m.pos.x > 2100 && m.pos.x < 2900 && m.pos.y > -1850 && m.pos.y < -1500) {
                 pistonsLocked = true;
-
                 roofFallCycle = simulation.cycle + 250;
                 roofReadyToFall = true;
             }
@@ -18627,10 +18650,6 @@ const level = {
             distanceToIntersection = (circle3.radius * distance) / (circle3.radius + circle2.radius);
             slopeAngle = Math.atan((circle2.y - circle3.y) / (circle2.x - circle3.x));
             angleToTangent = Math.acos(circle3.radius / distanceToIntersection);
-            const tangentPoint2 = {
-                x: Math.cos(angleToTangent + slopeAngle) * circle3.radius + circle3.x,
-                y: Math.sin(angleToTangent + slopeAngle) * circle3.radius + circle3.y
-            }
             const invertedTangentPoint2 = {
                 x: Math.cos(-angleToTangent + slopeAngle) * circle3.radius + circle3.x,
                 y: Math.sin(-angleToTangent + slopeAngle) * circle3.radius + circle3.y
@@ -18639,10 +18658,6 @@ const level = {
             const tangentPoint3 = {
                 x: Math.cos(angleToTangent + slopeAngle) * -circle2.radius + circle2.x,
                 y: Math.sin(angleToTangent + slopeAngle) * -circle2.radius + circle2.y
-            }
-            const invertedTangentPoint3 = {
-                x: Math.cos(-angleToTangent + slopeAngle) * -circle2.radius + circle2.x,
-                y: Math.sin(-angleToTangent + slopeAngle) * -circle2.radius + circle2.y
             }
 
             distance = Math.sqrt((piston2.position.y - 175 - circle3.y) ** 2 + (piston2.position.x - 50 - circle3.x) ** 2);
@@ -18894,6 +18909,9 @@ const level = {
         var lastBlock = Math.sin(simulation.cycle / 50) < 0;
 
         level.customTopLayer = () => {
+            if (!lightOn) lightButton.query();
+            if (!lightButton.isUp) lightOn = true;
+            lightButton.draw();
             elevator1.move();
 
             ctx.beginPath();
