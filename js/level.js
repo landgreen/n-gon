@@ -16,13 +16,13 @@ const level = {
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
-            simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
+            // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // tech.giveTech("performance")
             // level.difficultyIncrease(3 * 4) //30 is near max on hard  //60 is near max on why
             // spawn.setSpawnList();
             // spawn.setSpawnList();
-            m.maxHealth = m.health = 100
+            // m.maxHealth = m.health = 100
             // tech.isRerollDamage = true
             // powerUps.research.changeRerolls(99999)
             // m.immuneCycle = Infinity //you can't take damage
@@ -50,7 +50,7 @@ const level = {
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
 
-            level.skyscrapers();
+            // level.skyscrapers();
             // for (let i = 0; i < 4; ++i) spawn.hopMother(1900, -500)
             // for (let i = 0; i < 0; ++i) spawn.hopper(1900, -500)
             // for (let i = 0; i < 1; ++i) spawn.shooterBoss(1900, -2500)
@@ -63,7 +63,7 @@ const level = {
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
 
-            // level[simulation.isTraining ? "walk" : "intro"]() //normal starting level **************************************************
+            level[simulation.isTraining ? "walk" : "intro"]() //normal starting level **************************************************
 
             // simulation.isAutoZoom = false; //look in close
             // simulation.zoomScale *= 0.5;
