@@ -1,13 +1,20 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new mob type: hopMother - hoppers that drop eggs that explode on contact and after several seconds they hatch into baby hoppers
-  regular hopper mobs have more life and more damage
+after falling off most open maps you don't take damage
+  you fall down into the level again above the entrance
 
-a few bug fixes
+disabled smooth camera tracking for
+  portals
+  falling off map
+
+added a once every 7 seconds check to see if the player is suck inside the map
+  if stuck you teleport to the level entrance
+  catches about 90% of the ways to get stuck from falling too fast
+  this might causing problems after more testing, not sure
+
+bug fixes
 
 *********************************************************** TODO *****************************************************
-
-a mob/boss? that drops the mines from reactor and final boss
 
 more (all) bosses need to be made of parts
   good examples: spiderBoss, dragonFlyBoss, beetleBoss
@@ -1108,7 +1115,7 @@ possible names for tech
   magnetorquers - produce spin by pushing on earth's magnetic field
   Josephson junction - superconducting junction
   Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity
-  dark star - upgrade to WIMPs
+  perturbation
 
 ******************************************************** CARS IMAGES ********************************************************
 

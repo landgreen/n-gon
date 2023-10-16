@@ -548,15 +548,31 @@ const simulation = {
             }
         }
     },
-    noCameraScroll() { //makes the camera not scroll after changing locations
-        //only works if velocity is zero
+    translatePlayerAndCamera(where) {
+        //infinite falling.  teleport to sky after falling
+        const before = { x: player.position.x, y: player.position.y, }
+        Matter.Body.setPosition(player, { x: where.x, y: where.y });
+        const change = { x: before.x - player.position.x, y: before.y - player.position.y }
+        // translate camera to preserve illusion to endless fall
+        m.transX += change.x
+        m.transY += change.y
+        simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
+        simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
+        m.angle = Math.atan2(simulation.mouseInGame.y - m.pos.y, simulation.mouseInGame.x - m.pos.x);
+
+        //is there a reason to update m.pos here?
+        // m.pos.x = player.position.x;
+        // m.pos.y = playerBody.position.y - m.yOff;
+    },
+    setupCamera() { //makes the camera not scroll after changing locations
+        // //only works if velocity is zero
         m.pos.x = player.position.x;
         m.pos.y = playerBody.position.y - m.yOff;
         const scale = 0.8;
         m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
         m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
-        m.transX += (m.transSmoothX - m.transX) * 1;
-        m.transY += (m.transSmoothY - m.transY) * 1;
+        m.transX += (m.transSmoothX - m.transX);
+        m.transY += (m.transSmoothY - m.transY);
     },
     edgeZoomOutSmooth: 1,
     camera() {
@@ -570,6 +586,7 @@ const simulation = {
         ctx.translate(canvas.width2, canvas.height2); //center
         ctx.scale(simulation.zoom / simulation.edgeZoomOutSmooth, simulation.zoom / simulation.edgeZoomOutSmooth); //zoom in once centered
         ctx.translate(-canvas.width2 + m.transX, -canvas.height2 + m.transY); //translate
+        // ctx.translate(-canvas.width2 + m.transX - player.velocity.x, -canvas.height2 + m.transY + player.velocity.y); //translate
         //calculate in game mouse position by undoing the zoom and translations
         simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
         simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
@@ -909,29 +926,51 @@ const simulation = {
                     }
 
                     if (m.pos.y > simulation.fallHeight) { // if 4000px deep
-                        Matter.Body.setVelocity(player, {
-                            x: 0,
-                            y: 0
-                        });
-                        Matter.Body.setPosition(player, {
-                            x: level.enter.x + 50,
-                            y: level.enter.y - 20
-                        });
-                        // move bots
-                        for (let i = 0; i < bullet.length; i++) {
-                            if (bullet[i].botType) {
-                                Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
-                                    x: 250 * (Math.random() - 0.5),
-                                    y: 250 * (Math.random() - 0.5)
-                                }));
-                                Matter.Body.setVelocity(bullet[i], {
-                                    x: 0,
-                                    y: 0
-                                });
+                        if (level.isEndlessFall) {
+                            //infinite falling.  teleport to sky after falling
+
+                            simulation.ephemera.push({
+                                name: "slow player",
+                                count: 130, //cycles before it self removes
+                                do() {
+                                    this.count--
+                                    if (this.count < 0 || m.onGround) simulation.removeEphemera(this.name)
+                                    // console.log(player.velocity.y)
+                                    if (player.velocity.y > 70) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
+                                    if (player.velocity.y > 90) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
+                                },
+                            })
+
+                            const before = { x: player.position.x, y: player.position.y, }
+                            Matter.Body.setPosition(player, { x: level.enter.x, y: level.enter.y - 3000 });
+                            // Matter.Body.setPosition(player, level.fallPosition);
+
+                            const change = { x: before.x - player.position.x, y: before.y - player.position.y }
+                            // translate camera smoothly to preserve illusion to endless fall
+                            m.transX += change.x
+                            m.transY += change.y
+                            simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
+                            simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
+                            m.angle = Math.atan2(simulation.mouseInGame.y - m.pos.y, simulation.mouseInGame.x - m.pos.x);
+
+                        } else {
+                            Matter.Body.setVelocity(player, { x: 0, y: 0 });
+                            Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
+                            m.damage(0.05 * simulation.difficultyMode);
+                            m.energy -= 0.05 * simulation.difficultyMode
+                            // move bots
+                            for (let i = 0; i < bullet.length; i++) {
+                                if (bullet[i].botType) {
+                                    Matter.Body.setPosition(bullet[i], Vector.add(player.position, { x: 250 * (Math.random() - 0.5), y: 250 * (Math.random() - 0.5) }));
+                                    Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
+                                }
                             }
                         }
-                        m.damage(0.1 * simulation.difficultyMode);
-                        m.energy -= 0.1 * simulation.difficultyMode
+
+
+
+
+
                     }
                     if (isNaN(player.position.x)) m.death();
                     if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
@@ -959,6 +998,13 @@ const simulation = {
                     }
 
                     if (!(m.cycle % 420)) { //once every 7 seconds
+                        //check if player is inside the map
+                        if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
+                            // console.log('halp', Matter.Query.point(map, m.pos))
+                            Matter.Body.setVelocity(player, { x: 0, y: 0 });
+                            Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
+                        }
+
                         if (tech.isZeno) {
                             if (tech.isEnergyHealth) {
                                 m.energy *= 0.95
@@ -975,10 +1021,7 @@ const simulation = {
                             while (i--) {
                                 if (who[i].position.y > simulation.fallHeight) {
                                     if (save) {
-                                        Matter.Body.setVelocity(who[i], {
-                                            x: 0,
-                                            y: 0
-                                        });
+                                        Matter.Body.setVelocity(who[i], { x: 0, y: 0 });
                                         Matter.Body.setPosition(who[i], {
                                             x: level.exit.x + 30 * (Math.random() - 0.5),
                                             y: level.exit.y + 30 * (Math.random() - 0.5)
@@ -1016,6 +1059,7 @@ const simulation = {
     clearNow: false,
     clearMap() {
         level.isProcedural = false;
+        level.isEndlessFall = false;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (m.alive) {
             if (tech.isLongitudinal) b.guns[3].waves = []; //empty array of wave bullets

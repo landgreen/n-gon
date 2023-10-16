@@ -4612,19 +4612,18 @@ const b = {
                     this.force.y += this.mass * tech.foamGravity; //gravity
                     if (tech.isFoamAttract) {
                         for (let i = 0, len = mob.length; i < len; i++) {
+                            const range = Vector.magnitude(Vector.sub(mob[i].position, this.position))
                             if (
                                 !mob[i].isBadTarget &&
-                                Vector.magnitude(Vector.sub(mob[i].position, this.position)) < 375 &&
                                 mob[i].alive &&
-                                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                !mob[i].isInvulnerable
+                                !mob[i].isInvulnerable &&
+                                range < 500 &&
+                                Matter.Query.ray(map, this.position, mob[i].position).length === 0
                             ) {
-                                this.force = Vector.mult(Vector.normalise(Vector.sub(mob[i].position, this.position)), this.mass * 0.004)
-                                const slow = 0.9
-                                Matter.Body.setVelocity(this, {
-                                    x: this.velocity.x * slow,
-                                    y: this.velocity.y * slow
-                                });
+                                const mag = 0.001 * Math.min(1, 200 / range)
+                                this.force = Vector.mult(Vector.normalise(Vector.sub(mob[i].position, this.position)), this.mass * mag)
+                                const slow = 0.98
+                                Matter.Body.setVelocity(this, { x: this.velocity.x * slow, y: this.velocity.y * slow });
                                 break
                             }
                         }
@@ -7509,10 +7508,7 @@ const b = {
                 bullet[me].do = function () {
                     function onCollide(that) {
                         that.collisionFilter.mask = 0; //non collide with everything
-                        Matter.Body.setVelocity(that, {
-                            x: 0,
-                            y: 0
-                        });
+                        Matter.Body.setVelocity(that, { x: 0, y: 0 });
                         that.do = that.grow;
                     }
                     const mobCollisions = Matter.Query.collides(this, mob)

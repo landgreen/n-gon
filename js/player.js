@@ -196,14 +196,11 @@ const m = {
     look() { }, //set to lookDefault()
     lookDefault() {
         //always on mouse look
-        m.angle = Math.atan2(
-            simulation.mouseInGame.y - m.pos.y,
-            simulation.mouseInGame.x - m.pos.x
-        );
+        m.angle = Math.atan2(simulation.mouseInGame.y - m.pos.y, simulation.mouseInGame.x - m.pos.x);
         //smoothed mouse look translations
         const scale = 0.8;
-        m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
-        m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
+        m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale
+        m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale
 
         m.transX += (m.transSmoothX - m.transX) * m.lookSmoothing;
         m.transY += (m.transSmoothY - m.transY) * m.lookSmoothing;
@@ -4609,6 +4606,7 @@ const m = {
                             m.hole.isReady = false;
                             m.fieldRange = 0
                             Matter.Body.setPosition(player, simulation.mouseInGame);
+                            // simulation.translatePlayerAndCamera(simulation.mouseInGame) //too jerky
                             m.buttonCD_jump = 0 //this might fix a bug with jumping
                             const velocity = Vector.mult(Vector.normalise(sub), 20)
                             Matter.Body.setVelocity(player, {

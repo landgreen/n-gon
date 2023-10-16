@@ -1510,10 +1510,10 @@ const spawn = {
         //     }
         // }
         me.do = function () {
+            this.checkStatus();
             this.zombieHealthBar();
             this.lookForMobTargets();
             this.attack();
-            this.checkStatus();
         };
         me.mobSearchIndex = 0;
         me.target = null
@@ -1560,7 +1560,7 @@ const spawn = {
         }
         me.hitCD = 0
         me.attack = function () { //hit non zombie mobs
-            if (this.hitCD < simulation.cycle) {
+            if (this.hitCD < simulation.cycle && !this.isStunned && !this.isSlowed) {
                 if (this.target) {
                     this.force = Vector.mult(Vector.normalise(Vector.sub(this.target.position, this.position)), this.accelMag * this.mass)
                 } else { //wonder around

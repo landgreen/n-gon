@@ -3361,7 +3361,7 @@ const tech = {
     },
     {
         name: "decoherence",
-        description: `<strong class='color-m'>tech</strong> options you don't <strong>choose</strong> won't <strong>reoccur</strong><br>spawn ${powerUps.orb.research(6)}`,
+        description: `<strong class='color-m'>tech</strong> options you don't <strong>choose</strong> won't <strong>reoccur</strong><br>spawn ${powerUps.orb.research(7)}`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3370,7 +3370,7 @@ const tech = {
             return !tech.isSuperDeterminism
         },
         requires: "not superdeterminism",
-        bonusResearch: 6,
+        bonusResearch: 7,
         effect() {
             tech.isBanish = true
             for (let i = 0; i < this.bonusResearch; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
@@ -5662,19 +5662,19 @@ const tech = {
     },
     {
         name: "shaped charge",
-        description: `use ${powerUps.orb.research(3)} to dynamically <strong>reduce</strong><br>all <strong class='color-e'>explosions</strong> to prevent <strong class='color-h'>health</strong> loss`,
+        description: `use ${powerUps.orb.research(2)} to dynamically <strong>reduce</strong><br>all <strong class='color-e'>explosions</strong> to prevent <strong class='color-h'>health</strong> loss`,
         isGunTech: true,
         maxCount: 1,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 2) && (tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
+            return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 1) && (tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
         },
         requires: "an explosive damage source, not rocket propelled grenade",
         effect() {
             tech.isSmartRadius = true;
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 2; i++) {
                 if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
             }
         },
@@ -5731,9 +5731,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("grenades") && !tech.isVacuumBomb
+            return tech.haveGunCheck("grenades") && !tech.isVacuumBomb && !tech.isSmartRadius
         },
-        requires: "grenades, not vacuum bomb",
+        requires: "grenades, not vacuum bomb, shaped charges",
         effect() {
             tech.isImmuneExplosion = true;
             tech.isRPG = true;
@@ -6615,12 +6615,12 @@ const tech = {
         isGunTech: true,
         maxCount: 1,
         count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
+        frequency: 1,
+        frequencyDefault: 1,
         allowed() {
-            return !tech.isBulletTeleport && (tech.haveGunCheck("foam") || tech.isFoamBotUpgrade || tech.isFoamShot || tech.isFoamBall || tech.isFoamMine)
+            return tech.haveGunCheck("foam") || tech.isFoamBotUpgrade || tech.isFoamShot || tech.isFoamBall || tech.isFoamMine
         },
-        requires: "foam, not uncertainty",
+        requires: "foam",
         effect() {
             tech.isFoamAttract = true
         },
@@ -6637,9 +6637,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return (!tech.isFoamAttract && (tech.haveGunCheck("foam") || tech.isFoamBotUpgrade || tech.isFoamShot || tech.isFoamBall || tech.isFoamMine)) || (tech.haveGunCheck("wave") && !tech.is360Longitudinal) || (tech.haveGunCheck("super balls") && !tech.isSuperHarm) || tech.isSoundBotUpgrade
+            return (tech.haveGunCheck("foam") || tech.isFoamBotUpgrade || tech.isFoamShot || tech.isFoamBall || tech.isFoamMine) || (tech.haveGunCheck("wave") && !tech.is360Longitudinal) || (tech.haveGunCheck("super balls") && !tech.isSuperHarm) || tech.isSoundBotUpgrade
         },
-        requires: "foam, wave, super balls, not isotropic, electrostatic induction, Zectron",
+        requires: "foam, wave, super balls, not isotropic, Zectron",
         effect() {
             tech.isBulletTeleport = true
         },
@@ -7179,7 +7179,7 @@ const tech = {
     },
     {
         name: "compound lens",
-        description: "<strong>+50%</strong> <strong class='color-laser'>laser</strong> lens <strong class='color-d'>damage</strong><br><strong>+15°</strong> lens arc",
+        description: "<strong>+40%</strong> <strong class='color-laser'>laser</strong> lens <strong class='color-d'>damage</strong><br><strong>+25°</strong> lens arc",
         isGunTech: true,
         maxCount: 9,
         count: 0,
@@ -7190,8 +7190,8 @@ const tech = {
         },
         requires: "lens",
         effect() {
-            b.guns[11].arcRange += 15 * Math.PI / 180 / 2
-            b.guns[11].lensDamageOn += 0.5
+            b.guns[11].arcRange += 25 * Math.PI / 180 / 2
+            b.guns[11].lensDamageOn += 0.4
         },
         remove() {
             b.guns[11].arcRange = 90 * Math.PI / 180 / 2 //0.78 divded by 2 because of how it's drawn
