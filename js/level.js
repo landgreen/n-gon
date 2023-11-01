@@ -18288,7 +18288,7 @@ const level = {
         spawn.randomMob(1000, -1100, 1);
         spawn.randomMob(-160, -2050, 1);
         spawn.randomMob(-1100, -2900, 0.5);
-        spawn.randomLevelBoss(1900, -3800, [...spawn.randomBossList].splice(0, spawn.randomBossList.indexOf("shieldingBoss"), 1).concat([...spawn.randomBossList].splice(spawn.randomBossList.indexOf("shieldingBoss") + 1))); // shieldingBoss lags out the lighting system for some reason
+        spawn.randomLevelBoss(1900, -3800, spawn.randomBossList.filter(name => name != 'shieldingBoss')); // shieldingBoss lags out the lighting system for some reason
         spawn.randomMob(2500, -3500, 0.3);
         spawn.randomMob(1300, -4100, 0.5);
         spawn.randomMob(3400, -2450, 1);
