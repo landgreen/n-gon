@@ -332,7 +332,7 @@ const powerUps = {
                 simulation.circleFlare(0.043);
             }
             if (tech.isCancelRerolls) {
-                for (let i = 0, len = 5 + 5 * Math.random(); i < len; i++) {
+                for (let i = 0, len = 6 + 6 * Math.random(); i < len; i++) {
                     let spawnType
                     if (Math.random() < 0.4 && !tech.isEnergyNoAmmo) {
                         spawnType = "ammo"
@@ -344,7 +344,7 @@ const powerUps = {
                     powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), spawnType, false);
                 }
             }
-            if (tech.isCancelCouple) powerUps.spawnDelay("coupling", 5)
+            if (tech.isCancelCouple) powerUps.spawnDelay("coupling", 6)
             // if (tech.isCancelTech && Math.random() < 0.3) {
             //     powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "tech", false);
             //     simulation.makeTextLog(`<strong>options exchange</strong>: returns 1 <strong class='color-m'>tech</strong>`)
@@ -377,6 +377,24 @@ const powerUps = {
         if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 30 cycles
         if (m.holdingTarget) m.drop();
     },
+    animatePowerUpGrab(color) {
+        simulation.ephemera.push({
+            // name: "",
+            count: 25, //cycles before it self removes
+            do() {
+                this.count -= 2
+                if (this.count < 5) simulation.removeEphemera(this.name)
+
+                ctx.beginPath();
+                ctx.arc(m.pos.x, m.pos.y, this.count, 0, 2 * Math.PI);
+                ctx.fillStyle = color
+                ctx.fill();
+                // ctx.strokeStyle = "hsla(200,50%,61%,0.18)";
+                // ctx.stroke();
+            },
+        })
+
+    },
     coupling: {
         name: "coupling",
         color: "#0ae", //"#0cf",
@@ -384,6 +402,8 @@ const powerUps = {
             return 13;
         },
         effect() {
+            powerUps.animatePowerUpGrab('rgba(0, 170, 238,0.3)')
+
             m.couplingChange(1)
         },
         // spawnDelay(num) {
@@ -411,6 +431,7 @@ const powerUps = {
         duration: null, //set by "tech: band gap"
         damage: null, //set by "tech: band gap"
         effect() {
+            powerUps.animatePowerUpGrab('rgba(255, 0, 0, 0.5)')
             powerUps.boost.endCycle = m.cycle + Math.floor(Math.max(0, powerUps.boost.endCycle - m.cycle) * 0.6) + powerUps.boost.duration //duration+seconds plus 2/3 of current time left
         },
         draw() {
@@ -433,6 +454,7 @@ const powerUps = {
             return 20;
         },
         effect() {
+            powerUps.animatePowerUpGrab('rgba(255, 119, 187,0.3)')
             powerUps.research.changeRerolls(1)
         },
         isMakingBots: false, //to prevent bot fabrication from running 2 sessions at once
@@ -510,6 +532,7 @@ const powerUps = {
         },
         effect() {
             if (!tech.isEnergyHealth && m.alive) {
+                powerUps.animatePowerUpGrab('rgba(0, 238, 187,0.25)')
                 let heal = (this.size / 40 / (simulation.healScale ** 0.25)) ** 2 //simulation.healScale is undone here because heal scale is already properly affected on m.addHealth()
                 // console.log("size = " + this.size, "heal = " + heal)
                 if (heal > 0) {
@@ -599,6 +622,7 @@ const powerUps = {
         },
         effect() {
             if (b.inventory.length > 0) {
+                powerUps.animatePowerUpGrab('rgba(68, 102, 119,0.25)')
                 if (tech.isAmmoForGun && b.activeGun !== null) { //give extra ammo to one gun only with tech logistics
                     const target = b.guns[b.activeGun]
                     if (target.ammo !== Infinity) {
@@ -1014,6 +1038,7 @@ const powerUps = {
         },
         effect() {
             if (m.alive) {
+                // powerUps.animatePowerUpGrab('hsla(246, 100%, 77%,0.5)')
                 let junkCount = 0 //used for junk estimation
                 let totalCount = 0 //used for junk estimation
                 let options = []; //generate all options

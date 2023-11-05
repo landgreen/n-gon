@@ -563,6 +563,17 @@ const simulation = {
         //is there a reason to update m.pos here?
         // m.pos.x = player.position.x;
         // m.pos.y = playerBody.position.y - m.yOff;
+
+        for (let i = 0; i < bullet.length; i++) {
+            if (bullet[i].botType) {
+                if (Vector.magnitudeSquared(Vector.sub(bullet[i].position, player.position)) > 1000000) { //far away bots teleport to player
+                    Matter.Body.setPosition(bullet[i], Vector.add(player.position, { x: 250 * (Math.random() - 0.5), y: 250 * (Math.random() - 0.5) }));
+                    Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
+                } else { //close bots maintain relative distance to player on teleport
+                    Matter.Body.setPosition(bullet[i], Vector.sub(bullet[i].position, change));
+                }
+            }
+        }
     },
     setupCamera() { //makes the camera not scroll after changing locations
         // //only works if velocity is zero
@@ -931,7 +942,7 @@ const simulation = {
 
                             simulation.ephemera.push({
                                 name: "slow player",
-                                count: 130, //cycles before it self removes
+                                count: 160, //cycles before it self removes
                                 do() {
                                     this.count--
                                     if (this.count < 0 || m.onGround) simulation.removeEphemera(this.name)
@@ -952,7 +963,14 @@ const simulation = {
                             simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
                             simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
                             m.angle = Math.atan2(simulation.mouseInGame.y - m.pos.y, simulation.mouseInGame.x - m.pos.x);
-
+                            // move bots
+                            for (let i = 0; i < bullet.length; i++) {
+                                if (bullet[i].botType) {
+                                    Matter.Body.setPosition(bullet[i], Vector.sub(bullet[i].position, change));
+                                    // Matter.Body.setPosition(bullet[i], Vector.add(player.position, { x: 250 * (Math.random() - 0.5), y: 250 * (Math.random() - 0.5) }));
+                                    // Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
+                                }
+                            }
                         } else {
                             Matter.Body.setVelocity(player, { x: 0, y: 0 });
                             Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
@@ -1000,9 +1018,24 @@ const simulation = {
                     if (!(m.cycle % 420)) { //once every 7 seconds
                         //check if player is inside the map
                         if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
-                            // console.log('halp', Matter.Query.point(map, m.pos))
-                            Matter.Body.setVelocity(player, { x: 0, y: 0 });
-                            Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
+                            //check for the next few seconds to see if being stuck continues
+                            simulation.ephemera.push({
+                                name: "stuck",
+                                count: 240, //cycles before it self removes
+                                do() {
+                                    if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
+                                        this.count--
+                                        // console.log('halp, stuck in map!', Matter.Query.point(map, m.pos))
+                                        if (this.count < 0) {
+                                            simulation.removeEphemera(this.name)
+                                            Matter.Body.setVelocity(player, { x: 0, y: 0 });
+                                            Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
+                                        }
+                                    } else {
+                                        simulation.removeEphemera(this.name)
+                                    }
+                                },
+                            })
                         }
 
                         if (tech.isZeno) {
@@ -1234,7 +1267,7 @@ const simulation = {
             }
             requestAnimationFrame(respawnFleas);
         }
-        if (tech.isQuantumEraser) {
+        if (tech.isQuantumEraser && m.alive) {
             let count = 0
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].isDropPowerUp && mob[i].alive) count++

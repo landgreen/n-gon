@@ -1,18 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
-after falling off most open maps you don't take damage
-  you fall down into the level again above the entrance
+new community map - LaunchSite by Des Boot
 
-disabled smooth camera tracking for
-  portals
-  falling off map
+added a short color animation after grabbing basic power ups
 
-added a once every 7 seconds check to see if the player is suck inside the map
-  if stuck you teleport to the level entrance
-  catches about 90% of the ways to get stuck from falling too fast
-  this might causing problems after more testing, not sure
+reduced overall damage done to player by ~6%
+commodities exchange spawns 5-10 -> 6-12 power ups on cancel
+residual dipolar coupling spawns 5 -> 6 coupling power ups
 
-bug fixes
+bots maintain relative position to player after the no camera tracking teleport
+  for portals and falling off level
+
+the once every 7 seconds stuck check now also check to see if you stay stuck for 3 seconds before resetting you.
 
 *********************************************************** TODO *****************************************************
 

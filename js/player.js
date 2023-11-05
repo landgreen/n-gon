@@ -921,13 +921,13 @@ const m = {
 
             //hip joint
             ctx.beginPath();
-            ctx.arc(m.hip.x, m.hip.y, 10, 0, 2 * Math.PI);
+            ctx.arc(m.hip.x, m.hip.y, 9, 0, 2 * Math.PI);
             //knee joint
-            ctx.moveTo(m.knee.x + 6, m.knee.y);
-            ctx.arc(m.knee.x, m.knee.y, 6, 0, 2 * Math.PI);
+            ctx.moveTo(m.knee.x + 5, m.knee.y);
+            ctx.arc(m.knee.x, m.knee.y, 5, 0, 2 * Math.PI);
             //foot joint
-            ctx.moveTo(m.foot.x + 5, m.foot.y + 1);
-            ctx.arc(m.foot.x, m.foot.y + 1, 5, 0, 2 * Math.PI);
+            ctx.moveTo(m.foot.x + 4, m.foot.y + 1);
+            ctx.arc(m.foot.x, m.foot.y + 1, 4, 0, 2 * Math.PI);
             ctx.fillStyle = m.fillColor;
             ctx.fill();
             ctx.lineWidth = 2;

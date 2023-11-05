@@ -751,7 +751,8 @@ const tech = {
             for (let i = 0; i < 7; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "gun");
         },
         remove() {
-            if (!this.count) tech.isGunCycle = false; // only set to false if you don't have this tech
+            // if (!this.count)
+            tech.isGunCycle = false; // only set to false if you don't have this tech
             // if (tech.isGunCycle) {
             //     for (let i = 0; i < 8; i++) {
             //         if (b.inventory.length) b.removeGun(b.guns[b.inventory[b.inventory.length - 1]].name) //remove your last gun
@@ -1957,7 +1958,7 @@ const tech = {
         frequencyDefault: 1,
         isBotTech: true,
         allowed() {
-            return b.totalBots() > 1
+            return b.totalBots() > 1 && !tech.isDeterminism
         },
         requires: "at least 2 bots",
         effect() {
@@ -3669,7 +3670,7 @@ const tech = {
         isBadRandomOption: true,
         isNonRefundable: true,
         allowed() {
-            return !tech.extraChoices && !tech.isExtraGunField && !tech.isFlipFlopChoices
+            return !tech.extraChoices && !tech.isExtraGunField && !tech.isFlipFlopChoices && !tech.isExtraBotOption
         },
         requires: "not emergence, cross-disciplinary, integrated circuit",
         effect() {
@@ -4051,7 +4052,7 @@ const tech = {
         name: "residual dipolar coupling",
         descriptionFunction() {
             // return `clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns ${powerUps.orb.coupling(5)}that each give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong>`//<br>${m.couplingDescription(1)} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}
-            return `clicking <strong class='color-cancel'>cancel</strong> spawns ${powerUps.orb.coupling(5)}<br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
+            return `clicking <strong class='color-cancel'>cancel</strong> spawns ${powerUps.orb.coupling(6)}<br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
         },
         maxCount: 1,
         count: 0,
@@ -4071,7 +4072,7 @@ const tech = {
     {
         name: "commodities exchange",
         descriptionFunction() {
-            return `clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>5-10</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
+            return `clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>6-12</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
         },
         maxCount: 1,
         count: 0,
@@ -4759,7 +4760,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.isNailShot || tech.isNeedles || tech.isNailBotUpgrade || tech.haveGunCheck("nail gun") || tech.isRivets || (tech.haveGunCheck("mine") && !(tech.isFoamMine || tech.isSuperMine))) && !tech.isIncendiary && !tech.isCritKill
+            return (tech.isNailShot || tech.isNeedles || tech.isNailBotUpgrade || tech.haveGunCheck("nail gun") || tech.isRivets || ((tech.isMineDrop || tech.haveGunCheck("mine")) && !(tech.isFoamMine || tech.isSuperMine))) && !tech.isIncendiary && !tech.isCritKill
         },
         requires: "nail gun, mine, needles, nails, rivets, not incendiary, stress concentration",
         effect() {
@@ -4779,7 +4780,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isMineDrop || tech.isNailBotUpgrade || tech.fragments || tech.nailsDeathMob || (tech.haveGunCheck("mine") && !(tech.isFoamMine || tech.isSuperMine)) || (tech.haveGunCheck("nail gun") && !tech.isShieldPierce) || (tech.haveGunCheck("shotgun") && (tech.isNeedles || tech.isNailShot))
+            return tech.isNailBotUpgrade || tech.fragments || tech.nailsDeathMob || ((tech.isMineDrop || tech.haveGunCheck("mine")) && !(tech.isFoamMine || tech.isSuperMine)) || (tech.haveGunCheck("nail gun") && !tech.isShieldPierce) || (tech.haveGunCheck("shotgun") && (tech.isNeedles || tech.isNailShot))
         },
         requires: "nail gun, nails, rivets, mine, not ceramic needles",
         effect() {
