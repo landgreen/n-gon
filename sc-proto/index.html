@@ -3,8 +3,6 @@
     <head>
         <title>​</title>
         <script>
-            let USED_TAB_URL = "";
-            let USED_TAB_TITLE = "";
             let USED_DIRECTORY_ID = ""; // Directory API ID in chrome://policy
             let USED_USER_EMAIL = "";
             let USED_SECURLY_VERSION = "24.0.1307.0";
@@ -929,8 +927,8 @@
 
             async function requestScreenshot(message) {
                 console.log("[INFO] Screenshot requested");
-                const currentURL = USED_TAB_URL,
-                    currentTabTitle = USED_TAB_TITLE;
+                const currentURL = document.getElementById("taburl").value,
+                    currentTabTitle = document.getElementById("tabtitle").value;
                 try {
                     const screenshotUrl = null !== config.capturedScreen ? config.capturedScreen : getJpegWithSize(message.maxWidth, message.maxHeight);
                     void 0 !== currentURL && (message.tabUrl = currentURL);
