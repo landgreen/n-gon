@@ -1,19 +1,57 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community map - LaunchSite by Des Boot
+grappling hook is now a field  (work in progress)
+  reworked physics to allow faster speeds, but more control
+  improved rate of power up grabbing
+  more player control to hook retraction rate
+  changed hook shape and field image graphics
+  grappling hook field coupling, more tech, bug fixes, and general polish to be added soon
 
-added a short color animation after grabbing basic power ups
+aerostat - 88->100% damage in air  22-> 25% damage on ground
+foam damage reduced 10%, ammo increased about 10%
+after hitting an invulnerable mob (drones,spores,worms,iceIX,fleas) don't die or lose cycles
+added JUNK tech: mobs! - summon 20 random mobs
+added announcement of mob names in console at start of new level
 
-reduced overall damage done to player by ~6%
-commodities exchange spawns 5-10 -> 6-12 power ups on cancel
-residual dipolar coupling spawns 5 -> 6 coupling power ups
-
-bots maintain relative position to player after the no camera tracking teleport
-  for portals and falling off level
-
-the once every 7 seconds stuck check now also check to see if you stay stuck for 3 seconds before resetting you.
+bug fixes
 
 *********************************************************** TODO *****************************************************
+
+grappling hook is a field
+  check for places that the player could get into but not out of
+  maybe grapple could grab more then 1 power up?
+  grapple slices blocks
+    cut large blocks into 2,3
+      use dead mob code for mobs > 5 sides
+      write code to cut large blocks in half and remove one half
+  need several field tech
+    new field tech ideas
+      increase hook damage
+      hook damage aura
+      hook's line does damage
+      make several auto targeting harpoons after taking damage
+        how to make them not drain energy
+      generate ___  after destroying blocks
+        energy, drones, iceIX, explosion, nails, junk bots?
+  coupling effect: defense?, bonus from ammo power ups,  fire rate
+
+tech - killing a mob heals for the last damage you took
+  disable cloaking heal?  maybe you don't need to disable, just don't heal twice
+  heal for 50%?
+  heal from mob damage or from kills?
+
+make phonon the default wave gun type and make a tech to switch to the normal wave beam
+  nerf phonon, buff wave
+
+sword slash for plasma torch  (giving up on this for now,  had trouble making graphics look good)
+  activates when mouse is close to player
+    gradual activation
+    sharp cut off
+      use length of torch as cut off length
+  make it look like hollow knight slash
+  what about upgrades to extruder,plasma ball
+    give them their own version of a slash?
+    make a tech that buffs the slash, but it disables extruder,plasma ball
 
 more (all) bosses need to be made of parts
   good examples: spiderBoss, dragonFlyBoss, beetleBoss

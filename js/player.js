@@ -568,7 +568,7 @@ const m = {
         if (tech.squirrelFx !== 1) dmg *= 0.78//Math.pow(0.78, (tech.squirrelFx - 1) / 0.4)
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.1
         if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
-        if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.25
+        if (tech.isHarmReduce && input.field) dmg *= 0.25
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.1
         if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
@@ -2779,14 +2779,10 @@ const m = {
         effect: () => {
             m.fieldMeterColor = "#48f" //"#0c5"
             m.eyeFillColor = m.fieldMeterColor
-
             m.fieldShieldingScale = 0;
             m.fieldBlockCD = 3;
             m.grabPowerUpRange2 = 10000000
-            m.fieldPosition = {
-                x: m.pos.x,
-                y: m.pos.y
-            }
+            m.fieldPosition = { x: m.pos.x, y: m.pos.y }
             m.fieldAngle = m.angle
             m.perfectPush = (isFree = false) => {
                 if (m.fieldCDcycle < m.cycle) {
@@ -2794,10 +2790,7 @@ const m = {
                         if (
                             Vector.magnitude(Vector.sub(mob[i].position, m.fieldPosition)) - mob[i].radius < m.fieldRange &&
                             !mob[i].isUnblockable &&
-                            Vector.dot({
-                                x: Math.cos(m.fieldAngle),
-                                y: Math.sin(m.fieldAngle)
-                            }, Vector.normalise(Vector.sub(mob[i].position, m.fieldPosition))) > m.fieldThreshold &&
+                            Vector.dot({ x: Math.cos(m.fieldAngle), y: Math.sin(m.fieldAngle) }, Vector.normalise(Vector.sub(mob[i].position, m.fieldPosition))) > m.fieldThreshold &&
                             Matter.Query.ray(map, mob[i].position, m.fieldPosition).length === 0
                         ) {
                             mob[i].locatePlayer();
@@ -2816,11 +2809,7 @@ const m = {
                                 }
                             }
                             if (tech.blockDmg) { //electricity
-                                Matter.Body.setVelocity(mob[i], {
-                                    x: 0.5 * mob[i].velocity.x,
-                                    y: 0.5 * mob[i].velocity.y
-                                });
-
+                                Matter.Body.setVelocity(mob[i], { x: 0.5 * mob[i].velocity.x, y: 0.5 * mob[i].velocity.y });
                                 if (mob[i].isShielded) {
                                     for (let j = 0, len = mob.length; j < len; j++) {
                                         if (mob[j].id === mob[i].shieldID) mob[j].damage(tech.blockDmg * m.dmgScale * (tech.isBlockRadiation ? 6 : 2), true)
@@ -3684,6 +3673,94 @@ const m = {
                     ctx.strokeStyle = "rgba(255,0,110,0.06)"
                     ctx.stroke();
                 }
+                // } else if (true) { //plasma sword slash
+                //     const plasmaSweepCycles = 30
+                //     m.plasmaSweep = 0
+                //     m.plasmaSlashDirection = m.flipLegs//Math.random() > 0.5 ? 1 : -1;
+                //     m.hold = function () {
+                //         if (m.isHolding) {
+                //             m.drawHold(m.holdingTarget);
+                //             m.holding();
+                //             m.throwBlock();
+                //             m.plasmaSweep = 0
+                //             // } else if (true) { //not hold but field button is pressed
+                //         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+                //             if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
+                //             m.grabPowerUp();
+                //             m.lookForPickUp();
+
+                //             //graphics
+                //             if (m.plasmaSweep === 0) m.plasmaSlashDirection = m.flipLegs //Math.random() > 0.5 ? 1 : -1;
+                //             const angle = m.angle //+ 1 * (m.plasmaSweep - plasmaSweepCycles / 2) / plasmaSweepCycles * m.plasmaSlashDirection
+                //             const plasmaSweepCapped = Math.min(m.plasmaSweep, plasmaSweepCycles - 8) / plasmaSweepCycles
+                //             const range = 100 * plasmaSweepCapped
+                //             const arc = 1.3
+                //             const A = { x: m.pos.x + range * Math.cos(angle - arc), y: m.pos.y + range * Math.sin(angle - arc) }
+                //             const B = { x: m.pos.x + range * Math.cos(angle + arc), y: m.pos.y + range * Math.sin(angle + arc) }
+                //             const controlRange = 500 * plasmaSweepCapped
+                //             const AC = { x: m.pos.x + controlRange * Math.cos(angle - arc / 2), y: m.pos.y + controlRange * Math.sin(angle - arc / 2) }
+                //             const BC = { x: m.pos.x + controlRange * Math.cos(angle + arc / 2), y: m.pos.y + controlRange * Math.sin(angle + arc / 2) }
+                //             const innerControlRange = 300 * plasmaSweepCapped
+                //             const ACinner = { x: m.pos.x + innerControlRange * Math.cos(angle - arc / 2), y: m.pos.y + innerControlRange * Math.sin(angle - arc / 2) }
+                //             const BCinner = { x: m.pos.x + innerControlRange * Math.cos(angle + arc / 2), y: m.pos.y + innerControlRange * Math.sin(angle + arc / 2) }
+                //             ctx.beginPath();
+                //             ctx.moveTo(A.x, A.y)
+                //             ctx.bezierCurveTo(AC.x, AC.y, BC.x, BC.y, B.x, B.y); //outer curve
+                //             ctx.bezierCurveTo(BCinner.x, BCinner.y, ACinner.x, ACinner.y, A.x, A.y); //inner curve
+                //             // ctx.strokeStyle = "#000"
+                //             // ctx.stroke();
+                //             ctx.fillStyle = "rgba(255,0,255,0.5)"
+                //             ctx.fill();
+
+                //             //draw control points for graphics reference
+                //             ctx.lineWidth = '0.5'
+                //             ctx.beginPath();
+                //             ctx.arc(A.x, A.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+                //             ctx.beginPath();
+                //             ctx.arc(B.x, B.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+                //             ctx.beginPath();
+                //             ctx.arc(AC.x, AC.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+                //             ctx.beginPath();
+                //             ctx.arc(BC.x, BC.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+                //             ctx.beginPath();
+                //             ctx.arc(ACinner.x, ACinner.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+                //             ctx.beginPath();
+                //             ctx.arc(BCinner.x, BCinner.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+
+                //             //mob collision detection
+                //             collideRange = 160
+                //             const collideCenter = {
+                //                 x: m.pos.x + collideRange * Math.cos(angle),
+                //                 y: m.pos.y + collideRange * Math.sin(angle)
+                //             }
+                //             ctx.beginPath();
+                //             ctx.arc(collideCenter.x, collideCenter.y, 140, 0, 2 * Math.PI);
+                //             ctx.stroke();
+
+                //             //push mob away and slow them?
+
+
+                //             //sweeping motion and cooldown
+                //             m.plasmaSweep++
+                //             if (m.plasmaSweep > plasmaSweepCycles) {
+                //                 m.plasmaSweep = 0
+                //                 if (m.fireCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 30
+                //             }
+                //         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+                //             m.pickUp();
+                //             m.plasmaSweep = 0
+                //         } else {
+                //             m.plasmaSweep = 0
+                //             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                //         }
+                //         m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
+                //     }
             } else {
                 m.hold = function () {
                     if (m.isHolding) {
@@ -4863,6 +4940,31 @@ const m = {
         //     }
         //     m.drawRegenEnergy()
         // },
+    },
+    {
+        name: "grappling hook",
+        // description: `use <strong class='color-f'>energy</strong> to pull yourself towards the <strong>map</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
+        description: `use <strong class='color-f'>energy</strong> to fire a hook that attaches to <strong>map</strong>,<br>pulls player, <strong class='color-d'>damages</strong> mobs, and destroys <strong class='color-block'>blocks</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
+        effect: () => {
+            m.fieldFire = true;
+            // m.holdingMassScale = 0.01; //can hold heavier blocks with lower cost to jumping
+            m.fieldMeterColor = "#333"
+            m.eyeFillColor = m.fieldMeterColor
+            m.fieldHarmReduction = 0.45; //55% reduction
+
+            m.hold = function () {
+                if (input.field) {
+                    if (m.fieldCDcycle < m.cycle) {
+                        if (m.energy > 0.02) m.energy -= 0.02
+                        const where = { x: m.pos.x + 40 * Math.cos(m.angle), y: m.pos.y + 40 * Math.sin(m.angle) }
+                        b.grapple(where, m.angle)
+                        if (m.fieldCDcycle < m.cycle + 20) m.fieldCDcycle = m.cycle + 20
+                    }
+                    m.grabPowerUp();
+                }
+                m.drawRegenEnergy()
+            }
+        }
     },
     ],
     //************************************************************************************

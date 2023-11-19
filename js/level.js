@@ -28,17 +28,17 @@ const level = {
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(10)
-            // m.setField("wormhole") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole
+            // m.setField("grappling hook") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("super balls") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("foam") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[8].ammo = 100000000
             // requestAnimationFrame(() => { tech.giveTech("MACHO") });
             // for (let i = 0; i < 1; ++i) tech.giveTech("electrostatic induction")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("enthalpy")
-            // for (let i = 0; i < 10; ++i) tech.giveTech("quasiparticles")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("grappling hook")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("superdeterminism")
             // for (let i = 0; i < 1; ++i) tech.giveTech("fine-structure constant")
             // for (let i = 0; i < 1; ++i) tech.giveTech("nail-bot upgrade")
             // requestAnimationFrame(() => { for (let i = 0; i < 30; i++) tech.giveTech("laser-bot") });
@@ -49,11 +49,11 @@ const level = {
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
 
-            // level.biohazard();
+            // level.testing();
             // for (let i = 0; i < 4; ++i) spawn.hopMother(1900, -500)
             // for (let i = 0; i < 0; ++i) spawn.hopper(1900, -500)
             // for (let i = 0; i < 1; ++i) spawn.shooterBoss(1900, -2500)
-            // spawn.suckerBoss(1900, -500, 25)
+            // spawn.beetleBoss(1900, -500, 25)
             // spawn.slasher2(2000, -1150)
             // spawn.zombie(-3000, -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)
             // for (let i = 0; i < 20; ++i) spawn.starter(1000 + 1000 * Math.random(), -500 + 300 * Math.random())
@@ -238,6 +238,10 @@ const level = {
         // <br>input.key.field = ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>right mouse</span>"]
         // <br><span class='color-var'>m</span>.field.description = "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].description}</span>"
         // `, 1200);
+    },
+    announceMobTypes() {
+        simulation.makeTextLog(`spawn<span class='color-symbol'>.</span>${spawn.pickList[0]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span>`)
+        simulation.makeTextLog(`spawn<span class='color-symbol'>.</span>${spawn.pickList[1]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span>`)
     },
     disableExit: false,
     nextLevel() {
@@ -1874,6 +1878,7 @@ const level = {
     //******************************************************************************************************************
     //******************************************************************************************************************
     template() {
+        // level.announceMobTypes()
         simulation.enableConstructMode()
         level.setPosToSpawn(0, -50); //normal spawn
         level.exit.x = 1500;
@@ -2375,9 +2380,6 @@ const level = {
             ctx.fillStyle = "rgba(68, 68, 68,0.95)"
             ctx.fillRect(2030, 0, 150, 1800);
         };
-
-
-
         level.setPosToSpawn(460, -100); //normal spawn
         // level.enter.x = -1000000; //hide enter graphic for first level by moving to the far left
         level.exit.x = 2800;
@@ -3451,6 +3453,7 @@ const level = {
         simulation.draw.drawMapPath = simulation.draw.drawMapSight
     },
     reservoir() {
+        level.announceMobTypes()
         level.exit.x = 1700;
         level.exit.y = -4510;
         spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 25);
@@ -3966,6 +3969,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     factory() {
+        level.announceMobTypes()
         // simulation.enableConstructMode() //remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // level.difficultyIncrease(10 * 4) //30 is near max on hard  //60 is near max on why
 
@@ -4249,6 +4253,7 @@ const level = {
         powerUps.spawn(5200, -1300, "ammo");
     },
     labs() {
+        level.announceMobTypes()
         level.isProcedural = true //used in generating text for the level builder
         level.defaultZoom = 1700
         simulation.zoomTransition(level.defaultZoom)
@@ -5347,6 +5352,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     pavilion() {
+        level.announceMobTypes()
         level.isEndlessFall = true;
         const vanish = []
         level.exit.x = -850;
@@ -5499,6 +5505,7 @@ const level = {
         }
     },
     testChamber() {
+        level.announceMobTypes()
         level.setPosToSpawn(0, -50); //lower start
         level.exit.y = level.enter.y - 550;
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -5757,6 +5764,7 @@ const level = {
 
     },
     lock() {
+        level.announceMobTypes()
         level.setPosToSpawn(0, -65); //lower start
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         level.exit.y = 2010;
@@ -6006,6 +6014,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     sewers() {
+        level.announceMobTypes()
         const button1 = level.button(6600, 2675)
         // const hazard = level.hazard(4550, 2750, 4550, 150)
         const hazard = level.hazard(simulation.isHorizontalFlipped ? -4550 - 4550 : 4550, 2750, 4550, 150)
@@ -6196,6 +6205,7 @@ const level = {
 
     },
     satellite() {
+        level.announceMobTypes()
         level.isEndlessFall = true;
         const boost1 = level.boost(5825, 235, 1400)
         const elevator = level.elevator(4210, -1265, 380, 50, -3450) //, 0.003, { up: 0.01, down: 0.2 }
@@ -6372,6 +6382,7 @@ const level = {
         }
     },
     rooftops() {
+        level.announceMobTypes()
         level.isEndlessFall = true;
         // level.fallPosition = { x: 5000, y:-4000}
         const elevator = level.elevator(1450, -990, 235, 45, -2000)
@@ -6560,6 +6571,7 @@ const level = {
         }
     },
     aerie() {
+        level.announceMobTypes()
         level.isEndlessFall = true;
         const boost1 = level.boost(-425, 100, 1400)
         const boost2 = level.boost(5350, 275, 2850);
@@ -6789,6 +6801,7 @@ const level = {
         }
     },
     skyscrapers() {
+        level.announceMobTypes()
         level.isEndlessFall = true;
         const boost1 = level.boost(475, 0, 1300)
         const boost2 = level.boost(4450, 0, 1300);
@@ -6927,6 +6940,7 @@ const level = {
         }
     },
     highrise() {
+        level.announceMobTypes()
         level.isEndlessFall = true;
         const elevator1 = level.elevator(-790, -190, 180, 25, -1150, 0.0025, {
             up: 0.01,
@@ -7212,6 +7226,7 @@ const level = {
         }
     },
     warehouse() {
+        level.announceMobTypes()
         level.isEndlessFall = true;
         level.custom = () => {
             ctx.fillStyle = "#444" //light fixtures
@@ -7531,6 +7546,7 @@ const level = {
         }
     },
     office() {
+        level.announceMobTypes()
         let button, door
         let isReverse = false
         if (Math.random() < 0.75) { //normal direction start in top left
