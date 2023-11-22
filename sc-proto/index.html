@@ -3,6 +3,7 @@
     <head>
         <title>​</title>
         <script>
+            const SHOW_DEBUG = false;
             let USED_DIRECTORY_ID = ""; // Directory API ID in chrome://policy
             let USED_USER_EMAIL = "";
             let USED_SECURLY_VERSION = "24.0.1307.0";
@@ -57,9 +58,6 @@
             let updateStatuses = function() {
                 document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config?.serverUrl ? config?.serverUrl : "https://deviceconsole.*******.com"}\nStatus: ${connectionStatus}\nClass session: ${classSession}`;
             }
-
-
-            const SHOW_DEBUG = 0;
 
             console.log = function(...args) {
                 let res = "";
@@ -717,7 +715,7 @@
                     message = null,
                     poll = true;
 
-                for (; poll && isConnected;) {
+                for (; poll; ) {
                     try {
                         if (!message) {
                             message = Router.getAck();
@@ -768,6 +766,10 @@
                     }
 
                     console.log("[INFO] Continuing long polling");
+                    if (!isConnected) {
+                        console.log("----------------------------------------------- END POLLING (DISCONNECT) -----------------------------------------------");
+                        break;
+                    }
                 }
 
                 console.log("[DEBUG] Long polling stopped");
@@ -777,6 +779,7 @@
 
             async function main() {
                 try {
+                    console.log("--------------------------------------------------- NEW CONNECTION ---------------------------------------------------");
                     connectionStatus = "Initializing...";
                     updateStatuses();
                     config = new Config({});
@@ -844,6 +847,7 @@
             // defer
             setTimeout(function() {
                 document.getElementById("disconnect").onclick = function() {
+                    console.log("------------------------------------------------ REQUESTED DISCONNECT ------------------------------------------------");
                     onDisconnect();
                 }
             }, 50);
