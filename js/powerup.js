@@ -621,17 +621,18 @@ const powerUps = {
             return 17;
         },
         effect() {
+            const couplingExtraAmmo = m.fieldMode === 10 ? 1 + 0.04 * m.coupling : 1
             if (b.inventory.length > 0) {
                 powerUps.animatePowerUpGrab('rgba(68, 102, 119,0.25)')
                 if (tech.isAmmoForGun && b.activeGun !== null) { //give extra ammo to one gun only with tech logistics
                     const target = b.guns[b.activeGun]
                     if (target.ammo !== Infinity) {
                         if (tech.ammoCap) {
-                            const ammoAdded = Math.ceil(target.ammoPack * 0.7 * tech.ammoCap * 0.8) //0.7 is average
+                            const ammoAdded = Math.ceil(target.ammoPack * 0.7 * tech.ammoCap * 0.8 * couplingExtraAmmo) //0.7 is average
                             target.ammo = ammoAdded
                             // simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}`)
                         } else {
-                            const ammoAdded = Math.ceil((0.7 * Math.random() + 0.7 * Math.random()) * target.ammoPack * 0.8)
+                            const ammoAdded = Math.ceil((0.7 * Math.random() + 0.7 * Math.random()) * target.ammoPack * 0.8 * couplingExtraAmmo)
                             target.ammo += ammoAdded
                             // simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
                         }
@@ -642,11 +643,12 @@ const powerUps = {
                         const target = b.guns[b.inventory[i]]
                         if (target.ammo !== Infinity) {
                             if (tech.ammoCap) {
-                                const ammoAdded = Math.ceil(target.ammoPack * 0.45 * tech.ammoCap) //0.45 is average
+                                const ammoAdded = Math.ceil(target.ammoPack * 0.45 * tech.ammoCap * couplingExtraAmmo) //0.45 is average
                                 target.ammo = ammoAdded
                                 // textLog += `${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}<br>`
-                            } else {
-                                const ammoAdded = Math.ceil((0.45 * Math.random() + 0.45 * Math.random()) * target.ammoPack) //Math.ceil(Math.random() * target.ammoPack)
+                            } else { //default ammo behavior
+                                const ammoAdded = Math.ceil((0.45 * Math.random() + 0.45 * Math.random()) * target.ammoPack * couplingExtraAmmo) //Math.ceil(Math.random() * target.ammoPack)
+                                // console.log(ammoAdded, Math.ceil((0.45 * Math.random() + 0.45 * Math.random()) * target.ammoPack))
                                 target.ammo += ammoAdded
                                 // textLog += `${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}<br>`
                             }
@@ -1270,24 +1272,25 @@ const powerUps = {
                 }
                 for (let i = 0; i < localSettings.entanglement.techIndexes.length; i++) { //add tech
                     let choose = localSettings.entanglement.techIndexes[i]
-                    const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-
-                    if (choose === null || tech.tech[choose].count + 1 > tech.tech[choose].maxCount || !tech.tech[choose].allowed()) {
-                        // text += `<div class="choose-grid-module" style = "background-color: #efeff5; border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding-top: 6px; padding-bottom: 6px;"><div class="grid-title">${tech.tech[choose].name} <span style = "color: #aaa;font-weight: normal;font-size:80%;">- incoherent</span></div></div>`
-                        text += powerUps.incoherentTechText(choose)
-                    } else {
-                        if (tech.tech[choose].isFieldTech) {
-                            text += powerUps.fieldTechText(choose, `powerUps.choose('tech',${choose})`)
-                        } else if (tech.tech[choose].isGunTech) {
-                            text += powerUps.gunTechText(choose, `powerUps.choose('tech',${choose})`)
-                        } else if (tech.tech[choose].isLore) {
-                            text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
-                        } else if (tech.tech[choose].isJunk) {
-                            text += powerUps.junkTechText(choose, `powerUps.choose('tech',${choose})`)
-                        } else if (tech.tech[choose].isSkin) {
-                            text += powerUps.skinTechText(choose, `powerUps.choose('tech',${choose})`)
-                        } else { //normal tech
-                            text += powerUps.techText(choose, `powerUps.choose('tech',${choose})`)
+                    if (tech.tech[choose]) {
+                        const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
+                        if (choose === null || tech.tech[choose].count + 1 > tech.tech[choose].maxCount || !tech.tech[choose].allowed()) {
+                            // text += `<div class="choose-grid-module" style = "background-color: #efeff5; border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding-top: 6px; padding-bottom: 6px;"><div class="grid-title">${tech.tech[choose].name} <span style = "color: #aaa;font-weight: normal;font-size:80%;">- incoherent</span></div></div>`
+                            text += powerUps.incoherentTechText(choose)
+                        } else {
+                            if (tech.tech[choose].isFieldTech) {
+                                text += powerUps.fieldTechText(choose, `powerUps.choose('tech',${choose})`)
+                            } else if (tech.tech[choose].isGunTech) {
+                                text += powerUps.gunTechText(choose, `powerUps.choose('tech',${choose})`)
+                            } else if (tech.tech[choose].isLore) {
+                                text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                            } else if (tech.tech[choose].isJunk) {
+                                text += powerUps.junkTechText(choose, `powerUps.choose('tech',${choose})`)
+                            } else if (tech.tech[choose].isSkin) {
+                                text += powerUps.skinTechText(choose, `powerUps.choose('tech',${choose})`)
+                            } else { //normal tech
+                                text += powerUps.techText(choose, `powerUps.choose('tech',${choose})`)
+                            }
                         }
                     }
                 }

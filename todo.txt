@@ -1,39 +1,29 @@
 ******************************************************** NEXT PATCH **************************************************
 
-grappling hook is now a field  (work in progress)
-  reworked physics to allow faster speeds, but more control
-  improved rate of power up grabbing
-  more player control to hook retraction rate
-  changed hook shape and field image graphics
-  grappling hook field coupling, more tech, bug fixes, and general polish to be added soon
+grappling hook
+  added coupling effect - 4% extra ammo per coupling
+  doesn't destroy blocks, instead the player grabs blocks
+  doesn't automatically retract after hitting power ups
+  improved momentum conservation on yank and catching blocks, power ups
+  removed accidental 55% defense for grapple field
+  tech  (no images yet)
+    autonomous defense - fire harpoons at nearby mobs
+    rupture - explosion on impact with map, block, mob
 
-aerostat - 88->100% damage in air  22-> 25% damage on ground
-foam damage reduced 10%, ammo increased about 10%
-after hitting an invulnerable mob (drones,spores,worms,iceIX,fleas) don't die or lose cycles
-added JUNK tech: mobs! - summon 20 random mobs
-added announcement of mob names in console at start of new level
-
-bug fixes
+negative mass field has horizontal block motion by default
+fixed tech sorting by "allowed tech" in experiment mode
 
 *********************************************************** TODO *****************************************************
 
 grappling hook is a field
   check for places that the player could get into but not out of
-  maybe grapple could grab more then 1 power up?
-  grapple slices blocks
-    cut large blocks into 2,3
-      use dead mob code for mobs > 5 sides
-      write code to cut large blocks in half and remove one half
-  need several field tech
-    new field tech ideas
-      increase hook damage
-      hook damage aura
-      hook's line does damage
-      make several auto targeting harpoons after taking damage
-        how to make them not drain energy
-      generate ___  after destroying blocks
-        energy, drones, iceIX, explosion, nails, junk bots?
-  coupling effect: defense?, bonus from ammo power ups,  fire rate
+  field tech ideas
+    hook and line stuns?
+    increase hook damage      
+    hook damage aura
+    hook's line does damage
+    generate ___  after destroying blocks
+      energy, drones, iceIX, explosion, nails, junk bots?
 
 tech - killing a mob heals for the last damage you took
   disable cloaking heal?  maybe you don't need to disable, just don't heal twice

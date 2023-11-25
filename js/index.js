@@ -524,12 +524,10 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             if (!aHasKeyword && bHasKeyword) return 1;
             return 0;
         }
-
         if (find === 'guntech') {
             tech.tech.sort((a, b) => {
                 if (a.isGunTech && b.isGunTech) {
-                    if (a.allowed() > b.allowed()) return -1; //sort to the top
-                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                    return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 }
                 if (a.isGunTech && !b.isGunTech) return -1; //sort to the top
                 if (!a.isGunTech && b.isGunTech) return 1; //sort to the bottom
@@ -538,30 +536,30 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         } else if (find === 'fieldtech') {
             tech.tech.sort((a, b) => {
                 if (a.isFieldTech && b.isFieldTech) {
-                    if (a.allowed() > b.allowed()) return -1; //sort to the top
-                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                    return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 }
                 if (a.isFieldTech && !b.isFieldTech) return -1; //sort to the top
                 if (!a.isFieldTech && b.isFieldTech) return 1; //sort to the bottom
                 return 0;
             });
         } else if (find === 'allowed') {
+            // tech.tech.sort((a, b) => {
+            //     if (a.allowed() > !b.allowed()) return -1; //sort to the top
+            //     if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+            //     return 0;
+            // });
             tech.tech.sort((a, b) => {
-                if (a.allowed() > b.allowed()) return -1; //sort to the top
-                if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
-                return 0;
+                return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
             });
         } else if (find === 'have') {
             tech.tech.sort((a, b) => {
-                if (a.count > b.count) return -1; //sort to the top
-                if (!a.count < b.count) return 1; //sort to the bottom
+                return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 return 0;
             });
         } else if (find === 'heal') {
             tech.tech.sort((a, b) => {
                 if (a.isHealTech && b.isHealTech) {
-                    if (a.allowed() > b.allowed()) return -1; //sort to the top
-                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                    return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 }
                 if (a.isHealTech && !b.isHealTech) return -1; //sort to the top
                 if (!a.isHealTech && b.isHealTech) return 1; //sort to the bottom
@@ -570,8 +568,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         } else if (find === 'bot') {
             tech.tech.sort((a, b) => {
                 if (a.isBotTech && b.isBotTech) {
-                    if (a.allowed() > b.allowed()) return -1; //sort to the top
-                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                    return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 }
                 if (a.isBotTech && !b.isBotTech) return -1; //sort to the top
                 if (!a.isBotTech && b.isBotTech) return 1; //sort to the bottom
@@ -580,8 +577,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         } else if (document.getElementById("sort-input").value === 'skin') {
             tech.tech.sort((a, b) => {
                 if (a.isSkin && b.isSkin) {
-                    if (a.allowed() > b.allowed()) return -1; //sort to the top
-                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                    return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 }
                 if (a.isSkin && !b.isSkin) return -1; //sort to the top
                 if (!a.isSkin && b.isSkin) return 1; //sort to the bottom

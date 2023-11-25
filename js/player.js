@@ -2496,7 +2496,6 @@ const m = {
         // set pick up target for when mouse is released
         if (body[grabbing.targetIndex]) {
             m.holdingTarget = body[grabbing.targetIndex];
-            //
             ctx.beginPath(); //draw on each valid body
             let vertices = m.holdingTarget.vertices;
             ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -2588,6 +2587,8 @@ const m = {
                 return `<strong>+${(4 * couple).toFixed(0)}%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>`
             case 9: //wormhole
                 return `<span style = 'font-size:89%;'>after eating <strong class='color-block'>blocks</strong> <strong>+${(2 * couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong></span>`
+            case 10: //grappling hook
+                return `${powerUps.orb.ammo(1)} give ${(4 * couple).toFixed(0)}% more ammo`
         }
     },
     couplingChange(change = 0) {
@@ -2659,12 +2660,6 @@ const m = {
             }
         }
     },
-    // <div id="cube" style="width: 4em; height: 8em;">
-    //     <div style="transform: translate3d(1em, 0em, 0em)">1</div>
-    //     <div style="transform: translate3d(2em, 0em, 0em)">2</div>
-    //     <div style="transform: translate3d(3em, 0em, 0em)">3</div>
-    //     <div style="transform: translate3d(4em, 0em, 0em)">4</div>
-    // </div>
     {
         name: "standing wave",
         //<strong>deflecting</strong> protects you in every <strong>direction</strong>
@@ -3083,7 +3078,20 @@ const m = {
                                 for (let i = 0, len = who.length; i < len; ++i) {
                                     sub = Vector.sub(who[i].position, m.pos);
                                     dist = Vector.magnitude(sub);
-                                    if (dist < range) who[i].force.y -= who[i].mass * (simulation.g * mag);
+                                    if (dist < range) {
+                                        who[i].force.y -= who[i].mass * (simulation.g * mag); //add a bit more then standard gravity
+                                        if (input.left) { //blocks move horizontally with the same force as the player
+                                            who[i].force.x -= m.FxAir * who[i].mass / 10; // move player   left / a
+                                        } else if (input.right) {
+                                            who[i].force.x += m.FxAir * who[i].mass / 10; //move player  right / d
+                                        }
+                                    }
+
+
+
+                                    // sub = Vector.sub(who[i].position, m.pos);
+                                    // dist = Vector.magnitude(sub);
+                                    // if (dist < range) who[i].force.y -= who[i].mass * (simulation.g * mag);
                                 }
                             }
                             //control horizontal acceleration
@@ -3825,7 +3833,8 @@ const m = {
             }
             if (tech.isRewindField) {
                 this.rewindCount = 0
-                m.grabPowerUpRange2 = 300000
+                m.grabPowerUpRange2 = 300000//        m.grabPowerUpRange2 = 200000;
+
                 m.hold = function () {
                     // console.log(m.fieldCDcycle)
                     m.grabPowerUp();
@@ -4944,25 +4953,64 @@ const m = {
     {
         name: "grappling hook",
         // description: `use <strong class='color-f'>energy</strong> to pull yourself towards the <strong>map</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
-        description: `use <strong class='color-f'>energy</strong> to fire a hook that attaches to <strong>map</strong>,<br>pulls player, <strong class='color-d'>damages</strong> mobs, and destroys <strong class='color-block'>blocks</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
+        description: `use <strong class='color-f'>energy</strong> to fire a hook that <strong>pulls</strong> player<br><strong class='color-d'>damages</strong> mobs and destroys <strong class='color-block'>blocks</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
         effect: () => {
             m.fieldFire = true;
             // m.holdingMassScale = 0.01; //can hold heavier blocks with lower cost to jumping
             m.fieldMeterColor = "#333"
             m.eyeFillColor = m.fieldMeterColor
-            m.fieldHarmReduction = 0.45; //55% reduction
+            m.grabPowerUpRange2 = 300000 //m.grabPowerUpRange2 = 200000;
+            // m.fieldHarmReduction = 0.45; //55% reduction
 
             m.hold = function () {
-                if (input.field) {
+                if (m.isHolding) {
+                    m.drawHold(m.holdingTarget);
+                    m.holding();
+                    m.throwBlock();
+                } else if (input.field) {
+                    m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     if (m.fieldCDcycle < m.cycle) {
                         if (m.energy > 0.02) m.energy -= 0.02
-                        const where = { x: m.pos.x + 40 * Math.cos(m.angle), y: m.pos.y + 40 * Math.sin(m.angle) }
-                        b.grapple(where, m.angle)
+                        b.grapple({ x: m.pos.x + 40 * Math.cos(m.angle), y: m.pos.y + 40 * Math.sin(m.angle) }, m.angle)
                         if (m.fieldCDcycle < m.cycle + 20) m.fieldCDcycle = m.cycle + 20
                     }
                     m.grabPowerUp();
+                } else {
+                    m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                    if (tech.isHookDefense && m.energy > 0.33 && m.fieldCDcycle < m.cycle) {
+                        const maxCount = 6 //scale the number of hooks fired
+                        let count = maxCount
+                        const range = 300
+                        for (let i = 0; i < mob.length; i++) {
+                            if (!mob[i].isBadTarget &&
+                                !mob[i].isInvulnerable &&
+                                Vector.magnitude(Vector.sub(m.pos, mob[i].position)) < range &&
+                                Matter.Query.ray(map, m.pos, mob[i].position).length === 0
+                            ) {
+                                count--
+                                m.energy -= 0.2
+                                if (m.fieldCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 30
+                                const angle = Math.atan2(mob[i].position.y - player.position.y, mob[i].position.x - player.position.x);
+                                b.harpoon(m.pos, mob[i], angle, 0.75, true, 20) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
+                                bullet[bullet.length - 1].drain = 0
+                                for (; count > 0; count--) {
+                                    b.harpoon(m.pos, mob[i], angle + count * 2 * Math.PI / maxCount, 0.75, true, 10)
+                                    bullet[bullet.length - 1].drain = 0
+                                }
+                                break
+                            }
+                        }
+                        ctx.beginPath();
+                        ctx.arc(m.pos.x, m.pos.y, range, 0, 2 * Math.PI);
+                        ctx.strokeStyle = "#000";
+                        ctx.lineWidth = 0.25;
+                        ctx.setLineDash([10, 30]);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
                 }
                 m.drawRegenEnergy()
+                //look for nearby mobs and fire harpoons at them
             }
         }
     },

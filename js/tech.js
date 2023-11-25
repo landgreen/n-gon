@@ -4545,7 +4545,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (!tech.isLargeHarpoon && tech.haveGunCheck("harpoon")) || tech.isNeedles
+            return (!tech.isLargeHarpoon && tech.haveGunCheck("harpoon")) || tech.isNeedles || tech.isHookDefense
         },
         requires: "needle gun, harpoon, not Bessemer process",
         effect() {
@@ -5149,7 +5149,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return ((tech.haveGunCheck("super balls") || tech.isSuperMine) && !tech.isSuperBounce) || (tech.haveGunCheck("harpoon") && !tech.fragments)
+            return ((tech.haveGunCheck("super balls") || tech.isSuperMine) && !tech.isSuperBounce) || (tech.haveGunCheck("harpoon") && !tech.fragments) || tech.isHookDefense
         },
         requires: "super balls, harpoon, not fragmentation",
         effect() {
@@ -5574,7 +5574,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return !tech.isExplodeRadio && ((tech.haveGunCheck("harpoon") && !tech.isFoamBall) || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount || tech.isRivets || tech.blockDamage > 0.075)
+            return !tech.isExplodeRadio && ((tech.haveGunCheck("harpoon") && !tech.isFoamBall) || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount || tech.isRivets || tech.blockDamage > 0.075 || tech.isHookDefense)
         },
         requires: "grenades, missiles, rivets, harpoon, or mass driver, not iridium-192, not polyurethane foam",
         effect() {
@@ -7784,7 +7784,7 @@ const tech = {
     },
     {
         name: "inertial mass",
-        description: "<strong>negative mass</strong> is larger and <strong>faster</strong><br><strong class='color-block'>blocks</strong> also move <strong>horizontally</strong> with the field",
+        description: "<strong>negative mass</strong> is larger and <strong>faster</strong>",  //<br><strong class='color-block'>blocks</strong> also move <strong>horizontally</strong> with the field
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -8052,7 +8052,7 @@ const tech = {
     },
     {
         name: "electric generator",
-        description: "after <strong>deflecting</strong> mobs<br>molecular assembler generates <strong>+50</strong> <strong class='color-f'>energy</strong>",
+        description: "after <strong>deflecting</strong> mobs<br><strong>molecular assembler</strong> generates <strong>+50</strong> <strong class='color-f'>energy</strong>",
         isFieldTech: true,
         maxCount: 9,
         count: 0,
@@ -8754,6 +8754,82 @@ const tech = {
             tech.isWormholeMapIgnore = false
         }
     },
+    {
+        name: "autonomous defense",
+        description: "<strong>grappling hook</strong> uses <strong>20</strong> <strong class='color-f'>energy</strong><br> to fire <strong>harpoons</strong> at nearby mobs",
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 10
+        },
+        requires: "grappling hook",
+        effect() {
+            tech.isHookDefense = true
+        },
+        remove() {
+            tech.isHookDefense = false
+        }
+    },
+    {
+        name: "rupture",
+        description: "after <strong>grappling hook</strong> impacts solid objects<br>generate an <strong class='color-e'>explosion</strong>",
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 10
+        },
+        requires: "grappling hook",
+        effect() {
+            tech.isHookExplosion = true
+        },
+        remove() {
+            tech.isHookExplosion = false
+        }
+    },
+    // {
+    //     name: "autonomous defense",
+    //     description: "if you <strong>collide</strong> with a mob<br>fire <strong>harpoons</strong> at nearby mobs",
+    //     isFieldTech: true,
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 2,
+    //     frequencyDefault: 2,
+    //     allowed() {
+    //         return m.fieldMode === 10 && !tech.isHookDefense
+    //     },
+    //     requires: "grappling hook, not automatic offense",
+    //     effect() {
+    //         tech.isHookDefense = true
+    //     },
+    //     remove() {
+    //         tech.isHookDefense = false
+    //     }
+    // },
+    //     {
+    //     name: "wire",
+    //     description: "",
+    //     isFieldTech: true,
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 2,
+    //     frequencyDefault: 2,
+    //     allowed() {
+    //         return m.fieldMode === 10
+    //     },
+    //     requires: "grappling hook",
+    //     effect() {
+    //         tech.isHookWire = true
+    //     },
+    //     remove() {
+    //         tech.isHookWire = false
+    //     }
+    // },
     //************************************************** 
     //************************************************** experimental
     //************************************************** modes
@@ -11800,4 +11876,7 @@ const tech = {
     isHealBrake: null,
     isMassProduction: null,
     isPrinter: null,
+    // isHookWire: null,
+    isHookDefense: null,
+    isHookExplosion: null,
 }

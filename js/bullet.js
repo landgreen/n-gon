@@ -1484,54 +1484,17 @@ const b = {
             index: 3,
             isInternal: false
         }, {
-            x: 34,
-            y: 5,
+            x: 37,
+            y: 3,
             index: 4,
             isInternal: false
         }],
-
-            // [{
-            //     x: -10,
-            //     y: 2,
-            //     index: 0,
-            //     isInternal: false
-            // }, {
-            //     x: -10,
-            //     y: -2,
-            //     index: 1,
-            //     isInternal: false
-            // }, {
-            //     x: 35,
-            //     y: -3,
-            //     index: 2,
-            //     isInternal: false
-            // }, {
-            //     x: 37,
-            //     y: -2,
-            //     index: 3,
-            //     isInternal: false
-            // }, {
-            //     x: 40,
-            //     y: 0,
-            //     index: 4,
-            //     isInternal: false
-            // }, {
-            //     x: 37,
-            //     y: 2,
-            //     index: 5,
-            //     isInternal: false
-            // }, {
-            //     x: 35,
-            //     y: 3,
-            //     index: 6,
-            //     isInternal: false
-            // }],
             {
                 angle: angle,
                 friction: 1,
                 frictionAir: 0.4,
                 thrustMag: 0.13,
-                dmg: 6, //damage done in addition to the damage from momentum
+                dmg: 8, //damage done in addition to the damage from momentum
                 classType: "bullet",
                 endCycle: simulation.cycle + 70,
                 isSlowPull: false,
@@ -1543,6 +1506,70 @@ const b = {
                 // lookFrequency: Math.floor(7 + Math.random() * 3),
                 density: 0.004, //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
                 drain: 0.001,
+                draw() {
+                    const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
+                    const sub = Vector.sub(where, this.vertices[0])
+                    const controlPoint = Vector.add(where, Vector.mult(sub, -0.5))
+                    //draw rope
+                    ctx.beginPath();
+                    ctx.moveTo(where.x, where.y);
+                    ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
+                    // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+                    // if (tech.isHookWire) {
+                    //     //draw wire
+                    //     const hitMob = Matter.Query.ray(mob, this.position, m.pos, 10)
+                    //     if (hitMob.length && m.immuneCycle < m.cycle) {
+                    //         for (let i = 0; i < hitMob.length; i++) {
+                    //             console.log(hitMob[i].bodyA)
+                    //             // simulation.drawList.push({ //add dmg to draw queue
+                    //             //     x: path[path.length - 1].x,
+                    //             //     y: path[path.length - 1].y,
+                    //             //     radius: Math.sqrt(2000 * damage * best.who.damageReduction) + 2,
+                    //             //     color: tech.laserColorAlpha,
+                    //             //     time: simulation.drawTime
+                    //             // });
+                    //             hitMob[i].bodyA.damage(0.001)
+                    //         }
+                    //     }
+                    //     //draw glow around wire
+                    //     ctx.strokeStyle = "rgba(0,255,255,0.2)" // "#0ce"
+                    //     ctx.lineWidth = 20
+                    //     ctx.stroke();
+                    // }
+                    ctx.strokeStyle = "rgba(0,255,255,0.2)" // "#0ce"
+                    ctx.lineWidth = 10
+                    ctx.stroke();
+                    ctx.strokeStyle = "#000" // "#0ce"
+                    ctx.lineWidth = 0.5
+                    ctx.stroke();
+
+
+
+                    //draw harpoon spikes
+                    // ctx.beginPath();
+                    // ctx.lineTo(this.vertices[3].x, this.vertices[3].y);
+                    // // const spike1 = Vector.add(this.vertices[1], Vector.mult(Vector.sub(this.vertices[1], this.vertices[2]), 3))
+                    // // ctx.lineTo(spike1.x, spike1.y);
+                    // const controlPoint2 = Vector.add(this.vertices[3], Vector.mult(Vector.sub(this.vertices[3], this.vertices[2]), 20))
+                    // ctx.quadraticCurveTo(controlPoint2.x, controlPoint2.y, this.vertices[2].x, this.vertices[2].y)
+                    // ctx.fillStyle = '#000'
+                    // ctx.fill();
+
+
+                    ctx.beginPath();
+                    ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+                    const spikeLength = 2
+                    // const spike1 = Vector.add(this.vertices[1], Vector.mult(Vector.sub(this.vertices[1], this.vertices[2]), spikeLength))
+                    // ctx.moveTo(this.vertices[2].x, this.vertices[2].y);
+                    // ctx.lineTo(spike1.x, spike1.y);
+                    // ctx.lineTo(this.vertices[3].x, this.vertices[3].y);
+                    const spike2 = Vector.add(this.vertices[3], Vector.mult(Vector.sub(this.vertices[3], this.vertices[2]), spikeLength))
+                    ctx.moveTo(this.vertices[2].x, this.vertices[2].y);
+                    ctx.lineTo(spike2.x, spike2.y);
+                    ctx.lineTo(this.vertices[1].x, this.vertices[1].y);
+                    ctx.fillStyle = '#000'
+                    ctx.fill();
+                },
                 beforeDmg(who) {
                     if (tech.isShieldPierce && who.isShielded) { //disable shields
                         who.isShielded = false
@@ -1565,7 +1592,9 @@ const b = {
                     //     // this.endCycle = 0;
                     // }
                     if (m.fieldCDcycle < m.cycle + 40) m.fieldCDcycle = m.cycle + 40  //extra long cooldown on hitting mobs
+                    if (tech.isHookExplosion) b.explosion(this.position, 250 + 150 * Math.random()); //makes bullet do explosive damage at end
                     this.retract()
+
                 },
                 caughtPowerUp: null,
                 dropCaughtPowerUp() {
@@ -1594,35 +1623,6 @@ const b = {
                         this.dropCaughtPowerUp()
                     }
                 },
-                draw() {
-                    const where = {
-                        x: m.pos.x + 30 * Math.cos(m.angle),
-                        y: m.pos.y + 30 * Math.sin(m.angle)
-                    }
-                    const sub = Vector.sub(where, this.vertices[0])
-                    const controlPoint = Vector.add(where, Vector.mult(sub, -0.5))
-                    ctx.strokeStyle = "#000" // "#0ce"
-                    ctx.lineWidth = 0.5
-                    ctx.beginPath();
-                    ctx.moveTo(where.x, where.y);
-                    ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
-                    // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
-                    ctx.stroke();
-                    //draw harpoon spikes
-                    const spikeLength = 2
-                    ctx.beginPath();
-                    const spike1 = Vector.add(this.vertices[1], Vector.mult(Vector.sub(this.vertices[1], this.vertices[2]), spikeLength))
-                    ctx.moveTo(this.vertices[2].x, this.vertices[2].y);
-                    ctx.lineTo(spike1.x, spike1.y);
-                    ctx.lineTo(this.vertices[3].x, this.vertices[3].y);
-
-                    const spike2 = Vector.add(this.vertices[3], Vector.mult(Vector.sub(this.vertices[3], this.vertices[2]), spikeLength))
-                    ctx.moveTo(this.vertices[2].x, this.vertices[2].y);
-                    ctx.lineTo(spike2.x, spike2.y);
-                    ctx.lineTo(this.vertices[1].x, this.vertices[1].y);
-                    ctx.fillStyle = '#000'
-                    ctx.fill();
-                },
                 retract() {
                     this.do = this.returnToPlayer
                     this.endCycle = simulation.cycle + 60
@@ -1630,7 +1630,8 @@ const b = {
                     if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
                     this.collisionFilter.mask = 0//cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
                     //recoil on pulling grapple back
-                    const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (m.crouch ? 0.0001 : 0.0002))
+                    const mag = this.pickUpTarget ? Math.max(this.pickUpTarget.mass, 0.5) : 0.5
+                    const momentum = Vector.mult(Vector.sub(this.position, m.pos), mag * (m.crouch ? 0.0001 : 0.0002))
                     player.force.x += momentum.x
                     player.force.y += momentum.y
                 },
@@ -1642,7 +1643,20 @@ const b = {
                         const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (m.crouch ? 0.0001 : 0.0002))
                         player.force.x += momentum.x
                         player.force.y += momentum.y
+                        if (this.pickUpTarget) {
+                            m.holdingTarget = this.pickUpTarget
+                            // give block to player after it returns
+                            m.isHolding = true;
+                            //conserve momentum when player mass changes
+                            totalMomentum = Vector.add(Vector.mult(player.velocity, player.mass), Vector.mult(Vector.normalise(this.velocity), 15 * Math.min(20, this.pickUpTarget.mass)))
+                            Matter.Body.setVelocity(player, Vector.mult(totalMomentum, 1 / (m.defaultMass + this.pickUpTarget.mass)));
 
+                            m.definePlayerMass(m.defaultMass + this.pickUpTarget.mass * m.holdingMassScale)
+                            //make block collide with nothing
+                            m.holdingTarget.collisionFilter.category = 0;
+                            m.holdingTarget.collisionFilter.mask = 0;
+                            this.pickUpTarget = null
+                        }
                     } else {
                         if (m.energy > this.drain) m.energy -= this.drain
                         const sub = Vector.sub(this.position, m.pos)
@@ -1651,10 +1665,11 @@ const b = {
                         this.force.x -= returnForce.x
                         this.force.y -= returnForce.y
                         this.grabPowerUp()
+                        this.grabBlocks()
                     }
                     this.draw();
                 },
-                destroyBlocks() {
+                destroyBlocks() {//not used?
                     const blocks = Matter.Query.collides(this, body)
                     if (blocks.length && !blocks[0].bodyA.isNotHoldable) {
                         if (blocks[0].bodyA.mass > 2.5) this.retract()
@@ -1679,6 +1694,32 @@ const b = {
                         })
                     }
                 },
+                pickUpTarget: null,
+                grabBlocks() {
+                    if (this.pickUpTarget) {
+                        //position block on hook
+                        Matter.Body.setPosition(this.pickUpTarget, Vector.add(this.vertices[2], this.velocity))
+                        Matter.Body.setVelocity(this.pickUpTarget, { x: 0, y: 0 })
+                    } else if (!input.down) {
+                        const blocks = Matter.Query.collides(this, body)
+                        if (blocks.length) {
+                            // console.log(blocks)
+                            for (let i = 0; i < blocks.length; i++) {
+                                if (blocks[i].bodyA.classType === "body" && !blocks[i].bodyA.isNotHoldable && !blocks[0].bodyA.mass < 60) {
+                                    this.retract()
+                                    this.pickUpTarget = blocks[i].bodyA
+                                    if (tech.isHookExplosion) b.explosion(this.position, 250 + 150 * Math.random()); //makes bullet do explosive damage at end
+                                } else if (blocks[i].bodyB.classType === "body" && !blocks[i].bodyB.isNotHoldable && !blocks[0].bodyB.mass < 60) {
+                                    this.retract()
+                                    this.pickUpTarget = blocks[i].bodyB
+                                    if (tech.isHookExplosion) b.explosion(this.position, 250 + 150 * Math.random()); //makes bullet do explosive damage at end
+                                }
+                            }
+                            // if (blocks[0].bodyA.mass > 2.5 && blocks[0].bodyA.mass > 15) {
+
+                        }
+                    }
+                },
                 grabPowerUp() { //grab power ups near the tip of the harpoon
                     if (this.caughtPowerUp) {
                         Matter.Body.setPosition(this.caughtPowerUp, Vector.add(this.vertices[2], this.velocity))
@@ -1695,7 +1736,7 @@ const b = {
                                     powerUp[i].collisionFilter.mask = 0
                                     this.thrustMag *= 0.6
                                     this.endCycle += 0.5 //it pulls back slower, so this prevents it from ending early
-                                    this.retract()
+                                    // this.retract()
                                     break //just pull 1 power up if possible
                                 }
                             }
@@ -1706,7 +1747,8 @@ const b = {
                 do() {
                     if (m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
                     if (input.field) { //&& !Matter.Query.collides(this, body).length
-                        this.destroyBlocks()
+                        // this.destroyBlocks()
+                        this.grabBlocks()
                         this.grabPowerUp()
                         // if (this.endCycle < simulation.cycle + 1) { //if at end of lifespan, but player is holding down field, force retraction
                         //     this.endCycle = simulation.cycle + 30
@@ -1736,6 +1778,7 @@ const b = {
                     if (input.field && Matter.Query.collides(this, map).length) {
                         Matter.Body.setPosition(this, Vector.add(this.position, { x: -20 * Math.cos(this.angle), y: -20 * Math.sin(this.angle) }))
                         if (Matter.Query.collides(this, map).length) {
+                            if (tech.isHookExplosion) b.explosion(this.position, 150 + 50 * Math.random()); //makes bullet do explosive damage at end
                             Matter.Body.setVelocity(this, { x: 0, y: 0 });
                             Matter.Sleeping.set(this, true)
                             this.endCycle = simulation.cycle + 5

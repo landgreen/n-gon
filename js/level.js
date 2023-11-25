@@ -19,16 +19,18 @@ const level = {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // tech.giveTech("performance")
-            // level.difficultyIncrease(3 * 4) //30 is near max on hard  //60 is near max on why
+            // level.difficultyIncrease(1 * 4) //30 is near max on hard  //60 is near max on why
             // spawn.setSpawnList();
             // spawn.setSpawnList();
             // m.maxHealth = m.health = 100
+            // m.maxEnergy = m.energy = 10000000
             // tech.isRerollDamage = true
             // powerUps.research.changeRerolls(99999)
             // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // m.couplingChange(10)
             // m.setField("grappling hook") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // tech.isHookWire = true
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.damage(0.1);
@@ -36,10 +38,8 @@ const level = {
             // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[8].ammo = 100000000
             // requestAnimationFrame(() => { tech.giveTech("MACHO") });
-            // for (let i = 0; i < 1; ++i) tech.giveTech("electrostatic induction")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("grappling hook")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("superdeterminism")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("fine-structure constant")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("autonomous defense")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("rupture")
             // for (let i = 0; i < 1; ++i) tech.giveTech("nail-bot upgrade")
             // requestAnimationFrame(() => { for (let i = 0; i < 30; i++) tech.giveTech("laser-bot") });
             // for (let i = 0; i < 1; i++) tech.giveTech("laser-bot upgrade")
@@ -47,11 +47,11 @@ const level = {
             // for (let i = 0; i < 1; ++i) tech.giveTech("mechanical resonance")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
-            // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "coupling");
+            // for (let i = 0; i < 100; i++) powerUps.directSpawn(1750, -500, "coupling");
 
             // level.testing();
             // for (let i = 0; i < 4; ++i) spawn.hopMother(1900, -500)
-            // for (let i = 0; i < 0; ++i) spawn.hopper(1900, -500)
+            // for (let i = 0; i < 5; ++i) spawn.starter(1900, -500)
             // for (let i = 0; i < 1; ++i) spawn.shooterBoss(1900, -2500)
             // spawn.beetleBoss(1900, -500, 25)
             // spawn.slasher2(2000, -1150)
@@ -63,7 +63,8 @@ const level = {
             // for (let i = 0; i < 40; ++i) tech.giveTech()
 
             level[simulation.isTraining ? "walk" : "intro"]() //normal starting level **************************************************
-
+            // spawn.bodyRect(2425, -120, 200, 200);
+            // console.log(body[body.length - 1].mass)
             // simulation.isAutoZoom = false; //look in close
             // simulation.zoomScale *= 0.5;
             // simulation.setZoom();
