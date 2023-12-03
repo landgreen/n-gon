@@ -218,7 +218,7 @@ const tech = {
         }
     },
     hasExplosiveDamageCheck() {
-        return tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isBoomBotUpgrade || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb)
+        return tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isBoomBotUpgrade || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.isHookExplosion
     },
     damage: 1, //used for tech changes to player damage that don't have complex conditions
     damageFromTech() {
@@ -232,7 +232,7 @@ const tech = {
         //     }
         // }
         if (tech.isDivisor && b.activeGun && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.77
-        if (tech.isNoGroundDamage) dmg *= m.onGround ? 0.75 : 2
+        if (tech.isNoGroundDamage) dmg *= m.onGround ? 0.85 : 2
         if (tech.isDilate) dmg *= 1.5 + 0.6 * Math.sin(m.cycle * 0.0075)
         if (tech.isGunChoice && tech.buffedGun === b.inventoryGun) dmg *= 1 + 0.31 * b.inventory.length
         if (powerUps.boost.endCycle > m.cycle) dmg *= 1 + powerUps.boost.damage
@@ -2047,9 +2047,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return m.fieldMode !== 9 && !tech.isTokamak
+            return m.fieldMode !== 9 && !tech.isTokamak && !tech.isReel
         },
-        requires: "not wormhole, tokamak",
+        requires: "not wormhole, reel, tokamak",
         effect() {
             tech.blockDamage = 0.3
         },
@@ -5670,7 +5670,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 1) && (tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
+            return !tech.isImmuneExplosion && (build.isExperimentSelection || powerUps.research.count > 1) && (tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount > 0 || tech.isIncendiary || tech.isPulseLaser || tech.isTokamak || tech.isHookExplosion || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb))
         },
         requires: "an explosive damage source, not rocket propelled grenade",
         effect() {
@@ -6780,7 +6780,7 @@ const tech = {
         name: "capacitor bank",
         // description: "<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:97%;'>throwing <strong class='color-block'>blocks</strong>, foam, railgun, pulse, tokamak</em>",
         descriptionFunction() {
-            return `<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:93%;'>throwing, ${tech.haveGunCheck("foam", false) ? "<strong>foam</strong>" : "foam"}, ${tech.isPlasmaBall ? "<strong>plasma ball</strong>" : "plasma ball"}, ${tech.isRailGun ? "<strong>railgun</strong>" : "railgun"}, ${tech.isPulseLaser ? "<strong>pulse</strong>" : "pulse"}, ${tech.isTokamak ? "<strong>tokamak</strong>" : "tokamak"}</em>`
+            return `<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style = 'font-size:93%;'><strong class='color-block'>blocks</strong>, ${tech.haveGunCheck("foam", false) ? "<strong>foam</strong>" : "foam"}, ${tech.isPlasmaBall ? "<strong>plasma ball</strong>" : "plasma ball"}, ${tech.isRailGun ? "<strong>railgun</strong>" : "railgun"}, ${tech.isPulseLaser ? "<strong>pulse</strong>" : "pulse"}, ${tech.isTokamak ? "<strong>tokamak</strong>" : "tokamak"}</em>`
         },
         isGunTech: true,
         maxCount: 1,
@@ -6915,6 +6915,25 @@ const tech = {
         },
         remove() {
             tech.isRailEnergy = false;
+        }
+    },
+    {
+        name: "autonomous defense",
+        description: "if you <strong>collide</strong> with a <strong>mob</strong><br>fire <strong>harpoons</strong> at nearby <strong>mobs</strong>",
+        isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return tech.haveGunCheck("harpoon")
+        },
+        requires: "harpoon",
+        effect() {
+            tech.isHarpoonDefense = true
+        },
+        remove() {
+            tech.isHarpoonDefense = false
         }
     },
     {
@@ -7718,7 +7737,7 @@ const tech = {
     },
     {
         name: "neutronium",
-        description: `<strong>move</strong> and <strong>jump</strong> <strong>20%</strong> <strong>slower</strong><br>if your <strong class='color-f'>field</strong> is active <strong>+90%</strong> <strong class='color-defense'>defense</strong>`,
+        description: `<strong>move</strong> and <strong>jump</strong> <strong>20%</strong> <strong>slower</strong><br>if your <strong class='color-f'>field</strong> is active <strong>+95%</strong> <strong class='color-defense'>defense</strong>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -7746,7 +7765,7 @@ const tech = {
     },
     {
         name: "aerostat",
-        description: `<strong>+100%</strong> <strong class='color-d'>damage</strong> while <strong>off</strong> the <strong>ground</strong><br><strong>-25%</strong> <strong class='color-d'>damage</strong> while <strong>on</strong> the <strong>ground</strong>`,
+        description: `<strong>+100%</strong> <strong class='color-d'>damage</strong> while <strong>off</strong> the <strong>ground</strong><br><strong>-15%</strong> <strong class='color-d'>damage</strong> while <strong>on</strong> the <strong>ground</strong>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -8102,9 +8121,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldMode === 5 || m.fieldMode === 4) && !tech.isPrinter
+            return (m.fieldMode === 5 || m.fieldMode === 4 || m.fieldMode === 10) && !tech.isPrinter && !tech.isReel
         },
-        requires: "plasma torch, molecular assembler, not printer",
+        requires: "plasma torch, molecular assembler, grappling hook, not printer, reel",
         effect() {
             tech.isTokamak = true;
         },
@@ -8114,7 +8133,7 @@ const tech = {
     },
     {
         name: "degenerate matter",
-        description: "if your <strong class='color-f'>field</strong> is active<br><strong>+75%</strong> <strong class='color-defense'>defense</strong>",
+        description: "if your <strong class='color-f'>field</strong> is active<br><strong>+85%</strong> <strong class='color-defense'>defense</strong>",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -8755,7 +8774,7 @@ const tech = {
         }
     },
     {
-        name: "autonomous defense",
+        name: "CIWS",
         description: "<strong>grappling hook</strong> uses <strong>20</strong> <strong class='color-f'>energy</strong><br> to fire <strong>harpoons</strong> at nearby mobs",
         isFieldTech: true,
         maxCount: 1,
@@ -8792,8 +8811,29 @@ const tech = {
             tech.isHookExplosion = false
         }
     },
+    {
+        name: "reel",
+        description: "<strong>+400%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong><br><strong>+30</strong> <strong class='color-f'>energy</strong> when reeling in far away <strong class='color-block'>blocks</strong>",
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return m.fieldMode === 10 && !tech.isTokamak && tech.blockDamage === 0.075
+        },
+        requires: "not mass driver",
+        effect() {
+            tech.blockDamage = 0.375
+            tech.isReel = true
+        },
+        remove() {
+            tech.blockDamage = 0.075
+            tech.isReel = false
+        }
+    },
     // {
-    //     name: "autonomous defense",
+    //     name: "CIWS",
     //     description: "if you <strong>collide</strong> with a mob<br>fire <strong>harpoons</strong> at nearby mobs",
     //     isFieldTech: true,
     //     maxCount: 1,
@@ -11879,4 +11919,6 @@ const tech = {
     // isHookWire: null,
     isHookDefense: null,
     isHookExplosion: null,
+    isHarpoonDefense: null,
+    isReel: null,
 }

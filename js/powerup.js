@@ -621,7 +621,7 @@ const powerUps = {
             return 17;
         },
         effect() {
-            const couplingExtraAmmo = m.fieldMode === 10 ? 1 + 0.04 * m.coupling : 1
+            const couplingExtraAmmo = (m.fieldMode === 10 || m.fieldMode === 0) ? 1 + 0.04 * m.coupling : 1
             if (b.inventory.length > 0) {
                 powerUps.animatePowerUpGrab('rgba(68, 102, 119,0.25)')
                 if (tech.isAmmoForGun && b.activeGun !== null) { //give extra ammo to one gun only with tech logistics

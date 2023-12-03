@@ -1498,6 +1498,10 @@ const b = {
                 classType: "bullet",
                 endCycle: simulation.cycle + 70,
                 isSlowPull: false,
+                drawStringControlMagnitude: 1000 + 1000 * Math.random(),
+                drawStringFlip: (Math.round(Math.random()) ? 1 : -1),
+                attached: false,
+                glowColor: tech.isHookExplosion ? "rgba(200,0,0,0.07)" : tech.isHarmReduce ? "rgba(50,100,255,0.1)" : "rgba(0,200,255,0.07)",
                 collisionFilter: {
                     category: cat.bullet,
                     mask: tech.isShieldPierce ? cat.body | cat.mob | cat.mobBullet : cat.body | cat.mob | cat.mobBullet | cat.mobShield,
@@ -1507,13 +1511,31 @@ const b = {
                 density: 0.004, //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
                 drain: 0.001,
                 draw() {
+                    // draw rope
                     const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                     const sub = Vector.sub(where, this.vertices[0])
-                    const controlPoint = Vector.add(where, Vector.mult(sub, -0.5))
-                    //draw rope
+                    ctx.strokeStyle = "#000" // "#0ce"
+                    ctx.lineWidth = 0.5
                     ctx.beginPath();
                     ctx.moveTo(where.x, where.y);
-                    ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
+                    if (this.attached) {
+                        const controlPoint = Vector.add(where, Vector.mult(sub, -0.5))
+                        ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
+                    } else {
+                        const long = Math.max(Vector.magnitude(sub), 60)
+                        const perpendicular = Vector.mult(Vector.normalise(Vector.perp(sub)), this.drawStringFlip * Math.min(0.7 * long, 10 + this.drawStringControlMagnitude / (10 + Vector.magnitude(sub))))
+                        const controlPoint = Vector.add(Vector.add(where, Vector.mult(sub, -0.5)), perpendicular)
+                        ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
+                    }
+                    // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+                    // ctx.stroke();
+                    ctx.strokeStyle = this.glowColor // "#0ce"
+                    ctx.lineWidth = 10
+                    ctx.stroke();
+                    ctx.strokeStyle = "#000" // "#0ce"
+                    ctx.lineWidth = 0.5
+                    ctx.stroke();
+
                     // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
                     // if (tech.isHookWire) {
                     //     //draw wire
@@ -1536,36 +1558,16 @@ const b = {
                     //     ctx.lineWidth = 20
                     //     ctx.stroke();
                     // }
-                    ctx.strokeStyle = "rgba(0,255,255,0.2)" // "#0ce"
-                    ctx.lineWidth = 10
-                    ctx.stroke();
-                    ctx.strokeStyle = "#000" // "#0ce"
-                    ctx.lineWidth = 0.5
-                    ctx.stroke();
 
 
 
-                    //draw harpoon spikes
-                    // ctx.beginPath();
-                    // ctx.lineTo(this.vertices[3].x, this.vertices[3].y);
-                    // // const spike1 = Vector.add(this.vertices[1], Vector.mult(Vector.sub(this.vertices[1], this.vertices[2]), 3))
-                    // // ctx.lineTo(spike1.x, spike1.y);
-                    // const controlPoint2 = Vector.add(this.vertices[3], Vector.mult(Vector.sub(this.vertices[3], this.vertices[2]), 20))
-                    // ctx.quadraticCurveTo(controlPoint2.x, controlPoint2.y, this.vertices[2].x, this.vertices[2].y)
-                    // ctx.fillStyle = '#000'
-                    // ctx.fill();
 
-
+                    //draw hook
                     ctx.beginPath();
                     ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
-                    const spikeLength = 2
-                    // const spike1 = Vector.add(this.vertices[1], Vector.mult(Vector.sub(this.vertices[1], this.vertices[2]), spikeLength))
-                    // ctx.moveTo(this.vertices[2].x, this.vertices[2].y);
-                    // ctx.lineTo(spike1.x, spike1.y);
-                    // ctx.lineTo(this.vertices[3].x, this.vertices[3].y);
-                    const spike2 = Vector.add(this.vertices[3], Vector.mult(Vector.sub(this.vertices[3], this.vertices[2]), spikeLength))
+                    const spike = Vector.add(this.vertices[3], Vector.mult(Vector.sub(this.vertices[3], this.vertices[2]), 2))
                     ctx.moveTo(this.vertices[2].x, this.vertices[2].y);
-                    ctx.lineTo(spike2.x, spike2.y);
+                    ctx.lineTo(spike.x, spike.y);
                     ctx.lineTo(this.vertices[1].x, this.vertices[1].y);
                     ctx.fillStyle = '#000'
                     ctx.fill();
@@ -1577,24 +1579,9 @@ const b = {
                             who.isShielded = true
                         });
                     }
-                    // if (tech.fragments) {
-                    //     b.targetedNail(this.vertices[2], tech.fragments * Math.floor(2 + Math.random()))
-                    // }
-                    // if (tech.isFoamBall) {
-                    //     for (let i = 0, len = 3 * this.mass; i < len; i++) {
-                    //         const radius = 5 + 8 * Math.random()
-                    //         const velocity = {
-                    //             x: Math.max(0.5, 2 - radius * 0.1),
-                    //             y: 0
-                    //         }
-                    //         b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
-                    //     }
-                    //     // this.endCycle = 0;
-                    // }
                     if (m.fieldCDcycle < m.cycle + 40) m.fieldCDcycle = m.cycle + 40  //extra long cooldown on hitting mobs
                     if (tech.isHookExplosion) b.explosion(this.position, 250 + 150 * Math.random()); //makes bullet do explosive damage at end
                     this.retract()
-
                 },
                 caughtPowerUp: null,
                 dropCaughtPowerUp() {
@@ -1624,6 +1611,7 @@ const b = {
                     }
                 },
                 retract() {
+                    this.attached = false
                     this.do = this.returnToPlayer
                     this.endCycle = simulation.cycle + 60
                     Matter.Body.setDensity(this, 0.0005); //reduce density on return
@@ -1644,6 +1632,17 @@ const b = {
                         player.force.x += momentum.x
                         player.force.y += momentum.y
                         if (this.pickUpTarget) {
+                            if (tech.isReel && this.blockDist > 150) {
+                                // console.log(0.0003 * Math.min(this.blockDist, 1000))
+                                m.energy += 0.00044 * Math.min(this.blockDist, 800) //max 0.352 energy
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: m.pos.x,
+                                    y: m.pos.y,
+                                    radius: 10,
+                                    color: m.fieldMeterColor,
+                                    time: simulation.drawTime
+                                });
+                            }
                             m.holdingTarget = this.pickUpTarget
                             // give block to player after it returns
                             m.isHolding = true;
@@ -1696,22 +1695,46 @@ const b = {
                 },
                 pickUpTarget: null,
                 grabBlocks() {
-                    if (this.pickUpTarget) {
+                    if (this.pickUpTarget) { //if always attached to a block
                         //position block on hook
                         Matter.Body.setPosition(this.pickUpTarget, Vector.add(this.vertices[2], this.velocity))
                         Matter.Body.setVelocity(this.pickUpTarget, { x: 0, y: 0 })
-                    } else if (!input.down) {
+                    } else { // if (!input.down)
                         const blocks = Matter.Query.collides(this, body)
                         if (blocks.length) {
                             // console.log(blocks)
                             for (let i = 0; i < blocks.length; i++) {
                                 if (blocks[i].bodyA.classType === "body" && !blocks[i].bodyA.isNotHoldable && !blocks[0].bodyA.mass < 60) {
                                     this.retract()
-                                    this.pickUpTarget = blocks[i].bodyA
-                                    if (tech.isHookExplosion) b.explosion(this.position, 250 + 150 * Math.random()); //makes bullet do explosive damage at end
+                                    if (tech.isHookExplosion) {
+                                        b.explosion(this.position, 250 + 150 * Math.random()); //makes bullet do explosive damage at end
+                                        const blockVertices = blocks[i].bodyA.vertices
+                                        Composite.remove(engine.world, blocks[i].bodyA)
+                                        body.splice(body.indexOf(blocks[i].bodyA), 1)
+                                        //animate the block fading away
+                                        simulation.ephemera.push({
+                                            name: "blockFadeOut",
+                                            count: 25, //cycles before it self removes
+                                            do() {
+                                                this.count--
+                                                if (this.count < 0) simulation.removeEphemera(this.name)
+                                                ctx.beginPath();
+                                                ctx.moveTo(blockVertices[0].x, blockVertices[0].y);
+                                                for (let j = 1; j < blockVertices.length; j++) ctx.lineTo(blockVertices[j].x, blockVertices[j].y);
+                                                ctx.lineTo(blockVertices[0].x, blockVertices[0].y);
+                                                ctx.lineWidth = 2;
+                                                ctx.strokeStyle = `rgba(0,0,0,${this.count / 25})`
+                                                ctx.stroke();
+                                            },
+                                        })
+                                    } else {
+                                        this.pickUpTarget = blocks[i].bodyA
+                                        this.blockDist = Vector.magnitude(Vector.sub(this.pickUpTarget.position, m.pos))
+                                    }
                                 } else if (blocks[i].bodyB.classType === "body" && !blocks[i].bodyB.isNotHoldable && !blocks[0].bodyB.mass < 60) {
                                     this.retract()
                                     this.pickUpTarget = blocks[i].bodyB
+                                    this.blockDist = Vector.magnitude(Vector.sub(this.pickUpTarget.position, m.pos))
                                     if (tech.isHookExplosion) b.explosion(this.position, 250 + 150 * Math.random()); //makes bullet do explosive damage at end
                                 }
                             }
@@ -1779,6 +1802,7 @@ const b = {
                         Matter.Body.setPosition(this, Vector.add(this.position, { x: -20 * Math.cos(this.angle), y: -20 * Math.sin(this.angle) }))
                         if (Matter.Query.collides(this, map).length) {
                             if (tech.isHookExplosion) b.explosion(this.position, 150 + 50 * Math.random()); //makes bullet do explosive damage at end
+                            this.attached = true
                             Matter.Body.setVelocity(this, { x: 0, y: 0 });
                             Matter.Sleeping.set(this, true)
                             this.endCycle = simulation.cycle + 5
@@ -1802,14 +1826,15 @@ const b = {
                                     if (input.down) { //down
                                         this.isSlowPull = true
                                         dist = 0
-                                        player.force.y += 2.5 * player.mass * simulation.g; //adjust this to control fall rate while hooked and pressing down
+                                        player.force.y += 3 * player.mass * simulation.g; //adjust this to control fall rate while hooked and pressing down
                                     } else if (input.up) {
                                         this.isSlowPull = false
+                                        player.force.y -= player.mass * simulation.g; //adjust this to control fall rate while hooked and pressing down
                                     }
                                     if (m.energy < this.drain) this.isSlowPull = true
 
                                     // pulling friction that allowed a slight swinging, but has high linear pull at short dist
-                                    const drag = 1 - 30 / Math.min(Math.max(100, dist), 700) - 0.1 * (player.speed > 70)
+                                    const drag = 1 - 30 / Math.min(Math.max(100, dist), 700) - 0.1 * (player.speed > 66)
                                     // console.log(player.speed)
                                     Matter.Body.setVelocity(player, { x: player.velocity.x * drag, y: player.velocity.y * drag });
                                     const pullScale = 0.0004

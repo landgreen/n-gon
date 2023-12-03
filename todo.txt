@@ -1,34 +1,44 @@
 ******************************************************** NEXT PATCH **************************************************
 
-grappling hook
-  added coupling effect - 4% extra ammo per coupling
-  doesn't destroy blocks, instead the player grabs blocks
-  doesn't automatically retract after hitting power ups
-  improved momentum conservation on yank and catching blocks, power ups
-  removed accidental 55% defense for grapple field
-  tech  (no images yet)
-    autonomous defense - fire harpoons at nearby mobs
-    rupture - explosion on impact with map, block, mob
+new community level shipwreck by 3xionDev
 
-negative mass field has horizontal block motion by default
-fixed tech sorting by "allowed tech" in experiment mode
+grappling hook
+  tech: reel - increase block damage 400%, generate 30 energy after hooking blocks
+  added tokamak to grappling hook
+  updated rope graphics
+  added input.up to adjust positioning while hook is attached
+  added images for CIWS, rupture, autonomous defense
+  aerostat: 25->15% reduced damage on ground
+  rupture unlocks explosive tech
+  rupture destroys blocks
+  autonomous defense renamed to CIWS
+
+field emitter 6->4 base energy regen
+tech: autonomous defense - harpoon tech that fires harpoons after taking damage
+degenerate matter: 75->85% defense while field is active
+neutronium: 90->95% defense while field is active
+unified field theory no longer has field emitter as an option
 
 *********************************************************** TODO *****************************************************
 
-grappling hook is a field
+player got stuck inside block that wasn't pick up able
+
+grappling hook field
   check for places that the player could get into but not out of
   field tech ideas
-    hook and line stuns?
-    increase hook damage      
-    hook damage aura
-    hook's line does damage
-    generate ___  after destroying blocks
+    Buoyancy - aerostat, but for defense: +70% defense while off the ground
+      too similar to degenerate matter
+    generate ___ after destroying blocks
       energy, drones, iceIX, explosion, nails, junk bots?
 
 tech - killing a mob heals for the last damage you took
   disable cloaking heal?  maybe you don't need to disable, just don't heal twice
   heal for 50%?
   heal from mob damage or from kills?
+
+on sucker mob death trigger radiation damage AoE and a graphic  (Hawking radiation)
+
+tech prismatic laser - cycles between different laser colors every 1-2 seconds
 
 make phonon the default wave gun type and make a tech to switch to the normal wave beam
   nerf phonon, buff wave
@@ -1095,6 +1105,7 @@ add sounds
 ******************************************************** LORE ********************************************************
 
 possible names for tech
+  sidereal - with respect to the stars  (an extra rotation for time keeping)
   strange loop
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.

@@ -1193,6 +1193,11 @@ const mobs = {
                 this.alive = false; //triggers mob removal in mob[i].replace(i)
 
                 if (this.isDropPowerUp) {
+                    // if (true) {
+                    //     //killing a mob heals for the last damage you took
+
+
+                    // }
                     if (this.isSoonZombie) { //spawn zombie on death
                         this.leaveBody = false;
                         let count = 5 //delay spawn cycles

@@ -204,24 +204,17 @@ function collisionChecks(event) {
                             //     time: 25
                             // });
                         }
-                        // if (true) { //fire harpoons at mobs after getting hit
-                        //     const countMax = 12
-                        //     let count = countMax
-                        //     const range = 300
-                        //     for (let i = 0; i < mob.length; i++) {
-                        //         if (count > 0 && Vector.magnitude(Vector.sub(m.pos, mob[i].position)) < range) {
-                        //             count--
-                        //             if (m.fieldCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 30
-                        //             const angle = Math.atan2(mob[i].position.y - player.position.y, mob[i].position.x - player.position.x);
-                        //             b.harpoon(m.pos, mob[i], angle, 0.75, true, 20)                             // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
-                        //             for (; count > 0; count--) {
-                        //                 b.harpoon(m.pos, mob[i], count * Math.PI / countMax, 0.75, true, 9)                             // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
-                        //                 bullet[bullet.length - 1].drain = 0
-                        //             }
-                        //             break
-                        //         }
-                        //     }
-                        // }
+                        if (tech.isHarpoonDefense) { //fire harpoons at mobs after getting hit
+                            const maxCount = 10 + 3 * tech.extraHarpoons //scale the number of hooks fired
+                            let count = maxCount - 1
+                            const angle = Math.atan2(mob[k].position.y - player.position.y, mob[k].position.x - player.position.x);
+                            b.harpoon(m.pos, mob[k], angle, 0.75, true, 7) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
+                            bullet[bullet.length - 1].drain = 0
+                            for (; count > 0; count--) {
+                                b.harpoon(m.pos, mob[k], angle + count * 2 * Math.PI / maxCount, 0.75, true, 7)
+                                bullet[bullet.length - 1].drain = 0
+                            }
+                        }
                         if (tech.isStimulatedEmission) powerUps.ejectTech()
                         if (mob[k].onHit) mob[k].onHit();
                         if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles

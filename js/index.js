@@ -1275,7 +1275,7 @@ window.addEventListener("keydown", function (event) {
                                 simulation.molecularMode++
                                 m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
                             } else {
-                                m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 0 : m.fieldMode + 1) //cycle to next field
+                                m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field, skip field emitter
                                 if (m.fieldMode === 4) {
                                     simulation.molecularMode = 0
                                     m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()

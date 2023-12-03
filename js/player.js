@@ -568,8 +568,8 @@ const m = {
         if (tech.squirrelFx !== 1) dmg *= 0.78//Math.pow(0.78, (tech.squirrelFx - 1) / 0.4)
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.1
         if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
-        if (tech.isHarmReduce && input.field) dmg *= 0.25
-        if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.1
+        if (tech.isHarmReduce && input.field) dmg *= 0.15
+        if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.05
         if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
@@ -2043,7 +2043,9 @@ const m = {
         }
     },
     setFieldRegen() {
-        if (m.fieldMode === 6) {
+        if (m.fieldMode === 0) {
+            m.fieldRegen = 0.00067  //4 energy per second for field emitter
+        } else if (m.fieldMode === 6) {
             m.fieldRegen = 0.002  //12 energy per second for time dilation
         } else if (m.fieldMode === 2) {
             m.fieldRegen = 0.000833 //5 energy per second perfect dia
@@ -2636,7 +2638,7 @@ const m = {
         name: "field emitter",
         imageNumber: Math.floor(Math.random() * 23),
         description: `<em>initial field</em><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs and <strong>throw</strong> <strong class='color-block'>blocks</strong>
-        <br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`, //            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
+        <br>generate <strong>4</strong> <strong class='color-f'>energy</strong> per second`, //            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
         effect: () => {
             m.hold = function () {
                 if (m.isHolding) {
@@ -4957,7 +4959,7 @@ const m = {
         effect: () => {
             m.fieldFire = true;
             // m.holdingMassScale = 0.01; //can hold heavier blocks with lower cost to jumping
-            m.fieldMeterColor = "#333"
+            // m.fieldMeterColor = "#789"//"#456"
             m.eyeFillColor = m.fieldMeterColor
             m.grabPowerUpRange2 = 300000 //m.grabPowerUpRange2 = 200000;
             // m.fieldHarmReduction = 0.45; //55% reduction

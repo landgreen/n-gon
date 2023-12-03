@@ -7236,6 +7236,7 @@ const spawn = {
 
                     m.walk_cycle += m.flipLegs * m.Vx //makes the legs look like they are moving fast
 
+                    // if (simulation.fpsCap > 999){}
                     ctx.beginPath();
                     ctx.arc(this.position.x, this.position.y, this.eventHorizon, 0, 2 * Math.PI);
                     ctx.fillStyle = "#fff";
