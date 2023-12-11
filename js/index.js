@@ -305,17 +305,14 @@ const build = {
         // console.log(localSettings.isHideImages, from)
     },
     hideHUD() {
-
         if (simulation.isTraining) {
             localSettings.isHideHUD = false
         } else {
             localSettings.isHideHUD = !localSettings.isHideHUD
         }
-
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         document.getElementById("hide-hud").checked = localSettings.isHideHUD
         document.getElementById("hide-hud").classList.toggle("ticked")
-
         simulation.removeEphemera("dmgDefBars")
         if (!localSettings.isHideHUD) {
             simulation.ephemera.push({
@@ -791,9 +788,9 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 <div>
     <select name="difficulty-select" id="difficulty-select-experiment">
     <option value="1">easy</option>
-    <option value="2" selected>normal</option>
-    <option value="4">hard</option>
-    <option value="6">why</option>
+    <option value="2" selected>normal ⚆</option>
+    <option value="4">hard ⚆</option>
+    <option value="5">why ⚇</option>
     </select>
     &nbsp; &nbsp;
         <label for="hide-images-experiment" title="reload experiment with no images for fields, guns, and tech" style="font-size: 0.85em;">hide images</label>

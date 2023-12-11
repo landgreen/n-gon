@@ -1,25 +1,28 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community level shipwreck by 3xionDev
+why mode is now 20% easier, but still 25% harder than hard mode
+  easy:1, normal:2, hard:4, why:6->5
 
-grappling hook
-  tech: reel - increase block damage 400%, generate 30 energy after hooking blocks
-  added tokamak to grappling hook
-  updated rope graphics
-  added input.up to adjust positioning while hook is attached
-  added images for CIWS, rupture, autonomous defense
-  aerostat: 25->15% reduced damage on ground
-  rupture unlocks explosive tech
-  rupture destroys blocks
-  autonomous defense renamed to CIWS
+new community map unchartedCave by 3xionDev!
 
-field emitter 6->4 base energy regen
-tech: autonomous defense - harpoon tech that fires harpoons after taking damage
-degenerate matter: 75->85% defense while field is active
-neutronium: 90->95% defense while field is active
-unified field theory no longer has field emitter as an option
+Newtons 1st law 66->88% defense when moving fast
+Newtons 2nd law 66->88% damage when moving fast
+CIWS energy 20->18 per shot
+rupture disables reel and tokamak
+
 
 *********************************************************** TODO *****************************************************
+
+
+scrap bots don't follow player
+  adjust spawn rates to balance
+
+
+make grappling hook of different shapes
+  indicate tech upgrades?
+    rupture, reel, tokamak
+  do this in draw or in verticies?
+    draw can have different colors 
 
 player got stuck inside block that wasn't pick up able
 

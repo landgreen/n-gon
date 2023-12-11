@@ -1424,7 +1424,7 @@ const powerUps = {
         }
     },
     addResearchToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level one randomly placed research
-        if (mob.length && Math.random() < 0.45 - 0.3 * (simulation.difficultyMode > 5)) { //lower chance on why difficulty
+        if (mob.length && Math.random() < 0.45 - 0.3 * (simulation.difficultyMode > 4)) { //lower chance on why difficulty
             const index = Math.floor(Math.random() * mob.length)
             powerUps.spawn(mob[index].position.x, mob[index].position.y, "research");
         }

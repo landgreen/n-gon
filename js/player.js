@@ -567,7 +567,7 @@ const m = {
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.33
         if (tech.squirrelFx !== 1) dmg *= 0.78//Math.pow(0.78, (tech.squirrelFx - 1) / 0.4)
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.1
-        if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
+        if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0193, 0.88) //capped at speed of 55
         if (tech.isHarmReduce && input.field) dmg *= 0.15
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.05
         if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
@@ -3025,12 +3025,12 @@ const m = {
                     m.drawHold(m.holdingTarget);
                     m.holding();
                     m.throwBlock();
-                } else if (input.field && m.fieldCDcycle < m.cycle) { //push away
+                } else if (input.field) { //push away
                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                     m.grabPowerUp();
                     m.lookForPickUp();
                     const DRAIN = 0.00035
-                    if (m.energy > DRAIN) {
+                    if (m.energy > DRAIN && m.fieldCDcycle < m.cycle) {
                         if (tech.isFlyFaster) {
                             //look for nearby objects to make zero-g
                             function moveThis(who, range, mag = 1.06) {
@@ -4980,8 +4980,6 @@ const m = {
                 } else {
                     m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                     if (tech.isHookDefense && m.energy > 0.33 && m.fieldCDcycle < m.cycle) {
-                        const maxCount = 6 //scale the number of hooks fired
-                        let count = maxCount
                         const range = 300
                         for (let i = 0; i < mob.length; i++) {
                             if (!mob[i].isBadTarget &&
@@ -4989,14 +4987,14 @@ const m = {
                                 Vector.magnitude(Vector.sub(m.pos, mob[i].position)) < range &&
                                 Matter.Query.ray(map, m.pos, mob[i].position).length === 0
                             ) {
-                                count--
-                                m.energy -= 0.2
+                                m.energy -= 0.18
                                 if (m.fieldCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 30
                                 const angle = Math.atan2(mob[i].position.y - player.position.y, mob[i].position.x - player.position.x);
                                 b.harpoon(m.pos, mob[i], angle, 0.75, true, 20) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
                                 bullet[bullet.length - 1].drain = 0
-                                for (; count > 0; count--) {
-                                    b.harpoon(m.pos, mob[i], angle + count * 2 * Math.PI / maxCount, 0.75, true, 10)
+                                const maxCount = 6
+                                for (let j = maxCount - 1; j > 0; j--) {
+                                    b.harpoon(m.pos, mob[i], angle + j * 2 * Math.PI / maxCount, 0.75, true, 10)
                                     bullet[bullet.length - 1].drain = 0
                                 }
                                 break

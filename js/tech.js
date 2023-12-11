@@ -253,7 +253,7 @@ const tech = {
         if (tech.energyDamage) dmg *= 1 + m.energy * 0.22 * tech.energyDamage;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
-        if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.66, player.speed * 0.0165)
+        if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.88, player.speed * 0.0193)
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.83
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.defense()
         if (tech.isHarmDamage && m.lastHarmCycle + 480 > m.cycle) dmg *= 3;
@@ -1047,7 +1047,7 @@ const tech = {
     // },
     {
         name: "Newtons 1st law",
-        description: "<strong class='color-defense'>defense</strong> is proportional to your <strong>speed</strong><br>up to <strong>+66%</strong> <strong class='color-defense'>defense</strong> at <strong>40 speed</strong>",
+        description: "<strong class='color-defense'>defense</strong> is proportional to your <strong>speed</strong><br>up to <strong>+88%</strong> <strong class='color-defense'>defense</strong> at <strong>55 speed</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -1065,7 +1065,7 @@ const tech = {
     },
     {
         name: "Newtons 2nd law",
-        description: "<strong class='color-d'>damage</strong> is proportional to your <strong>speed</strong><br>up to <strong>+66%</strong> <strong class='color-d'>damage</strong> at <strong>40 speed</strong>",
+        description: "<strong class='color-d'>damage</strong> is proportional to your <strong>speed</strong><br>up to <strong>+88%</strong> <strong class='color-d'>damage</strong> at <strong>55 speed</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -8121,9 +8121,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldMode === 5 || m.fieldMode === 4 || m.fieldMode === 10) && !tech.isPrinter && !tech.isReel
+            return (m.fieldMode === 5 || m.fieldMode === 4 || m.fieldMode === 10) && !tech.isPrinter && !tech.isReel && !tech.isHookExplosion
         },
-        requires: "plasma torch, molecular assembler, grappling hook, not printer, reel",
+        requires: "plasma torch, molecular assembler, grappling hook, not printer, reel, rupture",
         effect() {
             tech.isTokamak = true;
         },
@@ -8775,7 +8775,7 @@ const tech = {
     },
     {
         name: "CIWS",
-        description: "<strong>grappling hook</strong> uses <strong>20</strong> <strong class='color-f'>energy</strong><br> to fire <strong>harpoons</strong> at nearby mobs",
+        description: "<strong>grappling hook</strong> uses <strong>18</strong> <strong class='color-f'>energy</strong><br> to fire <strong>harpoons</strong> at nearby mobs",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -8801,9 +8801,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 10
+            return m.fieldMode === 10 && !tech.isReel && !tech.isTokamak
         },
-        requires: "grappling hook",
+        requires: "grappling hook, not reel, tokamak",
         effect() {
             tech.isHookExplosion = true
         },
@@ -8820,9 +8820,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return m.fieldMode === 10 && !tech.isTokamak && tech.blockDamage === 0.075
+            return m.fieldMode === 10 && !tech.isTokamak && tech.blockDamage === 0.075 && !tech.isHookExplosion
         },
-        requires: "not mass driver",
+        requires: "grappling hook, not mass driver, rupture, tokamak",
         effect() {
             tech.blockDamage = 0.375
             tech.isReel = true
