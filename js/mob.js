@@ -242,7 +242,7 @@ const mobs = {
     deathCount: 0,
     mobSpawnWithHealth: 1,
     setMobSpawnHealth() {
-        mobs.mobSpawnWithHealth = 0.89 ** (tech.mobSpawnWithHealth)
+        mobs.mobSpawnWithHealth = 0.88 ** (tech.mobSpawnWithHealth)
     },
     //**********************************************************************************************
     //**********************************************************************************************
@@ -1133,6 +1133,85 @@ const mobs = {
                 if ((!this.isShielded || isBypassShield) && this.alive) {
                     if (dmg !== Infinity) {
                         dmg *= tech.damageFromTech()
+                        if (this.isDropPowerUp) {
+                            if (this.health === 1) {
+                                if (tech.isMobFullHealth) {
+                                    dmg *= 1.55
+
+                                    simulation.ephemera.push({
+                                        name: "damage outline",
+                                        count: 5, //cycles before it self removes
+                                        vertices: this.vertices,
+                                        do() {
+                                            this.count--
+                                            if (this.count < 0) simulation.removeEphemera(this.name)
+                                            //draw body
+                                            ctx.beginPath();
+                                            const vertices = this.vertices;
+                                            ctx.moveTo(vertices[0].x, vertices[0].y);
+                                            for (let j = 1, len = vertices.length; j < len; ++j) {
+                                                ctx.lineTo(vertices[j].x, vertices[j].y);
+                                            }
+                                            ctx.lineTo(vertices[0].x, vertices[0].y);
+                                            ctx.lineWidth = 3 //60 * (0.25 - this.damageReductionGoal)
+                                            ctx.strokeStyle = `#f05` //"rgba(150,150,225,0.5)";
+                                            ctx.stroke();
+                                        },
+                                    })
+                                } else if (tech.isMobFullHealthCloak) {
+                                    dmg *= 1.88
+
+                                    simulation.ephemera.push({
+                                        name: "damage outline",
+                                        count: 7, //cycles before it self removes
+                                        vertices: this.vertices,
+                                        do() {
+                                            this.count--
+                                            if (this.count < 0) simulation.removeEphemera(this.name)
+                                            //draw body
+                                            ctx.beginPath();
+                                            const vertices = this.vertices;
+                                            ctx.moveTo(vertices[0].x, vertices[0].y);
+                                            for (let j = 1, len = vertices.length; j < len; ++j) {
+                                                ctx.lineTo(vertices[j].x, vertices[j].y);
+                                            }
+                                            ctx.lineTo(vertices[0].x, vertices[0].y);
+                                            ctx.fillStyle = `rgba(255,0,100,0.15)` //"rgba(150,150,225,0.5)";
+                                            ctx.fill()
+                                            ctx.lineWidth = 3 //60 * (0.25 - this.damageReductionGoal)
+                                            ctx.strokeStyle = `#f08` //"rgba(150,150,225,0.5)";
+                                            ctx.stroke();
+                                        },
+                                    })
+                                }
+                            } else if (tech.isMobLowHealth && this.health < 0.25) {
+                                dmg *= 3.22
+
+                                simulation.ephemera.push({
+                                    name: "damage outline",
+                                    count: 2, //cycles before it self removes
+                                    vertices: this.vertices,
+                                    do() {
+                                        this.count--
+                                        if (this.count < 0) simulation.removeEphemera(this.name)
+                                        //draw body
+                                        ctx.beginPath();
+                                        const vertices = this.vertices;
+                                        ctx.moveTo(vertices[0].x, vertices[0].y);
+                                        for (let j = 1, len = vertices.length; j < len; ++j) {
+                                            ctx.lineTo(vertices[j].x, vertices[j].y);
+                                        }
+                                        ctx.lineTo(vertices[0].x, vertices[0].y);
+                                        ctx.fillStyle = `rgba(255,50,100,0.2)` //"rgba(150,150,225,0.5)";
+                                        ctx.fill()
+                                        ctx.lineWidth = 3 //60 * (0.25 - this.damageReductionGoal)
+                                        ctx.strokeStyle = `#f38` //"rgba(150,150,225,0.5)";
+                                        ctx.stroke();
+                                    },
+                                })
+                            }
+                        }
+
                         //mobs specific damage changes
                         if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 33% dmg at max range of 3000
                         dmg *= this.damageReduction
@@ -1143,6 +1222,7 @@ const mobs = {
                         }
                         dmg /= Math.sqrt(this.mass)
                     }
+
                     this.health -= dmg
                     //this.fill = this.color + this.health + ')';
                     this.onDamage(dmg); //custom damage effects
@@ -1187,7 +1267,7 @@ const mobs = {
             leaveBody: true,
             isDropPowerUp: true,
             death() {
-                if (tech.collidePowerUps && Math.random() < tech.collidePowerUps && this.isDropPowerUp) powerUps.randomize(this.position) //needs to run before onDeath spawns power ups
+                if (tech.collidePowerUps && this.isDropPowerUp) powerUps.randomize(this.position) //needs to run before onDeath spawns power ups
                 this.onDeath(this); //custom death effects
                 this.removeConsBB();
                 this.alive = false; //triggers mob removal in mob[i].replace(i)
@@ -1261,22 +1341,23 @@ const mobs = {
                     }
                     if (tech.isBotSpawnerReset) {
                         for (let i = 0, len = bullet.length; i < len; i++) {
-                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 780 //13 seconds
+                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 900 //15 seconds
                         }
                     }
                     if (Math.random() < tech.botSpawner) {
                         b.randomBot(this.position, false)
-                        bullet[bullet.length - 1].endCycle = simulation.cycle + 780 //13 seconds
+                        bullet[bullet.length - 1].endCycle = simulation.cycle + 900 //15 seconds
                         this.leaveBody = false; // no body since it turned into the bot
                     }
                     if (tech.isAddRemoveMaxHealth) {
                         if (this.isBoss && this.isDropPowerUp) {
                             powerUps.spawn(this.position.x + 20, this.position.y, "tech", false)
-                            powerUps.spawn(this.position.x - 20, this.position.y, "ammo", false)
+                            powerUps.spawn(this.position.x - 20, this.position.y, "research", false)
+                            powerUps.spawn(this.position.x - 40, this.position.y, "research", false)
+                            powerUps.spawn(this.position.x + 40, this.position.y, "research", false)
                             powerUps.spawn(this.position.x, this.position.y + 20, "research", false)
                             powerUps.spawn(this.position.x, this.position.y - 20, "heal", false)
-                            powerUps.spawn(this.position.x - 40, this.position.y, "ammo", false)
-                            powerUps.spawn(this.position.x, this.position.y + 40, "research", false)
+                            powerUps.spawn(this.position.x, this.position.y + 40, "heal", false)
                             powerUps.spawn(this.position.x, this.position.y - 40, "heal", false)
                         } else {
                             const amount = 0.005
@@ -1292,7 +1373,7 @@ const mobs = {
                         }
                     }
                     if (tech.cloakDuplication && !this.isBoss) {
-                        tech.cloakDuplication -= 0.02
+                        tech.cloakDuplication -= 0.01
                         powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                     }
                 } else if (tech.isShieldAmmo && this.shield && !this.isExtraShield) {

@@ -1,24 +1,64 @@
 ******************************************************** NEXT PATCH **************************************************
 
-why mode is now 20% easier, but still 25% harder than hard mode
-  easy:1, normal:2, hard:4, why:6->5
+mob health tech
+  tech: cascading failure - +222% damage to mobs below 25% health
+  tech: yield stress - +55% damage to mobs at maximum health
+  cloaking tech: topological defect - +88% damage to mobs at maximum health
+  harpoon tech: brittle - +88% harpoon/grapple damage to mobs at maximum health
 
-new community map unchartedCave by 3xionDev!
+cloaking buffs
+  50->66% defense while cloaked
+  recloak 0.25s faster
+  simplified cloaking field graphics
+  boson composite drains much less energy while moving through mobs and shields
+    fixed bug where mines and egg mobs were colliding with player while intangible
+  patch no longer drains energy when you heal on cloaking
+  metamaterial absorber gets 17->22% chance to spawn a power up for each mob alive
+  no-cloning theorem changes to 45->40% duplication and 2->1% duplication loss on killing a mob
 
-Newtons 1st law 66->88% defense when moving fast
-Newtons 2nd law 66->88% damage when moving fast
-CIWS energy 20->18 per shot
-rupture disables reel and tokamak
+finalBoss phases:
+  new: slow zone, antigravity pulse
+  nerfed: laser, black hole, orbitals
+  buffed: oscillation, mobs
+  improved graphics: boulder
 
+Hilbert space has a skin. 99->142% damage increase, but randomize tech after taking damage
+Higgs mechanism has a skin. +45->77% fire rate, player can't move while firing
+induction furnace gives +77% harpoon/grapple damage for 8 seconds after picking up a power up
+collider 50->100% chance to combine and randomize power ups
+quenching gives more bonus max health at high difficulty level  (maybe around 30% more health)
+accretion gives 5->7 heal power ups
+dynamo bots follow player much closer when you have many of them
+scrap-bots don't follow the player as accurately or as quickly
+  scrap bot duration 13->15 seconds
+JUNK tech: planned obsolescence - make 100 scrap bots that last for about 30 seconds
+
+community map dojo by werid_pusheen
+  fixed by Cornbread 2100
+
+hard mode gets 1 less heal at the start
+hard and why difficulty don't begin with starter mobs
+hopBullet mobs last 2 seconds less time
+adjusted button heights on train station level to be consistently the same height
 
 *********************************************************** TODO *****************************************************
 
+hexagon head skin
+  maybe give defense
 
-scrap bots don't follow player
-  adjust spawn rates to balance
 
+foam tech: increase size of foam and increase duration, but drop speed down, so they come to a stop and just hang
+  allow them to harm player?
+    this is probably just too annoying
+
+make a flutter variant
+  just move the wings to the back?
+  slow flap, and acceleration that increases when the flap occurs, like swimming
 
 make grappling hook of different shapes
+  shapes
+    longer
+    circular with spikes
   indicate tech upgrades?
     rupture, reel, tokamak
   do this in draw or in verticies?
@@ -31,8 +71,6 @@ grappling hook field
   field tech ideas
     Buoyancy - aerostat, but for defense: +70% defense while off the ground
       too similar to degenerate matter
-    generate ___ after destroying blocks
-      energy, drones, iceIX, explosion, nails, junk bots?
 
 tech - killing a mob heals for the last damage you took
   disable cloaking heal?  maybe you don't need to disable, just don't heal twice
@@ -42,9 +80,6 @@ tech - killing a mob heals for the last damage you took
 on sucker mob death trigger radiation damage AoE and a graphic  (Hawking radiation)
 
 tech prismatic laser - cycles between different laser colors every 1-2 seconds
-
-make phonon the default wave gun type and make a tech to switch to the normal wave beam
-  nerf phonon, buff wave
 
 sword slash for plasma torch  (giving up on this for now,  had trouble making graphics look good)
   activates when mouse is close to player
@@ -82,12 +117,6 @@ use cross product rotation for other mobs?
     this.torque = 0.00002 * this.inertia * (cross > 0 ? 1 : -1)
 
 super-bot:  fires super balls
-
-tech - only allow 1,2 turrets at time.  spawning a new mine removes the oldest mine
-  turrets never run out of ammo
-    or turrets automatically use one of your mine ammos when they run out?
-    good with multi gun builds
-  conflict with booby trap?
 
 tech: after a needle hits a mobs
   the needle splits into 3 needles?
@@ -183,32 +212,6 @@ hookBoss fires a hook that pulls player towards it
   player targeted unless cloaking
   also add effect to finalBoss
 
-finalBoss
-  add synergies between modes:
-  new modes:
-    something that needs to be killed quickly
-      if you don't kill it boss gets a shield
-    rotating quadrant immunity shield, can't take damage from that quadrant
-      maybe also attack player near that quadrant
-      but how to tell the angle of incoming damage
-        maybe a physics body like the shield but it only covers 1/3 of mob?
-    falling object warps to ceiling after hitting floor
-      doesn't end, player needs to kill it
-      slowly grows?
-    slow effect zones
-      random placement or place over player or both!
-      draw white dot and an outline of area of effect
-        expanding circle stroke, freeze effect triggers when stroke circle hits fill circle
-      after 1-2 seconds freeze player if in the zone
-        also freeze mobs
-    effect that makes player have to be close to boss
-    hook that tries to yank the player into hitting finalBoss
-      does damage
-      pulls player into center
-        counter with wormhole, negative mass
-      player targeted unless cloaking
-
-
 mob status effect - emit - mobs fire lasers for a few seconds 
   tech: phosphorescence - mobs emit after being hit with laser beams
 
@@ -226,7 +229,7 @@ tech increase max energy and energy to 5000, but you can no longer regen energy 
 it would be nice if there was incentive to go slow when choosing tech so n-gon is more relaxing
   add some css based visual effects for opening up a tech,gun,field
 
-make a new coupling effect for perfect diamagnetism or standing wave
+make a new coupling effect for perfect diamagnetism
 
 make a faster smaller version of cell boss that also has map collisions
 
@@ -237,21 +240,10 @@ JUNK tech description that changes similar to cards in inscription
   that changes based on mouse position
   can you tell if mouse is over card?
 
-tech - buff MACHO range, effect, move speed?
-while you are inside MACHO it will damage mobs?
-
 PWA?
   https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps
   https://codeburst.io/how-to-easily-turn-your-static-website-to-a-progressive-web-app-pwa-b0af08da9693
   https://github.com/landgreen/n-gon/pull/32/files
-
-bug blocks and power ups falling through map
-  always foam gun  (4-5 times)
-    might be about tech pressure vessel
-  happens rarely, doesn't repeat
-    only occurs for 3 people so far
-  normally after level 6
-  occurred once on the first level,  didn't fire gun and was able to walk through a body
 
 Tech:when relay switch/flip flop is on, turn ammo powerups into boosts, when relay swicth/flip flop is off, ammo powerups remain ammo powerups
   or toggle other power ups
@@ -259,9 +251,6 @@ Tech:when relay switch/flip flop is on, turn ammo powerups into boosts, when rel
     
 JUNK: what the golf?
   trying to throw a block throws you instead
-
-tech for lens - you can only fire through the lens
-  and some buff?  damage or energy?
 
 complete blowSuckBoss...  or don't
 
@@ -271,18 +260,6 @@ JUNK tech different effects based on night or day
   use system time
 
 Boss that shoots out a ring of bullets, then after a few seconds it gravitates the bullets back
-
-coupling
-  put coupling description as 4th line on field description
-    raw text no function call
-    no need for coupling description in power ups, pause
-  negative coupling?
-    wouldn't work for iceIX
-coupling tech
-  names: strongly coupled, Vibronic coupling, NMR coupling
-  tech: +x% field coupling, your field changes randomly every y seconds
-  tech: coupling starts at 200%, but decays when the field is in use, coupling recharges when the field is not in use
-    some fields aren't used much (that's ok?)
 
 tech give laser mines more lasers (3->4? 5?)
 
@@ -307,11 +284,6 @@ immediately fire all of your ammo
 after taking damage explode while invulnerable
   scale explosion radius with damage
 
-quantum immortality: send you to a new tab after you die with a random load out
-  basically everything is the same as it is now, but you switch tabs
-
-Tech: Tech/guns/fields can no longer be duplicated. Duplication applies twice
-
 tech: get sent to a new tab that closes in 3 minutes
   in the new tab you play reactor
   if you die in reactor you die in game, if you win you get 2-3 tech in the original game?
@@ -319,30 +291,7 @@ tech: get sent to a new tab that closes in 3 minutes
     count guns, field, tech and give random stuff on new tab
   i-frame instead of tab?
 
-reduce the amount of research and nerf anti randomization tech
-  increase possible synergies that go nuts
-
-tech expansion:  field coupling also expands each fields in different ways
-  how to make the description work
-    change description based on your current field?
-  perfect diamagnetism moves forward when you hold down the shield
-    it's great, but maybe annoying?
-    maybe only with crouch?
-  perfect diamagnetism just replace or increase Messier effect
-  time dilation drains 1/2 as much energy when paused
-  grow plasma torch as you hold it down
-  negative mass effects much more space
-    needs more benefit?
-  reduces the cloaking vision effect?
-    needs more benefit?
-
 tech: missiles explode a 2nd time after 1/2 a second (with a slightly different position determined by original velocity)
-
-The tech that makes blocks that fall into a wormhole give energy should scale with block size, with the same formula as tokomak
-
-junk suggestion: useless machine - ejects itself and removes itself from the item pool
-
-
 
 seed isn't working right from shared URL
 
@@ -358,8 +307,6 @@ mob mechanics
           nested object with nesting to show connection
         spawns new nodes
         draws connections as quad lines
-
-tech: You can place an extra perfect diamagnatism field on the map
 
 standing wave no longer pushes mobs away, but it can do damage to mobs caught in area effect
   Standing wave harmonics no longer deflects, but instead discharges excess energy as lightning toward nearby enemies 
@@ -1157,6 +1104,7 @@ possible names for tech
   Josephson junction - superconducting junction
   Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity
   perturbation
+  Unruh effect - accelerating makes heat/thermal particles
 
 ******************************************************** CARS IMAGES ********************************************************
 

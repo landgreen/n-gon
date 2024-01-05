@@ -967,7 +967,6 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
     startExperiment() { //start playing the game after exiting the experiment menu
         build.isExperimentSelection = false;
         spawn.setSpawnList(); //gives random mobs,  not starter mobs
-        spawn.setSpawnList();
         if (b.inventory.length > 0) {
             b.activeGun = b.inventory[0] //set first gun to active gun
             b.inventoryGun = 0;

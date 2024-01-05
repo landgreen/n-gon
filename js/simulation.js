@@ -1272,7 +1272,7 @@ const simulation = {
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].isDropPowerUp && mob[i].alive) count++
             }
-            count *= 0.17 //to fake the chance, this makes it not random, and maybe less confusing
+            count *= 0.22 //to fake the 20% chance, this makes it not random, and more predictable
             let cycle = () => { //run after waiting a cycle for the map to be cleared
                 const types = ["heal", "ammo", "heal", "ammo", "research", "coupling", "boost", "tech", "gun", "field"]
                 for (let i = 0; i < count; i++) powerUps.spawnDelay(types[Math.floor(Math.random() * types.length)], 1)

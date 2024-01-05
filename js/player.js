@@ -393,7 +393,7 @@ const m = {
         for (let i = 0, len = b.inventory.length; i < len; i++) {
             if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (1.15 + 0.3 * (Math.random() - 0.5))))
         }
-        console.log(b.activeGun)
+        // console.log(b.activeGun)
         //randomize tech
         for (let i = 0; i < totalTech; i++) {
             //find what tech I could get
@@ -568,7 +568,7 @@ const m = {
         if (tech.squirrelFx !== 1) dmg *= 0.78//Math.pow(0.78, (tech.squirrelFx - 1) / 0.4)
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.1
         if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0193, 0.88) //capped at speed of 55
-        if (tech.isHarmReduce && input.field) dmg *= 0.15
+        if (tech.isHarmReduce && input.field) dmg *= 0.12
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.05
         if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
@@ -935,83 +935,6 @@ const m = {
             ctx.restore();
         }
     },
-    // resetSkin() {
-    //     simulation.isAutoZoom = true;
-    //     m.yOffWhen.jump = 70
-    //     m.yOffWhen.stand = 49
-    //     m.yOffWhen.crouch = 22
-    //     m.isAltSkin = false
-    //     m.color = {
-    //         hue: 0,
-    //         sat: 0,
-    //         light: 100,
-    //     }
-    //     m.setFillColors();
-    //     m.draw = function () {
-    //         ctx.fillStyle = m.fillColor;
-    //         m.walk_cycle += m.flipLegs * m.Vx;
-    //         ctx.save();
-    //         ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
-    //         ctx.translate(m.pos.x, m.pos.y);
-    //         m.calcLeg(Math.PI, -3);
-    //         m.drawLeg("#4a4a4a");
-    //         m.calcLeg(0, 0);
-    //         m.drawLeg("#333");
-    //         ctx.rotate(m.angle);
-    //         ctx.beginPath();
-    //         ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-    //         ctx.fillStyle = m.bodyGradient
-    //         ctx.fill();
-    //         ctx.arc(15, 0, 4, 0, 2 * Math.PI);
-    //         ctx.strokeStyle = "#333";
-    //         ctx.lineWidth = 2;
-    //         ctx.stroke();
-    //         ctx.restore();
-    //         m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
-    //         powerUps.boost.draw()
-    //     }
-    //     m.drawLeg = function (stroke) {
-    //         // if (simulation.mouseInGame.x > m.pos.x) {
-    //         if (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2) {
-    //             m.flipLegs = 1;
-    //         } else {
-    //             m.flipLegs = -1;
-    //         }
-    //         ctx.save();
-    //         ctx.scale(m.flipLegs, 1); //leg lines
-    //         ctx.beginPath();
-    //         ctx.moveTo(m.hip.x, m.hip.y);
-    //         ctx.lineTo(m.knee.x, m.knee.y);
-    //         ctx.lineTo(m.foot.x, m.foot.y);
-    //         ctx.strokeStyle = stroke;
-    //         ctx.lineWidth = 7;
-    //         ctx.stroke();
-
-    //         //toe lines
-    //         ctx.beginPath();
-    //         ctx.moveTo(m.foot.x, m.foot.y);
-    //         ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-    //         ctx.moveTo(m.foot.x, m.foot.y);
-    //         ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
-    //         ctx.lineWidth = 4;
-    //         ctx.stroke();
-
-    //         //hip joint
-    //         ctx.beginPath();
-    //         ctx.arc(m.hip.x, m.hip.y, 11, 0, 2 * Math.PI);
-    //         //knee joint
-    //         ctx.moveTo(m.knee.x + 7, m.knee.y);
-    //         ctx.arc(m.knee.x, m.knee.y, 7, 0, 2 * Math.PI);
-    //         //foot joint
-    //         ctx.moveTo(m.foot.x + 6, m.foot.y);
-    //         ctx.arc(m.foot.x, m.foot.y, 6, 0, 2 * Math.PI);
-    //         ctx.fillStyle = m.fillColor;
-    //         ctx.fill();
-    //         ctx.lineWidth = 2;
-    //         ctx.stroke();
-    //         ctx.restore();
-    //     }
-    // },
     skin: {
         none() {
             m.isAltSkin = true
@@ -1142,6 +1065,96 @@ const m = {
                 ctx.fill();
                 ctx.lineWidth = 1;
                 // ctx.strokeStyle = "#333"
+                ctx.stroke();
+                ctx.restore();
+            }
+        },
+        strokeGap() {
+            m.isAltSkin = true
+            m.yOffWhen.stand = 52
+            m.yOffWhen.jump = 72
+            // m.yOffWhen.crouch = 22
+            // m.color = {
+            //     hue: 184,
+            //     sat: 0,
+            //     light: 55,
+            // }
+            // m.setFillColors();
+            m.draw = function () {
+                m.walk_cycle += m.flipLegs * m.Vx;
+                ctx.save();
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
+                ctx.translate(m.pos.x, m.pos.y);
+                m.calcLeg(Math.PI, -1.25);
+                m.drawLeg("#606070");
+                m.calcLeg(0, 0);
+                m.drawLeg("#445");
+
+
+                ctx.rotate(m.angle);
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                // ctx.arc(0, 0, 30, m.angle + 1, m.angle - 1);
+                ctx.fillStyle = "#fff"//m.bodyGradient
+                ctx.fill();
+                ctx.beginPath();
+                const arc = 0.7 + 0.17 * Math.sin(m.cycle * 0.012)
+                ctx.arc(0, 0, 30, -arc, arc, true); //- Math.PI / 2
+                ctx.strokeStyle = "#445";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(13, 0)
+                ctx.lineTo(20, 0)
+                // ctx.beginPath();
+                // ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = "#445";
+                ctx.stroke();
+
+                ctx.restore();
+                m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                powerUps.boost.draw()
+            }
+            m.drawLeg = function (stroke) {
+                // if (simulation.mouseInGame.x > m.pos.x) {
+                if (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2) {
+                    m.flipLegs = 1;
+                } else {
+                    m.flipLegs = -1;
+                }
+                ctx.save();
+                ctx.scale(m.flipLegs, 1); //leg lines
+                ctx.beginPath();
+                ctx.moveTo(m.hip.x, m.hip.y);
+                ctx.lineTo(m.knee.x, m.knee.y);
+                ctx.lineTo(m.foot.x, m.foot.y);
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = 5;
+                ctx.stroke();
+
+                //toe lines
+                ctx.beginPath();
+                ctx.moveTo(m.foot.x, m.foot.y);
+                ctx.lineTo(m.foot.x - 14, m.foot.y + 5);
+                ctx.moveTo(m.foot.x, m.foot.y);
+                ctx.lineTo(m.foot.x + 14, m.foot.y + 5);
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                //hip joint
+                ctx.beginPath();
+                ctx.arc(m.hip.x, m.hip.y, 8, 0, 2 * Math.PI);
+                //knee joint
+                ctx.moveTo(m.knee.x + 4, m.knee.y);
+                ctx.arc(m.knee.x, m.knee.y, 4, 0, 2 * Math.PI);
+                //foot joint
+                ctx.moveTo(m.foot.x + 4, m.foot.y + 1);
+                ctx.arc(m.foot.x, m.foot.y + 1, 4, 0, 2 * Math.PI);
+                ctx.fillStyle = m.fillColor;
+                ctx.fill();
+                ctx.lineWidth = 2;
                 ctx.stroke();
                 ctx.restore();
             }
@@ -1333,17 +1346,9 @@ const m = {
                 sat: 14,
                 light: 65,
             }
-            // m.setFillColors();
             m.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
             m.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 50}%)`
-            // let grd = ctx.createLinearGradient(-30, 0, 30, 0);
             const grd = ctx.createRadialGradient(16, 0, 0, 0, 0, 40);
-
-            // grd.addColorStop(0, `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 35}%)`);
-            // grd.addColorStop(0.25, `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 20}%)`);
-            // grd.addColorStop(0.5, `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 35}%)`);
-            // grd.addColorStop(1, `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 10}%)`);
-
             grd.addColorStop(0, `#c78034`);
             grd.addColorStop(0.04, `#bd5235`);
             grd.addColorStop(0.08, `#ab554d`);
@@ -1369,9 +1374,7 @@ const m = {
             grd.addColorStop(0.92, `#00e19b`);
             grd.addColorStop(0.96, `#19f5aa`);
             grd.addColorStop(1, `#aaf5af`);
-
             m.bodyGradient = grd
-
 
             m.draw = function () {
                 ctx.fillStyle = m.fillColor;
@@ -1410,7 +1413,7 @@ const m = {
                 ctx.lineTo(m.knee.x, m.knee.y);
                 ctx.lineTo(m.foot.x, m.foot.y);
                 ctx.strokeStyle = stroke;
-                ctx.lineWidth = 7;
+                ctx.lineWidth = 5;
                 ctx.stroke();
 
                 //toe lines
@@ -1424,21 +1427,22 @@ const m = {
 
                 //hip joint
                 ctx.beginPath();
-                ctx.arc(m.hip.x, m.hip.y, 11, 0, 2 * Math.PI);
-                ctx.fillStyle = "#1b85cf";
+                ctx.arc(m.hip.x, m.hip.y, 9, 0, 2 * Math.PI);
+                ctx.fillStyle = "#222";
+                // ctx.fillStyle = "#1b85cf";
                 ctx.fill();
                 //knee joint
                 ctx.beginPath();
-                ctx.arc(m.knee.x, m.knee.y, 7, 0, 2 * Math.PI);
-                ctx.fillStyle = "#ffa050";
+                ctx.arc(m.knee.x, m.knee.y, 5, 0, 2 * Math.PI);
+                // ctx.fillStyle = "#ffa050";
                 ctx.fill();
                 //foot joint
                 ctx.beginPath();
-                ctx.arc(m.foot.x, m.foot.y, 6, 0, 2 * Math.PI);
-                ctx.fillStyle = "#878cf0";
+                ctx.arc(m.foot.x, m.foot.y, 4, 0, 2 * Math.PI);
+                // ctx.fillStyle = "#878cf0";
                 ctx.fill();
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                // ctx.lineWidth = 3;
+                // ctx.stroke();
                 ctx.restore();
             }
         },
@@ -2636,7 +2640,7 @@ const m = {
     },
     fieldUpgrades: [{
         name: "field emitter",
-        imageNumber: Math.floor(Math.random() * 23),
+        imageNumber: Math.floor(Math.random() * 26), //pick one of the 25 field emitter image files at random
         description: `<em>initial field</em><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs and <strong>throw</strong> <strong class='color-block'>blocks</strong>
         <br>generate <strong>4</strong> <strong class='color-f'>energy</strong> per second`, //            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
         effect: () => {
@@ -2933,7 +2937,6 @@ const m = {
                     //     m.energy -= 2 * m.fieldRegen
                     //     if (m.energy < m.fieldRegen) m.fieldCDcycle = m.cycle + 90;
                     // }
-
 
                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                     m.grabPowerUp();
@@ -3998,7 +4001,7 @@ const m = {
     },
     {
         name: "metamaterial cloaking",
-        description: "<strong>+50%</strong> <strong class='color-defense'>defense</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>+333%</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
+        description: "<strong>+66%</strong> <strong class='color-defense'>defense</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>+333%</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
         effect: () => {
             m.fieldFire = true;
             m.fieldMeterColor = "#333";
@@ -4013,29 +4016,6 @@ const m = {
                 m.walk_cycle -= m.flipLegs * m.Vx;
                 m.pos.x += 4
                 m.draw();
-
-                // let history = m.history[(m.cycle - 1) % 600]
-                // m.pos.x = history.position.x
-                // m.pos.y = history.position.y + m.yPosDifference - history.yOff
-
-                // m.pos.x += 4
-                // ctx.fillStyle = m.fillColor;
-                // ctx.save();
-                // ctx.translate(m.pos.x, m.pos.y);
-                // m.calcLeg(Math.PI, -3);
-                // m.drawLeg("#ccc");
-                // m.calcLeg(0, 0);
-                // m.drawLeg("#ccc");
-                // ctx.rotate(m.angle);
-                // ctx.beginPath();
-                // ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                // ctx.fillStyle = "#fff"
-                // ctx.fill();
-                // ctx.arc(15, 0, 4, 0, 2 * Math.PI);
-                // ctx.strokeStyle = "#333";
-                // ctx.lineWidth = 2;
-                // ctx.stroke();
-                // ctx.restore()
             }
             m.drawCloak = function () {
                 m.fieldPhase += 0.007
@@ -4067,27 +4047,27 @@ const m = {
                 }
                 //not shooting (or using field) enable cloak
                 if (m.energy < 0.05 && m.fireCDcycle < m.cycle && !input.fire) m.fireCDcycle = m.cycle
-                if (m.fireCDcycle + 30 < m.cycle && !input.fire) { //automatically cloak if not firing
+                if (m.fireCDcycle + 10 < m.cycle && !input.fire) { //automatically cloak if not firing
                     const drain = 0.02
                     if (!m.isCloak && m.energy > drain + 0.03) {
                         m.energy -= drain
                         m.isCloak = true //enter cloak
-                        m.fieldHarmReduction = 0.5;
+                        m.fieldHarmReduction = 0.33; //66% reduction
                         m.enterCloakCycle = m.cycle
                         if (tech.isCloakHealLastHit && m.lastHit > 0) {
                             const heal = Math.min(0.75 * m.lastHit, m.energy)
-                            if (m.energy > heal) {
-                                m.energy -= heal
-                                m.addHealth(heal); //heal from last hit
-                                m.lastHit = 0
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: m.pos.x,
-                                    y: m.pos.y,
-                                    radius: Math.sqrt(heal) * 200,
-                                    color: "rgba(0,255,200,0.6)",
-                                    time: 16
-                                });
-                            }
+                            // if (m.energy > heal) {
+                            // m.energy -= heal * 0.8
+                            m.addHealth(heal); //heal from last hit
+                            m.lastHit = 0
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: m.pos.x,
+                                y: m.pos.y,
+                                radius: Math.sqrt(heal) * 200,
+                                color: "rgba(0,255,200,0.6)",
+                                time: 16
+                            });
+                            // }
                         }
                         if (tech.isIntangible) {
                             for (let i = 0; i < bullet.length; i++) {
@@ -4133,9 +4113,16 @@ const m = {
                     m.fieldRange = m.fieldRange * 0.85 + 130
                     m.fieldDrawRadius = m.fieldRange * 1.1 //* 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                     m.drawCloak()
-                    ctx.globalCompositeOperation = "lighter";
-                    m.drawCloakedM()
-                    ctx.globalCompositeOperation = "source-over";
+                    // ctx.globalCompositeOperation = "lighter";
+                    // m.drawCloakedM()
+                    // ctx.globalCompositeOperation = "source-over";
+
+                    ctx.beginPath();
+                    ctx.arc(m.pos.x, m.pos.y, 35, 0, 2 * Math.PI);
+                    ctx.strokeStyle = "rgba(255,255,255,0.25)";//"rgba(0,0,0,0.7)";//"rgba(255,255,255,0.7)";//"rgba(255,0,100,0.7)";
+                    ctx.lineWidth = 10
+                    ctx.stroke();
+
                 } else if (m.fieldRange < 4000) {
                     m.fieldRange += 90
                     m.fieldDrawRadius = m.fieldRange //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
@@ -4148,8 +4135,8 @@ const m = {
                         if (inPlayer.length > 0) {
                             for (let i = 0; i < inPlayer.length; i++) {
                                 if (m.energy > 0) {
-                                    if (!inPlayer[i].isUnblockable) m.energy -= 0.007;
-                                    if (inPlayer[i].shield) m.energy -= 0.025;
+                                    if (!inPlayer[i].isUnblockable) m.energy -= 0.003;
+                                    if (inPlayer[i].shield) m.energy -= 0.011;
                                 }
                             }
                         }
@@ -4158,10 +4145,17 @@ const m = {
                     }
                 }
                 this.drawRegenEnergyCloaking()
-                if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) { //show sneak attack status
-                    ctx.globalCompositeOperation = "multiply";
-                    m.drawCloakedM()
-                    ctx.globalCompositeOperation = "source-over";
+                if (m.isSneakAttack && m.sneakAttackCycle + Math.min(100, 0.66 * (m.cycle - m.enterCloakCycle)) > m.cycle) { //show sneak attack status
+                    const timeLeft = (m.sneakAttackCycle + Math.min(100, 0.66 * (m.cycle - m.enterCloakCycle)) - m.cycle) * 0.5
+                    ctx.beginPath();
+                    ctx.arc(m.pos.x, m.pos.y, 32, 0, 2 * Math.PI);
+                    ctx.strokeStyle = "rgba(180,30,70,0.5)";//"rgba(0,0,0,0.7)";//"rgba(255,255,255,0.7)";//"rgba(255,0,100,0.7)";
+                    ctx.lineWidth = Math.max(Math.min(10, timeLeft), 3);
+                    ctx.stroke();
+
+                    // ctx.globalCompositeOperation = "multiply";
+                    // m.drawCloakedM()
+                    // ctx.globalCompositeOperation = "source-over";
                 }
             }
         }

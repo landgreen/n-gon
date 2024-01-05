@@ -288,7 +288,7 @@ const b = {
         if (m.fieldMode === 6) b.fireCDscale *= 0.8
         if (tech.isFastTime) b.fireCDscale *= 0.5
         if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.82, Math.max(0, b.inventory.length - 1))
-        if (tech.isFireMoveLock) b.fireCDscale *= 0.55
+        if (tech.isFireMoveLock) b.fireCDscale *= 0.23 // 77% fire rate
     },
     fireAttributes(dir, rotate = true) {
         if (rotate) {
@@ -1508,8 +1508,9 @@ const b = {
                 },
                 minDmgSpeed: 4,
                 // lookFrequency: Math.floor(7 + Math.random() * 3),
-                density: 0.004, //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
+                density: 0.004, //0.001 is normal for blocks,  0.004 is normal for harpoon
                 drain: 0.001,
+                powerUpDamage: tech.isHarpoonPowerUp && simulation.cycle - 480 < tech.harpoonPowerUpCycle,
                 draw() {
                     // draw rope
                     const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
@@ -1559,9 +1560,26 @@ const b = {
                     //     ctx.stroke();
                     // }
 
-
-
-
+                    if (this.powerUpDamage) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                        ctx.lineTo(this.vertices[1].x, this.vertices[1].y);
+                        ctx.lineTo(this.vertices[2].x, this.vertices[2].y);
+                        ctx.lineTo(this.vertices[3].x, this.vertices[3].y);
+                        ctx.lineTo(this.vertices[4].x, this.vertices[4].y);
+                        ctx.lineJoin = "miter"
+                        ctx.miterLimit = 30;
+                        ctx.lineWidth = 25;
+                        ctx.strokeStyle = "rgba(0,255,255,0.4)";
+                        ctx.stroke();
+                        ctx.lineWidth = 8;
+                        ctx.strokeStyle = "rgb(0,255,255)";
+                        ctx.stroke();
+                        ctx.lineJoin = "round"
+                        ctx.miterLimit = 5
+                        ctx.fillStyle = "#000"
+                        ctx.fill();
+                    }
                     //draw hook
                     ctx.beginPath();
                     ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
@@ -1581,6 +1599,42 @@ const b = {
                     }
                     if (m.fieldCDcycle < m.cycle + 40) m.fieldCDcycle = m.cycle + 40  //extra long cooldown on hitting mobs
                     if (tech.isHookExplosion) b.explosion(this.position, 250 + 150 * Math.random()); //makes bullet do explosive damage at end
+                    // if (this.powerUpDamage) this.density = 2 * 0.004 //double damage after pick up power up for 8 seconds
+
+
+                    if (tech.isHarpoonPowerUp && simulation.cycle - 480 < tech.harpoonPowerUpCycle) {
+                        Matter.Body.setDensity(this, 1.8 * 0.004); //+90% damage after pick up power up for 8 seconds
+                    } else if (tech.isHarpoonFullHealth && who.health === 1) {
+                        Matter.Body.setDensity(this, 1.9 * 0.004); //+90% damage if mob has full health do
+                        simulation.ephemera.push({
+                            name: "grapple outline",
+                            count: 3, //cycles before it self removes
+                            vertices: this.vertices,
+                            do() {
+                                this.count--
+                                if (this.count < 0) simulation.removeEphemera(this.name)
+
+                                ctx.beginPath();
+                                ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                                for (let j = 1, len = this.vertices.length; j < len; j += 1) ctx.lineTo(this.vertices[j].x, this.vertices[j].y);
+                                ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+                                ctx.lineJoin = "miter"
+                                ctx.miterLimit = 20;
+                                ctx.lineWidth = 40;
+                                ctx.strokeStyle = "rgba(255,0,100,0.35)";
+                                ctx.stroke();
+                                ctx.lineWidth = 10;
+                                ctx.strokeStyle = `#f07`;
+                                ctx.stroke();
+                                ctx.lineJoin = "round"
+                                ctx.miterLimit = 5
+                                ctx.fillStyle = "#000"
+                                ctx.fill();
+                            },
+                        })
+                    }
+
+
                     this.retract()
                 },
                 caughtPowerUp: null,
@@ -1602,7 +1656,7 @@ const b = {
                             this.caughtPowerUp.effect();
                             Matter.Composite.remove(engine.world, this.caughtPowerUp);
                             powerUp.splice(index, 1);
-                            if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.004 * 6 //0.005 is normal
+                            if (tech.isHarpoonPowerUp) tech.harpoonPowerUpCycle = simulation.cycle
                         } else {
                             this.dropCaughtPowerUp()
                         }
@@ -1893,321 +1947,6 @@ const b = {
             });
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
-    // grapple(where, angle = m.angle, harpoonSize = 1) {
-    //     const me = bullet.length;
-    //     const returnRadius = 100 * Math.sqrt(harpoonSize)
-    //     bullet[me] = Bodies.fromVertices(where.x, where.y, [{
-    //         x: -50 * harpoonSize,
-    //         y: 2 * harpoonSize,
-    //         index: 0,
-    //         isInternal: false
-    //     }, {
-    //         x: -50 * harpoonSize,
-    //         y: -2 * harpoonSize,
-    //         index: 1,
-    //         isInternal: false
-    //     }, {
-    //         x: 45 * harpoonSize,
-    //         y: -3 * harpoonSize,
-    //         index: 2,
-    //         isInternal: false
-    //     }, {
-    //         x: 50 * harpoonSize,
-    //         y: 0,
-    //         index: 3,
-    //         isInternal: false
-    //     }, {
-    //         x: 45 * harpoonSize,
-    //         y: 3 * harpoonSize,
-    //         index: 4,
-    //         isInternal: false
-    //     }], {
-    //         angle: angle,
-    //         friction: 1,
-    //         frictionAir: 0.4,
-    //         thrustMag: 0.1,
-    //         dmg: 6, //damage done in addition to the damage from momentum
-    //         classType: "bullet",
-    //         endCycle: simulation.cycle + 70,
-    //         collisionFilter: {
-    //             category: cat.bullet,
-    //             mask: tech.isShieldPierce ? cat.body | cat.mob | cat.mobBullet : cat.body | cat.mob | cat.mobBullet | cat.mobShield,
-    //         },
-    //         minDmgSpeed: 4,
-    //         lookFrequency: Math.floor(7 + Math.random() * 3),
-    //         density: tech.harpoonDensity, //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
-    //         drain: tech.isRailEnergy ? 0.0006 : 0.006,
-    //         beforeDmg(who) {
-    //             if (tech.isShieldPierce && who.isShielded) { //disable shields
-    //                 who.isShielded = false
-    //                 requestAnimationFrame(() => {
-    //                     who.isShielded = true
-    //                 });
-    //             }
-    //             if (tech.fragments) {
-    //                 b.targetedNail(this.vertices[2], tech.fragments * Math.floor(2 + Math.random()))
-    //             }
-    //             if (tech.isFoamBall) {
-    //                 for (let i = 0, len = 4 * this.mass; i < len; i++) {
-    //                     const radius = 5 + 8 * Math.random()
-    //                     const velocity = {
-    //                         x: Math.max(0.5, 2 - radius * 0.1),
-    //                         y: 0
-    //                     }
-    //                     b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
-    //                 }
-    //                 // this.endCycle = 0;
-    //             }
-    //         },
-    //         caughtPowerUp: null,
-    //         dropCaughtPowerUp() {
-    //             if (this.caughtPowerUp) {
-    //                 this.caughtPowerUp.collisionFilter.category = cat.powerUp
-    //                 this.caughtPowerUp.collisionFilter.mask = cat.map | cat.powerUp
-    //                 this.caughtPowerUp = null
-    //             }
-    //         },
-    //         onEnd() {
-    //             if (this.caughtPowerUp && !simulation.isChoosing && (this.caughtPowerUp.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
-    //                 let index = null //find index
-    //                 for (let i = 0, len = powerUp.length; i < len; ++i) {
-    //                     if (powerUp[i] === this.caughtPowerUp) index = i
-    //                 }
-    //                 if (index !== null) {
-    //                     powerUps.onPickUp(this.caughtPowerUp);
-    //                     this.caughtPowerUp.effect();
-    //                     Matter.Composite.remove(engine.world, this.caughtPowerUp);
-    //                     powerUp.splice(index, 1);
-    //                     if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.004 * 6 //0.005 is normal
-    //                 } else {
-    //                     this.dropCaughtPowerUp()
-    //                 }
-    //             } else {
-    //                 this.dropCaughtPowerUp()
-    //             }
-    //         },
-    //         draw() {
-    //             const where = {
-    //                 x: m.pos.x + 30 * Math.cos(m.angle),
-    //                 y: m.pos.y + 30 * Math.sin(m.angle)
-    //             }
-    //             const sub = Vector.sub(where, this.vertices[0])
-    //             const controlPoint = Vector.add(where, Vector.mult(sub, -0.5))
-    //             ctx.strokeStyle = "#000" // "#0ce"
-    //             ctx.lineWidth = 0.5
-    //             ctx.beginPath();
-    //             ctx.moveTo(where.x, where.y);
-    //             ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
-    //             // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
-    //             ctx.stroke();
-    //             //draw harpoon spikes
-    //             const spikeLength = 2
-    //             ctx.beginPath();
-    //             const spike1 = Vector.add(this.vertices[1], Vector.mult(Vector.sub(this.vertices[1], this.vertices[2]), spikeLength))
-    //             ctx.moveTo(this.vertices[2].x, this.vertices[2].y);
-    //             ctx.lineTo(spike1.x, spike1.y);
-    //             ctx.lineTo(this.vertices[3].x, this.vertices[3].y);
-
-    //             const spike2 = Vector.add(this.vertices[3], Vector.mult(Vector.sub(this.vertices[3], this.vertices[2]), spikeLength))
-    //             ctx.moveTo(this.vertices[2].x, this.vertices[2].y);
-    //             ctx.lineTo(spike2.x, spike2.y);
-    //             ctx.lineTo(this.vertices[1].x, this.vertices[1].y);
-    //             ctx.fillStyle = '#000'
-    //             ctx.fill();
-    //         },
-    //         returnToPlayer() {
-    //             if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius) { //near player
-    //                 this.endCycle = 0;
-    //                 // if (m.energy < 0.05) {
-    //                 //     m.fireCDcycle = m.cycle + 120; //fire cooldown
-    //                 // } else if (m.cycle + 15 * b.fireCDscale < m.fireCDcycle) {
-    //                 //     m.fireCDcycle = m.cycle + 15 * b.fireCDscale //lower cd to 25 if it is above 25
-    //                 // }
-
-    //                 if (m.energy < 0.05) this.dropCaughtPowerUp()
-
-    //                 //recoil on catching
-    //                 const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (m.crouch ? 0.0001 : 0.0002))
-    //                 player.force.x += momentum.x
-    //                 player.force.y += momentum.y
-    //                 // refund ammo
-    //                 b.guns[9].ammo++;
-    //                 simulation.updateGunHUD();
-
-    //                 // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-    //                 //     if (b.guns[i].name === "harpoon") {
-    //                 //         b.guns[i].ammo++;
-    //                 //         simulation.updateGunHUD();
-    //                 //         break;
-    //                 //     }
-    //                 // }
-    //             } else {
-    //                 if (m.energy > this.drain) m.energy -= this.drain
-    //                 const sub = Vector.sub(this.position, m.pos)
-    //                 const rangeScale = 1 + 0.000001 * Vector.magnitude(sub) * Vector.magnitude(sub) //return faster when far from player
-    //                 const returnForce = Vector.mult(Vector.normalise(sub), rangeScale * this.thrustMag * this.mass)
-    //                 this.force.x -= returnForce.x
-    //                 this.force.y -= returnForce.y
-    //                 this.grabPowerUp()
-    //             }
-    //             this.draw();
-    //         },
-    //         grabPowerUp() { //grab power ups near the tip of the harpoon
-    //             if (this.caughtPowerUp) {
-    //                 Matter.Body.setPosition(this.caughtPowerUp, Vector.add(this.vertices[2], this.velocity))
-    //                 Matter.Body.setVelocity(this.caughtPowerUp, {
-    //                     x: 0,
-    //                     y: 0
-    //                 })
-    //             } else { //&& simulation.cycle % 2 
-    //                 for (let i = 0, len = powerUp.length; i < len; ++i) {
-    //                     const radius = powerUp[i].circleRadius + 50
-    //                     if (Vector.magnitudeSquared(Vector.sub(this.vertices[2], powerUp[i].position)) < radius * radius) {
-    //                         if (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) {
-    //                             this.caughtPowerUp = powerUp[i]
-    //                             Matter.Body.setVelocity(powerUp[i], {
-    //                                 x: 0,
-    //                                 y: 0
-    //                             })
-    //                             Matter.Body.setPosition(powerUp[i], this.vertices[2])
-    //                             powerUp[i].collisionFilter.category = 0
-    //                             powerUp[i].collisionFilter.mask = 0
-    //                             this.thrustMag *= 0.6
-    //                             this.endCycle += 0.5 //it pulls back slower, so this prevents it from ending early
-    //                             break //just pull 1 power up if possible
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         },
-    //         do() {
-    //             if (input.fire) { //&& !Matter.Query.collides(this, body).length
-    //                 this.grabPowerUp()
-    //                 if (this.endCycle < simulation.cycle + 1) { //if at end of lifespan, but player is holding down fire, force retraction
-    //                     this.endCycle = simulation.cycle + 60
-    //                     // m.fireCDcycle = m.cycle + 120 // cool down
-    //                     this.do = this.returnToPlayer
-    //                     Matter.Body.setDensity(this, 0.0005); //reduce density on return
-    //                     if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
-    //                     this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
-    //                 }
-    //             } else {
-    //                 //if not enough energy
-    //                 if (m.energy < 0.05) this.dropCaughtPowerUp()
-    //                 //     const returnForce = Vector.mult(Vector.normalise(Vector.sub(this.position, m.pos)), 3 * this.thrustMag * this.mass)
-    //                 //     this.force.x -= returnForce.x
-    //                 //     this.force.y -= returnForce.y
-    //                 //     this.frictionAir = 0.002
-    //                 //     this.do = () => {
-    //                 //         if (this.speed < 20) this.force.y += 0.0005 * this.mass;
-    //                 //     }
-
-    //                 // } else {
-    //                 //return to player
-    //                 this.do = this.returnToPlayer
-    //                 this.endCycle = simulation.cycle + 60
-    //                 Matter.Body.setDensity(this, 0.0005); //reduce density on return
-    //                 if (this.angularSpeed < 0.5) this.torque += this.inertia * 0.001 * (Math.random() - 0.5) //(Math.round(Math.random()) ? 1 : -1)
-    //                 this.collisionFilter.mask = cat.map | cat.mob | cat.mobBullet | cat.mobShield // | cat.body
-    //                 //recoil on catching
-    //                 const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (m.crouch ? 0.0001 : 0.0002))
-    //                 player.force.x += momentum.x
-    //                 player.force.y += momentum.y
-    //                 // }
-    //             }
-    //             //grappling hook
-    //             if (input.fire && Matter.Query.collides(this, map).length) {
-    //                 Matter.Body.setPosition(this, Vector.add(this.position, {
-    //                     x: 20 * Math.cos(this.angle),
-    //                     y: 20 * Math.sin(this.angle)
-    //                 }))
-    //                 if (Matter.Query.collides(this, map).length) {
-    //                     Matter.Body.setVelocity(this, {
-    //                         x: 0,
-    //                         y: 0
-    //                     });
-    //                     Matter.Sleeping.set(this, true)
-    //                     this.endCycle = simulation.cycle + 5
-    //                     this.dropCaughtPowerUp()
-    //                     this.do = () => {
-    //                         //between player nose and the grapple
-    //                         const sub = Vector.sub(this.vertices[0], {
-    //                             x: m.pos.x + 30 * Math.cos(m.angle),
-    //                             y: m.pos.y + 30 * Math.sin(m.angle)
-    //                         })
-    //                         let dist = Vector.magnitude(sub)
-    //                         if (input.fire) {
-    //                             // m.fireCDcycle = m.cycle + 30; // cool down if out of energy
-    //                             m.fireCDcycle = m.cycle + 5 + 40 * b.fireCDscale + 60 * (m.energy < 0.05)
-    //                             this.endCycle = simulation.cycle + 10
-    //                             if (input.down) { //down
-    //                                 dist = 0
-    //                                 player.force.y += 5 * player.mass * simulation.g;
-    //                             }
-    //                             if (m.energy > this.drain) {
-    //                                 Matter.Body.setVelocity(player, {
-    //                                     x: player.velocity.x * 0.8,
-    //                                     y: player.velocity.y * 0.8
-    //                                 });
-    //                                 const pull = Vector.mult(Vector.normalise(sub), 0.0008 * Math.min(Math.max(15, dist), 200))
-    //                                 player.force.x += pull.x
-    //                                 player.force.y += pull.y
-
-    //                                 if (dist > 500) {
-    //                                     m.energy -= this.drain
-    //                                     if (m.energy < 0) {
-    //                                         this.endCycle = 0;
-    //                                         if (m.cycle + 50 < m.fireCDcycle) m.fireCDcycle = m.cycle + 50
-    //                                         // refund ammo
-    //                                         b.guns[9].ammo++;
-    //                                         simulation.updateGunHUD();
-    //                                         // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-    //                                         //     if (b.guns[i].name === "harpoon") {
-    //                                         //         break;
-    //                                         //     }
-    //                                         // }
-    //                                     }
-    //                                 }
-    //                             }
-    //                             if (tech.isImmuneGrapple && m.immuneCycle < m.cycle + 10) {
-    //                                 m.immuneCycle = m.cycle + 10;
-    //                                 if (m.energy > 0.001) {
-    //                                     m.energy -= 0.001
-    //                                 } else { //out of energy
-    //                                     Matter.Sleeping.set(this, false)
-    //                                     this.collisionFilter.category = 0
-    //                                     this.collisionFilter.mask = 0
-    //                                     this.do = this.returnToPlayer
-    //                                     this.endCycle = simulation.cycle + 60
-    //                                     m.fireCDcycle = m.cycle + 120; //fire cooldown
-    //                                     //recoil on catching
-    //                                     const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (m.crouch ? 0.0001 : 0.0002))
-    //                                     player.force.x += momentum.x
-    //                                     player.force.y += momentum.y
-    //                                 }
-    //                             }
-    //                         } else {
-    //                             Matter.Sleeping.set(this, false)
-    //                             this.collisionFilter.category = 0
-    //                             this.collisionFilter.mask = 0
-    //                             this.do = this.returnToPlayer
-    //                             this.endCycle = simulation.cycle + 60
-    //                             //recoil on catching
-    //                             const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (m.crouch ? 0.0001 : 0.0002))
-    //                             player.force.x += momentum.x
-    //                             player.force.y += momentum.y
-    //                         }
-    //                         this.draw();
-    //                     }
-    //                 }
-    //             }
-    //             this.force.x += this.thrustMag * this.mass * Math.cos(this.angle);
-    //             this.force.y += this.thrustMag * this.mass * Math.sin(this.angle);
-    //             this.draw()
-    //         },
-    //     });
-    //     Composite.add(engine.world, bullet[me]); //add bullet to world
-    // },
     harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
         const me = bullet.length;
         const returnRadius = 100 * Math.sqrt(harpoonSize)
@@ -2274,11 +2013,42 @@ const b = {
                     }
                 }
                 if (tech.isFoamBall) {
-                    for (let i = 0, len = Math.min(50, 2.5 + 3 * Math.sqrt(this.mass)); i < len; i++) {
+                    for (let i = 0, len = Math.min(30, 2 + 2 * Math.sqrt(this.mass)); i < len; i++) {
                         const radius = 5 + 8 * Math.random()
                         const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                         b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
                     }
+                }
+                if (tech.isHarpoonPowerUp && simulation.cycle - 480 < tech.harpoonPowerUpCycle) {
+                    Matter.Body.setDensity(this, 1.8 * tech.harpoonDensity); //+90% damage after pick up power up for 8 seconds
+                } else if (tech.isHarpoonFullHealth && who.health === 1) {
+                    Matter.Body.setDensity(this, 1.9 * tech.harpoonDensity); //+90% damage if mob has full health do
+                    simulation.ephemera.push({
+                        name: "harpoon outline",
+                        count: 2, //cycles before it self removes
+                        vertices: this.vertices,
+                        do() {
+                            this.count--
+                            if (this.count < 0) simulation.removeEphemera(this.name)
+
+                            ctx.beginPath();
+                            ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                            for (let j = 1, len = this.vertices.length; j < len; j += 1) ctx.lineTo(this.vertices[j].x, this.vertices[j].y);
+                            ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+                            ctx.lineJoin = "miter"
+                            ctx.miterLimit = 20;
+                            ctx.lineWidth = 40;
+                            ctx.strokeStyle = "rgba(255,0,100,0.35)";
+                            ctx.stroke();
+                            ctx.lineWidth = 10;
+                            ctx.strokeStyle = `#f07`;
+                            ctx.stroke();
+                            ctx.lineJoin = "round"
+                            ctx.miterLimit = 5
+                            ctx.fillStyle = "#000"
+                            ctx.fill();
+                        },
+                    })
                 }
             },
             caughtPowerUp: null,
@@ -2300,7 +2070,7 @@ const b = {
                         this.caughtPowerUp.effect();
                         Matter.Composite.remove(engine.world, this.caughtPowerUp);
                         powerUp.splice(index, 1);
-                        if (tech.isHarpoonPowerUp) tech.harpoonDensity = 0.004 * 6 //0.006 is normal
+                        if (tech.isHarpoonPowerUp) tech.harpoonPowerUpCycle = simulation.cycle
                     } else {
                         this.dropCaughtPowerUp()
                     }
@@ -2308,29 +2078,26 @@ const b = {
                     this.dropCaughtPowerUp()
                 }
             },
-            drawToggleHarpoon() {
+            drawDamageAura() {
                 ctx.beginPath();
                 ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
                 for (let j = 1, len = this.vertices.length; j < len; j += 1) ctx.lineTo(this.vertices[j].x, this.vertices[j].y);
                 ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
                 ctx.lineJoin = "miter"
-                ctx.miterLimit = 100;
-                ctx.lineWidth = 60;
-                ctx.strokeStyle = "rgba(0,255,255,0.25)";
+                ctx.miterLimit = 20;
+                ctx.lineWidth = 15;
+                ctx.strokeStyle = "rgba(255,0,100,0.25)";
                 ctx.stroke();
-                ctx.lineWidth = 20;
-                ctx.strokeStyle = "rgb(0,255,255)";
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = `#f07`;
                 ctx.stroke();
                 ctx.lineJoin = "round"
-                ctx.miterLimit = 10
+                ctx.miterLimit = 5
                 ctx.fillStyle = "#000"
                 ctx.fill();
             },
             drawString() {
-                const where = {
-                    x: m.pos.x + 30 * Math.cos(m.angle),
-                    y: m.pos.y + 30 * Math.sin(m.angle)
-                }
+                const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                 const sub = Vector.sub(where, this.vertices[0])
                 const perpendicular = Vector.mult(Vector.normalise(Vector.perp(sub)), this.drawStringFlip * Math.min(80, 10 + this.drawStringControlMagnitude / (10 + Vector.magnitude(sub))))
                 const controlPoint = Vector.add(Vector.add(where, Vector.mult(sub, -0.5)), perpendicular)
@@ -2384,10 +2151,7 @@ const b = {
             grabPowerUp() { //grab power ups near the tip of the harpoon
                 if (this.caughtPowerUp) {
                     Matter.Body.setPosition(this.caughtPowerUp, Vector.add(this.vertices[2], this.velocity))
-                    Matter.Body.setVelocity(this.caughtPowerUp, {
-                        x: 0,
-                        y: 0
-                    })
+                    Matter.Body.setVelocity(this.caughtPowerUp, { x: 0, y: 0 })
                 } else { //&& simulation.cycle % 2 
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
                         const radius = powerUp[i].circleRadius + 50
@@ -2395,10 +2159,7 @@ const b = {
                             if (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) {
                                 powerUp[i].isGrabbed = true
                                 this.caughtPowerUp = powerUp[i]
-                                Matter.Body.setVelocity(powerUp[i], {
-                                    x: 0,
-                                    y: 0
-                                })
+                                Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 })
                                 Matter.Body.setPosition(powerUp[i], this.vertices[2])
                                 powerUp[i].collisionFilter.category = 0
                                 powerUp[i].collisionFilter.mask = 0
@@ -2459,15 +2220,15 @@ const b = {
                 this.draw();
             }
         }
-        if (tech.isHarpoonPowerUp && bullet[me].density > 0.01) {
+        if (tech.isHarpoonPowerUp && simulation.cycle - 480 < tech.harpoonPowerUpCycle) { //8 seconds
             if (isReturn) {
                 bullet[me].draw = function () {
-                    this.drawToggleHarpoon()
+                    this.drawDamageAura()
                     this.drawString()
                 }
             } else {
                 bullet[me].draw = function () {
-                    this.drawToggleHarpoon()
+                    this.drawDamageAura()
                 }
             }
         } else if (isReturn) {
@@ -2628,15 +2389,9 @@ const b = {
                             if (dist < radius * radius) {
                                 if (mob[i].speed > 2) {
                                     if (mob[i].isBoss || mob[i].isShielded) {
-                                        Matter.Body.setVelocity(mob[i], {
-                                            x: mob[i].velocity.x * 0.95,
-                                            y: mob[i].velocity.y * 0.95
-                                        });
+                                        Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.95, y: mob[i].velocity.y * 0.95 });
                                     } else {
-                                        Matter.Body.setVelocity(mob[i], {
-                                            x: mob[i].velocity.x * 0.25,
-                                            y: mob[i].velocity.y * 0.25
-                                        });
+                                        Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.25, y: mob[i].velocity.y * 0.25 });
                                     }
                                 }
                                 // Matter.Body.setPosition(this, Vector.add(this.position, mob[i].velocity)) //move with the medium
@@ -5139,39 +4894,39 @@ const b = {
         for (let i = 0; i < tech.dynamoBotCount; i++) b.dynamoBot({
             x: player.position.x + 50 * (Math.random() - 0.5),
             y: player.position.y + 50 * (Math.random() - 0.5)
-        }, false)
+        })
         for (let i = 0; i < tech.laserBotCount; i++) b.laserBot({
             x: player.position.x + 50 * (Math.random() - 0.5),
             y: player.position.y + 50 * (Math.random() - 0.5)
-        }, false)
+        })
         for (let i = 0; i < tech.nailBotCount; i++) b.nailBot({
             x: player.position.x + 50 * (Math.random() - 0.5),
             y: player.position.y + 50 * (Math.random() - 0.5)
-        }, false)
+        })
         for (let i = 0; i < tech.foamBotCount; i++) b.foamBot({
             x: player.position.x + 50 * (Math.random() - 0.5),
             y: player.position.y + 50 * (Math.random() - 0.5)
-        }, false)
+        })
         for (let i = 0; i < tech.soundBotCount; i++) b.soundBot({
             x: player.position.x + 50 * (Math.random() - 0.5),
             y: player.position.y + 50 * (Math.random() - 0.5)
-        }, false)
+        })
         for (let i = 0; i < tech.boomBotCount; i++) b.boomBot({
             x: player.position.x + 50 * (Math.random() - 0.5),
             y: player.position.y + 50 * (Math.random() - 0.5)
-        }, false)
+        })
         for (let i = 0; i < tech.orbitBotCount; i++) b.orbitBot({
             x: player.position.x + 50 * (Math.random() - 0.5),
             y: player.position.y + 50 * (Math.random() - 0.5)
-        }, false)
+        })
         for (let i = 0; i < tech.plasmaBotCount; i++) b.plasmaBot({
             x: player.position.x + 50 * (Math.random() - 0.5),
             y: player.position.y + 50 * (Math.random() - 0.5)
-        }, false)
+        })
         for (let i = 0; i < tech.missileBotCount; i++) b.missileBot({
             x: player.position.x + 50 * (Math.random() - 0.5),
             y: player.position.y + 50 * (Math.random() - 0.5)
-        }, false)
+        })
         if (tech.isIntangible && m.isCloak) {
             for (let i = 0; i < bullet.length; i++) {
                 if (bullet[i].botType) bullet[i].collisionFilter.mask = cat.map | cat.bullet | cat.mobBullet | cat.mobShield
@@ -5250,7 +5005,6 @@ const b = {
 
     },
     setDynamoBotDelay() {
-        //reorder orbital bot positions around a circle
         let total = 0
         for (let i = 0; i < bullet.length; i++) {
             if (bullet[i].botType === 'dynamo') total++
@@ -5259,13 +5013,17 @@ const b = {
         for (let i = 0; i < bullet.length; i++) {
             if (bullet[i].botType === 'dynamo') {
                 count++
-                const step = Math.max(60 - 3 * total, 20)
-                bullet[i].followDelay = (step * count) % 600
+                const step = Math.max(60 - 3 * total, 10)
+                if (bullet[i].isKeep) {
+                    bullet[i].followDelay = (step * count) % 600
+                } else {
+                    bullet[i].followDelay = Math.floor(step * bullet.length * Math.random()) % 600
+                }
             }
         }
     },
-    dynamoBot(position = player.position, isConsole = true) {
-        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.dynamoBot()`);
+    dynamoBot(position = player.position, isKeep = true) {
+        // if (isKeep) simulation.makeTextLog(`<span class='color-var'>b</span>.dynamoBot()`);
         const me = bullet.length;
         bullet[me] = Bodies.polygon(position.x, position.y, 5, 10, {
             isUpgraded: tech.isDynamoBotUpgrade,
@@ -5274,7 +5032,8 @@ const b = {
             frictionStatic: 0,
             frictionAir: 0.02,
             spin: 0.07 * (Math.random() < 0.5 ? -1 : 1),
-            // isStatic: true,  
+            // isStatic: true,
+            isKeep: isKeep,
             isSensor: true,
             restitution: 0,
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
@@ -5359,17 +5118,14 @@ const b = {
                     }
                 }
                 let history = m.history[(m.cycle - this.followDelay) % 600]
-                Matter.Body.setPosition(this, {
-                    x: history.position.x,
-                    y: history.position.y - history.yOff + 24.2859
-                }) //bullets move with player
+                Matter.Body.setPosition(this, { x: history.position.x, y: history.position.y - history.yOff + 24.2859 }) //bullets move with player
             }
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
         b.setDynamoBotDelay()
     },
-    nailBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
-        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.nailBot()`);
+    nailBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isKeep = true) {
+        // if (isKeep) simulation.makeTextLog(`<span class='color-var'>b</span>.nailBot()`);
         const me = bullet.length;
         const dir = m.angle;
         const RADIUS = (12 + 4 * Math.random())
@@ -5386,8 +5142,8 @@ const b = {
             // lookFrequency: 56 + Math.floor(17 * Math.random()) - isUpgraded * 20,
             lastLookCycle: simulation.cycle + 60 * Math.random(),
             delay: Math.floor((tech.isNailBotUpgrade ? 18 : 85) * b.fireCDscale),
-            acceleration: 0.005 * (1 + 0.5 * Math.random()),
-            range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(),
+            acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
+            range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -5433,8 +5189,8 @@ const b = {
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
-    missileBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
-        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.missileBot()`);
+    missileBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isKeep = true) {
+        // if (isKeep) simulation.makeTextLog(`<span class='color-var'>b</span>.missileBot()`);
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(position.x, position.y, 28, 11, {
             botType: "missile",
@@ -5504,8 +5260,8 @@ const b = {
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
-    foamBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
-        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.foamBot()`);
+    foamBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isKeep = true) {
+        // if (isKeep) simulation.makeTextLog(`<span class='color-var'>b</span>.foamBot()`);
         const me = bullet.length;
         const dir = m.angle;
         const RADIUS = (10 + 5 * Math.random())
@@ -5524,8 +5280,8 @@ const b = {
             fireCount: 0,
             fireLimit: 5 + 2 * tech.isFoamBotUpgrade,
             delay: Math.floor((145 + (tech.isFoamBotUpgrade ? 0 : 230)) * b.fireCDscale),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
-            acceleration: 0.005 * (1 + 0.5 * Math.random()),
-            range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(), //how far from the player the bot will move
+            acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
+            range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100, //how far from the player the bot will move
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -5625,8 +5381,8 @@ const b = {
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
-    soundBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
-        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.soundBot()`);
+    soundBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isKeep = true) {
+        // if (isKeep) simulation.makeTextLog(`<span class='color-var'>b</span>.soundBot()`);
         const me = bullet.length;
         const dir = m.angle;
         bullet[me] = Bodies.rectangle(position.x, position.y, 12, 30, {
@@ -5644,8 +5400,8 @@ const b = {
             fireCount: 0,
             fireLimit: 5 + 2 * tech.isSoundBotUpgrade,
             delay: Math.floor((120 + (tech.isSoundBotUpgrade ? 0 : 70)) * b.fireCDscale),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
-            acceleration: 0.005 * (1 + 0.5 * Math.random()),
-            range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots(), //how far from the player the bot will move
+            acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
+            range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100, //how far from the player the bot will move
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -5791,11 +5547,8 @@ const b = {
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
-    laserBot(position = {
-        x: player.position.x + 50 * (Math.random() - 0.5),
-        y: player.position.y + 50 * (Math.random() - 0.5)
-    }, isConsole = true) {
-        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.laserBot()`);
+    laserBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isKeep = true) {
+        // if (isKeep) simulation.makeTextLog(`<span class='color-var'>b</span>.laserBot()`);
         const me = bullet.length;
         const dir = m.angle;
         const RADIUS = (14 + 6 * Math.random())
@@ -5833,10 +5586,7 @@ const b = {
                 const mag = Math.min(farAway, 4) * this.mass * this.acceleration
                 this.force = Vector.mult(Vector.normalise(Vector.sub(playerPos, this.position)), mag)
                 //manual friction to not lose rotational velocity
-                Matter.Body.setVelocity(this, {
-                    x: this.velocity.x * 0.95,
-                    y: this.velocity.y * 0.95
-                });
+                Matter.Body.setVelocity(this, { x: this.velocity.x * 0.95, y: this.velocity.y * 0.95 });
                 //find targets
                 if (!(simulation.cycle % this.lookFrequency)) {
                     this.lockedOn = null;
@@ -5858,11 +5608,13 @@ const b = {
                         }
                     }
                     //randomize position relative to player
-                    if (Math.random() < 0.15) {
-                        const range = 110 + 4 * b.totalBots()
-                        this.offPlayer = {
-                            x: range * (Math.random() - 0.5),
-                            y: range * (Math.random() - 0.5) - 20,
+                    if (Math.random() < 0.1) {
+                        if (isKeep) {
+                            const range = 110 + 4 * b.totalBots()
+                            this.offPlayer = { x: range * (Math.random() - 0.5), y: range * (Math.random() - 0.5) - 20, }
+                        } else {
+                            const range = 110 + 4 * b.totalBots() + 100 * Math.random()
+                            this.offPlayer = Vector.mult(Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random()), range)
                         }
                     }
                 }
@@ -6040,11 +5792,8 @@ const b = {
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
-    boomBot(position = {
-        x: player.position.x + 50 * (Math.random() - 0.5),
-        y: player.position.y + 50 * (Math.random() - 0.5)
-    }, isConsole = true) {
-        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.boomBot()`);
+    boomBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isKeep = true) {
+        // if (isKeep) simulation.makeTextLog(`<span class='color-var'>b</span>.boomBot()`);
         const me = bullet.length;
         const dir = m.angle;
         const RADIUS = (7 + 2 * Math.random())
@@ -6059,9 +5808,9 @@ const b = {
             dmg: 0,
             minDmgSpeed: 0,
             lookFrequency: 43 + Math.floor(7 * Math.random()) - 13 * tech.isBoomBotUpgrade,
-            acceleration: 0.005 * (1 + 0.5 * Math.random()),
+            acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             attackAcceleration: 0.012 + 0.006 * tech.isBoomBotUpgrade,
-            range: 500 * (1 + 0.1 * Math.random()) + 350 * tech.isBoomBotUpgrade,
+            range: 500 * (1 + 0.1 * Math.random()) + 350 * tech.isBoomBotUpgrade + !isKeep * 100,
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -6131,8 +5880,8 @@ const b = {
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
-    plasmaBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isConsole = true) {
-        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.plasmaBot()`);
+    plasmaBot(position = { x: player.position.x + 50 * (Math.random() - 0.5), y: player.position.y + 50 * (Math.random() - 0.5) }, isKeep = true) {
+        // if (isKeep) simulation.makeTextLog(`<span class='color-var'>b</span>.plasmaBot()`);
         const me = bullet.length;
         const dir = m.angle;
         const RADIUS = 21
@@ -6305,8 +6054,8 @@ const b = {
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
     },
-    orbitBot(position = player.position, isConsole = true) {
-        if (isConsole) simulation.makeTextLog(`<span class='color-var'>b</span>.orbitBot()`);
+    orbitBot(position = player.position, isKeep = true) {
+        // if (isKeep) simulation.makeTextLog(`<span class='color-var'>b</span>.orbitBot()`);
         const me = bullet.length;
         bullet[me] = Bodies.polygon(position.x, position.y, 9, 12, {
             isUpgraded: tech.isOrbitBotUpgrade,
@@ -6316,6 +6065,7 @@ const b = {
             frictionAir: 1,
             isStatic: true,
             isSensor: true,
+            isKeep: isKeep,
             restitution: 0,
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 0,
@@ -6330,17 +6080,17 @@ const b = {
                 //reorder orbital bot positions around a circle
                 let totalOrbitalBots = 0
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType === 'orbit' && bullet[i] !== this) totalOrbitalBots++
+                    if (bullet[i].botType === 'orbit' && bullet[i] !== this && bullet[i].isKeep) totalOrbitalBots++
                 }
                 let index = 0
                 for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].botType === 'orbit' && bullet[i] !== this) {
+                    if (bullet[i].botType === 'orbit' && bullet[i] !== this && bullet[i].isKeep) {
                         bullet[i].phase = (index / totalOrbitalBots) * 2 * Math.PI
                         index++
                     }
                 }
             },
-            range: 190 + 130 * tech.isOrbitBotUpgrade, //range is set in bot upgrade too!
+            range: 190 + 130 * tech.isOrbitBotUpgrade + !isKeep * 60 * (0.5 - Math.random()), //range is set in bot upgrade too!
             orbitalSpeed: 0,
             phase: 2 * Math.PI * Math.random(),
             do() {
@@ -6377,10 +6127,7 @@ const b = {
                 }
                 //orbit player
                 const time = simulation.cycle * this.orbitalSpeed + this.phase
-                const orbit = {
-                    x: Math.cos(time),
-                    y: Math.sin(time) //*1.1
-                }
+                const orbit = { x: Math.cos(time), y: Math.sin(time) }
                 Matter.Body.setPosition(this, Vector.add(m.pos, Vector.mult(orbit, this.range))) //bullets move with player
             }
         })
@@ -6392,11 +6139,11 @@ const b = {
         //reorder orbital bot positions around a circle
         let totalOrbitalBots = 0
         for (let i = 0; i < bullet.length; i++) {
-            if (bullet[i].botType === 'orbit') totalOrbitalBots++
+            if (bullet[i].botType === 'orbit' && bullet[i].isKeep) totalOrbitalBots++
         }
         let index = 0
         for (let i = 0; i < bullet.length; i++) {
-            if (bullet[i].botType === 'orbit') {
+            if (bullet[i].botType === 'orbit' && bullet[i].isKeep) {
                 bullet[i].phase = (index / totalOrbitalBots) * 2 * Math.PI
                 index++
             }
@@ -6739,7 +6486,7 @@ const b = {
             name: "shotgun", //1
             // description: `fire a wide <strong>burst</strong> of short range <strong> bullets</strong><br>with a low <strong><em>fire rate</em></strong><br><strong>3-4</strong> nails per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `fire a wide <strong>burst</strong> of short range <strong> bullets</strong><br>has a slow <strong><em>fire rate</em></strong><br><strong>${this.ammoPack.toFixed(1)}</strong> nails per ${powerUps.orb.ammo()}`
+                return `fire a wide <strong>burst</strong> of short range <strong> bullets</strong><br>has a slow <strong><em>fire rate</em></strong><br><strong>${this.ammoPack.toFixed(1)}</strong> shots per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 3.5,
@@ -7995,7 +7742,6 @@ const b = {
                     }
                     //fire
                     if ((!input.fire && this.charge > 0.6)) {
-                        // tech.harpoonDensity = 0.0065 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
                         const where = {
                             x: m.pos.x + 30 * Math.cos(m.angle),
                             y: m.pos.y + 30 * Math.sin(m.angle)
@@ -8067,8 +7813,6 @@ const b = {
                         const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), m.crouch ? 0.03 : 0.06)
                         player.force.x -= recoil.x
                         player.force.y -= recoil.y
-                        // tech.harpoonDensity = 0.0065 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
-
                         const harpoonSize = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
                         const thrust = 0.15 * (this.charge)
                         if (tech.extraHarpoons) {
@@ -8263,12 +8007,8 @@ const b = {
                                 count++
                                 if (!(count % delay) && this.ammo > 0) {
                                     this.ammo--
-                                    b.harpoon({
-                                        x: m.pos.x + 30 * Math.cos(m.angle),
-                                        y: m.pos.y + 30 * Math.sin(m.angle)
-                                    }, null, angle, harpoonSize, true, totalCycles)
+                                    b.harpoon({ x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }, null, angle, harpoonSize, true, totalCycles)
                                     angle += SPREAD
-                                    tech.harpoonDensity = 0.004 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
                                 }
                                 if (count < num * delay && m.alive) requestAnimationFrame(harpoonDelay);
                             }
@@ -8298,7 +8038,6 @@ const b = {
                     } else {
                         b.harpoon(where, closest.target, m.angle, harpoonSize, true, totalCycles)
                     }
-                    tech.harpoonDensity = 0.004 //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
                 }
                 m.fireCDcycle = m.cycle + 5 + 35 * b.fireCDscale + 60 * (m.energy < 0.05) + tech.extraHarpoons // cool down is set when harpoon bullet returns to player
                 const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), m.crouch ? 0.015 : 0.035)
