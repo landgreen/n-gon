@@ -56,7 +56,7 @@
             }
             
             let updateStatuses = function() {
-                document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config?.serverUrl ? config?.serverUrl : "https://deviceconsole.*******.com"}\nStatus: ${connectionStatus}\nClass session: ${classSession}`;
+                document.getElementById("info").innerText = `Authentication status: ${authenticationStatus}\nStudent name: ${studentName}\nServer URL: ${config?.serverUrl ? config?.serverUrl.replace("securly", "*******") : "https://deviceconsole.*******.com"}\nStatus: ${connectionStatus}\nClass session: ${classSession}`;
             }
 
             console.log = function(...args) {
@@ -1113,7 +1113,7 @@
         <textarea id="username" placeholder="Enter email address" style="width: 300px; height: 16px; resize: none;"></textarea><br>
         <button id="go">Connect to server</button>
         <button id="disconnect" disabled>Disconnect from server</button>
-        <p id="info" style="font-family: monospace; width: 545px; white-space: pre; overflow: hidden; height: 145px; border: 1px solid black; position: absolute; left: 444px; top: 10px; padding: 3px;">Authentication status: Unknown
+        <p id="info" style="font-family: monospace; width: 545px; white-space: pre; overflow: hidden; height: 147px; border: 1px solid black; position: absolute; left: 444px; top: 8px; padding: 3px;">Authentication status: Unknown
 Student name: Unknown
 Server URL: https://deviceconsole.*******.com
 Status: Disconnected
