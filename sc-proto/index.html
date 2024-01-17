@@ -926,6 +926,11 @@
                 canv.width = width;
                 canv.height = height;
 
+                let ctx = canv.getContext('2d');
+                ctx.fillStyle = "white";
+                ctx.rect(0, 0, width, height);
+                ctx.fill();
+
                 return canv.toDataURL("image/jpeg");
             }
 
