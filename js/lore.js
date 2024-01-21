@@ -1092,7 +1092,7 @@ const lore = {
 
             () => {
                 setTimeout(() => {
-                    lore.anand.text("How ever it thinks it can learn and, I think we showed it that nonviolence is an option,")
+                    lore.anand.text("How ever it thinks it can learn, and I think we showed it that nonviolence is an option,")
                 }, 1000);
             },
             () => {
@@ -1116,7 +1116,7 @@ const lore = {
                 }, 1000);
             },
             () => {
-                lore.anand.text("me too")
+                lore.anand.text("Me too,")
             },
             () => {
                 lore.anand.text("but I'm also pretty hungry, wanna go get some food?")

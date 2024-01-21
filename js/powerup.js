@@ -326,7 +326,7 @@ const powerUps = {
                 return
             }
             if (tech.isCancelDuplication) {
-                tech.duplication += 0.043
+                tech.duplication += 0.047
                 tech.maxDuplicationEvent()
                 simulation.makeTextLog(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${0.043}`)
                 simulation.circleFlare(0.043);
@@ -361,7 +361,7 @@ const powerUps = {
             // }
         }
         if (tech.isAnsatz && powerUps.research.count < 1) {
-            for (let i = 0; i < 2; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
+            for (let i = 0; i < 3; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
         }
         // document.getElementById("choose-grid").style.display = "none"
         document.getElementById("choose-grid").style.visibility = "hidden"
@@ -466,28 +466,30 @@ const powerUps = {
                     if (m.alive && powerUps.research.count >= cost) {
                         requestAnimationFrame(cycle);
                         this.isMakingBots = true
-                    } else {
-                        this.isMakingBots = false
-                    }
-                    if (!simulation.paused && !simulation.isChoosing && !(simulation.cycle % 60)) {
-                        powerUps.research.count -= cost
-                        b.randomBot()
-                        if (tech.renormalization) {
-                            for (let i = 0; i < cost; i++) {
-                                if (Math.random() < 0.46) {
-                                    m.fieldCDcycle = m.cycle + 20;
-                                    powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
+
+                        if (!simulation.paused && !simulation.isChoosing && !(simulation.cycle % 60)) {
+                            powerUps.research.count -= cost
+                            b.randomBot()
+                            if (tech.renormalization) {
+                                for (let i = 0; i < cost; i++) {
+                                    if (Math.random() < 0.47) {
+                                        m.fieldCDcycle = m.cycle + 20;
+                                        powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
+                                    }
                                 }
                             }
                         }
+                    } else {
+                        this.isMakingBots = false
                     }
                 }
                 requestAnimationFrame(cycle);
             }
+
             if (tech.isDeathAvoid && document.getElementById("tech-anthropic")) {
                 document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.count}`
             }
-            if (tech.renormalization && Math.random() < 0.46 && amount < 0) {
+            if (tech.renormalization && Math.random() < 0.47 && amount < 0) {
                 for (let i = 0, len = -amount; i < len; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
             }
             if (tech.isRerollHaste) {
@@ -1412,6 +1414,31 @@ const powerUps = {
                     }
                 }
             }
+
+
+            if (tech.isAddRemoveMaxHealth) {
+                powerUps.spawn(x + 20, y, "tech", false)
+                powerUps.spawn(x - 20, y, "research", false)
+                powerUps.spawn(x - 40, y, "research", false)
+                powerUps.spawn(x + 40, y, "research", false)
+                powerUps.spawn(x, y + 20, "research", false)
+                powerUps.spawn(x, y - 20, "heal", false)
+                powerUps.spawn(x, y + 40, "heal", false)
+                powerUps.spawn(x, y - 40, "heal", false)
+                // if (this.isBoss && this.isDropPowerUp) {
+                // } else {
+                //     const amount = 0.005
+                //     if (tech.isEnergyHealth) {
+                //         if (m.maxEnergy > amount) {
+                //             tech.healMaxEnergyBonus -= amount
+                //             m.setMaxEnergy();
+                //         }
+                //     } else if (m.maxHealth > amount) {
+                //         tech.extraMaxHealth -= amount //decrease max health
+                //         m.setMaxHealth();
+                //     }
+                // }
+            }
         }
     },
     chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
@@ -1501,11 +1528,11 @@ const powerUps = {
     },
     pauseEjectTech(index) {
         if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isNonRefundable) {
-            if (Math.random() < 0.2 || tech.tech[index].isFromAppliedScience || (tech.tech[index].bonusResearch !== undefined && tech.tech[index].bonusResearch > powerUps.research.count)) {
+            if (Math.random() < 0.03 || tech.tech[index].isFromAppliedScience || (tech.tech[index].bonusResearch !== undefined && tech.tech[index].bonusResearch > powerUps.research.count)) {
                 tech.removeTech(index)
-                // powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
             } else {
                 powerUps.ejectTech(index)
+                m.damage(0.06)
             }
             document.getElementById(`${index}-pause-tech`).style.textDecoration = "line-through"
             document.getElementById(`${index}-pause-tech`).style.animation = ""

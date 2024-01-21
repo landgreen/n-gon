@@ -9,7 +9,7 @@ const level = {
     onLevel: -1,
     levelsCleared: 0,
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
-    //see level.populateLevels:   (intro, ... , reservoir or factory, reactor, ... , subway, final)    added later
+    //see level.populateLevels:   (initial, ... , reservoir or factory, reactor, ... , subway, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
     communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon", "diamagnetism"],
@@ -36,22 +36,24 @@ const level = {
             // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[8].ammo = 100000000
             // requestAnimationFrame(() => { tech.giveTech("Higgs mechanism") });
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Higgs mechanism")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("topological defect")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Hilbert space")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("martingale")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("paradigm shift")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("bubble fusion")
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) tech.giveTech("orbital-bot") });
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) b.orbitBot(m.pos, false) });
+            // m.skin.hexagon();
 
-            // for (let i = 0; i < 1; i++) tech.giveTech("cascading failure")
+
+            // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
             // for (let i = 0; i < 1; ++i) tech.giveTech("induction furnace")
             // for (let i = 0; i < 1; ++i) tech.giveTech("autonomous defense")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 100; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.skyscrapers();
+            // level.testing();
 
             // for (let i = 0; i < 4; ++i) spawn.hopMother(1900, -500)
-            // for (let i = 0; i < 10; ++i) spawn.starter(1900, -500, 50)
+            // for (let i = 0; i < 4; ++i) spawn.stinger(1900, -500)
             // for (let i = 0; i < 1; ++i) spawn.timeSkipBoss(1900, -2500)
             // spawn.beetleBoss(1900, -500, 25)
             // spawn.slasher2(2000, -1150)
@@ -62,7 +64,7 @@ const level = {
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
 
-            level[simulation.isTraining ? "walk" : "intro"]() //normal starting level **************************************************
+            level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // spawn.bodyRect(2425, -120, 200, 200);
             // console.log(body[body.length - 1].mass)
@@ -74,9 +76,9 @@ const level = {
             // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "ammo");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             //lore testing
+            // simulation.isCheating = false //true;
             // for (let i = 0; i < 5; i++) tech.giveTech("undefined")
             // lore.techCount = 2
-            // simulation.isCheating = false //true;
             // level.levelsCleared = 10
             // localSettings.loreCount = 5 //this sets what conversation is heard
             // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -284,6 +286,150 @@ const level = {
             tech.isDeathAvoidedThisLevel = false;
             simulation.updateTechHUD();
             simulation.clearNow = true; //triggers in simulation.clearMap to remove all physics bodies and setup for new map
+
+
+            //pop up new level info screen for a few seconds
+            if (!simulation.isChoosing && m.alive && (level.levels[level.onLevel] === "final" || level.levels[level.onLevel] === "reactor")) { //level.levels[level.onLevel] === "subway" ||
+                //pause
+                if (!simulation.paused) {
+                    simulation.paused = true;
+                    simulation.isChoosing = true; //stops p from un pausing on key down
+                    // build.pauseGrid()
+                    // document.body.style.cursor = "auto";
+                }
+                //build level info
+                document.getElementById("choose-grid").style.gridTemplateColumns = "250px"
+                let text = `<div><div class="card-background" style="height:auto; border: none; background-color: transparent; line-height: 160%; background-color: var(--card-color); font-size: 1.15em;"> <div class="card-text">`
+                for (let i = 0; i < level.levels.length; i++) {
+                    if (i < level.levelsCleared) {
+                        text += `<div style="user-select: none;">${level.levels[i]}</div>`
+                    } else if (i === level.levelsCleared) {
+                        // text += `<div><strong class="fade-in-faster">${level.levels[i]}</strong></div>`
+                        text += `<div class="unblur" style="user-select: none;"><strong>${level.levels[i]}</strong></div>`
+                    } else {
+                        text += `<div class= "blurry-text" style="user-select: none;">${level.levels[i]}</div>` //blurry text
+                        // ???????? text
+                        // text += `<div style="user-select: none; color: #bbb;">`
+                        // for (let j = 0; j < level.levels[i].length; j++)     text += `?`
+                        // text += `</div>`
+                    }
+                }
+                text += `</div> </div></div>`
+
+                document.getElementById("choose-grid").innerHTML = text
+                //show level info
+                document.getElementById("choose-grid").style.opacity = "1"
+                document.getElementById("choose-grid").style.transitionDuration = "0.25s"; //how long is the fade in on
+                document.getElementById("choose-grid").style.visibility = "visible"
+
+                simulation.draw.cons();
+                simulation.draw.body();
+                level.customTopLayer();
+                let count = simulation.testing ? 0 : 240
+                let newLevelDraw = () => {
+                    count--
+                    if (count > 0) {
+                        requestAnimationFrame(newLevelDraw);
+                    } else { //unpause
+                        // document.body.style.cursor = "none";
+                        if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 30; //player is immune to damage for 30 cycles
+                        if (simulation.paused) requestAnimationFrame(cycle);
+                        if (m.alive) simulation.paused = false;
+                        simulation.isChoosing = false; //stops p from un pausing on key down
+                        build.unPauseGrid()
+                        document.getElementById("choose-grid").style.opacity = "0"
+                        setTimeout(() => {
+                            document.getElementById("choose-grid").style.visibility = "hidden"
+                        }, 1000);
+                    }
+                    //draw
+                    simulation.wipe();
+                    m.look();
+                    simulation.camera();
+                    // if (count < 30) {
+                    // }
+                    // if (count < 60) {
+                    //     simulation.draw.cons();
+                    //     simulation.draw.body();
+                    //     level.customTopLayer();
+                    //     simulation.draw.body();
+                    //     simulation.draw.drawMapPath();
+                    //     mobs.draw();
+                    // } else
+                    // if (count < 240) {
+                    simulation.draw.wireFrame();
+                    // }
+                    // else if (count === 91) { //hide text boss
+                    //     document.getElementById("choose-grid").style.opacity = "0"
+                    //     setTimeout(() => {
+                    //         document.getElementById("choose-grid").style.visibility = "hidden"
+                    //     }, 1000);
+                    // }
+                    ctx.restore();
+                    simulation.drawCursor();
+                }
+                requestAnimationFrame(newLevelDraw);
+
+
+                // // clear
+                // requestAnimationFrame(() => {
+                //     simulation.wipe();
+                // });
+
+                // //wireframe
+                // setTimeout(() => {
+                //     requestAnimationFrame(() => {
+                //         simulation.wipe();
+                //         simulation.camera();
+                //         simulation.draw.wireFrame();
+                //         ctx.restore();
+                //     });
+                // }, 500);
+
+                // //almost normal draw
+                // setTimeout(() => {
+                //     requestAnimationFrame(() => {
+                //         simulation.wipe();
+                //         simulation.camera();
+                //         // ctx.fillStyle = "rgba(0,0,0,0.66)"
+                //         // ctx.fill(simulation.draw.mapPath);
+                //         simulation.draw.drawMapPath();
+                //         ctx.restore();
+                //     });
+                // }, 1000);
+
+                // //normal draw
+                // setTimeout(() => {
+                //     requestAnimationFrame(() => {
+                //         simulation.wipe();
+                //         simulation.camera();
+                //         // level.custom();
+                //         simulation.draw.cons();
+                //         simulation.draw.body();
+                //         // m.draw();
+                //         // m.hold();
+                //         level.customTopLayer();
+                //         simulation.draw.drawMapPath();
+                //         ctx.restore();
+                //     });
+                // }, 1500);
+
+                // //unpause
+                // setTimeout(() => {
+                //     document.body.style.cursor = "none";
+                //     if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 30 cycles
+                //     if (simulation.paused) requestAnimationFrame(cycle);
+                //     if (m.alive) simulation.paused = false;
+                //     simulation.isChoosing = false; //stops p from un pausing on key down
+                //     build.unPauseGrid()
+
+                //     document.getElementById("choose-grid").style.opacity = "0"
+                //     // document.getElementById("choose-grid").style.visibility = "hidden"
+                //     setTimeout(() => {
+                //         document.getElementById("choose-grid").style.visibility = "hidden"
+                //     }, 1000);
+                // }, 2000);
+            }
         }
     },
     populateLevels() { //run a second time if URL is loaded
@@ -335,7 +481,7 @@ const level = {
             level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, Math.random() < 0.5 ? "factory" : "reservoir"); //add level to the back half of the randomized levels list
             level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
             if (!build.isExperimentSelection || (build.hasExperimentalMode && !simulation.isCheating)) { //experimental mode is endless, unless you only have an experiment Tech
-                level.levels.unshift("intro"); //add level to the start of the randomized levels list
+                level.levels.unshift("initial"); //add level to the start of the randomized levels list
                 level.levels.push("subway"); //add level to the end of the randomized levels list
                 level.levels.push("final"); //add level to the end of the randomized levels list
             }
@@ -1911,7 +2057,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     testing() {
-        simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
+        // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
 
         document.body.style.backgroundColor = "#fff";
         // color.map = "#444" //custom map color
@@ -2158,7 +2304,7 @@ const level = {
         spawn.mapRect(-500, -25, 25, 50); //edge shelf
         spawn.mapRect(475, -25, 25, 50); //edge shelf
     },
-    intro() {
+    initial() {
         if (level.levelsCleared === 0) { //if this is the 1st level of the game
             if (simulation.difficultyMode > 2) spawn.setSpawnList() // hard and why difficulty don't begin with starter mobs
 
@@ -2216,7 +2362,7 @@ const level = {
         } else {
             for (let i = 0; i < 60; i++) {
                 setTimeout(() => {
-                    if (level.levels[level.onLevel] === "intro") spawn.sneaker(2100, -1500 - 50 * i);
+                    if (level.levels[level.onLevel] === "initial") spawn.sneaker(2100, -1500 - 50 * i);
                 }, 2000 + 500 * i);
             }
         }
@@ -2457,6 +2603,7 @@ const level = {
         document.body.style.backgroundColor = "#ddd";
 
         for (let i = 0; i < 16; i++) powerUps.spawn(4600 + 40 * i, -30, "ammo");
+        if (simulation.difficultyMode > 4) for (let i = 0; i < 8; i++) powerUps.spawn(4600 + 40 * i, -30, "ammo"); //extra ammo on why difficulty
 
         spawn.mapRect(-1950, 0, 8200, 1800); //ground
         spawn.mapRect(-1950, -1500, 1800, 1900); //left wall
@@ -3832,19 +3979,19 @@ const level = {
                                 for (let i = 0; i < 250; i++) spawn.starter(-2700 + 2400 * Math.random(), -1300 - 500 * Math.random())
                             } else {
                                 if (Math.random() < 0.07 && simulation.difficulty > 35) {
-                                    for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
+                                    for (let i = 0, len = scale * 0.22 / 6; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
                                     for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false);
-                                    for (let i = 0, len = scale * 0.15 / 6; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false)
-                                    for (let i = 0, len = scale * 0.26 / 6; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false);
+                                    for (let i = 0, len = scale * 0.13 / 6; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false)
+                                    for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false);
                                 } else {
                                     if (Math.random() < 0.25) {
-                                        for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                                        for (let i = 0, len = scale * 0.22; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
                                     } else if (Math.random() < 0.33) {
                                         for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
                                     } else if (Math.random() < 0.5) {
-                                        for (let i = 0, len = scale * 0.15; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+                                        for (let i = 0, len = scale * 0.13; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
                                     } else {
-                                        for (let i = 0, len = scale * 0.26; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+                                        for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
                                     }
                                 }
                             }
@@ -3919,6 +4066,7 @@ const level = {
                             isDoorsLocked = true
                             for (let i = 0; i < 9; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo")
                             for (let i = 0; i < 3; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "heal");
+                            if (simulation.difficultyMode > 4) for (let i = 0; i < 8; i++) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo"); //extra ammo on why difficulty
                             const scale = Math.pow(simulation.difficulty, 0.7) //hard around 30, why around 54
                             if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
                                 for (let i = 0; i < 250; i++) spawn.starter(300 + 2400 * Math.random(), -1300 - 500 * Math.random())
@@ -12158,7 +12306,10 @@ const level = {
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         spawn.mapRect(1500, -10, 100, 20);
         level.defaultZoom = 1800
-        simulation.setZoom(1200);
+        // simulation.setZoom(1200);
+        simulation.zoomTransition(1200)
+
+
         document.body.style.backgroundColor = "#daa69f";
         color.map = "#600";
 
@@ -12567,7 +12718,9 @@ const level = {
                     level.exit.y = -2030;
                     relocateTo(50, -2050);
                     simulation.fallHeight = -1000;
-                    simulation.setZoom(1800);
+                    // simulation.setZoom(1800);
+                    simulation.zoomTransition(1800)
+
                     templePlayer.startAnim = -1;
                     templePlayer.drawExit = false;
                 }

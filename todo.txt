@@ -1,55 +1,21 @@
 ******************************************************** NEXT PATCH **************************************************
 
-mob health tech
-  tech: cascading failure - +222% damage to mobs below 25% health
-  tech: yield stress - +55% damage to mobs at maximum health
-  cloaking tech: topological defect - +88% damage to mobs at maximum health
-  harpoon tech: brittle - +88% harpoon/grapple damage to mobs at maximum health
 
-cloaking buffs
-  50->66% defense while cloaked
-  recloak 0.25s faster
-  simplified cloaking field graphics
-  boson composite drains much less energy while moving through mobs and shields
-    fixed bug where mines and egg mobs were colliding with player while intangible
-  patch no longer drains energy when you heal on cloaking
-  metamaterial absorber gets 17->22% chance to spawn a power up for each mob alive
-  no-cloning theorem changes to 45->40% duplication and 2->1% duplication loss on killing a mob
 
-finalBoss phases:
-  new: slow zone, antigravity pulse
-  nerfed: laser, black hole, orbitals
-  buffed: oscillation, mobs
-  improved graphics: boulder
-
-Hilbert space has a skin. 99->142% damage increase, but randomize tech after taking damage
-Higgs mechanism has a skin. +45->77% fire rate, player can't move while firing
-induction furnace gives +77% harpoon/grapple damage for 8 seconds after picking up a power up
-collider 50->100% chance to combine and randomize power ups
-quenching gives more bonus max health at high difficulty level  (maybe around 30% more health)
-accretion gives 5->7 heal power ups
-dynamo bots follow player much closer when you have many of them
-scrap-bots don't follow the player as accurately or as quickly
-  scrap bot duration 13->15 seconds
-JUNK tech: planned obsolescence - make 100 scrap bots that last for about 30 seconds
-
-community map dojo by werid_pusheen
-  fixed by Cornbread 2100
-
-hard mode gets 1 less heal at the start
-hard and why difficulty don't begin with starter mobs
-hopBullet mobs last 2 seconds less time
-adjusted button heights on train station level to be consistently the same height
 
 *********************************************************** TODO *****************************************************
-
-hexagon head skin
-  maybe give defense
 
 
 foam tech: increase size of foam and increase duration, but drop speed down, so they come to a stop and just hang
   allow them to harm player?
     this is probably just too annoying
+Foam slow down mobs twice as much and slowly pulls them towards the ground
+  +30% foam damage
+  Half foam velocity
+  Foam is now effected by gravity
+  Requires a source of foam and not aerogel
+  https://en.m.wikipedia.org/wiki/Tungsten_hexafluoride
+
 
 make a flutter variant
   just move the wings to the back?
@@ -1054,9 +1020,10 @@ add sounds
 
 ******************************************************** LORE ********************************************************
 
+look up sci-fi science ideas here  https://projectrho.com/public_html/rocket/
+
 possible names for tech
   sidereal - with respect to the stars  (an extra rotation for time keeping)
-  strange loop
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   swarm intelligence - for a drone tech
@@ -1102,9 +1069,9 @@ possible names for tech
   memetics
   magnetorquers - produce spin by pushing on earth's magnetic field
   Josephson junction - superconducting junction
-  Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity
-  perturbation
+  Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity 
   Unruh effect - accelerating makes heat/thermal particles
+  configuration space - holds the position of everything
 
 ******************************************************** CARS IMAGES ********************************************************
 

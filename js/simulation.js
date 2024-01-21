@@ -24,7 +24,6 @@ const simulation = {
         mobs.healthBar();
         m.draw();
         m.hold();
-        // v.draw(); //working on visibility work in progress
         level.customTopLayer();
         simulation.draw.drawMapPath();
         b.fire();
@@ -33,10 +32,8 @@ const simulation = {
         if (!m.isBodiesAsleep) b.bulletDo();
         simulation.drawCircle();
         simulation.runEphemera();
-        // simulation.clip();
         ctx.restore();
         simulation.drawCursor();
-        // simulation.pixelGraphics();
     },
     testingLoop() {
         simulation.gravity();
@@ -505,47 +502,52 @@ const simulation = {
         simulation.zoom = canvas.height / zoomScale; //sets starting zoom scale
     },
     zoomTransition(newZoomScale, step = 2) {
+        //old version
+        // if (simulation.isAutoZoom) {
+        //     const isBigger = (newZoomScale - simulation.zoomScale > 0) ? true : false;
+        //     requestAnimationFrame(zLoop);
+        //     const currentLevel = level.onLevel
+
+        //     function zLoop() {
+        //         if (currentLevel !== level.onLevel || simulation.isAutoZoom === false) return //stop the zoom if player goes to a new level
+
+        //         if (isBigger) {
+        //             simulation.zoomScale += step
+        //             if (simulation.zoomScale >= newZoomScale) {
+        //                 simulation.setZoom(newZoomScale);
+        //                 return
+        //             }
+        //         } else {
+        //             simulation.zoomScale -= step
+        //             if (simulation.zoomScale <= newZoomScale) {
+        //                 simulation.setZoom(newZoomScale);
+        //                 return
+        //             }
+        //         }
+
+        //         simulation.setZoom();
+        //         requestAnimationFrame(zLoop);
+        //     }
+        // }
+
+
+        //rewrite using the ephemera system
         if (simulation.isAutoZoom) {
-            const isBigger = (newZoomScale - simulation.zoomScale > 0) ? true : false;
-            requestAnimationFrame(zLoop);
-            const currentLevel = level.onLevel
-
-            function zLoop() {
-                if (currentLevel !== level.onLevel || simulation.isAutoZoom === false) return //stop the zoom if player goes to a new level
-
-                if (isBigger) {
+            simulation.ephemera.push({
+                name: "zoom",
+                count: simulation.testing ? 0 : 120, //cycles before it self removes
+                currentLevel: level.onLevel,
+                do() {
+                    this.count--
+                    const step = (newZoomScale - simulation.zoomScale) / this.count
                     simulation.zoomScale += step
-                    if (simulation.zoomScale >= newZoomScale) {
-                        simulation.setZoom(newZoomScale);
-                        return
+                    if (this.count < 1 && this.currentLevel === level.onLevel && simulation.isAutoZoom) {
+                        simulation.zoomScale = newZoomScale
+                        simulation.removeEphemera(this.name)
                     }
-                } else {
-                    simulation.zoomScale -= step
-                    if (simulation.zoomScale <= newZoomScale) {
-                        simulation.setZoom(newZoomScale);
-                        return
-                    }
-                }
-
-                simulation.setZoom();
-                requestAnimationFrame(zLoop);
-            }
-        }
-    },
-    zoomInFactor: 0,
-    startZoomIn(time = 180) {
-        simulation.zoom = 0;
-        let count = 0;
-        requestAnimationFrame(zLoop);
-
-        function zLoop() {
-            simulation.zoom += canvas.height / simulation.zoomScale / time;
-            count++;
-            if (count < time) {
-                requestAnimationFrame(zLoop);
-            } else {
-                simulation.setZoom();
-            }
+                    simulation.setZoom(simulation.zoomScale);
+                },
+            })
         }
     },
     translatePlayerAndCamera(where) {
@@ -974,8 +976,8 @@ const simulation = {
                         } else {
                             Matter.Body.setVelocity(player, { x: 0, y: 0 });
                             Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
-                            m.damage(0.05 * simulation.difficultyMode);
-                            m.energy -= 0.05 * simulation.difficultyMode
+                            // m.damage(0.02 * simulation.difficultyMode);
+                            // m.energy -= 0.02 * simulation.difficultyMode
                             // move bots
                             for (let i = 0; i < bullet.length; i++) {
                                 if (bullet[i].botType) {
@@ -1003,15 +1005,28 @@ const simulation = {
                             });
                         }
                         if (tech.isHealthRecovery) {
-                            const heal = 0.005 * m.maxHealth
-                            m.addHealth(heal)
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: m.pos.x,
-                                y: m.pos.y,
-                                radius: Math.sqrt(heal) * 150,
-                                color: "rgba(0,255,200,0.5)",
-                                time: 4
-                            });
+                            if (tech.isEnergyHealth) {
+                                if (m.immuneCycle < m.cycle) {
+                                    m.energy += m.maxEnergy * 0.005
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: m.pos.x,
+                                        y: m.pos.y,
+                                        radius: Math.sqrt(m.maxEnergy * 0.02) * 60,
+                                        color: "rgba(0, 204, 255,0.4)", //#0cf
+                                        time: 4
+                                    });
+                                }
+                            } else {
+                                const heal = 0.005 * m.maxHealth
+                                m.addHealth(heal)
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: m.pos.x,
+                                    y: m.pos.y,
+                                    radius: Math.sqrt(heal) * 150,
+                                    color: "rgba(0,255,200,0.5)",
+                                    time: 4
+                                });
+                            }
                         }
                     }
 
@@ -1355,7 +1370,7 @@ const simulation = {
         ctx.textAlign = "center";
         ctx.fillText(`(${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)})`, simulation.mouse.x, simulation.mouse.y - 20);
     },
-    sight: { //credit to Cornbread for adding this algorithm to n-gon
+    sight: { //credit to Cornbread2100 for adding this algorithm to n-gon
         // square: 0,
         intersectMap: [], //this is precalculated in simulation.draw.lineOfSightPrecalculation()
         getIntersection(v1, v1End, domain) {

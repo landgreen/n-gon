@@ -1409,14 +1409,16 @@ window.addEventListener("keydown", function (event) {
         if (event.key === "X") m.death(); //only uppercase
         switch (event.key.toLowerCase()) {
             case "o":
-                simulation.isAutoZoom = false;
-                simulation.zoomScale /= 0.9;
-                simulation.setZoom();
+                // simulation.isAutoZoom = false;
+                // simulation.zoomScale /= 0.9;
+                // simulation.setZoom();
+                simulation.zoomTransition(simulation.zoomScale / 0.9)
                 break;
             case "i":
-                simulation.isAutoZoom = false;
-                simulation.zoomScale *= 0.9;
-                simulation.setZoom();
+                // simulation.isAutoZoom = false;
+                // simulation.zoomScale *= 0.9;
+                // simulation.setZoom();
+                simulation.zoomTransition(simulation.zoomScale * 0.9)
                 break
             case "`":
                 powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "research");

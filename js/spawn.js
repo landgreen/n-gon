@@ -22,9 +22,10 @@ const spawn = {
     fullPickList: [
         "slasher", "slasher", "slasher2", "slasher3",
         "hopper", "hopper", "hopMother", "hopMother",
-        "flutter", "flutter", "flutter",
         "stabber", "stabber", "stabber",
         "springer", "springer", "springer",
+        "stinger", "stinger", "stinger",
+        "flutter", "flutter",
         "shooter", "shooter",
         "grenadier", "grenadier",
         "striker", "striker",
@@ -34,7 +35,7 @@ const spawn = {
     ],
     mobTypeSpawnOrder: [], //preset list of mob names calculated at the start of a run by the randomSeed
     mobTypeSpawnIndex: 0, //increases as the mob type cycles
-    allowedGroupList: ["spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "launcherOne", "stabber", "sniper", "pulsar", "grenadier", "slasher", "flutter"],
+    allowedGroupList: ["spinner", "striker", "springer", "laser", "focuser", "beamer", "exploder", "spawner", "shooter", "launcher", "launcherOne", "stabber", "sniper", "pulsar", "grenadier", "slasher", "flutter", "stinger"],
     setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
         spawn.pickList.splice(0, 1);
         const push = spawn.mobTypeSpawnOrder[spawn.mobTypeSpawnIndex++ % spawn.mobTypeSpawnOrder.length]
@@ -3792,6 +3793,202 @@ const spawn = {
                 ctx.fillStyle = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.2)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
                 this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
                 this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
+            }
+            // else { //flocking behavior (not working yet)
+            //     this.force.x += Math.cos(this.angle) * this.accelMag * this.mass
+            //     this.force.y += Math.sin(this.angle) * this.accelMag * this.mass
+            //     //set direction to turn to fire
+            //     if (!(simulation.cycle % this.seePlayerFreq)) {
+            //         //find nearest mob and maintain a distance
+            //         let nearestMob = null
+            //         let nearestMobDistance = Infinity
+            //         for (let i = 0; i < mob.length; i++) {
+            //             const newMobDistance = Vector.magnitude(Vector.sub(this.position, mob[i].position))
+            //             if (mob[i].isDropPowerUp && mob[i].alive && newMobDistance < nearestMobDistance) { //&& !mob[i].isBoss
+            //                 nearestMobDistance = newMobDistance
+            //                 nearestMob = mob[i]
+            //             }
+            //         }
+            //         if (nearestMob) {
+            //             // console.log(nearestMob)
+            //             this.fireDir = Vector.normalise(Vector.sub(nearestMob.position, this.position));
+            //             //dot product can't tell if mob is facing directly away or directly towards,  so check if pointed directly away from player every few cycles
+            //             const mod = (a, n) => {
+            //                 return a - Math.floor(a / n) * n
+            //             }
+            //             const sub = Vector.sub(nearestMob.position, this.position) //check by comparing different between angles.  Give this a nudge if angles are 180 degree different
+            //             const diff = mod(Math.atan2(sub.y, sub.x) - this.angle + Math.PI, 2 * Math.PI) - Math.PI
+            //             if (Math.abs(diff) > 2.8) this.torque += 0.0002 * this.inertia * Math.random();
+            //         }
+            //     }
+            //     //rotate towards fireDir
+            //     const angle = this.angle + Math.PI / 2;
+            //     c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
+            //     const threshold = 0.4;
+            //     const turn = 0.000025 * this.inertia
+            //     if (c > threshold) {
+            //         this.torque += turn;
+            //     } else if (c < -threshold) {
+            //         this.torque -= turn;
+            //     }
+            //     const flapArc = 0.7 //don't go past 1.57 for normal flaps
+            //     ctx.fillStyle = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.2)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
+            //     this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
+            //     this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
+            // }
+        };
+    },
+    stinger(x, y, radius = 18 + 4 * Math.random()) {
+        const color = '#5bc'
+        mobs.spawn(x, y, 7, radius, color);
+        let me = mob[mob.length - 1];
+        Matter.Body.setDensity(me, 0.0025); //extra dense //normal is 0.001 //makes effective life much larger
+        // me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+
+        me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
+        Matter.Body.rotate(me, Math.random() * Math.PI * 2);
+        me.accelMag = 0.0015 + 0.0007 * Math.sqrt(simulation.accelScale);
+        me.frictionAir = 0.04;
+        // me.seePlayerFreq = 40 + Math.floor(13 * Math.random())
+        me.memory = 240;
+        me.restitution = 0.8;
+        me.frictionStatic = 0;
+        me.friction = 0;
+        me.lookTorque = 0.000001 * (Math.random() > 0.5 ? -1 : 1);
+        me.fireDir = { x: 0, y: 0 }
+        spawn.shield(me, x, y);
+
+        // me.onDeath = function() {};
+        me.flapRate = 0.06 + 0.03 * Math.random()
+        me.flapRadius = 40 + radius * 3
+        me.do = function () {
+            this.seePlayerByHistory()
+            this.checkStatus();
+            if (this.seePlayer.recall) {
+                this.force.x += Math.cos(this.angle) * this.accelMag * this.mass
+                this.force.y += Math.sin(this.angle) * this.accelMag * this.mass
+
+                //set direction to turn to fire
+                if (!(simulation.cycle % this.seePlayerFreq)) {
+                    this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                    //dot product can't tell if mob is facing directly away or directly towards,  so check if pointed directly away from player every few cycles
+                    const mod = (a, n) => a - Math.floor(a / n) * n
+                    const sub = Vector.sub(m.pos, this.position) //check by comparing different between angles.  Give this a nudge if angles are 180 degree different
+                    const diff = mod(Math.atan2(sub.y, sub.x) - this.angle + Math.PI, 2 * Math.PI) - Math.PI
+                    if (Math.abs(diff) > 2.8) this.torque += 0.0002 * this.inertia * Math.random();
+                }
+
+                //rotate towards fireDir
+                const angle = this.angle + Math.PI / 2;
+                c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
+                const threshold = 0.4;
+                const turn = 0.00002 * this.inertia
+                if (c > threshold) {
+                    this.torque += turn;
+                } else if (c < -threshold) {
+                    this.torque -= turn;
+                }
+
+                // this.accelMag = 0.0006 + 0.0007 * Math.sqrt(simulation.accelScale);
+                this.frictionAir = 0.11 + 0.09 * Math.sin(simulation.cycle * this.flapRate - Math.PI / 2)
+
+                const flapArc = 0.8 //don't go past 1.57 for normal flaps
+                ctx.fillStyle = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.2)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
+                this.wing(this.angle + 2.1 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
+                this.wing(this.angle - 2.1 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
+
+                const seeRange = 550 + 35 * simulation.difficultyMode;
+                if (this.distanceToPlayer() < seeRange) {
+                    const vertexCollision = function (v1, v1End, domain) {
+                        for (let i = 0; i < domain.length; ++i) {
+                            let vertices = domain[i].vertices;
+                            const len = vertices.length - 1;
+                            for (let j = 0; j < len; j++) {
+                                results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
+                                if (results.onLine1 && results.onLine2) {
+                                    const dx = v1.x - results.x;
+                                    const dy = v1.y - results.y;
+                                    const dist2 = dx * dx + dy * dy;
+                                    if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                                        best = {
+                                            x: results.x,
+                                            y: results.y,
+                                            dist2: dist2,
+                                            who: domain[i],
+                                            v1: vertices[j],
+                                            v2: vertices[j + 1]
+                                        };
+                                    }
+                                }
+                            }
+                            results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
+                            if (results.onLine1 && results.onLine2) {
+                                const dx = v1.x - results.x;
+                                const dy = v1.y - results.y;
+                                const dist2 = dx * dx + dy * dy;
+                                if (dist2 < best.dist2) {
+                                    best = {
+                                        x: results.x,
+                                        y: results.y,
+                                        dist2: dist2,
+                                        who: domain[i],
+                                        v1: vertices[0],
+                                        v2: vertices[len]
+                                    };
+                                }
+                            }
+                        }
+                    };
+                    best = {
+                        x: null,
+                        y: null,
+                        dist2: Infinity,
+                        who: null,
+                        v1: null,
+                        v2: null
+                    };
+                    const seeRangeRandom = seeRange - 200 - 150 * Math.random()
+                    const look = {
+                        x: this.position.x + seeRangeRandom * Math.cos(this.angle),
+                        y: this.position.y + seeRangeRandom * Math.sin(this.angle)
+                    };
+                    vertexCollision(this.position, look, map);
+                    vertexCollision(this.position, look, body);
+                    if (!m.isCloak) vertexCollision(this.position, look, [playerBody, playerHead]);
+
+                    // hitting player
+                    if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
+                        const dmg = 0.002 * simulation.dmgScale;
+                        m.damage(dmg);
+                        //draw damage
+                        ctx.fillStyle = color;
+                        ctx.beginPath();
+                        ctx.arc(best.x, best.y, 5 + dmg * 1500, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                    //draw beam
+                    const vertex = 3
+                    if (best.dist2 === Infinity) best = look;
+                    ctx.beginPath();
+                    ctx.moveTo(this.vertices[vertex].x, this.vertices[vertex].y);
+                    ctx.lineTo(best.x, best.y);
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // ctx.beginPath();
+                    // ctx.arc(this.vertices[vertex].x, this.vertices[vertex].y, 5, 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
+                    // ctx.fillStyle = color;
+                    // ctx.fill();
+                }
+                // else {
+                //     ctx.beginPath();
+                //     ctx.arc(this.vertices[1].x, this.vertices[1].y, 1 + 0.3 * (simulation.cycle % this.laserInterval), 0, 2 * Math.PI); //* this.fireCycle / this.fireDelay
+                //     ctx.fillStyle = color;
+                //     ctx.fill();
+                // }
             }
             // else { //flocking behavior (not working yet)
             //     this.force.x += Math.cos(this.angle) * this.accelMag * this.mass

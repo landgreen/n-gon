@@ -1350,16 +1350,7 @@ const mobs = {
                         this.leaveBody = false; // no body since it turned into the bot
                     }
                     if (tech.isAddRemoveMaxHealth) {
-                        if (this.isBoss && this.isDropPowerUp) {
-                            powerUps.spawn(this.position.x + 20, this.position.y, "tech", false)
-                            powerUps.spawn(this.position.x - 20, this.position.y, "research", false)
-                            powerUps.spawn(this.position.x - 40, this.position.y, "research", false)
-                            powerUps.spawn(this.position.x + 40, this.position.y, "research", false)
-                            powerUps.spawn(this.position.x, this.position.y + 20, "research", false)
-                            powerUps.spawn(this.position.x, this.position.y - 20, "heal", false)
-                            powerUps.spawn(this.position.x, this.position.y + 40, "heal", false)
-                            powerUps.spawn(this.position.x, this.position.y - 40, "heal", false)
-                        } else {
+                        if (!this.isBoss) {
                             const amount = 0.005
                             if (tech.isEnergyHealth) {
                                 if (m.maxEnergy > amount) {
@@ -1371,12 +1362,34 @@ const mobs = {
                                 m.setMaxHealth();
                             }
                         }
+
+                        // if (this.isBoss && this.isDropPowerUp) {
+                        //     powerUps.spawn(this.position.x + 20, this.position.y, "tech", false)
+                        //     powerUps.spawn(this.position.x - 20, this.position.y, "research", false)
+                        //     powerUps.spawn(this.position.x - 40, this.position.y, "research", false)
+                        //     powerUps.spawn(this.position.x + 40, this.position.y, "research", false)
+                        //     powerUps.spawn(this.position.x, this.position.y + 20, "research", false)
+                        //     powerUps.spawn(this.position.x, this.position.y - 20, "heal", false)
+                        //     powerUps.spawn(this.position.x, this.position.y + 40, "heal", false)
+                        //     powerUps.spawn(this.position.x, this.position.y - 40, "heal", false)
+                        // } else {
+                        //     const amount = 0.005
+                        //     if (tech.isEnergyHealth) {
+                        //         if (m.maxEnergy > amount) {
+                        //             tech.healMaxEnergyBonus -= amount
+                        //             m.setMaxEnergy();
+                        //         }
+                        //     } else if (m.maxHealth > amount) {
+                        //         tech.extraMaxHealth -= amount //decrease max health
+                        //         m.setMaxHealth();
+                        //     }
+                        // }
                     }
                     if (tech.cloakDuplication && !this.isBoss) {
                         tech.cloakDuplication -= 0.01
                         powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                     }
-                } else if (tech.isShieldAmmo && this.shield && !this.isExtraShield) {
+                } else if (tech.isShieldAmmo && this.shield && !this.isExtraShield && this.isDropPowerUp) {
                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                     if (Math.random() < 0.4) {
                         type = "heal"
