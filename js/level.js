@@ -12,7 +12,7 @@ const level = {
     //see level.populateLevels:   (initial, ... , reservoir or factory, reactor, ... , subway, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
     communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo"],
-    trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon", "diamagnetism"],
+    trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
@@ -63,7 +63,6 @@ const level = {
             // tech.tech[322].frequency = 100
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
-
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // spawn.bodyRect(2425, -120, 200, 200);
@@ -76,6 +75,7 @@ const level = {
             // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "ammo");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             //lore testing
+            // localSettings.isTrainingNotAttempted = true
             // simulation.isCheating = false //true;
             // for (let i = 0; i < 5; i++) tech.giveTech("undefined")
             // lore.techCount = 2
@@ -252,8 +252,9 @@ const level = {
         if (!level.disableExit) {
             level.levelsCleared++;
             level.onLevel++; //cycles map to next level
+
             if (simulation.isTraining) {
-                if (level.onLevel > level.levels.length - 1) {
+                if (level.onLevel > level.levels.length - 1) { //if all training levels are completed
                     level.disableExit = true
                     document.getElementById("health").style.display = "none"
                     document.getElementById("health-bg").style.display = "none"
@@ -286,16 +287,12 @@ const level = {
             tech.isDeathAvoidedThisLevel = false;
             simulation.updateTechHUD();
             simulation.clearNow = true; //triggers in simulation.clearMap to remove all physics bodies and setup for new map
-
-
             //pop up new level info screen for a few seconds
             if (!simulation.isChoosing && m.alive && (level.levels[level.onLevel] === "final" || level.levels[level.onLevel] === "reactor")) { //level.levels[level.onLevel] === "subway" ||
                 //pause
                 if (!simulation.paused) {
                     simulation.paused = true;
                     simulation.isChoosing = true; //stops p from un pausing on key down
-                    // build.pauseGrid()
-                    // document.body.style.cursor = "auto";
                 }
                 //build level info
                 document.getElementById("choose-grid").style.gridTemplateColumns = "250px"
@@ -370,67 +367,19 @@ const level = {
                 }
                 requestAnimationFrame(newLevelDraw);
 
-
-                // // clear
-                // requestAnimationFrame(() => {
-                //     simulation.wipe();
-                // });
-
-                // //wireframe
-                // setTimeout(() => {
-                //     requestAnimationFrame(() => {
-                //         simulation.wipe();
-                //         simulation.camera();
-                //         simulation.draw.wireFrame();
-                //         ctx.restore();
-                //     });
-                // }, 500);
-
-                // //almost normal draw
-                // setTimeout(() => {
-                //     requestAnimationFrame(() => {
-                //         simulation.wipe();
-                //         simulation.camera();
-                //         // ctx.fillStyle = "rgba(0,0,0,0.66)"
-                //         // ctx.fill(simulation.draw.mapPath);
-                //         simulation.draw.drawMapPath();
-                //         ctx.restore();
-                //     });
-                // }, 1000);
-
-                // //normal draw
-                // setTimeout(() => {
-                //     requestAnimationFrame(() => {
-                //         simulation.wipe();
-                //         simulation.camera();
-                //         // level.custom();
-                //         simulation.draw.cons();
-                //         simulation.draw.body();
-                //         // m.draw();
-                //         // m.hold();
-                //         level.customTopLayer();
-                //         simulation.draw.drawMapPath();
-                //         ctx.restore();
-                //     });
-                // }, 1500);
-
-                // //unpause
-                // setTimeout(() => {
-                //     document.body.style.cursor = "none";
-                //     if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 30 cycles
-                //     if (simulation.paused) requestAnimationFrame(cycle);
-                //     if (m.alive) simulation.paused = false;
-                //     simulation.isChoosing = false; //stops p from un pausing on key down
-                //     build.unPauseGrid()
-
-                //     document.getElementById("choose-grid").style.opacity = "0"
-                //     // document.getElementById("choose-grid").style.visibility = "hidden"
-                //     setTimeout(() => {
-                //         document.getElementById("choose-grid").style.visibility = "hidden"
-                //     }, 1000);
-                // }, 2000);
             }
         }
+    },
+    unPause() {
+        if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 30; //player is immune to damage for 30 cycles
+        if (simulation.paused) requestAnimationFrame(cycle);
+        if (m.alive) simulation.paused = false;
+        simulation.isChoosing = false; //stops p from un pausing on key down
+        build.unPauseGrid()
+        document.getElementById("choose-grid").style.opacity = "0"
+        setTimeout(() => {
+            document.getElementById("choose-grid").style.visibility = "hidden"
+        }, 1000);
     },
     populateLevels() { //run a second time if URL is loaded
         if (document.getElementById("banned").value) { //remove levels from ban list in settings
@@ -468,6 +417,7 @@ const level = {
         if (simulation.isTraining) {
             simulation.isHorizontalFlipped = false
             level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
+            if (simulation.isCommunityMaps) level.trainingLevels.push("diamagnetism")
         } else { //add remove and shuffle levels for the normal game (not training levels)
             level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
             if (simulation.isCommunityMaps) {
@@ -608,7 +558,73 @@ const level = {
 
                 if (level.exitCount > 100) {
                     level.exitCount = 0
-                    level.nextLevel()
+
+                    //prompt an option to do the training levels or continue to the normal game
+                    if (!simulation.isChoosing && m.alive && !simulation.isTraining && !simulation.isCheating && b.inventory.length === 0 && level.levelsCleared === 0 && localSettings.isTrainingNotAttempted) {
+                        //pause
+                        if (!simulation.paused) {
+                            simulation.paused = true;
+                            simulation.isChoosing = true; //stops p from un pausing on key down
+
+                            document.body.style.cursor = "auto";
+                            document.getElementById("choose-grid").style.pointerEvents = "auto";
+                            document.getElementById("choose-grid").style.transitionDuration = "0s";
+                        }
+                        //build level info
+                        document.getElementById("choose-grid").classList.add('choose-grid-no-images');
+                        document.getElementById("choose-grid").classList.remove('choose-grid');
+                        document.getElementById("choose-grid").style.gridTemplateColumns = "350px"
+                        let text = `
+                            <div class="choose-grid-module" id = "choose-training" style = "font-size: 1em; padding:10px;color:#333;">
+                                <h2 style="text-align: center;letter-spacing: 5px;">training</h2>
+                                Begin the <strong>guided tutorial</strong> that shows you how to use your <strong class='color-f'>field</strong> and <strong class='color-g'>gun</strong>.
+                            </div>
+                            <div class="choose-grid-module" id = "choose-unPause" style = "font-size: 1em; padding:10px;color:#333;">
+                                <h2 style="text-align: center; letter-spacing: 7px;">play</h2>
+                                Begin the <strong>standard game</strong> where you progress through <strong>13</strong> random levels and beat the final boss.
+                            </div>`
+                        //use you use your <strong class='color-g'>gun</strong>, <strong class='color-f'>field</strong>, and <strong class='color-m'>tech</strong>
+                        document.getElementById("choose-grid").innerHTML = text
+                        //show level info
+                        document.getElementById("choose-grid").style.opacity = "1"
+                        document.getElementById("choose-grid").style.transitionDuration = "0.25s"; //how long is the fade in on
+                        document.getElementById("choose-grid").style.visibility = "visible"
+                        document.getElementById("choose-training").addEventListener("click", () => {
+                            level.unPause()
+                            simulation.isTraining = true
+                            level.levelsCleared--;
+                            level.onLevel--
+                            simulation.isHorizontalFlipped = false
+                            level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
+                            level.nextLevel()
+                            //reset hide image style
+                            if (localSettings.isHideImages) {
+                                document.getElementById("choose-grid").classList.add('choose-grid-no-images');
+                                document.getElementById("choose-grid").classList.remove('choose-grid');
+                            } else {
+                                document.getElementById("choose-grid").classList.add('choose-grid');
+                                document.getElementById("choose-grid").classList.remove('choose-grid-no-images');
+                            }
+                        });
+                        document.getElementById("choose-unPause").addEventListener("click", () => {
+                            level.unPause()
+                            level.nextLevel()
+                            //reset hide image style
+                            if (localSettings.isHideImages) {
+                                document.getElementById("choose-grid").classList.add('choose-grid-no-images');
+                                document.getElementById("choose-grid").classList.remove('choose-grid');
+                            } else {
+                                document.getElementById("choose-grid").classList.add('choose-grid');
+                                document.getElementById("choose-grid").classList.remove('choose-grid-no-images');
+                            }
+                        });
+                        requestAnimationFrame(() => {
+                            ctx.fillStyle = `rgba(150,150,150,0.9)`; //`rgba(221,221,221,0.6)`;
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        });
+                    } else { //advance to next level
+                        level.nextLevel()
+                    }
                 }
             }
         },

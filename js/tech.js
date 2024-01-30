@@ -250,7 +250,7 @@ const tech = {
         if (tech.isBotDamage) dmg *= 1 + 0.06 * b.totalBots()
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
         if (tech.isLowEnergyDamage) dmg *= 1 + 0.7 * Math.max(0, 1 - m.energy)
-        if (tech.energyDamage) dmg *= 1 + m.energy * 0.26 * tech.energyDamage;
+        if (tech.energyDamage) dmg *= 1 + m.energy * 0.23 * tech.energyDamage;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2.11
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.88, player.speed * 0.0193)
@@ -2517,7 +2517,7 @@ const tech = {
     },
     {
         name: "MACHO",
-        description: "a massive but compact object slowly follows you<br>if you are inside the <strong>MACHO</strong> <strong>+60%</strong> <strong class='color-defense'>defense</strong>",
+        description: "a massive compact halo object follows you<br><strong>+60%</strong> <strong class='color-defense'>defense</strong> while you are inside the <strong>MACHO</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -7675,7 +7675,7 @@ const tech = {
     {
         name: "electronegativity",
         descriptionFunction() {
-            return `<strong>+0.26%</strong> <strong class='color-d'>damage</strong> per current stored <strong class='color-f'>energy</strong><br><em>(+${(27 * m.maxEnergy).toFixed(0)}% damage at max energy)</em>`
+            return `<strong>+0.23%</strong> <strong class='color-d'>damage</strong> per current stored <strong class='color-f'>energy</strong><br><em>(+${(27 * m.maxEnergy).toFixed(0)}% damage at max energy)</em>`
         },
         // description: "<strong>+1%</strong> <strong class='color-d'>damage</strong> per <strong>8</strong> stored <strong class='color-f'>energy</strong>",
         isFieldTech: true,

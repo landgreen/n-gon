@@ -1752,18 +1752,19 @@ document.getElementById("updates").addEventListener("toggle", function () {
         xhr.open("GET", path, true);
         xhr.send();
     }
-    let text = `<strong>n-gon</strong>: <a href="https://github.com/landgreen/n-gon/blob/master/todo.txt">todo list</a> and complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a><hr>`
+    let text = `<pre><strong>n-gon</strong>: <a href="https://github.com/landgreen/n-gon/blob/master/todo.txt">todo list</a> and complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a><hr>`
     document.getElementById("updates-div").innerHTML = text
 
     ///  https://api.github.com/repos/landgreen/n-gon/stats/commit_activity
     loadJSON('https://api.github.com/repos/landgreen/n-gon/commits',
         function (data) {
-            // console.log(data)
+            // console.log(data[0].sha) //unique code for most recent commit
             for (let i = 0, len = 20; i < len; i++) {
                 text += "<strong>" + data[i].commit.author.date.substr(0, 10) + "</strong> - "; //+ "<br>"
                 text += data[i].commit.message
                 if (i < len - 1) text += "<hr>"
             }
+            text += "</pre>"
             document.getElementById("updates-div").innerHTML = text.replace(/\n/g, "<br />")
         },
         function (xhr) {

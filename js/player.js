@@ -477,6 +477,8 @@ const m = {
                 Composite.clear(engine.world);
                 Engine.clear(engine);
                 simulation.splashReturn();
+                //if you die after clearing fewer than 4 levels the difficulty settings automatically opens
+                if (level.levelsCleared < 4 && !simulation.isTraining && !simulation.isCheating) document.getElementById("settings-details").open = true;
             }, 5000);
         }
     },
@@ -5042,7 +5044,7 @@ const m = {
     {
         name: "grappling hook",
         // description: `use <strong class='color-f'>energy</strong> to pull yourself towards the <strong>map</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
-        description: `use <strong class='color-f'>energy</strong> to fire a hook that <strong>pulls</strong> player<br><strong class='color-d'>damages</strong> mobs and destroys <strong class='color-block'>blocks</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
+        description: `use <strong class='color-f'>energy</strong> to fire a hook that <strong>pulls</strong> player<br><strong class='color-d'>damages</strong> mobs and grabs <strong class='color-block'>blocks</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
         effect: () => {
             m.fieldFire = true;
             // m.holdingMassScale = 0.01; //can hold heavier blocks with lower cost to jumping

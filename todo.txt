@@ -1,10 +1,31 @@
 ******************************************************** NEXT PATCH **************************************************
 
+electronegativity: +26->23% damage
 
+gun cancel button doesn't show up on the initial level if you haven't done the training yet and you didn't choose a gun
+after exiting initial level players are prompted to start the training levels
+  only if they haven't done the training and they didn't pick up a gun, and a few other conditions
+community training levels only are added when community maps setting is on and player clicks on training
 
+if you die after clearing fewer than 4 levels the difficulty settings automatically opens
+improved text formatting on updates
 
 *********************************************************** TODO *****************************************************
 
+improve new player experience
+  training is too long to be a tutorial
+    before nail gun level offer player option to continue or switch to normal game
+
+Cosmological natural selection:  do something with black holes
+  spawn black hole mobs
+    after bosses die?
+    after any mob dies
+    at the start of new levels
+    make new black hole bullet mobs
+
+write code the checks version and compares it to the version from patch notes
+  and link to main page if they don't match
+  (this is because there are several outdated versions hosted on sites with ads)
 
 foam tech: increase size of foam and increase duration, but drop speed down, so they come to a stop and just hang
   allow them to harm player?
@@ -17,10 +38,6 @@ Foam slow down mobs twice as much and slowly pulls them towards the ground
   https://en.m.wikipedia.org/wiki/Tungsten_hexafluoride
 
 
-make a flutter variant
-  just move the wings to the back?
-  slow flap, and acceleration that increases when the flap occurs, like swimming
-
 make grappling hook of different shapes
   shapes
     longer
@@ -31,12 +48,6 @@ make grappling hook of different shapes
     draw can have different colors 
 
 player got stuck inside block that wasn't pick up able
-
-grappling hook field
-  check for places that the player could get into but not out of
-  field tech ideas
-    Buoyancy - aerostat, but for defense: +70% defense while off the ground
-      too similar to degenerate matter
 
 tech - killing a mob heals for the last damage you took
   disable cloaking heal?  maybe you don't need to disable, just don't heal twice
@@ -1025,6 +1036,7 @@ look up sci-fi science ideas here  https://projectrho.com/public_html/rocket/
 possible names for tech
   sidereal - with respect to the stars  (an extra rotation for time keeping)
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
+  holographic - 2-D surface can predict the 3-D space behind it?  I think
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   swarm intelligence - for a drone tech
   genetic algorithm
@@ -1072,6 +1084,7 @@ possible names for tech
   Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity 
   Unruh effect - accelerating makes heat/thermal particles
   configuration space - holds the position of everything
+
 
 ******************************************************** CARS IMAGES ********************************************************
 
