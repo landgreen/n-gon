@@ -478,7 +478,7 @@ const m = {
                 Engine.clear(engine);
                 simulation.splashReturn();
                 //if you die after clearing fewer than 4 levels the difficulty settings automatically opens
-                if (level.levelsCleared < 4 && !simulation.isTraining && !simulation.isCheating) document.getElementById("settings-details").open = true;
+                if ((level.levelsCleared < 4 || level.levelsCleared > 12) && !simulation.isTraining && !simulation.isCheating) document.getElementById("settings-details").open = true;
             }, 5000);
         }
     },

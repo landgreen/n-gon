@@ -45,8 +45,8 @@ const level = {
 
 
             // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("induction furnace")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("autonomous defense")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("quenching")
+            // for (let i = 0; i < 3; ++i) tech.giveTech("adiabatic healing")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 100; i++) powerUps.directSpawn(1750, -500, "coupling");
@@ -72,7 +72,7 @@ const level = {
             // simulation.setZoom();
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "boost");
-            // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "ammo");
+            // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "heal");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             //lore testing
             // localSettings.isTrainingNotAttempted = true

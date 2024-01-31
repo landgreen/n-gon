@@ -1,14 +1,11 @@
 ******************************************************** NEXT PATCH **************************************************
 
-electronegativity: +26->23% damage
+after beating the final boss the difficulty settings automatically opens
+quenching - double the damage and double the max health given
+  aligned the effects more consistently with defense and difficulty based heal reduction
+  prevented possible death by quenching
 
-gun cancel button doesn't show up on the initial level if you haven't done the training yet and you didn't choose a gun
-after exiting initial level players are prompted to start the training levels
-  only if they haven't done the training and they didn't pick up a gun, and a few other conditions
-community training levels only are added when community maps setting is on and player clicks on training
-
-if you die after clearing fewer than 4 levels the difficulty settings automatically opens
-improved text formatting on updates
+fixed super balls bug
 
 *********************************************************** TODO *****************************************************
 

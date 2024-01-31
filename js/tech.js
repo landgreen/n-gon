@@ -3169,7 +3169,7 @@ const tech = {
     {
         name: "quenching",
         descriptionFunction() {
-            return `after over healing from ${powerUps.orb.heal()}<br>gain max <strong class='color-h'>health</strong> and lose current <strong class='color-h'>health</strong>`
+            return `${powerUps.orb.heal()} over healing results in <strong>200%</strong> <strong class='color-h'>health</strong> loss<br> and <strong>200%</strong> max <strong class='color-h'>health</strong> increase`
         },
         maxCount: 1,
         count: 0,

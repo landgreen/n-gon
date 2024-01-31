@@ -537,12 +537,18 @@ const powerUps = {
                 powerUps.animatePowerUpGrab('rgba(0, 238, 187,0.25)')
                 let heal = (this.size / 40 / (simulation.healScale ** 0.25)) ** 2 //simulation.healScale is undone here because heal scale is already properly affected on m.addHealth()
                 if (heal > 0) {
-                    const overHeal = m.health + heal * simulation.healScale - m.maxHealth //used with tech.isOverHeal
+                    let overHeal = m.health + heal * simulation.healScale - m.maxHealth //used with tech.isOverHeal
                     const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
                     m.addHealth(heal);
                     if (healOutput > 0) simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
                     if (tech.isOverHeal && overHeal > 0) { //tech quenching
+                        overHeal *= 2 //double the over heal converted to max health
+                        //make sure overHeal doesn't kill player
+                        if (m.health - overHeal * m.defense() < 0) overHeal = m.health - 0.01
+                        tech.extraMaxHealth += overHeal //increase max health
+                        m.setMaxHealth();
                         m.damage(overHeal);
+                        overHeal *= m.defense() // account for defense after m.damage() so the text log is accurate
                         simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>-=</span> ${(overHeal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
                         simulation.drawList.push({ //add dmg to draw queue
                             x: m.pos.x,
@@ -551,8 +557,6 @@ const powerUps = {
                             color: simulation.mobDmgColor,
                             time: simulation.drawTime
                         });
-                        tech.extraMaxHealth += overHeal * Math.sqrt(simulation.healScale) //increase max health
-                        m.setMaxHealth();
                     } else if (overHeal > 0.13) { //if leftover heals spawn a new spammer heal power up
                         requestAnimationFrame(() => {
                             powerUps.directSpawn(this.position.x, this.position.y, "heal", true, null, overHeal * 40 * (simulation.healScale ** 0.25))//    directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {

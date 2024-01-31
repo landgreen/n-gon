@@ -4028,7 +4028,7 @@ const b = {
         bullet[me] = Bodies.polygon(where.x, where.y, 12, radius, b.fireAttributes(dir, false));
         Composite.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
-        bullet[me].calcDensity = function () { 0.0007 + 0.00055 * tech.isSuperHarm + 0.0004 * tech.isBulletTeleport }
+        bullet[me].calcDensity = function () { return 0.0007 + 0.00055 * tech.isSuperHarm + 0.0004 * tech.isBulletTeleport }
         Matter.Body.setDensity(bullet[me], bullet[me].calcDensity());
         bullet[me].endCycle = simulation.cycle + Math.floor(270 + 90 * Math.random());
         bullet[me].minDmgSpeed = 0;
