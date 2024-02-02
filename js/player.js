@@ -196,14 +196,11 @@ const m = {
     look() { }, //set to lookDefault()
     lookDefault() {
         //always on mouse look
-        m.angle = Math.atan2(
-            simulation.mouseInGame.y - m.pos.y,
-            simulation.mouseInGame.x - m.pos.x
-        );
+        m.angle = Math.atan2(simulation.mouseInGame.y - m.pos.y, simulation.mouseInGame.x - m.pos.x);
         //smoothed mouse look translations
         const scale = 0.8;
-        m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
-        m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
+        m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale
+        m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale
 
         m.transX += (m.transSmoothX - m.transX) * m.lookSmoothing;
         m.transY += (m.transSmoothY - m.transY) * m.lookSmoothing;
@@ -396,7 +393,7 @@ const m = {
         for (let i = 0, len = b.inventory.length; i < len; i++) {
             if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (1.15 + 0.3 * (Math.random() - 0.5))))
         }
-        console.log(b.activeGun)
+        // console.log(b.activeGun)
         //randomize tech
         for (let i = 0; i < totalTech; i++) {
             //find what tech I could get
@@ -480,6 +477,8 @@ const m = {
                 Composite.clear(engine.world);
                 Engine.clear(engine);
                 simulation.splashReturn();
+                //if you die after clearing fewer than 4 levels the difficulty settings automatically opens
+                if ((level.levelsCleared < 4 || level.levelsCleared > 12) && !simulation.isTraining && !simulation.isCheating) document.getElementById("settings-details").open = true;
             }, 5000);
         }
     },
@@ -542,7 +541,7 @@ const m = {
     },
     baseHealth: 1,
     setMaxHealth() {
-        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 2.22 * tech.isFallingDamage + 4 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth
+        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 3 * tech.isFallingDamage + 4 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
@@ -567,15 +566,15 @@ const m = {
         // if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.973 ** m.coupling
         if (tech.isLowHealthDefense) dmg *= 1 - Math.max(0, 1 - m.health) * 0.8
-        if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.33
+        if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.26
         if (tech.squirrelFx !== 1) dmg *= 0.78//Math.pow(0.78, (tech.squirrelFx - 1) / 0.4)
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.1
-        if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0165, 0.66)
-        if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.25
-        if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.1
+        if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0193, 0.88) //capped at speed of 55
+        if (tech.isHarmReduce && input.field) dmg *= 0.12
+        if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.05
         if (tech.isBotArmor) dmg *= 0.94 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
-        if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
+        if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.27
         if (tech.isTurret && m.crouch) dmg *= 0.34;
         if (tech.isFirstDer && b.inventory[0] === b.activeGun) dmg *= 0.85 ** b.inventory.length
         if (tech.isEnergyHealth) {
@@ -728,7 +727,7 @@ const m = {
                     tech.isDeathAvoidedThisLevel = true
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
-                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
+                    for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     m.energy = m.maxEnergy + 0.1
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function () { //set wipe to have trails
@@ -758,7 +757,7 @@ const m = {
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
                     <br>${powerUps.research.count}`)
-                    for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
+                    for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function () { //set wipe to have trails
                         ctx.fillStyle = "rgba(255,255,255,0.03)";
@@ -924,13 +923,13 @@ const m = {
 
             //hip joint
             ctx.beginPath();
-            ctx.arc(m.hip.x, m.hip.y, 10, 0, 2 * Math.PI);
+            ctx.arc(m.hip.x, m.hip.y, 9, 0, 2 * Math.PI);
             //knee joint
-            ctx.moveTo(m.knee.x + 6, m.knee.y);
-            ctx.arc(m.knee.x, m.knee.y, 6, 0, 2 * Math.PI);
+            ctx.moveTo(m.knee.x + 5, m.knee.y);
+            ctx.arc(m.knee.x, m.knee.y, 5, 0, 2 * Math.PI);
             //foot joint
-            ctx.moveTo(m.foot.x + 5, m.foot.y + 1);
-            ctx.arc(m.foot.x, m.foot.y + 1, 5, 0, 2 * Math.PI);
+            ctx.moveTo(m.foot.x + 4, m.foot.y + 1);
+            ctx.arc(m.foot.x, m.foot.y + 1, 4, 0, 2 * Math.PI);
             ctx.fillStyle = m.fillColor;
             ctx.fill();
             ctx.lineWidth = 2;
@@ -938,83 +937,6 @@ const m = {
             ctx.restore();
         }
     },
-    // resetSkin() {
-    //     simulation.isAutoZoom = true;
-    //     m.yOffWhen.jump = 70
-    //     m.yOffWhen.stand = 49
-    //     m.yOffWhen.crouch = 22
-    //     m.isAltSkin = false
-    //     m.color = {
-    //         hue: 0,
-    //         sat: 0,
-    //         light: 100,
-    //     }
-    //     m.setFillColors();
-    //     m.draw = function () {
-    //         ctx.fillStyle = m.fillColor;
-    //         m.walk_cycle += m.flipLegs * m.Vx;
-    //         ctx.save();
-    //         ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
-    //         ctx.translate(m.pos.x, m.pos.y);
-    //         m.calcLeg(Math.PI, -3);
-    //         m.drawLeg("#4a4a4a");
-    //         m.calcLeg(0, 0);
-    //         m.drawLeg("#333");
-    //         ctx.rotate(m.angle);
-    //         ctx.beginPath();
-    //         ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-    //         ctx.fillStyle = m.bodyGradient
-    //         ctx.fill();
-    //         ctx.arc(15, 0, 4, 0, 2 * Math.PI);
-    //         ctx.strokeStyle = "#333";
-    //         ctx.lineWidth = 2;
-    //         ctx.stroke();
-    //         ctx.restore();
-    //         m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
-    //         powerUps.boost.draw()
-    //     }
-    //     m.drawLeg = function (stroke) {
-    //         // if (simulation.mouseInGame.x > m.pos.x) {
-    //         if (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2) {
-    //             m.flipLegs = 1;
-    //         } else {
-    //             m.flipLegs = -1;
-    //         }
-    //         ctx.save();
-    //         ctx.scale(m.flipLegs, 1); //leg lines
-    //         ctx.beginPath();
-    //         ctx.moveTo(m.hip.x, m.hip.y);
-    //         ctx.lineTo(m.knee.x, m.knee.y);
-    //         ctx.lineTo(m.foot.x, m.foot.y);
-    //         ctx.strokeStyle = stroke;
-    //         ctx.lineWidth = 7;
-    //         ctx.stroke();
-
-    //         //toe lines
-    //         ctx.beginPath();
-    //         ctx.moveTo(m.foot.x, m.foot.y);
-    //         ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-    //         ctx.moveTo(m.foot.x, m.foot.y);
-    //         ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
-    //         ctx.lineWidth = 4;
-    //         ctx.stroke();
-
-    //         //hip joint
-    //         ctx.beginPath();
-    //         ctx.arc(m.hip.x, m.hip.y, 11, 0, 2 * Math.PI);
-    //         //knee joint
-    //         ctx.moveTo(m.knee.x + 7, m.knee.y);
-    //         ctx.arc(m.knee.x, m.knee.y, 7, 0, 2 * Math.PI);
-    //         //foot joint
-    //         ctx.moveTo(m.foot.x + 6, m.foot.y);
-    //         ctx.arc(m.foot.x, m.foot.y, 6, 0, 2 * Math.PI);
-    //         ctx.fillStyle = m.fillColor;
-    //         ctx.fill();
-    //         ctx.lineWidth = 2;
-    //         ctx.stroke();
-    //         ctx.restore();
-    //     }
-    // },
     skin: {
         none() {
             m.isAltSkin = true
@@ -1149,6 +1071,96 @@ const m = {
                 ctx.restore();
             }
         },
+        strokeGap() {
+            m.isAltSkin = true
+            m.yOffWhen.stand = 52
+            m.yOffWhen.jump = 72
+            // m.yOffWhen.crouch = 22
+            // m.color = {
+            //     hue: 184,
+            //     sat: 0,
+            //     light: 55,
+            // }
+            // m.setFillColors();
+            m.draw = function () {
+                m.walk_cycle += m.flipLegs * m.Vx;
+                ctx.save();
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
+                ctx.translate(m.pos.x, m.pos.y);
+                m.calcLeg(Math.PI, -1.25);
+                m.drawLeg("#606070");
+                m.calcLeg(0, 0);
+                m.drawLeg("#445");
+
+
+                ctx.rotate(m.angle);
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                // ctx.arc(0, 0, 30, m.angle + 1, m.angle - 1);
+                ctx.fillStyle = "#fff"//m.bodyGradient
+                ctx.fill();
+                ctx.beginPath();
+                const arc = 0.7 + 0.17 * Math.sin(m.cycle * 0.012)
+                ctx.arc(0, 0, 30, -arc, arc, true); //- Math.PI / 2
+                ctx.strokeStyle = "#445";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(13, 0)
+                ctx.lineTo(20, 0)
+                // ctx.beginPath();
+                // ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = "#445";
+                ctx.stroke();
+
+                ctx.restore();
+                m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                powerUps.boost.draw()
+            }
+            m.drawLeg = function (stroke) {
+                // if (simulation.mouseInGame.x > m.pos.x) {
+                if (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2) {
+                    m.flipLegs = 1;
+                } else {
+                    m.flipLegs = -1;
+                }
+                ctx.save();
+                ctx.scale(m.flipLegs, 1); //leg lines
+                ctx.beginPath();
+                ctx.moveTo(m.hip.x, m.hip.y);
+                ctx.lineTo(m.knee.x, m.knee.y);
+                ctx.lineTo(m.foot.x, m.foot.y);
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = 5;
+                ctx.stroke();
+
+                //toe lines
+                ctx.beginPath();
+                ctx.moveTo(m.foot.x, m.foot.y);
+                ctx.lineTo(m.foot.x - 14, m.foot.y + 5);
+                ctx.moveTo(m.foot.x, m.foot.y);
+                ctx.lineTo(m.foot.x + 14, m.foot.y + 5);
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                //hip joint
+                ctx.beginPath();
+                ctx.arc(m.hip.x, m.hip.y, 8, 0, 2 * Math.PI);
+                //knee joint
+                ctx.moveTo(m.knee.x + 4, m.knee.y);
+                ctx.arc(m.knee.x, m.knee.y, 4, 0, 2 * Math.PI);
+                //foot joint
+                ctx.moveTo(m.foot.x + 4, m.foot.y + 1);
+                ctx.arc(m.foot.x, m.foot.y + 1, 4, 0, 2 * Math.PI);
+                ctx.fillStyle = m.fillColor;
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+        },
         energy() {
             m.isAltSkin = true
             m.color = {
@@ -1264,23 +1276,29 @@ const m = {
                 m.drawLeg("#5f5f5f");
                 m.calcLeg(0, 1);
                 m.drawLeg("#555");
+                ctx.rotate(m.angle);
+
+                const size = 33
                 ctx.beginPath();
-                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                ctx.lineTo(size * 1, size * 0)
+                ctx.lineTo(size * 0.5, size * 0.866)
+                ctx.lineTo(size * -0.5, size * 0.866)
+                ctx.lineTo(size * -1, size * 0)
+                ctx.lineTo(size * -0.5, size * -0.866)
+                ctx.lineTo(size * 0.5, size * -0.866)
+                ctx.lineTo(size * 1, size * 0)
+                ctx.lineTo(size * 0.5, size * 0)
                 ctx.fillStyle = m.bodyGradient
                 ctx.fill();
-                // ctx.fillStyle = grdRad
-                // ctx.fill();
-                ctx.strokeStyle = "#000";
+                ctx.strokeStyle = "#333";
                 ctx.lineWidth = 1.5;
-                ctx.rotate(m.angle);
-                ctx.beginPath();
-                ctx.arc(15, 0, 4, 0, 2 * Math.PI);
-                ctx.fillStyle = "#fff"
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                ctx.arc(15, 0, 4, 0, 2 * Math.PI);
                 ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(15, 0, 3, 0, 2 * Math.PI);
+                ctx.fillStyle = "#333"
+                ctx.fill();
+
                 ctx.restore();
                 m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
                 powerUps.boost.draw()
@@ -1336,17 +1354,9 @@ const m = {
                 sat: 14,
                 light: 65,
             }
-            // m.setFillColors();
             m.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
             m.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 50}%)`
-            // let grd = ctx.createLinearGradient(-30, 0, 30, 0);
             const grd = ctx.createRadialGradient(16, 0, 0, 0, 0, 40);
-
-            // grd.addColorStop(0, `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 35}%)`);
-            // grd.addColorStop(0.25, `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 20}%)`);
-            // grd.addColorStop(0.5, `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 35}%)`);
-            // grd.addColorStop(1, `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 10}%)`);
-
             grd.addColorStop(0, `#c78034`);
             grd.addColorStop(0.04, `#bd5235`);
             grd.addColorStop(0.08, `#ab554d`);
@@ -1372,9 +1382,7 @@ const m = {
             grd.addColorStop(0.92, `#00e19b`);
             grd.addColorStop(0.96, `#19f5aa`);
             grd.addColorStop(1, `#aaf5af`);
-
             m.bodyGradient = grd
-
 
             m.draw = function () {
                 ctx.fillStyle = m.fillColor;
@@ -1413,7 +1421,7 @@ const m = {
                 ctx.lineTo(m.knee.x, m.knee.y);
                 ctx.lineTo(m.foot.x, m.foot.y);
                 ctx.strokeStyle = stroke;
-                ctx.lineWidth = 7;
+                ctx.lineWidth = 5;
                 ctx.stroke();
 
                 //toe lines
@@ -1427,21 +1435,22 @@ const m = {
 
                 //hip joint
                 ctx.beginPath();
-                ctx.arc(m.hip.x, m.hip.y, 11, 0, 2 * Math.PI);
-                ctx.fillStyle = "#1b85cf";
+                ctx.arc(m.hip.x, m.hip.y, 9, 0, 2 * Math.PI);
+                ctx.fillStyle = "#222";
+                // ctx.fillStyle = "#1b85cf";
                 ctx.fill();
                 //knee joint
                 ctx.beginPath();
-                ctx.arc(m.knee.x, m.knee.y, 7, 0, 2 * Math.PI);
-                ctx.fillStyle = "#ffa050";
+                ctx.arc(m.knee.x, m.knee.y, 5, 0, 2 * Math.PI);
+                // ctx.fillStyle = "#ffa050";
                 ctx.fill();
                 //foot joint
                 ctx.beginPath();
-                ctx.arc(m.foot.x, m.foot.y, 6, 0, 2 * Math.PI);
-                ctx.fillStyle = "#878cf0";
+                ctx.arc(m.foot.x, m.foot.y, 4, 0, 2 * Math.PI);
+                // ctx.fillStyle = "#878cf0";
                 ctx.fill();
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                // ctx.lineWidth = 3;
+                // ctx.stroke();
                 ctx.restore();
             }
         },
@@ -1481,8 +1490,6 @@ const m = {
 
                 // console.log(simulation.zoomScale)
                 simulation.setZoom(1800 + 400 * Math.sin(m.cycle * 0.0075))
-
-
             }
         },
         dilate2() {
@@ -1599,6 +1606,95 @@ const m = {
                 ctx.arc(m.pos.x + 15 * Math.cos(m.angle), m.pos.y + 15 * Math.sin(m.angle), 5, 0, 2 * Math.PI);
                 ctx.fillStyle = "#000"
                 ctx.fill();
+                m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                powerUps.boost.draw()
+            }
+            m.drawLeg = function (stroke) {
+                // if (simulation.mouseInGame.x > m.pos.x) {
+                if (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2) {
+                    m.flipLegs = 1;
+                } else {
+                    m.flipLegs = -1;
+                }
+                ctx.save();
+                ctx.scale(m.flipLegs, 1); //leg lines
+                ctx.beginPath();
+                ctx.moveTo(m.hip.x, m.hip.y);
+                ctx.lineTo(m.knee.x, m.knee.y);
+                ctx.lineTo(m.foot.x, m.foot.y);
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = 6;
+                ctx.stroke();
+
+                //toe lines
+                ctx.beginPath();
+                ctx.moveTo(m.foot.x, m.foot.y);
+                ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
+                ctx.moveTo(m.foot.x, m.foot.y);
+                ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                //hip joint
+                ctx.beginPath();
+                ctx.arc(m.hip.x, m.hip.y, 11, 0, 2 * Math.PI);
+                //knee joint
+                ctx.moveTo(m.knee.x + 5, m.knee.y);
+                ctx.arc(m.knee.x, m.knee.y, 5, 0, 2 * Math.PI);
+                //foot joint
+                ctx.moveTo(m.foot.x + 5, m.foot.y);
+                ctx.arc(m.foot.x, m.foot.y, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = "#000";
+                ctx.fill();
+                // ctx.lineWidth = 2;
+                // ctx.stroke();
+                ctx.restore();
+            }
+        },
+        hexagon() {
+            m.isAltSkin = true
+            m.color = {
+                hue: 0,
+                sat: 0,
+                light: 100,
+            }
+            // m.setFillColors();
+            m.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
+            m.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 35}%)`
+            let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+            grd.addColorStop(0, m.fillColorDark);
+            grd.addColorStop(0.7, m.fillColor);
+            // grd.addColorStop(1, m.fillColor);
+            m.bodyGradient = grd
+
+            m.draw = function () {
+                ctx.fillStyle = m.fillColor;
+                m.walk_cycle += m.flipLegs * m.Vx;
+                ctx.save();
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
+                ctx.translate(m.pos.x, m.pos.y);
+                m.calcLeg(Math.PI, -3);
+                m.drawLeg("#4a4a4a");
+                m.calcLeg(0, 0);
+                m.drawLeg("#333");
+                ctx.rotate(m.angle);
+
+                const size = 32
+                ctx.beginPath();
+                ctx.lineTo(size * 1, size * 0)
+                ctx.lineTo(size * 0.5, size * 0.866)
+                ctx.lineTo(size * -0.5, size * 0.866)
+                ctx.lineTo(size * -1, size * 0)
+                ctx.lineTo(size * -0.5, size * -0.866)
+                ctx.lineTo(size * 0.5, size * -0.866)
+                ctx.lineTo(size * 1, size * 0)
+                ctx.fillStyle = m.bodyGradient
+                ctx.fill();
+                ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
                 m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
                 powerUps.boost.draw()
             }
@@ -2046,7 +2142,9 @@ const m = {
         }
     },
     setFieldRegen() {
-        if (m.fieldMode === 6) {
+        if (m.fieldMode === 0) {
+            m.fieldRegen = 0.00067  //4 energy per second for field emitter
+        } else if (m.fieldMode === 6) {
             m.fieldRegen = 0.002  //12 energy per second for time dilation
         } else if (m.fieldMode === 2) {
             m.fieldRegen = 0.000833 //5 energy per second perfect dia
@@ -2499,7 +2597,6 @@ const m = {
         // set pick up target for when mouse is released
         if (body[grabbing.targetIndex]) {
             m.holdingTarget = body[grabbing.targetIndex];
-            //
             ctx.beginPath(); //draw on each valid body
             let vertices = m.holdingTarget.vertices;
             ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -2591,6 +2688,8 @@ const m = {
                 return `<strong>+${(4 * couple).toFixed(0)}%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>`
             case 9: //wormhole
                 return `<span style = 'font-size:89%;'>after eating <strong class='color-block'>blocks</strong> <strong>+${(2 * couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong></span>`
+            case 10: //grappling hook
+                return `${powerUps.orb.ammo(1)} give ${(4 * couple).toFixed(0)}% more ammo`
         }
     },
     couplingChange(change = 0) {
@@ -2636,9 +2735,9 @@ const m = {
     },
     fieldUpgrades: [{
         name: "field emitter",
-        imageNumber: Math.floor(Math.random() * 23),
+        imageNumber: Math.floor(Math.random() * 26), //pick one of the 25 field emitter image files at random
         description: `<em>initial field</em><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs and <strong>throw</strong> <strong class='color-block'>blocks</strong>
-        <br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`, //            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
+        <br>generate <strong>4</strong> <strong class='color-f'>energy</strong> per second`, //            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
         effect: () => {
             m.hold = function () {
                 if (m.isHolding) {
@@ -2662,12 +2761,6 @@ const m = {
             }
         }
     },
-    // <div id="cube" style="width: 4em; height: 8em;">
-    //     <div style="transform: translate3d(1em, 0em, 0em)">1</div>
-    //     <div style="transform: translate3d(2em, 0em, 0em)">2</div>
-    //     <div style="transform: translate3d(3em, 0em, 0em)">3</div>
-    //     <div style="transform: translate3d(4em, 0em, 0em)">4</div>
-    // </div>
     {
         name: "standing wave",
         //<strong>deflecting</strong> protects you in every <strong>direction</strong>
@@ -2782,14 +2875,10 @@ const m = {
         effect: () => {
             m.fieldMeterColor = "#48f" //"#0c5"
             m.eyeFillColor = m.fieldMeterColor
-
             m.fieldShieldingScale = 0;
             m.fieldBlockCD = 3;
             m.grabPowerUpRange2 = 10000000
-            m.fieldPosition = {
-                x: m.pos.x,
-                y: m.pos.y
-            }
+            m.fieldPosition = { x: m.pos.x, y: m.pos.y }
             m.fieldAngle = m.angle
             m.perfectPush = (isFree = false) => {
                 if (m.fieldCDcycle < m.cycle) {
@@ -2797,10 +2886,7 @@ const m = {
                         if (
                             Vector.magnitude(Vector.sub(mob[i].position, m.fieldPosition)) - mob[i].radius < m.fieldRange &&
                             !mob[i].isUnblockable &&
-                            Vector.dot({
-                                x: Math.cos(m.fieldAngle),
-                                y: Math.sin(m.fieldAngle)
-                            }, Vector.normalise(Vector.sub(mob[i].position, m.fieldPosition))) > m.fieldThreshold &&
+                            Vector.dot({ x: Math.cos(m.fieldAngle), y: Math.sin(m.fieldAngle) }, Vector.normalise(Vector.sub(mob[i].position, m.fieldPosition))) > m.fieldThreshold &&
                             Matter.Query.ray(map, mob[i].position, m.fieldPosition).length === 0
                         ) {
                             mob[i].locatePlayer();
@@ -2819,11 +2905,7 @@ const m = {
                                 }
                             }
                             if (tech.blockDmg) { //electricity
-                                Matter.Body.setVelocity(mob[i], {
-                                    x: 0.5 * mob[i].velocity.x,
-                                    y: 0.5 * mob[i].velocity.y
-                                });
-
+                                Matter.Body.setVelocity(mob[i], { x: 0.5 * mob[i].velocity.x, y: 0.5 * mob[i].velocity.y });
                                 if (mob[i].isShielded) {
                                     for (let j = 0, len = mob.length; j < len; j++) {
                                         if (mob[j].id === mob[i].shieldID) mob[j].damage(tech.blockDmg * m.dmgScale * (tech.isBlockRadiation ? 6 : 2), true)
@@ -2951,7 +3033,6 @@ const m = {
                     //     if (m.energy < m.fieldRegen) m.fieldCDcycle = m.cycle + 90;
                     // }
 
-
                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                     m.grabPowerUp();
                     m.lookForPickUp();
@@ -3042,12 +3123,12 @@ const m = {
                     m.drawHold(m.holdingTarget);
                     m.holding();
                     m.throwBlock();
-                } else if (input.field && m.fieldCDcycle < m.cycle) { //push away
+                } else if (input.field) { //push away
                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                     m.grabPowerUp();
                     m.lookForPickUp();
                     const DRAIN = 0.00035
-                    if (m.energy > DRAIN) {
+                    if (m.energy > DRAIN && m.fieldCDcycle < m.cycle) {
                         if (tech.isFlyFaster) {
                             //look for nearby objects to make zero-g
                             function moveThis(who, range, mag = 1.06) {
@@ -3097,7 +3178,20 @@ const m = {
                                 for (let i = 0, len = who.length; i < len; ++i) {
                                     sub = Vector.sub(who[i].position, m.pos);
                                     dist = Vector.magnitude(sub);
-                                    if (dist < range) who[i].force.y -= who[i].mass * (simulation.g * mag);
+                                    if (dist < range) {
+                                        who[i].force.y -= who[i].mass * (simulation.g * mag); //add a bit more then standard gravity
+                                        if (input.left) { //blocks move horizontally with the same force as the player
+                                            who[i].force.x -= m.FxAir * who[i].mass / 10; // move player   left / a
+                                        } else if (input.right) {
+                                            who[i].force.x += m.FxAir * who[i].mass / 10; //move player  right / d
+                                        }
+                                    }
+
+
+
+                                    // sub = Vector.sub(who[i].position, m.pos);
+                                    // dist = Vector.magnitude(sub);
+                                    // if (dist < range) who[i].force.y -= who[i].mass * (simulation.g * mag);
                                 }
                             }
                             //control horizontal acceleration
@@ -3687,6 +3781,94 @@ const m = {
                     ctx.strokeStyle = "rgba(255,0,110,0.06)"
                     ctx.stroke();
                 }
+                // } else if (true) { //plasma sword slash
+                //     const plasmaSweepCycles = 30
+                //     m.plasmaSweep = 0
+                //     m.plasmaSlashDirection = m.flipLegs//Math.random() > 0.5 ? 1 : -1;
+                //     m.hold = function () {
+                //         if (m.isHolding) {
+                //             m.drawHold(m.holdingTarget);
+                //             m.holding();
+                //             m.throwBlock();
+                //             m.plasmaSweep = 0
+                //             // } else if (true) { //not hold but field button is pressed
+                //         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+                //             if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
+                //             m.grabPowerUp();
+                //             m.lookForPickUp();
+
+                //             //graphics
+                //             if (m.plasmaSweep === 0) m.plasmaSlashDirection = m.flipLegs //Math.random() > 0.5 ? 1 : -1;
+                //             const angle = m.angle //+ 1 * (m.plasmaSweep - plasmaSweepCycles / 2) / plasmaSweepCycles * m.plasmaSlashDirection
+                //             const plasmaSweepCapped = Math.min(m.plasmaSweep, plasmaSweepCycles - 8) / plasmaSweepCycles
+                //             const range = 100 * plasmaSweepCapped
+                //             const arc = 1.3
+                //             const A = { x: m.pos.x + range * Math.cos(angle - arc), y: m.pos.y + range * Math.sin(angle - arc) }
+                //             const B = { x: m.pos.x + range * Math.cos(angle + arc), y: m.pos.y + range * Math.sin(angle + arc) }
+                //             const controlRange = 500 * plasmaSweepCapped
+                //             const AC = { x: m.pos.x + controlRange * Math.cos(angle - arc / 2), y: m.pos.y + controlRange * Math.sin(angle - arc / 2) }
+                //             const BC = { x: m.pos.x + controlRange * Math.cos(angle + arc / 2), y: m.pos.y + controlRange * Math.sin(angle + arc / 2) }
+                //             const innerControlRange = 300 * plasmaSweepCapped
+                //             const ACinner = { x: m.pos.x + innerControlRange * Math.cos(angle - arc / 2), y: m.pos.y + innerControlRange * Math.sin(angle - arc / 2) }
+                //             const BCinner = { x: m.pos.x + innerControlRange * Math.cos(angle + arc / 2), y: m.pos.y + innerControlRange * Math.sin(angle + arc / 2) }
+                //             ctx.beginPath();
+                //             ctx.moveTo(A.x, A.y)
+                //             ctx.bezierCurveTo(AC.x, AC.y, BC.x, BC.y, B.x, B.y); //outer curve
+                //             ctx.bezierCurveTo(BCinner.x, BCinner.y, ACinner.x, ACinner.y, A.x, A.y); //inner curve
+                //             // ctx.strokeStyle = "#000"
+                //             // ctx.stroke();
+                //             ctx.fillStyle = "rgba(255,0,255,0.5)"
+                //             ctx.fill();
+
+                //             //draw control points for graphics reference
+                //             ctx.lineWidth = '0.5'
+                //             ctx.beginPath();
+                //             ctx.arc(A.x, A.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+                //             ctx.beginPath();
+                //             ctx.arc(B.x, B.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+                //             ctx.beginPath();
+                //             ctx.arc(AC.x, AC.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+                //             ctx.beginPath();
+                //             ctx.arc(BC.x, BC.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+                //             ctx.beginPath();
+                //             ctx.arc(ACinner.x, ACinner.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+                //             ctx.beginPath();
+                //             ctx.arc(BCinner.x, BCinner.y, 5, 0, 2 * Math.PI);
+                //             ctx.stroke();
+
+                //             //mob collision detection
+                //             collideRange = 160
+                //             const collideCenter = {
+                //                 x: m.pos.x + collideRange * Math.cos(angle),
+                //                 y: m.pos.y + collideRange * Math.sin(angle)
+                //             }
+                //             ctx.beginPath();
+                //             ctx.arc(collideCenter.x, collideCenter.y, 140, 0, 2 * Math.PI);
+                //             ctx.stroke();
+
+                //             //push mob away and slow them?
+
+
+                //             //sweeping motion and cooldown
+                //             m.plasmaSweep++
+                //             if (m.plasmaSweep > plasmaSweepCycles) {
+                //                 m.plasmaSweep = 0
+                //                 if (m.fireCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 30
+                //             }
+                //         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+                //             m.pickUp();
+                //             m.plasmaSweep = 0
+                //         } else {
+                //             m.plasmaSweep = 0
+                //             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                //         }
+                //         m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
+                //     }
             } else {
                 m.hold = function () {
                     if (m.isHolding) {
@@ -3751,7 +3933,8 @@ const m = {
             }
             if (tech.isRewindField) {
                 this.rewindCount = 0
-                m.grabPowerUpRange2 = 300000
+                m.grabPowerUpRange2 = 300000//        m.grabPowerUpRange2 = 200000;
+
                 m.hold = function () {
                     // console.log(m.fieldCDcycle)
                     m.grabPowerUp();
@@ -3913,7 +4096,7 @@ const m = {
     },
     {
         name: "metamaterial cloaking",
-        description: "<strong>+50%</strong> <strong class='color-defense'>defense</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>+333%</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
+        description: "<strong>+66%</strong> <strong class='color-defense'>defense</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>+333%</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second",
         effect: () => {
             m.fieldFire = true;
             m.fieldMeterColor = "#333";
@@ -3928,29 +4111,6 @@ const m = {
                 m.walk_cycle -= m.flipLegs * m.Vx;
                 m.pos.x += 4
                 m.draw();
-
-                // let history = m.history[(m.cycle - 1) % 600]
-                // m.pos.x = history.position.x
-                // m.pos.y = history.position.y + m.yPosDifference - history.yOff
-
-                // m.pos.x += 4
-                // ctx.fillStyle = m.fillColor;
-                // ctx.save();
-                // ctx.translate(m.pos.x, m.pos.y);
-                // m.calcLeg(Math.PI, -3);
-                // m.drawLeg("#ccc");
-                // m.calcLeg(0, 0);
-                // m.drawLeg("#ccc");
-                // ctx.rotate(m.angle);
-                // ctx.beginPath();
-                // ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                // ctx.fillStyle = "#fff"
-                // ctx.fill();
-                // ctx.arc(15, 0, 4, 0, 2 * Math.PI);
-                // ctx.strokeStyle = "#333";
-                // ctx.lineWidth = 2;
-                // ctx.stroke();
-                // ctx.restore()
             }
             m.drawCloak = function () {
                 m.fieldPhase += 0.007
@@ -3982,27 +4142,27 @@ const m = {
                 }
                 //not shooting (or using field) enable cloak
                 if (m.energy < 0.05 && m.fireCDcycle < m.cycle && !input.fire) m.fireCDcycle = m.cycle
-                if (m.fireCDcycle + 30 < m.cycle && !input.fire) { //automatically cloak if not firing
+                if (m.fireCDcycle + 10 < m.cycle && !input.fire) { //automatically cloak if not firing
                     const drain = 0.02
                     if (!m.isCloak && m.energy > drain + 0.03) {
                         m.energy -= drain
                         m.isCloak = true //enter cloak
-                        m.fieldHarmReduction = 0.5;
+                        m.fieldHarmReduction = 0.33; //66% reduction
                         m.enterCloakCycle = m.cycle
                         if (tech.isCloakHealLastHit && m.lastHit > 0) {
                             const heal = Math.min(0.75 * m.lastHit, m.energy)
-                            if (m.energy > heal) {
-                                m.energy -= heal
-                                m.addHealth(heal); //heal from last hit
-                                m.lastHit = 0
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: m.pos.x,
-                                    y: m.pos.y,
-                                    radius: Math.sqrt(heal) * 200,
-                                    color: "rgba(0,255,200,0.6)",
-                                    time: 16
-                                });
-                            }
+                            // if (m.energy > heal) {
+                            // m.energy -= heal * 0.8
+                            m.addHealth(heal); //heal from last hit
+                            m.lastHit = 0
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: m.pos.x,
+                                y: m.pos.y,
+                                radius: Math.sqrt(heal) * 200,
+                                color: "rgba(0,255,200,0.6)",
+                                time: 16
+                            });
+                            // }
                         }
                         if (tech.isIntangible) {
                             for (let i = 0; i < bullet.length; i++) {
@@ -4048,9 +4208,16 @@ const m = {
                     m.fieldRange = m.fieldRange * 0.85 + 130
                     m.fieldDrawRadius = m.fieldRange * 1.1 //* 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                     m.drawCloak()
-                    ctx.globalCompositeOperation = "lighter";
-                    m.drawCloakedM()
-                    ctx.globalCompositeOperation = "source-over";
+                    // ctx.globalCompositeOperation = "lighter";
+                    // m.drawCloakedM()
+                    // ctx.globalCompositeOperation = "source-over";
+
+                    ctx.beginPath();
+                    ctx.arc(m.pos.x, m.pos.y, 35, 0, 2 * Math.PI);
+                    ctx.strokeStyle = "rgba(255,255,255,0.25)";//"rgba(0,0,0,0.7)";//"rgba(255,255,255,0.7)";//"rgba(255,0,100,0.7)";
+                    ctx.lineWidth = 10
+                    ctx.stroke();
+
                 } else if (m.fieldRange < 4000) {
                     m.fieldRange += 90
                     m.fieldDrawRadius = m.fieldRange //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
@@ -4063,8 +4230,8 @@ const m = {
                         if (inPlayer.length > 0) {
                             for (let i = 0; i < inPlayer.length; i++) {
                                 if (m.energy > 0) {
-                                    if (!inPlayer[i].isUnblockable) m.energy -= 0.007;
-                                    if (inPlayer[i].shield) m.energy -= 0.025;
+                                    if (!inPlayer[i].isUnblockable) m.energy -= 0.003;
+                                    if (inPlayer[i].shield) m.energy -= 0.011;
                                 }
                             }
                         }
@@ -4073,10 +4240,17 @@ const m = {
                     }
                 }
                 this.drawRegenEnergyCloaking()
-                if (m.isSneakAttack && m.sneakAttackCycle + Math.min(120, 0.5 * (m.cycle - m.enterCloakCycle)) > m.cycle) { //show sneak attack status
-                    ctx.globalCompositeOperation = "multiply";
-                    m.drawCloakedM()
-                    ctx.globalCompositeOperation = "source-over";
+                if (m.isSneakAttack && m.sneakAttackCycle + Math.min(100, 0.66 * (m.cycle - m.enterCloakCycle)) > m.cycle) { //show sneak attack status
+                    const timeLeft = (m.sneakAttackCycle + Math.min(100, 0.66 * (m.cycle - m.enterCloakCycle)) - m.cycle) * 0.5
+                    ctx.beginPath();
+                    ctx.arc(m.pos.x, m.pos.y, 32, 0, 2 * Math.PI);
+                    ctx.strokeStyle = "rgba(180,30,70,0.5)";//"rgba(0,0,0,0.7)";//"rgba(255,255,255,0.7)";//"rgba(255,0,100,0.7)";
+                    ctx.lineWidth = Math.max(Math.min(10, timeLeft), 3);
+                    ctx.stroke();
+
+                    // ctx.globalCompositeOperation = "multiply";
+                    // m.drawCloakedM()
+                    // ctx.globalCompositeOperation = "source-over";
                 }
             }
         }
@@ -4609,6 +4783,7 @@ const m = {
                             m.hole.isReady = false;
                             m.fieldRange = 0
                             Matter.Body.setPosition(player, simulation.mouseInGame);
+                            // simulation.translatePlayerAndCamera(simulation.mouseInGame) //too jerky
                             m.buttonCD_jump = 0 //this might fix a bug with jumping
                             const velocity = Vector.mult(Vector.normalise(sub), 20)
                             Matter.Body.setVelocity(player, {
@@ -4865,6 +5040,68 @@ const m = {
         //     }
         //     m.drawRegenEnergy()
         // },
+    },
+    {
+        name: "grappling hook",
+        // description: `use <strong class='color-f'>energy</strong> to pull yourself towards the <strong>map</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
+        description: `use <strong class='color-f'>energy</strong> to fire a hook that <strong>pulls</strong> player<br><strong class='color-d'>damages</strong> mobs and grabs <strong class='color-block'>blocks</strong><br>generate <strong>6</strong> <strong class='color-f'>energy</strong> per second`,
+        effect: () => {
+            m.fieldFire = true;
+            // m.holdingMassScale = 0.01; //can hold heavier blocks with lower cost to jumping
+            // m.fieldMeterColor = "#789"//"#456"
+            m.eyeFillColor = m.fieldMeterColor
+            m.grabPowerUpRange2 = 300000 //m.grabPowerUpRange2 = 200000;
+            // m.fieldHarmReduction = 0.45; //55% reduction
+
+            m.hold = function () {
+                if (m.isHolding) {
+                    m.drawHold(m.holdingTarget);
+                    m.holding();
+                    m.throwBlock();
+                } else if (input.field) {
+                    m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                    if (m.fieldCDcycle < m.cycle) {
+                        if (m.energy > 0.02) m.energy -= 0.02
+                        b.grapple({ x: m.pos.x + 40 * Math.cos(m.angle), y: m.pos.y + 40 * Math.sin(m.angle) }, m.angle)
+                        if (m.fieldCDcycle < m.cycle + 20) m.fieldCDcycle = m.cycle + 20
+                    }
+                    m.grabPowerUp();
+                } else {
+                    m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+                    if (tech.isHookDefense && m.energy > 0.33 && m.fieldCDcycle < m.cycle) {
+                        const range = 300
+                        for (let i = 0; i < mob.length; i++) {
+                            if (!mob[i].isBadTarget &&
+                                !mob[i].isInvulnerable &&
+                                Vector.magnitude(Vector.sub(m.pos, mob[i].position)) < range &&
+                                Matter.Query.ray(map, m.pos, mob[i].position).length === 0
+                            ) {
+                                m.energy -= 0.18
+                                if (m.fieldCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 30
+                                const angle = Math.atan2(mob[i].position.y - player.position.y, mob[i].position.x - player.position.x);
+                                b.harpoon(m.pos, mob[i], angle, 0.75, true, 20) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
+                                bullet[bullet.length - 1].drain = 0
+                                const maxCount = 6
+                                for (let j = maxCount - 1; j > 0; j--) {
+                                    b.harpoon(m.pos, mob[i], angle + j * 2 * Math.PI / maxCount, 0.75, true, 10)
+                                    bullet[bullet.length - 1].drain = 0
+                                }
+                                break
+                            }
+                        }
+                        ctx.beginPath();
+                        ctx.arc(m.pos.x, m.pos.y, range, 0, 2 * Math.PI);
+                        ctx.strokeStyle = "#000";
+                        ctx.lineWidth = 0.25;
+                        ctx.setLineDash([10, 30]);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                }
+                m.drawRegenEnergy()
+                //look for nearby mobs and fire harpoons at them
+            }
+        }
     },
     ],
     //************************************************************************************

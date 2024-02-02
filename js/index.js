@@ -305,17 +305,14 @@ const build = {
         // console.log(localSettings.isHideImages, from)
     },
     hideHUD() {
-
         if (simulation.isTraining) {
             localSettings.isHideHUD = false
         } else {
             localSettings.isHideHUD = !localSettings.isHideHUD
         }
-
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         document.getElementById("hide-hud").checked = localSettings.isHideHUD
         document.getElementById("hide-hud").classList.toggle("ticked")
-
         simulation.removeEphemera("dmgDefBars")
         if (!localSettings.isHideHUD) {
             simulation.ephemera.push({
@@ -524,12 +521,10 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             if (!aHasKeyword && bHasKeyword) return 1;
             return 0;
         }
-
         if (find === 'guntech') {
             tech.tech.sort((a, b) => {
                 if (a.isGunTech && b.isGunTech) {
-                    if (a.allowed() > b.allowed()) return -1; //sort to the top
-                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                    return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 }
                 if (a.isGunTech && !b.isGunTech) return -1; //sort to the top
                 if (!a.isGunTech && b.isGunTech) return 1; //sort to the bottom
@@ -538,30 +533,30 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         } else if (find === 'fieldtech') {
             tech.tech.sort((a, b) => {
                 if (a.isFieldTech && b.isFieldTech) {
-                    if (a.allowed() > b.allowed()) return -1; //sort to the top
-                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                    return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 }
                 if (a.isFieldTech && !b.isFieldTech) return -1; //sort to the top
                 if (!a.isFieldTech && b.isFieldTech) return 1; //sort to the bottom
                 return 0;
             });
         } else if (find === 'allowed') {
+            // tech.tech.sort((a, b) => {
+            //     if (a.allowed() > !b.allowed()) return -1; //sort to the top
+            //     if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+            //     return 0;
+            // });
             tech.tech.sort((a, b) => {
-                if (a.allowed() > b.allowed()) return -1; //sort to the top
-                if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
-                return 0;
+                return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
             });
         } else if (find === 'have') {
             tech.tech.sort((a, b) => {
-                if (a.count > b.count) return -1; //sort to the top
-                if (!a.count < b.count) return 1; //sort to the bottom
+                return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 return 0;
             });
         } else if (find === 'heal') {
             tech.tech.sort((a, b) => {
                 if (a.isHealTech && b.isHealTech) {
-                    if (a.allowed() > b.allowed()) return -1; //sort to the top
-                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                    return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 }
                 if (a.isHealTech && !b.isHealTech) return -1; //sort to the top
                 if (!a.isHealTech && b.isHealTech) return 1; //sort to the bottom
@@ -570,8 +565,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         } else if (find === 'bot') {
             tech.tech.sort((a, b) => {
                 if (a.isBotTech && b.isBotTech) {
-                    if (a.allowed() > b.allowed()) return -1; //sort to the top
-                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                    return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 }
                 if (a.isBotTech && !b.isBotTech) return -1; //sort to the top
                 if (!a.isBotTech && b.isBotTech) return 1; //sort to the bottom
@@ -580,8 +574,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         } else if (document.getElementById("sort-input").value === 'skin') {
             tech.tech.sort((a, b) => {
                 if (a.isSkin && b.isSkin) {
-                    if (a.allowed() > b.allowed()) return -1; //sort to the top
-                    if (!a.allowed() < b.allowed()) return 1; //sort to the bottom
+                    return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
                 }
                 if (a.isSkin && !b.isSkin) return -1; //sort to the top
                 if (!a.isSkin && b.isSkin) return 1; //sort to the bottom
@@ -795,9 +788,9 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 <div>
     <select name="difficulty-select" id="difficulty-select-experiment">
     <option value="1">easy</option>
-    <option value="2" selected>normal</option>
-    <option value="4">hard</option>
-    <option value="6">why</option>
+    <option value="2" selected>normal ⚆</option>
+    <option value="4">hard ⚆</option>
+    <option value="5">why ⚇</option>
     </select>
     &nbsp; &nbsp;
         <label for="hide-images-experiment" title="reload experiment with no images for fields, guns, and tech" style="font-size: 0.85em;">hide images</label>
@@ -974,7 +967,6 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
     startExperiment() { //start playing the game after exiting the experiment menu
         build.isExperimentSelection = false;
         spawn.setSpawnList(); //gives random mobs,  not starter mobs
-        spawn.setSpawnList();
         if (b.inventory.length > 0) {
             b.activeGun = b.inventory[0] //set first gun to active gun
             b.inventoryGun = 0;
@@ -1279,7 +1271,7 @@ window.addEventListener("keydown", function (event) {
                                 simulation.molecularMode++
                                 m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
                             } else {
-                                m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 0 : m.fieldMode + 1) //cycle to next field
+                                m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field, skip field emitter
                                 if (m.fieldMode === 4) {
                                     simulation.molecularMode = 0
                                     m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
@@ -1417,14 +1409,16 @@ window.addEventListener("keydown", function (event) {
         if (event.key === "X") m.death(); //only uppercase
         switch (event.key.toLowerCase()) {
             case "o":
-                simulation.isAutoZoom = false;
-                simulation.zoomScale /= 0.9;
-                simulation.setZoom();
+                // simulation.isAutoZoom = false;
+                // simulation.zoomScale /= 0.9;
+                // simulation.setZoom();
+                simulation.zoomTransition(simulation.zoomScale / 0.9)
                 break;
             case "i":
-                simulation.isAutoZoom = false;
-                simulation.zoomScale *= 0.9;
-                simulation.setZoom();
+                // simulation.isAutoZoom = false;
+                // simulation.zoomScale *= 0.9;
+                // simulation.setZoom();
+                simulation.zoomTransition(simulation.zoomScale * 0.9)
                 break
             case "`":
                 powerUps.directSpawn(simulation.mouseInGame.x, simulation.mouseInGame.y, "research");
@@ -1758,18 +1752,19 @@ document.getElementById("updates").addEventListener("toggle", function () {
         xhr.open("GET", path, true);
         xhr.send();
     }
-    let text = `<strong>n-gon</strong>: <a href="https://github.com/landgreen/n-gon/blob/master/todo.txt">todo list</a> and complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a><hr>`
+    let text = `<pre><strong>n-gon</strong>: <a href="https://github.com/landgreen/n-gon/blob/master/todo.txt">todo list</a> and complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a><hr>`
     document.getElementById("updates-div").innerHTML = text
 
     ///  https://api.github.com/repos/landgreen/n-gon/stats/commit_activity
     loadJSON('https://api.github.com/repos/landgreen/n-gon/commits',
         function (data) {
-            // console.log(data)
+            // console.log(data[0].sha) //unique code for most recent commit
             for (let i = 0, len = 20; i < len; i++) {
                 text += "<strong>" + data[i].commit.author.date.substr(0, 10) + "</strong> - "; //+ "<br>"
                 text += data[i].commit.message
                 if (i < len - 1) text += "<hr>"
             }
+            text += "</pre>"
             document.getElementById("updates-div").innerHTML = text.replace(/\n/g, "<br />")
         },
         function (xhr) {

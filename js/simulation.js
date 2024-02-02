@@ -24,7 +24,6 @@ const simulation = {
         mobs.healthBar();
         m.draw();
         m.hold();
-        // v.draw(); //working on visibility work in progress
         level.customTopLayer();
         simulation.draw.drawMapPath();
         b.fire();
@@ -33,10 +32,8 @@ const simulation = {
         if (!m.isBodiesAsleep) b.bulletDo();
         simulation.drawCircle();
         simulation.runEphemera();
-        // simulation.clip();
         ctx.restore();
         simulation.drawCursor();
-        // simulation.pixelGraphics();
     },
     testingLoop() {
         simulation.gravity();
@@ -505,58 +502,90 @@ const simulation = {
         simulation.zoom = canvas.height / zoomScale; //sets starting zoom scale
     },
     zoomTransition(newZoomScale, step = 2) {
+        //old version
+        // if (simulation.isAutoZoom) {
+        //     const isBigger = (newZoomScale - simulation.zoomScale > 0) ? true : false;
+        //     requestAnimationFrame(zLoop);
+        //     const currentLevel = level.onLevel
+
+        //     function zLoop() {
+        //         if (currentLevel !== level.onLevel || simulation.isAutoZoom === false) return //stop the zoom if player goes to a new level
+
+        //         if (isBigger) {
+        //             simulation.zoomScale += step
+        //             if (simulation.zoomScale >= newZoomScale) {
+        //                 simulation.setZoom(newZoomScale);
+        //                 return
+        //             }
+        //         } else {
+        //             simulation.zoomScale -= step
+        //             if (simulation.zoomScale <= newZoomScale) {
+        //                 simulation.setZoom(newZoomScale);
+        //                 return
+        //             }
+        //         }
+
+        //         simulation.setZoom();
+        //         requestAnimationFrame(zLoop);
+        //     }
+        // }
+
+
+        //rewrite using the ephemera system
         if (simulation.isAutoZoom) {
-            const isBigger = (newZoomScale - simulation.zoomScale > 0) ? true : false;
-            requestAnimationFrame(zLoop);
-            const currentLevel = level.onLevel
-
-            function zLoop() {
-                if (currentLevel !== level.onLevel || simulation.isAutoZoom === false) return //stop the zoom if player goes to a new level
-
-                if (isBigger) {
+            simulation.ephemera.push({
+                name: "zoom",
+                count: simulation.testing ? 0 : 120, //cycles before it self removes
+                currentLevel: level.onLevel,
+                do() {
+                    this.count--
+                    const step = (newZoomScale - simulation.zoomScale) / this.count
                     simulation.zoomScale += step
-                    if (simulation.zoomScale >= newZoomScale) {
-                        simulation.setZoom(newZoomScale);
-                        return
+                    if (this.count < 1 && this.currentLevel === level.onLevel && simulation.isAutoZoom) {
+                        simulation.zoomScale = newZoomScale
+                        simulation.removeEphemera(this.name)
                     }
-                } else {
-                    simulation.zoomScale -= step
-                    if (simulation.zoomScale <= newZoomScale) {
-                        simulation.setZoom(newZoomScale);
-                        return
-                    }
+                    simulation.setZoom(simulation.zoomScale);
+                },
+            })
+        }
+    },
+    translatePlayerAndCamera(where) {
+        //infinite falling.  teleport to sky after falling
+        const before = { x: player.position.x, y: player.position.y, }
+        Matter.Body.setPosition(player, { x: where.x, y: where.y });
+        const change = { x: before.x - player.position.x, y: before.y - player.position.y }
+        // translate camera to preserve illusion to endless fall
+        m.transX += change.x
+        m.transY += change.y
+        simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
+        simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
+        m.angle = Math.atan2(simulation.mouseInGame.y - m.pos.y, simulation.mouseInGame.x - m.pos.x);
+
+        //is there a reason to update m.pos here?
+        // m.pos.x = player.position.x;
+        // m.pos.y = playerBody.position.y - m.yOff;
+
+        for (let i = 0; i < bullet.length; i++) {
+            if (bullet[i].botType) {
+                if (Vector.magnitudeSquared(Vector.sub(bullet[i].position, player.position)) > 1000000) { //far away bots teleport to player
+                    Matter.Body.setPosition(bullet[i], Vector.add(player.position, { x: 250 * (Math.random() - 0.5), y: 250 * (Math.random() - 0.5) }));
+                    Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
+                } else { //close bots maintain relative distance to player on teleport
+                    Matter.Body.setPosition(bullet[i], Vector.sub(bullet[i].position, change));
                 }
-
-                simulation.setZoom();
-                requestAnimationFrame(zLoop);
             }
         }
     },
-    zoomInFactor: 0,
-    startZoomIn(time = 180) {
-        simulation.zoom = 0;
-        let count = 0;
-        requestAnimationFrame(zLoop);
-
-        function zLoop() {
-            simulation.zoom += canvas.height / simulation.zoomScale / time;
-            count++;
-            if (count < time) {
-                requestAnimationFrame(zLoop);
-            } else {
-                simulation.setZoom();
-            }
-        }
-    },
-    noCameraScroll() { //makes the camera not scroll after changing locations
-        //only works if velocity is zero
+    setupCamera() { //makes the camera not scroll after changing locations
+        // //only works if velocity is zero
         m.pos.x = player.position.x;
         m.pos.y = playerBody.position.y - m.yOff;
         const scale = 0.8;
         m.transSmoothX = canvas.width2 - m.pos.x - (simulation.mouse.x - canvas.width2) * scale;
         m.transSmoothY = canvas.height2 - m.pos.y - (simulation.mouse.y - canvas.height2) * scale;
-        m.transX += (m.transSmoothX - m.transX) * 1;
-        m.transY += (m.transSmoothY - m.transY) * 1;
+        m.transX += (m.transSmoothX - m.transX);
+        m.transY += (m.transSmoothY - m.transY);
     },
     edgeZoomOutSmooth: 1,
     camera() {
@@ -570,6 +599,7 @@ const simulation = {
         ctx.translate(canvas.width2, canvas.height2); //center
         ctx.scale(simulation.zoom / simulation.edgeZoomOutSmooth, simulation.zoom / simulation.edgeZoomOutSmooth); //zoom in once centered
         ctx.translate(-canvas.width2 + m.transX, -canvas.height2 + m.transY); //translate
+        // ctx.translate(-canvas.width2 + m.transX - player.velocity.x, -canvas.height2 + m.transY + player.velocity.y); //translate
         //calculate in game mouse position by undoing the zoom and translations
         simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
         simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
@@ -909,29 +939,58 @@ const simulation = {
                     }
 
                     if (m.pos.y > simulation.fallHeight) { // if 4000px deep
-                        Matter.Body.setVelocity(player, {
-                            x: 0,
-                            y: 0
-                        });
-                        Matter.Body.setPosition(player, {
-                            x: level.enter.x + 50,
-                            y: level.enter.y - 20
-                        });
-                        // move bots
-                        for (let i = 0; i < bullet.length; i++) {
-                            if (bullet[i].botType) {
-                                Matter.Body.setPosition(bullet[i], Vector.add(player.position, {
-                                    x: 250 * (Math.random() - 0.5),
-                                    y: 250 * (Math.random() - 0.5)
-                                }));
-                                Matter.Body.setVelocity(bullet[i], {
-                                    x: 0,
-                                    y: 0
-                                });
+                        if (level.isEndlessFall) {
+                            //infinite falling.  teleport to sky after falling
+
+                            simulation.ephemera.push({
+                                name: "slow player",
+                                count: 160, //cycles before it self removes
+                                do() {
+                                    this.count--
+                                    if (this.count < 0 || m.onGround) simulation.removeEphemera(this.name)
+                                    // console.log(player.velocity.y)
+                                    if (player.velocity.y > 70) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
+                                    if (player.velocity.y > 90) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
+                                },
+                            })
+
+                            const before = { x: player.position.x, y: player.position.y, }
+                            Matter.Body.setPosition(player, { x: level.enter.x, y: level.enter.y - 3000 });
+                            // Matter.Body.setPosition(player, level.fallPosition);
+
+                            const change = { x: before.x - player.position.x, y: before.y - player.position.y }
+                            // translate camera smoothly to preserve illusion to endless fall
+                            m.transX += change.x
+                            m.transY += change.y
+                            simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
+                            simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
+                            m.angle = Math.atan2(simulation.mouseInGame.y - m.pos.y, simulation.mouseInGame.x - m.pos.x);
+                            // move bots
+                            for (let i = 0; i < bullet.length; i++) {
+                                if (bullet[i].botType) {
+                                    Matter.Body.setPosition(bullet[i], Vector.sub(bullet[i].position, change));
+                                    // Matter.Body.setPosition(bullet[i], Vector.add(player.position, { x: 250 * (Math.random() - 0.5), y: 250 * (Math.random() - 0.5) }));
+                                    // Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
+                                }
+                            }
+                        } else {
+                            Matter.Body.setVelocity(player, { x: 0, y: 0 });
+                            Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
+                            // m.damage(0.02 * simulation.difficultyMode);
+                            // m.energy -= 0.02 * simulation.difficultyMode
+                            // move bots
+                            for (let i = 0; i < bullet.length; i++) {
+                                if (bullet[i].botType) {
+                                    Matter.Body.setPosition(bullet[i], Vector.add(player.position, { x: 250 * (Math.random() - 0.5), y: 250 * (Math.random() - 0.5) }));
+                                    Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
+                                }
                             }
                         }
-                        m.damage(0.1 * simulation.difficultyMode);
-                        m.energy -= 0.1 * simulation.difficultyMode
+
+
+
+
+
                     }
                     if (isNaN(player.position.x)) m.death();
                     if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
@@ -946,19 +1005,54 @@ const simulation = {
                             });
                         }
                         if (tech.isHealthRecovery) {
-                            const heal = 0.005 * m.maxHealth
-                            m.addHealth(heal)
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: m.pos.x,
-                                y: m.pos.y,
-                                radius: Math.sqrt(heal) * 150,
-                                color: "rgba(0,255,200,0.5)",
-                                time: 4
-                            });
+                            if (tech.isEnergyHealth) {
+                                if (m.immuneCycle < m.cycle) {
+                                    m.energy += m.maxEnergy * 0.005
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: m.pos.x,
+                                        y: m.pos.y,
+                                        radius: Math.sqrt(m.maxEnergy * 0.02) * 60,
+                                        color: "rgba(0, 204, 255,0.4)", //#0cf
+                                        time: 4
+                                    });
+                                }
+                            } else {
+                                const heal = 0.005 * m.maxHealth
+                                m.addHealth(heal)
+                                simulation.drawList.push({ //add dmg to draw queue
+                                    x: m.pos.x,
+                                    y: m.pos.y,
+                                    radius: Math.sqrt(heal) * 150,
+                                    color: "rgba(0,255,200,0.5)",
+                                    time: 4
+                                });
+                            }
                         }
                     }
 
                     if (!(m.cycle % 420)) { //once every 7 seconds
+                        //check if player is inside the map
+                        if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
+                            //check for the next few seconds to see if being stuck continues
+                            simulation.ephemera.push({
+                                name: "stuck",
+                                count: 240, //cycles before it self removes
+                                do() {
+                                    if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
+                                        this.count--
+                                        // console.log('halp, stuck in map!', Matter.Query.point(map, m.pos))
+                                        if (this.count < 0) {
+                                            simulation.removeEphemera(this.name)
+                                            Matter.Body.setVelocity(player, { x: 0, y: 0 });
+                                            Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
+                                        }
+                                    } else {
+                                        simulation.removeEphemera(this.name)
+                                    }
+                                },
+                            })
+                        }
+
                         if (tech.isZeno) {
                             if (tech.isEnergyHealth) {
                                 m.energy *= 0.95
@@ -975,10 +1069,7 @@ const simulation = {
                             while (i--) {
                                 if (who[i].position.y > simulation.fallHeight) {
                                     if (save) {
-                                        Matter.Body.setVelocity(who[i], {
-                                            x: 0,
-                                            y: 0
-                                        });
+                                        Matter.Body.setVelocity(who[i], { x: 0, y: 0 });
                                         Matter.Body.setPosition(who[i], {
                                             x: level.exit.x + 30 * (Math.random() - 0.5),
                                             y: level.exit.y + 30 * (Math.random() - 0.5)
@@ -1016,6 +1107,7 @@ const simulation = {
     clearNow: false,
     clearMap() {
         level.isProcedural = false;
+        level.isEndlessFall = false;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (m.alive) {
             if (tech.isLongitudinal) b.guns[3].waves = []; //empty array of wave bullets
@@ -1190,12 +1282,12 @@ const simulation = {
             }
             requestAnimationFrame(respawnFleas);
         }
-        if (tech.isQuantumEraser) {
+        if (tech.isQuantumEraser && m.alive) {
             let count = 0
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].isDropPowerUp && mob[i].alive) count++
             }
-            count *= 0.17 //to fake the chance, this makes it not random, and maybe less confusing
+            count *= 0.22 //to fake the 20% chance, this makes it not random, and more predictable
             let cycle = () => { //run after waiting a cycle for the map to be cleared
                 const types = ["heal", "ammo", "heal", "ammo", "research", "coupling", "boost", "tech", "gun", "field"]
                 for (let i = 0; i < count; i++) powerUps.spawnDelay(types[Math.floor(Math.random() * types.length)], 1)
@@ -1278,7 +1370,7 @@ const simulation = {
         ctx.textAlign = "center";
         ctx.fillText(`(${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)})`, simulation.mouse.x, simulation.mouse.y - 20);
     },
-    sight: { //credit to Cornbread for adding this algorithm to n-gon
+    sight: { //credit to Cornbread2100 for adding this algorithm to n-gon
         // square: 0,
         intersectMap: [], //this is precalculated in simulation.draw.lineOfSightPrecalculation()
         getIntersection(v1, v1End, domain) {

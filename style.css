@@ -1377,3 +1377,129 @@ summary {
 .link:hover {
     text-decoration: underline;
 }
+
+/* 
+.fade-ins {
+    animation: 1.5s linear 1s fadeins;
+}
+
+@keyframes fadeins {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+} */
+.blurry-text {
+    color: transparent;
+    text-shadow: 0 0 9px rgba(0, 0, 0, 0.5);
+}
+
+.unblur {
+    color: transparent;
+    text-shadow: 0 0 9px rgba(0, 0, 0, 0.5);
+    animation: 1.5s ease 1.2s normal forwards 1 unblur;
+}
+
+@keyframes unblur {
+    0% {
+        color: transparent;
+        text-shadow: 0 0 9px rgba(0, 0, 0, 0.5);
+    }
+
+    100% {
+        /* font-weight: 800; */
+        color: #000;
+        text-shadow: 0 0 0px rgba(0, 0, 0, 0.5);
+    }
+}
+
+.fade-in {
+    opacity: 0;
+    animation: 2s ease 1.5s normal forwards 1 fadein;
+}
+
+.fade-in-fast {
+    opacity: 0;
+    animation: 1.5s ease 1s normal forwards 1 fadein;
+}
+
+.fade-in-faster {
+    opacity: 0;
+    animation: 2s ease 0.5s normal forwards 1 fadein;
+}
+
+@keyframes fadein {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.draw-lines {
+    stroke-dasharray: 20;
+    stroke-dashoffset: 20;
+    animation: dash 2.4s ease-in forwards;
+}
+
+.draw-lines-dash {
+    stroke-dasharray: 4;
+    stroke-dashoffset: 4;
+    animation: dash 2.4s ease-in forwards;
+}
+
+.draw-lines-o {
+    stroke-dasharray: 11;
+    stroke-dashoffset: 11;
+    animation: dash 2.4s ease-in forwards;
+}
+
+.draw-lines-g {
+    stroke-dasharray: 17;
+    stroke-dashoffset: 17;
+    animation: dash 2.4s ease-in forwards;
+}
+
+.draw-lines-box-1 {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: dash 5s ease-in forwards;
+    animation-delay: 0s;
+}
+
+.draw-lines-box-2 {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: dash 2.6s ease-in forwards;
+    animation-delay: 1s;
+}
+
+.draw-lines-box-3 {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: dash 1.15s ease-in forwards;
+    animation-delay: 1.55s;
+}
+
+.draw-lines3 {
+    stroke-dasharray: 3000;
+    stroke-dashoffset: 3000;
+    animation: dash 3.1s ease-in forwards;
+}
+
+.draw-lines4 {
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    animation: dash 2.5s ease-in forwards;
+}
