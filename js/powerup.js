@@ -687,7 +687,7 @@ const powerUps = {
             return `<div></div>`
         } else if (tech.isCancelTech) {
             return `<div class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;">randomize</div>`
-        } else if (level.levelsCleared === 0 && localSettings.isTrainingNotAttempted) { //don't show cancel if on initial level and haven't done tutorial
+        } else if (level.levelsCleared === 0 && localSettings.isTrainingNotAttempted && b.inventory.length === 0) { //don't show cancel if on initial level and haven't done tutorial
             return `<div class='cancel-card'  style="visibility: hidden;"></div>`
         } else {
             return `<div class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 85px;">cancel</div>`
@@ -745,7 +745,7 @@ const powerUps = {
             text += `<span class='cancel-card' style="width: 95px;float: right;background-color: #aaa;color:#888;">cancel</span>`
         } else if (tech.isCancelTech) {
             text += `<span class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;float: right;font-size:0.9em;padding-top:5px">randomize</span>`
-        } else if (level.levelsCleared === 0 && localSettings.isTrainingNotAttempted) {
+        } else if (level.levelsCleared === 0 && localSettings.isTrainingNotAttempted && b.inventory.length === 0) {
             text += `<span class='cancel-card' style="visibility: hidden;">cancel</span>` //don't show cancel if on initial level and haven't done tutorial
         } else {
             text += `<span class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 95px;float: right;">cancel</span>`
@@ -1539,7 +1539,7 @@ const powerUps = {
                 tech.removeTech(index)
             } else {
                 powerUps.ejectTech(index)
-                m.damage(0.06)
+                m.damage(0.04)
             }
             document.getElementById(`${index}-pause-tech`).style.textDecoration = "line-through"
             document.getElementById(`${index}-pause-tech`).style.animation = ""

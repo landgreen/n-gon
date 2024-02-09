@@ -231,6 +231,8 @@ const tech = {
         //         }
         //     }
         // }
+        if (tech.isDamageCooldown) dmg *= m.lastKillCycle + 240 > m.cycle ? 0.5 : 4
+        if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.93
         if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.77
         if (tech.isNoGroundDamage) dmg *= m.onGround ? 0.85 : 2
         if (tech.isDilate) dmg *= 1.5 + 0.6 * Math.sin(m.cycle * 0.0075)
@@ -254,7 +256,6 @@ const tech = {
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.007
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2.11
         if (tech.isSpeedDamage) dmg *= 1 + Math.min(0.88, player.speed * 0.0193)
-        if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.93
         if (tech.isAxion && tech.isHarmMACHO) dmg *= 2 - m.defense()
         if (tech.isHarmDamage && m.lastHarmCycle + 480 > m.cycle) dmg *= 3;
         if (tech.lastHitDamage && m.lastHit) dmg *= 1 + tech.lastHitDamage * m.lastHit * (2 - m.defense()) // if (!simulation.paused) m.lastHit = 0
@@ -366,6 +367,30 @@ const tech = {
         }
     },
     {
+        name: "depolarization",
+        descriptionFunction() {
+            // return `<strong>+300%</strong> <strong class='color-d'>damage</strong> or <strong>-50%</strong> <strong class='color-d'>damage</strong><br>if a mob has <strong>died</strong> in the last <strong>5 seconds</strong>`
+            return `<span style = 'font-size:88%;'><strong>+300%</strong> <strong class='color-d'>damage</strong> if <strong>no</strong> mobs <strong>died</strong> in the last <strong>4 seconds</strong><br><strong>-50%</strong> <strong class='color-d'>damage</strong> if a mob <strong>died</strong> in the last <strong>4 seconds</strong></span>`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        isSkin: true,
+        allowed() {
+            return !m.isAltSkin
+        },
+        requires: "not skinned",
+        effect() {
+            m.skin.polar();
+            tech.isDamageCooldown = true;
+        },
+        remove() {
+            tech.isDamageCooldown = false;
+            if (this.count) m.resetSkin();
+        }
+    },
+    {
         name: "Higgs mechanism",
         description: "<strong>+77%</strong> <strong><em>fire rate</em></strong><br>while <strong>firing</strong> your <strong>position</strong> is fixed",
         maxCount: 1,
@@ -462,7 +487,7 @@ const tech = {
     {
         name: "mass-energy equivalence",
         // description: "<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br>√ of <strong class='color-defense'>defense</strong> <strong>reduction</strong> reduces max <strong class='color-f'>energy</strong>",
-        description: `<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong class='color-defense'>defensive</strong> upgrades <strong>reduced</strong> by <strong>~66%</strong>`,
+        description: `<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong class='color-defense'>defensive</strong> upgrades <strong>reduced</strong> by about <strong>50%</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -535,7 +560,7 @@ const tech = {
         // description: "<strong>charge</strong>, <strong>parity</strong>, and <strong>time</strong> invert to undo <strong class='color-defense'>defense</strong><br><strong class='color-rewind'>rewind</strong> <strong>(1.5—5)</strong> seconds for <strong>(66—220)</strong> <strong class='color-f'>energy</strong>",
         // description: "after losing <strong class='color-h'>health</strong>, if you have <strong>full</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>44</strong> <strong class='color-f'>energy</strong> per second",
         descriptionFunction() {
-            return `after losing <strong class='color-h'>health</strong>, if you have <strong>${(100 * Math.min(100, m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>20</strong> <strong class='color-f'>energy</strong> per second`
+            return `after losing <strong class='color-h'>health</strong>, if you have above <strong>${(85 * Math.min(100, m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>20</strong> <strong class='color-f'>energy</strong> per second`
         },
         maxCount: 1,
         count: 0,
@@ -1344,6 +1369,27 @@ const tech = {
         },
         remove() {
             tech.isShieldAmmo = false;
+        }
+    },
+    {
+        name: "enthalpy",
+        descriptionFunction() {
+            return `after mobs <strong>die</strong><br>they have a <strong>+8%</strong> chance to spawn ${powerUps.orb.heal(1)}`
+        },
+        maxCount: 9,
+        count: 0,
+        frequency: 1000,
+        frequencyDefault: 1000,
+        isHealTech: true,
+        allowed() {
+            return true
+        },
+        requires: "",
+        effect() {
+            tech.healSpawn += 0.08;
+        },
+        remove() {
+            tech.healSpawn = 0;
         }
     },
     {
@@ -3234,27 +3280,6 @@ const tech = {
         }
     },
     {
-        name: "enthalpy",
-        descriptionFunction() {
-            return `doing <strong class='color-d'>damage</strong> has a small chance to spawn ${powerUps.orb.heal(1)}` //<br><strong>–10%</strong> <strong class='color-defense'>defense</strong>
-        },
-        maxCount: 9,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        isHealTech: true,
-        allowed() {
-            return true
-        },
-        requires: "",
-        effect() {
-            tech.healthDrain += 0.023;
-        },
-        remove() {
-            tech.healthDrain = 0;
-        }
-    },
-    {
         name: "maintenance",
         descriptionFunction() {
             return `</strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-h'>healing</strong> <strong class='color-m'>tech</strong><br>spawn ${powerUps.orb.heal(13)}`
@@ -3532,9 +3557,9 @@ const tech = {
     {
         name: "mass production",
         descriptionFunction() {
-            return `<strong class='color-m'>tech</strong> always have <strong>+3</strong> choices to spawn<br>options for &nbsp; ${powerUps.orb.ammo(1)} &nbsp; or &nbsp; ${powerUps.orb.heal(1)} &nbsp; or &nbsp; ${powerUps.orb.research(1)}`
+            return `spawn ${powerUps.orb.ammo(3)}${powerUps.orb.heal(3)} &nbsp;${powerUps.orb.research(2)}<br><strong class='color-m'>tech</strong> have extra choices to spawn ${powerUps.orb.ammo(1)},&nbsp; ${powerUps.orb.heal(1)}, &nbsp;or&nbsp; ${powerUps.orb.research(1)}`
         },
-        // description: `<strong class='color-m'>tech</strong> always have <strong>+3</strong> choices to spawn<br>${powerUps.orb.ammo(8)} ${powerUps.orb.heal(8)} &nbsp;&nbsp; or ${powerUps.orb.research(5)}`,
+        // description: `< strong class='color-m' > tech</strong > always have < strong > +3</strong > choices to spawn < br > ${ powerUps.orb.ammo(8) } ${ powerUps.orb.heal(8) } & nbsp;& nbsp; or ${ powerUps.orb.research(5) } `,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3543,6 +3568,9 @@ const tech = {
         requires: "",
         effect() {
             tech.isMassProduction = true
+            powerUps.spawnDelay("ammo", 4);
+            powerUps.spawnDelay("heal", 4);
+            powerUps.spawnDelay("research", 2);
         },
         remove() {
             tech.isMassProduction = false
@@ -3551,7 +3579,7 @@ const tech = {
     {
         name: "research",
         descriptionFunction() {
-            return `spawn ${this.value > 36 ? this.value + powerUps.orb.research(1) : powerUps.orb.research(this.value)}<br>next time this effect is improved by ${powerUps.orb.research(5)}`
+            return `spawn ${this.value > 36 ? this.value + powerUps.orb.research(1) : powerUps.orb.research(this.value)} <br>next time this effect is improved by ${powerUps.orb.research(5)}`
         },
         maxCount: 9,
         count: 0,
@@ -3610,7 +3638,7 @@ const tech = {
     },
     {
         name: "pseudoscience",
-        description: "<span style = 'font-size:94%;'>when <strong>selecting</strong> a power up, <strong class='color-r'>research</strong> <strong>3</strong> times</span><br>for <strong>free</strong>, but add <strong>1-3%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
+        description: "<span style='font-size:94%;'>when <strong>selecting</strong> a power up, <strong class='color-r'>research</strong> <strong>3</strong> times</span><br>for <strong>free</strong>, but add <strong>1-3%</strong> <strong class='color-junk'>JUNK</strong> to the <strong class='color-m'>tech</strong> pool",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3940,7 +3968,7 @@ const tech = {
         // description: `when <strong>paused</strong> clicking a <strong class='color-m'>tech</strong> <strong>ejects</strong> it<br>with a <strong>20%</strong> chance to remove without <strong>ejecting</strong>`,
         // description: `when <strong>paused</strong> clicking a <strong class='color-m'>tech</strong> <strong>ejects</strong> it<br>and  a <strong>20%</strong> chance to remove without <strong>ejecting</strong>`,
         descriptionFunction() {
-            return `when <strong>paused</strong> clicking a <strong class='color-m'>tech</strong> <strong>ejects</strong> it<br><strong>–6</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} each time and a <strong>3%</strong> chance to fail`
+            return `when <strong>paused</strong> clicking a <strong class='color-m'>tech</strong> <strong>ejects</strong> it<br><strong>–4</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} each time and a <strong>3%</strong> chance to fail`
         },
         maxCount: 1,
         count: 0,
@@ -5246,7 +5274,7 @@ const tech = {
     },
     {
         name: "Zectron",
-        description: `<strong>+75%</strong> <strong>super ball</strong> density and <strong class='color-d'>damage</strong>, but<br>after colliding with <strong>super balls</strong> <strong>-25%</strong> <strong class='color-f'>energy</strong>`,
+        description: `<strong>+90%</strong> <strong>super ball</strong> density and <strong class='color-d'>damage</strong>, but<br>after colliding with <strong>super balls</strong> <strong>-25%</strong> <strong class='color-f'>energy</strong>`,
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -11756,7 +11784,7 @@ const tech = {
     fireRate: null,
     bulletSize: null,
     energySiphon: null,
-    healthDrain: null,
+    healSpawn: null,
     crouchAmmoCount: null,
     bulletsLastLonger: null,
     isImmortal: null,
@@ -12107,5 +12135,6 @@ const tech = {
     isHarpoonFullHealth: null,
     isMobFullHealth: null,
     isMobFullHealthCloak: null,
-    isMobLowHealth: null
+    isMobLowHealth: null,
+    isDamageCooldown: null,
 }

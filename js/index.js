@@ -408,6 +408,7 @@ ${botText}
 ${junkCount ? `<br><strong class='color-junk'>JUNK</strong>: ${(junkCount / totalCount * 100).toFixed(1)}%  ` : ""}
 <br>
 <br>level: ${level.levelsCleared} ${level.levels[level.onLevel]} (${level.difficultyText()})
+<br>mobs: ${spawn.pickList[0]},  ${spawn.pickList[0]}
 <br>seed: ${Math.initialSeed} &nbsp; ${m.cycle} cycles
 <br>mobs: ${mob.length} &nbsp; blocks: ${body.length} &nbsp; bullets: ${bullet.length} &nbsp; power ups: ${powerUp.length} 
 ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}

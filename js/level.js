@@ -11,7 +11,7 @@ const level = {
     // playableLevels: ["pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion", "pavilion"],
     //see level.populateLevels:   (initial, ... , reservoir or factory, reactor, ... , subway, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock"],
-    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo"],
+    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", 'arena'],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
@@ -28,29 +28,30 @@ const level = {
             // tech.tech[297].frequency = 100
             // m.couplingChange(10)
             // m.setField("metamaterial cloaking") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.energy = 0
             // tech.isHookWire = true
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("super balls") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[8].ammo = 100000000
             // requestAnimationFrame(() => { tech.giveTech("Higgs mechanism") });
-            // for (let i = 0; i < 1; ++i) tech.giveTech("martingale")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("paradigm shift")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("bubble fusion")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("optical amplifier")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("depolarization")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("mass production")
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) tech.giveTech("orbital-bot") });
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) b.orbitBot(m.pos, false) });
             // m.skin.hexagon();
 
-
             // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("quenching")
-            // for (let i = 0; i < 3; ++i) tech.giveTech("adiabatic healing")
+            // m.lastKillCycle = m.cycle
+            // for (let i = 0; i < 1; ++i) tech.giveTech("depolarization")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("CPT symmetry")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 100; i++) powerUps.directSpawn(1750, -500, "coupling");
-            // level.testing();
+            // level.arena();
 
             // for (let i = 0; i < 4; ++i) spawn.hopMother(1900, -500)
             // for (let i = 0; i < 4; ++i) spawn.stinger(1900, -500)
@@ -287,8 +288,9 @@ const level = {
             tech.isDeathAvoidedThisLevel = false;
             simulation.updateTechHUD();
             simulation.clearNow = true; //triggers in simulation.clearMap to remove all physics bodies and setup for new map
+
             //pop up new level info screen for a few seconds
-            if (!simulation.isChoosing && m.alive && (level.levels[level.onLevel] === "final" || level.levels[level.onLevel] === "reactor")) { //level.levels[level.onLevel] === "subway" ||
+            if (!localSettings.isHideHUD && !simulation.isChoosing && !simulation.isCheating && m.alive && (level.levels[level.onLevel] === "final" || level.levels[level.onLevel] === "reactor" || level.levels[level.onLevel] === "subway")) {
                 //pause
                 if (!simulation.paused) {
                     simulation.paused = true;
@@ -296,6 +298,7 @@ const level = {
                 }
                 //build level info
                 document.getElementById("choose-grid").style.gridTemplateColumns = "250px"
+                //onclick="level.unPause()"
                 let text = `<div><div class="card-background" style="height:auto; border: none; background-color: transparent; line-height: 160%; background-color: var(--card-color); font-size: 1.15em;"> <div class="card-text">`
                 for (let i = 0; i < level.levels.length; i++) {
                     if (i < level.levelsCleared) {
@@ -322,7 +325,7 @@ const level = {
                 simulation.draw.cons();
                 simulation.draw.body();
                 level.customTopLayer();
-                let count = simulation.testing ? 0 : 240
+                let count = countMax = simulation.testing ? 0 : 180
                 let newLevelDraw = () => {
                     count--
                     if (count > 0) {
@@ -354,7 +357,16 @@ const level = {
                     //     mobs.draw();
                     // } else
                     // if (count < 240) {
+
+                    // ctx.lineDashOffset = 900 * Math.random()
+                    // ctx.setLineDash([3, -8 + 0.5 * count]);
+
+                    const scale = 10
+                    ctx.setLineDash([scale * (countMax - count), scale * count]);
                     simulation.draw.wireFrame();
+                    ctx.setLineDash([]);
+
+
                     // }
                     // else if (count === 91) { //hide text boss
                     //     document.getElementById("choose-grid").style.opacity = "0"
@@ -591,6 +603,7 @@ const level = {
                         document.getElementById("choose-grid").style.visibility = "visible"
                         document.getElementById("choose-training").addEventListener("click", () => {
                             level.unPause()
+                            document.body.style.cursor = "none";
                             simulation.isTraining = true
                             level.levelsCleared--;
                             level.onLevel--
@@ -608,6 +621,7 @@ const level = {
                         });
                         document.getElementById("choose-unPause").addEventListener("click", () => {
                             level.unPause()
+                            document.body.style.cursor = "none";
                             level.nextLevel()
                             //reset hide image style
                             if (localSettings.isHideImages) {
@@ -31119,6 +31133,661 @@ const level = {
         };
         boss.showHealthBar = true;
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
+    },
+    arena() {
+        simulation.makeTextLog(`<strong>arena</strong> by <span class='color-var'>Richard0820</span>`)
+        let isUsingSwordMod = false;
+        for (let i = 0; i < tech.tech.length; i++) {
+            if (tech.tech[i].name === 'size-weight illusion') { //to detect if the player is using the sword mod so that it won't mess up their mod. The sword mod adds this tech so if it is detected then the sword won't be removed from the gun array //Landgreen, don't add a tech with the same name
+                isUsingSwordMod = true;
+            }
+        }
+        if (!isUsingSwordMod) {
+            (function () {
+                const e = {
+                    name: "sword",
+                    descriptionFunction() { return `swing a <b>sword</b> that <b style="color: indigo;">lifesteals</b> <strong class='color-h'>health</strong><br>drains <strong class='color-h'>health</strong> instead of ammunition<br>doesn't use <b>ammo</b>` },
+                    ammo: Infinity,
+                    ammoPack: Infinity,
+                    defaultAmmoPack: Infinity,
+                    have: false,
+                    cycle: 0,
+                    sword: undefined,
+                    bladeSegments: undefined,
+                    bladeTrails: [],
+                    angle: 0,
+                    constraint: undefined,
+                    do() {
+                        if (input.fire && m.fireCDcycle > m.cycle) {
+                            if (tech.isEnergyHealth) {
+                                m.energy -= 0.004;
+                            } else {
+                                m.health -= 0.001;
+                                m.displayHealth();
+                            }
+                        }
+                        if (b.activeGun !== null && input.fire && (tech.isEnergyHealth ? m.energy >= 0.11 : m.health >= 0.11)) {
+                            if (!this.sword && b.guns[b.activeGun].name === 'sword') {
+                                Matter.Body.setMass(player, 1000);
+                                ({ sword: this.sword, bladeSegments: this.bladeSegments } = this.createAndSwingSword());
+                                this.angle = m.angle;
+                            }
+                        }
+                        if (this.sword && !input.fire) {
+                            this.cycle = 0;
+                            Matter.Body.setAngularVelocity(this.sword, 0);
+                            Matter.Body.setMass(player, 5)
+                            Composite.remove(engine.world, this.sword);
+                            this.sword.parts.forEach(part => {
+                                Composite.remove(engine.world, part);
+                                const index = bullet.indexOf(part);
+                                if (index !== -1) {
+                                    bullet.splice(index, 1);
+                                }
+                            });
+                            this.sword = undefined;
+                            if (this.constraint) {
+                                Composite.remove(engine.world, this.constraint);
+                                this.constraint = undefined;
+                            }
+                            this.bladeTrails = [];
+                            m.fireCDcycle = m.cycle + 10;
+                        } else {
+                            if (this.sword && (tech.isEnergyHealth ? m.energy >= 0.11 : m.health >= 0.11)) {
+                                let handle;
+                                for (let i = 0; i < bullet.length; i++) {
+                                    if (bullet[i].customName == "handle") {
+                                        handle = bullet[i];
+                                    }
+                                }
+                                if (!(this.angle > -Math.PI / 2 && this.angle < Math.PI / 2)) {
+                                    Matter.Body.setAngularVelocity(this.sword, -Math.PI * 0.1);
+                                } else {
+                                    Matter.Body.setAngularVelocity(this.sword, Math.PI * 0.1);
+                                }
+                                if (!this.constraint && (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2)) {
+                                    this.constraint = Constraint.create({
+                                        bodyA: player,
+                                        bodyB: this.sword,
+                                        pointB: { x: -9, y: ((handle.position.y - this.sword.position.y)) },
+                                        stiffness: 0.1,
+                                        damping: 0.0001815,
+                                        length: 0,
+
+                                    });
+                                    Composite.add(engine.world, this.constraint);
+                                } else if (!this.constraint) {
+                                    this.constraint = Constraint.create({
+                                        bodyA: player,
+                                        bodyB: this.sword,
+                                        pointB: { x: 9, y: ((handle.position.y - this.sword.position.y)) },
+                                        stiffness: 0.1,
+                                        damping: 0.0001815,
+                                        length: 0,
+                                    });
+                                    Composite.add(engine.world, this.constraint);
+                                }
+                            } else if (this.sword) {
+                                if (tech.isEnergyHealth) {
+                                    m.energy = 0.01;
+                                    m.immuneCycle = m.cycle + 30;
+                                }
+                                this.cycle = 0;
+                                Matter.Body.setAngularVelocity(this.sword, 0);
+                                Matter.Body.setMass(player, 5)
+                                Composite.remove(engine.world, this.sword);
+                                this.sword.parts.forEach(part => {
+                                    Composite.remove(engine.world, part);
+                                    const index = bullet.indexOf(part);
+                                    if (index !== -1) {
+                                        bullet.splice(index, 1);
+                                    }
+                                });
+                                this.sword = undefined;
+                                if (this.constraint) {
+                                    Composite.remove(engine.world, this.constraint);
+                                    this.constraint = undefined;
+                                }
+                                this.bladeTrails = [];
+                                m.fireCDcycle = 0;
+                            }
+                        }
+                        if (this.sword) {
+                            for (let i = 0; i < this.bladeSegments.length; i++) {
+                                const blade = this.bladeSegments[i];
+                                const trail = this.bladeTrails[i] || [];
+                                const vertices = blade.vertices.map(vertex => ({ x: vertex.x, y: vertex.y }));
+                                trail.push(vertices);
+                                if (trail.length > 10) {
+                                    trail.shift();
+                                }
+                                this.bladeTrails[i] = trail;
+                            }
+
+                            for (let i = 0; i < this.bladeTrails.length; i++) {
+                                const trail = this.bladeTrails[i];
+
+                                const alphaStep = 1 / trail.length;
+                                let alpha = 0;
+
+                                for (let j = 0; j < trail.length; j++) {
+                                    const vertices = trail[j];
+                                    ctx.beginPath();
+                                    ctx.moveTo(vertices[0].x, vertices[0].y);
+
+                                    for (let k = 1; k < vertices.length; k++) {
+                                        ctx.lineTo(vertices[k].x, vertices[k].y);
+                                    };
+
+                                    alpha += alphaStep;
+                                    ctx.closePath();
+                                    if (tech.isEnergyHealth) {
+                                        const eyeColor = m.fieldMeterColor;
+                                        const r = eyeColor[1];
+                                        const g = eyeColor[2];
+                                        const b = eyeColor[3];
+                                        const color = `#${r}${r}${g}${g}${b}${b}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+                                        ctx.fillStyle = color;
+                                    } else {
+                                        ctx.fillStyle = `rgba(220, 20, 60, ${alpha})`;
+                                    }
+                                    ctx.fill();
+                                }
+                            }
+                            for (let i = 0; i < this.bladeSegments.length; i++) {
+                                ctx.beginPath();
+                                ctx.lineJoin = "miter";
+                                ctx.miterLimit = 100;
+                                ctx.strokeStyle = tech.isEnergyHealth ? m.fieldMeterColor : tech.isAmmoSword ? "#c0c0c0" : "crimson";
+                                ctx.lineWidth = 5;
+                                ctx.fillStyle = "black";
+                                ctx.moveTo(this.bladeSegments[i].vertices[0].x, this.bladeSegments[i].vertices[0].y);
+                                for (let j = 0; j < this.bladeSegments[i].vertices.length; j++) {
+                                    ctx.lineTo(this.bladeSegments[i].vertices[j].x, this.bladeSegments[i].vertices[j].y)
+                                };
+                                ctx.closePath();
+                                ctx.stroke();
+                                ctx.fill();
+                                ctx.lineJoin = "round";
+                                ctx.miterLimit = 10;
+                            }
+                        }
+                        if (this.sword) {
+                            for (let i = 0; i < mob.length; i++) {
+                                if (Matter.Query.collides(this.sword, [mob[i]]).length > 0) {
+                                    const dmg = m.dmgScale * 6 * Math.sqrt(this.sword.speed);
+                                    if (m.health < 0.9) {
+                                        if (tech.isEnergyHealth) {
+                                            m.energy += 0.04;
+                                        } else {
+                                            m.health += 0.001 * (dmg - mob[i].health);
+                                            m.displayHealth();
+                                        }
+                                    } else {
+                                        if (tech.isEnergyHealth) {
+                                            m.energy += 0.04;
+                                        } else {
+                                            m.health = m.maxHealth;
+                                            m.displayHealth();
+                                        }
+                                    }
+                                    mob[i].damage(dmg, true);
+                                    simulation.drawList.push({
+                                        x: mob[i].position.x,
+                                        y: mob[i].position.y,
+                                        radius: Math.sqrt(dmg / this.sword.speed) * 50,
+                                        color: simulation.mobDmgColor,
+                                        time: simulation.drawTime
+                                    });
+                                    const angle = Math.atan2(mob[i].position.y - this.sword.position.y, mob[i].position.x - this.sword.position.x);
+                                    this.sword.force.x -= Math.cos(angle) * 5;
+                                    this.sword.force.y -= Math.sin(angle) * 5;
+                                    break
+                                }
+                            }
+                        }
+                    },
+                    createAndSwingSword(x = player.position.x, y = player.position.y, angle = m.angle) {
+                        if (this.cycle < m.cycle) {
+                            this.cycle = Infinity;
+                            m.fireCDcycle = Infinity;
+                            const handleWidth = 20;
+                            const handleHeight = 150;
+                            const handle = Bodies.rectangle(x, y, handleWidth, handleHeight, spawn.propsIsNotHoldable);
+                            bullet[bullet.length] = handle;
+                            handle.customName = "handle";
+                            bullet[bullet.length - 1].do = () => { };
+                            const bladeWidth = 100;
+                            const bladeHeight = 20;
+                            const numBlades = 15;
+                            const extensionFactor = 5;
+                            const bladeSegments = [];
+                            if ((angle > -Math.PI / 2 && angle < Math.PI / 2)) {
+                                for (let i = 0; i < numBlades; i++) {
+                                    const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
+                                    const bladeX = x + i * (bladeWidth / 20);
+                                    const bladeY = y - handleHeight / 2 - i * (bladeHeight / 4.5) * extensionFactor;
+
+                                    const vertices = [
+                                        { x: bladeX, y: bladeY - bladeHeight / 2 },
+                                        { x: bladeX + bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                                        { x: bladeX - bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                                        { x: bladeX, y: bladeY - bladeHeight / 2 + 10 },
+                                    ];
+
+                                    const blade = Bodies.fromVertices(bladeX, bladeY, vertices, spawn.propsIsNotHoldable);
+                                    bullet[bullet.length] = blade;
+                                    bullet[bullet.length - 1].do = () => { };
+                                    Matter.Body.rotate(blade, -Math.sin(i * (Math.PI / 270) * 15));
+                                    bladeSegments.push(blade);
+                                }
+                            } else {
+                                for (let i = 0; i < numBlades; i++) {
+                                    const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
+                                    const mirroredBladeX = x - i * (bladeWidth / 20);
+                                    const mirroredBladeY = y - handleHeight / 2 - i * (bladeHeight / 4.5) * extensionFactor;
+                                    const mirroredVertices = [
+                                        { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 },
+                                        { x: mirroredBladeX + bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
+                                        { x: mirroredBladeX - bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
+                                        { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 + 10 },
+                                    ];
+                                    const mirroredBlade = Bodies.fromVertices(mirroredBladeX, mirroredBladeY, mirroredVertices, spawn.propsIsNotHoldable);
+                                    bullet[bullet.length] = mirroredBlade;
+                                    bullet[bullet.length - 1].do = () => { };
+                                    Matter.Body.rotate(mirroredBlade, Math.sin(i * (Math.PI / 270) * 15));
+                                    bladeSegments.push(mirroredBlade);
+                                }
+                            }
+                            const sword = Body.create({
+                                parts: [handle, ...bladeSegments],
+                            });
+
+                            Composite.add(engine.world, sword);
+                            Matter.Body.setPosition(sword, { x, y });
+
+                            sword.collisionFilter.category = cat.bullet;
+                            sword.collisionFilter.mask = cat.mobBullet | cat.mob;
+                            Body.scale(sword, -1, 1, { x, y });
+                            // sword.frictionAir -= 0.01;
+
+                            return { sword, bladeSegments };
+                        }
+                    },
+                    fire() { }
+                };
+                b.guns.push(e);
+                const gunArray = b.guns.filter(
+                    (obj, index, self) =>
+                        index === self.findIndex((item) => item.name === obj.name)
+                );
+                b.guns = gunArray;
+            })();
+        }
+        simulation.makeTextLog(`<strong>arena</strong> by <span class='color-var'>Richard0820</span>`);
+        let index = 0;
+        let index2 = 0;
+        let { sword: sword, bladeSegments: bladeSegments } = createSword();
+        const door = level.door(-950, -3000, 400, 4000, 2000, 10);
+        const door2 = level.door(550, -3000, 400, 4000, 2000, 10);
+        level.setPosToSpawn(-7900, -2550); //normal spawn
+        level.exit.x = 7875;
+        level.exit.y = -2530;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
+        level.defaultZoom = 8000
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#987654";
+        color.map = "#765432" //custom map color
+        color.block = "#876543";
+        door.isClosing = true;
+        door2.isClosing = true;
+        spawnStuff(1000, -3100, 4450, 3125, 50 / simulation.difficultyMode);
+        spawnStuff(5400, -2425, 200, 2250, 5 / simulation.difficultyMode);
+        spawnStuff(5625, -2425, 2000, 275, 5 / simulation.difficultyMode);
+        spawnStuff(5625, -2125, 850, 1125, 5 / simulation.difficultyMode);
+        spawnStuff(6500, -2150, 475, 650, 5 / simulation.difficultyMode);
+        spawnStuff(7000, -2125, 325, 275, 5 / simulation.difficultyMode);
+        spawnStuff(5650, -950, 300, 450, 5 / simulation.difficultyMode);
+        spawn.randomLevelBoss(4225, -575);
+        for (let i = 0; i < 5; i++) {
+            powerUps.spawn(-6075, -2000, "heal");
+        }
+        let bladeTrails = [];
+        let isOwned = false;
+        class Particle {
+            constructor() {
+                this.x = player.position.x + Math.random() * 10000 - 5000;
+                this.y = player.position.y + Math.random() * 10000 - 5000;
+                this.vx = 0;
+                this.vy = 0;
+                this.accelX = 0;
+                this.accelY = 0;
+                this.life = 2000;
+                this.alpha = 1;
+                this.size = 8;
+            }
+
+            update() {
+                this.vx += this.accelX;
+                this.vy += this.accelY;
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < player.position.x - 5000 || this.x > player.position.x + 5000 ||
+                    this.y < player.position.y - 5000 || this.y > player.position.y + 5000) {
+                    this.reset();
+                }
+            }
+
+            reset() {
+                this.x = player.position.x + Math.random() * 10000 - 5000;
+                this.y = player.position.y + Math.random() * 10000 - 5000;
+                this.vx = 0;
+                this.vy = 0;
+                this.life = Math.random() * 1000 + 1000;
+                this.maxLife = this.life;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            isAlive() {
+                return this.life >= 0;
+            }
+        }
+        class ParticleSystem {
+            constructor() {
+                this.particles = [];
+                this.updateHandler = undefined;
+            }
+
+            addParticle(particle) {
+                this.particles.push(particle);
+            }
+
+            update(deltaTime = 0) {
+                this.particles.forEach(particle => {
+                    particle.update(deltaTime);
+                    this.updateHandler && this.updateHandler(particle);
+                });
+            }
+
+            onUpdate(fn) {
+                this.updateHandler = fn;
+            }
+        }
+        let system = new ParticleSystem();
+        for (let i = 0; i < 200; i++) {
+            let particle = new Particle();
+            system.addParticle(particle);
+        }
+        system.onUpdate((particle) => {
+            if (!particle.isAlive()) {
+                particle.reset();
+            }
+
+            particle.life -= 10;
+            particle.accelX = (Math.random() - 0.5) * 0.02;
+            particle.accelY = (Math.random() - 0.5) * 0.02;
+
+            if (particle.life >= particle.maxLife / 2) {
+                particle.alpha = 1 - (particle.life / particle.maxLife);
+            } else {
+                particle.alpha = particle.life / particle.maxLife;
+            }
+
+            particle.update();
+        });
+        function update() {
+            system.update();
+        }
+        function draw() {
+            system.particles.forEach(particle => particle.draw(ctx));
+        }
+        level.custom = () => {
+            update();
+            draw();
+            for (let i = 0, len = b.guns.length; i < len; i++) {
+                if (b.guns[i].name === "sword" && b.guns[i].have) {
+                    isOwned = true;
+                }
+            }
+            Matter.Body.setPosition(sword, { x: -3950, y: -275 - (Math.sin(simulation.cycle / 100) * 50) });
+            Matter.Body.setAngularVelocity(sword, 0);
+            door.openClose();
+            door2.openClose();
+            if (Matter.Collision.collides(sword, player) && index <= 0 || isOwned) {
+                bladeTrails = [];
+                bladeSegments = [];
+                Composite.remove(engine.world, sword);
+                sword.parts.forEach(part => {
+                    Composite.remove(engine.world, part);
+                    const index = bullet.indexOf(part);
+                    if (index !== -1) {
+                        bullet.splice(index, 1);
+                    }
+                });
+                b.giveGuns("sword");
+                door.isClosing = false;
+                door2.isClosing = false;
+                index++;
+            }
+
+            level.exit.drawAndCheck();
+
+            level.enter.draw();
+            if (tech.isEnergyHealth) {
+                ctx.beginPath();
+                const gradient = ctx.createRadialGradient(-3950, 0, 5, -3950, 0, 350 + Math.sin(simulation.cycle * 0.15) * 0.1);
+                gradient.addColorStop(0, m.fieldMeterColor);
+                gradient.addColorStop(0.9, "transparent");
+                // gradient.addColorStop(1, "darkgray");
+                ctx.fillStyle = gradient;
+                ctx.strokeStyle = "transparent";
+                ctx.fillRect(-4000, -350, 100, 350);
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                const gradient = ctx.createLinearGradient(-3500, 0, -3500, -350 + Math.sin(simulation.cycle * 0.15) * 0.1);
+                gradient.addColorStop(0, "crimson");
+                gradient.addColorStop(0.9, "transparent");
+                // gradient.addColorStop(1, "darkgray");
+                ctx.fillStyle = gradient;
+                ctx.strokeStyle = "transparent";
+                ctx.fillRect(-4000, -350, 100, 350);
+                ctx.fill();
+                ctx.stroke();
+            }
+            if (player.position.x > -4000 && player.position.x < -3900 && player.position.y > -350 && player.position.y < 0) {
+                player.force.y -= 0.03;
+            }
+
+            if (player.position.x > level.exit.x && player.position.x < level.exit.x + 100 && player.position.y > level.exit.y - 150 && player.position.y < level.exit.y - 0 && player.velocity.y < .15 && index2 == 0 && !isUsingSwordMod) {
+                b.removeGun("sword"); //completely removing the stuff (if you leave properly through the door)
+                for (let i = 0, len = b.guns.length; i < len; i++) {
+                    if (b.guns[i].name === "sword") {
+                        b.guns.splice(i, 1);
+                        break;
+                    }
+                }
+                index2++;
+                simulation.makeTextLog(`If you want to keep this sword, visit <a href="https://github.com/Whyisthisnotavalable/n-scythe">https://github.com/Whyisthisnotavalable/n-scythe</a>. The sword is there.`)
+            }
+            for (let i = 0; i < bladeSegments.length; i++) {
+                const blade = bladeSegments[i];
+                const trail = bladeTrails[i] || [];
+                const vertices = blade.vertices.map(vertex => ({ x: vertex.x, y: vertex.y }));
+                trail.push(vertices);
+                if (trail.length > 10) {
+                    trail.shift();
+                }
+                bladeTrails[i] = trail;
+            }
+
+            for (let i = 0; i < bladeTrails.length; i++) {
+                const trail = bladeTrails[i];
+
+                const alphaStep = 1 / trail.length;
+                let alpha = 0;
+
+                for (let j = 0; j < trail.length; j++) {
+                    const vertices = trail[j];
+                    ctx.beginPath();
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+
+                    for (let k = 1; k < vertices.length; k++) {
+                        ctx.lineTo(vertices[k].x, vertices[k].y);
+                    };
+
+                    alpha += alphaStep;
+                    ctx.closePath();
+                    if (tech.isEnergyHealth) {
+                        const eyeColor = m.fieldMeterColor;
+                        const r = eyeColor[1];
+                        const g = eyeColor[2];
+                        const b = eyeColor[3];
+                        const color = `#${r}${r}${g}${g}${b}${b}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+                        ctx.fillStyle = color;
+                    } else {
+                        ctx.fillStyle = `rgba(220, 20, 60, ${alpha})`;
+                    }
+                    ctx.fill();
+                }
+            }
+            for (let i = 0; i < bladeSegments.length; i++) {
+                ctx.beginPath();
+                ctx.lineJoin = "miter";
+                ctx.miterLimit = 100;
+                ctx.strokeStyle = tech.isEnergyHealth ? m.fieldMeterColor : tech.isAmmoSword ? "#c0c0c0" : "crimson";
+                ctx.lineWidth = 5;
+                ctx.fillStyle = "black";
+                ctx.moveTo(bladeSegments[i].vertices[0].x, bladeSegments[i].vertices[0].y);
+                for (let j = 0; j < bladeSegments[i].vertices.length; j++) {
+                    ctx.lineTo(bladeSegments[i].vertices[j].x, bladeSegments[i].vertices[j].y)
+                };
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill();
+                ctx.lineJoin = "round";
+                ctx.miterLimit = 10;
+            }
+            if (bladeSegments.length) {
+                ctx.beginPath();
+                ctx.lineJoin = "miter";
+                ctx.miterLimit = 100;
+                ctx.strokeStyle = tech.isEnergyHealth ? m.fieldMeterColor : tech.isAmmoSword ? "#c0c0c0" : "crimson";
+                ctx.lineWidth = 5;
+                ctx.fillStyle = "black";
+                ctx.moveTo(sword.parts[1].vertices[0].x, sword.parts[1].vertices[0].y);
+                for (let j = 0; j < sword.parts[1].vertices.length; j++) {
+                    ctx.lineTo(sword.parts[1].vertices[j].x, sword.parts[1].vertices[j].y)
+                };
+                ctx.closePath();
+                ctx.fill();
+                ctx.lineJoin = "round";
+                ctx.miterLimit = 10;
+            }
+        };
+        level.customTopLayer = () => { };
+
+        spawn.mapRect(-10000, 0, 20000, 2000);
+        spawn.mapRect(-10000, -10000, 2000, 10000);
+        spawn.mapRect(8000, -10000, 2000, 10000);
+        spawn.mapRect(-10000, -10000, 20000, 2000);
+        spawn.spawnStairs(8000, 0, 15, 2500, 2500, true);
+        spawn.spawnStairs(-8000, 0, 15, 2500, 2500, false);
+
+        spawn.mapRect(-4000, -10, 100, 20);
+        spawn.mapRect(4000, -10, 100, 20);
+
+        spawn.mapRect(-1000, -10000, 2000, 8000);
+        spawn.mapRect(-500, -10000, 1000, 9700);
+        function createSword(x = 0, y = 0, angle = 0) { //sword asthetic
+            const handleWidth = 20;
+            const handleHeight = 150;
+            const handle = Bodies.rectangle(x, y, handleWidth, handleHeight, spawn.propsIsNotHoldable);
+            bullet[bullet.length] = handle;
+            handle.customName = "handle";
+            bullet[bullet.length - 1].do = () => { };
+            const bladeWidth = 100;
+            const bladeHeight = 20;
+            const numBlades = 15;
+            const extensionFactor = 5;
+            const bladeSegments = [];
+            if ((angle > -Math.PI / 2 && angle < Math.PI / 2)) {
+                for (let i = 0; i < numBlades; i++) {
+                    const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
+                    const bladeX = x + i * (bladeWidth / 20);
+                    const bladeY = y - handleHeight / 2 - i * (bladeHeight / 4.5) * extensionFactor;
+
+                    const vertices = [
+                        { x: bladeX, y: bladeY - bladeHeight / 2 },
+                        { x: bladeX + bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                        { x: bladeX - bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                        { x: bladeX, y: bladeY - bladeHeight / 2 + 10 },
+                    ];
+
+                    const blade = Bodies.fromVertices(bladeX, bladeY, vertices, spawn.propsIsNotHoldable);
+                    bullet[bullet.length] = blade;
+                    bullet[bullet.length - 1].do = () => { };
+                    Matter.Body.rotate(blade, -Math.sin(i * (Math.PI / 270) * 15));
+                    bladeSegments.push(blade);
+                }
+            } else {
+                for (let i = 0; i < numBlades; i++) {
+                    const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
+                    const mirroredBladeX = x - i * (bladeWidth / 20);
+                    const mirroredBladeY = y - handleHeight / 2 - i * (bladeHeight / 4.5) * extensionFactor;
+                    const mirroredVertices = [
+                        { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 },
+                        { x: mirroredBladeX + bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
+                        { x: mirroredBladeX - bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
+                        { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 + 10 },
+                    ];
+                    const mirroredBlade = Bodies.fromVertices(mirroredBladeX, mirroredBladeY, mirroredVertices, spawn.propsIsNotHoldable);
+                    bullet[bullet.length] = mirroredBlade;
+                    bullet[bullet.length - 1].do = () => { };
+                    Matter.Body.rotate(mirroredBlade, Math.sin(i * (Math.PI / 270) * 15));
+                    bladeSegments.push(mirroredBlade);
+                }
+            }
+            const sword = Body.create({
+                parts: [handle, ...bladeSegments],
+            });
+
+            Composite.add(engine.world, sword);
+            Matter.Body.setPosition(sword, { x, y });
+
+            sword.collisionFilter.category = cat.bullet;
+            sword.collisionFilter.mask = cat.bullet;
+            Body.scale(sword, -1, 1, { x, y });
+            Body.rotate(sword, Math.PI / 1.05)
+            sword.frictionAir = -0.01;
+
+            return { sword, bladeSegments };
+        }
+        function spawnStuff(x, y, width, height, num) {
+            for (let i = 0; i < num; i++) {
+                randomMob(x + width * Math.random(), y + height * Math.random(), Infinity)
+            }
+        }
+        function randomMob(x, y, chance = 1) {
+            if (spawn.spawnChance(chance) || chance === Infinity) {
+                const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
+                spawn[pick](x, y);
+            }
+            if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
+                const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
+                spawn[pick](x, y);
+            }
+        }
     },
     // ********************************************************************************************************
     // ********************************************************************************************************

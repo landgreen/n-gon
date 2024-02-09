@@ -1394,19 +1394,19 @@ summary {
 } */
 .blurry-text {
     color: transparent;
-    text-shadow: 0 0 9px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
 }
 
 .unblur {
     color: transparent;
-    text-shadow: 0 0 9px rgba(0, 0, 0, 0.5);
-    animation: 1.5s ease 1.2s normal forwards 1 unblur;
+    text-shadow: 0 0 7px rgba(0, 0, 0, 0.5);
+    animation: 2.5s ease 0.5s normal forwards 1 unblur;
 }
 
 @keyframes unblur {
     0% {
         color: transparent;
-        text-shadow: 0 0 9px rgba(0, 0, 0, 0.5);
+        text-shadow: 0 0 7px rgba(0, 0, 0, 0.5);
     }
 
     100% {

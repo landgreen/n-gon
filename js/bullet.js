@@ -3545,7 +3545,7 @@ const b = {
                 } else {
                     if (tech.isIncendiary && simulation.cycle + this.deathCycles < this.endCycle && !tech.isForeverDrones) {
                         const max = Math.max(Math.min(this.endCycle - simulation.cycle - this.deathCycles, 1500), 0)
-                        b.explosion(this.position, max * 0.1 + this.isImproved * 110 + 60 * Math.random()); //makes bullet do explosive damage at end
+                        b.explosion(this.position, max * 0.14 + this.isImproved * 110 + 60 * Math.random()); //makes bullet do explosive damage at end
                         if (tech.isForeverDrones) {
                             this.endCycle = 0
                             b.drone({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
@@ -4028,7 +4028,7 @@ const b = {
         bullet[me] = Bodies.polygon(where.x, where.y, 12, radius, b.fireAttributes(dir, false));
         Composite.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
-        bullet[me].calcDensity = function () { return 0.0007 + 0.00055 * tech.isSuperHarm + 0.0004 * tech.isBulletTeleport }
+        bullet[me].calcDensity = function () { return 0.0007 + 0.00065 * tech.isSuperHarm + 0.0004 * tech.isBulletTeleport }
         Matter.Body.setDensity(bullet[me], bullet[me].calcDensity());
         bullet[me].endCycle = simulation.cycle + Math.floor(270 + 90 * Math.random());
         bullet[me].minDmgSpeed = 0;
@@ -4041,7 +4041,7 @@ const b = {
                 this.force.y += this.mass * 0.001;
                 if (Matter.Query.collides(this, [player]).length) {
                     this.endCycle = 0
-                    m.energy -= m.energy * 0.25
+                    m.energy -= m.energy * 0.2
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,
                         y: this.position.y,
@@ -6583,7 +6583,7 @@ const b = {
                         if (tech.isIncendiary) {
                             bullet[me].endCycle = simulation.cycle + 60
                             bullet[me].onEnd = function () {
-                                b.explosion(this.position, 360 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
+                                b.explosion(this.position, 400 + (Math.random() - 0.5) * 60); //makes bullet do explosive damage at end
                             }
                             bullet[me].beforeDmg = function () {
                                 this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -6642,7 +6642,7 @@ const b = {
                                 y: speed * Math.sin(dirOff)
                             });
                             bullet[me].onEnd = function () {
-                                b.explosion(this.position, 150 * (tech.isShotgunReversed ? 1.4 : 1) + (Math.random() - 0.5) * 30); //makes bullet do explosive damage at end
+                                b.explosion(this.position, 180 * (tech.isShotgunReversed ? 1.4 : 1) + (Math.random() - 0.5) * 30); //makes bullet do explosive damage at end
                             }
                             bullet[me].beforeDmg = function () {
                                 this.endCycle = 0; //bullet ends cycle after hitting a mob and triggers explosion
@@ -8164,10 +8164,11 @@ const b = {
                 if (tech.isStuckOn) {
                     if (this.isStuckOn) {
                         if (!input.fire) this.fire();
-                        if (m.energy < tech.laserDrain) this.isStuckOn = false
+                        if (m.energy < tech.laserDrain + 0.06) this.isStuckOn = false
                     } else if (input.fire) {
                         this.isStuckOn = true
                     }
+                    // console.log(this.isStuckOn)
                 }
             },
             do() { },

@@ -563,7 +563,6 @@ const m = {
         if (tech.isHarmMACHO) dmg *= 0.4
         if (tech.isImmortal) dmg *= 0.7
         if (tech.energyRegen === 0) dmg *= 0.34
-        // if (tech.healthDrain) dmg *= 1 + 3.33 * tech.healthDrain //tech.healthDrain = 0.03 at one stack //cause more damage
         if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.973 ** m.coupling
         if (tech.isLowHealthDefense) dmg *= 1 - Math.max(0, 1 - m.health) * 0.8
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.26
@@ -577,11 +576,7 @@ const m = {
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.27
         if (tech.isTurret && m.crouch) dmg *= 0.34;
         if (tech.isFirstDer && b.inventory[0] === b.activeGun) dmg *= 0.85 ** b.inventory.length
-        if (tech.isEnergyHealth) {
-            return Math.pow(dmg, 0.33) //defense has less effect
-        } else {
-            return dmg
-        }
+        return tech.isEnergyHealth ? Math.pow(dmg, 0.5) : dmg //defense has less effect
     },
     rewind(steps) { // m.rewind(Math.floor(Math.min(599, 137 * m.energy)))
         if (tech.isRewindGrenade) {
@@ -1068,6 +1063,111 @@ const m = {
                 ctx.lineWidth = 1;
                 // ctx.strokeStyle = "#333"
                 ctx.stroke();
+                ctx.restore();
+            }
+        },
+        polar() {
+            m.isAltSkin = true
+            m.color = {
+                hue: 0,
+                sat: 0,
+                light: 100,
+            }
+            // m.setFillColors();
+            m.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
+            m.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 35}%)`
+            let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+            grd.addColorStop(0, m.fillColorDark);
+            grd.addColorStop(0.7, m.fillColor);
+            // grd.addColorStop(1, m.fillColor);
+            m.bodyGradient = grd
+
+            m.draw = function () {
+                ctx.fillStyle = m.fillColor;
+                m.walk_cycle += m.flipLegs * m.Vx;
+                ctx.save();
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
+                ctx.translate(m.pos.x, m.pos.y);
+                m.calcLeg(Math.PI, -3);
+
+
+                const diff = (m.lastKillCycle - m.cycle + 240) / 240
+                const color = diff < 0 ? "#fff" : "#aaa"
+                const hue = 220 + 20 * Math.sin(0.01 * m.cycle)
+                const colorInverse = diff < 0 ? `hsl(${hue}, 80%, 40%)` : "#fff"
+                // const colorInverseFade = diff < 0 ? "#ccc" : "#fff"
+                m.drawLeg(color, colorInverse);
+                m.calcLeg(0, 0);
+                m.drawLeg(color, colorInverse);
+
+                ctx.rotate(m.angle);
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                ctx.fillStyle = color
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(15, 0)
+                ctx.lineTo(28, 0)
+                // ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                ctx.strokeStyle = colorInverse;
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.restore();
+
+
+                // const scale = diff>0.3 
+                // console.log(diff.toFixed(3), scale.toFixed(3))
+                ctx.beginPath();
+                ctx.ellipse(m.pos.x, m.pos.y, 24, 18, 3.14 * Math.random(), 0, 2 * Math.PI)
+                // `rgba(0,0,${100 + 30 * Math.sin(0.1 * m.cycle)},0.8)`
+                ctx.fillStyle = diff < 0 ? `hsl(${hue}, 80%, 40%)` : `rgba(255,255,255,${Math.min(Math.max(0, diff + 0.3), 1)})`
+                // ctx.fillStyle = colorInverse
+                // ctx.fillStyle = `rgba(0,0,0,${scale})`
+                ctx.fill();
+
+                m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                powerUps.boost.draw()
+            }
+            m.drawLeg = function (stroke, circles) {
+                // if (simulation.mouseInGame.x > m.pos.x) {
+                if (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2) {
+                    m.flipLegs = 1;
+                } else {
+                    m.flipLegs = -1;
+                }
+                ctx.save();
+                ctx.scale(m.flipLegs, 1); //leg lines
+                ctx.beginPath();
+                ctx.moveTo(m.hip.x, m.hip.y);
+                ctx.lineTo(m.knee.x, m.knee.y);
+                ctx.lineTo(m.foot.x, m.foot.y);
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = 6;
+                ctx.stroke();
+
+                //toe lines
+                ctx.beginPath();
+                ctx.moveTo(m.foot.x, m.foot.y);
+                ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
+                ctx.moveTo(m.foot.x, m.foot.y);
+                ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                //hip joint
+                ctx.beginPath();
+                ctx.arc(m.hip.x, m.hip.y, 11, 0, 2 * Math.PI);
+                //knee joint
+                ctx.moveTo(m.knee.x + 5, m.knee.y);
+                ctx.arc(m.knee.x, m.knee.y, 5, 0, 2 * Math.PI);
+                //foot joint
+                ctx.moveTo(m.foot.x + 5, m.foot.y);
+                ctx.arc(m.foot.x, m.foot.y, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = circles;
+                ctx.fill();
+                // ctx.lineWidth = 2;
+                // ctx.stroke();
                 ctx.restore();
             }
         },
@@ -1579,9 +1679,9 @@ const m = {
             // m.setFillColors();
             m.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
             m.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 35}%)`
-            let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+            let grd = ctx.createLinearGradient(-20, 0, 15, 0);
             grd.addColorStop(0, m.fillColorDark);
-            grd.addColorStop(0.7, m.fillColor);
+            grd.addColorStop(1, m.fillColor);
             // grd.addColorStop(1, m.fillColor);
             m.bodyGradient = grd
 
@@ -1595,10 +1695,11 @@ const m = {
                 m.drawLeg("#eee");
                 m.calcLeg(0, 0);
                 m.drawLeg("#fff");
-                ctx.rotate(0.017 * simulation.cycle);
+
+                ctx.rotate(0.024 * simulation.cycle);
                 ctx.beginPath();
                 ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                ctx.fillStyle = m.bodyGradient
+                ctx.fillStyle = m.energy > 0.85 * Math.min(1, m.maxEnergy) ? m.bodyGradient : "#fff"
                 ctx.fill();
                 ctx.restore();
 
@@ -3654,74 +3755,75 @@ const m = {
                         m.drawHold(m.holdingTarget);
                         m.holding();
                         m.throwBlock();
-                    } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+                    } else if (input.field) { //not hold but field button is pressed
                         if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                         m.grabPowerUp();
                         m.lookForPickUp();
+                        if (m.fieldCDcycle < m.cycle) {
+                            //field is active
+                            if (!m.plasmaBall.isAttached) { //return ball to player
+                                if (m.plasmaBall.isOn) {
+                                    m.plasmaBall.isPopping = true
+                                } else {
+                                    m.plasmaBall.isAttached = true
+                                    m.plasmaBall.isOn = true
+                                    m.plasmaBall.isPopping = false
+                                    m.plasmaBall.alpha = 0.7
+                                    m.plasmaBall.setPositionToNose()
+                                    // m.plasmaBall.reset()
 
-                        //field is active
-                        if (!m.plasmaBall.isAttached) { //return ball to player
-                            if (m.plasmaBall.isOn) {
-                                m.plasmaBall.isPopping = true
-                            } else {
-                                m.plasmaBall.isAttached = true
-                                m.plasmaBall.isOn = true
-                                m.plasmaBall.isPopping = false
-                                m.plasmaBall.alpha = 0.7
+                                }
+                                // const scale = 0.7
+                                // Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
+                                // if (m.plasmaBall.circleRadius < m.plasmaBall.radiusLimit) {
+                                // m.plasmaBall.isAttached = true
+                                // m.plasmaBall.isOn = true
+                                // m.plasmaBall.setPositionToNose()
+                                // }
+                            } else if (m.energy > m.plasmaBall.drain) { //charge up when attached
+                                if (tech.isCapacitor) {
+                                    m.energy -= m.plasmaBall.drain * 2;
+                                    const scale = 1 + 48 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+                                    Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+                                } else {
+                                    m.energy -= m.plasmaBall.drain;
+                                    const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+                                    Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
+                                }
+                                if (m.energy > m.maxEnergy) {
+                                    m.energy -= m.plasmaBall.drain * 2;
+                                    const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+                                    Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
+                                }
                                 m.plasmaBall.setPositionToNose()
-                                // m.plasmaBall.reset()
 
-                            }
-                            // const scale = 0.7
-                            // Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
-                            // if (m.plasmaBall.circleRadius < m.plasmaBall.radiusLimit) {
-                            // m.plasmaBall.isAttached = true
-                            // m.plasmaBall.isOn = true
-                            // m.plasmaBall.setPositionToNose()
-                            // }
-                        } else if (m.energy > m.plasmaBall.drain) { //charge up when attached
-                            if (tech.isCapacitor) {
-                                m.energy -= m.plasmaBall.drain * 2;
-                                const scale = 1 + 48 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
-                                Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+                                //add friction for player when holding ball, more friction in vertical
+                                // const floatScale = Math.sqrt(m.plasmaBall.circleRadius)
+                                // const friction = 0.0002 * floatScale
+                                // const slowY = (player.velocity.y > 0) ? Math.max(0.8, 1 - friction * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - friction * Math.abs(player.velocity.y)) //down : up
+                                // Matter.Body.setVelocity(player, {
+                                //     x: Math.max(0.95, 1 - friction * Math.abs(player.velocity.x)) * player.velocity.x,
+                                //     y: slowY * player.velocity.y
+                                // });
+
+                                // if (player.velocity.y > 7) player.force.y -= 0.95 * player.mass * simulation.g //less gravity when falling fast
+                                // player.force.y -= Math.min(0.95, 0.05 * floatScale) * player.mass * simulation.g; //undo some gravity on up or down
+
+                                //float
+                                const slowY = (player.velocity.y > 0) ? Math.max(0.8, 1 - 0.002 * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - 0.001 * Math.abs(player.velocity.y)) //down : up
+                                Matter.Body.setVelocity(player, {
+                                    x: Math.max(0.95, 1 - 0.003 * Math.abs(player.velocity.x)) * player.velocity.x,
+                                    y: slowY * player.velocity.y
+                                });
+                                if (player.velocity.y > 5) {
+                                    player.force.y -= 0.9 * player.mass * simulation.g //less gravity when falling fast
+                                } else {
+                                    player.force.y -= 0.5 * player.mass * simulation.g;
+                                }
                             } else {
-                                m.energy -= m.plasmaBall.drain;
-                                const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
-                                Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
+                                m.fieldCDcycle = m.cycle + 90;
+                                m.plasmaBall.fire()
                             }
-                            if (m.energy > m.maxEnergy) {
-                                m.energy -= m.plasmaBall.drain * 2;
-                                const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
-                                Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
-                            }
-                            m.plasmaBall.setPositionToNose()
-
-                            //add friction for player when holding ball, more friction in vertical
-                            // const floatScale = Math.sqrt(m.plasmaBall.circleRadius)
-                            // const friction = 0.0002 * floatScale
-                            // const slowY = (player.velocity.y > 0) ? Math.max(0.8, 1 - friction * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - friction * Math.abs(player.velocity.y)) //down : up
-                            // Matter.Body.setVelocity(player, {
-                            //     x: Math.max(0.95, 1 - friction * Math.abs(player.velocity.x)) * player.velocity.x,
-                            //     y: slowY * player.velocity.y
-                            // });
-
-                            // if (player.velocity.y > 7) player.force.y -= 0.95 * player.mass * simulation.g //less gravity when falling fast
-                            // player.force.y -= Math.min(0.95, 0.05 * floatScale) * player.mass * simulation.g; //undo some gravity on up or down
-
-                            //float
-                            const slowY = (player.velocity.y > 0) ? Math.max(0.8, 1 - 0.002 * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - 0.001 * Math.abs(player.velocity.y)) //down : up
-                            Matter.Body.setVelocity(player, {
-                                x: Math.max(0.95, 1 - 0.003 * Math.abs(player.velocity.x)) * player.velocity.x,
-                                y: slowY * player.velocity.y
-                            });
-                            if (player.velocity.y > 5) {
-                                player.force.y -= 0.9 * player.mass * simulation.g //less gravity when falling fast
-                            } else {
-                                player.force.y -= 0.5 * player.mass * simulation.g;
-                            }
-                        } else {
-                            m.fieldCDcycle = m.cycle + 90;
-                            m.plasmaBall.fire()
                         }
                     } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                         m.pickUp();
@@ -4204,6 +4306,7 @@ const m = {
                         }
                     }
                 }
+
                 if (m.isCloak) {
                     m.fieldRange = m.fieldRange * 0.85 + 130
                     m.fieldDrawRadius = m.fieldRange * 1.1 //* 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));

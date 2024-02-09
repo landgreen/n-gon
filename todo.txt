@@ -1,17 +1,40 @@
 ******************************************************** NEXT PATCH **************************************************
 
-after beating the final boss the difficulty settings automatically opens
-quenching - double the damage and double the max health given
-  aligned the effects more consistently with defense and difficulty based heal reduction
-  prevented possible death by quenching
+community map - arena by Richard0820
+ 
+skin tech: depolarization - gain +300 damage or -50% damage if a mobs has died in last 5 seconds
+CPT triggers if you have above 90->85 energy
+  CPT skin graphically indicates when CPT is active
+mass-energy defense reduction is 66->50%
 
-fixed super balls bug
+new level load display animation draws the outline of the new map
+  only on reactor and final levels
+  choose MINIMAL HUD in settings to disable (or enter testing mode)
+enthalpy spawns heals on mobs death with a 5% chance
+  this is roughly an 80% increase in spawn rate
+mass production spawns a few ammo and heals when you first get it
+paradigm shift 6->4 health removed
+incendiary ammunition drone and shotgun explosions are 30% bigger
+Zectron super balls do 75->90% more damage and drain 25->20 energy on hitting player
+
+fixed bug with optical amplifier and cloaking field
+plasma ball can pick up power ups when out of energy, like other fields
+fixed bug with not hiding mouse
 
 *********************************************************** TODO *****************************************************
+
+final and reactor menu is still kinda annoying
+  maybe tweak the style and duration
 
 improve new player experience
   training is too long to be a tutorial
     before nail gun level offer player option to continue or switch to normal game
+
++40% foam size
++40% foam damage
+-40% foam ammo gain
+When foam is in an explosion it also explodes with size proportional to the size of the foam bubble
+Requires foam, explosion source, not aerogel
 
 Cosmological natural selection:  do something with black holes
   spawn black hole mobs
@@ -34,6 +57,9 @@ Foam slow down mobs twice as much and slowly pulls them towards the ground
   Requires a source of foam and not aerogel
   https://en.m.wikipedia.org/wiki/Tungsten_hexafluoride
 
+if needles touch map and mob at the same time pin mob to map
+  this might be better as a railgun tech, or a railgun rework
+  name rebar
 
 make grappling hook of different shapes
   shapes
@@ -55,6 +81,9 @@ on sucker mob death trigger radiation damage AoE and a graphic  (Hawking radiati
 
 tech prismatic laser - cycles between different laser colors every 1-2 seconds
 
+
+When you destroy an enemy’s shield it causes a large explosion. Requires not bubble fusion
+
 sword slash for plasma torch  (giving up on this for now,  had trouble making graphics look good)
   activates when mouse is close to player
     gradual activation
@@ -64,6 +93,8 @@ sword slash for plasma torch  (giving up on this for now,  had trouble making gr
   what about upgrades to extruder,plasma ball
     give them their own version of a slash?
     make a tech that buffs the slash, but it disables extruder,plasma ball
+
+
 
 more (all) bosses need to be made of parts
   good examples: spiderBoss, dragonFlyBoss, beetleBoss
