@@ -1,30 +1,15 @@
 ******************************************************** NEXT PATCH **************************************************
 
-community map - arena by Richard0820
- 
-skin tech: depolarization - gain +300 damage or -50% damage if a mobs has died in last 5 seconds
-CPT triggers if you have above 90->85 energy
-  CPT skin graphically indicates when CPT is active
-mass-energy defense reduction is 66->50%
+tech: hyperpolarization - reduce the CD on depolarization by 1 second
 
-new level load display animation draws the outline of the new map
-  only on reactor and final levels
-  choose MINIMAL HUD in settings to disable (or enter testing mode)
-enthalpy spawns heals on mobs death with a 5% chance
-  this is roughly an 80% increase in spawn rate
-mass production spawns a few ammo and heals when you first get it
-paradigm shift 6->4 health removed
-incendiary ammunition drone and shotgun explosions are 30% bigger
-Zectron super balls do 75->90% more damage and drain 25->20 energy on hitting player
+metamaterial absorber 22->25% chance to get power up for mobs not killed
+symbiosis -0.5 -> 0.25 max health after killing a mob
+dazzler -15->10 energy after decloaking and stunning mobs
+Hilbert space 142->300% damage
 
-fixed bug with optical amplifier and cloaking field
-plasma ball can pick up power ups when out of energy, like other fields
-fixed bug with not hiding mouse
+fixed bug with 1000x more frequent enthalpy
 
 *********************************************************** TODO *****************************************************
-
-final and reactor menu is still kinda annoying
-  maybe tweak the style and duration
 
 improve new player experience
   training is too long to be a tutorial

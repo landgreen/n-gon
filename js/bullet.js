@@ -800,7 +800,7 @@ const b = {
                     requestAnimationFrame(cycle)
                 } else {
                     count++
-                    if (count < 110) requestAnimationFrame(cycle);
+                    if (count < 130) requestAnimationFrame(cycle);
                     if (!(count % 10)) {
                         const unit = Vector.rotate({
                             x: 1,

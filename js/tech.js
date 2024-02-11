@@ -231,7 +231,7 @@ const tech = {
         //         }
         //     }
         // }
-        if (tech.isDamageCooldown) dmg *= m.lastKillCycle + 240 > m.cycle ? 0.5 : 4
+        if (tech.isDamageCooldown) dmg *= m.lastKillCycle + tech.isDamageCooldownTime > m.cycle ? 0.45 : 4.33
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.93
         if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.77
         if (tech.isNoGroundDamage) dmg *= m.onGround ? 0.85 : 2
@@ -367,30 +367,6 @@ const tech = {
         }
     },
     {
-        name: "depolarization",
-        descriptionFunction() {
-            // return `<strong>+300%</strong> <strong class='color-d'>damage</strong> or <strong>-50%</strong> <strong class='color-d'>damage</strong><br>if a mob has <strong>died</strong> in the last <strong>5 seconds</strong>`
-            return `<span style = 'font-size:88%;'><strong>+300%</strong> <strong class='color-d'>damage</strong> if <strong>no</strong> mobs <strong>died</strong> in the last <strong>4 seconds</strong><br><strong>-50%</strong> <strong class='color-d'>damage</strong> if a mob <strong>died</strong> in the last <strong>4 seconds</strong></span>`
-        },
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        isSkin: true,
-        allowed() {
-            return !m.isAltSkin
-        },
-        requires: "not skinned",
-        effect() {
-            m.skin.polar();
-            tech.isDamageCooldown = true;
-        },
-        remove() {
-            tech.isDamageCooldown = false;
-            if (this.count) m.resetSkin();
-        }
-    },
-    {
         name: "Higgs mechanism",
         description: "<strong>+77%</strong> <strong><em>fire rate</em></strong><br>while <strong>firing</strong> your <strong>position</strong> is fixed",
         maxCount: 1,
@@ -419,7 +395,7 @@ const tech = {
     },
     {
         name: "Hilbert space",
-        description: "<strong>+142%</strong> <strong class='color-d'>damage</strong><br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
+        description: "<strong>+300%</strong> <strong class='color-d'>damage</strong><br>after a <strong>collision</strong> enter an <strong class='alt'>alternate reality</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -430,7 +406,7 @@ const tech = {
             return !m.isAltSkin && !tech.isResearchReality && !tech.isSwitchReality
         },
         requires: "not skinned, Ψ(t) collapse, many-worlds",
-        damage: 2.42,
+        damage: 4, //1+300%
         effect() {
             m.skin.anodize();
             tech.damage *= this.damage
@@ -527,20 +503,20 @@ const tech = {
         name: "1st ionization energy",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ionization_energy' class="link">1st ionization energy</a>`,
         // description: `after you collect ${powerUps.orb.heal()}<br><strong>+${0.1 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`,
-        // descriptionFunction: `convert current and future ${powerUps.orb.heal()} into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${10 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`,
+        // descriptionFunction: `convert current and future ${powerUps.orb.heal()} into <div class="heal-circle" style="background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style="background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${10 * tech.largerHeals}</strong> maximum <strong class='color-f'>energy</strong>`,
         descriptionFunction() {
-            return `convert current and future <div class="heal-circle"></div> into <div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style = "background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${11 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)}</strong> maximum <strong class='color-f'>energy</strong>`
+            return `convert current and future <div class="heal-circle"></div> into <div class="heal-circle" style="background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style="background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${11 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)}</strong> maximum <strong class='color-f'>energy</strong>`
         },
         maxCount: 1,
         count: 0,
-        frequency: 4,
-        frequencyDefault: 4,
+        frequency: 5,
+        frequencyDefault: 5,
         allowed() {
             return tech.isEnergyHealth && !tech.isOverHeal
         },
         requires: "mass-energy equivalence, not quenching",
         effect() {
-            powerUps.healGiveMaxEnergy = true; //tech.healMaxEnergyBonus given from heal power up 
+            powerUps.healGiveMaxEnergy = true; //tech.healMaxEnergyBonus given from heal power up
             powerUps.heal.color = "#ff0" //"#0ae"
             for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
                 if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
@@ -553,6 +529,50 @@ const tech = {
             for (let i = 0; i < powerUp.length; i++) { //find active heal power ups and adjust color live
                 if (powerUp[i].name === "heal") powerUp[i].color = powerUps.heal.color
             }
+        }
+    },
+    {
+        name: "depolarization",
+        descriptionFunction() {
+            // return `<strong>+300%</strong> <strong class='color-d'>damage</strong> or <strong>-50%</strong> <strong class='color-d'>damage</strong><br>if a mob has <strong>died</strong> in the last <strong>5 seconds</strong>`
+            return `<span style = 'font-size:88%;'><strong>+333%</strong> <strong class='color-d'>damage</strong> if <strong>no</strong> mobs <strong>died</strong> in the last <strong>${(tech.isDamageCooldownTime / 60).toFixed(0)} seconds</strong><br><strong>-55%</strong> <strong class='color-d'>damage</strong> if a mob <strong>died</strong> in the last <strong>${(tech.isDamageCooldownTime / 60).toFixed(0)} seconds</strong></span > `
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        isSkin: true,
+        allowed() {
+            return !m.isAltSkin
+        },
+        requires: "not skinned",
+        effect() {
+            m.skin.polar();
+            tech.isDamageCooldown = true;
+        },
+        remove() {
+            tech.isDamageCooldown = false;
+            if (this.count) m.resetSkin();
+        }
+    },
+    {
+        name: "hyperpolarization",
+        descriptionFunction() {
+            return `the <strong class= 'color-d'> damage</strong> from <strong> depolarization</strong> <br>resets <strong>1 second</strong> sooner after a mob has <strong>died</strong>`
+        },
+        maxCount: 3,
+        count: 0,
+        frequency: 4,
+        frequencyDefault: 4,
+        allowed() {
+            return tech.isDamageCooldown
+        },
+        requires: "depolarization",
+        effect() {
+            tech.isDamageCooldownTime -= 60
+        },
+        remove() {
+            tech.isDamageCooldownTime = 240
         }
     },
     {
@@ -736,7 +756,7 @@ const tech = {
     },
     {
         name: "applied science",
-        description: `get a random <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong><br>for each of your <strong class='color-g'>guns</strong>`, //spawn ${powerUps.orb.research(1)} and 
+        description: `get a random <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong><br>for each of your <strong class='color-g'>guns</strong>`, //spawn ${powerUps.orb.research(1)} and
         maxCount: 9,
         count: 0,
         isNonRefundable: true,
@@ -826,8 +846,8 @@ const tech = {
                 info = `<br>this level: <strong>+${(31 * Math.max(0, b.inventory.length)).toFixed(0)}%</strong> <strong class='color-d'>damage</strong> for <strong class="highlight">${gun}</strong>`
             }
             return `
-                a new <strong class='color-g'>gun</strong> is <strong>chosen</strong> to be improved each <strong>level</strong>
-                <br><strong>+31%</strong> <strong class='color-d'>damage</strong> per <strong class='color-g'>gun</strong> for the <strong>chosen</strong> <strong class='color-g'>gun</strong>${info}`
+                                                                                            a new <strong class='color-g'>gun</strong> is <strong>chosen</strong> to be improved each <strong>level</strong>
+                                                                                            <br><strong>+31%</strong> <strong class='color-d'>damage</strong> per <strong class='color-g'>gun</strong> for the <strong>chosen</strong> <strong class='color-g'>gun</strong>${info}`
         },
         maxCount: 1,
         count: 0,
@@ -1029,7 +1049,7 @@ const tech = {
     {
         name: "integrated armament",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Weapon' class="link">integrated armament</a>`,
-        description: `<span style = 'font-size:95%;'>+<strong>25%</strong> <strong class='color-d'>damage</strong>, but new <strong class='color-g'>guns</strong> replace<br>your current <strong class='color-g'>gun</strong> and convert <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></span>`,
+        description: `<span style='font-size:95%;'>+<strong>25%</strong> <strong class='color-d'>damage</strong>, but new <strong class='color-g'>guns</strong> replace<br>your current <strong class='color-g'>gun</strong> and convert <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></span>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -1378,8 +1398,8 @@ const tech = {
         },
         maxCount: 9,
         count: 0,
-        frequency: 1000,
-        frequencyDefault: 1000,
+        frequency: 1,
+        frequencyDefault: 1,
         isHealTech: true,
         allowed() {
             return true
@@ -6116,7 +6136,7 @@ const tech = {
     },
     {
         name: "booby trap",
-        description: "<strong>50%</strong> chance to drop a <strong>mine</strong> from <strong>power ups</strong><br><strong>+36%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
+        description: "<strong>50%</strong> chance to drop a <strong>mine</strong> from <strong>power ups</strong><br><strong>+30%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -6132,7 +6152,7 @@ const tech = {
                 x: 0,
                 y: 0
             }, 0)
-            this.refundAmount += tech.addJunkTechToPool(0.36)
+            this.refundAmount += tech.addJunkTechToPool(0.30)
         },
         refundAmount: 0,
         remove() {
@@ -8597,7 +8617,7 @@ const tech = {
     {
         name: "metamaterial absorber",  //quantum eraser
         descriptionFunction() {
-            return `for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br>there is a <strong>22%</strong> chance to spawn a random <strong>power up</strong>`
+            return `for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br>there is a <strong>25%</strong> chance to spawn a random <strong>power up</strong>`
         },
         // descriptionFunction() {
         //     return `for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br>`
@@ -8621,7 +8641,7 @@ const tech = {
     {
         name: "symbiosis",
         descriptionFunction() {
-            return `after a <strong>boss</strong> <strong>dies</strong> spawn ${powerUps.orb.research(4)}${powerUps.orb.heal(3)} and a <strong class='color-m'>tech</strong><br>after a <strong>mob</strong> <strong>dies</strong> <strong>–0.5</strong> maximum ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"}`
+            return `after a <strong>boss</strong> <strong>dies</strong> spawn ${powerUps.orb.research(4)}${powerUps.orb.heal(3)} and a <strong class='color-m'>tech</strong><br>after a <strong>mob</strong> <strong>dies</strong> <strong>–0.25</strong> maximum ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"}`
         },
         isFieldTech: true,
         maxCount: 1,
@@ -8685,7 +8705,7 @@ const tech = {
     {
         name: "dazzler",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Dazzler_(weapon)' class="link">dazzler</a>`,
-        description: "after <strong class='color-cloaked'>decloaking</strong> <strong>stun</strong> nearby mobs<br>and drain <strong>–15</strong> <strong class='color-f'>energy</strong>",
+        description: "after <strong class='color-cloaked'>decloaking</strong> <strong>stun</strong> nearby mobs<br>and drain <strong>–10</strong> <strong class='color-f'>energy</strong>",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -12137,4 +12157,5 @@ const tech = {
     isMobFullHealthCloak: null,
     isMobLowHealth: null,
     isDamageCooldown: null,
+    isDamageCooldownTime: null,
 }

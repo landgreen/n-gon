@@ -580,36 +580,24 @@ const m = {
     },
     rewind(steps) { // m.rewind(Math.floor(Math.min(599, 137 * m.energy)))
         if (tech.isRewindGrenade) {
-            const immunityDuration = 65
+            const immunityDuration = 50
             const immunityCycle = m.cycle + immunityDuration + 10 + tech.isPetalsExplode * 30 + tech.isCircleExplode * 21
             if (m.immuneCycle < immunityCycle) m.immuneCycle = immunityCycle; //player is immune to damage until after grenades might explode...
 
             for (let i = 1, len = Math.floor(4 + steps / 40); i < len; i++) {
-                b.grenade(Vector.add(m.pos, {
-                    x: 10 * (Math.random() - 0.5),
-                    y: 10 * (Math.random() - 0.5)
-                }), -i * Math.PI / len) //fire different angles for each grenade
+                b.grenade(Vector.add(m.pos, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) }), -i * Math.PI / len) //fire different angles for each grenade
                 const who = bullet[bullet.length - 1]
 
                 if (tech.isNeutronBomb) {
-                    Matter.Body.setVelocity(who, {
-                        x: who.velocity.x * 0.3,
-                        y: who.velocity.y * 0.3
-                    });
+                    Matter.Body.setVelocity(who, { x: who.velocity.x * 0.3, y: who.velocity.y * 0.3 });
                 } else if (tech.isVacuumBomb) {
-                    Matter.Body.setVelocity(who, {
-                        x: who.velocity.x * 0.5,
-                        y: who.velocity.y * 0.5
-                    });
+                    Matter.Body.setVelocity(who, { x: who.velocity.x * 0.5, y: who.velocity.y * 0.5 });
                     who.endCycle = simulation.cycle + immunityDuration
 
                 } else if (tech.isRPG) {
                     who.endCycle = simulation.cycle + 10
                 } else {
-                    Matter.Body.setVelocity(who, {
-                        x: who.velocity.x * 0.5,
-                        y: who.velocity.y * 0.5
-                    });
+                    Matter.Body.setVelocity(who, { x: who.velocity.x * 0.5, y: who.velocity.y * 0.5 });
                     who.endCycle = simulation.cycle + immunityDuration
                 }
             }
@@ -1091,7 +1079,7 @@ const m = {
                 m.calcLeg(Math.PI, -3);
 
 
-                const diff = (m.lastKillCycle - m.cycle + 240) / 240
+                const diff = (m.lastKillCycle - m.cycle + tech.isDamageCooldownTime) / tech.isDamageCooldownTime
                 const color = diff < 0 ? "#fff" : "#aaa"
                 const hue = 220 + 20 * Math.sin(0.01 * m.cycle)
                 const colorInverse = diff < 0 ? `hsl(${hue}, 80%, 40%)` : "#fff"
@@ -4285,7 +4273,7 @@ const m = {
                     if (tech.isCloakStun) { //stun nearby mobs after exiting cloak
                         let isMobsAround = false
                         const stunRange = m.fieldDrawRadius * 1.5
-                        const drain = 0.14
+                        const drain = 0.1
                         if (m.energy > drain) {
                             for (let i = 0, len = mob.length; i < len; ++i) {
                                 if (Vector.magnitude(Vector.sub(mob[i].position, m.pos)) < stunRange && Matter.Query.ray(map, mob[i].position, m.pos).length === 0 && !mob[i].isBadTarget) {
