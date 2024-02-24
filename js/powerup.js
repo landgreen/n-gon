@@ -332,7 +332,7 @@ const powerUps = {
                 simulation.circleFlare(0.043);
             }
             if (tech.isCancelRerolls) {
-                for (let i = 0, len = 6 + 6 * Math.random(); i < len; i++) {
+                for (let i = 0, len = 10 + 4 * Math.random(); i < len; i++) {
                     let spawnType
                     if (Math.random() < 0.4 && !tech.isEnergyNoAmmo) {
                         spawnType = "ammo"

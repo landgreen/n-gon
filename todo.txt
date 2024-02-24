@@ -1,15 +1,70 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: hyperpolarization - reduce the CD on depolarization by 1 second
+mob: laserLayer - leaves behind lasers that persist for a few seconds
+ghoster mobs do 66% less damage, but they eject your ammo
 
-metamaterial absorber 22->25% chance to get power up for mobs not killed
-symbiosis -0.5 -> 0.25 max health after killing a mob
-dazzler -15->10 energy after decloaking and stunning mobs
-Hilbert space 142->300% damage
+grappling hook tech rupture renamed swarf
+  fires several nails at nearby mobs, not explosions
+grappling hook 6->9 energy per second
+CIWS 18->10 energy
+reel +40->75 energy reeling blocks
+wormhole 5->7% duplication
+cloaking no longer drains energy, this fixes a can't cloak bug
+  dazzler no longer drains energy
+    dazzler range reduced by 15%
+    dazzler stuns for 3->2 seconds
+zero point energy 100->166 max energy
+expansion 40->77 max energy
+annihilation -33% of max energy -> 10 energy
+dynamical systems is no longer a field tech  35->30 damage
+tessellation is no longer a field tech  50->35 defense
+yield stress removed
+  topological defect 80->111% damage
+  brittle 80->111% damage
+commodities exchange  6-12 -> 10-14 power ups
+heat engine 50->40% damage
+flame test grenades clusters explode 40% faster
+alternator uses 10->0% energy for harpoon
 
-fixed bug with 1000x more frequent enthalpy
+finally made a shared vertexCollision function
+  this might cause some bugs with laser-like effects...
+
 
 *********************************************************** TODO *****************************************************
+
+increase damage for each not picked up power up on the level
+
+make a laserLayerBoss
+  add lasers on player's history
+
+button/switch input ideas from Cocoon game
+  pick up blocks that have a rubber band attached to a sliding switch
+    as player moves the vector direction of the rubber band will move the slider left or right
+    use this to open doors, move larger blocks, ...
+  switches that toggle left, right when player presses input.field while standing nearby
+    replace laser off on switch?
+    platform that rises up when player presses input.field while standing
+  How to instruct player to use field on these?
+    color with field #0ff
+    draw field effect
+    make it still functional without the field button
+
+tech:  - getting a new gun also gives you 2 random tech for that gun
+  or a field?
+  can these guntech tech be converted into a player choice?
+
+tech: interest - research and ammo increases by 10% at the start of each level?
+  spawn research and ammo at start of new level
+    extend to current health?
+
+how to reduce the number of clicks and keypresses
+  auto fire mode
+    player shoots at whatever is nearby
+      should player have to look towards mobs?
+      increase ammo?
+
+animate egg laying mobs
+  just draw a circle when it happens?
 
 improve new player experience
   training is too long to be a tutorial
@@ -51,7 +106,7 @@ make grappling hook of different shapes
     longer
     circular with spikes
   indicate tech upgrades?
-    rupture, reel, tokamak
+    swarf, reel, tokamak
   do this in draw or in verticies?
     draw can have different colors 
 
@@ -1097,6 +1152,7 @@ possible names for tech
   Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity 
   Unruh effect - accelerating makes heat/thermal particles
   configuration space - holds the position of everything
+  stress–energy tensor
 
 
 ******************************************************** CARS IMAGES ********************************************************
