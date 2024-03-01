@@ -3035,7 +3035,7 @@ const b = {
         const me = bullet.length;
         const THRUST = 0.0018
         const RADIUS = 18
-        const SCALE = 1 - 0.12 / tech.bulletsLastLonger
+        const SCALE = 1 - 0.11 / tech.bulletsLastLonger
         bullet[me] = Bodies.polygon(where.x, where.y, 3, RADIUS, {
             angle: dir - Math.PI,
             // inertia: Infinity,

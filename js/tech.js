@@ -231,6 +231,7 @@ const tech = {
         //         }
         //     }
         // }
+        if (tech.isPowerUpDamage) dmg *= 1 + 0.05 * powerUp.length
         if (tech.isDamageCooldown) dmg *= m.lastKillCycle + tech.isDamageCooldownTime > m.cycle ? 0.45 : 4.33
         if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 1.93
         if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.77
@@ -3339,6 +3340,27 @@ const tech = {
         },
     },
     {
+        name: "accretion disk",
+        descriptionFunction() {
+            return `<strong>+5%</strong> <strong class='color-d'>damage</strong> <em>(${5 * powerUp.length}%)</em><br>for each <strong>power up</strong> that exists on this <strong>level</strong>`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 3,
+        frequencyDefault: 3,
+        isHealTech: true,
+        allowed() {
+            return tech.isHealAttract
+        },
+        requires: "accretion",
+        effect() {
+            tech.isPowerUpDamage = true
+        },
+        remove() {
+            tech.isPowerUpDamage = false
+        },
+    },
+    {
         name: "self-assembly",
         descriptionFunction() {
             return `at the start of each <strong>level</strong><br>for every <strong>25%</strong> missing ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} spawn ${powerUps.orb.heal()}`
@@ -4067,7 +4089,7 @@ const tech = {
     },
     {
         name: "unified field theory",
-        description: `when <strong>paused</strong> clicking your <strong class='color-f'>field</strong> <strong>cycles</strong> it<br><strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong><strong class='color-m'>tech</strong>`,
+        description: `in the <strong>pause</strong> menu click to <strong>switch</strong> <strong class='color-f'>fields</strong><br><strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-f'>field</strong><strong class='color-m'>tech</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -12166,4 +12188,5 @@ const tech = {
     isMobLowHealth: null,
     isDamageCooldown: null,
     isDamageCooldownTime: null,
+    isPowerUpDamage: null,
 }

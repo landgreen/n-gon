@@ -540,10 +540,10 @@ const m = {
         }
     },
     baseHealth: 1,
-    setMaxHealth() {
+    setMaxHealth(isMessage) {
         m.maxHealth = m.baseHealth + tech.extraMaxHealth + 3 * tech.isFallingDamage + 4 * tech.isFlipFlop * tech.isFlipFlopOn * tech.isFlipFlopHealth
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
-        simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
+        if (isMessage) simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
         m.displayHealth();
     },
@@ -605,10 +605,7 @@ const m = {
 
         let history = m.history[(m.cycle - steps) % 600]
         Matter.Body.setPosition(player, history.position);
-        Matter.Body.setVelocity(player, {
-            x: history.velocity.x,
-            y: history.velocity.y
-        });
+        Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
         m.yOff = history.yOff
         if (m.yOff < 48) {
             m.doCrouch()
@@ -2125,14 +2122,8 @@ const m = {
     hole: {
         isOn: false,
         isReady: false,
-        pos1: {
-            x: 0,
-            y: 0
-        },
-        pos2: {
-            x: 0,
-            y: 0
-        },
+        pos1: { x: 0, y: 0 },
+        pos2: { x: 0, y: 0 },
     },
     fieldArc: 0,
     fieldThreshold: 0,
@@ -2175,20 +2166,14 @@ const m = {
         m.calculateFieldThreshold(); //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
         m.isBodiesAsleep = true;
         m.wakeCheck();
-        m.setMaxEnergy();
-        m.setMaxHealth();
+        m.setMaxEnergy(false);
+        m.setMaxHealth(false);
         m.couplingChange()
         m.hole = {
             isOn: false,
             isReady: false,
-            pos1: {
-                x: 0,
-                y: 0
-            },
-            pos2: {
-                x: 0,
-                y: 0
-            },
+            pos1: { x: 0, y: 0 },
+            pos2: { x: 0, y: 0 },
         }
     },
     setMaxEnergy(isMessage = true) {
@@ -3436,15 +3421,9 @@ const m = {
                         }
                     } else if (simulation.molecularMode === 1) {
                         m.energy -= 0.33;
-                        const direction = {
-                            x: Math.cos(m.angle),
-                            y: Math.sin(m.angle)
-                        }
+                        const direction = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
                         const push = Vector.mult(Vector.perp(direction), 0.08)
-                        b.missile({
-                            x: m.pos.x + 30 * direction.x,
-                            y: m.pos.y + 30 * direction.y
-                        }, m.angle, -15)
+                        b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, -15)
                         bullet[bullet.length - 1].force.x += push.x * (Math.random() - 0.5)
                         bullet[bullet.length - 1].force.y += 0.005 + push.y * (Math.random() - 0.5)
                         // b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
@@ -3538,10 +3517,7 @@ const m = {
                     radiusLimit: 10,
                     damage: 0.8,
                     setPositionToNose() {
-                        const nose = {
-                            x: m.pos.x + 10 * Math.cos(m.angle),
-                            y: m.pos.y + 10 * Math.sin(m.angle)
-                        }
+                        const nose = { x: m.pos.x + 10 * Math.cos(m.angle), y: m.pos.y + 10 * Math.sin(m.angle) }
                         Matter.Body.setPosition(this, Vector.add(nose, Vector.mult(Vector.normalise(Vector.sub(nose, m.pos)), circleRadiusScale * this.circleRadius)));
                     },
                     fire() {

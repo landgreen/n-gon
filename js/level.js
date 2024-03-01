@@ -19,8 +19,8 @@ const level = {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
             // tech.giveTech("performance")
-            // level.difficultyIncrease(3 * 2) //30 is near max on hard  //60 is near max on why
-            // m.maxHealth = m.health = 100000000
+            // level.difficultyIncrease(7 * 2) //30 is near max on hard  //60 is near max on why
+            // m.maxHealth = m.health = 1//00000000
             // m.maxEnergy = m.energy = 10000000
             // tech.isRerollDamage = true
             // powerUps.research.changeRerolls(99999)
@@ -47,7 +47,7 @@ const level = {
             // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
             // m.lastKillCycle = m.cycle
             // for (let i = 0; i < 1; ++i) tech.giveTech("swarf")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("CPT symmetry")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("unified field theory")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 100; i++) powerUps.directSpawn(1750, -500, "coupling");
@@ -57,8 +57,8 @@ const level = {
             // for (let i = 0; i < 1; ++i) spawn.laserLayer(1400, -500)
             // Matter.Body.setPosition(player, { x: -200, y: -3330 });
             // for (let i = 0; i < 4; ++i) spawn.laserLayer(1300, -500 + 100 * Math.random())
-            // for (let i = 0; i < 3; ++i) spawn.laser(1900, -500)
-            // for (let i = 0; i < 1; ++i) spawn.laserBombingBoss(1900, -2500)
+            // for (let i = 0; i < 1; ++i) spawn.laserLayerBoss(1900, -500)
+            // for (let i = 0; i < 1; ++i) spawn.dragonFlyBoss(1900, -500)
             // spawn.beetleBoss(1900, -500, 25)
             // spawn.zombie(-3000, -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)
             // for (let i = 0; i < 5; ++i) spawn.starter(1000 + 1000 * Math.random(), -500 + 300 * Math.random())
@@ -4996,10 +4996,7 @@ const level = {
                     powerUps.directSpawn(x + 998, y - 333, "tech", false);
                 }
                 const powerUp1 = powerUp[powerUp.length - 1]
-                powerUp1.holdPosition = {
-                    x: powerUp1.position.x,
-                    y: powerUp1.position.y
-                }
+                powerUp1.holdPosition = { x: powerUp1.position.x, y: powerUp1.position.y }
                 let isSpawnedMobs = false
                 doCustom.push(
                     () => {
@@ -5014,9 +5011,23 @@ const level = {
                             if (Vector.magnitudeSquared(Vector.sub(m.pos, powerUp1.position)) < 90000) { //zone radius is 300
                                 //damage player and drain energy
                                 if (m.immuneCycle < m.cycle) {
-                                    m.damage(0.01);
-                                    if (m.energy > 0.1) m.energy -= 0.02
+                                    if (m.energy < 0.02) {
+                                        //push out
+                                        // const force = Vector.mult(Vector.normalise(Vector.sub(player.position, powerUp1.position)), 0.02 * player.mass)
+                                        // player.force.x += force.x
+                                        // player.force.y += force.y
+                                        player.force.x += (player.position.x > powerUp1.position.x) ? 0.02 * player.mass : - 0.02 * player.mass
+
+                                    } else {
+                                        m.energy -= 0.01
+                                        //friction
+                                        Matter.Body.setVelocity(player, {
+                                            x: player.velocity.x * 0.45,
+                                            y: player.velocity.y * 0.98
+                                        });
+                                    }
                                 }
+
                                 //draw electricity going towards player
                                 const unit = Vector.normalise(Vector.sub(m.pos, powerUp1.position))
                                 let xElec = powerUp1.position.x + 40 * unit.x;

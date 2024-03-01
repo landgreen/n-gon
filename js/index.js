@@ -351,7 +351,6 @@ const build = {
                     }
                 }
 
-
                 // fade alpha for all pixels
                 // for (let i = 0; i < data.length; i += 4) {
                 //     if (data[i + 3] > 0) {
@@ -424,11 +423,8 @@ const build = {
         }
     },
     pauseGrid() {
-        // build.pixelDraw();
-
         build.generatePauseLeft() //makes the left side of the pause menu with the tech
         build.generatePauseRight() //makes the right side of the pause menu with the tech
-
         document.getElementById("tech").style.display = "none"
         document.getElementById("guns").style.display = "none"
         document.getElementById("field").style.display = "none"
@@ -436,12 +432,8 @@ const build = {
         document.getElementById("health-bg").style.display = "none"
         document.getElementById("defense-bar").style.display = "none"
         document.getElementById("damage-bar").style.display = "none"
-
-
         //show in game console
-        // document.getElementById("text-log").style.display = "inline"
         simulation.lastLogTime = m.cycle //hide in game console
-
     },
     generatePauseLeft() {
         //used for junk estimation
@@ -504,12 +496,29 @@ ${junkCount ? `<br><strong class='color-junk'>JUNK</strong>: ${(junkCount / tota
 ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 </span></div>`;
         // deaths: ${mobs.mobDeaths} &nbsp;
-        if (tech.isPauseSwitchField && !simulation.isChoosing) {
+        // if (tech.isPauseSwitchField && !simulation.isChoosing) {
+        //     const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
+        //     text += `<div class="pause-grid-module card-background" id ="pause-field" ${style} >
+        //                    <div class="card-text" style = "animation: fieldColorCycle 1s linear infinite alternate;">
+        //                    <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
+        //                    ${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
+        if ((tech.isPauseSwitchField || simulation.testing)) {  //&& !simulation.isChoosing
+            // const fieldNameP = m.fieldUpgrades[m.fieldMode > 1 ? m.fieldMode - 1 : m.fieldUpgrades.length - 1].name
+            // const fieldNameN = m.fieldUpgrades[m.fieldMode === m.fieldUpgrades.length - 2 ? 1 : m.fieldMode + 1].name
+            //button above for previous
+            text += `<div class="pause-grid-module" id ="pause-field-previous" style="animation: fieldColorCycle 3s linear infinite alternate; border-top: 1px solid #000;border-bottom: 1px solid #000;">
+                           <div class="grid-title" style="text-align: center;">↑ <div class="circle-grid field"></div> ↑</div></div>`
+            //button for current
             const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
             text += `<div class="pause-grid-module card-background" id ="pause-field" ${style} >
-                           <div class="card-text" style = "animation: fieldColorCycle 1s linear infinite alternate;">
+                           <div class="card-text">
                            <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
                            ${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
+            //button below for next
+            text += `<div class="pause-grid-module" id ="pause-field-next" style="animation: fieldColorCycle 3s linear infinite alternate;border-bottom: 1px solid #000;">
+                           <div class="grid-title" style="text-align: center;">↓ <div class="circle-grid field"></div> ↓</div></div>`
+
+
         } else {
             const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
             text += `<div class="pause-grid-module card-background" id ="pause-field" ${style} >
@@ -1356,7 +1365,24 @@ window.addEventListener("keydown", function (event) {
                     document.body.style.cursor = "auto";
 
                     if (tech.isPauseSwitchField || simulation.testing) {
-                        document.getElementById("pause-field").addEventListener("click", () => {
+                        document.getElementById("pause-field-previous").addEventListener("click", () => {
+                            const energy = m.energy //save current energy
+                            if (m.fieldMode === 4 && simulation.molecularMode > 0) {
+                                simulation.molecularMode--
+                                m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
+                            } else {
+                                m.setField((m.fieldMode < 2) ? m.fieldUpgrades.length - 1 : m.fieldMode - 1) //cycle to previous field, skip field emitter
+                                if (m.fieldMode === 4) {
+                                    simulation.molecularMode = 3
+                                    m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
+                                }
+                            }
+                            m.energy = energy //return to current energy
+                            document.getElementById("pause-field").style.backgroundImage = `url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? Math.floor(Math.random() * 10) : ""}.webp')`
+                            document.getElementById("pause-field").innerHTML = `<div class="card-text"> <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>${m.fieldUpgrades[m.fieldMode].description}</div>`
+                        });
+
+                        document.getElementById("pause-field-next").addEventListener("click", () => {
                             const energy = m.energy //save current energy
                             if (m.fieldMode === 4 && simulation.molecularMode < 3) {
                                 simulation.molecularMode++
@@ -1371,10 +1397,7 @@ window.addEventListener("keydown", function (event) {
                             m.energy = energy //return to current energy
                             // document.getElementById("pause-field").innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[m.fieldMode].name}</div> ${m.fieldUpgrades[m.fieldMode].description}`
                             document.getElementById("pause-field").style.backgroundImage = `url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? Math.floor(Math.random() * 10) : ""}.webp')`
-                            document.getElementById("pause-field").innerHTML = `
-                            <div class="card-text" style = "animation: fieldColorCycle 1s linear infinite alternate;">
-                            <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
-                            ${m.fieldUpgrades[m.fieldMode].description}</div>`
+                            document.getElementById("pause-field").innerHTML = `<div class="card-text"> <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
                         });
                     }
                 }

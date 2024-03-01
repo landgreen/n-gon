@@ -1,41 +1,24 @@
 ******************************************************** NEXT PATCH **************************************************
 
-mob: laserLayer - leaves behind lasers that persist for a few seconds
-ghoster mobs do 66% less damage, but they eject your ammo
+laserLayerBoss - sends lasers to player's location
+snakes bosses - after you kill a tail piece the rest of the tails lose 5% life
+  this makes targeting any part of the tail a viable strategy
 
-grappling hook tech rupture renamed swarf
-  fires several nails at nearby mobs, not explosions
-grappling hook 6->9 energy per second
-CIWS 18->10 energy
-reel +40->75 energy reeling blocks
-wormhole 5->7% duplication
-cloaking no longer drains energy, this fixes a can't cloak bug
-  dazzler no longer drains energy
-    dazzler range reduced by 15%
-    dazzler stuns for 3->2 seconds
-zero point energy 100->166 max energy
-expansion 40->77 max energy
-annihilation -33% of max energy -> 10 energy
-dynamical systems is no longer a field tech  35->30 damage
-tessellation is no longer a field tech  50->35 defense
-yield stress removed
-  topological defect 80->111% damage
-  brittle 80->111% damage
-commodities exchange  6-12 -> 10-14 power ups
-heat engine 50->40% damage
-flame test grenades clusters explode 40% faster
-alternator uses 10->0% energy for harpoon
-
-finally made a shared vertexCollision function
-  this might cause some bugs with laser-like effects...
-
+accretion disk - 5% damage for every power up on this level
+  requires accretion
+unified field theory has buttons to cycle field forwards or backwards when paused
+iceIX range and damage increased 15%
+electric tech in labs level is finally nerfed
+  drains energy, but doesn't do damage
+  pushes player away
 
 *********************************************************** TODO *****************************************************
 
-increase damage for each not picked up power up on the level
-
-make a laserLayerBoss
-  add lasers on player's history
+boss - tracks the position, velocity, angle of power ups, blocks, and bullets it fires
+  reactor only?
+  will rewind time
+    after damage threshold?
+  does it track player bullets? 
 
 button/switch input ideas from Cocoon game
   pick up blocks that have a rubber band attached to a sliding switch
