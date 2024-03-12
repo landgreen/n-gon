@@ -129,6 +129,19 @@ function vertexCollision(v1, v1End, domains) {  //= [map, body, [playerBody, pla
     return best
 }
 
+// prompts to reload and exit  for JUNK tech named "beforeunload"
+function beforeUnloadEventListener(event) {
+    event.preventDefault();
+    if (tech.isExitPrompt) {
+        tech.damage *= 1.25
+        simulation.makeTextLog(`damage <span class='color-symbol'>*=</span> ${1.25}`)
+        if (Math.random() < 0.25) {
+            removeEventListener('beforeunload', beforeUnloadEventListener);
+        }
+    }
+}
+// addEventListener('beforeunload', beforeUnloadEventListener);
+
 
 //collision groups
 //   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield | cat.phased
@@ -425,6 +438,7 @@ const build = {
     pauseGrid() {
         build.generatePauseLeft() //makes the left side of the pause menu with the tech
         build.generatePauseRight() //makes the right side of the pause menu with the tech
+        // build.sortTech('') //sorts tech into the order the player got them using tech.tech[i].cycle = m.cycle
         document.getElementById("tech").style.display = "none"
         document.getElementById("guns").style.display = "none"
         document.getElementById("field").style.display = "none"
@@ -436,15 +450,6 @@ const build = {
         simulation.lastLogTime = m.cycle //hide in game console
     },
     generatePauseLeft() {
-        //used for junk estimation
-        let junkCount = 0
-        let totalCount = 1 //start at one to avoid NaN issues
-        for (let i = 0; i < tech.tech.length; i++) {
-            if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isBanished) {
-                totalCount += tech.tech[i].frequency
-                if (tech.tech[i].isJunk) junkCount += tech.tech[i].frequency
-            }
-        }
         //left side
         let botText = ""
         if (tech.nailBotCount) botText += `<br>nail-bots: ${tech.nailBotCount}`
@@ -487,7 +492,7 @@ ${botText}
 <span style="float: right;">mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)})</span> 
 <br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}
 <span style="float: right;">velocity: (${player.velocity.x.toFixed(3)}, ${player.velocity.y.toFixed(3)})</span> 
-${junkCount ? `<br><strong class='color-junk'>JUNK</strong>: ${(junkCount / totalCount * 100).toFixed(1)}%  ` : ""}
+${tech.junkChance ? `<br><strong class='color-junk'>JUNK</strong>: ${(100 * tech.junkChance).toFixed(1)}%  ` : ""}
 <br>
 <br>level: ${level.levelsCleared} ${level.levels[level.onLevel]} (${level.difficultyText()})
 <br>mobs: ${spawn.pickList[0]},  ${spawn.pickList[0]}
@@ -542,14 +547,6 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         el.innerHTML = text
     },
     generatePauseRight() {
-        //right side
-        // <input onclick="" type="checkbox" id="sort-damage" name="sort-damage" style="width:1em; height:1em;">
-        //       <label for="sort-damage" title="sort tech by damage"><strong class='color-d'>damage</strong></label>
-
-        //       <input onclick="build.sortTech('guntech')" type="checkbox" id="sort-guntech" name="sort-guntech" style="width:1em; height:1em;">
-        //       <label for="sort-guntech" title="sort guntech"> <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></label>
-
-        // <button onclick="build.sortTech('bot')" class='sort-button'><strong class='color-bot'>bot</strong></button>
         let text = `<div class="sort">
 <button onclick="build.sortTech('damage')" class='sort-button'><strong class='color-d'>damage</strong></button>
 <button onclick="build.sortTech('guntech')" class='sort-button'><strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></button>
@@ -560,38 +557,13 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 <input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#000;" placeholder="sort by"/>
 <button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
 </div>`;
-        // const style = (tech.isPauseEjectTech && !simulation.isChoosing) ? 'style="animation: techColorCycle 1s linear infinite alternate;"' : ''
         const ejectClass = (tech.isPauseEjectTech && !simulation.isChoosing) ? 'pause-eject' : ''
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0) {
-                // const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
-                // if (tech.tech[i].isNonRefundable) {
-                //     text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})" style = "border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding-top: 6px; padding-bottom: 6px;"><div class="grid-title">${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
-                // } else if (tech.tech[i].isFieldTech) {
-                //     text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})" ${style}><div class="grid-title">
-                //                             <span style="position:relative;">
-                //                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                //                               <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
-                //                             </span>
-                //                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
-                // } else if (tech.tech[i].isGunTech) {
-                //     text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})" ${style}><div class="grid-title">
-                //                             <span style="position:relative;">
-                //                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                //                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
-                //                             </span>
-                //                             &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
-                // } else if (tech.tech[i].isLore) {
-                //     text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
-                // } else {
-                //     text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})" ${style}><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
-                // }
                 const style = (localSettings.isHideImages || tech.tech[i].isJunk || tech.tech[i].isLore) ? `style="height:auto;"` : `style = "background-image: url('img/${tech.tech[i].name}.webp');"`
                 const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                 if (tech.tech[i].isNonRefundable) {
                     text += `<div class="pause-grid-module" id ="${i}-pause-tech"  style = "border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding: 6px;"><div class="grid-title">${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`
-                    // } else if (tech.tech[i].isLore) {
-                    //     text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isFieldTech) {
                     text += `<div id="${i}-pause-tech" class="pause-grid-module card-background ${ejectClass}" onclick="powerUps.pauseEjectTech(${i})" ${style}>`
                     text += build.fieldTechText(i) + "</div>"
@@ -601,6 +573,9 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                 } else if (tech.tech[i].isSkin) {
                     text += `<div id="${i}-pause-tech" class="pause-grid-module card-background ${ejectClass}" onclick="powerUps.pauseEjectTech(${i})" ${style}>`
                     text += build.skinTechText(i) + "</div>"
+                } else if (tech.tech[i].isJunk) {
+                    text += `<div id="${i}-pause-tech" class="pause-grid-module card-background ${ejectClass}" onclick="powerUps.pauseEjectTech(${i})" ${style}>`
+                    text += build.junkTechText(i) + "</div>"
                 } else {
                     text += `<div id="${i}-pause-tech" class="pause-grid-module card-background ${ejectClass}" onclick="powerUps.pauseEjectTech(${i})" ${style}>`
                     text += build.techText(i) + "</div>"
@@ -612,6 +587,17 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         const el = document.getElementById("pause-grid-right")
         el.style.display = "grid"
         el.innerHTML = text
+
+        //add event listener for pressing enter key when in sort
+        function pressEnterSort(event) {
+            if (event.key === 'Enter') {
+                requestAnimationFrame(() => { document.getElementById("sort-input").focus(); });
+                // event.preventDefault(); // Prevent the default action to avoid form submission or any other default action
+                build.sortTech('input')
+            }
+        }
+        document.getElementById("sort-input").addEventListener('keydown', pressEnterSort);
+        requestAnimationFrame(() => { document.getElementById("sort-input").focus(); });
     },
     sortTech(find, isExperiment = false) {
         const sortKeyword = (a, b) => {
@@ -621,6 +607,16 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             if (!aHasKeyword && bHasKeyword) return 1;
             return 0;
         }
+
+        // if (find === '') {
+        //     tech.tech.sort((a, b) => { //sorts tech into the order the player got them using tech.tech[i].cycle = m.cycle
+        //         console.log(a.cycle, b.cycle)
+        //         if (a.cycle === undefined && b.cycle !== undefined) return -1;
+        //         if (a.cycle !== undefined && b.cycle === undefined) return 1;
+        //         if (a.cycle === undefined && b.cycle === undefined) return 0;
+        //         if (a.cycle !== b.cycle) return a.cycle - b.cycle;
+        //     });
+        // } else
         if (find === 'guntech') {
             tech.tech.sort((a, b) => {
                 if (a.isGunTech && b.isGunTech) {
@@ -704,6 +700,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             build.generatePauseRight() //makes the right side of the pause menu with the tech            
         }
         document.getElementById("sort-input").value = find; //make the sorted string display in the keyword search input field
+        simulation.updateTechHUD();
     },
     unPauseGrid() {
         document.getElementById("guns").style.display = "inline"
@@ -961,10 +958,17 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             }
         }
         document.getElementById("experiment-grid").innerHTML = text
-        // for (let i = 0, len = tech.tech.length; i < len; i++) {
-        // if (tech.tech[i].count)
-        // document.getElementById("tech-" + i).classList.add("build-tech-selected")
-        // }
+
+
+
+        //add event listener for pressing enter key when in sort
+        function pressEnterSort(event) {
+            if (event.key === 'Enter') {
+                // event.preventDefault(); // Prevent the default action to avoid form submission or any other default action
+                build.sortTech('input', true)
+            }
+        }
+        document.getElementById("sort-input").addEventListener('keydown', pressEnterSort);
 
         document.getElementById("difficulty-select-experiment").value = document.getElementById("difficulty-select").value
         document.getElementById("difficulty-select-experiment").addEventListener("input", () => {
@@ -1348,12 +1352,15 @@ window.addEventListener("keydown", function (event) {
             simulation.previousGun();
             break
         case input.key.pause:
-            if (!simulation.isChoosing && input.isPauseKeyReady && m.alive) {
+
+            if (input.isPauseKeyReady && m.alive && !build.isExperimentSelection) {
                 input.isPauseKeyReady = false
-                setTimeout(function () {
-                    input.isPauseKeyReady = true
-                }, 300);
-                if (simulation.paused) {
+                setTimeout(function () { input.isPauseKeyReady = true }, 300);
+                if (simulation.isChoosing) {
+
+                    build.pauseGrid()
+
+                } else if (simulation.paused) {
                     build.unPauseGrid()
                     simulation.paused = false;
                     // level.levelAnnounce();
@@ -1404,7 +1411,7 @@ window.addEventListener("keydown", function (event) {
             }
             break
         case input.key.testing:
-            if (m.alive && localSettings.loreCount > 0 && !simulation.paused) {
+            if (m.alive && localSettings.loreCount > 0 && !simulation.paused && !build.isExperimentSelection) {
                 if (simulation.difficultyMode > 4) {
                     simulation.makeTextLog("<em>testing mode disabled for this difficulty</em>");
                     break

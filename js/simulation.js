@@ -418,6 +418,15 @@ const simulation = {
         simulation.boldActiveGunHUD();
     },
     updateTechHUD() {
+
+        // tech.tech.sort((a, b) => {
+        //     console.log(a.cycle, b.cycle)
+        //     if (a.cycle === undefined && b.cycle !== undefined) return -1;
+        //     if (a.cycle !== undefined && b.cycle === undefined) return 1;
+        //     if (a.cycle === undefined && b.cycle === undefined) return 0;
+        //     if (a.cycle !== b.cycle) return a.cycle - b.cycle;
+        // });
+
         let text = ""
         for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
             if (tech.tech[i].isLost) {

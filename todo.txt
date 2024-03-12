@@ -1,18 +1,40 @@
 ******************************************************** NEXT PATCH **************************************************
 
-laserLayerBoss - sends lasers to player's location
-snakes bosses - after you kill a tail piece the rest of the tails lose 5% life
-  this makes targeting any part of the tail a viable strategy
+new tech are sorted to the top of the tech list
+  pause menu tech list matches the tech list in game
+JUNK tech icons are properly displayed in pause
+Sort interface works with enter key
+bug fix: you can no longer pause or enter testing in experiment selection on text input
+pressing P in power up selection menu brings up the pause menu
+  so you can see your tech and stats
+blocks stuck in vertical portals have a bit of randomness added to their velocity to help them escape
 
-accretion disk - 5% damage for every power up on this level
-  requires accretion
-unified field theory has buttons to cycle field forwards or backwards when paused
-iceIX range and damage increased 15%
-electric tech in labs level is finally nerfed
-  drains energy, but doesn't do damage
-  pushes player away
+JUNK tech chance is a raw percent chance to display a random JUNK
+  it was previously a specific JUNK tech directly added to the pool
+  this might cause bugs
+JUNK tech: beforeunload - asks if you want to cancel if you exit game, if you cancel gain 25% damage, but there is a 25% chance to exit anyways
+JUNK tech: what the block? - trying to throw a block, throws you instead
+reinforcement learning converted into a JUNK tech
+JUNK DNA - scale damage by 100->200% of JUNK pool tech percent
+dark patterns 33->22% JUNK
+replication 33->22% JUNK
+
+overcharge 66->88 max energy
+residual dipolar coupling 6->8 coupling per cancel
+futures exchange 4.7->5% duplication per cancel
+hyperpolarization reduces polarization time by 1->1.25 seconds
+reel +75->100 energy
+
+updated physics engine to matter.js 0.19 (from 0.18)
 
 *********************************************************** TODO *****************************************************
+
+
+List of ways to break the game
+  CPT + high energy regen
+  research->bot fabrication-> ersatz bots -> various bot upgrades
+  duplication 100%
+  electronegativity and high energy?
 
 boss - tracks the position, velocity, angle of power ups, blocks, and bullets it fires
   reactor only?
@@ -32,7 +54,7 @@ button/switch input ideas from Cocoon game
     draw field effect
     make it still functional without the field button
 
-tech:  - getting a new gun also gives you 2 random tech for that gun
+tech - getting a new gun also gives you 2 random tech for that gun
   or a field?
   can these guntech tech be converted into a player choice?
 
@@ -149,6 +171,7 @@ super-bot:  fires super balls
 tech: after a needle hits a mobs
   the needle splits into 3 needles?
   reset your fire CD?
+  fire again for zero ammo
   2x damage for each consecutive mob hit?
 
 mob non-combat behaviors, like Rain World
@@ -277,9 +300,6 @@ Tech:when relay switch/flip flop is on, turn ammo powerups into boosts, when rel
   or toggle other power ups
     health/ammo
     
-JUNK: what the golf?
-  trying to throw a block throws you instead
-
 complete blowSuckBoss...  or don't
 
 tech: laser reflections increase damage
@@ -1136,6 +1156,7 @@ possible names for tech
   Unruh effect - accelerating makes heat/thermal particles
   configuration space - holds the position of everything
   stress–energy tensor
+  radioisotope thermoelectric generator - 
 
 
 ******************************************************** CARS IMAGES ********************************************************

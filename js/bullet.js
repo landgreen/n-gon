@@ -1519,7 +1519,7 @@ const b = {
                         if (this.pickUpTarget) {
                             if (tech.isReel && this.blockDist > 150) {
                                 // console.log(0.0003 * Math.min(this.blockDist, 1000))
-                                m.energy += 0.0009 * Math.min(this.blockDist, 800) //max 0.352 energy
+                                m.energy += 0.00113 * Math.min(this.blockDist, 800) //max 0.352 energy
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: m.pos.x,
                                     y: m.pos.y,

@@ -29,9 +29,9 @@ const tech = {
         // tech.removeJunkTechFromPool();
         // tech.removeLoreTechFromPool();
         // tech.addLoreTechToPool();
+        tech.junkChance = 0;
         tech.extraMaxHealth = 0;
         tech.totalCount = 0;
-        tech.junkCount = 0 //tech.countJunkTech();
         simulation.updateTechHUD();
         simulation.updateGunHUD();
     },
@@ -63,7 +63,6 @@ const tech = {
         tech.tech[index].remove();
         tech.tech[index].count = 0;
         tech.totalCount -= totalRemoved
-        tech.countJunkTech();
         simulation.updateTechHUD();
         tech.tech[index].isLost = true
         simulation.updateTechHUD();
@@ -82,36 +81,41 @@ const tech = {
     //         if (tech.tech[i].isLore && tech.tech[i].count === 0) tech.tech.splice(i, 1)
     //     }
     // },
+    junkChance: 0,
     addJunkTechToPool(percent) { //percent is number between 0-1
-        tech.junkPoolPercent += percent
+        tech.junkChance += (1 - tech.junkChance) * percent
+        return percent
         //make an array for possible junk tech to add
-        let options = [];
-        for (let i = 0; i < tech.tech.length; i++) {
-            if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].isJunk) options.push(i);
-        }
-        if (options.length) {
-            let countNonJunk = 0 // count total non junk tech
-            for (let i = 0, len = tech.tech.length; i < len; i++) {
-                if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isJunk) countNonJunk += tech.tech[i].frequency
-            }
-            const num = Math.ceil(percent * countNonJunk) //scale number added
-            for (let i = 0; i < num; i++) tech.tech[options[Math.floor(Math.random() * options.length)]].frequency++ //add random array options to tech pool
-            simulation.makeTextLog(`<span class='color-var'>tech</span>.tech.push(${num.toFixed(0)} <span class='color-text'>JUNK</span>)`)
-            return num
-        } else {
-            return 0
-        }
+        // let options = [];
+        // for (let i = 0; i < tech.tech.length; i++) {
+        //     if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].isJunk) options.push(i);
+        // }
+        // if (options.length) {
+        //     let countNonJunk = 0 // count total non junk tech
+        //     for (let i = 0, len = tech.tech.length; i < len; i++) {
+        //         if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isJunk) countNonJunk += tech.tech[i].frequency
+        //     }
+        //     const num = Math.ceil(percent * countNonJunk) //scale number added
+        //     for (let i = 0; i < num; i++) tech.tech[options[Math.floor(Math.random() * options.length)]].frequency++ //add random array options to tech pool
+        //     simulation.makeTextLog(`<span class='color-var'>tech</span>.tech.push(${num.toFixed(0)} <span class='color-text'>JUNK</span>)`)
+        //     return num
+        // } else {
+        //     return 0
+        // }
     },
-    removeJunkTechFromPool(num = 1) {
-        for (let j = 0; j < num; j++) {
-            for (let i = 0; i < tech.tech.length; i++) {
-                if (tech.tech[i].isJunk && tech.tech[i].frequency > 0 && tech.tech[i].count < tech.tech[i].maxCount) {
-                    tech.tech[i].frequency--
-                    break
-                }
-            }
+    removeJunkTechFromPool(percent) {
+        // for (let j = 0; j < num; j++) {
+        //     for (let i = 0; i < tech.tech.length; i++) {
+        //         if (tech.tech[i].isJunk && tech.tech[i].frequency > 0 && tech.tech[i].count < tech.tech[i].maxCount) {
+        //             tech.tech[i].frequency--
+        //             break
+        //         }
+        //     }
+        // }
+        if (percent > 0) {
+            tech.junkChance = (tech.junkChance - percent) / (1 - percent)
+            if (tech.junkChance < 0.001 || tech.junkChance === undefined) tech.junkChance = 0
         }
-        tech.junkPoolPercent = 0
     },
     giveRandomJUNK() {
         const list = []
@@ -123,6 +127,10 @@ const tech = {
         simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${name}</span>")<em>`);
     },
     giveTech(index = 'random') {
+        // if (Math.random() < tech.junkChance) {
+        //     tech.giveRandomJUNK();
+        //     return
+        // }
         if (index === 'random') {
             let options = [];
             for (let i = 0; i < tech.tech.length; i++) {
@@ -157,27 +165,20 @@ const tech = {
             if (tech.isBanish && tech.tech[index].isBanished) tech.tech[index].isBanished = false //stops the bug where you can't gets stacks of tech you take with decoherence, I think
             tech.tech[index].effect(); //give specific tech
             tech.tech[index].count++
+            // tech.tech[index].cycle = m.cycle
+            console.log(tech.tech[index].cycle)
             tech.totalCount++ //used in power up randomization
-            tech.countJunkTech();
+            //move new tech to the top of the tech list
+            if (index > 0) {
+                // Remove the element from the array
+                const [item] = tech.tech.splice(index, 1);
+                // Add the element to the front of the array
+                tech.tech.unshift(item);
+            }
+
             simulation.updateTechHUD();
         }
     },
-    junkPoolPercent: 0,
-    junkCount: 0,
-    countJunkTech() {
-        tech.junkCount = 0
-        for (let i = 0; i < tech.tech.length; i++) {
-            if (tech.tech[i].count > 0 && tech.tech[i].isJunk) tech.junkCount++
-        }
-    },
-    // setTechoNonRefundable(name) {
-    //     for (let i = 0; i < tech.tech.length; i++) {
-    //         if (tech.tech.name === name) {
-    //             tech.tech[i].isNonRefundable = true;
-    //             return
-    //         }
-    //     }
-    // },
     setCheating() {
         if (!simulation.isCheating) {
             simulation.isCheating = true;
@@ -261,7 +262,7 @@ const tech = {
         if (tech.isHarmDamage && m.lastHarmCycle + 480 > m.cycle) dmg *= 3;
         if (tech.lastHitDamage && m.lastHit) dmg *= 1 + tech.lastHitDamage * m.lastHit * (2 - m.defense()) // if (!simulation.paused) m.lastHit = 0
         if (tech.isLowHealthDmg) dmg *= 1 + 0.7 * Math.max(0, 1 - (tech.isEnergyHealth ? m.energy : m.health))
-        if (tech.isJunkDNA) dmg *= 1 + tech.junkPoolPercent
+        if (tech.isJunkDNA) dmg *= 1 + 2 * tech.junkChance
         return dmg
     },
     duplicationChance() {
@@ -536,7 +537,9 @@ const tech = {
         name: "depolarization",
         descriptionFunction() {
             // return `<strong>+300%</strong> <strong class='color-d'>damage</strong> or <strong>-50%</strong> <strong class='color-d'>damage</strong><br>if a mob has <strong>died</strong> in the last <strong>5 seconds</strong>`
-            return `<span style = 'font-size:88%;'><strong>+333%</strong> <strong class='color-d'>damage</strong> if <strong>no</strong> mobs <strong>died</strong> in the last <strong>${(tech.isDamageCooldownTime / 60).toFixed(0)} seconds</strong><br><strong>-55%</strong> <strong class='color-d'>damage</strong> if a mob <strong>died</strong> in the last <strong>${(tech.isDamageCooldownTime / 60).toFixed(0)} seconds</strong></span > `
+            // return `<span style = 'font-size:88%;'><strong>+333%</strong> <strong class='color-d'>damage</strong> if <strong>no</strong> mobs <strong>died</strong> in the last <strong>${(tech.isDamageCooldownTime / 60).toFixed(1)} seconds</strong><br><strong>-55%</strong> <strong class='color-d'>damage</strong> if a mob <strong>died</strong> in the last <strong>${(tech.isDamageCooldownTime / 60).toFixed(0)} seconds</strong></span> `
+            // return `<span style = 'font-size:90%;'><strong>-55%</strong> <strong class='color-d'>damage</strong> if a mob <strong>died</strong> in the last <strong>${(tech.isDamageCooldownTime / 60).toFixed(1)} seconds</strong><br>otherwise do <strong>+333%</strong> <strong class='color-d'>damage</strong></span>`
+            return `<span style = 'font-size:95%;'><strong>-55%</strong> <strong class='color-d'>damage</strong> for <strong>${(tech.isDamageCooldownTime / 60).toFixed(1)} seconds</strong> after a mob <strong>dies</strong><br><strong>+333%</strong> <strong class='color-d'>damage</strong> otherwise</span>`
         },
         maxCount: 1,
         count: 0,
@@ -559,7 +562,7 @@ const tech = {
     {
         name: "hyperpolarization",
         descriptionFunction() {
-            return `the <strong class= 'color-d'> damage</strong> from <strong> depolarization</strong> <br>resets <strong>1 second</strong> sooner after a mob has <strong>died</strong>`
+            return `the <strong class= 'color-d'> damage</strong> from <strong> depolarization</strong> <br>resets <strong>1.25 seconds</strong> sooner after a mob <strong>dies</strong>`
         },
         maxCount: 3,
         count: 0,
@@ -570,7 +573,7 @@ const tech = {
         },
         requires: "depolarization",
         effect() {
-            tech.isDamageCooldownTime -= 60
+            tech.isDamageCooldownTime -= 75
         },
         remove() {
             tech.isDamageCooldownTime = 240
@@ -661,7 +664,7 @@ const tech = {
     },
     {
         name: "ordnance",
-        description: "<strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong><br>spawn a <strong class='color-g'>gun</strong> and <strong>+7%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
+        description: "<strong>double</strong> the <strong class='flicker'>frequency</strong> of finding <strong class='color-g'>gun</strong><strong class='color-m'>tech</strong><br>spawn a <strong class='color-g'>gun</strong> and <strong>+6%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -675,7 +678,7 @@ const tech = {
             for (let i = 0, len = tech.tech.length; i < len; i++) {
                 if (tech.tech[i].isGunTech) tech.tech[i].frequency *= 2
             }
-            this.refundAmount += tech.addJunkTechToPool(0.07)
+            this.refundAmount += tech.addJunkTechToPool(0.06)
         },
         refundAmount: 0,
         remove() {
@@ -2915,7 +2918,7 @@ const tech = {
     },
     {
         name: "overcharge",
-        description: "<strong>+66</strong> maximum <strong class='color-f'>energy</strong><br><strong>+5%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
+        description: "<strong>+88</strong> maximum <strong class='color-f'>energy</strong><br><strong>+5%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -3942,7 +3945,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return tech.junkCount > 0
+            return tech.junkChance > 0
         },
         requires: "some JUNK tech",
         effect() {
@@ -3954,7 +3957,7 @@ const tech = {
     },
     {
         name: "dark patterns",
-        description: "<strong>+22%</strong> <strong class='color-d'>damage</strong><br><strong>+22%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
+        description: "<strong>+22%</strong> <strong class='color-d'>damage</strong><br><strong>+11%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -3966,7 +3969,7 @@ const tech = {
         damage: 1.22,
         effect() {
             tech.damage *= this.damage
-            this.refundAmount += tech.addJunkTechToPool(0.22)
+            this.refundAmount += tech.addJunkTechToPool(0.11)
         },
         refundAmount: 0,
         remove() {
@@ -3979,29 +3982,21 @@ const tech = {
     {
         name: "junk DNA",
         descriptionFunction() {
-            // return ` <strong>+100%</strong> ${b.guns[6].nameString()} <strong class='color-d'>damage</strong> per <strong class='color-junk'>JUNK</strong><strong class='color-m'>tech</strong> <em>(${(100 * tech.junkCount).toFixed(0)}%)</em><br><strong>+33%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool`
-            return `<strong class='color-d'>damage</strong> scales with <strong class='color-junk'>JUNK</strong> <strong class='color-m'>tech</strong> pool percent`
+            return `increase <strong class='color-d'>damage</strong> by twice the<br><strong class='color-junk'>JUNK</strong> <strong class='color-m'>tech</strong> pool percent <em>(${(200 * tech.junkChance).toFixed(0)}%)</em>`
         },
-        // isGunTech: true,
         maxCount: 1,
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return tech.junkPoolPercent > 0
+            return tech.junkChance > 0
         },
         requires: "JUNK in tech pool",
         effect() {
             tech.isJunkDNA = true
-            // this.refundAmount += tech.addJunkTechToPool(0.20)
         },
-        // refundAmount: 0,
         remove() {
             tech.isJunkDNA = false
-            // if (this.count > 0 && this.refundAmount > 0) {
-            //     tech.removeJunkTechFromPool(this.refundAmount)
-            //     this.refundAmount = 0
-            // }
         }
     },
     {
@@ -4246,7 +4241,7 @@ const tech = {
         name: "residual dipolar coupling",
         descriptionFunction() {
             // return `clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns ${powerUps.orb.coupling(5)}that each give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong>`//<br>${m.couplingDescription(1)} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}
-            return `clicking <strong class='color-cancel'>cancel</strong> spawns ${powerUps.orb.coupling(6)}<br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
+            return `clicking <strong class='color-cancel'>cancel</strong> spawns ${powerUps.orb.coupling(8)}<br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
         },
         maxCount: 1,
         count: 0,
@@ -4304,7 +4299,7 @@ const tech = {
     },
     {
         name: "futures exchange",
-        description: "clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>gives <strong>+4.7%</strong> power up <strong class='color-dup'>duplication</strong> chance",
+        description: "clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>gives <strong>+5%</strong> power up <strong class='color-dup'>duplication</strong> chance",
         // descriptionFunction() {
         //     return `clicking <strong style = 'font-size:150%;'>×</strong> to <strong>cancel</strong> a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>gives <strong>+${4.9 - 0.15*simulation.difficultyMode}%</strong> power up <strong class='color-dup'>duplication</strong> chance`
         // },
@@ -4327,7 +4322,7 @@ const tech = {
     },
     {
         name: "replication",
-        description: "<strong>+10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+33%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
+        description: "<strong>+10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+22%</strong> <strong class='color-junk'>JUNK</strong> to <strong class='color-m'>tech</strong> pool",
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -4339,8 +4334,8 @@ const tech = {
         effect() {
             tech.duplicateChance += 0.1
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
-            if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.11);
-            this.refundAmount += tech.addJunkTechToPool(0.33)
+            if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.1);
+            this.refundAmount += tech.addJunkTechToPool(0.22)
         },
         refundAmount: 0,
         remove() {
@@ -4676,30 +4671,6 @@ const tech = {
             for (let i = 0; i < removeTotal + 1; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
         },
         remove() { }
-    },
-    {
-        name: "reinforcement learning",
-        description: "increase the <strong class='flicker'>frequency</strong> of finding copies of<br>your current <strong class='color-m'>tech</strong> by <strong>1000%</strong>",
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        allowed() {
-            return tech.totalCount > 9
-        },
-        requires: "at least 10 tech",
-        effect() {
-            for (let i = 0, len = tech.tech.length; i < len; i++) {
-                if (tech.tech[i].count > 0) tech.tech[i].frequency *= 10
-            }
-        },
-        remove() {
-            if (this.count) {
-                for (let i = 0, len = tech.tech.length; i < len; i++) {
-                    if (tech.tech[i].count > 0 && tech.tech[i].frequency > 1) tech.tech[i].frequency /= 10
-                }
-            }
-        }
     },
     // {
     //     name: "backward induction",
@@ -6230,10 +6201,7 @@ const tech = {
         requires: "mines",
         effect() {
             tech.isMineDrop = true;
-            if (tech.isMineDrop) b.mine(m.pos, {
-                x: 0,
-                y: 0
-            }, 0)
+            if (tech.isMineDrop) b.mine(m.pos, { x: 0, y: 0 }, 0)
             this.refundAmount += tech.addJunkTechToPool(0.30)
         },
         refundAmount: 0,
@@ -9057,7 +9025,7 @@ const tech = {
     },
     {
         name: "reel",
-        description: "<strong>+400%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong><br>up to <strong>+75</strong> <strong class='color-f'>energy</strong> after reeling in <strong class='color-block'>blocks</strong>",
+        description: "<strong>+400%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong><br>up to <strong>+100</strong> <strong class='color-f'>energy</strong> after reeling in <strong class='color-block'>blocks</strong>",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -9548,6 +9516,30 @@ const tech = {
             }, 1000);
         },
         remove() { }
+    },
+    {
+        name: "reinforcement learning",
+        description: "<strong>+1000%</strong> <strong class='flicker'>frequency</strong> of finding copies of current <strong class='color-m'>tech</strong><br>",
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        isJunk: true,
+        allowed() {
+            return tech.totalCount > 9
+        },
+        requires: "at least 10 tech",
+        effect() {
+            for (let i = 0, len = tech.tech.length; i < len; i++) {
+                if (tech.tech[i].count > 0) tech.tech[i].frequency *= 10
+            }
+        },
+        remove() {
+            if (this.count) {
+                for (let i = 0, len = tech.tech.length; i < len; i++) {
+                    if (tech.tech[i].count > 0 && tech.tech[i].frequency > 1) tech.tech[i].frequency /= 10
+                }
+            }
+        }
     },
     {
         name: "startle response",
@@ -10229,6 +10221,25 @@ const tech = {
         remove() { }
     },
     {
+        name: "what the block?",
+        description: "throwing a <strong class='color-block'>block</strong> throws <strong>you</strong> instead",
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isNonRefundable: true,
+        isJunk: true,
+        allowed() {
+            return m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
+        },
+        requires: "not pilot wave, tokamak, wormhole",
+        effect() {
+
+        },
+        remove() {
+            m.throwBlock = m.throwBlockDefault
+        }
+    },
+    {
         name: "spinor",
         description: "the direction you aim is determined by your position",
         maxCount: 1,
@@ -10599,9 +10610,7 @@ const tech = {
         },
         requires: "",
         effect() {
-            for (let i = tech.tech.length - 1; i > 0; i--) {
-                if (tech.tech[i].isJunk) tech.tech[i].frequency = 0
-            }
+            tech.junkChance = 0;
         },
         remove() { }
     },
@@ -11593,6 +11602,26 @@ const tech = {
         remove() { }
     },
     {
+        name: "beforeunload",
+        description: "<strong>75%</strong> of the time when you attempt to <strong>exit</strong> n-gon<br>you are prompted to <strong>cancel</strong> or continue.<br>Each time you <strong>cancel</strong> gain <strong>+25%</strong> <strong class='color-d'>damage</strong>.",
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        isJunk: true,
+        allowed() {
+            return tech.totalCount > 9
+        },
+        requires: "at least 10 tech",
+        effect() {
+            tech.isExitPrompt = true
+            addEventListener('beforeunload', beforeUnloadEventListener);
+        },
+        remove() {
+            tech.isExitPrompt = false
+            if (this.count > 0) removeEventListener('beforeunload', beforeUnloadEventListener);
+        }
+    },
+    {
         name: "planetesimals",
         description: `play <strong>planetesimals</strong> <em style = 'font-size:80%;'>(an asteroids-like game)</em><br>clear <strong>levels</strong> in <strong>planetesimals</strong> to spawn <strong class='color-m'>tech</strong><br>if you <strong style="color:red;">die</strong> in <strong>planetesimals</strong> you <strong style="color:red;">die</strong> in <strong>n-gon</strong>`,
         maxCount: 1,
@@ -12189,4 +12218,5 @@ const tech = {
     isDamageCooldown: null,
     isDamageCooldownTime: null,
     isPowerUpDamage: null,
+    isExitPrompt: null,
 }

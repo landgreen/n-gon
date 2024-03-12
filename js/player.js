@@ -362,10 +362,10 @@ const m = {
         // tech.removeLoreTechFromPool();
         // tech.addLoreTechToPool();
         // tech.removeJunkTechFromPool();
+        tech.junkChance = 0;
         tech.duplication = 0;
         tech.extraMaxHealth = 0;
         tech.totalCount = 0;
-        tech.countJunkTech();
         const randomBotCount = b.totalBots()
         b.zeroBotCount()
         //remove all bullets, respawn bots
@@ -547,7 +547,6 @@ const m = {
         if (m.health > m.maxHealth) m.health = m.maxHealth;
         m.displayHealth();
     },
-
     defaultFPSCycle: 0, //tracks when to return to normal fps
     immuneCycle: 0, //used in engine
     lastCalculatedDamage: 0, //used to decided if damage bar needs to be redrawn  (in simulation.checks)
@@ -2329,7 +2328,8 @@ const m = {
             m.isHolding = false
         }
     },
-    throwBlock() {
+    throwBlock() { },
+    throwBlockDefault() {
         if (m.holdingTarget) {
             if (input.field) {
                 if (m.energy > 0.001) {
@@ -2473,6 +2473,116 @@ const m = {
                         expand(m.holdingTarget, Math.min(20, m.holdingTarget.mass * 3))
                     }
                 }
+            }
+        } else {
+            m.isHolding = false
+        }
+    },
+    throwSelf() {
+        if (m.holdingTarget) {
+            if (input.field) {
+                if (m.energy > 0.001) {
+                    if (m.fireCDcycle < m.cycle) m.fireCDcycle = m.cycle
+                    if (tech.isCapacitor && m.throwCharge < 4) m.throwCharge = 4
+                    m.throwCharge += 0.5 / m.holdingTarget.mass / b.fireCDscale
+                    if (m.throwCharge < 6) m.energy -= 0.001 / b.fireCDscale; // m.throwCharge caps at 5 
+
+                    //trajectory path prediction
+                    //draw charge
+                    const x = m.pos.x + 15 * Math.cos(m.angle);
+                    const y = m.pos.y + 15 * Math.sin(m.angle);
+                    const len = m.holdingTarget.vertices.length - 1;
+                    const edge = m.throwCharge * m.throwCharge * m.throwCharge;
+                    const grd = ctx.createRadialGradient(x, y, edge, x, y, edge + 5);
+                    grd.addColorStop(0, "rgba(255,50,150,0.3)");
+                    grd.addColorStop(1, "transparent");
+                    ctx.fillStyle = grd;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(m.holdingTarget.vertices[len].x, m.holdingTarget.vertices[len].y);
+                    ctx.lineTo(m.holdingTarget.vertices[0].x, m.holdingTarget.vertices[0].y);
+                    ctx.fill();
+                    for (let i = 0; i < len; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(m.holdingTarget.vertices[i].x, m.holdingTarget.vertices[i].y);
+                        ctx.lineTo(m.holdingTarget.vertices[i + 1].x, m.holdingTarget.vertices[i + 1].y);
+                        ctx.fill();
+                    }
+                    //trajectory prediction
+                    const cycles = 30
+                    const charge = Math.min(m.throwCharge / 5, 1)
+                    const speed = (tech.isPrinter ? 15 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
+                    const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
+                    ctx.beginPath()
+                    for (let i = 1, len = 10; i < len + 1; i++) {
+                        const time = cycles * i / len
+                        ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + 0.34 * time * time)
+                    }
+                    ctx.strokeStyle = "rgba(68, 68, 68, 0.15)" //color.map
+                    ctx.lineWidth = 2
+                    ctx.stroke()
+
+                } else {
+                    m.drop()
+                }
+            } else if (m.throwCharge > 0) { //Matter.Query.region(mob, player.bounds)
+                if (m.holdingTarget.isPrinted) m.holdingTarget.isPrinted = undefined
+                //throw the body
+                m.fieldCDcycle = m.cycle + 20;
+                m.fireCDcycle = m.cycle + 20;
+
+                m.isHolding = false;
+                //bullet-like collisions
+                m.holdingTarget.collisionFilter.category = cat.bullet
+                m.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield;
+                if (tech.isBlockRestitution) {
+                    m.holdingTarget.restitution = 0.999 //extra bouncy
+                    m.holdingTarget.friction = m.holdingTarget.frictionStatic = m.holdingTarget.frictionAir = 0.001
+                }
+                //check every second to see if player is away from thrown body, and make solid
+                const solid = function (that) {
+                    const dx = that.position.x - player.position.x;
+                    const dy = that.position.y - player.position.y;
+                    // if (that.speed < 3 && dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
+                    if (dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
+                        that.collisionFilter.category = cat.body; //make solid
+                        that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet; //can hit player now
+                    } else {
+                        setTimeout(solid, 40, that);
+                    }
+                };
+                setTimeout(solid, 200, m.holdingTarget);
+
+                const charge = Math.min(m.throwCharge / 5, 1)
+                //***** scale throw speed with the first number, 80 *****
+                // let speed = 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
+                let speed = (tech.isPrinter ? 15 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
+
+
+                m.throwCharge = 0;
+                m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
+                Matter.Body.setVelocity(m.holdingTarget, {
+                    x: Math.cos(m.angle) * speed / (m.crouch ? 30 : 10) * Math.sqrt(m.holdingTarget.mass),
+                    y: player.velocity.y - Math.sin(m.angle) * speed / 30 * Math.sqrt(m.holdingTarget.mass)
+                });
+                Matter.Body.setVelocity(player, {
+                    x: player.velocity.x - player.velocity.x * 0.5 + Math.cos(m.angle) * speed,
+                    y: player.velocity.y - player.velocity.y * 0.5 + Math.sin(m.angle) * speed
+                });
+                m.definePlayerMass() //return to normal player mass
+
+                if (tech.isAddBlockMass) {
+                    const expand = function (that, massLimit) {
+                        if (that.mass < massLimit) {
+                            const scale = 1.04;
+                            Matter.Body.scale(that, scale, scale);
+                            setTimeout(expand, 20, that, massLimit);
+                        }
+                    };
+                    expand(m.holdingTarget, Math.min(20, m.holdingTarget.mass * 3))
+                }
+
             }
         } else {
             m.isHolding = false

@@ -33,26 +33,25 @@ const level = {
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.damage(0.1);
-            // b.giveGuns("drones") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("mine") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[8].ammo = 100000000
-            // requestAnimationFrame(() => { tech.giveTech("Higgs mechanism") });
-            // for (let i = 0; i < 1; ++i) tech.giveTech("flame test")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("dazzler")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("mass production")
-            // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) tech.giveTech("orbital-bot") });
+            // requestAnimationFrame(() => { tech.giveTech("eternalism") });
+            // for (let i = 0; i < 1; ++i) tech.giveTech("beforeunload")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Sleipnir")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("dark patterns")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("paradigm shift") });
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) b.orbitBot(m.pos, false) });
             // m.skin.hexagon();
-
             // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
             // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 1; ++i) tech.giveTech("swarf")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("what the block?")
             // for (let i = 0; i < 1; ++i) tech.giveTech("unified field theory")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
             // for (let i = 0; i < 100; i++) powerUps.directSpawn(1750, -500, "coupling");
             // spawn.mapRect(575, -700, 25, 425);  //block mob line of site on testing
-            // level.testing();
+            // level.testChamber();
 
             // for (let i = 0; i < 1; ++i) spawn.laserLayer(1400, -500)
             // Matter.Body.setPosition(player, { x: -200, y: -3330 });
@@ -75,7 +74,7 @@ const level = {
             // simulation.isAutoZoom = false; //look in close
             // simulation.zoomScale *= 0.5;
             // simulation.setZoom();
-            // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
+            // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "boost");
             // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "heal");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
@@ -1570,7 +1569,6 @@ const level = {
                     }
                 }
             }
-            // if (body.length) {
             for (let i = 0, len = body.length; i < len; i++) {
                 if (body[i] !== m.holdingTarget) {
                     // body[i].bounds.max.x - body[i].bounds.min.x < 100 && body[i].bounds.max.y - body[i].bounds.min.y < 100
@@ -1591,17 +1589,20 @@ const level = {
                         }
                         //rotate velocity
                         let mag
-                        if (this.portalPair.angle !== 0 && this.portalPair.angle !== Math.PI) { //portal that fires the player up
+                        if (this.portalPair.angle !== 0 && this.portalPair.angle !== Math.PI) { //portal that fires up
                             mag = Math.max(10, Math.min(50, body[i].velocity.y * 0.8)) + 11
+                            let v = Vector.mult(this.portalPair.unit, mag)
+                            //rotate the velocity vector of blocks fired directly up to keep them from getting stuck endlessly in vertical portals
+                            Matter.Body.setVelocity(body[i], Vector.rotate(v, 0.5 * (Math.random() - 0.5)));
                         } else {
                             mag = Math.max(6, Math.min(50, Vector.magnitude(body[i].velocity)))
+                            let v = Vector.mult(this.portalPair.unit, mag)
+                            Matter.Body.setVelocity(body[i], v);
                         }
-                        let v = Vector.mult(this.portalPair.unit, mag)
-                        Matter.Body.setVelocity(body[i], v);
+
                     }
                 }
             }
-            // }
 
             //remove block if touching
             // if (body.length) {
