@@ -109,7 +109,7 @@ function collisionChecks(event) {
                         let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * simulation.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
                         // if (m.isCloak) dmg *= 0.5
                         mob[k].foundPlayer();
-                        if (tech.isRewindAvoidDeath && (m.energy + 0.05) > Math.min(0.95, m.maxEnergy) && dmg > 0.01) { //CPT reversal runs in m.damage, but it stops the rest of the collision code here too
+                        if (tech.isRewindAvoidDeath && m.energy > 0.85 * Math.min(1, m.maxEnergy) && dmg > 0.01) { //CPT reversal runs in m.damage, but it stops the rest of the collision code here too
                             m.damage(dmg);
                             return
                         }
@@ -229,8 +229,8 @@ function collisionChecks(event) {
                             y: mob[k].velocity.y - 8 * Math.sin(angle)
                         });
 
-                        if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].isDropPowerUp && m.energy > 0.34 * m.maxEnergy && mob[k].damageReduction > 0) {
-                            m.energy -= 0.33 * Math.max(m.maxEnergy, m.energy) //0.33 * m.energy
+                        if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].isDropPowerUp && m.energy > 0.1 && mob[k].damageReduction > 0) {
+                            m.energy -= 0.1 //* Math.max(m.maxEnergy, m.energy) //0.33 * m.energy
                             if (m.immuneCycle === m.cycle + m.collisionImmuneCycles) m.immuneCycle = 0; //player doesn't go immune to collision damage
                             mob[k].death();
                             simulation.drawList.push({ //add dmg to draw queue

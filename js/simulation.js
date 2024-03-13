@@ -418,6 +418,15 @@ const simulation = {
         simulation.boldActiveGunHUD();
     },
     updateTechHUD() {
+
+        // tech.tech.sort((a, b) => {
+        //     console.log(a.cycle, b.cycle)
+        //     if (a.cycle === undefined && b.cycle !== undefined) return -1;
+        //     if (a.cycle !== undefined && b.cycle === undefined) return 1;
+        //     if (a.cycle === undefined && b.cycle === undefined) return 0;
+        //     if (a.cycle !== b.cycle) return a.cycle - b.cycle;
+        // });
+
         let text = ""
         for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
             if (tech.tech[i].isLost) {
@@ -1287,7 +1296,7 @@ const simulation = {
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].isDropPowerUp && mob[i].alive) count++
             }
-            count *= 0.22 //to fake the 20% chance, this makes it not random, and more predictable
+            count *= 0.25 //to fake the 25% chance, this makes it not random, and more predictable
             let cycle = () => { //run after waiting a cycle for the map to be cleared
                 const types = ["heal", "ammo", "heal", "ammo", "research", "coupling", "boost", "tech", "gun", "field"]
                 for (let i = 0; i < count; i++) powerUps.spawnDelay(types[Math.floor(Math.random() * types.length)], 1)
