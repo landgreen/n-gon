@@ -169,7 +169,7 @@ const tech = {
             console.log(tech.tech[index].cycle)
             tech.totalCount++ //used in power up randomization
             //move new tech to the top of the tech list
-            if (index > 0) {
+            if (index > 0 && !build.isExperimentSelection) {
                 // Remove the element from the array
                 const [item] = tech.tech.splice(index, 1);
                 // Add the element to the front of the array
@@ -2928,7 +2928,7 @@ const tech = {
         },
         requires: "",
         effect() {
-            tech.bonusEnergy += 0.66
+            tech.bonusEnergy += 0.88
             m.setMaxEnergy()
             this.refundAmount += tech.addJunkTechToPool(0.05)
         },

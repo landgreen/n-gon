@@ -1,31 +1,6 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new tech are sorted to the top of the tech list
-  pause menu tech list matches the tech list in game
-JUNK tech icons are properly displayed in pause
-Sort interface works with enter key
-bug fix: you can no longer pause or enter testing in experiment selection on text input
-pressing P in power up selection menu brings up the pause menu
-  so you can see your tech and stats
-blocks stuck in vertical portals have a bit of randomness added to their velocity to help them escape
-
-JUNK tech chance is a raw percent chance to display a random JUNK
-  it was previously a specific JUNK tech directly added to the pool
-  this might cause bugs
-JUNK tech: beforeunload - asks if you want to cancel if you exit game, if you cancel gain 25% damage, but there is a 25% chance to exit anyways
-JUNK tech: what the block? - trying to throw a block, throws you instead
-reinforcement learning converted into a JUNK tech
-JUNK DNA - scale damage by 100->200% of JUNK pool tech percent
-dark patterns 33->22% JUNK
-replication 33->22% JUNK
-
-overcharge 66->88 max energy
-residual dipolar coupling 6->8 coupling per cancel
-futures exchange 4.7->5% duplication per cancel
-hyperpolarization reduces polarization time by 1->1.25 seconds
-reel +75->100 energy
-
-updated physics engine to matter.js 0.19 (from 0.18)
+bug fix for experiment mode
 
 *********************************************************** TODO *****************************************************
 
