@@ -505,9 +505,13 @@ const powerUps = {
         currentRerollCount: 0,
         use(type) { //runs when you actually research a list of selections, type can be field, gun, or tech
             if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
-                tech.addJunkTechToPool(tech.junkResearchNumber * 0.01)
+                tech.addJunkTechToPool(0.01)
             } else {
                 powerUps.research.changeRerolls(-1)
+            }
+            if (tech.isResearchDamage) {
+                tech.damage *= 1.04
+                simulation.makeTextLog(`<strong>1.04x</strong> <strong class='color-d'>damage</strong> from <strong>peer review</strong>`);
             }
             powerUps.research.currentRerollCount++
             // if (tech.isBanish && type === 'tech') { // banish researched tech
@@ -699,11 +703,8 @@ const powerUps = {
             text += `<div class='choose-grid-module entanglement flipX' onclick='powerUps.endDraft("${type}",true)'>entanglement</div>`
         } else if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
             text += `<div onclick="powerUps.research.use('${type}')" class='research-card'>` // style = "margin-left: 192px; margin-right: -192px;"
-            tech.junkResearchNumber = Math.ceil(3 * Math.random())
             text += `<div><div> <span style="position:relative;">`
-            for (let i = 0; i < tech.junkResearchNumber; i++) {
-                text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15 * i}px ;opacity:0.8; border: 1px #fff solid;width: 1.15em;height: 1.15em;"></div>`
-            }
+            text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15 * i}px ;opacity:0.8; border: 1px #fff solid;width: 1.15em;height: 1.15em;"></div>`
             text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div></div>`
         } else if (powerUps.research.count > 0) {
             text += `<div onclick="powerUps.research.use('${type}')" class='research-card' >` // style = "margin-left: 192px; margin-right: -192px;"
@@ -721,11 +722,8 @@ const powerUps = {
             text += `<span class='research-card entanglement flipX' style="width: 275px;" onclick='powerUps.endDraft("${type}",true)'><span style="letter-spacing: 6px;">entanglement</span></span>`  //&zwnj;
         } else if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
             text += `<span onclick="powerUps.research.use('${type}')" class='research-card' style="width: 275px;float: left;">` // style = "margin-left: 192px; margin-right: -192px;"
-            tech.junkResearchNumber = Math.ceil(3 * Math.random())
             text += `<div><div><span style="position:relative;">`
-            for (let i = 0, len = tech.junkResearchNumber; i < len; i++) {
-                text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15 * i}px ;opacity:0.8; border: 1px #fff solid;width: 1.15em;height: 1.15em;"></div>`
-            }
+            text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15 * i}px ;opacity:0.8; border: 1px #fff solid;width: 1.15em;height: 1.15em;"></div>`
             text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality ? "<span class='alt'>alternate reality</span>" : "research"}</span></div></div></span>`
         } else if (powerUps.research.count > 0) {
             text += `<span onclick="powerUps.research.use('${type}')" class='research-card' style="width: 275px;float: left;">` // style = "margin-left: 192px; margin-right: -192px;"
@@ -787,24 +785,6 @@ const powerUps = {
         }
         return text
     },
-    // researchAndCancelText(type) {
-    //     let text = "<div class= 'choose-grid-module'>"
-    //     if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
-    //         text += `<div onclick="powerUps.research.use('${type}')" class='choose-grid-module research-card'>` // style = "margin-left: 192px; margin-right: -192px;"
-    //         tech.junkResearchNumber = Math.ceil(4 * Math.random())
-    //         text += `<div><div> <span style="position:relative;">`
-    //         for (let i = 0; i < tech.junkResearchNumber; i++) text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
-    //         text += `</span>&nbsp; <span class='research-select'>pseudoscience</span></div></div></div>`
-    //     } else if (powerUps.research.count > 0) {
-    //         text += `<div onclick="powerUps.research.use('${type}')" class='choose-grid-module research-card' >` // style = "margin-left: 192px; margin-right: -192px;"
-    //         text += `<div><div><span style="position:relative;">`
-    //         for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="position:absolute; top:0; left:${(18 - len*0.21)*i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
-    //         text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality?"<span class='alt'>alternate reality</span>": "research"}</span></div></div></div>`
-    //     } else {
-    //         text += `<div></div>`
-    //     }
-    //     return text + '</div>'
-    // },
     hideStyle: `style="height:auto; border: none; background-color: transparent;"`,
     gunText(choose, click) {
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/gun/${b.guns[choose].name}.webp');"`

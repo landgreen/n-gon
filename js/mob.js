@@ -1078,7 +1078,7 @@ const mobs = {
                                     })
                                 }
                             } else if (tech.isMobLowHealth && this.health < 0.25) {
-                                dmg *= 3.22
+                                dmg *= 3
 
                                 simulation.ephemera.push({
                                     name: "damage outline",

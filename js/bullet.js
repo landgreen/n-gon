@@ -287,8 +287,8 @@ const b = {
         b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage
         if (m.fieldMode === 6) b.fireCDscale *= 0.8
         if (tech.isFastTime) b.fireCDscale *= 0.5
-        if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.82, Math.max(0, b.inventory.length - 1))
-        if (tech.isFireMoveLock) b.fireCDscale *= 0.23 // 77% fire rate
+        if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.8, Math.max(0, b.inventory.length - 1))
+        if (tech.isFireMoveLock) b.fireCDscale *= 0.2 // 77% fire rate
     },
     fireAttributes(dir, rotate = true) {
         if (rotate) {
@@ -1873,7 +1873,7 @@ const b = {
                 if (tech.isHarpoonPowerUp && simulation.cycle - 480 < tech.harpoonPowerUpCycle) {
                     Matter.Body.setDensity(this, 1.8 * tech.harpoonDensity); //+90% damage after pick up power up for 8 seconds
                 } else if (tech.isHarpoonFullHealth && who.health === 1) {
-                    Matter.Body.setDensity(this, 2.11 * tech.harpoonDensity); //+90% damage if mob has full health do
+                    Matter.Body.setDensity(this, 2.2 * tech.harpoonDensity); //+90% damage if mob has full health do
                     simulation.ephemera.push({
                         name: "harpoon outline",
                         count: 2, //cycles before it self removes
@@ -7230,7 +7230,6 @@ const b = {
         },
         {
             name: "foam", //8
-            // description: `spray bubbly foam that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time<br><strong>24</strong> bubbles per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
                 return `spray bubbly <strong>foam</strong> that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time<br><strong>${this.ammoPack.toFixed(0)}</strong> bubbles per ${powerUps.orb.ammo()}`
             },

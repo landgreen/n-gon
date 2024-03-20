@@ -974,7 +974,7 @@ const spawn = {
                         if (!simulation.paused && !simulation.onTitlePage) {
                             count++
                             if (count < 660) {
-                                if (count === 1) simulation.makeTextLog(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
+                                if (count === 1 && simulation.difficultyMode < 5) simulation.makeTextLog(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
                                 if (!(count % 60)) simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> ${((count / 60 - Math.random()) * 0.1).toFixed(3)}`);
                             } else if (count === 660) {
                                 simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1 <em>//analysis complete</em>`);
@@ -1011,7 +1011,7 @@ const spawn = {
                                 return
                             }
                         }
-                        if (simulation.testing) {
+                        if (simulation.testing || simulation.difficultyMode > 4) {
                             unlockExit()
                             setTimeout(function () {
                                 simulation.makeTextLog(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);

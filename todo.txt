@@ -1,9 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-bug fix for experiment mode
+text rework
+  most numbers converted from "+50%" to "1.5x"
+  renamed defense -> damage taken
+  adjusted about 20 tech to round down or up their values to less decimals
+    for a few I added research cost or JUNK chance to balance rounding
+
+new community map soft by Richard0820
+tech: peer review - gain +damage each time you research
+self-assembly scales with health not health percent
+matter.js engine reverted back to 0.18 (to fix an issue with time dilation)
 
 *********************************************************** TODO *****************************************************
 
+tech - destroys a random tech each new level and gains +damage each time
 
 List of ways to break the game
   CPT + high energy regen
@@ -1085,7 +1095,6 @@ possible names for tech
   holographic - 2-D surface can predict the 3-D space behind it?  I think
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   swarm intelligence - for a drone tech
-  genetic algorithm
   metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity
   stochastic optimization
   electrostatic discharge

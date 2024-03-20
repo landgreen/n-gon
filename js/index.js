@@ -474,11 +474,11 @@ const build = {
 <label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.15em;" >hide images</label>
 <br>
 <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
-<label for="hide-hud" title="hide: tech, defense, damage, in game console" style="font-size:1.15em;">minimal HUD</label>
+<label for="hide-hud" title="hide: tech, damage taken, damage, in game console" style="font-size:1.15em;">minimal HUD</label>
 <br>
 
-<br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)} &nbsp; &nbsp; difficulty: ${((m.dmgScale)).toPrecision(4)}
-<br><strong class='color-defense'>defense</strong>: ${(1 - m.defense()).toPrecision(5)} &nbsp; &nbsp; difficulty: ${(1 / simulation.dmgScale).toPrecision(4)}
+<br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)} <span style="float: right;"><strong class='color-d'>difficulty:</strong> ${((m.dmgScale)).toPrecision(4)}</span>
+<br><strong class='color-defense'>damage taken</strong>: ${(m.defense()).toPrecision(4)} <span style="float: right;"><strong class='color-defense'>difficulty:</strong> ${(simulation.dmgScale).toPrecision(4)}</span>
 <br><strong><em>fire rate</em></strong>: ${((1 - b.fireCDscale) * 100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
 ${tech.duplicationChance() ? `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance() * 100).toFixed(0)}%` : ""}
 ${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
@@ -552,7 +552,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 <button onclick="build.sortTech('guntech')" class='sort-button'><strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></button>
 <button onclick="build.sortTech('fieldtech')" class='sort-button'><strong class='color-f'>field</strong><strong class='color-m'>tech</strong></button>
 <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
-<button onclick="build.sortTech('defense')" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">defense</strong></button>
+<button onclick="build.sortTech('damage taken')" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">damage taken</strong></button>
 <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
 <input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#000;" placeholder="sort by"/>
 <button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
@@ -876,7 +876,9 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         <button onclick="build.sortTech('guntech', true)" class='sort-button'><strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></button>
         <button onclick="build.sortTech('fieldtech', true)" class='sort-button'><strong class='color-f'>field</strong><strong class='color-m'>tech</strong></button>
         <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d'>damage</strong></button>
-        <button onclick="build.sortTech('defense', true)" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">defense</strong></button>
+        <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
+        <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">damage taken</strong></button>
+        <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
         <button onclick="build.sortTech('have', true)" class='sort-button color-m' style="letter-spacing: 1px;font-weight: 800;">have</button>
         <button onclick="build.sortTech('allowed', true)" class='sort-button' style="letter-spacing: 1px;font-weight: 400;">allowed</button>
         <input type="search" id="sort-input" style="width: 8.7em;font-size: 0.6em;color:#000;" placeholder="sort by"/>
@@ -1602,10 +1604,7 @@ window.addEventListener("keydown", function (event) {
             case "r":
                 m.resetHistory();
                 Matter.Body.setPosition(player, simulation.mouseInGame);
-                Matter.Body.setVelocity(player, {
-                    x: 0,
-                    y: 0
-                });
+                Matter.Body.setVelocity(player, { x: 0, y: 0 });
                 // move bots to player
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].botType) {
