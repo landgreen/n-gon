@@ -130,9 +130,9 @@ const b = {
     //         if (b.guns[i].name === name) return b.guns[i].ammo
     //     }
     // },
-    giveGuns(gun = "random", ammoPacks = 10) {
-        if (tech.ammoCap) ammoPacks = 0.45 * tech.ammoCap
-        if (tech.isOneGun) b.removeAllGuns();
+    giveGuns(gun = "random", ammoPacks = 22) {
+        if (tech.ammoCap) ammoPacks = tech.ammoCap
+        if (tech.isOneGun) b.resetAllGuns();
         if (gun === "random") {
             //find what guns player doesn't have
             options = []
@@ -198,8 +198,8 @@ const b = {
                 }
                 if (gunTechPool.length) {
                     const index = Math.floor(Math.random() * gunTechPool.length)
-                    tech.giveTech(gunTechPool[index]) // choose from the gun pool
                     simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[gunTechPool[index]].name}</span>")`)
+                    tech.giveTech(gunTechPool[index]) // choose from the gun pool
                 } else {
                     tech.giveTech() //get normal tech if you can't find any gun tech
                 }
@@ -229,11 +229,12 @@ const b = {
         }
         b.setFireCD();
     },
-    removeAllGuns() {
+    resetAllGuns() {
         b.inventory = []; //removes guns and ammo  
         for (let i = 0, len = b.guns.length; i < len; ++i) {
             b.guns[i].count = 0;
             b.guns[i].have = false;
+            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
             if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
         }
         tech.buffedGun = 0
@@ -835,10 +836,7 @@ const b = {
                     suck([player], this.explodeRad * 1.3)
                 }
 
-                Matter.Body.setVelocity(this, {
-                    x: 0,
-                    y: 0
-                }); //keep bomb in place
+                Matter.Body.setVelocity(this, { x: 0, y: 0 }); //keep bomb in place
                 //draw suck
                 const radius = 2.75 * this.explodeRad * (this.endCycle - simulation.cycle) / this.suckCycles
                 ctx.fillStyle = "rgba(0,0,0,0.1)";
@@ -1827,7 +1825,7 @@ const b = {
             friction: 1,
             frictionAir: 0.4,
             // thrustMag: 0.1,
-            drain: tech.isRailEnergy ? 0 : 0.006,
+            drain: tech.isRailEnergy ? 0.0002 : 0.006,
             turnRate: isReturn ? 0.1 : 0.03, //0.015
             drawStringControlMagnitude: 3000 + 5000 * Math.random(),
             drawStringFlip: (Math.round(Math.random()) ? 1 : -1),
@@ -5816,8 +5814,8 @@ const b = {
                 return `use compressed air to rapidly drive <strong>nails</strong><br><em>fire rate</em> <strong>increases</strong> the longer you fire<br><strong>${this.ammoPack.toFixed(0)}</strong> nails per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 60,
-            defaultAmmoPack: 60,
+            ammoPack: 27,
+            defaultAmmoPack: 27,
             recordedAmmo: 0,
             have: false,
             nextFireCycle: 0, //use to remember how longs its been since last fire, used to reset count
@@ -6131,8 +6129,8 @@ const b = {
                 return `fire a wide <strong>burst</strong> of short range <strong> bullets</strong><br>has a slow <strong><em>fire rate</em></strong><br><strong>${this.ammoPack.toFixed(1)}</strong> shots per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 3.5,
-            defaultAmmoPack: 3.5,
+            ammoPack: 1.6,
+            defaultAmmoPack: 1.6,
             have: false,
             do() {
                 //fade cross hairs
@@ -6422,7 +6420,8 @@ const b = {
                 return `fire <strong>3</strong> balls in a wide arc<br>balls <strong>bounce</strong> with no momentum loss<br><strong>${this.ammoPack.toFixed(0)}</strong> balls per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 9,
+            ammoPack: 4.05,
+            defaultAmmoPack: 4.05,
             have: false,
             // num: 5,
             do() { },
@@ -6500,8 +6499,8 @@ const b = {
                 return `emit <strong>wave packets</strong> that propagate through <strong>solids</strong><br>waves <strong class='color-s'>slow</strong> mobs<br><strong>${this.ammoPack.toFixed(0)}</strong> wave packets per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 115,
-            defaultAmmoPack: 115,
+            ammoPack: 52,
+            defaultAmmoPack: 52,
             have: false,
             wavePacketCycle: 0,
             delay: 40,
@@ -6863,7 +6862,8 @@ const b = {
                 return `launch <strong>homing</strong> missiles that target mobs<br>missiles <strong class='color-e'>explode</strong> on contact with mobs<br><strong>${this.ammoPack.toFixed(1)}</strong> missiles per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 5,
+            ammoPack: 2.3,
+            defaultAmmoPack: 2.3,
             have: false,
             fireCycle: 0,
             do() { },
@@ -6971,7 +6971,8 @@ const b = {
                 return `lob a single <strong>bouncy</strong> projectile<br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after one second<br><strong>${this.ammoPack.toFixed(0)}</strong> grenades per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 7,
+            ammoPack: 3.2,
+            defaultAmmoPack: 3.2,
             have: false,
             do() { }, //do is set in b.setGrenadeMode()
             fire() {
@@ -6995,7 +6996,8 @@ const b = {
                 return `toss a <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> that discharges ${b.guns[6].nameString("s")}<br>${b.guns[6].nameString("s")} seek out nearby mobs<br><strong>${this.ammoPack.toFixed(1)}</strong> sporangium per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 2.6,
+            ammoPack: 1.22,
+            defaultAmmoPack: 1.22,
             have: false,
             nameString(suffix = "") {
                 if (tech.isSporeFlea) {
@@ -7020,7 +7022,7 @@ const b = {
                 bullet[me].maxRadius = 30;
                 bullet[me].restitution = 0.3;
                 bullet[me].minDmgSpeed = 0;
-                bullet[me].totalSpores = 8 + 2 * tech.isSporeFreeze + 4 * tech.isSporeColony
+                bullet[me].totalSpores = 8 + 2 * tech.isSporeFreeze + 5 * tech.isSporeColony
                 bullet[me].stuck = function () { };
                 bullet[me].beforeDmg = function () { };
                 bullet[me].do = function () {
@@ -7165,7 +7167,7 @@ const b = {
                     ]
 
                     for (len = this.totalSpores; count < len; count++) {
-                        if (tech.isSporeColony && Math.random() < 0.5) {
+                        if (tech.isSporeColony && Math.random() < 0.33) {
                             things[Math.floor(Math.random() * things.length)]()
                         } else if (tech.isSporeFlea) {
                             things[2]()
@@ -7192,8 +7194,8 @@ const b = {
                 return `deploy <strong>autonomous</strong> <strong>drones</strong> that smash into mobs<br>drones <strong>collect</strong> nearby power ups<br><strong>${this.ammoPack.toFixed(0)}</strong> drones per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 16,
-            defaultAmmoPack: 16,
+            ammoPack: 7.3,
+            defaultAmmoPack: 7.3,
             have: false,
             do() { },
             fire() {
@@ -7234,7 +7236,8 @@ const b = {
                 return `spray bubbly <strong>foam</strong> that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time<br><strong>${this.ammoPack.toFixed(0)}</strong> bubbles per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 28,
+            ammoPack: 12.6,
+            defaultAmmoPack: 12.6,
             have: false,
             charge: 0,
             isDischarge: false,
@@ -7351,7 +7354,8 @@ const b = {
                 return `throw a <strong>self-steering</strong> harpoon that uses <strong class='color-f'>energy</strong><br>to <strong>retract</strong> and refund its <strong class='color-ammo'>ammo</strong> cost<br><strong>${this.ammoPack.toFixed(1)}</strong> harpoons per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 1.7, //update this in railgun tech
+            ammoPack: 0.77, //update this in railgun tech
+            defaultAmmoPack: 0.77,
             have: false,
             fire() { },
             do() { },
@@ -7692,7 +7696,8 @@ const b = {
                 return `toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>refund <strong>undetonated</strong> mines on <strong>exiting</strong> a level<br><strong>${this.ammoPack.toFixed(1)}</strong> mines per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 1.7,
+            ammoPack: 0.77,
+            defaultAmmoPack: 0.77,
             have: false,
             nameString(suffix = "") {
                 if (tech.isFoamMine) {
@@ -7761,12 +7766,12 @@ const b = {
         },
         {
             name: "laser", //11
-            // description: `emit a <strong>beam</strong> of collimated coherent <strong class='color-laser'>light</strong><br>drains <strong class='color-f'>energy</strong> instead of ammo<br>drains <strong>${(0.001 + tech.laserDrain) * 100}%</strong> <strong class='color-f'>energy</strong> per second`,
             descriptionFunction() {
-                return `emit a <strong>beam</strong> of collimated coherent <strong class='color-laser'>light</strong><br>drains <strong>${((0.001 + tech.laserDrain) * 600).toFixed(2)}</strong> <strong class='color-f'>energy</strong> per second<br>doesn't use <strong>ammo</strong>`
+                return `emit a <strong>beam</strong> of collimated coherent <strong class='color-laser'>light</strong><br>costs <strong>${(tech.laserDrain * 6000).toFixed(1)}</strong> <strong class='color-f'>energy</strong> per second<br>doesn't use <strong>ammo</strong>`
             },
             ammo: 0,
             ammoPack: Infinity,
+            defaultAmmoPack: Infinity,
             have: false,
             charge: 0,
             isStuckOn: false,
@@ -7903,7 +7908,7 @@ const b = {
                 // this.fire = this.firePhoton
             },
             fireLaser() {
-                const drain = 0.001 + tech.laserDrain / b.fireCDscale
+                const drain = tech.laserDrain / b.fireCDscale
                 if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
@@ -7921,7 +7926,7 @@ const b = {
             },
             firePulse() { },
             fireSplit() {
-                const drain = 0.001 + tech.laserDrain / b.fireCDscale
+                const drain = tech.laserDrain / b.fireCDscale
                 if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
@@ -7946,7 +7951,7 @@ const b = {
                 }
             },
             fireWideBeam() {
-                const drain = 0.001 + tech.laserDrain / b.fireCDscale
+                const drain = tech.laserDrain / b.fireCDscale
                 if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {
@@ -8019,7 +8024,7 @@ const b = {
                 }
             },
             fireHistory() {
-                drain = 0.001 + tech.laserDrain / b.fireCDscale
+                drain = tech.laserDrain / b.fireCDscale
                 if (m.energy < drain) {
                     m.fireCDcycle = m.cycle + 100; // cool down if out of energy
                 } else {

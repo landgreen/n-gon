@@ -33,19 +33,22 @@ const level = {
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.damage(0.1);
-            // b.giveGuns("mine") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("drones") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[8].ammo = 100000000
-            // requestAnimationFrame(() => { tech.giveTech("eternalism") });
-            // for (let i = 0; i < 1; ++i) tech.giveTech("beforeunload")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Sleipnir")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("dark patterns")
+            // requestAnimationFrame(() => { tech.giveTech("optical amplifier") });
+            // for (let i = 0; i < 1; ++i) tech.giveTech("mass production")
+            // tech.giveTech("Pareto efficiency")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("reduced tolerances")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Newtons 1st law")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Newtons 2nd law")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("paradigm shift") });
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) b.orbitBot(m.pos, false) });
-            // m.skin.hexagon();
             // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
             // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 1; ++i) tech.giveTech("what the block?")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("deprecated")
             // for (let i = 0; i < 1; ++i) tech.giveTech("unified field theory")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
@@ -56,7 +59,7 @@ const level = {
             // for (let i = 0; i < 1; ++i) spawn.laserLayer(1400, -500)
             // Matter.Body.setPosition(player, { x: -200, y: -3330 });
             // for (let i = 0; i < 4; ++i) spawn.laserLayer(1300, -500 + 100 * Math.random())
-            // for (let i = 0; i < 1; ++i) spawn.laserLayerBoss(1900, -500)
+            // for (let i = 0; i < 1; ++i) spawn.stinger(1900, -500)
             // for (let i = 0; i < 1; ++i) spawn.dragonFlyBoss(1900, -500)
             // spawn.beetleBoss(1900, -500, 25)
             // spawn.zombie(-3000, -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)
@@ -74,9 +77,9 @@ const level = {
             // simulation.isAutoZoom = false; //look in close
             // simulation.zoomScale *= 0.5;
             // simulation.setZoom();
-            // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
+            // for (let i = 0; i < 3; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "boost");
-            // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "heal");
+            // for (let i = 0; i < 100; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "ammo");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             //lore testing
             // localSettings.isTrainingNotAttempted = true
@@ -168,12 +171,42 @@ const level = {
             powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
         }
         if (tech.isHealLowHealth) {
-            if (tech.isEnergyHealth) {
-                var len = 4 * Math.max(0, m.maxEnergy - m.energy)
-            } else {
-                var len = 4 * Math.max(0, m.maxHealth - m.health)
-            }
+            const len = tech.isEnergyHealth ? 5 * Math.max(0, m.maxEnergy - m.energy) : 5 * Math.max(0, m.maxHealth - m.health)
             for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "heal", false);
+        }
+        if (tech.interestRate > 0) {
+            const rate = ((level[level.levels[level.onLevel]].name === "final" || level[level.levels[level.onLevel]].name === "subway") ? 1 / 3 : 1) * tech.interestRate //this effect triggers extra times on these final levels
+            if (b.activeGun !== null && b.activeGun !== undefined && b.guns[b.activeGun].name !== "laser") {
+                const ammoPerOrb = b.guns[b.activeGun].ammoPack
+                const a = Math.ceil(rate * b.guns[b.activeGun].ammo / ammoPerOrb)
+                powerUps.spawnDelay("ammo", a);
+                simulation.makeTextLog(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${a > 20 ? a + powerUps.orb.ammo(1) : powerUps.orb.ammo(a)}`)
+            }
+            if (powerUps.research.count > 0) {
+                const r = Math.ceil(rate * powerUps.research.count)
+                simulation.makeTextLog(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-r'>research</span> <span class='color-symbol'>=</span> ${r > 20 ? r + powerUps.orb.research(1) : powerUps.orb.research(r)}`)
+                powerUps.spawnDelay("research", r);
+            }
+            if (m.coupling > 0) {
+                const c = Math.ceil(rate * m.coupling)
+                powerUps.spawnDelay("coupling", c);
+                simulation.makeTextLog(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
+            }
+
+            const healPerOrb = (powerUps.heal.size() / 40 / (simulation.healScale ** 0.25)) ** 2
+            const h = Math.ceil(rate * m.health / healPerOrb)
+            powerUps.spawnDelay("heal", h);
+            simulation.makeTextLog(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
+
+            // trying to spawn smaller heals
+            // const healPerOrb = (powerUps.heal.size() / 40 / (simulation.healScale ** 0.25)) ** 2
+            // console.log(healPerOrb)
+            // let h = tech.interestRate * m.health / healPerOrb
+            // console.log(tech.interestRate, m.health, healPerOrb, h)
+            // const overHeal = h - Math.floor(h)
+            // powerUps.spawn(m.pos.x, m.pos.y, "heal", true, null, Math.max(0.25, overHeal) * 40 * (simulation.healScale ** 0.25))
+            // if (h > healPerOrb) powerUps.spawnDelay("heal", h);
+            // simulation.makeTextLog(`${(Math.ceil(tech.interestRate * 100)).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
         }
     },
     trainingText(say) {
@@ -181,7 +214,6 @@ const level = {
         simulation.isTextLogOpen = true
         simulation.makeTextLog(`<span style="font-size: 120%;line-height: 120%;"><span style="color:#51f;">supervised.learning</span>(<span style="color:#777; font-size: 80%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span><br>${say}</span>`, Infinity)
         simulation.isTextLogOpen = false
-        // lore.trainer.text("Wow. Just a platform.")
     },
     trainingBackgroundColor: "#e1e1e1",
     custom() { },
@@ -21080,7 +21112,7 @@ const level = {
                     if (m.alive) {
                         // tech.damage *= 2;
                         let text = "";
-                        if (!tech.isSuperDeterminism) { text += `<div class='cancel' onclick='powerUps.endDraft("buff",true)'>${tech.isCancelTech ? "?" : "✕"}</div>`; };
+                        if (!tech.isSuperDeterminism) { text += `<div class='cancel' onclick='powerUps.endDraft("buff",true)'>${(tech.isCancelTech && tech.cancelTechCount === 0) ? "?" : "✕"}</div>`; };
                         text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>Blessing Of Sal</h3>`;
                         text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(1)"><div class="grid-title"><div class="circle-grid tech" style="background-image: linear-gradient(lightyellow, yellow);"></div> &nbsp; Speed Boost</div>Increase speed by 5%</div>`;
                         text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(2)"><div class="grid-title"><div class="circle-grid tech" style="background-image: linear-gradient(gray, lightgray);"></div> &nbsp; Defense Boost</div>Reduce damage by 5%</div>`;
@@ -24125,64 +24157,6 @@ const level = {
                 ctx.setLineDash([]);
             }
         };
-        // if(powerUps.pass == undefined) {
-        // let pass = {pass:true, activated:false};
-        // Object.assign(powerUps, pass)
-        // }
-        // const loadOut = {
-        // loadOut: {
-        // name: "loadOut",
-        // color: "#000000", //"hsl(248,100%,65%)",
-        // size() { return 40 },
-        // effect() {
-        // if(m.alive) {
-        // // tech.damage *= 2;
-        // let text = "";
-        // if (!tech.isSuperDeterminism) { text += `<div class='cancel' onclick='powerUps.endDraft("buff",true)'>${tech.isCancelTech ? "?":"✕"}</div>`; };
-        // text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>Blessing Of Sal</h3>`;
-        // text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(1)"><div class="grid-title"><div class="circle-grid tech" style="background-image: linear-gradient(lightyellow, yellow);"></div> &nbsp; Speed Boost</div>Increase speed by 5%</div>`;
-        // text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(2)"><div class="grid-title"><div class="circle-grid tech" style="background-image: linear-gradient(gray, lightgray);"></div> &nbsp; Defense Boost</div>Reduce damage by 5%</div>`;
-        // text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(3)"><div class="grid-title"><div class="circle-grid tech" style="background-image: linear-gradient(red, orange);"></div> &nbsp; Damage Boost</div>Increase damage by 10%</div>`;
-        // if(powerUps.pass == true) {
-        // text += `<div disabled class="choose-grid-module" onclick="powerUps.loadOut.choose(4)"><div class="grid-title"><div class="circle-grid tech" style="background-image: radial-gradient(black, gray);"></div> &nbsp; Blade of Sal</div>Press Shift to summon the <b style="color: ${m.eyeFillColor};">Mythical</b> <em style="color: lightblue; text-shadow: ${m.eyeFillColor} 0px 0 5px;">Las Slayer</em><div>Drains <strong class='color-f'>Energy</strong></div></div>`;
-        // }
-        // document.getElementById("choose-grid").innerHTML = text;
-        // powerUps.showDraft();//no known bugs ig idk, im keep this as it is
-        // }
-        // }, 
-        // choose(index) {
-        // if(index == 1) {
-        // tech.squirrelFx += 0.25; 
-        // tech.squirrelJump += 0.1; 
-        // m.setMovement(); 
-        // powerUps.endDraft("buff");
-        // } else if(index == 2) {
-        // simulation.dmgScale *= 0.95; 
-        // powerUps.endDraft("buff");
-        // } else if(index == 3) {
-        // m.dmgScale *= 1.1;
-        // powerUps.endDraft("buff");
-        // } else if(index == 4) { //sword!
-        // powerUps.pass = false;
-        // addEventListener("keydown", function(event) {
-        // if(event.key == "Shift" && powerUps.activated == false) {
-        // sword()
-        // powerUps.activated = true;
-        // } else if(event.key == "Shift" && powerUps.activated == true) {
-        // for(let i = 0; i < mob.length; i++) {
-        // if(mob[i].isSword) {
-        // mob[i].death()
-        // }
-        // powerUps.activated = false;
-        // }
-        // }
-        // })
-        // powerUps.endDraft("buff");
-        // }
-        // }
-        // }
-        // }
-        // Object.assign(powerUps, loadOut)
         const restoreBoss = function (x, y, radius = 30) { //ATTENTION LANDGREEN: RESTOREBOSS WILL NOT DROP ANY TECH, NOR WILL THERE BE ANY IN THE MAP. DO NOT ADD ANY TECH TO MY MAP
             mobs.spawn(x, y, 8, radius, 'transparent');
             let me = mob[mob.length - 1];
@@ -33022,7 +32996,7 @@ const level = {
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
         document.body.style.backgroundColor = level.trainingBackgroundColor
-        b.removeAllGuns();
+        b.resetAllGuns();
         b.giveGuns("nail gun")
         b.guns[b.activeGun].ammo = 0
         simulation.updateGunHUD();
@@ -33117,7 +33091,7 @@ const level = {
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
         document.body.style.backgroundColor = level.trainingBackgroundColor
-        b.removeAllGuns();
+        b.resetAllGuns();
         b.giveGuns("shotgun")
         // b.guns[b.activeGun].ammo = 0
         // simulation.updateGunHUD();
@@ -33199,7 +33173,7 @@ const level = {
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
         document.body.style.backgroundColor = level.trainingBackgroundColor
-        b.removeAllGuns();
+        b.resetAllGuns();
         b.giveGuns("super balls")
         // b.guns[b.activeGun].ammo = 0
         // simulation.updateGunHUD();
@@ -33283,7 +33257,7 @@ const level = {
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
         document.body.style.backgroundColor = level.trainingBackgroundColor
-        b.removeAllGuns();
+        b.resetAllGuns();
         b.giveGuns("wave")
         // b.guns[b.activeGun].ammo = 0
         // simulation.updateGunHUD();
@@ -33370,7 +33344,7 @@ const level = {
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
         document.body.style.backgroundColor = level.trainingBackgroundColor
-        b.removeAllGuns();
+        b.resetAllGuns();
         b.giveGuns("missiles")
         // b.guns[b.activeGun].ammo = 0
         // simulation.updateGunHUD();
@@ -33459,7 +33433,7 @@ const level = {
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
         document.body.style.backgroundColor = level.trainingBackgroundColor
-        b.removeAllGuns();
+        b.resetAllGuns();
         let instruction = 0
         level.trainingText(`use your <strong class='color-f'>field</strong> to stack the <strong class='color-block'>blocks</strong>`)
 
@@ -33511,7 +33485,7 @@ const level = {
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
         document.body.style.backgroundColor = level.trainingBackgroundColor
-        b.removeAllGuns();
+        b.resetAllGuns();
         b.giveGuns("mine")
 
         let instruction = 0
@@ -33595,7 +33569,7 @@ const level = {
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
         document.body.style.backgroundColor = level.trainingBackgroundColor
-        b.removeAllGuns();
+        b.resetAllGuns();
         b.giveGuns("grenades")
 
         const elevator1 = level.elevator(550, -100, 180, 25, -840, 0.003, {
@@ -33715,7 +33689,7 @@ const level = {
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
         document.body.style.backgroundColor = level.trainingBackgroundColor
-        b.removeAllGuns();
+        b.resetAllGuns();
         b.giveGuns("harpoon")
 
         let instruction = 0

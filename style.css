@@ -519,38 +519,6 @@ summary {
     border-radius: 5px;
 }
 
-/* keeps 4 columns at 1440px */
-/* @media (1500px <= width < 1950px) {
-    .experiment-grid-module, .choose-grid-module, .pause-grid-module {
-        line-height: 150%;
-        font-size: 0.72em;
-    }
-    #experiment-grid, #choose-grid, .pause-grid{
-        grid-template-columns: repeat(auto-fit, 360px);
-    }
-    .card-background{
-        height:315px;
-    }
-    .card-text {
-        min-height: 82px;
-    }
-}
-@media (width < 1500px) {
-    .experiment-grid-module, .choose-grid-module, .pause-grid-module {
-        line-height: 143%;
-        font-size: 0.68em;
-    }
-    #experiment-grid, #choose-grid, .pause-grid{
-        grid-template-columns: repeat(auto-fit, 340px);
-    }
-    .card-background{
-        height:290px; 
-    }
-    .card-text {
-        min-height: 75px;
-    }
-} */
-
 .experiment-grid-module:hover .card-text {
     background-color: var(--hover-card-color);
 }
@@ -694,77 +662,6 @@ summary {
     pointer-events: none;
     display: none;
 }
-
-/* #damage-bar {
-    position: absolute;
-    top: 0px;
-    left: 15px;
-    height: 6px;
-    width: 0px;
-    transition: width 0.3s linear;
-    opacity: 1;
-    z-index: 2;
-    pointer-events: none;
-    background-color: #f03;
-    border: 1px solid #701;
-    display: none;
-}
-
-#defense-bar {
-    position: absolute;
-    top: 9px;
-    left: 15px;
-    height: 5px;
-    width: 0px;
-    transition: width 0.3s linear;
-    opacity: 1;
-    z-index: 2;
-    pointer-events: none;
-    background-color: #fff;
-    border: 1px solid #333;
-    display: none;
-}
-#health {
-    position: absolute;
-    top: 16px;
-    left: 15px;
-    height: 20px;
-    width: 0px;
-    transition: width 1s ease-out;    z-index: 2;
-    pointer-events: none;
-    background-color: #0fa;
-    border: 2px solid rgb(51, 162, 125);
-    border-radius: 8px;
-    display: none;
-}
-#health-bg {
-    position: absolute;
-    top: 18px;
-    left: 15px;
-    height: 20px;
-    width: 0px;
-    transition: width 1s ease-out;
-    background-color: #000;
-    opacity: 0.1;
-    z-index: 1;
-    pointer-events: none;
-    border-radius: 8px;
-    display: none;
-} */
-
-/* .low-health {
-    animation: blink 250ms infinite alternate;
-}
-
-@keyframes blink {
-    from {
-        opacity: 1;
-    }
-
-    to {
-        opacity: 0.6;
-    }
-} */
 
 /* background on title page */
 #fade-out {
@@ -924,6 +821,15 @@ summary {
     font-variant: small-caps;
     letter-spacing: 1px;
     text-shadow: 1.5px -1.5px hsla(243, 100%, 38%, 0.2);
+}
+
+.color-remove {
+    text-decoration: line-through;
+    /* letter-spacing: 2px; */
+    border-radius: 3px;
+    padding: 0px 3px;
+    background-color: hsl(255, 40%, 71%);
+    color: #fff;
 }
 
 .color-cloaked {
@@ -1090,7 +996,7 @@ summary {
     background-color: #0d9;
     border: 0.05em #fff solid;
     opacity: 0.85;
-    margin-bottom: -3px;
+    margin-bottom: -2px;
 }
 
 .heal-circle-energy {
@@ -1101,7 +1007,7 @@ summary {
     background-color: #ff0;
     border: 0.05em #000 solid;
     opacity: 0.85;
-    margin-bottom: -3px;
+    margin-bottom: -2px;
 }
 
 .coupling-circle {

@@ -348,7 +348,7 @@ const m = {
                 }
                 if (
                     !tech.tech[i].isNonRefundable &&
-                    !tech.tech[i].isFromAppliedScience &&
+                    // !tech.tech[i].isFromAppliedScience &&
                     !tech.tech[i].isAltRealityTech
                 ) {
                     totalTech += tech.tech[i].count
@@ -366,6 +366,7 @@ const m = {
         tech.duplication = 0;
         tech.extraMaxHealth = 0;
         tech.totalCount = 0;
+        tech.removeCount = 0;
         const randomBotCount = b.totalBots()
         b.zeroBotCount()
         //remove all bullets, respawn bots
@@ -384,14 +385,17 @@ const m = {
         b.inventoryGun = 0;
         for (let i = 0, len = b.guns.length; i < len; ++i) {
             b.guns[i].have = false;
-            if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = 0;
+            if (b.guns[i].ammo !== Infinity) {
+                b.guns[i].ammo = 0;
+                b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+            }
         }
         //give random guns
         for (let i = 0; i < totalGuns; i++) b.giveGuns()
 
         //randomize ammo based on ammo/ammoPack count
         for (let i = 0, len = b.inventory.length; i < len; i++) {
-            if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (1.15 + 0.3 * (Math.random() - 0.5))))
+            if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (2.5 + 0.3 * (Math.random() - 0.5))))
         }
         // console.log(b.activeGun)
         //randomize tech
@@ -553,9 +557,6 @@ const m = {
     lastCalculatedDefense: 0, //used to decided if defense bar needs to be redrawn  (in simulation.checks)
     defense() {
         let dmg = 1
-        dmg *= m.fieldHarmReduction
-        // if (!tech.isFlipFlopOn && tech.isFlipFlopHealth) dmg *= 0.5
-        // 1.25 + Math.sin(m.cycle * 0.01)
         if (tech.isDiaphragm) dmg *= 0.55 + 0.35 * Math.sin(m.cycle * 0.0075);
         if (tech.isZeno) dmg *= 0.15
         if (tech.isFieldHarmReduction) dmg *= 0.6
@@ -566,7 +567,7 @@ const m = {
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.3
         if (tech.squirrelFx !== 1) dmg *= 0.8//Math.pow(0.78, (tech.squirrelFx - 1) / 0.4)
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.1
-        if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0193, 0.88) //capped at speed of 55
+        if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min(player.speed * 0.0193, 0.8) //capped at speed of 55
         if (tech.isHarmReduce && input.field) dmg *= 0.1
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.05
         if (tech.isBotArmor) dmg *= 0.95 ** b.totalBots()
@@ -574,7 +575,9 @@ const m = {
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.isTurret && m.crouch) dmg *= 0.3;
         if (tech.isFirstDer && b.inventory[0] === b.activeGun) dmg *= 0.85 ** b.inventory.length
-        return tech.isEnergyHealth ? Math.pow(dmg, 0.5) : dmg //defense has less effect
+        // return tech.isEnergyHealth ? Math.pow(dmg, 0.7) : dmg //defense has less effect
+        // dmg *= m.fieldHarmReduction
+        return dmg * m.fieldHarmReduction
     },
     rewind(steps) { // m.rewind(Math.floor(Math.min(599, 137 * m.energy)))
         if (tech.isRewindGrenade) {
@@ -1541,7 +1544,7 @@ const m = {
             m.isAltSkin = true
             simulation.isAutoZoom = false;
             m.draw = function () {
-                const amplitude = 8 + 4 * Math.sin(m.cycle * 0.0075)
+                const amplitude = 8 + 4 * Math.sin(m.cycle * 0.01)
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
@@ -1572,13 +1575,13 @@ const m = {
                 //zoom camera in and out
 
                 // console.log(simulation.zoomScale)
-                simulation.setZoom(1800 + 400 * Math.sin(m.cycle * 0.0075))
+                simulation.setZoom(1800 + 400 * Math.sin(m.cycle * 0.01))
             }
         },
         dilate2() {
             m.isAltSkin = true
             m.draw = function () {
-                const amplitude = Math.sin(m.cycle * 0.0075)
+                const amplitude = Math.sin(m.cycle * 0.01)
 
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
@@ -1595,7 +1598,7 @@ const m = {
                 ctx.fillStyle = m.bodyGradient
                 ctx.fill();
                 ctx.strokeStyle = "#345";
-                ctx.lineWidth = 3 + 3 * Math.sin(m.cycle * 0.0075 + Math.PI);
+                ctx.lineWidth = 3 + 3 * Math.sin(m.cycle * 0.01 + Math.PI);
                 ctx.stroke();
                 // ctx.arc(12, 0, 8 + 4 * amplitude, 0, 2 * Math.PI); //big eye
                 ctx.beginPath();
@@ -1608,7 +1611,7 @@ const m = {
                 ctx.restore();
                 m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
                 powerUps.boost.draw()
-                simulation.setZoom(1800 + 400 * Math.sin(m.cycle * 0.0075))
+                simulation.setZoom(1800 + 400 * amplitude)
             }
             m.drawLeg = function (stroke) {
                 // if (simulation.mouseInGame.x > m.pos.x) {
@@ -2860,17 +2863,17 @@ const m = {
                 return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses ${(0.1 * couple).toFixed(2)} <strong class='color-s'>ice IX</strong></span>`
             // return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${2*couple}</strong> seconds post collision</span>`
             case 3: //negative mass
-                return `<strong>${(100 * (1 - 0.973 ** couple)).toFixed(1)}%</strong> <strong class='color-defense'>damage taken</strong>`
+                return `<strong>${(0.973 ** couple).toFixed(2)}x</strong> <strong class='color-defense'>damage taken</strong>`
             case 4: //assembler
                 return `<strong>+${(0.8 * couple).toFixed(1)}</strong> <strong class='color-f'>energy</strong> per second`
             case 5: //plasma
                 return `<strong>${(1 + 1.5 * couple).toFixed(3)}x</strong> <strong class='color-d'>damage</strong>`
             case 6: //time dilation
-                return `<strong>+${(5 * couple).toFixed(0)}%</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
+                return `<strong>+${(1 + 0.05 * couple).toFixed(2)}x</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
             case 7: //cloaking
                 return `<strong>${(1 + 3.3 * couple).toFixed(3)}x</strong> ambush <strong class='color-d'>damage</strong>`
             case 8: //pilot wave
-                return `<strong>+${(1 + 4 * couple).toFixed(2)}%</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>`
+                return `<strong>${(1 + 0.05 * couple).toFixed(2)}x</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>`
             case 9: //wormhole
                 return `<span style = 'font-size:89%;'>after eating <strong class='color-block'>blocks</strong> <strong>+${(2 * couple).toFixed(0)}</strong> <strong class='color-f'>energy</strong></span>`
             case 10: //grappling hook

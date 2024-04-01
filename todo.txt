@@ -1,24 +1,62 @@
 ******************************************************** NEXT PATCH **************************************************
 
-text rework
-  most numbers converted from "+50%" to "1.5x"
-  renamed defense -> damage taken
-  adjusted about 20 tech to round down or up their values to less decimals
-    for a few I added research cost or JUNK chance to balance rounding
+added CSS style for "remove/eject" keyword
+tech: deprecated - gain 1.05x damage for each tech removed this game
+tech: externality - 1.1x damage, removing this gives 40 ammo power ups
+paradigm shift no longer has a 3% failure rate
+  minus 3->4 health
+  it can remove applied science tech
+removing strange loop gives a random removetech
 
-new community map soft by Richard0820
-tech: peer review - gain +damage each time you research
-self-assembly scales with health not health percent
-matter.js engine reverted back to 0.18 (to fix an issue with time dilation)
+tech: marginal utility - give a specific gun 2x ammo per ammo power up
+tech: interest - research, ammo, coupling, health increases by 6% at the start of each level
+tech: Pareto efficiency - give each gun randomly 5x or 0.2x ammo per ammo power up
+
+aperture 6->4s cycles between 1 to 2 -> 0.8 to 3 damage
+mass-energy no longer has a reduction in defense effects
+  but it costs 2 research now
+1st ionization energy 11->14 max energy per heal
+colony: 1.5->1.6x spores 40->33% chance to spawn something different
+laser cost formula changed to be independent of field regen
+  this makes the effects of cost and fire rate 33% bigger
+  free-electron laser 3.5->3x energy cost
+options exchange - the first time you click cancel it randomizes choices
+  allows a free trigger from other cancel tech
+pseudoscience gets 3->2 free researches
+alternator harpoon has 0->0.03x energy cost
+coupling for pilot wave gives 1.04->1.05x block damage
+
+several bugs fixes
 
 *********************************************************** TODO *****************************************************
 
+removeJunkTechFromPool doesn't seem to remove the correct amount
+
+make search not case sensitive
+
+wormholes that end inside wall check to see if the space before the wall is safe and end there instead
+  can use laser code
+
+tech:  - (1 + 0.01)x for each tech, gun, field you've picked up
+  scales with born rule, duplication, remove tech
+
+explosions have a chance to spawn spores
+  infinite feedback loop with spores that explode?
+
+make sure healing isn't effected by simulation.healScale
+  instead heal orb size should be scaled
+    but the ratio between size and heal shouldn't be effected
+
 tech - destroys a random tech each new level and gains +damage each time
+
+tech - destroy all but active gun and convert ammo over to main gun
 
 List of ways to break the game
   CPT + high energy regen
   research->bot fabrication-> ersatz bots -> various bot upgrades
+  grappling hook + high fire rate + alternator + time dilation
   duplication 100%
+  interest + coupling, research + peer review?
   electronegativity and high energy?
 
 boss - tracks the position, velocity, angle of power ups, blocks, and bullets it fires
@@ -42,10 +80,6 @@ button/switch input ideas from Cocoon game
 tech - getting a new gun also gives you 2 random tech for that gun
   or a field?
   can these guntech tech be converted into a player choice?
-
-tech: interest - research and ammo increases by 10% at the start of each level?
-  spawn research and ammo at start of new level
-    extend to current health?
 
 how to reduce the number of clicks and keypresses
   auto fire mode
@@ -1093,6 +1127,7 @@ possible names for tech
   sidereal - with respect to the stars  (an extra rotation for time keeping)
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   holographic - 2-D surface can predict the 3-D space behind it?  I think
+  conformal - similar rules for small and big scales  linked to holographic principle
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   swarm intelligence - for a drone tech
   metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity
@@ -1141,6 +1176,8 @@ possible names for tech
   configuration space - holds the position of everything
   stress–energy tensor
   radioisotope thermoelectric generator - 
+  retrovirus: these things make JUNK DNA so link it somehow to that tech?
+    Upon infection with a retrovirus, a cell converts the retroviral RNA into DNA and sometimes the DNA will be passed on to progeny as JUNK DNA
 
 
 ******************************************************** CARS IMAGES ********************************************************

@@ -791,7 +791,7 @@ const simulation = {
         input.endKeySensing();
         simulation.ephemera = []
         tech.setupAllTech(); //sets tech to default values
-        b.removeAllGuns();
+        b.resetAllGuns();
         tech.duplication = 0;
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
             if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()

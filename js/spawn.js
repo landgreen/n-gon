@@ -2835,7 +2835,7 @@ const spawn = {
                         for (let i = 0; i < b.inventory.length; i++) {
                             const gun = b.guns[b.inventory[i]]
                             if (gun.ammo > 0 && gun.ammo !== Infinity) {
-                                gun.ammo -= Math.ceil((0.45 * Math.random() + 0.45 * Math.random()) * gun.ammoPack) //Math.ceil(Math.random() * target.ammoPack)
+                                gun.ammo -= Math.ceil((Math.random() + Math.random()) * gun.ammoPack)
                                 if (gun.ammo < 0) gun.ammo = 0
                                 isRemovedAmmo = true
                             }
@@ -3317,7 +3317,7 @@ const spawn = {
                 this.wing(this.angle - 2.1 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
 
                 const seeRange = 550 + 35 * simulation.difficultyMode;
-                if (this.distanceToPlayer() < seeRange) {
+                if (this.distanceToPlayer() < 1000) {
                     best = {
                         x: null,
                         y: null,
@@ -5938,7 +5938,7 @@ const spawn = {
                         for (let i = 0; i < b.inventory.length; i++) {
                             const gun = b.guns[b.inventory[i]]
                             if (gun.ammo > 0 && gun.ammo !== Infinity) {
-                                gun.ammo -= Math.ceil((0.6 * Math.random() + 0.6 * Math.random()) * gun.ammoPack) //Math.ceil(Math.random() * target.ammoPack)
+                                gun.ammo -= Math.ceil(1.1 * (Math.random() + Math.random()) * gun.ammoPack)
                                 if (gun.ammo < 0) gun.ammo = 0
                                 isRemovedAmmo = true
                             }

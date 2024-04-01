@@ -320,16 +320,12 @@ const powerUps = {
     },
     endDraft(type, isCanceled = false) { //type should be a gun, tech, or field
         if (isCanceled) {
-            if (tech.isCancelTech && Math.random() < 0.85 && type !== "entanglement") {
-                // powerUps.research.use('tech')
-                powerUps[type].effect();
-                return
-            }
             if (tech.isCancelDuplication) {
-                tech.duplication += 0.05
+                const value = 0.05
+                tech.duplication += value
                 tech.maxDuplicationEvent()
-                simulation.makeTextLog(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${0.043}`)
-                simulation.circleFlare(0.043);
+                simulation.makeTextLog(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${value}`)
+                simulation.circleFlare(value);
             }
             if (tech.isCancelRerolls) {
                 for (let i = 0, len = 10 + 4 * Math.random(); i < len; i++) {
@@ -345,21 +341,14 @@ const powerUps = {
                 }
             }
             if (tech.isCancelCouple) powerUps.spawnDelay("coupling", 8)
-            // if (tech.isCancelTech && Math.random() < 0.3) {
-            //     powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "tech", false);
-            //     simulation.makeTextLog(`<strong>options exchange</strong>: returns 1 <strong class='color-m'>tech</strong>`)
-            // }
-            // if (tech.isBanish && type === 'tech') { // banish researched tech by adding them to the list of banished tech
-            //     const banishLength = tech.isDeterminism ? 1 : 3 + tech.extraChoices * 2
-            //     for (let i = 0; i < banishLength; i++) {
-            //         const index = powerUps.tech.choiceLog.length - i - 1
-            //         if (powerUps.tech.choiceLog[index] && tech.tech[powerUps.tech.choiceLog[index]]) {
-            //             tech.tech[powerUps.tech.choiceLog[index]].isBanished = true
-            //         }
-            //     }
-            //     simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - banishLength)}`)
-            // }
+            if (tech.isCancelTech && tech.cancelTechCount === 0 && type !== "entanglement") {
+                tech.cancelTechCount++
+                // powerUps.research.use('tech')
+                powerUps[type].effect();
+                return
+            }
         }
+        tech.cancelTechCount = 0
         if (tech.isAnsatz && powerUps.research.count < 1) {
             for (let i = 0; i < 3; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
         }
@@ -386,7 +375,7 @@ const powerUps = {
                 if (this.count < 5) simulation.removeEphemera(this.name)
 
                 ctx.beginPath();
-                ctx.arc(m.pos.x, m.pos.y, this.count, 0, 2 * Math.PI);
+                ctx.arc(m.pos.x, m.pos.y, Math.max(3, this.count), 0, 2 * Math.PI);
                 ctx.fillStyle = color
                 ctx.fill();
                 // ctx.strokeStyle = "hsla(200,50%,61%,0.18)";
@@ -504,14 +493,15 @@ const powerUps = {
         },
         currentRerollCount: 0,
         use(type) { //runs when you actually research a list of selections, type can be field, gun, or tech
-            if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
+            if (tech.isJunkResearch && powerUps.research.currentRerollCount < 2) {
                 tech.addJunkTechToPool(0.01)
             } else {
                 powerUps.research.changeRerolls(-1)
             }
             if (tech.isResearchDamage) {
-                tech.damage *= 1.04
-                simulation.makeTextLog(`<strong>1.04x</strong> <strong class='color-d'>damage</strong> from <strong>peer review</strong>`);
+                tech.damage *= 1.05
+                simulation.makeTextLog(`<strong>1.05x</strong> <strong class='color-d'>damage</strong>`);
+                tech.addJunkTechToPool(0.01)
             }
             powerUps.research.currentRerollCount++
             // if (tech.isBanish && type === 'tech') { // banish researched tech
@@ -610,7 +600,7 @@ const powerUps = {
                 }
             }
             if (powerUps.healGiveMaxEnergy) {
-                tech.healMaxEnergyBonus += 0.11 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)
+                tech.healMaxEnergyBonus += 0.14 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)
                 m.setMaxEnergy();
             }
         },
@@ -636,50 +626,23 @@ const powerUps = {
                     const target = b.guns[b.activeGun]
                     if (target.ammo !== Infinity) {
                         if (tech.ammoCap) {
-                            const ammoAdded = Math.ceil(target.ammoPack * 0.7 * tech.ammoCap * 0.8 * couplingExtraAmmo) //0.7 is average
-                            target.ammo = ammoAdded
-                            // simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}`)
+                            target.ammo = Math.ceil(2 * target.ammoPack * tech.ammoCap * couplingExtraAmmo)
                         } else {
-                            const ammoAdded = Math.ceil((0.7 * Math.random() + 0.7 * Math.random()) * target.ammoPack * 0.8 * couplingExtraAmmo)
-                            target.ammo += ammoAdded
-                            // simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
+                            target.ammo += Math.ceil(2 * (Math.random() + Math.random()) * target.ammoPack * couplingExtraAmmo)
                         }
                     }
                 } else { //give ammo to all guns in inventory
-                    // let textLog = ""
                     for (let i = 0, len = b.inventory.length; i < len; i++) {
                         const target = b.guns[b.inventory[i]]
                         if (target.ammo !== Infinity) {
                             if (tech.ammoCap) {
-                                const ammoAdded = Math.ceil(target.ammoPack * 0.45 * tech.ammoCap * couplingExtraAmmo) //0.45 is average
-                                target.ammo = ammoAdded
-                                // textLog += `${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}<br>`
+                                target.ammo = Math.ceil(target.ammoPack * tech.ammoCap * couplingExtraAmmo)
                             } else { //default ammo behavior
-                                const ammoAdded = Math.ceil((0.45 * Math.random() + 0.45 * Math.random()) * target.ammoPack * couplingExtraAmmo) //Math.ceil(Math.random() * target.ammoPack)
-                                // console.log(ammoAdded, Math.ceil((0.45 * Math.random() + 0.45 * Math.random()) * target.ammoPack))
-                                target.ammo += ammoAdded
-                                // textLog += `${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}<br>`
+                                target.ammo += Math.ceil((Math.random() + Math.random()) * target.ammoPack * couplingExtraAmmo)
                             }
                         }
                     }
-                    // simulation.makeTextLog(textLog)
                 }
-                // } else { //give ammo to all guns in inventory
-                //     for (let i = 0, len = b.inventory.length; i < len; i++) {
-                //         const target = b.guns[b.inventory[i]]
-                //         if (target.ammo !== Infinity) {
-                //             if (tech.ammoCap) {
-                //                 const ammoAdded = Math.ceil(target.ammoPack * 0.45 * tech.ammoCap) //0.45 is average
-                //                 target.ammo = ammoAdded
-                //                 simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${ammoAdded}`)
-                //             } else {
-                //                 const ammoAdded = Math.ceil((0.45 * Math.random() + 0.45 * Math.random()) * target.ammoPack) //Math.ceil(Math.random() * target.ammoPack)
-                //                 target.ammo += ammoAdded
-                //                 simulation.makeTextLog(`${target.name}.<span class='color-g'>ammo</span> <span class='color-symbol'>+=</span> ${ammoAdded}`)
-                //             }
-                //         }
-                //     }
-                // }
                 simulation.updateGunHUD();
             }
         }
@@ -689,7 +652,7 @@ const powerUps = {
 
         if (tech.isSuperDeterminism) {
             return `<div></div>`
-        } else if (tech.isCancelTech) {
+        } else if (tech.isCancelTech && tech.cancelTechCount === 0) {
             return `<div class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;">randomize</div>`
         } else if (level.levelsCleared === 0 && localSettings.isTrainingNotAttempted && b.inventory.length === 0) { //don't show cancel if on initial level and haven't done tutorial
             return `<div class='cancel-card'  style="visibility: hidden;"></div>`
@@ -701,7 +664,7 @@ const powerUps = {
         let text = ""
         if (type === "entanglement") {
             text += `<div class='choose-grid-module entanglement flipX' onclick='powerUps.endDraft("${type}",true)'>entanglement</div>`
-        } else if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
+        } else if (tech.isJunkResearch && powerUps.research.currentRerollCount < 2) {
             text += `<div onclick="powerUps.research.use('${type}')" class='research-card'>` // style = "margin-left: 192px; margin-right: -192px;"
             text += `<div><div> <span style="position:relative;">`
             text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15 * i}px ;opacity:0.8; border: 1px #fff solid;width: 1.15em;height: 1.15em;"></div>`
@@ -720,7 +683,7 @@ const powerUps = {
         let text = `<div class='research-cancel'>`
         if (type === "entanglement") {
             text += `<span class='research-card entanglement flipX' style="width: 275px;" onclick='powerUps.endDraft("${type}",true)'><span style="letter-spacing: 6px;">entanglement</span></span>`  //&zwnj;
-        } else if (tech.isJunkResearch && powerUps.research.currentRerollCount < 3) {
+        } else if (tech.isJunkResearch && powerUps.research.currentRerollCount < 2) {
             text += `<span onclick="powerUps.research.use('${type}')" class='research-card' style="width: 275px;float: left;">` // style = "margin-left: 192px; margin-right: -192px;"
             text += `<div><div><span style="position:relative;">`
             text += `<div class="circle-grid junk" style="position:absolute; top:0; left:${15 * i}px ;opacity:0.8; border: 1px #fff solid;width: 1.15em;height: 1.15em;"></div>`
@@ -729,7 +692,7 @@ const powerUps = {
             text += `<span onclick="powerUps.research.use('${type}')" class='research-card' style="width: 275px;float: left;">` // style = "margin-left: 192px; margin-right: -192px;"
             text += `<div><div><span style="position:relative;">`
             let researchCap = 18
-            if (tech.isCancelTech) researchCap -= 2
+            if (tech.isCancelTech && tech.cancelTechCount === 0) researchCap -= 2
             if (canvas.width < 1951) researchCap -= 3
             if (canvas.width < 1711) researchCap -= 4
             for (let i = 0, len = Math.min(powerUps.research.count, researchCap); i < len; i++) {
@@ -741,7 +704,7 @@ const powerUps = {
         }
         if (tech.isSuperDeterminism) {
             text += `<span class='cancel-card' style="width: 95px;float: right;background-color: #aaa;color:#888;">cancel</span>`
-        } else if (tech.isCancelTech) {
+        } else if (tech.isCancelTech && tech.cancelTechCount === 0) {
             text += `<span class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;float: right;font-size:0.9em;padding-top:5px">randomize</span>`
         } else if (level.levelsCleared === 0 && localSettings.isTrainingNotAttempted && b.inventory.length === 0) {
             text += `<span class='cancel-card' style="visibility: hidden;">cancel</span>` //don't show cancel if on initial level and haven't done tutorial
@@ -1163,18 +1126,8 @@ const powerUps = {
                             text += powerUps.fieldText(pick, `powerUps.choose('field',${pick})`)
                         }
                     }
-                    // if (tech.isMicroTransactions && powerUps.research.count > 0) {
-                    //     const skins = [] //find skins
-                    //     for (let i = 0; i < tech.tech.length; i++) {
-                    //         if (tech.tech[i].isSkin) skins.push(i)
-                    //     }
-                    //     const choose = skins[Math.floor(Math.seededRandom(0, skins.length))] //pick an element from the array of options
-
-                    //     text += `<div class="choose-grid-module" onclick="tech.giveTech(${choose});powerUps.research.changeRerolls(-1);powerUps.endDraft('tech');powerUps.tech.effect();"><div class="grid-title"><div class="circle-grid research"></div> <span style = 'font-size:90%; font-weight: 100; letter-spacing: -1.5px;'>microtransaction:</span> ${tech.tech[choose].name}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
-                    // }
                     if (tech.isBrainstorm && !tech.isBrainstormActive && !simulation.isChoosing) {
                         tech.isBrainstormActive = true
-
                         let count = 1
                         let timeStart = performance.now()
                         const cycle = (timestamp) => {
@@ -1194,33 +1147,9 @@ const powerUps = {
                             }
                         }
                         requestAnimationFrame(cycle);
-
-                        //     count++
-                        // if (count < tech.brainStormDelay * 5 && simulation.isChoosing) {
-                        //     if (!(count % tech.brainStormDelay)) {
-                        //         powerUps.tech.effect();
-                        //         document.getElementById("choose-grid").style.pointerEvents = "auto"; //turn off the normal 500ms delay
-                        //         document.body.style.cursor = "auto";
-                        //         document.getElementById("choose-grid").style.transitionDuration = "0s";
-                        //     }
-                        //     requestAnimationFrame(cycle);
-                        // } else {
-                        //     tech.isBrainstormActive = false
-                        // }
                     }
-                    // if (localSettings.isHideImages) text += powerUps.researchText('tech')
                     document.getElementById("choose-grid").innerHTML = text
                     powerUps.showDraft();
-
-                    //fade in all circles
-                    // requestAnimationFrame(() => {
-                    //     var elements = document.getElementsByClassName('circle-grid');
-                    //     for (var i in elements) {
-                    //         if (elements.hasOwnProperty(i)) {
-                    //             elements[i].style.opacity = '1';
-                    //         }
-                    //     }
-                    // });
                 }
             }
         },
@@ -1287,18 +1216,17 @@ const powerUps = {
             }
         },
     },
-    spawnDelay(type, num) {
-        let count = num
+    spawnDelay(type, count) {
+        count *= 2
         let cycle = () => {
             if (count > 0) {
                 if (m.alive) requestAnimationFrame(cycle);
                 if (!simulation.paused && !simulation.isChoosing) { //&& !(simulation.cycle % 2)
                     count--
-                    const where = {
-                        x: m.pos.x + 50 * (Math.random() - 0.5),
-                        y: m.pos.y + 50 * (Math.random() - 0.5)
+                    if (!(count % 2)) {
+                        const where = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }
+                        powerUps.spawn(where.x, where.y, type);
                     }
-                    powerUps.spawn(where.x, where.y, type);
                 }
             }
         }
@@ -1483,6 +1411,7 @@ const powerUps = {
                         // powerUp[powerUp.length - 1].isDuplicated = true
                     }
                     // remove a random tech from the list of tech you have
+                    tech.removeCount += tech.tech[choose].count
                     tech.tech[choose].remove();
                     tech.tech[choose].count = 0;
                     tech.tech[choose].isLost = true;
@@ -1501,6 +1430,7 @@ const powerUps = {
                 }
                 // remove a random tech from the list of tech you have
                 tech.tech[choose].remove();
+                tech.removeCount += tech.tech[choose].count
                 tech.tech[choose].count = 0;
                 tech.tech[choose].isLost = true;
                 simulation.updateTechHUD();
@@ -1513,34 +1443,17 @@ const powerUps = {
     },
     pauseEjectTech(index) {
         if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isNonRefundable) {
-            if (Math.random() < 0.03 || tech.tech[index].isFromAppliedScience || (tech.tech[index].bonusResearch !== undefined && tech.tech[index].bonusResearch > powerUps.research.count)) {
-                tech.removeTech(index)
-            } else {
-                powerUps.ejectTech(index)
-                m.damage(0.04)
-            }
+            // if (tech.tech[index].bonusResearch !== undefined && tech.tech[index].bonusResearch > powerUps.research.count) {
+            //     tech.removeTech(index)
+            // } else {
+            // }
+            powerUps.ejectTech(index)
+            m.damage(0.04)
             document.getElementById(`${index}-pause-tech`).style.textDecoration = "line-through"
             document.getElementById(`${index}-pause-tech`).style.animation = ""
             document.getElementById(`${index}-pause-tech`).onclick = null
         }
     },
-    // removeRandomTech() {
-    //     const have = [] //find which tech you have
-    //     for (let i = 0; i < tech.tech.length; i++) {
-    //         if (tech.tech[i].count > 0) have.push(i)
-    //     }
-    //     if (have.length) {
-    //         const choose = have[Math.floor(Math.random() * have.length)]
-    //         simulation.makeTextLog(`<span class='color-var'>tech</span>.removeTech("<span class='color-text'>${tech.tech[choose].name}</span>")`)
-    //         const totalRemoved = tech.tech[choose].count
-    //         tech.tech[choose].count = 0;
-    //         tech.tech[choose].remove(); // remove a random tech form the list of tech you have
-    //         tech.tech[choose].isLost = true
-    //         simulation.updateTechHUD();
-    //         return totalRemoved
-    //     }
-    //     return 0
-    // },
     randomize(where) { //makes a random power up convert into a random different power up
         //put 10 power ups close together
         const len = Math.min(10, powerUp.length)

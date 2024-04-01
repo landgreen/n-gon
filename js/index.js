@@ -808,14 +808,12 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                 tech.giveTech(index)
             } else if (!tech.tech[index].isNonRefundable) {
                 // tech.totalCount -= tech.tech[index].count
-                tech.removeTech(index);
                 document.getElementById("tech-" + index).classList.remove("build-tech-selected");
+                tech.removeTech(index);
             } else {
                 // for non refundable tech this makes it flash off for a second, but return to on to show that it can't be set off
                 document.getElementById("tech-" + index).classList.remove("build-tech-selected")
-                setTimeout(() => {
-                    document.getElementById("tech-" + index).classList.add("build-tech-selected")
-                }, 50);
+                setTimeout(() => { document.getElementById("tech-" + index).classList.add("build-tech-selected") }, 50);
             }
         }
         build.updateExperimentText(isAllowed)
@@ -1099,9 +1097,6 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         } else { //if you have no tech (not cheating) remove all power ups that might have spawned from tech
             for (let i = 0; i < powerUp.length; ++i) Matter.Composite.remove(engine.world, powerUp[i]);
             powerUp = [];
-            // if (build.hasExperimentalMode) {
-            //     for (let i = 0; i < 7; i++) tech.giveTech("undefined")
-            // }
         }
         document.body.style.cursor = "none";
         document.body.style.overflow = "hidden"
