@@ -1,32 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
-added CSS style for "remove/eject" keyword
-tech: deprecated - gain 1.05x damage for each tech removed this game
-tech: externality - 1.1x damage, removing this gives 40 ammo power ups
-paradigm shift no longer has a 3% failure rate
-  minus 3->4 health
-  it can remove applied science tech
-removing strange loop gives a random removetech
+switched github pages hosting folder
+  https://landgreen.github.io/sidescroller/   ->   https://landgreen.github.io/n-gon/
+  <meta http-equiv="refresh" content="0; url=https://landgreen.github.io/n-gon/">
 
-tech: marginal utility - give a specific gun 2x ammo per ammo power up
-tech: interest - research, ammo, coupling, health increases by 6% at the start of each level
-tech: Pareto efficiency - give each gun randomly 5x or 0.2x ammo per ammo power up
+player damage reduction adjustment: 0.905x -> 0.9x per level per difficulty mode (1,2,4,5)
+  on easy that's 0.30 -> 0.28 by level 12 (a 6% player damage nerf)
+  on why that's 0.0025 -> 0.001797 by level 12 (a 28% player damage nerf)
 
-aperture 6->4s cycles between 1 to 2 -> 0.8 to 3 damage
-mass-energy no longer has a reduction in defense effects
-  but it costs 2 research now
-1st ionization energy 11->14 max energy per heal
-colony: 1.5->1.6x spores 40->33% chance to spawn something different
-laser cost formula changed to be independent of field regen
-  this makes the effects of cost and fire rate 33% bigger
-  free-electron laser 3.5->3x energy cost
-options exchange - the first time you click cancel it randomizes choices
-  allows a free trigger from other cancel tech
-pseudoscience gets 3->2 free researches
-alternator harpoon has 0->0.03x energy cost
-coupling for pilot wave gives 1.04->1.05x block damage
+you can only get applied science 9->1 time
+supply chain - spawns a gun, but doesn't give applied science frequency
 
-several bugs fixes
+bug fixes
 
 *********************************************************** TODO *****************************************************
 

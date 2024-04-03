@@ -1627,7 +1627,7 @@ const m = {
                 ctx.lineTo(m.knee.x, m.knee.y);
                 ctx.lineTo(m.foot.x, m.foot.y);
                 ctx.strokeStyle = stroke;
-                ctx.lineWidth = 6 + 2 * Math.sin(m.cycle * 0.0075 + Math.PI);
+                ctx.lineWidth = 6 + 2 * Math.sin(m.cycle * 0.01 + Math.PI);
                 ctx.stroke();
 
                 //toe lines
@@ -1650,7 +1650,7 @@ const m = {
                 ctx.arc(m.foot.x, m.foot.y, 6, 0, 2 * Math.PI);
                 ctx.fillStyle = "#345";
                 ctx.fill();
-                ctx.lineWidth = 3 + 3 * Math.sin(m.cycle * 0.0075 + Math.PI);
+                ctx.lineWidth = 3 + 3 * Math.sin(m.cycle * 0.01 + Math.PI);
                 ctx.stroke();
                 ctx.restore();
             }
