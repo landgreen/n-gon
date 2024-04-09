@@ -432,7 +432,7 @@ const simulation = {
             if (tech.tech[i].isLost) {
                 if (text) text += "<br>" //add a new line, but not on the first line
                 text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
-            } else if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
+            } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
                 if (text) text += "<br>" //add a new line, but not on the first line
                 text += tech.tech[i].name
                 if (tech.tech[i].nameInfo) {

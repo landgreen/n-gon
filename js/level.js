@@ -29,6 +29,7 @@ const level = {
             // m.couplingChange(10)
             // m.setField("plasma torch") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
+            // powerUps.research.count = 3
             // tech.isHookWire = true
             // m.energy = 0
             // simulation.molecularMode = 2
@@ -39,16 +40,16 @@ const level = {
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[8].ammo = 100000000
             // requestAnimationFrame(() => { tech.giveTech("optical amplifier") });
-            // for (let i = 0; i < 1; ++i) tech.giveTech("mass production")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("combinatorial optimization")
             // tech.giveTech("Pareto efficiency")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("reduced tolerances")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Newtons 1st law")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Newtons 2nd law")
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("paradigm shift") });
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Higgs mechanism")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("active cooling")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("heuristics")
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) b.orbitBot(m.pos, false) });
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("ersatz bots") });
             // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
             // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 1; ++i) tech.giveTech("deprecated")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Lorentz transformation")
             // for (let i = 0; i < 1; ++i) tech.giveTech("unified field theory")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 10; i++) powerUps.directSpawn(1750, -500, "research");
@@ -1778,12 +1779,12 @@ const level = {
 
                     if (this.height > 0 && Matter.Query.region([player], this).length) {
                         if (m.immuneCycle < m.cycle) {
-                            const DRAIN = 0.004 * (tech.isRadioactiveResistance ? 0.25 : 1)
+                            const DRAIN = 0.004 * (tech.isRadioactiveResistance ? 0.2 : 1)
                             if (m.energy > DRAIN) {
                                 m.energy -= DRAIN
                                 if (tech.isEnergyHealth && m.energy < 0) m.death()
                             } else {
-                                m.damage(damage * (tech.isRadioactiveResistance ? 0.25 : 1))
+                                m.damage(damage * (tech.isRadioactiveResistance ? 0.2 : 1))
 
                             }
                         }
@@ -12460,11 +12461,11 @@ const level = {
                     // Trolled
                     const hasCPT = tech.isRewindAvoidDeath;
                     tech.isRewindAvoidDeath = false;
-                    const DRAIN = 0.002 * (tech.isRadioactiveResistance ? 0.25 : 1) + 0.001;
+                    const DRAIN = 0.002 * (tech.isRadioactiveResistance ? 0.2 : 1) + 0.001;
                     if (m.energy > DRAIN && !tech.isEnergyHealth) {
                         m.energy -= DRAIN;
                     }
-                    m.damage(0.00015 * (tech.isRadioactiveResistance ? 0.25 : 1));
+                    m.damage(0.00015 * (tech.isRadioactiveResistance ? 0.2 : 1));
                     if (tech.isEnergyHealth) {
                         const previousEnergy = m.energy;
                         m.regenEnergy();

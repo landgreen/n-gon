@@ -1,23 +1,41 @@
 ******************************************************** NEXT PATCH **************************************************
 
-switched github pages hosting folder
-  https://landgreen.github.io/sidescroller/   ->   https://landgreen.github.io/n-gon/
-  <meta http-equiv="refresh" content="0; url=https://landgreen.github.io/n-gon/">
+adjusted text and math for the fire rate system to use the new "x" syntax
+tech search is no longer case sensitive
 
-player damage reduction adjustment: 0.905x -> 0.9x per level per difficulty mode (1,2,4,5)
-  on easy that's 0.30 -> 0.28 by level 12 (a 6% player damage nerf)
-  on why that's 0.0025 -> 0.001797 by level 12 (a 28% player damage nerf)
+Zectron 1.9->2x damage, -25% -> -5 energy
+exothermic process -20% -> -5 energy
 
-you can only get applied science 9->1 time
-supply chain - spawns a gun, but doesn't give applied science frequency
-
-bug fixes
+instant/unRemovable tech has a unique icon and no longer shows up in the tech list
+  marginal utility - no longer spawns ammo
+  heuristics - no longer spawn a gun, 1.2->1.3 fire rate
+  open-source - gives 1 extra bot option and 3x bot tech frequency
+  robotics - now just spawns 2 bots
+  induction brake - doesn't spawn heals, but lasts 15->17 seconds
+  accretion - doesn't spawn heals, but gets 3% duplication
+  mass production - doesn't spawn power ups, but gets 3% duplication
+  Ψ(t) collapse - doesn't spawn research, spawns 5 research from bosses
+  decoherence - doesn't spawn research, spawns 2 research from bosses
+  fine-structure constant - doesn't spawn coupling, spawn 9 coupling from bosses
+  Bayesian statistics - 1.03->1.05x damage, doesn't spawn research
+  Born rule code rewritten, but it should have a similar effect as before
+  triple point - 1.5->5 second freeze, but no coupling spawn
+  geodesics - no longer spawns ammo and guns, but gives 1.5x damage
+  ideal gas law - doesn't remove ammo, 12->6x foam ammo per ammo power up
 
 *********************************************************** TODO *****************************************************
 
-removeJunkTechFromPool doesn't seem to remove the correct amount
+after clicking on a new tech (or getting it in any way) animate adding the tech to your collection
 
-make search not case sensitive
+tech - getting caught in an explosion gives you _____
+  damage for 10 seconds?
+  heals
+
+tech - limit total number of tech to like 10?
+
+tech - destroying blocks gives _____
+
+removeJunkTechFromPool doesn't seem to remove the correct amount
 
 wormholes that end inside wall check to see if the space before the wall is safe and end there instead
   can use laser code
@@ -34,11 +52,9 @@ make sure healing isn't effected by simulation.healScale
 
 tech - destroys a random tech each new level and gains +damage each time
 
-tech - destroy all but active gun and convert ammo over to main gun
-
 List of ways to break the game
   CPT + high energy regen
-  research->bot fabrication-> ersatz bots -> various bot upgrades
+  research -> bot fabrication -> ersatz bots -> various bot upgrades
   grappling hook + high fire rate + alternator + time dilation
   duplication 100%
   interest + coupling, research + peer review?
@@ -1112,6 +1128,8 @@ possible names for tech
   sidereal - with respect to the stars  (an extra rotation for time keeping)
   holonomy -  parallel transport of a vector leads to movement (applies to curved space)
   holographic - 2-D surface can predict the 3-D space behind it?  I think
+  entropic gravity - gravity is emergent in a holographic way
+    (maybe a field tech for negative mass)
   conformal - similar rules for small and big scales  linked to holographic principle
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   swarm intelligence - for a drone tech
@@ -1163,7 +1181,7 @@ possible names for tech
   radioisotope thermoelectric generator - 
   retrovirus: these things make JUNK DNA so link it somehow to that tech?
     Upon infection with a retrovirus, a cell converts the retroviral RNA into DNA and sometimes the DNA will be passed on to progeny as JUNK DNA
-
+  amalgam, amalgamation - the action, process, or result of combining or uniting. 
 
 ******************************************************** CARS IMAGES ********************************************************
 

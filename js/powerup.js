@@ -483,7 +483,7 @@ const powerUps = {
             }
             if (tech.isRerollHaste) {
                 if (powerUps.research.count === 0) {
-                    tech.researchHaste = 0.66;
+                    tech.researchHaste = 0.5;
                     b.setFireCD();
                 } else {
                     tech.researchHaste = 1;
@@ -557,7 +557,7 @@ const powerUps = {
                         });
                     }
                     if (tech.isHealBrake) {
-                        const totalTime = 900
+                        const totalTime = 1020
                         //check if you already have this effect
                         let foundActiveEffect = false
                         for (let i = 0; i < simulation.ephemera.length; i++) {
@@ -769,6 +769,15 @@ const powerUps = {
         return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
                 <div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
+                ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
+    },
+    instantTechText(choose, click) {
+        const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
+        const style = localSettings.isHideImages || tech.tech[choose].isLore ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
+        // <div class="circle-grid tech"></div>
+        return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
+                <div class="card-text">
+                <div class="grid-title"> <div class="circle-grid-instant"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
     },
     skinTechText(choose, click) {
@@ -1060,6 +1069,8 @@ const powerUps = {
                                 text += powerUps.junkTechText(choose, `powerUps.choose('tech',${choose})`)
                             } else if (tech.tech[choose].isSkin) {
                                 text += powerUps.skinTechText(choose, `powerUps.choose('tech',${choose})`)
+                            } else if (tech.tech[choose].isInstant) {
+                                text += powerUps.instantTechText(choose, `powerUps.choose('tech',${choose})`)
                             } else { //normal tech
                                 text += powerUps.techText(choose, `powerUps.choose('tech',${choose})`)
                             }
@@ -1202,6 +1213,8 @@ const powerUps = {
                                 text += powerUps.junkTechText(choose, `powerUps.choose('tech',${choose})`)
                             } else if (tech.tech[choose].isSkin) {
                                 text += powerUps.skinTechText(choose, `powerUps.choose('tech',${choose})`)
+                            } else if (tech.tech[choose].isInstant) {
+                                text += powerUps.instantTechTextTechText(choose, `powerUps.choose('tech',${choose})`)
                             } else { //normal tech
                                 text += powerUps.techText(choose, `powerUps.choose('tech',${choose})`)
                             }
@@ -1327,8 +1340,6 @@ const powerUps = {
                     }
                 }
             }
-
-
             if (tech.isAddRemoveMaxHealth) {
                 powerUps.spawn(x + 20, y, "tech", false)
                 powerUps.spawn(x - 20, y, "research", false)
@@ -1338,20 +1349,11 @@ const powerUps = {
                 powerUps.spawn(x, y - 20, "heal", false)
                 powerUps.spawn(x, y + 40, "heal", false)
                 powerUps.spawn(x, y - 40, "heal", false)
-                // if (this.isBoss && this.isDropPowerUp) {
-                // } else {
-                //     const amount = 0.005
-                //     if (tech.isEnergyHealth) {
-                //         if (m.maxEnergy > amount) {
-                //             tech.healMaxEnergyBonus -= amount
-                //             m.setMaxEnergy();
-                //         }
-                //     } else if (m.maxHealth > amount) {
-                //         tech.extraMaxHealth -= amount //decrease max health
-                //         m.setMaxHealth();
-                //     }
-                // }
             }
+            if (tech.isResearchReality) powerUps.spawnDelay("research", 5)
+            if (tech.isBanish) powerUps.spawnDelay("research", 2)
+            if (tech.isCouplingNoHit) powerUps.spawnDelay("coupling", 9)
+            // if (tech.isRerollDamage) powerUps.spawnDelay("research", 1)
         }
     },
     chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
@@ -1389,12 +1391,12 @@ const powerUps = {
     },
     ejectTech(choose = 'random', isOverride = false) {
         if (!simulation.isChoosing || isOverride) {
-            // console.log(tech.tech[choose].name, tech.tech[choose].count, tech.tech[choose].isNonRefundable)
+            // console.log(tech.tech[choose].name, tech.tech[choose].count, tech.tech[choose].isInstant)
             //find which tech you have
             if (choose === 'random') {
                 const have = []
                 for (let i = 0; i < tech.tech.length; i++) {
-                    if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) have.push(i)
+                    if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) have.push(i)
                 }
                 // if (have.length === 0) {
                 //     for (let i = 0; i < tech.tech.length; i++) {
@@ -1421,7 +1423,7 @@ const powerUps = {
                 } else {
                     return false
                 }
-            } else if (tech.tech[choose].count && !tech.tech[choose].isNonRefundable) {
+            } else if (tech.tech[choose].count && !tech.tech[choose].isInstant) {
                 simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
 
                 for (let i = 0; i < tech.tech[choose].count; i++) {
@@ -1442,7 +1444,7 @@ const powerUps = {
         }
     },
     pauseEjectTech(index) {
-        if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isNonRefundable) {
+        if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isInstant) {
             // if (tech.tech[index].bonusResearch !== undefined && tech.tech[index].bonusResearch > powerUps.research.count) {
             //     tech.removeTech(index)
             // } else {

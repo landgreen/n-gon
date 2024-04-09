@@ -254,12 +254,12 @@ const spawn = {
 
             //aoe damage to player
             if (m.immuneCycle < m.cycle && Vector.magnitude(Vector.sub(player.position, this.position)) < this.radius) {
-                const DRAIN = tech.isRadioactiveResistance ? 0.05 * 0.25 : 0.05
+                const DRAIN = tech.isRadioactiveResistance ? 0.05 * 0.2 : 0.05
                 if (m.energy > DRAIN) {
                     if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 } else {
                     m.energy = 0;
-                    m.damage((tech.isRadioactiveResistance ? 0.005 * 0.25 : 0.005) * simulation.dmgScale)
+                    m.damage((tech.isRadioactiveResistance ? 0.005 * 0.2 : 0.005) * simulation.dmgScale)
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,
                         y: this.position.y,
@@ -2089,8 +2089,8 @@ const spawn = {
                     this.death();
                     //hit player
                     if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.explodeRange && m.immuneCycle < m.cycle) {
-                        m.damage(0.01 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.25 : 1));
-                        m.energy -= 0.1 * (tech.isRadioactiveResistance ? 0.25 : 1)
+                        m.damage(0.01 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.2 : 1));
+                        m.energy -= 0.1 * (tech.isRadioactiveResistance ? 0.2 : 1)
                         if (m.energy < 0) m.energy = 0
                     }
                     const range = this.explodeRange + 50 //mines get a slightly larger range to explode
@@ -5060,8 +5060,8 @@ const spawn = {
                     this.death();
                     //hit player
                     if (Vector.magnitude(Vector.sub(this.position, player.position)) < this.explodeRange && m.immuneCycle < m.cycle) {
-                        m.damage(0.02 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.25 : 1));
-                        m.energy -= 0.2 * (tech.isRadioactiveResistance ? 0.25 : 1)
+                        m.damage(0.02 * simulation.dmgScale * (tech.isRadioactiveResistance ? 0.2 : 1));
+                        m.energy -= 0.2 * (tech.isRadioactiveResistance ? 0.2 : 1)
                         if (m.energy < 0) m.energy = 0
                     }
                     // mob[i].isInvulnerable = false //make mineBoss not invulnerable ?

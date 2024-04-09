@@ -1228,7 +1228,10 @@ const mobs = {
                             simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
                         }); //wrapping in animation frame prevents errors, probably
                     }
-                    if (tech.isEnergyLoss) m.energy *= 0.8;
+                    if (tech.isEnergyLoss) {
+                        m.energy -= 0.05;
+                        if (m.energy < 0) m.energy = 0
+                    }
                     powerUps.spawnRandomPowerUp(this.position.x, this.position.y);
                     m.lastKillCycle = m.cycle; //tracks the last time a kill was made, mostly used in simulation.checks()
                     mobs.mobDeaths++

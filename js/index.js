@@ -191,7 +191,7 @@ let color = { //light
 // check for URL parameters to load an experimental game
 //**********************************************************************
 
-//example  https://landgreen.github.io/sidescroller/index.html?
+//example  https://landgreen.github.io/n-gon/index.html?
 //          &gun1=minigun&gun2=laser
 //          &tech1=laser-bot&tech2=mass%20driver&tech3=overcharge&tech4=laser-bot&tech5=laser-bot&field=phase%20decoherence%20field&difficulty=2
 //add ? to end of url then for each power up add
@@ -477,9 +477,9 @@ const build = {
 <label for="hide-hud" title="hide: tech, damage taken, damage, in game console" style="font-size:1.15em;">minimal HUD</label>
 <br>
 
-<br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)} <span style="float: right;"><strong class='color-d'>difficulty:</strong> ${((m.dmgScale)).toPrecision(4)}</span>
-<br><strong class='color-defense'>damage taken</strong>: ${(m.defense()).toPrecision(4)} <span style="float: right;"><strong class='color-defense'>difficulty:</strong> ${(simulation.dmgScale).toPrecision(4)}</span>
-<br><strong><em>fire rate</em></strong>: ${((1 - b.fireCDscale) * 100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
+<br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)}x <span style="float: right;"><strong class='color-d'>difficulty:</strong> ${((m.dmgScale)).toPrecision(4)}x</span>
+<br><strong class='color-defense'>damage taken</strong>: ${(m.defense()).toPrecision(4)}x <span style="float: right;"><strong class='color-defense'>difficulty:</strong> ${(simulation.dmgScale).toPrecision(4)}x</span>
+<br><strong><em>fire rate</em></strong>: ${(1 / b.fireCDscale).toFixed(2)}x
 ${tech.duplicationChance() ? `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance() * 100).toFixed(0)}%` : ""}
 ${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
 ${botText}
@@ -562,8 +562,8 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             if (tech.tech[i].count > 0) {
                 const style = (localSettings.isHideImages || tech.tech[i].isJunk || tech.tech[i].isLore) ? `style="height:auto;"` : `style = "background-image: url('img/${tech.tech[i].name}.webp');"`
                 const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
-                if (tech.tech[i].isNonRefundable) {
-                    text += `<div class="pause-grid-module" id ="${i}-pause-tech"  style = "border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding: 6px;"><div class="grid-title">${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`
+                if (tech.tech[i].isInstant) {
+                    // text += `<div class="pause-grid-module" id ="${i}-pause-tech"  style = "border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding: 6px;"><div class="grid-title">${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isFieldTech) {
                     text += `<div id="${i}-pause-tech" class="pause-grid-module card-background ${ejectClass}" onclick="powerUps.pauseEjectTech(${i})" ${style}>`
                     text += build.fieldTechText(i) + "</div>"
@@ -689,7 +689,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         } else if (find === 'energy') {
             tech.tech.sort(sortKeyword);
         } else if (find === 'input') {
-            find = document.getElementById("sort-input").value;
+            find = document.getElementById("sort-input").value.toLowerCase();
             tech.tech.sort(sortKeyword);
         }
         if (isExperiment) {
@@ -729,6 +729,12 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
     techText(i) {
         return `<div class="card-text" >
         <div class="grid-title" ><div class="circle-grid tech"></div> &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
+        ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
+    },
+    instantTechText(i) {
+        // 
+        return `<div class="card-text" >
+        <div class="grid-title" > <div class="circle-grid-instant"></div> &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
         ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     skinTechText(i) {
@@ -803,10 +809,10 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             }
         } else if (type === "tech") {
             if (tech.tech[index].count < tech.tech[index].maxCount) {
-                // if (!tech.tech[index].isLore && !tech.tech[index].isNonRefundable && !who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
+                // if (!tech.tech[index].isLore && !tech.tech[index].isInstant && !who.classList.contains("build-tech-selected")) who.classList.add("build-tech-selected");
                 if (!document.getElementById("tech-" + index).classList.contains("build-tech-selected")) document.getElementById("tech-" + index).classList.add("build-tech-selected");
                 tech.giveTech(index)
-            } else if (!tech.tech[index].isNonRefundable) {
+            } else if (!tech.tech[index].isInstant) {
                 // tech.totalCount -= tech.tech[index].count
                 document.getElementById("tech-" + index).classList.remove("build-tech-selected");
                 tech.removeTech(index);
@@ -835,6 +841,8 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                     } else if (tech.tech[i].isSkin) {
                         techID.classList.remove('experiment-grid-hide');
                         techID.innerHTML = build.skinTechText(i)
+                    } else if (tech.tech[i].isInstant) {
+                        techID.innerHTML = build.instantTechText(i)
                     } else {
                         techID.innerHTML = build.techText(i)
                     }
@@ -860,6 +868,8 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                         techID.innerHTML = build.junkTechText(i)
                     } else if (tech.tech[i].isSkin) {
                         techID.innerHTML = build.skinTechText(i)
+                    } else if (tech.tech[i].isInstant) {
+                        techID.innerHTML = build.instantTechText(i)
                     } else {
                         techID.innerHTML = build.techText(i)
                     }
@@ -937,7 +947,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if ((!tech.tech[i].isJunk || localSettings.isJunkExperiment) && !tech.tech[i].isLore) {
                 const style = (localSettings.isHideImages || tech.tech[i].isJunk) ? hideStyle : `style="background-image: url('img/${tech.tech[i].name}.webp');"`
-                if ((tech.tech[i].allowed() || tech.tech[i].count > 0) && (!tech.tech[i].isNonRefundable || localSettings.isJunkExperiment)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
+                if ((tech.tech[i].allowed() || tech.tech[i].count > 0) && (!tech.tech[i].isInstant || localSettings.isJunkExperiment)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
                     text += `<div id="tech-${i}" class="experiment-grid-module card-background ${tech.tech[i].count ? "build-tech-selected" : ""}" onclick="build.choosePowerUp(${i},'tech')" ${style}>`
                 } else { //disabled
                     text += `<div id="tech-${i}" class="experiment-grid-module card-background experiment-grid-disabled" ${style}>`
@@ -951,6 +961,8 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                     text += build.skinTechText(i)
                 } else if (tech.tech[i].isJunk) {
                     text += build.junkTechText(i)
+                } else if (tech.tech[i].isInstant) {
+                    text += build.instantTechText(i)
                 } else {
                     text += build.techText(i)
                 }
@@ -1014,7 +1026,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         document.getElementById("experiment-grid").style.display = "grid"
     },
     shareURL(isCustom = false) {
-        let url = "https://landgreen.github.io/sidescroller/index.html?"
+        let url = "https://landgreen.github.io/n-gon/index.html?"
         url += `&seed=${Math.initialSeed}`
         let count = 0;
         for (let i = 0; i < b.inventory.length; i++) {
@@ -1026,7 +1038,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         count = 0;
         for (let i = 0; i < tech.tech.length; i++) {
             for (let j = 0; j < tech.tech[i].count; j++) {
-                if (!tech.tech[i].isLore && !tech.tech[i].isJunk && !tech.tech[i].isNonRefundable) {
+                if (!tech.tech[i].isLore && !tech.tech[i].isJunk && !tech.tech[i].isInstant) {
                     url += `&tech${count}=${encodeURIComponent(tech.tech[i].name.trim())}`
                     count++
                 }

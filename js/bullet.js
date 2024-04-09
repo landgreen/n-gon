@@ -179,7 +179,7 @@ const b = {
             //count how many gun tech you have and remove them
             let gunTechCount = 0 //2 bonus gun tech
             for (let i = 0, len = tech.tech.length; i < len; i++) {
-                if (tech.tech[i].isGunTech && tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable && !tech.tech[i].isRemoveGun) {
+                if (tech.tech[i].isGunTech && tech.tech[i].count > 0 && !tech.tech[i].isInstant && !tech.tech[i].isRemoveGun) {
                     const remove = tech.removeTech(i)
                     gunTechCount += remove
                 }
@@ -287,9 +287,9 @@ const b = {
     setFireCD() {
         b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.aimDamage
         if (m.fieldMode === 6) b.fireCDscale *= 0.8
-        if (tech.isFastTime) b.fireCDscale *= 0.5
-        if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.8, Math.max(0, b.inventory.length - 1))
-        if (tech.isFireMoveLock) b.fireCDscale *= 0.2 // 77% fire rate
+        if (tech.isFastTime) b.fireCDscale *= 0.666
+        if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.76923, Math.max(0, b.inventory.length - 1))
+        if (tech.isFireMoveLock) b.fireCDscale *= 0.25
     },
     fireAttributes(dir, rotate = true) {
         if (rotate) {
@@ -398,11 +398,11 @@ const b = {
 
             //player damage
             if (Vector.magnitude(Vector.sub(where, player.position)) < radius) {
-                const DRAIN = (tech.isExplosionHarm ? 0.6 : 0.45) * (tech.isRadioactiveResistance ? 0.25 : 1)
+                const DRAIN = (tech.isExplosionHarm ? 0.6 : 0.45) * (tech.isRadioactiveResistance ? 0.2 : 1)
                 if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 if (m.energy < 0) {
                     m.energy = 0
-                    if (simulation.dmgScale) m.damage(tech.radioactiveDamage * 0.03 * (tech.isRadioactiveResistance ? 0.25 : 1));
+                    if (simulation.dmgScale) m.damage(tech.radioactiveDamage * 0.03 * (tech.isRadioactiveResistance ? 0.2 : 1));
                 }
             }
 
@@ -1030,12 +1030,12 @@ const b = {
                 } else {
                     //aoe damage to player
                     if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.damageRadius) {
-                        const DRAIN = (tech.isRadioactiveResistance ? 0.0025 * 0.25 : 0.0025)
+                        const DRAIN = (tech.isRadioactiveResistance ? 0.0025 * 0.2 : 0.0025)
                         if (m.energy > DRAIN) {
                             if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                         } else {
                             m.energy = 0;
-                            if (simulation.dmgScale) m.damage((tech.isRadioactiveResistance ? 0.00016 * 0.25 : 0.00016) * tech.radioactiveDamage) //0.00015
+                            if (simulation.dmgScale) m.damage((tech.isRadioactiveResistance ? 0.00016 * 0.2 : 0.00016) * tech.radioactiveDamage) //0.00015
                         }
                     }
                     //aoe damage to mobs
@@ -3615,7 +3615,7 @@ const b = {
                         if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                     } else {
                         m.energy = 0;
-                        if (simulation.dmgScale) m.damage((tech.isRadioactiveResistance ? 0.00005 : 0.0002) * tech.radioactiveDamage) //0.00015
+                        if (simulation.dmgScale) m.damage((tech.isRadioactiveResistance ? 0.00004 : 0.0002) * tech.radioactiveDamage) //0.00015
                     }
                 }
                 //aoe damage to mobs
@@ -3777,7 +3777,7 @@ const b = {
         bullet[me] = Bodies.polygon(where.x, where.y, 12, radius, b.fireAttributes(dir, false));
         Composite.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
-        bullet[me].calcDensity = function () { return 0.0007 + 0.00065 * tech.isSuperHarm + 0.0004 * tech.isBulletTeleport }
+        bullet[me].calcDensity = function () { return 0.0007 + 0.0007 * tech.isSuperHarm + 0.0004 * tech.isBulletTeleport }
         Matter.Body.setDensity(bullet[me], bullet[me].calcDensity());
         bullet[me].endCycle = simulation.cycle + Math.floor(270 + 90 * Math.random());
         bullet[me].minDmgSpeed = 0;
@@ -3790,7 +3790,8 @@ const b = {
                 this.force.y += this.mass * 0.001;
                 if (Matter.Query.collides(this, [player]).length) {
                     this.endCycle = 0
-                    m.energy -= m.energy * 0.2
+                    m.energy -= 0.05
+                    if (m.energy < 0) m.energy = 0
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,
                         y: this.position.y,

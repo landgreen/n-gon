@@ -147,7 +147,7 @@ function collisionChecks(event) {
                         }
                         if (tech.isPiezo) m.energy += 20.48;
                         if (tech.isCouplingNoHit && m.coupling > 0) {
-                            m.couplingChange(-5)
+                            m.couplingChange(-4)
 
                             const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
                             let where = Vector.add(m.pos, Vector.mult(unit, 17))
@@ -182,27 +182,6 @@ function collisionChecks(event) {
                                 color: 'rgba(0, 171, 238, 0.7)',
                                 time: 32
                             });
-                            // simulation.drawList.push({ //add dmg to draw queue
-                            //     x: m.pos.x,
-                            //     y: m.pos.y,
-                            //     radius: 150,
-                            //     color: 'rgba(0, 171, 238, 0.33)',
-                            //     time: 6
-                            // });
-                            // simulation.drawList.push({ //add dmg to draw queue
-                            //     x: m.pos.x,
-                            //     y: m.pos.y,
-                            //     radius: 75,
-                            //     color: 'rgba(0, 171, 238, 0.5)',
-                            //     time: 16
-                            // });
-                            // simulation.drawList.push({ //add dmg to draw queue
-                            //     x: m.pos.x,
-                            //     y: m.pos.y,
-                            //     radius: 25,
-                            //     color: 'rgba(0, 171, 238, 0.75)',
-                            //     time: 25
-                            // });
                         }
                         if (tech.isHarpoonDefense) { //fire harpoons at mobs after getting hit
                             const maxCount = 10 + 3 * tech.extraHarpoons //scale the number of hooks fired
