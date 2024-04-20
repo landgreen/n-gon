@@ -825,24 +825,16 @@ const powerUps = {
         if (!localSettings.isHideImages) {
             setTimeout(() => { //delay so that the html element exists
                 if (tech.tech[choose].url === undefined) { //if on url has been set yet
-                    const url = "https://images.search.yahoo.com/search/images?p=" + tech.tech[choose].name;
+                    const url = `https://api.openverse.engineering/v1/images/?q=${tech.tech[choose].name}`;
                     fetch(url, { signal: AbortSignal.timeout(1000) }) //give up if it takes over 1 second
-                        .then((response) => response.text())
-                        .then((html) => {
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(html, "text/html");
-                            const elements = doc.getElementsByClassName("ld");
-                            // console.log(i, elements[i].getAttribute("data"), JSON.parse(elements[i].getAttribute("data")).iurl)
-                            const index = Math.floor(Math.random() * 4) //randomly choose from the first 4 images
-                            if (parseInt(JSON.parse(elements[index].getAttribute("data")).s.slice(0, -2)) < 500) { //make sure it isn't too big
-                                tech.tech[choose].url = JSON.parse(elements[index].getAttribute("data")).iurl //store the url
+                        .then((response) => response.json())
+                        .then((responseJson) => {
+                            console.log(responseJson);
+                            if (responseJson.results.length > 0) {
+                                const index = Math.floor(Math.random() * responseJson.results.length) //randomly choose from the images
+                                console.log(responseJson.results[index])
+                                tech.tech[choose].url = responseJson.results[index].url //store the url
                                 document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')` //make the url the background image
-                            } else if (parseInt(JSON.parse(elements[index + 1].getAttribute("data")).s.slice(0, -2)) < 500) { //try a different images and see if it is smaller
-                                tech.tech[choose].url = JSON.parse(elements[index + 1].getAttribute("data")).iurl
-                                document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
-                            } else if (parseInt(JSON.parse(elements[index + 2].getAttribute("data")).s.slice(0, -2)) < 500) { //try a different images and see if it is smaller
-                                tech.tech[choose].url = JSON.parse(elements[index + 2].getAttribute("data")).iurl
-                                document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
                             }
                         });
                 } else {
