@@ -1214,7 +1214,7 @@ const powerUps = {
                             } else if (tech.tech[choose].isSkin) {
                                 text += powerUps.skinTechText(choose, `powerUps.choose('tech',${choose})`)
                             } else if (tech.tech[choose].isInstant) {
-                                text += powerUps.instantTechTextTechText(choose, `powerUps.choose('tech',${choose})`)
+                                text += powerUps.instantTechText(choose, `powerUps.choose('tech',${choose})`)
                             } else { //normal tech
                                 text += powerUps.techText(choose, `powerUps.choose('tech',${choose})`)
                             }
