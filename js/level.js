@@ -41,7 +41,7 @@ const level = {
             // requestAnimationFrame(() => { tech.giveTech("optical amplifier") });
             // for (let i = 0; i < 1; ++i) tech.giveTech("combinatorial optimization")
             // tech.giveTech("Pareto efficiency")
-            for (let i = 0; i < 1; ++i) tech.giveTech("collider")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("collider")
             // for (let i = 0; i < 1; ++i) tech.giveTech("anthropic principle")
             // for (let i = 0; i < 1; ++i) tech.giveTech("bubble fusion")
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) b.orbitBot(m.pos, false) });
@@ -23193,7 +23193,8 @@ const level = {
         const door = level.door(2650, -825, 50, 250, 250, 10);
         const elevator = level.elevator(-11050, -650, 450, 75, -2975, 0.003, { up: 0.1, down: 0.1 })
         const slimePit = level.hazard(-4775, -350, 1975, 175);
-        const boost = level.boost(137.5, -600, 75, 25);
+        const boost = level.boost(137.5, -600, 75);
+
         let base = Matter.Bodies.rectangle(-4375, -1000, 100, 100, {
             density: 0.05,
             isNotHoldable: true,
