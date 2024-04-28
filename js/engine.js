@@ -113,32 +113,7 @@ function collisionChecks(event) {
                             m.damage(dmg);
                             return
                         }
-                        if (tech.isFlipFlop) {
-                            if (tech.isFlipFlopOn) {
-                                tech.isFlipFlopOn = false
-                                if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>OFF</strong>`
-                                m.eyeFillColor = 'transparent'
-                                m.damage(dmg);
-                            } else {
-                                tech.isFlipFlopOn = true //immune to damage this hit, lose immunity for next hit
-                                if (document.getElementById("tech-flip-flop")) document.getElementById("tech-flip-flop").innerHTML = ` = <strong>ON</strong>`
-                                m.eyeFillColor = m.fieldMeterColor //'#0cf'
-                                if (!tech.isFlipFlopHarm) m.damage(dmg);
-                            }
-                            if (tech.isFlipFlopHealth) {
-                                m.setMaxHealth();
-                                for (let i = 0; i < powerUp.length; i++) {
-                                    if (powerUp[i].name === "heal") {
-                                        const oldSize = powerUp[i].size
-                                        powerUp[i].size = powerUps.heal.size() //update current heals
-                                        const scale = powerUp[i].size / oldSize
-                                        Matter.Body.scale(powerUp[i], scale, scale); //grow    
-                                    }
-                                }
-                            }
-                        } else {
-                            m.damage(dmg); //normal damage
-                        }
+                        m.damage(dmg); //normal damage
 
                         if (tech.isCollisionRealitySwitch && m.alive) {
                             m.switchWorlds()

@@ -1161,6 +1161,7 @@ const mobs = {
                 this.onDeath(this); //custom death effects
                 this.removeConsBB();
                 this.alive = false; //triggers mob removal in mob[i].replace(i)
+                console.log(this.shieldCount)
 
                 if (this.isDropPowerUp) {
                     // if (true) {
@@ -1306,7 +1307,7 @@ const mobs = {
                         tech.cloakDuplication -= 0.01
                         powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                     }
-                } else if (tech.isShieldAmmo && this.shield && !this.isExtraShield && this.isDropPowerUp) {
+                } else if (tech.isShieldAmmo && this.shield && this.shieldCount === 1) {
                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                     if (Math.random() < 0.4) {
                         type = "heal"

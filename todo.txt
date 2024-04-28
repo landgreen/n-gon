@@ -1,31 +1,76 @@
 ******************************************************** NEXT PATCH **************************************************
 
-adjusted text and math for the fire rate system to use the new "x" syntax
-tech search is no longer case sensitive
+newLevel - towers
+  please give feedback
+boost level elements can now be pointed at any angle
 
-Zectron 1.9->2x damage, -25% -> -5 energy
-exothermic process -20% -> -5 energy
+paradigm shift costs 1 health, but cost increases after each use
+  ejecting with paradigm shift tech sets their frequency to zero, so they don't show up again
+polyurethane foam - makes more foam from super balls
+bubble fusion - now works with any shield, but only once per mob
+  so it triggers from the shieldingBoss
+collider - has a higher chance to form tech vs. other power ups
 
-instant/unRemovable tech has a unique icon and no longer shows up in the tech list
-  marginal utility - no longer spawns ammo
-  heuristics - no longer spawn a gun, 1.2->1.3 fire rate
-  open-source - gives 1 extra bot option and 3x bot tech frequency
-  robotics - now just spawns 2 bots
-  induction brake - doesn't spawn heals, but lasts 15->17 seconds
-  accretion - doesn't spawn heals, but gets 3% duplication
-  mass production - doesn't spawn power ups, but gets 3% duplication
-  Ψ(t) collapse - doesn't spawn research, spawns 5 research from bosses
-  decoherence - doesn't spawn research, spawns 2 research from bosses
-  fine-structure constant - doesn't spawn coupling, spawn 9 coupling from bosses
-  Bayesian statistics - 1.03->1.05x damage, doesn't spawn research
-  Born rule code rewritten, but it should have a similar effect as before
-  triple point - 1.5->5 second freeze, but no coupling spawn
-  geodesics - no longer spawns ammo and guns, but gives 1.5x damage
-  ideal gas law - doesn't remove ammo, 12->6x foam ammo per ammo power up
+removed all ON/OFF tech
+  I just don't think they are fun
+
+JUNK tech - wall jump
+
+fixed some bugs 
+
+player damage reduction adjustment: 0.9x -> 0.89x per level per difficulty mode (1,2,4,5)
+  on easy that's 0.28 -> 0.245 by level 12 (a 12% player damage nerf)
+  on why a 50% player damage nerf by level 12
 
 *********************************************************** TODO *****************************************************
 
+increase difficulty
+
+quantum physics lecture notes:
+https://www.scottaaronson.com/democritus/lec9.html
+Quantum mechanics is what you would inevitably come up with if you started from probability theory, and then said, let's try to generalize it so that the numbers we used to call "probabilities" can be negative numbers.
+
+flip player upside down
+  how 
+    rotate player in matter.js
+      make sure floor sensor works
+    flip player crouch direction
+    redraw legs, orb
+    flip gravity
+
+  when to use?
+    fieldTech: negative mass?
+    effect in level
+
+tech - while immune to damage taken:
+  3x damage
+  no ammo costs?
+tech - immune to damage taken after killing a mob
+tech - after a power up is duplicated
+  update text to random effect after choosing tech, or after each trigger, or on first display of tech
+  pick 1 effect at random
+    become immune to damage taken for 5 seconds
+    summon JUNK bots for 10 seconds
+    2x current energy
+    gain 1.01x damage permanently
+
+
+field tech: negative mass - quickly pull/teleport in all nearby blocks and then fire them away from player
+  what triggers effect?
+  auto aim blocks?
+
+after picking up heals gain ____
+  0.1x damage taken for 12s
+after picking up ammo gain ____
+  4x fire rate for 12s
+after picking up research gain ____
+  +10 choices for 12s
+
+tech: Energy generation increases with you velocity
+  Newtons' 3rd law?
+
 after clicking on a new tech (or getting it in any way) animate adding the tech to your collection
+  fade in on right side text list?
 
 tech - getting caught in an explosion gives you _____
   damage for 10 seconds?
@@ -51,14 +96,6 @@ make sure healing isn't effected by simulation.healScale
     but the ratio between size and heal shouldn't be effected
 
 tech - destroys a random tech each new level and gains +damage each time
-
-List of ways to break the game
-  CPT + high energy regen
-  research -> bot fabrication -> ersatz bots -> various bot upgrades
-  grappling hook + high fire rate + alternator + time dilation
-  duplication 100%
-  interest + coupling, research + peer review?
-  electronegativity and high energy?
 
 boss - tracks the position, velocity, angle of power ups, blocks, and bullets it fires
   reactor only?
@@ -1182,8 +1219,20 @@ possible names for tech
   retrovirus: these things make JUNK DNA so link it somehow to that tech?
     Upon infection with a retrovirus, a cell converts the retroviral RNA into DNA and sometimes the DNA will be passed on to progeny as JUNK DNA
   amalgam, amalgamation - the action, process, or result of combining or uniting. 
+  thermoplastic - the stuff in 3-D printers, use for molecular assembler tech
 
-******************************************************** CARS IMAGES ********************************************************
+******************************************************** DESIGN ********************************************************
+
+List of ways to break the game
+  options exchange + paradigm shift + CPT to undo health cost = repeatable cancel triggers
+  CPT + high energy regen
+  research -> bot fabrication -> ersatz bots -> various bot upgrades
+  grappling hook + high fire rate + alternator + time dilation
+  duplication 100%
+  interest + coupling, research + peer review?
+  electronegativity and high energy?
+
+******************************************************** IMAGES ********************************************************
 
 process:  discord midjourney prompts -> "pixelmator pro" adjust color, repair, scale to 384x256, export PNG -> webP? -> place in /img folder
 make n-gon a progressive web app to manage image downloads, cache

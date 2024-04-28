@@ -1430,7 +1430,7 @@ window.addEventListener("keydown", function (event) {
                     simulation.loop = simulation.normalLoop
                     if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'none'
                     simulation.makeTextLog("", 0);
-                } else { //if (keys[191])
+                } else {
                     simulation.testing = true;
                     simulation.loop = simulation.testingLoop
                     if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'inline'

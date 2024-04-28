@@ -3790,7 +3790,7 @@ const b = {
                 this.force.y += this.mass * 0.001;
                 if (Matter.Query.collides(this, [player]).length) {
                     this.endCycle = 0
-                    m.energy -= 0.05
+                    m.energy -= 0.04
                     if (m.energy < 0) m.energy = 0
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,
@@ -3828,8 +3828,8 @@ const b = {
             if (!who.isInvulnerable) {
                 if (tech.oneSuperBall) mobs.statusStun(who, 120) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
                 if (tech.isFoamBall) {
-                    for (let i = 0, len = 5 * this.mass; i < len; i++) {
-                        const radius = 5 + 8 * Math.random()
+                    for (let i = 0, len = 6 * this.mass; i < len; i++) {
+                        const radius = 6 + 9 * Math.random()
                         const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                         b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
                     }

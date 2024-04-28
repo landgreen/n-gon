@@ -19,6 +19,7 @@ const tech = {
         //remove lore if it's your first time playing since it's confusing
         //also remove lore if cheating
         tech.removeCount = 0;
+        tech.pauseEjectTech = 1; //used in paradigm shift
         lore.techCount = 0;
         if (simulation.isCheating || localSettings.runCount < 1) { //simulation.isCommunityMaps ||
             for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -231,7 +232,6 @@ const tech = {
         if (m.isSneakAttack && m.sneakAttackCycle + Math.min(100, 0.66 * (m.cycle - m.enterCloakCycle)) > m.cycle) dmg *= 4.5 * (1 + 0.033 * m.coupling)
         if (tech.deathSkipTime) dmg *= 1 + 0.6 * tech.deathSkipTime
         if (tech.isTechDebt) dmg *= tech.totalCount > 20 ? Math.pow(0.85, tech.totalCount - 20) : 4 - 0.15 * tech.totalCount
-        if (tech.isFlipFlopDamage && tech.isFlipFlopOn) dmg *= 1.555
         if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.71828
         if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
         if (tech.isDamageForGuns) dmg *= 1 + 0.22 * Math.max(0, b.inventory.length - 1)
@@ -545,7 +545,7 @@ const tech = {
         }
     },
     {
-        name: "hyperpolarization",
+        name: "repolarization",
         descriptionFunction() {
             return `the <strong class= 'color-d'> damage</strong> from <strong> depolarization</strong> <br>resets <strong>1.25 seconds</strong> sooner after a mob <strong>dies</strong>`
         },
@@ -826,7 +826,7 @@ const tech = {
                 }
                 if (gunTechPool.length) {
                     const index = Math.floor(Math.random() * gunTechPool.length)
-                    console.log(gunTechPool, index, gunTechPool[index], tech.tech[gunTechPool[index]].name)
+                    // console.log(gunTechPool, index, gunTechPool[index], tech.tech[gunTechPool[index]].name)
                     simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[gunTechPool[index]].name}</span>")`, 360)
                     // tech.tech[gunTechPool[index]].isInstant = true //makes it not remove properly under paradigm shift
                     tech.giveTech(gunTechPool[index]) // choose from the gun pool
@@ -1390,7 +1390,7 @@ const tech = {
     },
     {
         name: "thermal runaway",
-        description: "after mobs <strong>die</strong><br>they <strong class='color-e'>explode</strong>",
+        description: "after mobs <strong>die</strong> they <strong class='color-e'>explode</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -1472,7 +1472,7 @@ const tech = {
     {
         name: "bubble fusion",
         descriptionFunction() {
-            return `after destroying a mob's natural <strong>shield</strong><br>spawn <strong>1-2</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
+            return `after destroying a mob's <strong>shield</strong><br>spawn <strong>1-2</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)} <em>(once per mob)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -2295,7 +2295,7 @@ const tech = {
     },
     {
         name: "decorrelation",
-        description: "if your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> are unused for <strong>2</strong> seconds<br><strong>0.3x</strong> <strong class='color-defense'>damage taken</strong>",
+        description: "if your <strong class='color-g'>gun</strong> and <strong class='color-f'>field</strong> are unused for <strong>2</strong> seconds<br><strong>0.3x</strong> <strong class='color-defense'>damage taken</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -2313,7 +2313,7 @@ const tech = {
     },
     {
         name: "anticorrelation",
-        description: "if your <strong class='color-g'>gun</strong> or <strong class='color-f'>field</strong> are unused for <strong>2</strong> seconds<br><strong>2x</strong> <strong class='color-d'>damage</strong>",
+        description: "if your <strong class='color-g'>gun</strong> and <strong class='color-f'>field</strong> are unused for <strong>2</strong> seconds<br><strong>2x</strong> <strong class='color-d'>damage</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -2422,285 +2422,285 @@ const tech = {
             tech.isBlockPowerUps = false
         }
     },
-    {
-        name: "NOR gate",
-        description: "if <strong>flip-flop</strong> is <strong class='color-flop'>OFF</strong><br>become <strong>invulnerable</strong> to your next collision",
-        maxCount: 1,
-        count: 0,
-        frequency: 3,
-        frequencyDefault: 3,
-        allowed() {
-            return tech.isFlipFlop
-        },
-        requires: "flip-flop",
-        effect() {
-            tech.isFlipFlopHarm = true //do you have this tech
-        },
-        remove() {
-            tech.isFlipFlopHarm = false
-        }
-    },
-    {
-        name: "shape-memory alloy",
-        descriptionFunction() {
-            return `if <strong>flip-flop</strong> is <strong class='color-flop'>ON</strong><br><strong>+400</strong> maximum <strong class='color-h'>health</strong> and <strong>2x</strong> ${powerUps.orb.heal()} effect`
-        },
-        maxCount: 1,
-        count: 0,
-        frequency: 3,
-        frequencyDefault: 3,
-        allowed() {
-            return tech.isFlipFlop
-        },
-        requires: "flip-flop",
-        effect() {
-            tech.isFlipFlopHealth = true;
-            m.setMaxHealth();
-            for (let i = 0; i < powerUp.length; i++) {
-                if (powerUp[i].name === "heal") {
-                    const oldSize = powerUp[i].size
-                    powerUp[i].size = powerUps.heal.size() //update current heals
-                    const scale = powerUp[i].size / oldSize
-                    Matter.Body.scale(powerUp[i], scale, scale); //grow    
-                }
-            }
-        },
-        remove() {
-            tech.isFlipFlopHealth = false;
-            m.setMaxHealth();
-            for (let i = 0; i < powerUp.length; i++) {
-                if (powerUp[i].name === "heal") {
-                    const oldSize = powerUp[i].size
-                    powerUp[i].size = powerUps.heal.size() //update current heals
-                    const scale = powerUp[i].size / oldSize
-                    Matter.Body.scale(powerUp[i], scale, scale); //grow    
-                }
-            }
-        }
-    },
-    {
-        name: "flip-flop",
-        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Flip-flop_(electronics)' class="link">flip-flop</a>`,
-        description: `toggle <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after a <strong>collision</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
-        nameInfo: "<span id = 'tech-flip-flop'></span>",
-        addNameInfo() {
-            setTimeout(function () {
-                if (document.getElementById("tech-flip-flop")) {
-                    if (tech.isFlipFlopOn) {
-                        document.getElementById("tech-flip-flop").innerHTML = ` = <strong>ON</strong>`
-                        m.eyeFillColor = m.fieldMeterColor //'#5af'
-                    } else {
-                        document.getElementById("tech-flip-flop").innerHTML = ` = <strong>OFF</strong>`
-                        m.eyeFillColor = "transparent"
-                    }
-                }
-            }, 100);
-        },
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        allowed() {
-            return !tech.isRelay
-        },
-        requires: "not relay switch",
-        effect() {
-            tech.isFlipFlop = true //do you have this tech?
-            if (!tech.isFlipFlopOn) {
-                tech.isFlipFlopOn = true //what is the state of flip-Flop?
-            }
-            // if (!m.isShipMode) {
-            //     m.skin.flipFlop()
-            // }
-        },
-        remove() {
-            tech.isFlipFlop = false
-            if (tech.isFlipFlopOn) {
-                tech.isFlipFlopOn = false //what is the state of flip-Flop?
-            }
-            m.eyeFillColor = 'transparent'
-            // m.resetSkin();
-        }
-    },
-    {
-        name: "NAND gate",
-        description: "if <strong class='color-flop'>ON</strong><br><strong>1.555x</strong> <strong class='color-d'>damage</strong>",
-        maxCount: 1,
-        count: 0,
-        frequency: 3,
-        frequencyDefault: 3,
-        allowed() {
-            return tech.isFlipFlop || tech.isRelay
-        },
-        requires: "ON/OFF tech",
-        effect() {
-            tech.isFlipFlopDamage = true;
-        },
-        remove() {
-            tech.isFlipFlopDamage = false;
-        }
-    },
-    {
-        name: "integrated circuit",
-        description: "if <strong class='color-flop'>ON</strong> <strong>+7</strong> power up <strong>choices</strong><br>if <strong class='color-flop'>OFF</strong> <strong>-1</strong> power up <strong>choices</strong>",
-        maxCount: 1,
-        count: 0,
-        frequency: 3,
-        frequencyDefault: 3,
-        allowed() {
-            return (tech.isFlipFlop || tech.isRelay) && !tech.isDeterminism
-        },
-        requires: "ON/OFF tech, not determinism",
-        effect() {
-            tech.isFlipFlopChoices = true //do you have this tech
-        },
-        remove() {
-            tech.isFlipFlopChoices = false
-        }
-    },
-    {
-        name: "transistor",
-        description: "if <strong class='color-flop'>ON</strong> generate <strong>+20</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>-1</strong> <strong class='color-f'>energy</strong> per second",
-        maxCount: 1,
-        count: 0,
-        frequency: 3,
-        frequencyDefault: 3,
-        allowed() {
-            return tech.isFlipFlop || tech.isRelay
-        },
-        requires: "ON/OFF tech",
-        effect() {
-            tech.isFlipFlopEnergy = true;
-        },
-        remove() {
-            tech.isFlipFlopEnergy = false;
-        }
-    },
     // {
-    //     name: "decoupling",
-    //     link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Decoupling_(cosmology)' class="link">decoupling</a>`,
+    //     name: "NOR gate",
+    //     description: "if <strong>flip-flop</strong> is <strong class='color-flop'>OFF</strong><br>become <strong>invulnerable</strong> to your next collision",
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 3,
+    //     frequencyDefault: 3,
+    //     allowed() {
+    //         return tech.isFlipFlop
+    //     },
+    //     requires: "flip-flop",
+    //     effect() {
+    //         tech.isFlipFlopHarm = true //do you have this tech
+    //     },
+    //     remove() {
+    //         tech.isFlipFlopHarm = false
+    //     }
+    // },
+    // {
+    //     name: "shape-memory alloy",
     //     descriptionFunction() {
-    //         //<span style = 'font-size:80%;'>(${ m.couplingDescription(this.bonus)})</span>
-    //         return `if <strong class='color-flop'>ON</strong> <strong>+5</strong> <strong class='color-coupling'>coupling</strong><br>if <strong class='color-flop'>OFF</strong> a dangerous particle slowly <strong>chases</strong> you`
+    //         return `if <strong>flip-flop</strong> is <strong class='color-flop'>ON</strong><br><strong>+400</strong> maximum <strong class='color-h'>health</strong> and <strong>2x</strong> ${powerUps.orb.heal()} effect`
     //     },
     //     maxCount: 1,
     //     count: 0,
     //     frequency: 3,
     //     frequencyDefault: 3,
-    //     bonus: 5, //coupling given
+    //     allowed() {
+    //         return tech.isFlipFlop
+    //     },
+    //     requires: "flip-flop",
+    //     effect() {
+    //         tech.isFlipFlopHealth = true;
+    //         m.setMaxHealth();
+    //         for (let i = 0; i < powerUp.length; i++) {
+    //             if (powerUp[i].name === "heal") {
+    //                 const oldSize = powerUp[i].size
+    //                 powerUp[i].size = powerUps.heal.size() //update current heals
+    //                 const scale = powerUp[i].size / oldSize
+    //                 Matter.Body.scale(powerUp[i], scale, scale); //grow    
+    //             }
+    //         }
+    //     },
+    //     remove() {
+    //         tech.isFlipFlopHealth = false;
+    //         m.setMaxHealth();
+    //         for (let i = 0; i < powerUp.length; i++) {
+    //             if (powerUp[i].name === "heal") {
+    //                 const oldSize = powerUp[i].size
+    //                 powerUp[i].size = powerUps.heal.size() //update current heals
+    //                 const scale = powerUp[i].size / oldSize
+    //                 Matter.Body.scale(powerUp[i], scale, scale); //grow    
+    //             }
+    //         }
+    //     }
+    // },
+    // {
+    //     name: "flip-flop",
+    //     link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Flip-flop_(electronics)' class="link">flip-flop</a>`,
+    //     description: `toggle <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after a <strong>collision</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
+    //     // nameInfo: "<span id = 'tech-flip-flop'></span>",
+    //     // addNameInfo() {
+    //     //     setTimeout(function () {
+    //     //         if (document.getElementById("tech-flip-flop")) {
+    //     //             if (tech.isFlipFlopOn) {
+    //     //                 document.getElementById("tech-flip-flop").innerHTML = ` = <strong>ON</strong>`
+    //     //                 m.eyeFillColor = m.fieldMeterColor //'#5af'
+    //     //             } else {
+    //     //                 document.getElementById("tech-flip-flop").innerHTML = ` = <strong>OFF</strong>`
+    //     //                 m.eyeFillColor = "transparent"
+    //     //             }
+    //     //         }
+    //     //     }, 100);
+    //     // },
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 1,
+    //     frequencyDefault: 1,
+    //     allowed() {
+    //         return !tech.isRelay
+    //     },
+    //     requires: "not relay switch",
+    //     effect() {
+    //         tech.isFlipFlop = true //do you have this tech?
+    //         if (!tech.isFlipFlopOn) {
+    //             tech.isFlipFlopOn = true //what is the state of flip-Flop?
+    //         }
+    //         // if (!m.isShipMode) {
+    //         //     m.skin.flipFlop()
+    //         // }
+    //     },
+    //     remove() {
+    //         tech.isFlipFlop = false
+    //         if (tech.isFlipFlopOn) {
+    //             tech.isFlipFlopOn = false //what is the state of flip-Flop?
+    //         }
+    //         m.eyeFillColor = 'transparent'
+    //         // m.resetSkin();
+    //     }
+    // },
+    // {
+    //     name: "NAND gate",
+    //     description: "if <strong class='color-flop'>ON</strong><br><strong>1.555x</strong> <strong class='color-d'>damage</strong>",
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 3,
+    //     frequencyDefault: 3,
     //     allowed() {
     //         return tech.isFlipFlop || tech.isRelay
     //     },
     //     requires: "ON/OFF tech",
     //     effect() {
-    //         tech.isFlipFlopCoupling = true;
-    //         if (tech.isFlipFlopOn) {
-    //             m.couplingChange(this.bonus)
-    //         } else {
-    //             for (let i = 0; i < mob.length; i++) {
-    //                 if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
-    //             }
-    //             spawn.WIMP()
-    //             mob[mob.length - 1].isDecoupling = true //so you can find it to remove
-    //         }
+    //         tech.isFlipFlopDamage = true;
     //     },
     //     remove() {
-    //         tech.isFlipFlopCoupling = false;
-    //         if (this.count) {
-    //             if (tech.isFlipFlop || tech.isRelay) {
-    //                 if (tech.isFlipFlopOn) {
-    //                     m.couplingChange(-this.bonus)
-    //                 } else {
-    //                     for (let i = 0; i < mob.length; i++) {
-    //                         if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
-    //                     }
-    //                 }
-    //             }
-    //         }
+    //         tech.isFlipFlopDamage = false;
     //     }
     // },
-    {
-        name: "relay switch",
-        description: `toggle <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after picking up a <strong>power up</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
-        nameInfo: "<span id = 'tech-switch'></span>",
-        addNameInfo() {
-            setTimeout(function () {
-                if (document.getElementById("tech-switch")) {
-                    if (tech.isFlipFlopOn) {
-                        document.getElementById("tech-switch").innerHTML = ` = <strong>ON</strong>`
-                        m.eyeFillColor = m.fieldMeterColor //'#5af'
-                    } else {
-                        document.getElementById("tech-switch").innerHTML = ` = <strong>OFF</strong>`
-                        m.eyeFillColor = "transparent"
-                    }
-                }
-            }, 100);
-        },
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        allowed() {
-            return !tech.isFlipFlop
-        },
-        requires: "not flip-flop",
-        effect() {
-            m.isAltSkin = true
-            tech.isRelay = true //do you have this tech?
-            if (!tech.isFlipFlopOn) {
-                tech.isFlipFlopOn = true //what is the state of flip-Flop?
-            }
-            // if (!m.isShipMode) {
-            //     m.skin.flipFlop()
-            // }
-        },
-        remove() {
-            tech.isRelay = false
-            if (tech.isFlipFlopOn) {
-                tech.isFlipFlopOn = false //what is the state of flip-Flop?
-            }
-            m.eyeFillColor = 'transparent'
-            // m.resetSkin();
-        }
-    },
-    {
-        name: "lithium-ion",
-        description: "if <strong>relay switch</strong> is <strong class='color-flop'>ON</strong><br><strong>+300</strong> maximum <strong class='color-f'>energy</strong>",
-        maxCount: 1,
-        count: 0,
-        frequency: 3,
-        frequencyDefault: 3,
-        allowed() {
-            return tech.isRelay
-        },
-        requires: "relay switch",
-        effect() {
-            tech.isRelayEnergy = true
-            m.setMaxEnergy()
-        },
-        remove() {
-            tech.isRelayEnergy = false
-            m.setMaxEnergy()
-        }
-    },
-    {
-        name: "thermocouple",
-        description: "if  <strong>relay switch</strong> is <strong class='color-flop'>ON</strong><br>condense <strong>4-13</strong> <strong class='color-s'>ice IX</strong> crystals per second",
-        maxCount: 9,
-        count: 0,
-        frequency: 3,
-        frequencyDefault: 3,
-        allowed() {
-            return tech.isRelay
-        },
-        requires: "relay switch",
-        effect() {
-            tech.relayIce++
-        },
-        remove() {
-            tech.relayIce = 0
-        }
-    },
+    // {
+    //     name: "integrated circuit",
+    //     description: "if <strong class='color-flop'>ON</strong> <strong>+7</strong> power up <strong>choices</strong><br>if <strong class='color-flop'>OFF</strong> <strong>-1</strong> power up <strong>choices</strong>",
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 3,
+    //     frequencyDefault: 3,
+    //     allowed() {
+    //         return (tech.isFlipFlop || tech.isRelay) && !tech.isDeterminism
+    //     },
+    //     requires: "ON/OFF tech, not determinism",
+    //     effect() {
+    //         tech.isFlipFlopChoices = true //do you have this tech
+    //     },
+    //     remove() {
+    //         tech.isFlipFlopChoices = false
+    //     }
+    // },
+    // {
+    //     name: "transistor",
+    //     description: "if <strong class='color-flop'>ON</strong> generate <strong>+20</strong> <strong class='color-f'>energy</strong> per second<br>if <strong class='color-flop'>OFF</strong> drain <strong>-1</strong> <strong class='color-f'>energy</strong> per second",
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 3,
+    //     frequencyDefault: 3,
+    //     allowed() {
+    //         return tech.isFlipFlop || tech.isRelay
+    //     },
+    //     requires: "ON/OFF tech",
+    //     effect() {
+    //         tech.isFlipFlopEnergy = true;
+    //     },
+    //     remove() {
+    //         tech.isFlipFlopEnergy = false;
+    //     }
+    // },
+    // // {
+    // //     name: "decoupling",
+    // //     link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Decoupling_(cosmology)' class="link">decoupling</a>`,
+    // //     descriptionFunction() {
+    // //         //<span style = 'font-size:80%;'>(${ m.couplingDescription(this.bonus)})</span>
+    // //         return `if <strong class='color-flop'>ON</strong> <strong>+5</strong> <strong class='color-coupling'>coupling</strong><br>if <strong class='color-flop'>OFF</strong> a dangerous particle slowly <strong>chases</strong> you`
+    // //     },
+    // //     maxCount: 1,
+    // //     count: 0,
+    // //     frequency: 3,
+    // //     frequencyDefault: 3,
+    // //     bonus: 5, //coupling given
+    // //     allowed() {
+    // //         return tech.isFlipFlop || tech.isRelay
+    // //     },
+    // //     requires: "ON/OFF tech",
+    // //     effect() {
+    // //         tech.isFlipFlopCoupling = true;
+    // //         if (tech.isFlipFlopOn) {
+    // //             m.couplingChange(this.bonus)
+    // //         } else {
+    // //             for (let i = 0; i < mob.length; i++) {
+    // //                 if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
+    // //             }
+    // //             spawn.WIMP()
+    // //             mob[mob.length - 1].isDecoupling = true //so you can find it to remove
+    // //         }
+    // //     },
+    // //     remove() {
+    // //         tech.isFlipFlopCoupling = false;
+    // //         if (this.count) {
+    // //             if (tech.isFlipFlop || tech.isRelay) {
+    // //                 if (tech.isFlipFlopOn) {
+    // //                     m.couplingChange(-this.bonus)
+    // //                 } else {
+    // //                     for (let i = 0; i < mob.length; i++) {
+    // //                         if (mob[i].isDecoupling) mob[i].alive = false //remove WIMP
+    // //                     }
+    // //                 }
+    // //             }
+    // //         }
+    // //     }
+    // // },
+    // {
+    //     name: "relay switch",
+    //     description: `toggle <strong class="color-flop">ON</strong> and <strong class="color-flop">OFF</strong> after picking up a <strong>power up</strong><br>unlock advanced <strong class='color-m'>tech</strong> that runs if <strong class="color-flop">ON</strong>`,
+    //     // nameInfo: "<span id = 'tech-switch'></span>",
+    //     // addNameInfo() {
+    //     //     setTimeout(function () {
+    //     //         if (document.getElementById("tech-switch")) {
+    //     //             if (tech.isFlipFlopOn) {
+    //     //                 document.getElementById("tech-switch").innerHTML = ` = <strong>ON</strong>`
+    //     //                 m.eyeFillColor = m.fieldMeterColor //'#5af'
+    //     //             } else {
+    //     //                 document.getElementById("tech-switch").innerHTML = ` = <strong>OFF</strong>`
+    //     //                 m.eyeFillColor = "transparent"
+    //     //             }
+    //     //         }
+    //     //     }, 100);
+    //     // },
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 1,
+    //     frequencyDefault: 1,
+    //     allowed() {
+    //         return !tech.isFlipFlop
+    //     },
+    //     requires: "not flip-flop",
+    //     effect() {
+    //         m.isAltSkin = true
+    //         tech.isRelay = true //do you have this tech?
+    //         if (!tech.isFlipFlopOn) {
+    //             tech.isFlipFlopOn = true //what is the state of flip-Flop?
+    //         }
+    //         // if (!m.isShipMode) {
+    //         //     m.skin.flipFlop()
+    //         // }
+    //     },
+    //     remove() {
+    //         tech.isRelay = false
+    //         if (tech.isFlipFlopOn) {
+    //             tech.isFlipFlopOn = false //what is the state of flip-Flop?
+    //         }
+    //         m.eyeFillColor = 'transparent'
+    //         // m.resetSkin();
+    //     }
+    // },
+    // {
+    //     name: "lithium-ion",
+    //     description: "if <strong>relay switch</strong> is <strong class='color-flop'>ON</strong><br><strong>+300</strong> maximum <strong class='color-f'>energy</strong>",
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 3,
+    //     frequencyDefault: 3,
+    //     allowed() {
+    //         return tech.isRelay
+    //     },
+    //     requires: "relay switch",
+    //     effect() {
+    //         tech.isRelayEnergy = true
+    //         m.setMaxEnergy()
+    //     },
+    //     remove() {
+    //         tech.isRelayEnergy = false
+    //         m.setMaxEnergy()
+    //     }
+    // },
+    // {
+    //     name: "thermocouple",
+    //     description: "if  <strong>relay switch</strong> is <strong class='color-flop'>ON</strong><br>condense <strong>4-13</strong> <strong class='color-s'>ice IX</strong> crystals per second",
+    //     maxCount: 9,
+    //     count: 0,
+    //     frequency: 3,
+    //     frequencyDefault: 3,
+    //     allowed() {
+    //         return tech.isRelay
+    //     },
+    //     requires: "relay switch",
+    //     effect() {
+    //         tech.relayIce++
+    //     },
+    //     remove() {
+    //         tech.relayIce = 0
+    //     }
+    // },
     {
         name: "first derivative",
         descriptionFunction() {
@@ -3421,6 +3421,7 @@ const tech = {
         effect() {
             tech.isHealAttract = true
             powerUps.setPowerUpMode();
+            if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.03);
         },
         remove() {
             tech.isHealAttract = false
@@ -3515,12 +3516,12 @@ const tech = {
     },
     {
         name: "anthropic principle",
-        nameInfo: "<span id = 'tech-anthropic'></span>",
-        addNameInfo() {
-            setTimeout(function () {
-                powerUps.research.changeRerolls(0)
-            }, 1000);
-        },
+        // nameInfo: "<span id = 'tech-anthropic'></span>",
+        // addNameInfo() {
+        //     setTimeout(function () {
+        //         powerUps.research.changeRerolls(0)
+        //     }, 1000);
+        // },
         descriptionFunction() {
             return `once per level, instead of <strong>dying</strong><br>use ${powerUps.orb.research(1)} and spawn ${powerUps.orb.heal(16)}`
         },
@@ -3871,9 +3872,12 @@ const tech = {
         requires: "not determinism",
         effect() {
             tech.isExtraGunField = true;
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+            if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.05);
         },
         remove() {
             tech.isExtraGunField = false;
+            if (this.count) powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         }
     },
     {
@@ -3936,7 +3940,7 @@ const tech = {
         isBadRandomOption: true,
         isInstant: true,
         allowed() {
-            return !tech.extraChoices && !tech.isExtraGunField && !tech.isFlipFlopChoices && !tech.isExtraBotOption
+            return !tech.extraChoices && !tech.isExtraGunField && !tech.isExtraBotOption
         },
         requires: "not emergence, cross-disciplinary, integrated circuit",
         effect() {
@@ -4106,9 +4110,13 @@ const tech = {
         requires: "",
         effect() {
             tech.isMassProduction = true
+            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+            if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.03);
         },
         remove() {
             tech.isMassProduction = false
+            if (this.count) powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+
         }
     },
     {
@@ -4307,7 +4315,7 @@ const tech = {
         name: "residual dipolar coupling",
         descriptionFunction() {
             // return `clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns ${powerUps.orb.coupling(5)}that each give <strong>+0.1</strong> <strong class='color-coupling'>coupling</strong>`//<br>${m.couplingDescription(1)} ${m.fieldMode === 0 ? "" : "per <strong class='color-coupling'>coupling</strong>"}
-            return `clicking <strong class='color-cancel'>cancel</strong> spawns ${powerUps.orb.coupling(8)}<br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
+            return `clicking <strong class='color-cancel'>cancel</strong> spawns ${powerUps.orb.coupling(7)}<br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
         },
         maxCount: 1,
         count: 0,
@@ -4327,7 +4335,7 @@ const tech = {
     {
         name: "commodities exchange",
         descriptionFunction() {
-            return `clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>10-14</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
+            return `clicking <strong class='color-cancel'>cancel</strong> for a <strong class='color-f'>field</strong>, <strong class='color-m'>tech</strong>, or <strong class='color-g'>gun</strong><br>spawns <strong>8-12</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
         },
         maxCount: 1,
         count: 0,
@@ -4382,7 +4390,7 @@ const tech = {
         },
         remove() {
             tech.isCancelDuplication = false
-            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+            if (this.count) powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         }
     },
     {
@@ -4430,13 +4438,13 @@ const tech = {
         },
         remove() {
             tech.isPowerUpsVanish = false
-            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+            if (this.count) powerUps.setPowerUpMode(); //needed after adjusting duplication chance        }
         }
     },
     {
         name: "correlated damage",
         descriptionFunction() {
-            return `<strong class='color-dup'>duplication</strong> increases <strong class='color-d'>damage</strong> by the same percent<br><em>(${(1 + Math.min(1, tech.duplicationChance())).toFixed(2)}x)</em>`
+            return `<strong class='color-dup'>duplication</strong> increases <strong class='color-d'>damage</strong><br><em>(${(1 + Math.min(1, tech.duplicationChance())).toFixed(2)}x)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -4467,9 +4475,11 @@ const tech = {
         effect() {
             tech.isDuplicateMobs = true;
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+            if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.08);
         },
         remove() {
             tech.isDuplicateMobs = false;
+            if (this.count) powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         }
     },
     {
@@ -4506,11 +4516,11 @@ const tech = {
         effect() {
             tech.isStimulatedEmission = true
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
-            if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.15);
+            if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.20);
         },
         remove() {
             tech.isStimulatedEmission = false
-            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+            if (this.count) powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         }
     },
     {
@@ -4536,6 +4546,7 @@ const tech = {
             if (this.count > 0 && m.alive) {
                 tech.duplication += 0.11
                 powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+                if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.11);
                 tech.damage /= this.damage
                 this.frequency = 0
             }
@@ -4684,7 +4695,7 @@ const tech = {
     {
         name: "paradigm shift",
         descriptionFunction() {
-            return `when <strong>paused</strong> clicking a <strong class='color-m'>tech</strong> <span class='color-remove'>ejects</span> it<br><strong>–4</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} each time`
+            return `when <strong>paused</strong> clicking a <strong class='color-m'>tech</strong> <span class='color-remove'>ejects</span> it<br><strong>–${tech.pauseEjectTech.toFixed(1)}</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} cost <em>(1.2x cost each use)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -4699,6 +4710,7 @@ const tech = {
         },
         remove() {
             tech.isPauseEjectTech = false;
+
         }
     },
     {
@@ -5332,7 +5344,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0))
+            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0))
         },
         requires: "a freeze effect",
         effect() {
@@ -5351,7 +5363,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0))
+            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0))
         },
         requires: "a freeze effect",
         effect() {
@@ -5370,7 +5382,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0))) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
+            return (tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0))) && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.isMobBlockFling && !tech.nailsDeathMob
         },
         requires: "a localized freeze effect, no other mob death tech",
         effect() {
@@ -5389,7 +5401,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0)) || tech.iceIXOnDeath || tech.isIceShot
+            return (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0)) || tech.iceIXOnDeath || tech.isIceShot
         },
         requires: "ice IX",
         effect() {
@@ -5408,7 +5420,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.relayIce || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0)) || tech.iceIXOnDeath || tech.isIceShot
+            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0)) || tech.iceIXOnDeath || tech.isIceShot
         },
         requires: "a localized freeze effect",
         effect() {
@@ -5433,7 +5445,7 @@ const tech = {
         // },
         // requires: "perfect diamagnetism",
         allowed() {
-            return (tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.relayIce || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0)))
+            return (tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0)))
         },
         requires: "a localized freeze effect",
         effect() {
@@ -5485,7 +5497,7 @@ const tech = {
     },
     {
         name: "Zectron",
-        description: `<strong>2x</strong> <strong>super ball</strong> density and <strong class='color-d'>damage</strong>, but<br>after colliding with <strong>super balls</strong> <strong>-5</strong> <strong class='color-f'>energy</strong>`,
+        description: `<strong>2x</strong> <strong>super ball</strong> density and <strong class='color-d'>damage</strong>, but<br>after colliding with <strong>super balls</strong> <strong>-4</strong> <strong class='color-f'>energy</strong>`,
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -5630,7 +5642,7 @@ const tech = {
             tech.wavePacketDamage *= 1.4
         },
         remove() {
-            tech.waveFrequency = 0.2
+            tech.waveFrequency = 0.2  //adjust this to make the waves much larger
             tech.wavePacketDamage = 1
         }
     },
@@ -8549,7 +8561,7 @@ const tech = {
         },
         remove() {
             tech.cloakDuplication = 0
-            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+            if (this.count) powerUps.setPowerUpMode(); //needed after adjusting duplication chance
         }
     },
     {
@@ -8719,7 +8731,7 @@ const tech = {
         },
         remove() {
             tech.fieldDuplicate = 0
-            powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+            if (this.count) powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             if (this.count > 0) powerUps.research.changeRerolls(3)
         }
     },
@@ -10965,6 +10977,25 @@ const tech = {
         }
     },
     {
+        name: "wall jump",
+        description: "jump on walls",
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isJunk: true,
+        allowed() {
+            return !m.isShipMode
+        },
+        requires: "",
+        effect() {
+            jumpSensor.vertices[0].x += -22
+            jumpSensor.vertices[3].x += -22
+            jumpSensor.vertices[1].x += 22
+            jumpSensor.vertices[2].x += 22
+        },
+        remove() { }
+    },
+    {
         name: "posture",
         description: "stand a bit taller",
         maxCount: 1,
@@ -11935,6 +11966,7 @@ const tech = {
     isExplodeRadio: null,
     isPauseSwitchField: null,
     isPauseEjectTech: null,
+    pauseEjectTech: null,
     isShieldPierce: null,
     isDuplicateMobs: null,
     is100Duplicate: null,
@@ -11945,15 +11977,6 @@ const tech = {
     isSwitchReality: null,
     isResearchReality: null,
     isAnthropicDamage: null,
-    isFlipFlop: null,
-    isFlipFlopHarm: null,
-    isFlipFlopOn: null,
-    // isFlipFlopLevelReset: null,
-    isFlipFlopDamage: null,
-    isFlipFlopEnergy: null,
-    isFlipFlopChoices: null,
-    isRelay: null,
-    relayIce: null,
     isMetaAnalysis: null,
     isFoamAttract: null,
     droneCycleReduction: null,
@@ -12046,8 +12069,6 @@ const tech = {
     isTechDebt: null,
     isPlasmaBall: null,
     plasmaDischarge: null,
-    isFlipFlopHealth: null,
-    isRelayEnergy: null,
     coyoteTime: null,
     missileFireCD: null,
     isBotField: null,

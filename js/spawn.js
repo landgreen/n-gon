@@ -1691,6 +1691,7 @@ const spawn = {
             powerUps.spawnBossPowerUp(me.position.x, me.position.y)
             powerUps.spawn(me.position.x, me.position.y, "heal");
             powerUps.spawn(me.position.x, me.position.y, "ammo");
+            powerUps.spawn(me.position.x, me.position.y, "ammo");
         } else if (!m.isCloak) {
             me.foundPlayer();
         }
@@ -1698,7 +1699,7 @@ const spawn = {
         me.isInvulnerable = true
         me.startingDamageReduction = me.damageReduction
         me.damageReduction = 0
-        me.invulnerabilityCountDown = 25 + simulation.difficulty
+        me.invulnerabilityCountDown = 30 + simulation.difficulty
         me.onHit = function () { //run this function on hitting player
             if (powerUps.ejectTech()) {
                 powerUps.ejectGraphic("150, 138, 255");
@@ -1713,10 +1714,7 @@ const spawn = {
             if (vertices > 3) {
                 this.isDropPowerUp = false;
                 spawn.powerUpBossBaby(this.position.x, this.position.y, vertices - 1)
-                Matter.Body.setVelocity(mob[mob.length - 1], {
-                    x: this.velocity.x,
-                    y: this.velocity.y
-                })
+                Matter.Body.setVelocity(mob[mob.length - 1], { x: this.velocity.x, y: this.velocity.y })
             }
             for (let i = 0; i < powerUp.length; i++) powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
         };
@@ -1770,15 +1768,16 @@ const spawn = {
             powerUps.spawnBossPowerUp(me.position.x, me.position.y)
             powerUps.spawn(me.position.x, me.position.y, "heal");
             powerUps.spawn(me.position.x, me.position.y, "ammo");
+            powerUps.spawn(me.position.x, me.position.y, "ammo");
         } else if (!m.isCloak) {
             me.foundPlayer();
         }
 
-        me.damageReduction = 0.15 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
-        // me.isInvulnerable = true
-        // me.startingDamageReduction = me.damageReduction
-        // me.damageReduction = 0
-        // me.invulnerabilityCountDown = 60 + simulation.difficulty * 2
+        me.damageReduction = 0.22 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.isInvulnerable = true
+        me.startingDamageReduction = me.damageReduction
+        me.damageReduction = 0
+        me.invulnerabilityCountDown = 30 + simulation.difficulty
 
         me.onHit = function () { //run this function on hitting player
             if (powerUps.ejectTech()) {
@@ -1794,10 +1793,7 @@ const spawn = {
             if (vertices > 3) {
                 this.isDropPowerUp = false;
                 spawn.powerUpBoss(this.position.x, this.position.y, vertices - 1)
-                Matter.Body.setVelocity(mob[mob.length - 1], {
-                    x: this.velocity.x,
-                    y: this.velocity.y
-                })
+                Matter.Body.setVelocity(mob[mob.length - 1], { x: this.velocity.x, y: this.velocity.y })
             }
             for (let i = 0; i < powerUp.length; i++) powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
         };
@@ -1843,22 +1839,22 @@ const spawn = {
         // me.constrainPowerUps()
         me.do = function () {
             this.stroke = `hsl(0,0%,${80 + 25 * Math.sin(simulation.cycle * 0.01)}%)`
-            // if (this.isInvulnerable) {
-            //     if (this.invulnerabilityCountDown > 0) {
-            //         this.invulnerabilityCountDown--
-            //         ctx.beginPath();
-            //         let vertices = this.vertices;
-            //         ctx.moveTo(vertices[0].x, vertices[0].y);
-            //         for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
-            //         ctx.lineTo(vertices[0].x, vertices[0].y);
-            //         ctx.lineWidth = 20;
-            //         ctx.strokeStyle = "rgba(255,255,255,0.7)";
-            //         ctx.stroke();
-            //     } else {
-            //         this.isInvulnerable = false
-            //         this.damageReduction = this.startingDamageReduction
-            //     }
-            // }
+            if (this.isInvulnerable) {
+                if (this.invulnerabilityCountDown > 0) {
+                    this.invulnerabilityCountDown--
+                    ctx.beginPath();
+                    let vertices = this.vertices;
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                    ctx.lineTo(vertices[0].x, vertices[0].y);
+                    ctx.lineWidth = 13 + 5 * Math.random();
+                    ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.2 * Math.random()})`;
+                    ctx.stroke();
+                } else {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                }
+            }
             //steal all power ups
             // for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
             //     powerUp[i].collisionFilter.mask = 0
@@ -6898,9 +6894,7 @@ const spawn = {
             ctx.moveTo(this.vertices[this.vertices.length - 1].x, this.vertices[this.vertices.length - 1].y)
             const phase = (this.vertices.length + 1) * this.cycle / this.maxCycles
             if (phase > 1) ctx.lineTo(this.vertices[0].x, this.vertices[0].y)
-            for (let i = 1; i < phase - 1; i++) {
-                ctx.lineTo(this.vertices[i].x, this.vertices[i].y)
-            }
+            for (let i = 1; i < phase - 1; i++) ctx.lineTo(this.vertices[i].x, this.vertices[i].y)
             ctx.lineWidth = 5
             ctx.strokeStyle = "rgb(255,255,255)"
             ctx.stroke();
@@ -7584,7 +7578,7 @@ const spawn = {
             }
         };
     },
-    shield(target, x, y, chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2) + tech.duplicationChance(), isExtraShield = false) {
+    shield(target, x, y, chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2) + tech.duplicationChance()) {
         if (this.allowShields && Math.random() < chance) {
             mobs.spawn(x, y, 9, target.radius + 30, "rgba(220,220,255,0.9)");
             let me = mob[mob.length - 1];
@@ -7593,7 +7587,6 @@ const spawn = {
             me.shield = true;
             me.damageReduction = 0.05 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
             me.isUnblockable = true
-            me.isExtraShield = isExtraShield //this prevents spamming with tech.isShieldAmmo
             me.collisionFilter.category = cat.mobShield
             me.collisionFilter.mask = cat.bullet;
             consBB[consBB.length] = Constraint.create({
@@ -7615,7 +7608,14 @@ const spawn = {
 
             me.shieldTargetID = target.id
             target.isShielded = true;
+            if (target.shieldCount > 0) {
+                target.shieldCount++
+            } else {
+                target.shieldCount = 1
+            }
+            me.shieldCount = target.shieldCount //used with "bubble fusion"
             target.shieldID = me.id
+
             me.onDeath = function () {
                 //clear isShielded status from target
                 for (let i = 0, len = mob.length; i < len; i++) {
@@ -8210,12 +8210,6 @@ const spawn = {
             }
         }
     },
-    // bodyRect(x, y, width, height, chance = 1, properties = { friction: 0.05, frictionAir: 0.001 }) {
-    //     if (Math.random() < chance) body[body.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
-    // },
-    // bodyVertex(x, y, vector, properties) { //adds shape to body array
-    //     body[body.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
-    // },
     bodyRect(x, y, width, height, chance = 1, properties = { friction: 0.05, frictionAir: 0.001 }) { //this is the command that adds blocks to the world in the middle of a level
         if (Math.random() < chance) {
             body[body.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
