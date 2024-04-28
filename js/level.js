@@ -4253,11 +4253,10 @@ const level = {
     },
     towers() {
         // simulation.enableConstructMode() //remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        level.difficultyIncrease(10 * 4) //30 is near max on hard  //60 is near max on why
+        // level.difficultyIncrease(10 * 4) //30 is near max on hard  //60 is near max on why
         // simulation.isHorizontalFlipped = true
-        const isFlipped = (simulation.isHorizontalFlipped && Math.random() < 0.33) ? true : false
-
         level.announceMobTypes()
+        const isFlipped = (simulation.isHorizontalFlipped && Math.random() < 0.33) ? true : false
         if (isFlipped) {
             level.setPosToSpawn(9150 + 50, -2230 - 25);
             level.exit.x = -100 - 50;
