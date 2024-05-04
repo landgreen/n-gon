@@ -12121,12 +12121,6 @@ const level = {
             return bound.has(player.bounds.min) || bound.has(player.bounds.max);
         }
 
-        function addWIMP(x, y) {
-            spawn.WIMP(x, y);
-            const me = mob[mob.length - 1];
-            me.isWIMP = true;
-        }
-
         function relocateWIMPs(x, y) {
             for (const i of mob) {
                 if (i.isWIMP) {
@@ -12665,10 +12659,11 @@ const level = {
         Promise.resolve().then(() => {
             // Clear all WIMPS and their research
             for (let i = 0; i < mob.length; i++) {
-                while (mob[i] && !mob[i].isMACHO) {
-                    mob[i].replace(i);
+                if (mob[i] && !mob[i].isMACHO) {
+                    mob[i].isWIMP = true;
                 }
             }
+            relocateWIMPs(0, -10030);
             for (let i = 0; i < powerUp.length; i++) {
                 while (powerUp[i] && powerUp[i].name === "research") {
                     Matter.Composite.remove(engine.world, powerUp[i]);
@@ -12884,7 +12879,7 @@ const level = {
                     return this.rings.length;
                 },
                 get cap() {
-                    return (this.ringNumber + 1) * 90 + 240;
+                    return this.ringNumber * 90 + 180;
                 },
                 get capped() {
                     return templePlayer.room2.spawnInitiatorCycles > this.cap;
@@ -12919,8 +12914,8 @@ const level = {
                                 y: -300
                             }), simulation.cycle - 5);
                         }
-                        if (!this.capped && cycle >= this.cap - 200) {
-                            const multCoeff = (cycle - this.cap + 200) * 0.4
+                        if (!this.capped && cycle >= this.cap - 180) {
+                            const multCoeff = (cycle - this.cap + 180) * 0.4
                             ctx.translate((Math.random() - 0.5) * multCoeff, (Math.random() - 0.5) * multCoeff);
                         }
                         ctx.shadowBlur = 20;
@@ -12930,12 +12925,12 @@ const level = {
                         DrawTools.arcOut(this.pos.x, this.pos.y, 100, 0, Math.PI * 2);
                         if (templePlayer.room2.cycles <= 100) {
                             for (let i = 0; i < this.ringNumber; i++) {
-                                if (cycle < i * 90 + 90) break;
+                                if (cycle < i * 90) break;
                                 const ring = this.rings[i];
                                 ctx.shadowColor = `rgb(${ring.colour.join(",")})`;
-                                const opacity = this.capped ? 1 - 0.01 * templePlayer.room2.cycles : (cycle / 180 - i / 2 - 0.5);
+                                const opacity = this.capped ? 1 - 0.01 * templePlayer.room2.cycles : (cycle / 180 - i / 2);
                                 ctx.strokeStyle = `rgba(${ring.colour.join(",")}, ${Math.min(opacity, 1)})`;
-                                const radius = (this.capped ? 1 + 0.07 * templePlayer.room2.cycles : Math.sin(Math.min(cycle - i * 90 - 90, 45) / 90 * Math.PI)) * ring.radius;
+                                const radius = (this.capped ? 1 + 0.07 * templePlayer.room2.cycles : Math.sin(Math.min(cycle - i * 90, 45) / 90 * Math.PI)) * ring.radius;
                                 DrawTools.arcOut(this.pos.x, this.pos.y, radius, 0, Math.PI * 2);
                             }
                         }
@@ -13083,14 +13078,15 @@ const level = {
             room0() {
                 if (templePlayer.startAnim <= 0) return;
                 templePlayer.startAnim++;
-                if (templePlayer.startAnim == 120) {
+                if (templePlayer.startAnim == 60) {
                     makeLore("Not so fast.");
                 }
-                if (templePlayer.startAnim < 360) {
+                if (templePlayer.startAnim < 180) {
                     trapPlayer(1000, templePlayer.initialTrapY);
                 } else {
                     level.exit.x = 4500;
                     level.exit.y = -2030;
+                    relocateWIMPs(level.exit.x, level.exit.y);
                     relocateTo(50, -2050);
                     simulation.fallHeight = -1000;
                     // simulation.setZoom(1800);
@@ -13101,49 +13097,31 @@ const level = {
                 }
             },
             room1() {
-                if (templePlayer.room1ToRoom2Anim <= 0) return;
-                if (templePlayer.room1ToRoom2Anim === 1) {
+                const frame = templePlayer.room1ToRoom2Anim;
+                if (frame <= 0) return;
+                if (frame === 1) {
                     level.exit.x = -50;
                     level.exit.y = -10030;
                     makeLore("Pathetic.");
                 }
-                if (templePlayer.room1ToRoom2Anim === 121) {
-                    makeLore("You will never succeed.");
-                }
-                if (templePlayer.room1ToRoom2Anim >= 360 && templePlayer.room1ToRoom2Anim <= 720) {
-                    const factor = 200 - 200 * Math.cos((templePlayer.room1ToRoom2Anim / 120 - 3) * Math.PI);
+                if (frame >= 1 && frame <= 360) {
+                    const factor = 100 - 100 * Math.cos((frame / 90) * Math.PI);
                     ctx.translate(factor, factor);
                     Promise.resolve().then(() => {
                         ctx.save();
                         ctx.globalCompositeOperation = "color-burn";
-                        ctx.fillStyle = DrawTools.randomColours;
+                        ctx.fillStyle = DrawTools.randomColours((frame) * (360 - frame) / 32400);
                         DrawTools.updateRandomColours(5);
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         ctx.restore();
                     });
                 }
-                if (templePlayer.room1ToRoom2Anim === 720) {
+                if (frame === 180) {
                     makeLore("You are trying too hard.");
                     relocateTo(0, -7050);
                     simulation.fallHeight = -6000;
                     templePlayer.stage = 2;
-                }
-                if (templePlayer.room1ToRoom2Anim === 960) {
-                    makeLore("I have mastered the understandings of the universe.");
-                }
-                if (templePlayer.room1ToRoom2Anim === 1200) {
-                    // Congrats, you discovered the actual words by looking at the source code. Are you happy now?
-                    const x = (
-                        ["a speck of dust", "an insignificant hindrance", "a tiny obstacle"]
-                    )[Math.floor(Math.random() * 3)].split("");
-                    for (let i = 0; i < x.length / 1.6; i++) {
-                        const randomIndex = Math.floor(Math.random() * x.length);
-                        if (x[randomIndex] !== " ") {
-                            x[randomIndex] = String.fromCharCode(Math.floor(Math.random() * 50) + 192);
-                        }
-                    };
-                    makeLore(`You are no more than ${x.join("")} to me.</h3></h2>`);
-                    relocateWIMPs(0, -10030);
+                    relocateWIMPs(level.exit.x, level.exit.y - 3000);
                 }
                 templePlayer.room1ToRoom2Anim++;
             },
@@ -13154,23 +13132,10 @@ const level = {
                     level.exit.y = -13130;
                     makeLore("Do not try me.");
                 }
+                if (templePlayer.room2ToRoom3Anim >= 1 && templePlayer.room2ToRoom3Anim <= 180) {
+                    canvas.style.filter = `sepia(${templePlayer.room2ToRoom3Anim / 180}) invert(${templePlayer.room2ToRoom3Anim / 180})`;
+                }
                 if (templePlayer.room2ToRoom3Anim === 180) {
-                    makeLore("I have absolute power over you.");
-                    canvas.style.filter = "hue-rotate(90deg)";
-                }
-                if (templePlayer.room2ToRoom3Anim === 360) {
-                    makeLore("You will not succeed...");
-                    canvas.style.filter = "invert(0.2)";
-                }
-                if (templePlayer.room2ToRoom3Anim === 420) {
-                    makeLore("<h6 style='display: inline-block'>...</h6>");
-                    canvas.style.filter = "invert(0.4)";
-                }
-                if (templePlayer.room2ToRoom3Anim > 480 && templePlayer.room2ToRoom3Anim <= 660) {
-                    canvas.style.filter = `sepia(${(templePlayer.room2ToRoom3Anim - 480) / 180}) invert(${0.5 + (templePlayer.room2ToRoom3Anim - 480) / 180})`;
-                }
-                if (templePlayer.room2ToRoom3Anim === 780) {
-                    makeLore("Do not interfere with me.");
                     templePlayer.stage = 3;
                     relocateTo(50, -13150);
                     simulation.fallHeight = -10000;
@@ -13182,43 +13147,28 @@ const level = {
                             mob[i].replace(i);
                         }
                     }
+                    templePlayer.drawExit = true;
+                    for (let i = 0; i < 5 * tech.wimpCount; i++) {
+                        powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false);
+                    }
+                    canvas.style.filter = "";
                 }
-                if (templePlayer.room2ToRoom3Anim > 780 && templePlayer.room2ToRoom3Anim <= 960) {
-                    canvas.style.filter = `sepia(${(960 - templePlayer.room2ToRoom3Anim) / 180}) invert(${(960 - templePlayer.room2ToRoom3Anim) / 180})`;
+                if (templePlayer.room2ToRoom3Anim > 180 && templePlayer.room2ToRoom3Anim <= 360) {
+                    canvas.style.filter = `sepia(${(360 - templePlayer.room2ToRoom3Anim) / 180}) invert(${(360 - templePlayer.room2ToRoom3Anim) / 180})`;
                 }
                 templePlayer.room2ToRoom3Anim++;
             },
             room3() {
                 if (templePlayer.room3ToEndAnim <= 0) return;
                 if (templePlayer.room3ToEndAnim === 1) {
-                    makeLore("No.");
-                }
-                if (templePlayer.room3ToEndAnim === 120) {
-                    makeLore("This cannot be.");
-                }
-                if (templePlayer.room3ToEndAnim === 240) {
-                    makeLore("Has my power failed me?");
-                }
-                if (templePlayer.room3ToEndAnim === 360) {
-                    makeLore("Was it worth it, destroying this place?");
-                }
-                if (templePlayer.room3ToEndAnim === 600) {
-                    makeLore("No one is greater than me.");
-                }
-                const text = "noone-";
-                for (let i = 0; i < 12; i++) {
-                    if (templePlayer.room3ToEndAnim === 720 + i * 20) {
-                        name = name.slice(0, -1);
-                        simulation.makeTextLog(`<span style="font-size: 1em"><span style="color: #f00">${name}:</span> &nbsp; ${text[i % 6]}</span>`);
-                        canvas.style.filter = `brightness(${1 - i / 22})`;
-                    }
-                }
-                if (templePlayer.room3ToEndAnim === 1060) {
-                    templePlayer.drawExit = true;
-                    for (let i = 0; i < 5 * tech.wimpCount; i++) {
-                        powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false);
-                    }
-                    canvas.style.filter = "";
+                    const x = "Nooooooooooo".split("");
+                    for (let i = 0; i < x.length / 1.6; i++) {
+                        const randomIndex = Math.floor(Math.random() * x.length);
+                        if (x[randomIndex] !== " ") {
+                            x[randomIndex] = String.fromCharCode(Math.floor(Math.random() * 50) + 192);
+                        }
+                    };
+                    makeLore(x.join(""));
                 }
                 templePlayer.room3ToEndAnim++;
             },
@@ -13227,11 +13177,11 @@ const level = {
                 Promise.resolve().then(() => {
                     ctx.save();
                     ctx.setTransform(1, 0, 0, 1, 0, 0);
-                    ctx.fillStyle = `rgba(0, 0, 0, ${(simulation.cycle - templePlayer.clearedCycle) / 300})`;
+                    ctx.fillStyle = `rgba(0, 0, 0, ${(simulation.cycle - templePlayer.clearedCycle) / 30})`;
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     ctx.restore();
                 });
-                if (simulation.cycle - templePlayer.clearedCycle > 420) level.nextLevel();
+                if (simulation.cycle - templePlayer.clearedCycle > 30) level.nextLevel();
             }
         };
         const LogicHandler = {
@@ -13383,7 +13333,7 @@ const level = {
                 const roomConditions = [
                     isInBound(firstRoomBounds) && templePlayer.room1.cycles < 2400,
                     isInBound(secondRoomBounds) && templePlayer.room2.cycles > 0 && templePlayer.room2.cycles < 2160,
-                    isInBound(thirdRoomBounds) && templePlayer.room2ToRoom3Anim < 1320
+                    isInBound(thirdRoomBounds) && templePlayer.room2ToRoom3Anim < 540
                 ];
                 Promise.resolve(roomConditions).then(roomConditions => {
                     // First Room
@@ -13413,7 +13363,7 @@ const level = {
                         ctx.fillStyle = "#0004";
                         ctx.fillRect(canvas.width2 - 288, 50, 576, 20);
                         ctx.fillStyle = "#000";
-                        ctx.fillRect(canvas.width2 - 288, 50, 1.6 * (1320 - templePlayer.room2ToRoom3Anim), 20);
+                        ctx.fillRect(canvas.width2 - 288, 50, 1.6 * (540 - templePlayer.room2ToRoom3Anim), 20);
                         ctx.restore();
                     }
                 });
@@ -13465,7 +13415,7 @@ const level = {
                 }
             },
             room3() {
-                if (templePlayer.room2ToRoom3Anim === 1320) {
+                if (templePlayer.room2ToRoom3Anim === 540) {
                     thirdRoomBoss(1800, -13700);
                     for (let i = 0; i < 3; i++) {
                         powerUps.spawn(m.spawnPos.x, m.spawnPos.y, "heal");
@@ -13474,8 +13424,8 @@ const level = {
             }
         };
         const DrawTools = {
-            get randomColours() {
-                return `rgb(${this._randomColours.join(",")})`
+            randomColours(alpha = 1) {
+                return `rgba(${this._randomColours.join(",")},${alpha})`
             },
             _randomColours: [Math.random() * 255, Math.random() * 255, Math.random() * 255],
             updateRandomColours(x = 0.8) {
