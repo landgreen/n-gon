@@ -158,7 +158,7 @@ const spawn = {
         me.do = function () {
             if (!simulation.isTimeSkipping) {
                 const sine = Math.sin(simulation.cycle * 0.015)
-                this.radius = 55 * tech.isDarkStar + 370 * (1 + 0.1 * sine)
+                this.radius = 111 * tech.isDarkStar + 370 * (1 + 0.1 * sine)
                 //chase player
                 const sub = Vector.sub(player.position, this.position)
                 const mag = Vector.magnitude(sub)
@@ -167,7 +167,21 @@ const spawn = {
                 // const where = Vector.add(this.position, Vector.mult(Vector.normalise(sub), this.chaseSpeed))
                 // if (mag > 10) Matter.Body.setPosition(this, { x: where.x, y: where.y });
 
-                //realistic physics
+                // if (true) {
+                //     if (m.crouch) {
+                //         if (Vector.magnitude(Vector.sub(this.position, m.pos)) > this.radius) {
+                //             attract *= 40
+                //         } else {
+                //             Matter.Body.setVelocity(this, Vector.mult(this.velocity, 0.9)); //friction
+                //         }
+
+                //     }
+                // }
+
+                if (tech.isMoveMACHO && m.crouch) {
+                    Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.97), Vector.mult(player.velocity, 0.03)))
+                    Matter.Body.setPosition(this, Vector.add(Vector.mult(this.position, 0.95), Vector.mult(player.position, 0.05)))
+                }
                 const force = Vector.mult(Vector.normalise(sub), 0.000000003)
                 this.force.x += force.x
                 this.force.y += force.y
@@ -175,18 +189,12 @@ const spawn = {
 
                 if (mag < this.radius) { //buff to player when inside radius
                     tech.isHarmMACHO = true;
-
                     //draw halo
                     ctx.strokeStyle = "rgba(80,120,200,0.2)" //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
                     ctx.beginPath();
                     ctx.arc(m.pos.x, m.pos.y, 36, 0, 2 * Math.PI);
                     ctx.lineWidth = 10;
                     ctx.stroke();
-                    // ctx.strokeStyle = "rgba(255,255,0,0.17)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
-                    // ctx.beginPath();
-                    // ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-                    // ctx.lineWidth = 30;
-                    // ctx.stroke();
                 } else {
                     tech.isHarmMACHO = false;
                 }
@@ -203,14 +211,13 @@ const spawn = {
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isShielded) {
                             if (Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius < this.radius) {
-                                mob[i].damage(0.025 * m.dmgScale);
-                                // mob[i].locatePlayer();//
-
+                                const dmg = 0.025 * m.dmgScale * (tech.isMoveMACHO ? 1.5 : 1)
+                                mob[i].damage(dmg);
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: mob[i].position.x,
                                     y: mob[i].position.y,
                                     radius: mob[i].radius + 8,
-                                    color: `rgba(10,0,40,0.1)`, // random hue, but not red
+                                    color: `rgba(10,0,40,0.1)`,
                                     time: 4
                                 });
                             }
@@ -5731,9 +5738,9 @@ const spawn = {
     sneakBoss(x, y, radius = 70) {
         mobs.spawn(x, y, 5, radius, "transparent");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.001); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.15 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
 
         me.accelMag = 0.0017 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.01;
@@ -5748,6 +5755,7 @@ const spawn = {
         me.vanishesLeft = Math.ceil(1 + simulation.difficultyMode * 0.5)
         me.onDeath = function () {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            for (let i = 0; i < simulation.difficultyMode / 2 - 0.5; i++) spawn.sneaker(this.position.x + 10 * Math.random(), this.position.y + 10 * Math.random())
         };
         me.onDamage = function () {
             if (this.vanishesLeft > 0 && this.health < 0.1) { //if health is below 10% teleport to a random spot on player history, heal, and cloak
@@ -5772,6 +5780,7 @@ const spawn = {
                 this.seePlayer.recall = 0
                 this.cloak();
                 this.health = 1;
+                for (let i = 0; i < simulation.difficultyMode / 2 - 0.5; i++) spawn.sneaker(this.position.x + 10 * Math.random(), this.position.y + 10 * Math.random())
             }
         };
         me.cloak = function () {
@@ -5803,7 +5812,7 @@ const spawn = {
             this.gravity();
             this.seePlayerByHistory(55);
             this.checkStatus();
-            this.attraction();
+            if (this.alpha > 0.8) this.attraction();
             //draw
             if (this.seePlayer.recall) {
                 if (this.alpha < 1) this.alpha += 0.005 + 0.003 / simulation.CDScale;
@@ -5908,7 +5917,7 @@ const spawn = {
     ghoster(x, y, radius = 50 + Math.ceil(Math.random() * 90)) {
         mobs.spawn(x, y, 7, radius, "transparent");
         let me = mob[mob.length - 1];
-        me.seeAtDistance2 = 300000;
+        me.seeAtDistance2 = 500000;
         me.accelMag = 0.00007 + 0.0001 * simulation.accelScale;
         if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
         Matter.Body.setDensity(me, 0.0002); //normal is 0.001
@@ -5917,10 +5926,9 @@ const spawn = {
         me.alpha = 1; //used in drawGhost
         me.isNotCloaked = false; //used in drawGhost
         me.isBadTarget = true;
-        // me.leaveBody = false;
         me.collisionFilter.mask = cat.bullet //| cat.body
         me.showHealthBar = false;
-        me.memory = 600;
+        me.memory = 900;
         me.delay = 60
         me.cd = 0;
         me.onHit = function () {
@@ -5948,6 +5956,9 @@ const spawn = {
                 }
             }
         };
+        me.onDamage = function () {
+            if (this.health < 0.8) me.seeAtDistance2 = 2000000;
+        }
         me.do = function () {
             if (this.speed > 7) Matter.Body.setVelocity(this, { x: this.velocity.x * 0.8, y: this.velocity.y * 0.8 }); //cap max speed to avoid getting launched by deflection, explosion
             this.seePlayerCheckByDistance();
@@ -5957,8 +5968,8 @@ const spawn = {
             //draw
             if (this.distanceToPlayer2() < this.seeAtDistance2) {
                 if (this.alpha < 1) this.alpha += 0.011 * simulation.CDScale; //near player go solid
-            } else {
-                if (this.alpha > 0) this.alpha -= 0.05; ///away from player, hide
+            } else if (this.alpha > 0) {
+                this.alpha -= 0.05; ///away from player, hide
             }
             if (this.alpha > 0) {
                 if (this.alpha > 0.7 && this.seePlayer.recall) {

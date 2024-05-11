@@ -342,7 +342,7 @@ const powerUps = {
                     powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), spawnType, false);
                 }
             }
-            if (tech.isCancelCouple) powerUps.spawnDelay("coupling", 7)
+            if (tech.isCancelCouple) powerUps.spawnDelay("coupling", 8)
             if (tech.isCancelTech && tech.cancelTechCount === 0 && type !== "entanglement") {
                 tech.cancelTechCount++
                 // powerUps.research.use('tech')
@@ -350,7 +350,7 @@ const powerUps = {
                 return
             }
         }
-        tech.cancelTechCount = 0
+
         if (tech.isAnsatz && powerUps.research.count < 1) {
             for (let i = 0; i < 3; i++) powerUps.spawn(m.pos.x + 40 * (Math.random() - 0.5), m.pos.y + 40 * (Math.random() - 0.5), "research", false);
         }
@@ -655,7 +655,7 @@ const powerUps = {
         if (tech.isSuperDeterminism) {
             return `<div></div>`
         } else if (tech.isCancelTech && tech.cancelTechCount === 0) {
-            return `<div class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;">randomize</div>`
+            return `<div class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;"><span class="color-randomize">randomize</span></div>`
         } else if (level.levelsCleared === 0 && localSettings.isTrainingNotAttempted && b.inventory.length === 0) { //don't show cancel if on initial level and haven't done tutorial
             return `<div class='cancel-card'  style="visibility: hidden;"></div>`
         } else {
@@ -707,7 +707,7 @@ const powerUps = {
         if (tech.isSuperDeterminism) {
             text += `<span class='cancel-card' style="width: 95px;float: right;background-color: #aaa;color:#888;">cancel</span>`
         } else if (tech.isCancelTech && tech.cancelTechCount === 0) {
-            text += `<span class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;float: right;font-size:0.9em;padding-top:5px">randomize</span>`
+            text += `<span class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;float: right;font-size:0.9em;padding-top:5px;"><span class="color-randomize">randomize</span></span>`
         } else if (level.levelsCleared === 0 && localSettings.isTrainingNotAttempted && b.inventory.length === 0) {
             text += `<span class='cancel-card' style="visibility: hidden;">cancel</span>` //don't show cancel if on initial level and haven't done tutorial
         } else {
@@ -897,22 +897,25 @@ const powerUps = {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-size: contain;background-repeat: no-repeat;background-image: url('img/junk.webp');"`
         if (!localSettings.isHideImages) {
-            setTimeout(() => { //delay so that the html element exists
-                if (tech.tech[choose].url === undefined) { //if on url has been set yet
-                    const url = `https://api.openverse.engineering/v1/images/?q=${tech.tech[choose].name}`;
-                    fetch(url, { signal: AbortSignal.timeout(1000) }) //give up if it takes over 1 second
-                        .then((response) => response.json())
-                        .then((responseJson) => {
-                            if (responseJson.results.length > 0) {
-                                const index = Math.floor(Math.random() * responseJson.results.length) //randomly choose from the images
-                                tech.tech[choose].url = responseJson.results[index].url //store the url
-                                document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')` //make the url the background image
-                            }
-                        });
-                } else {
-                    document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
-                }
-            }, 1);
+            // setTimeout(() => { //delay so that the html element exists
+            //     if (tech.tech[choose].url === undefined) { //if on url has been set yet
+            //         const url = `https://api.openverse.engineering/v1/images/?q=${tech.tech[choose].name}`;
+            //         fetch(url, { signal: AbortSignal.timeout(1000) }) //give up if it takes over 1 second
+            //             .then((response) => response.json())
+            //             .then((responseJson) => {
+            //                 if (responseJson.results.length > 0) {
+            //                     const index = Math.floor(Math.random() * responseJson.results.length) //randomly choose from the images
+            //                     tech.tech[choose].url = responseJson.results[index].url //store the url
+            //                     document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')` //make the url the background image
+            //                 }
+            //             });
+            //     } else {
+            //         document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
+            //     }
+            // }, 1);
+            // setTimeout(() => { //delay so that the html element exists
+            //     document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
+            // }, 1);
         }
         return `<div id = "junk-${choose}" class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
@@ -941,7 +944,13 @@ const powerUps = {
                 }
                 // console.log(options.length)
                 if (options.length > 0 || !tech.isSuperDeterminism) {
-                    let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + 2 * (m.fieldMode === 8)))
+                    let totalChoices = 2 + tech.extraChoices + 2 * (m.fieldMode === 8)
+                    if (tech.isCancelTech && tech.cancelTechCount === 1) {
+                        totalChoices *= 3
+                        tech.cancelTechCount++
+                    }
+                    if (tech.isDeterminism) totalChoices = 1
+                    totalChoices = Math.min(options.length, totalChoices)
                     function removeOption(index) {
                         for (let i = 0; i < options.length; i++) {
                             if (options[i] === index) {
@@ -1002,7 +1011,14 @@ const powerUps = {
                 for (let i = 1; i < m.fieldUpgrades.length; i++) { //skip field emitter
                     if (i !== m.fieldMode) options.push(i);
                 }
-                let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + 2 * (m.fieldMode === 8)))
+                // let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + 2 * (m.fieldMode === 8)))
+                let totalChoices = 2 + tech.extraChoices + 2 * (m.fieldMode === 8)
+                if (tech.isCancelTech && tech.cancelTechCount === 1) {
+                    totalChoices *= 3
+                    tech.cancelTechCount++
+                }
+                if (tech.isDeterminism) totalChoices = 1
+                totalChoices = Math.min(options.length, totalChoices)
                 function removeOption(index) {
                     for (let i = 0; i < options.length; i++) {
                         if (options[i] === index) {
@@ -1076,7 +1092,15 @@ const powerUps = {
                     }
                 }
                 //set total choices
-                let totalChoices = (tech.isDeterminism ? 1 : 3 + tech.extraChoices + 2 * (m.fieldMode === 8))
+                // let totalChoices = (tech.isDeterminism ? 1 : 3 + tech.extraChoices + 2 * (m.fieldMode === 8))
+                let totalChoices = 3 + tech.extraChoices + 2 * (m.fieldMode === 8)
+                if (tech.isCancelTech && tech.cancelTechCount === 1) {
+                    totalChoices *= 3
+                    tech.cancelTechCount++
+                }
+                if (tech.isDeterminism) totalChoices = 1
+                totalChoices = Math.min(options.length, totalChoices)
+
                 if (optionLengthNoDuplicates < totalChoices + 1) { //if not enough options for all the choices
                     totalChoices = optionLengthNoDuplicates
                     if (tech.isBanish) { //when you run out of options eject banish
@@ -1256,8 +1280,20 @@ const powerUps = {
                     if (!alreadyHasGun) text += powerUps.gunText(choose, `powerUps.choose('gun',${choose})`)
                 }
                 for (let i = 0; i < localSettings.entanglement.techIndexes.length; i++) { //add tech
-                    let choose = localSettings.entanglement.techIndexes[i]
-                    if (tech.tech[choose]) {
+
+                    let found = false;
+                    let choose = undefined
+                    console.log(localSettings.entanglement.techIndexes[i])
+                    for (let j = 0; j < tech.tech.length; j++) {
+                        if (localSettings.entanglement.techIndexes[i] === tech.tech[j].name) {
+                            choose = j;
+                            found = true;
+                            break;
+                        }
+                    }
+                    // let choose = localSettings.entanglement.techIndexes[i]
+                    console.log(choose)
+                    if (found && tech.tech[choose]) {
                         const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
                         if (choose === null || tech.tech[choose].count + 1 > tech.tech[choose].maxCount || !tech.tech[choose].allowed()) {
                             // text += `<div class="choose-grid-module" style = "background-color: #efeff5; border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding-top: 6px; padding-bottom: 6px;"><div class="grid-title">${tech.tech[choose].name} <span style = "color: #aaa;font-weight: normal;font-size:80%;">- incoherent</span></div></div>`
@@ -1330,12 +1366,11 @@ const powerUps = {
             powerUps.spawn(x, y, "gun");
             return;
         }
-        // if (Math.random() < 0.0027 * (22 - tech.totalCount)) { //a new tech has a low chance for each not acquired tech up to 25
-        if (Math.random() < 0.005 * (10 - level.levelsCleared)) { //a new tech has a low chance that decreases in later levels
-            powerUps.spawn(x, y, "tech");
-            return;
-        }
-        if (Math.random() < 0.0015) {
+        // if (Math.random() < 0.005 * (10 - level.levelsCleared)) { //a new tech has a low chance that decreases in later levels
+        //     powerUps.spawn(x, y, "tech");
+        //     return;
+        // }
+        if (Math.random() < 0.0016) {
             powerUps.spawn(x, y, "field");
             return;
         }
@@ -1499,7 +1534,7 @@ const powerUps = {
             // }
             tech.tech[index].frequency = 0 //banish tech
             powerUps.ejectTech(index)
-            m.damage(tech.pauseEjectTech * 0.01)
+            if (m.immuneCycle < m.cycle) m.damage(tech.pauseEjectTech * 0.01)
             tech.pauseEjectTech *= 1.2
             document.getElementById(`${index}-pause-tech`).style.textDecoration = "line-through"
             document.getElementById(`${index}-pause-tech`).style.animation = ""
@@ -1591,12 +1626,16 @@ const powerUps = {
             (!tech.isSuperDeterminism || (target !== 'research')) &&
             !(tech.isEnergyNoAmmo && target === 'ammo')
         ) {
-            if (tech.isBoostReplaceAmmo && target === 'ammo') target = 'boost'
+            if (tech.isBoostReplaceAmmo && target === 'ammo') {
+                target = 'boost'
+                size = powerUps[target].size()
+            }
             powerUps.directSpawn(x, y, target, moving, mode, size)
             if (Math.random() < tech.duplicationChance()) {
                 powerUps.directSpawn(x, y, target, moving, mode, size, true)
                 powerUp[powerUp.length - 1].isDuplicated = true
                 // if (tech.isPowerUpsVanish) powerUp[powerUp.length - 1].endCycle = simulation.cycle + 300
+                if (tech.isDupEnergy) m.energy *= 2
             }
         }
     },

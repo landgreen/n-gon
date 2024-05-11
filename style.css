@@ -744,13 +744,6 @@ summary {
     user-select: none;
 }
 
-/* color for in game console output */
-/* .ammo-flash {
-    color: #f33;
-    transition: color 2s;
-} */
-
-
 .color-text {
     color: #000;
 }
@@ -815,6 +808,58 @@ summary {
 
 .color-ammo {
     color: #356;
+}
+
+.color-choice {
+    display: inline-block;
+}
+
+.color-choice span {
+    display: inline-block;
+    animation: bounce 3s infinite;
+    transform-origin: bottom;
+    color: #555;
+}
+
+.color-choice span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.color-choice span:nth-child(2) {
+    animation-delay: 1s;
+}
+
+.color-choice span:nth-child(3) {
+    animation-delay: 2s;
+}
+
+@keyframes bounce {
+    0% {
+        transform: translateY(0);
+    }
+
+    15% {
+        transform: translateY(-2px);
+        color: #aaa;
+    }
+
+    30% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.color-invulnerable {
+    color: #fff;
+    text-shadow: 0px 0px 7px #000;
+}
+
+.color-MACHO {
+    color: #246;
+    text-shadow: 0px 0px 7px #246;
 }
 
 .color-dup {
@@ -1069,6 +1114,44 @@ summary {
 
 .research {
     background-color: #f7b;
+}
+
+.color-speed {
+    display: inline-block;
+    transform: skew(-27deg);
+    /* font-weight: 400; */
+    color: #038;
+}
+
+.color-randomize {
+    display: inline-block;
+    animation: randomize 4s linear infinite alternate;
+    transform-origin: bottom;
+    color: #555;
+}
+
+@keyframes randomize {
+
+    0%,
+    100% {
+        font-family: Arial;
+    }
+
+    20% {
+        font-family: Times New Roman;
+    }
+
+    40% {
+        font-family: Verdana;
+    }
+
+    60% {
+        font-family: Georgia;
+    }
+
+    80% {
+        font-family: Courier New;
+    }
 }
 
 .alt {

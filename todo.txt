@@ -1,34 +1,85 @@
 ******************************************************** NEXT PATCH **************************************************
 
-newLevel - towers
-  please give feedback
-boost level elements can now be pointed at any angle
+tech: anyon - 2x energy after duplicating a power up, +6% duplication chance
+tech: Abelian group - 4x damage while invulnerable
+tech: fermion - become invulnerable for 5 seconds after a mob dies
+tech: entropic gravity - crouching pulls MACHO towards the player, and 1.5x to all MACHO effects (damage, damage reduction, AoE damage)
+tech: modified Newtonian dynamics - +20 speed for all Newtonian law tech
 
-paradigm shift costs 1 health, but cost increases after each use
-  ejecting with paradigm shift tech sets their frequency to zero, so they don't show up again
-polyurethane foam - makes more foam from super balls
-bubble fusion - now works with any shield, but only once per mob
-  so it triggers from the shieldingBoss
-collider - has a higher chance to form tech vs. other power ups
+choice, MACHO, invulnerable, speed - have text keyword CSS style
+removed chance to find a random tech in early levels from mobs
+  this reduces tech per full game by about 2
+tower level has a few changes
+options exchange only works once per level, but it gives 3x choices after randomizing
+dark star has a 1.2->1.3x MACHO radius
+autocannon fires 1->2 extra super balls, but balls have higher gravity
+grappling hook field starts with 0.6x damage reduction
+super balls + uncertainty principle makes all balls start in the same spot and only separate after teleporting
+ablative drones spawns 50% more drones on collision
+von Neumann probe gives 40% more drones per block mass
+  also added text clarification that it uses 5 energy
+tech lens rotates 50% faster
+ghoster mobs are more aggressive once they have lost 20% health
+sneakBoss doesn't start accelerating until it is partly uncloaked, but it spawns sneaker mobs after cloaking
 
-removed all ON/OFF tech
-  I just don't think they are fun
+fixed bug with 2 different boost power up sizes
+paradigm shift doesn't do damage while player is invulnerable
+random internet JUNK images disabled because some of the images are bad
+entanglement bug fix, maybe
 
-JUNK tech - wall jump
+******************************************************* DESIGN ******************************************************
 
-fixed some bugs 
+priorities
+  synergies between tech
+    difficult to achieve synergies that feel so powerful they are game breaking / changing
+  randomized content adds repeatability
+    bosses, mobs, levels, tech
+  graphical indicators of tech effects and quantity
+  subtle lore woven into unexpected places
 
-player damage reduction adjustment: 0.9x -> 0.89x per level per difficulty mode (1,2,4,5)
-  on easy that's 0.28 -> 0.245 by level 12 (a 12% player damage nerf)
-  on why a 50% player damage nerf by level 12
+add more randomize sub level map content
+  left/right sides of lock
+  small lab rooms
+
+powerful synergies
+  CPT + high energy regen
+  research + bot fabrication + ersatz bots + various bot upgrades
+  harpoon + high fire rate + alternator + time dilation
+  duplication 100%
+  interest + coupling, research + (peer review? or Bayesian statistics)
+  electronegativity and high energy?
+    electronegativity + anyon + duplication + Maxwells demon + interest
+  chain reaction + invulnerable + Abelian group + parasitism = clear all mobs on level
 
 *********************************************************** TODO *****************************************************
 
-increase difficulty
+make each difficulty level have specific listed changes
+  to motivate people to try that difficulty to see the difference
+  make difficulty easier to see
+    in pause menu
+    before game begins
+  automatically increase difficulty when player wins?
+  difficulty based changes (maybe in the order)
+    more bosses
+    more mobs
+    mobs attack faster
+    mobs move faster
+    reduced heals
+    reduced damage done
+    increased damage taken
+    mobs regen health
+    -1 choice for tech, field, gun
+    no starting power ups (heal, research)
+    starting JUNK chance?
 
-quantum physics lecture notes:
-https://www.scottaaronson.com/democritus/lec9.html
-Quantum mechanics is what you would inevitably come up with if you started from probability theory, and then said, let's try to generalize it so that the numbers we used to call "probabilities" can be negative numbers.
+bug Newton's 1st law image not showing up on github server
+  shows up on n-gon, and landgreen  github, but webp file isn't loading onto server?
+  try name change,
+  wait and see if next patch fixes it
+
+Boss mob - takes a snapshot of the positions of all mobs, player, blocks, power ups.  Then 3 seconds later it teleports everything back to those spots.
+  after snap shot is stored draw outline of body positions for a second to show the change
+  immune after snapshot?   or  immune after teleport?
 
 flip player upside down
   how 
@@ -37,15 +88,10 @@ flip player upside down
     flip player crouch direction
     redraw legs, orb
     flip gravity
-
   when to use?
     fieldTech: negative mass?
     effect in level
 
-tech - while immune to damage taken:
-  3x damage
-  no ammo costs?
-tech - immune to damage taken after killing a mob
 tech - after a power up is duplicated
   update text to random effect after choosing tech, or after each trigger, or on first display of tech
   pick 1 effect at random
@@ -53,11 +99,13 @@ tech - after a power up is duplicated
     summon JUNK bots for 10 seconds
     2x current energy
     gain 1.01x damage permanently
-
+  cool name: 
 
 field tech: negative mass - quickly pull/teleport in all nearby blocks and then fire them away from player
-  what triggers effect?
-  auto aim blocks?
+  how does player triggers effect?
+    picking up a block pulls in all nearby blocks, throwing block fires all nearby blocks
+    taking damage
+  auto aim 50% of blocks at mobs
 
 after picking up heals gain ____
   0.1x damage taken for 12s
@@ -1220,17 +1268,8 @@ possible names for tech
     Upon infection with a retrovirus, a cell converts the retroviral RNA into DNA and sometimes the DNA will be passed on to progeny as JUNK DNA
   amalgam, amalgamation - the action, process, or result of combining or uniting. 
   thermoplastic - the stuff in 3-D printers, use for molecular assembler tech
-
-******************************************************** DESIGN ********************************************************
-
-List of ways to break the game
-  options exchange + paradigm shift + CPT to undo health cost = repeatable cancel triggers
-  CPT + high energy regen
-  research -> bot fabrication -> ersatz bots -> various bot upgrades
-  grappling hook + high fire rate + alternator + time dilation
-  duplication 100%
-  interest + coupling, research + peer review?
-  electronegativity and high energy?
+  ergosphere - region of a spinning black hole that might allow FTL or alternate realities.
+  equivalence principle - gravity and acceleration are the same
 
 ******************************************************** IMAGES ********************************************************
 
