@@ -192,10 +192,11 @@ const simulation = {
     levelsCleared: 0,
     difficultyMode: 2, //normal difficulty is 2
     difficulty: 0,
-    dmgScale: null, //set in levels.setDifficulty
+    constraint: 0,
+    dmgScale: null,
     healScale: 1,
-    accelScale: null, //set in levels.setDifficulty
-    CDScale: null, //set in levels.setDifficulty
+    accelScale: null,
+    CDScale: null,
     molecularMode: Math.floor(4 * Math.random()), //0 spores, 1 missile, 2 ice IX, 3 drones //randomize molecular assembler field type
     // dropFPS(cap = 40, time = 15) {
     //   simulation.fpsCap = cap
@@ -625,8 +626,8 @@ const simulation = {
     restoreCamera() {
         ctx.restore();
     },
-    trails() {
-        const swapPeriod = 150
+    trails(swapPeriod = 150) {
+        // const swapPeriod = 150
         const len = 30
         for (let i = 0; i < len; i++) {
             setTimeout(function () {
@@ -846,10 +847,7 @@ const simulation = {
 
         level.onLevel = 0;
         level.levelsCleared = 0;
-        //resetting difficulty
-        // simulation.difficulty = 0;
-        level.setDifficulty()
-        simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
+        level.updateDifficulty()
 
         simulation.clearNow = true;
         document.getElementById("text-log").style.display = "none"
@@ -1143,15 +1141,6 @@ const simulation = {
                 simulation.updateGunHUD();
             }
 
-            // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
-            //     if (b.guns[i].name === "mine") {
-            //         b.guns[i].ammo += count
-            //         if (tech.ammoCap) b.guns[i].ammo = Math.min(tech.ammoCap, b.guns[i].ammo)
-            //         simulation.updateGunHUD();
-            //         break;
-            //     }
-            // }
-
             if (tech.isMutualism && !tech.isEnergyHealth) {
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].isMutualismActive) {
@@ -1304,7 +1293,7 @@ const simulation = {
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].isDropPowerUp && mob[i].alive) count++
             }
-            count *= 0.25 //to fake the 25% chance, this makes it not random, and more predictable
+            count *= 0.3 //to fake the 25% chance, this makes it not random, and more predictable
             let cycle = () => { //run after waiting a cycle for the map to be cleared
                 const types = ["heal", "ammo", "heal", "ammo", "research", "coupling", "boost", "tech", "gun", "field"]
                 for (let i = 0; i < count; i++) powerUps.spawnDelay(types[Math.floor(Math.random() * types.length)], 1)

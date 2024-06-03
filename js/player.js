@@ -418,7 +418,7 @@ const m = {
         m.drop();
         if (simulation.paused) build.pauseGrid() //update the build when paused
     },
-    dmgScale: null, //scales all damage, but not raw .dmg //set in levels.setDifficulty
+    dmgScale: null, //scales all damage, but not raw .dmg 
     death() {
         if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
             //remove immortality tech
@@ -482,7 +482,7 @@ const m = {
                 Engine.clear(engine);
                 simulation.splashReturn();
                 //if you die after clearing fewer than 4 levels the difficulty settings automatically opens
-                if ((level.levelsCleared < 4 || level.levelsCleared > 12) && !simulation.isTraining && !simulation.isCheating) document.getElementById("settings-details").open = true;
+                if ((level.levelsCleared < 4 || level.levelsCleared > 12) && !simulation.isTraining && !simulation.isCheating) document.getElementById("constraint-details").open = true;
             }, 5000);
         }
     },
@@ -567,7 +567,7 @@ const m = {
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.3
         if (tech.squirrelFx !== 1) dmg *= 0.8//Math.pow(0.78, (tech.squirrelFx - 1) / 0.4)
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.1
-        if (tech.isSpeedHarm && player.speed > 0.1) dmg *= 1 - Math.min((tech.speedAdded + player.speed) * 0.0193, 0.8) //capped at speed of 55
+        if (tech.isSpeedHarm && (tech.speedAdded + player.speed) > 0.1) dmg *= 1 - Math.min((tech.speedAdded + player.speed) * 0.0193, 0.8) //capped at speed of 55
         if (tech.isHarmReduce && input.field) dmg *= 0.1
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.05
         if (tech.isBotArmor) dmg *= 0.95 ** b.totalBots()
@@ -716,7 +716,6 @@ const m = {
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
                     setTimeout(function () {
-                        tech.maxDuplicationEvent()
                         simulation.wipe = function () { //set wipe to normal
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
@@ -745,7 +744,6 @@ const m = {
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
                     setTimeout(function () {
-                        tech.maxDuplicationEvent()
                         simulation.wipe = function () { //set wipe to normal
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
@@ -2178,7 +2176,7 @@ const m = {
         }
     },
     setMaxEnergy(isMessage = true) {
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2.66 * tech.isGroundState + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.05 * m.coupling + 0.77 * tech.isStandingWaveExpand
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 3 * tech.isGroundState + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.05 * m.coupling + 0.77 * tech.isStandingWaveExpand
         if (isMessage) simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
@@ -2253,10 +2251,7 @@ const m = {
         //calculate a vector from body to player and make it length 1
         const diff = Vector.normalise(Vector.sub(who.position, m.pos));
         //make a vector for the player's direction of length 1
-        const dir = {
-            x: Math.cos(m.angle),
-            y: Math.sin(m.angle)
-        };
+        const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) };
         //the dot product of diff and dir will return how much over lap between the vectors
         if (Vector.dot(dir, diff) > m.fieldThreshold) {
             return true;
@@ -2867,7 +2862,7 @@ const m = {
             case 4: //assembler
                 return `<strong>+${(0.8 * couple).toFixed(1)}</strong> <strong class='color-f'>energy</strong> per second`
             case 5: //plasma
-                return `<strong>${(1 + 1.5 * couple).toFixed(3)}x</strong> <strong class='color-d'>damage</strong>`
+                return `<strong>${(1 + 0.015 * couple).toFixed(3)}x</strong> <strong class='color-d'>damage</strong>`
             case 6: //time dilation
                 return `<strong>+${(1 + 0.05 * couple).toFixed(2)}x</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
             case 7: //cloaking
@@ -4415,7 +4410,7 @@ const m = {
         //<br><strong class='color-block'>blocks</strong> can't <strong>collide</strong> with <strong>intangible</strong> mobs
         //field <strong>radius</strong> decreases out of <strong>line of sight</strong>
         //<strong>unlock</strong> <strong class='color-m'>tech</strong> from other <strong class='color-f'>fields</strong>
-        description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+2</strong> <strong>choices</strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second",
+        description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+3</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second",
         effect: () => {
             m.fieldMeterColor = "#333"
             m.eyeFillColor = m.fieldMeterColor

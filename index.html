@@ -46,19 +46,124 @@
     <svg class="SVG-button" id="training-button" width="120" height="45" style="border: 2px #333 solid;" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame(false, true)">
         <text x="10" y="33">training</text>
     </svg>
+    
     <div id='info'>
+        <!-- <div id="constraint">
+            <details id = 'constraint-details'>
+                <summary>difficulty</summary>  
+                <div class="details-div">
+                    <style>
+                        .grid-container {
+                            display: grid;
+                            grid-template-columns: 0fr 5fr 0fr;
+                            line-height: 150%;
+                        }
+                        #difficulty-slider {
+                            margin-top: 3rem;
+                            height: 30rem;
+                            width: 2rem;
+                            writing-mode: vertical-lr;
+                            /* direction: rtl; */
+                        }
+                        .far-right-column {
+                            display: grid;
+                            grid-template-rows: repeat(6, 1fr);
+                            /* grid-gap: 55px; */
+                            font-size: 2rem;
+                            align-self: center;
+                            justify-self: center;
+                        }
+                        .far-right-column > div{
+                            padding-top: 60px;
+                        }
+                        .left-column {
+                            grid-row: 1 / span 6
+                        }
+                        .right-column {
+                            display: grid;
+                            grid-template-rows: repeat(6, 1fr);
+                        }
+                        .row {
+                            transition: opacity 0.4s ease-out;
+                            border: 2px #000 solid;
+                            margin-top: -2px;;
+                            font-size: 1.2rem;
+                            padding: 10px;
+                        }
+                        #constraint-0{
+                            background-color: hsl(240, 18%, 98%);
+                            border-radius: 10px 10px 0 0; 
+                        }
+                        #constraint-1{
+                            background-color: hsl(240, 18%, 96%);;
+                            /* border-radius: 10px 10px 0 0;  */
+                        }
+                        #constraint-2{
+                            background-color: hsl(240, 18%, 94%);;
+                        }
+                        #constraint-3{
+                            background-color: hsl(240, 18%, 92%);;
+                        }
+                        #constraint-4{
+                            background-color: hsl(240, 18%, 90%);;
+                        }
+                        #constraint-5{
+                            background-color: hsl(240, 18%, 88%);;
+                            border-radius: 0 0 10px 10px;
+                        }
+                    </style>
+                    <div class="grid-container">
+                        <div class="left-column">
+                            <input type="range" id="difficulty-slider" name="temp" type="range" step="1" value="0" min="0" max="5" list="values" />
+                            <datalist id="values">
+                                <option value="0"></option>
+                                <option value="1"></option>
+                                <option value="2"></option>
+                                <option value="3"></option>
+                                <option value="4"></option>
+                                <option value="5"></option>
+                            </datalist>
+                        </div>
+                        <div class="right-column">
+                            <div class="row" id="constraint-0"><strong>2x</strong> <strong class='color-defense'>damage taken</strong> per level
+                            <br><strong>0.82x</strong> <strong class='color-d'>damage</strong> per level</div>
+                            <div class="row" id="constraint-1"><strong>-5</strong> initial <strong>power ups</strong>
+                                <br><strong>5%</strong> chance for <strong>shielded</strong> mobs</div>
+                            <div class="row" id="constraint-2"><strong>2x</strong> <strong class='color-defense'>damage taken</strong> per level
+                                <br><strong>0.82x</strong> <strong class='color-d'>damage</strong> per level</div>
+                            <div class="row" id="constraint-3"><strong>+1</strong> boss per level, <strong>-1</strong> <strong class='color-m'>tech</strong> per boss
+                                <br><strong>1.5x</strong> mob movement and reactions</div>
+                            <div class="row" id="constraint-4"><strong>2x</strong> <strong class='color-defense'>damage taken</strong> per level
+                                <br><strong>0.82x</strong> <strong class='color-d'>damage</strong> per level</div>
+                            <div class="row" id="constraint-5"><strong>10%</strong> chance for <strong>shielded</strong> mobs
+                                <br><strong>-3</strong> initial power ups</div>
+                        </div>
+                        <div class="far-right-column">
+                            <div id = "constraint-0-record"></div>
+                            <div id = "constraint-1-record"></div>
+                            <div id = "constraint-2-record"></div>
+                            <div id = "constraint-3-record"></div>
+                            <div id = "constraint-4-record"></div>
+                            <div id = "constraint-5-record"></div>
+                        </div>
+                    </div>
+                    confirm difficulty parameters
+                </div>
+            </details>
+        </div> -->
+        
         <div id="settings">
             <details id = 'settings-details'>
                 <summary>settings</summary>
                 <div style="line-height: 150%;" class="details-div">
-                    <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">combat difficulty:</label>
+                    <!-- <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">combat difficulty:</label>
                     <select name="difficulty-select" id="difficulty-select" style="background-color: #fff">
                         <option value="1">easy</option>
                         <option value="2" selected>normal ⚆</option>
                         <option value="4">hard ⚆</option>
                         <option value="5">why ⚇</option>
                     </select>
-                    <br>
+                    <br> -->
                     <input onclick="build.showImages('settings')" type="checkbox" id="hide-images" name="hide-images" style="width:17px; height:17px;">
                     <label for="hide-images" title="hide images for fields, guns, and tech">hide images</label>
                     <br>

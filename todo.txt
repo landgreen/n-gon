@@ -1,35 +1,28 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: anyon - 2x energy after duplicating a power up, +6% duplication chance
-tech: Abelian group - 4x damage while invulnerable
-tech: fermion - become invulnerable for 5 seconds after a mob dies
-tech: entropic gravity - crouching pulls MACHO towards the player, and 1.5x to all MACHO effects (damage, damage reduction, AoE damage)
-tech: modified Newtonian dynamics - +20 speed for all Newtonian law tech
+difficulty rework
+  difficulty adjusted through a power up on the initial level
+  difficulty parameters are more precisely explained
+  JUNK tech: difficulty - spawns a difficulty power up (only works before level 6)
 
-choice, MACHO, invulnerable, speed - have text keyword CSS style
-removed chance to find a random tech in early levels from mobs
-  this reduces tech per full game by about 2
-tower level has a few changes
-options exchange only works once per level, but it gives 3x choices after randomizing
-dark star has a 1.2->1.3x MACHO radius
-autocannon fires 1->2 extra super balls, but balls have higher gravity
-grappling hook field starts with 0.6x damage reduction
-super balls + uncertainty principle makes all balls start in the same spot and only separate after teleporting
-ablative drones spawns 50% more drones on collision
-von Neumann probe gives 40% more drones per block mass
-  also added text clarification that it uses 5 energy
-tech lens rotates 50% faster
-ghoster mobs are more aggressive once they have lost 20% health
-sneakBoss doesn't start accelerating until it is partly uncloaked, but it spawns sneaker mobs after cloaking
+bots no longer benefit from increased fireRate 
+shields have a chance spawn on almost all mobs (but not stealth mobs)
+level exit door animation is 33% faster
+power ups have fewer sides.  It might improve game performance, but I can't tell the difference.
+1.15x base wave bullets damage (bots, particles, and phonon)
+metamaterial absorber 25->30% chance to get power ups from mobs left alive
+apomixis is now a JUNK tech, and it requires duplication > 99%
+pilot wave field 2->3 extra choices
+plasma torch slows mobs more, and don't push mobs back as much
+  fixed bug where plasma torch didn't get tech degenerate matter
+laserLayerBoss and layerLayer do 33% less damage
+mines aren't triggered by invulnerable mobs
 
-fixed bug with 2 different boost power up sizes
-paradigm shift doesn't do damage while player is invulnerable
-random internet JUNK images disabled because some of the images are bad
-entanglement bug fix, maybe
+bug fixes
 
 ******************************************************* DESIGN ******************************************************
 
-priorities
+priorities    
   synergies between tech
     difficult to achieve synergies that feel so powerful they are game breaking / changing
   randomized content adds repeatability
@@ -53,29 +46,69 @@ powerful synergies
 
 *********************************************************** TODO *****************************************************
 
-make each difficulty level have specific listed changes
-  to motivate people to try that difficulty to see the difference
-  make difficulty easier to see
-    in pause menu
-    before game begins
-  automatically increase difficulty when player wins?
-  difficulty based changes (maybe in the order)
-    more bosses
-    more mobs
-    mobs attack faster
-    mobs move faster
-    reduced heals
-    reduced damage done
-    increased damage taken
-    mobs regen health
-    -1 choice for tech, field, gun
-    no starting power ups (heal, research)
-    starting JUNK chance?
+difficulty rework: explicit changes to the game to increase difficulty
+  UI -
+    add difficulty display to pause menu
+      update pause menu text to match opening screen menu
+      just make it a square like field or gun on left pause column
+      add a wire attached to difficulty power up
+        like the one attached to player, but thinner
+  add new difficulty to game code
+    todo
+      check for any undocumented side effects
+        heal power ups (small effect)
+          (remove, keep, or add to parameters)
+  balance testing log:
+      difficultyMode=5 died on level 5 with a good drone build,  seemed similar balance to old why mode, maybe slightly harder...
+      difficultyMode=2 won with a good spore build,  seemed similar balance to old normal mode
+
+tokamak synergy tech
+  tech: stellarator - after firing a block with tokamak, heal (scale heal amount with block mass?)
+  tech: inertial confinement - while charging tokamak you can fly, and invulnerable
+      but energy drains
+
+bullets should trigger shrinking platforms level element?
+
+level element - player activated elevators
+  could be fast and throw player
+  could just rise up slow (slow might have a bad jerky animation)
+
+tech: super balls split after 3 seconds, but they fire with less speed
+
+buff plasma torch
+  buff plasma tech?
+  buff plasma field defense?
+  buff plasma damage?
+
+rework energy and health HUD
+  make both diegetic?
+  should health be red or green?
+
+white laser
+  what to name?  not much in wikipedia
+  goes through shields?
+  damage, energy cost
+  3+ closely overlapping beams (but reflecting, not like diffusion)
+  tech.laserColor = "#fff"
+  tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
 bug Newton's 1st law image not showing up on github server
   shows up on n-gon, and landgreen  github, but webp file isn't loading onto server?
   try name change,
   wait and see if next patch fixes it
+
+tech: atomic pile - lose 1 health if you are above the maximum energy
+  generate energy for each nearby mob?
+  do damage?
+  plasma torch tech?
+
+boss mob - several squares that move like the snake in the game snake/light cycles
+  moves towards player (is smell history pathing good enough?)
+  doesn't have inertia/force?  or it obeys normal physics kinda?
+  gets longer when
+    you hit it with bullets?
+    it gets near a power up?
+    it gets near mobs
 
 Boss mob - takes a snapshot of the positions of all mobs, player, blocks, power ups.  Then 3 seconds later it teleports everything back to those spots.
   after snap shot is stored draw outline of body positions for a second to show the change
@@ -1270,6 +1303,8 @@ possible names for tech
   thermoplastic - the stuff in 3-D printers, use for molecular assembler tech
   ergosphere - region of a spinning black hole that might allow FTL or alternate realities.
   equivalence principle - gravity and acceleration are the same
+  Casimir effect - attractive force between two close conductive plates
+  difference engine - early calculator/computer
 
 ******************************************************** IMAGES ********************************************************
 

@@ -1,7 +1,7 @@
 let bullet = [];
 
 const b = {
-    // dmgScale: null, //scales all damage, but not raw .dmg //set in levels.setDifficulty
+    // dmgScale: null, //scales all damage, but not raw .dmg
     gravity: 0.0006, //most other bodies have   gravity = 0.001
     activeGun: null, //current gun in use by player
     inventoryGun: 0,
@@ -2313,13 +2313,14 @@ const b = {
                     best.who.locatePlayer();
 
                     //push mobs away
-                    const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
-                    Matter.Body.applyForce(best.who, path[1], force)
-                    if (best.who.speed > 4) {
-                        Matter.Body.setVelocity(best.who, { //friction
-                            x: best.who.velocity.x * 0.9,
-                            y: best.who.velocity.y * 0.9
-                        });
+                    if (best.who.speed > 3) {
+                        const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.005 * Math.min(5, best.who.mass))
+                        Matter.Body.applyForce(best.who, path[1], force)
+                        Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.4, y: best.who.velocity.y * 0.4 });
+                    } else {
+                        const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
+                        Matter.Body.applyForce(best.who, path[1], force)
+                        Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.7, y: best.who.velocity.y * 0.7 });
                     }
                     //draw mob damage circle
                     simulation.drawList.push({
@@ -2702,28 +2703,13 @@ const b = {
                         this.lookFrequency = 55 + Math.floor(22 * Math.random())
                         simulation.drawList.push({ x: this.position.x, y: this.position.y, radius: 10, color: "#f00", time: 4 });
                         this.do = function () { //overwrite the do method for this bullet
-
-
-                            //make mobs think the mine is where the player is
-                            // for (let i = 0; i < mob.length; i++) {
-                            //     mob[i].seePlayer.recall = mob[i].memory + Math.round(mob[i].memory * Math.random()); //cycles before mob falls a sleep
-                            //     mob[i].seePlayer.position.x = this.position.x;
-                            //     mob[i].seePlayer.position.y = this.position.y;
-                            //     mob[i].seePlayer.yes = true;
-                            // }
-
-
                             this.force.y += this.mass * 0.002; //extra gravity
                             if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
-
-
-
-
-
                                 const random = 300 * Math.random()
                                 for (let i = 0, len = mob.length; i < len; ++i) {
                                     if (
                                         !mob[i].isBadTarget &&
+                                        !mob[i].isInvulnerable &&
                                         Vector.magnitude(Vector.sub(this.position, mob[i].position)) < this.range + mob[i].radius + random &&
                                         Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                                         Matter.Query.ray(body, this.position, mob[i].position).length === 0
@@ -4892,7 +4878,7 @@ const b = {
             minDmgSpeed: 2,
             // lookFrequency: 56 + Math.floor(17 * Math.random()) - isUpgraded * 20,
             lastLookCycle: simulation.cycle + 60 * Math.random(),
-            delay: Math.floor((tech.isNailBotUpgrade ? 18 : 85) * b.fireCDscale),
+            delay: Math.floor((tech.isNailBotUpgrade ? 18 : 85)),
             acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100,
             endCycle: Infinity,
@@ -4954,7 +4940,7 @@ const b = {
             minDmgSpeed: 2,
             lookFrequency: 26 + Math.ceil(6 * Math.random()),
             cd: 0,
-            delay: Math.floor(60 * b.fireCDscale),
+            delay: Math.floor(60),
             range: 70 + 3 * b.totalBots(),
             endCycle: Infinity,
             classType: "bullet",
@@ -5030,7 +5016,7 @@ const b = {
             cd: 0,
             fireCount: 0,
             fireLimit: 5 + 2 * tech.isFoamBotUpgrade,
-            delay: Math.floor((145 + (tech.isFoamBotUpgrade ? 0 : 230)) * b.fireCDscale),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
+            delay: Math.floor((145 + (tech.isFoamBotUpgrade ? 0 : 230))),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
             acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100, //how far from the player the bot will move
             endCycle: Infinity,
@@ -5150,7 +5136,7 @@ const b = {
             cd: 0,
             fireCount: 0,
             fireLimit: 5 + 2 * tech.isSoundBotUpgrade,
-            delay: Math.floor((120 + (tech.isSoundBotUpgrade ? 0 : 70)) * b.fireCDscale),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
+            delay: Math.floor((120 + (tech.isSoundBotUpgrade ? 0 : 70))),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
             acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100, //how far from the player the bot will move
             endCycle: Infinity,
@@ -5646,8 +5632,19 @@ const b = {
                                 best.who.damage(dmg);
                                 best.who.locatePlayer();
                                 //push mobs away
-                                const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.007 * Math.min(5, best.who.mass))
-                                Matter.Body.applyForce(best.who, path[1], force)
+                                // const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.007 * Math.min(5, best.who.mass))
+                                // Matter.Body.applyForce(best.who, path[1], force)
+                                //push mobs away
+                                if (best.who.speed > 3) {
+                                    const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.005 * Math.min(5, best.who.mass))
+                                    Matter.Body.applyForce(best.who, path[1], force)
+                                    Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.4, y: best.who.velocity.y * 0.4 });
+                                } else {
+                                    const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
+                                    Matter.Body.applyForce(best.who, path[1], force)
+                                    Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.7, y: best.who.velocity.y * 0.7 });
+                                }
+
                                 if (best.who.speed > 2.5) Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.75, y: best.who.velocity.y * 0.75 });
                                 //draw mob damage circle
                                 if (best.who.damageReduction) {
@@ -7752,10 +7749,7 @@ const b = {
                         }
                         let speed = 36
                         if (Matter.Query.point(map, pos).length > 0) speed = -2 //don't launch if mine will spawn inside map
-                        b.mine(pos, {
-                            x: speed * Math.cos(m.angle),
-                            y: speed * Math.sin(m.angle)
-                        }, 0)
+                        b.mine(pos, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }, 0)
                         m.fireCDcycle = m.cycle + Math.floor(55 * b.fireCDscale); // cool down
                     }
                 } else {
@@ -7765,10 +7759,7 @@ const b = {
                     }
                     let speed = 23
                     if (Matter.Query.point(map, pos).length > 0) speed = -2 //don't launch if mine will spawn inside map
-                    b.mine(pos, {
-                        x: speed * Math.cos(m.angle),
-                        y: speed * Math.sin(m.angle)
-                    }, 0)
+                    b.mine(pos, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }, 0)
                     m.fireCDcycle = m.cycle + Math.floor(35 * b.fireCDscale); // cool down
                 }
             }
@@ -7809,11 +7800,6 @@ const b = {
                 ctx.arc(m.pos.x, m.pos.y, 60, this.angle - this.arcRange, this.angle + this.arcRange);
                 ctx.strokeStyle = '#fff' //'rgba(255,255,255,0.9)' //'hsl(189, 100%, 95%)'
                 ctx.stroke();
-                // const a = { x: radius * Math.cos(this.angle + this.arcRange), y: radius * Math.sin(this.angle + this.arcRange) }
-                // const b = Vector.add(m.pos, a)
-                // ctx.lineTo(b.x, b.y)
-                // ctx.fillStyle = '#fff'
-                // ctx.fill()
             },
             stuckOn() {
                 if (tech.isStuckOn) {
@@ -7916,6 +7902,79 @@ const b = {
                 }
                 // this.fire = this.firePhoton
             },
+            // fireLaser() {
+            //     // console.log('hi')
+            //     const drain = tech.laserDrain / b.fireCDscale
+            //     if (m.energy < drain) {
+            //         m.fireCDcycle = m.cycle + 100; // cool down if out of energy
+            //     } else {
+            //         m.fireCDcycle = m.cycle
+            //         m.energy -= drain
+            //         const range = {
+            //             x: 5000 * Math.cos(m.angle),
+            //             y: 5000 * Math.sin(m.angle)
+            //         }
+            //         const laserSeparation = 3
+            //         const rangeOffPlus = {
+            //             x: laserSeparation * Math.cos(m.angle + Math.PI / 2),
+            //             y: laserSeparation * Math.sin(m.angle + Math.PI / 2)
+            //         }
+            //         const rangeOffMinus = {
+            //             x: laserSeparation * Math.cos(m.angle - Math.PI / 2),
+            //             y: laserSeparation * Math.sin(m.angle - Math.PI / 2)
+            //         }
+            //         const dmg = 0.70 * tech.laserDamage / b.fireCDscale * this.lensDamage //  3.5 * 0.55 = 200% more damage
+            //         const where = {
+            //             x: m.pos.x + 30 * Math.cos(m.angle),
+            //             y: m.pos.y + 30 * Math.sin(m.angle)
+            //         }
+            //         const eye = {
+            //             x: m.pos.x + 15 * Math.cos(m.angle),
+            //             y: m.pos.y + 15 * Math.sin(m.angle)
+            //         }
+            //         // ctx.strokeStyle = tech.laserColor;
+            //         // ctx.lineWidth = 8
+            //         // ctx.beginPath();
+            //         if (Matter.Query.ray(map, eye, where).length === 0 && Matter.Query.ray(body, eye, where).length === 0) {
+            //             b.laser(eye, {
+            //                 x: eye.x + range.x,
+            //                 y: eye.y + range.y
+            //             }, dmg)
+            //         }
+            //         for (let i = 1; i < 2; i++) {
+            //             let whereOff = Vector.add(where, {
+            //                 x: i * rangeOffPlus.x,
+            //                 y: i * rangeOffPlus.y
+            //             })
+            //             if (Matter.Query.ray(map, eye, whereOff).length === 0 && Matter.Query.ray(body, eye, whereOff).length === 0) {
+            //                 ctx.moveTo(eye.x, eye.y)
+            //                 ctx.lineTo(whereOff.x, whereOff.y)
+            //                 b.laser(whereOff, {
+            //                     x: whereOff.x + range.x,
+            //                     y: whereOff.y + range.y
+            //                 }, dmg)
+            //             }
+            //             whereOff = Vector.add(where, {
+            //                 x: i * rangeOffMinus.x,
+            //                 y: i * rangeOffMinus.y
+            //             })
+            //             if (Matter.Query.ray(map, eye, whereOff).length === 0 && Matter.Query.ray(body, eye, whereOff).length === 0) {
+            //                 ctx.moveTo(eye.x, eye.y)
+            //                 ctx.lineTo(whereOff.x, whereOff.y)
+            //                 b.laser(whereOff, {
+            //                     x: whereOff.x + range.x,
+            //                     y: whereOff.y + range.y
+            //                 }, dmg)
+            //             }
+            //         }
+            //         // ctx.stroke();
+            //         // if (tech.isLaserLens && b.guns[11].lensDamage !== 1) {
+            //         //     ctx.lineWidth = 20 + 3 * b.guns[11].lensDamageOn
+            //         //     ctx.globalAlpha = 0.3
+            //         //     ctx.stroke();
+            //         // }
+            //     }
+            // },
             fireLaser() {
                 const drain = tech.laserDrain / b.fireCDscale
                 if (m.energy < drain) {

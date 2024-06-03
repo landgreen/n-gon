@@ -189,7 +189,6 @@ const powerUps = {
             } else {
                 powerUps.do = () => powerUps.draw();
             }
-            tech.maxDuplicationEvent() //check to see if hitting 100% duplication
         } else {
             powerUps.draw = powerUps.drawCircle
             if (tech.isHealAttract) {
@@ -325,7 +324,6 @@ const powerUps = {
             if (tech.isCancelDuplication) {
                 const value = 0.05
                 tech.duplication += value
-                tech.maxDuplicationEvent()
                 simulation.makeTextLog(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${value}`)
                 simulation.circleFlare(value);
             }
@@ -385,6 +383,129 @@ const powerUps = {
             },
         })
 
+    },
+    difficulty: {
+        name: "difficulty",
+        color: "#000",
+        size() {
+            return 80 / Math.pow(localSettings.difficultyMode, 1.5);
+        },
+        effect() {
+            const initialDifficultyMode = simulation.difficultyMode
+            requestAnimationFrame(() => { //add a background behind the power up menu
+                ctx.fillStyle = `rgba(150,150,150,0.9)`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            });
+            powerUps.animatePowerUpGrab('rgba(0, 0, 0,0.6)')
+
+            if (!simulation.paused) {
+                simulation.paused = true;
+                simulation.isChoosing = true; //stops p from un pausing on key down
+                document.body.style.cursor = "auto";
+                document.getElementById("choose-grid").style.pointerEvents = "auto";
+                document.getElementById("choose-grid").style.transitionDuration = "0s";
+            }
+            //build level info
+            document.getElementById("choose-grid").classList.add('choose-grid-no-images');
+            document.getElementById("choose-grid").classList.remove('choose-grid');
+            document.getElementById("choose-grid").style.gridTemplateColumns = "405px" //adjust this to increase the width of the whole menu, but mostly the center column
+
+            let text = `<div>
+            <div class="grid-container">
+                <div class="left-column">
+                    <input type="range" id="difficulty-slider" name="temp" type="range" step="1" value="1" min="1" max="6" list="values" />
+                    <datalist id="values">
+                        <option value="1"></option>
+                        <option value="2"></option>
+                        <option value="3"></option>
+                        <option value="4"></option>
+                        <option value="5"></option>
+                        <option value="6"></option>
+                    </datalist>
+                </div>
+                <div class="right-column">
+                    <div class="row" id="constraint-1"><strong>0.82x</strong> <strong class='color-d'>damage</strong> done per level
+                    <br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-2"><strong>-5</strong> initial <strong>power ups</strong>
+                        <br><strong>faster</strong> and <strong>more</strong> mobs per level</div>
+                    <div class="row" id="constraint-3"><strong>0.82x</strong> <strong class='color-d'>damage</strong> done per level
+                    <br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-4"><strong>+1</strong> boss per level, <strong>-1</strong> <strong class='color-m'>tech</strong> per boss
+                        <br><strong>-1</strong> ${powerUps.orb.research()} per level</div>
+                    <div class="row" id="constraint-5"><strong>0.82x</strong> <strong class='color-d'>damage</strong> done per level
+                    <br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-6"><strong>3x</strong> chance for <strong>shielded</strong> mobs
+                        <br><strong>-3</strong> initial power ups</div>
+                </div>
+                <div class="far-right-column">
+                    <div id = "constraint-1-record">${localSettings.difficultyCompleted[1] ? "⚆" : " "}</div>
+                    <div id = "constraint-2-record">${localSettings.difficultyCompleted[2] ? "⚆" : " "}</div>
+                    <div id = "constraint-3-record">${localSettings.difficultyCompleted[3] ? "⚆" : " "}</div>
+                    <div id = "constraint-4-record">${localSettings.difficultyCompleted[4] ? "⚆" : " "}</div>
+                    <div id = "constraint-5-record">${localSettings.difficultyCompleted[5] ? "⚇" : " "}</div>
+                    <div id = "constraint-6-record">${localSettings.difficultyCompleted[6] ? "⚇" : " "}</div>
+                </div>
+            </div>
+            <div class="choose-grid-module" id="choose-difficulty">
+                confirm difficulty parameters 
+            </div>
+            </div>`
+            document.getElementById("choose-grid").innerHTML = text
+            //show level info
+            document.getElementById("choose-grid").style.opacity = "1"
+            document.getElementById("choose-grid").style.transitionDuration = "0.3s"; //how long is the fade in on
+            document.getElementById("choose-grid").style.visibility = "visible"
+            document.getElementById("choose-difficulty").addEventListener("click", () => {
+                level.unPause()
+                document.body.style.cursor = "none";
+                //reset hide image style
+                if (localSettings.isHideImages) {
+                    document.getElementById("choose-grid").classList.add('choose-grid-no-images');
+                    document.getElementById("choose-grid").classList.remove('choose-grid');
+                } else {
+                    document.getElementById("choose-grid").classList.add('choose-grid');
+                    document.getElementById("choose-grid").classList.remove('choose-grid-no-images');
+                }
+                if (level.levelsCleared === 0 && initialDifficultyMode !== simulation.difficultyMode) {
+                    //remove and respawn all power ups if difficulty mode was changed
+                    for (let i = 0; i < powerUp.length; ++i) Matter.Composite.remove(engine.world, powerUp[i]);
+                    powerUp = [];
+                    level.initialPowerUps()
+                    simulation.trails(30)
+                }
+            });
+
+            let setConstraintText = function (isReset = true) {
+                for (let i = 1; i < 7; i++) {
+                    const id = document.getElementById("constraint-" + i)
+                    if (simulation.difficultyMode < i) {
+                        id.style.opacity = "0.15"
+                    } else {
+                        id.style.opacity = "1"
+                    }
+                }
+                if (isReset) {
+                    lore.setTechGoal()
+                    localSettings.difficultyMode = simulation.difficultyMode
+                    localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
+                    localSettings.entanglement = undefined //after changing difficulty, reset stored tech
+                    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                }
+            }
+            setConstraintText(false)
+            document.getElementById("difficulty-slider").value = simulation.difficultyMode
+            document.getElementById("difficulty-slider").addEventListener("input", () => {
+                simulation.difficultyMode = document.getElementById("difficulty-slider").value
+                setConstraintText()
+            });
+            for (let i = 1; i < 7; i++) {
+                document.getElementById("constraint-" + i).addEventListener("click", () => {
+                    simulation.difficultyMode = i
+                    document.getElementById("difficulty-slider").value = simulation.difficultyMode
+                    setConstraintText()
+                });
+            }
+        },
     },
     coupling: {
         name: "coupling",
@@ -541,6 +662,7 @@ const powerUps = {
                         overHeal *= 2 //double the over heal converted to max health
                         //make sure overHeal doesn't kill player
                         if (m.health - overHeal * m.defense() < 0) overHeal = m.health - 0.01
+                        if (overHeal > m.maxHealth) overHeal = m.maxHealth  //just in case overHeal gets too big
                         tech.extraMaxHealth += overHeal //increase max health
                         m.setMaxHealth();
                         m.damage(overHeal);
@@ -944,7 +1066,7 @@ const powerUps = {
                 }
                 // console.log(options.length)
                 if (options.length > 0 || !tech.isSuperDeterminism) {
-                    let totalChoices = 2 + tech.extraChoices + 2 * (m.fieldMode === 8)
+                    let totalChoices = 2 + tech.extraChoices + 3 * (m.fieldMode === 8)
                     if (tech.isCancelTech && tech.cancelTechCount === 1) {
                         totalChoices *= 3
                         tech.cancelTechCount++
@@ -1011,8 +1133,7 @@ const powerUps = {
                 for (let i = 1; i < m.fieldUpgrades.length; i++) { //skip field emitter
                     if (i !== m.fieldMode) options.push(i);
                 }
-                // let totalChoices = Math.min(options.length, (tech.isDeterminism ? 1 : 2 + tech.extraChoices + 2 * (m.fieldMode === 8)))
-                let totalChoices = 2 + tech.extraChoices + 2 * (m.fieldMode === 8)
+                let totalChoices = 2 + tech.extraChoices + 3 * (m.fieldMode === 8)
                 if (tech.isCancelTech && tech.cancelTechCount === 1) {
                     totalChoices *= 3
                     tech.cancelTechCount++
@@ -1092,8 +1213,7 @@ const powerUps = {
                     }
                 }
                 //set total choices
-                // let totalChoices = (tech.isDeterminism ? 1 : 3 + tech.extraChoices + 2 * (m.fieldMode === 8))
-                let totalChoices = 3 + tech.extraChoices + 2 * (m.fieldMode === 8)
+                let totalChoices = 3 + tech.extraChoices + 3 * (m.fieldMode === 8)
                 if (tech.isCancelTech && tech.cancelTechCount === 1) {
                     totalChoices *= 3
                     tech.cancelTechCount++
@@ -1327,6 +1447,7 @@ const powerUps = {
     },
     spawnDelay(type, count, delay = 2) {
         count *= delay
+        // let totalSpawned = 0
         let cycle = () => {
             if (count > 0) {
                 if (m.alive) requestAnimationFrame(cycle);
@@ -1335,6 +1456,8 @@ const powerUps = {
                     if (!(count % delay)) {
                         const where = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }
                         powerUps.spawn(where.x, where.y, type);
+                        // totalSpawned++
+                        // if (!(totalSpawned % 10)) delay++
                     }
                 }
             }
@@ -1400,11 +1523,10 @@ const powerUps = {
                 powerUps.randomPowerUpCounter++;
                 powerUpChance(Math.max(level.levelsCleared, 10) * 0.1)
             }
-            if (!(simulation.difficulty > spawn.secondaryBossThreshold)) {
+            if (!(simulation.difficultyMode > 2 && level.levelsCleared > 1)) {
                 powerUps.randomPowerUpCounter += 0.6;
                 powerUpChance(Math.max(level.levelsCleared, 6) * 0.1)
             }
-
             function powerUpChance(chanceToFail) {
                 if (Math.random() * chanceToFail < powerUps.randomPowerUpCounter) {
                     powerUps.randomPowerUpCounter = 0;
@@ -1446,8 +1568,8 @@ const powerUps = {
             powerUps.spawn(x, y, "ammo", false);
         }
     },
-    addResearchToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level one randomly placed research
-        if (mob.length && Math.random() < 0.45 - 0.3 * (simulation.difficultyMode > 4)) { //lower chance on why difficulty
+    addResearchToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level a research
+        if (simulation.difficultyMode < 4 && mob.length) { //don't spawn on higher difficulty settings
             const index = Math.floor(Math.random() * mob.length)
             powerUps.spawn(mob[index].position.x, mob[index].position.y, "research");
         }
@@ -1535,7 +1657,7 @@ const powerUps = {
             tech.tech[index].frequency = 0 //banish tech
             powerUps.ejectTech(index)
             if (m.immuneCycle < m.cycle) m.damage(tech.pauseEjectTech * 0.01)
-            tech.pauseEjectTech *= 1.2
+            tech.pauseEjectTech *= 1.3
             document.getElementById(`${index}-pause-tech`).style.textDecoration = "line-through"
             document.getElementById(`${index}-pause-tech`).style.animation = ""
             document.getElementById(`${index}-pause-tech`).onclick = null
@@ -1614,7 +1736,7 @@ const powerUps = {
             properties.isDuplicated = true
         } else {
             properties.inertia = Infinity //prevents rotation for circles only
-            polygonSides = 0
+            polygonSides = 12
         }
         powerUp[index] = Matter.Bodies.polygon(x, y, polygonSides, size, properties);
         if (mode) powerUp[index].mode = mode

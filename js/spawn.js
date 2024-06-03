@@ -48,7 +48,8 @@ const spawn = {
         // spawn.pickList.push(spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]);
     },
     spawnChance(chance) {
-        return Math.random() < chance + 0.07 * simulation.difficulty && mob.length < -1 + 16 * Math.log10(simulation.difficulty + 1)
+        const difficultyChance = simulation.difficultyMode === 1 ? 1 : simulation.difficulty
+        return (Math.random() < chance + 0.07 * difficultyChance) && (mob.length < -1 + 16 * Math.log10(simulation.difficulty + 1))
     },
     randomMob(x, y, chance = 1) {
         if (spawn.spawnChance(chance) || chance === Infinity) {
@@ -112,24 +113,8 @@ const spawn = {
             }
         }
     },
-    secondaryBossThreshold: 22,
     secondaryBossChance(x, y) {
-        // if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
-        //     tech.isScaleMobsWithDuplication = true
-        //     spawn.randomLevelBoss(x, y);
-        //     tech.isScaleMobsWithDuplication = false
-        //     return true
-        // } else if (tech.isResearchBoss) {
-        //     if (powerUps.research.count > 2) {
-        //         powerUps.research.changeRerolls(-3)
-        //         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 3<br>${powerUps.research.count}`)
-        //     } else {
-        //         tech.addJunkTechToPool(0.49)
-        //     }
-        //     spawn.randomLevelBoss(x, y);
-        //     return true
-        // }
-        if (simulation.difficulty > spawn.secondaryBossThreshold) {  //starts on hard mode level 6, level 12 on easy, level 4 on why?
+        if (simulation.difficultyMode > 2 && level.levelsCleared > 1) {
             spawn.randomLevelBoss(x, y);
         } else {
             return false
@@ -178,7 +163,7 @@ const spawn = {
                 //     }
                 // }
 
-                if (tech.isMoveMACHO && m.crouch) {
+                if (tech.isMoveMACHO && m.crouch && input.down) {
                     Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.97), Vector.mult(player.velocity, 0.03)))
                     Matter.Body.setPosition(this, Vector.add(Vector.mult(this.position, 0.95), Vector.mult(player.position, 0.05)))
                 }
@@ -934,6 +919,12 @@ const spawn = {
         me.onDeath = function () {
             if (!this.hasRunDeathScript) {
                 this.hasRunDeathScript = true
+                //record win on this difficulty level to show up in the difficulty settings as a
+                if (!simulation.isCheating) {
+                    localSettings.difficultyCompleted[simulation.difficultyMode] = true
+                    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                }
+
                 //make a block body to replace this one
                 //this body is too big to leave behind in the normal way mobs.replace()
                 const len = body.length;
@@ -1029,8 +1020,6 @@ const spawn = {
                     }
                     requestAnimationFrame(loop);
                 }
-                // for (let i = 0; i < 3; i++)
-                level.difficultyIncrease(simulation.difficultyMode) //ramp up damage
                 //remove power Ups,  to avoid spamming console
                 function removeAll(array) {
                     for (let i = 0; i < array.length; ++i) Matter.Composite.remove(engine.world, array[i]);
@@ -1274,7 +1263,7 @@ const spawn = {
         const me = mob[mob.length - 1];
         me.isBoss = true;
         Matter.Body.setDensity(me, 0.002); //normal density even though its a boss
-        me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1); //extra reduction for a boss, because normal density
+        me.damageReduction = 0.04
         me.frictionAir = 0.01;
         me.accelMag = 0.0002;
         me.onDeath = function () {
@@ -1440,7 +1429,7 @@ const spawn = {
         me.cellMassMax = 70
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body | cat.map
         Matter.Body.setDensity(me, 0.0001 + 0.00002 * simulation.difficulty) // normal density is 0.001
-        me.damageReduction = 0.17 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1); //me.damageReductionGoal
+        me.damageReduction = 0.17
 
         const k = 642 //k=r^2/m
         me.split = function () {
@@ -1525,7 +1514,7 @@ const spawn = {
         me.onHit = function () { //run this function on hitting player
             this.explode();
         };
-        me.damageReduction = 0.14 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1);
+        me.damageReduction = 0.14
         me.doAwake = function () {
             this.alwaysSeePlayer();
             this.checkStatus();
@@ -1640,7 +1629,7 @@ const spawn = {
                 powerUps.spawnRandomPowerUp(this.position.x, this.position.y) // manual power up spawn to avoid spawning too many tech with "symbiosis"
             }
         }
-        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.2
         //required setup for invulnerable
         // me.isInvulnerable = false
         me.invulnerabilityCountDown = 0
@@ -1702,7 +1691,7 @@ const spawn = {
         } else if (!m.isCloak) {
             me.foundPlayer();
         }
-        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.2
         me.isInvulnerable = true
         me.startingDamageReduction = me.damageReduction
         me.damageReduction = 0
@@ -1780,7 +1769,7 @@ const spawn = {
             me.foundPlayer();
         }
 
-        me.damageReduction = 0.22 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.22
         me.isInvulnerable = true
         me.startingDamageReduction = me.damageReduction
         me.damageReduction = 0
@@ -2157,7 +2146,7 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.damageReduction = 0.09 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.09
         me.accelMag = 0.05; //jump height
         me.g = 0.003; //required if using this.gravity
         me.frictionAir = 0.01;
@@ -2207,7 +2196,7 @@ const spawn = {
     //         powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     //     };
     //     me.lastSpeed = me.speed
-    //     me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+    //     me.damageReduction = 0.25 
     //     me.do = function() {
     //         // this.armor();
     //         this.gravity();
@@ -2279,10 +2268,7 @@ const spawn = {
         me.fill = "#28b";
         me.rememberFill = me.fill;
         me.cd = 0;
-        me.burstDir = {
-            x: 0,
-            y: 0
-        };
+        me.burstDir = { x: 0, y: 0 };
         me.frictionAir = 0.022;
         me.lookTorque = 0.0000014;
         me.restitution = 0;
@@ -2386,6 +2372,7 @@ const spawn = {
                 ctx.fill();
             }
         }
+        if (simulation.difficultyMode === 6) spawn.shield(me, x, y);
     },
     // timeBoss(x, y, radius = 25) {
     //     mobs.spawn(x, y, 12, radius, "#000");
@@ -2403,7 +2390,7 @@ const spawn = {
     //     me.onDeath = function() {
     //         powerUps.spawnBossPowerUp(this.position.x, this.position.y)
     //     };
-    //     me.damageReduction = 0.23 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+    //     me.damageReduction = 0.23 
     //     me.do = function() {
     //         //keep it slow, to stop issues from explosion knock backs
     //         if (!(simulation.cycle % this.seePlayerFreq)) {
@@ -2483,7 +2470,7 @@ const spawn = {
                 // toMe(bullet, this.position, this.eventHorizon))
             }
         };
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.25
         me.do = function () {
             //keep it slow, to stop issues from explosion knock backs
             if (this.speed > 1) {
@@ -2586,7 +2573,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
         me.isBoss = true;
-        me.damageReduction = 0.13 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) //normal is 1,  most bosses have 0.25
+        me.damageReduction = 0.13  //normal is 1,  most bosses have 0.25
 
         targets.push(me.id) //add to shield protection
         me.friction = 0;
@@ -2675,7 +2662,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.babyList = [] //list of mobs that are apart of this boss
         Matter.Body.setDensity(me, 0.0015); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
-        me.damageReduction = 0.13 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) //normal is 1,  most bosses have 0.25
+        me.damageReduction = 0.13  //normal is 1,  most bosses have 0.25
         me.isBoss = true;
 
         me.friction = 0;
@@ -2991,7 +2978,7 @@ const spawn = {
         me.laserRange = 350;
         me.seeAtDistance2 = 2000000;
         me.isBoss = true;
-        me.damageReduction = 0.35 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) // me.damageReductionGoal
+        me.damageReduction = 0.35  // me.damageReductionGoal
 
         me.showHealthBar = false; //drawn in this.awake
         me.delayLimit = 60 + Math.floor(30 * Math.random());
@@ -3162,7 +3149,7 @@ const spawn = {
         mobs.spawn(x, y, 7, radius, '#16576b');
         let me = mob[mob.length - 1];
         Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
-        // me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        // me.damageReduction = 0.04 
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
@@ -3265,7 +3252,7 @@ const spawn = {
         mobs.spawn(x, y, 7, radius, color);
         let me = mob[mob.length - 1];
         Matter.Body.setDensity(me, 0.0025); //extra dense //normal is 0.001 //makes effective life much larger
-        // me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        // me.damageReduction = 0.04 
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
@@ -3416,7 +3403,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.isBoss = true;
         Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.07 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.07
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.nextHealthThreshold = 0.75
@@ -3607,7 +3594,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.isBoss = true;
         Matter.Body.setDensity(me, 0.004); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.1
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
@@ -3699,7 +3686,7 @@ const spawn = {
         mobs.spawn(x, y, 3, radius, "rgb(0,235,255)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.25
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
@@ -3805,7 +3792,7 @@ const spawn = {
         Matter.Body.rotate(me, Math.PI * 0.1);
         Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
-        me.damageReduction = 0.034 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.034
 
         me.frictionStatic = 0;
         me.friction = 0;
@@ -3903,7 +3890,7 @@ const spawn = {
         me.do = function () {
             if (player.speed > 5) this.do = this.fire //don't attack until player moves
         }
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.25
         me.fire = function () {
             // this.armor();
             this.checkStatus();
@@ -4004,6 +3991,7 @@ const spawn = {
         me.pulseRadius = Math.min(400, 170 + simulation.difficulty * 3)
         me.fireDelay = Math.max(75, 140 - simulation.difficulty * 0.5)
         me.isFiring = false
+        spawn.shield(me, x, y);
         me.onHit = function () { };
         me.canSeeTarget = function () {
             const angle = this.angle + Math.PI / 2;
@@ -4124,7 +4112,7 @@ const spawn = {
         }
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
         me.accelMag = 0.0002 * simulation.accelScale;
-        // me.frictionAir = 1
+        spawn.shield(me, x, y);
 
         me.lasers = [] //keeps track of static laser beams
         me.laserLimit = simulation.difficultyMode < 3 ? 1 : 2
@@ -4180,7 +4168,7 @@ const spawn = {
                 if (this.lasers[i].fade > 0.99) {
                     if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) { // hitting player
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage after getting hit
-                        const dmg = 0.05 * simulation.dmgScale;
+                        const dmg = 0.03 * simulation.dmgScale;
                         m.damage(dmg);
                         simulation.drawList.push({ //add dmg to draw queue
                             x: best.x,
@@ -4270,14 +4258,12 @@ const spawn = {
         }
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
         me.accelMag = 0.0001 * simulation.accelScale;
-
-
         me.isBoss = true;
         me.onDeath = function () {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
         Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.25
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.nextHealthThreshold = 0.75
@@ -4286,17 +4272,13 @@ const spawn = {
             if (this.health < this.nextHealthThreshold) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
-                this.invulnerableCount = 120
+                this.invulnerableCount = 90
                 this.isInvulnerable = true
                 this.damageReduction = 0
-
-                // if (this.health > 0.74) this.laserLimit += 2 //increase total lasers once player gets into combat
-                // this.addLaser()
                 this.laserDelay = 130
             }
         };
         me.lasers = [] //keeps track of static laser beams
-        // me.laserLimit = 1 + 2 * (simulation.difficultyMode < 3 ? 1 : 2)
         me.laserLimit = 2 + (simulation.difficultyMode < 3 ? 1 : 2)
         me.fireDelay = Math.max(75, 140 - simulation.difficulty * 0.5)
         me.cycle = 0
@@ -4349,7 +4331,7 @@ const spawn = {
                 if (this.lasers[i].fade > 0.99) {
                     if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) { // hitting player
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage after getting hit
-                        const dmg = 0.05 * simulation.dmgScale;
+                        const dmg = 0.03 * simulation.dmgScale;
                         m.damage(dmg);
                         simulation.drawList.push({ //add dmg to draw queue
                             x: best.x,
@@ -4412,7 +4394,6 @@ const spawn = {
                 this.force.y += force.y;
             } else { //drift
                 const force = Vector.mult(Vector.normalise(Vector.sub(this.driftGoal, this.position)), 0.00001 * this.mass)
-                // const force = Vector.mult(this.driftGoal, 0.0001 * this.mass)
                 this.force.x += force.x;
                 this.force.y += force.y;
             }
@@ -4452,6 +4433,7 @@ const spawn = {
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
         me.accelMag = 0.0001 * simulation.accelScale;
         me.laserInterval = 100
+        spawn.shield(me, x, y);
         me.onHit = function () {
             //run this function on hitting player
             this.explode();
@@ -4529,7 +4511,7 @@ const spawn = {
         // me.torque -= me.inertia * 0.002
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
         Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.25
         me.isBoss = true;
         // spawn.shield(me, x, y, 1);  //not working, not sure why
         me.onDeath = function () {
@@ -4743,7 +4725,7 @@ const spawn = {
 
         // spawn.shield(me, x, y, 1);
         Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.12 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.12
         me.isBoss = true;
         me.onDamage = function () { };
         me.onDeath = function () {
@@ -4839,7 +4821,7 @@ const spawn = {
         me.restitution = 1
         // spawn.spawnOrbitals(me, radius + 50 + 125 * Math.random(), 1)
         Matter.Body.setDensity(me, 0.002 + 0.0001 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.09 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.09
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.nextHealthThreshold = 0.75
@@ -4935,7 +4917,7 @@ const spawn = {
         me.isBoss = true;
         me.isReactorBoss = true;
         Matter.Body.setDensity(me, 0.001); //normal is 0.001
-        me.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.04
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.nextHealthThreshold = 0.75
@@ -5092,7 +5074,7 @@ const spawn = {
         me.isBoss = true;
         me.isReactorBoss = true;
         Matter.Body.setDensity(me, 0.003); //normal is 0.001
-        me.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.1
         me.startingDamageReduction = me.damageReduction
         me.inertia = Infinity;
         me.isInvulnerable = false
@@ -5185,7 +5167,7 @@ const spawn = {
         // me.skipRate = 1 + Math.floor(simulation.difficulty*0.02)
         // spawn.shield(me, x, y, 1);
         Matter.Body.setDensity(me, 0.001); //normal is 0.001
-        me.damageReduction = 0.05 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.05
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.onDamage = function () {
@@ -5292,7 +5274,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
         me.isBoss = true;
-        me.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.1
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.frictionAir = 0.02
@@ -5740,7 +5722,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         Matter.Body.setDensity(me, 0.001); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
-        me.damageReduction = 0.15 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.15
 
         me.accelMag = 0.0017 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.01;
@@ -5789,12 +5771,12 @@ const spawn = {
                 this.isCloaked = true;
                 this.isBadTarget = true;
                 this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
-                this.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+                this.damageReduction = 0.04
             }
         }
         me.deCloak = function () {
             if (this.isCloaked) {
-                this.damageReduction = 0.4 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+                this.damageReduction = 0.4
                 this.isCloaked = false;
                 this.isBadTarget = false;
                 this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can touch player
@@ -5802,7 +5784,7 @@ const spawn = {
         }
         me.do = function () {
             if (this.damageReduction === 0) {
-                this.damageReduction = 0.04 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+                this.damageReduction = 0.04
                 let i = this.status.length //clear bad status effects
                 while (i--) {
                     if (this.status[i].type === "stun" || this.status[i].type === "dot") this.status.splice(i, 1);
@@ -5852,6 +5834,8 @@ const spawn = {
         me.showHealthBar = false;
         me.memory = 240;
         me.isVanished = false;
+        // spawn.shield(me, x, y);  //makes it too hard to stealth
+
         me.onDamage = function () {
             if (!this.isVanished && this.health < 0.1 && !this.isStunned && !this.isSlowed) { //if health is below 10% teleport to a random spot on player history, heal, and cloak
                 this.health = 1;
@@ -5931,6 +5915,7 @@ const spawn = {
         me.memory = 900;
         me.delay = 60
         me.cd = 0;
+        spawn.shield(me, x, y, 1); // bad for stealth
         me.onHit = function () {
             if (this.cd < simulation.cycle) {
                 this.cd = simulation.cycle + this.delay;
@@ -6063,7 +6048,7 @@ const spawn = {
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         spawn.shield(me, x, y, 1);
 
-        const len = Math.floor(Math.min(15, 3 + Math.sqrt(simulation.difficulty))) // simulation.difficulty = 40 on hard mode level 10
+        const len = Math.floor(Math.min(15, 3 + Math.sqrt(simulation.difficulty)))
         const speed = (0.007 + 0.003 * Math.random() + 0.004 * Math.sqrt(simulation.difficulty))
         let radiusOrbitals = radius + 125 + 350 * Math.random()
         for (let i = 0; i < len; i++) spawn.orbital(me, radiusOrbitals, i / len * 2 * Math.PI, speed)
@@ -6073,7 +6058,7 @@ const spawn = {
         me.onDeath = function () {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
-        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.2
         me.do = function () {
             // this.armor();
             this.seePlayerCheckByDistance();
@@ -6106,7 +6091,7 @@ const spawn = {
         me.onDeath = function () { //helps collisions functions work better after vertex have been changed
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
         }
-        // spawn.shield(me, x, y);
+        spawn.shield(me, x, y);
         me.do = function () {
             this.seePlayerByLookingAt();
             this.checkStatus();
@@ -6131,7 +6116,7 @@ const spawn = {
 
         me.isBoss = true;
         Matter.Body.setDensity(me, 0.01 + 0.0004 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.2
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         me.isVerticesChange = true
@@ -6293,14 +6278,11 @@ const spawn = {
         me.accelMag = 0.0005 * simulation.accelScale;
         me.frictionAir = 0.05;
         me.torque = 0.0001 * me.inertia;
-        me.fireDir = {
-            x: 0,
-            y: 0
-        };
+        me.fireDir = { x: 0, y: 0 };
         me.onDeath = function () { //helps collisions functions work better after vertex have been changed
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices))
         }
-        // spawn.shield(me, x, y);
+        spawn.shield(me, x, y);
         me.do = function () {
             // this.seePlayerByLookingAt();
             this.seePlayerCheck();
@@ -6492,7 +6474,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.isBoss = true;
         Matter.Body.setDensity(me, 0.0022 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.2
 
         me.accelMag = 0.0001 * simulation.accelScale;
         me.fireFreq = Math.floor(330 * simulation.CDScale)
@@ -6535,7 +6517,7 @@ const spawn = {
     //     let me = mob[mob.length - 1];
     //     me.isBoss = true;
     //     Matter.Body.setDensity(me, 0.0022 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-    //     me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+    //     me.damageReduction = 0.2 
 
     //     me.fireFreq = Math.floor(60 * simulation.CDScale)
     //     me.seePlayerFreq = 15
@@ -6636,7 +6618,7 @@ const spawn = {
     //     let me = mob[mob.length - 1];
     //     me.isBoss = true;
     //     Matter.Body.setDensity(me, 0.0022 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-    //     me.damageReduction = 0.2 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+    //     me.damageReduction = 0.2 
 
     //     me.accelMag = 0.0001 * simulation.accelScale;
     //     me.fireFreq = Math.floor(180 * simulation.CDScale)
@@ -6732,7 +6714,7 @@ const spawn = {
                 });
             }
         };
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.25
         me.do = function () {
             // this.armor();
             if (this.grenadeLimiter > 1) this.grenadeLimiter--
@@ -6757,16 +6739,13 @@ const spawn = {
         me.accelMag = 0.0006 * simulation.accelScale;
         me.frictionAir = 0.05;
         me.torque = 0.0001 * me.inertia * (Math.random() > 0.5 ? -1 : 1)
-        me.fireDir = {
-            x: 0,
-            y: 0
-        };
+        me.fireDir = { x: 0, y: 0 };
         me.onDeath = function () { //helps collisions functions work better after vertex have been changed
             spawn.grenade(this.position.x, this.position.y, 200 * simulation.CDScale);
             // mob[mob.length - 1].collisionFilter.category = 0
             mob[mob.length - 1].collisionFilter.mask = cat.player | cat.map;
         }
-        // spawn.shield(me, x, y);
+        spawn.shield(me, x, y);
         me.do = function () {
             this.seePlayerCheck();
             this.checkStatus();
@@ -6897,7 +6876,7 @@ const spawn = {
         me.onDamage = function () {
             this.cycle = 0
         };
-        me.damageReduction = 0.35 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.35
         me.do = function () {
             Matter.Body.rotate(this, 0.003) //gently spin around
             this.checkStatus();
@@ -6919,8 +6898,8 @@ const spawn = {
                         ctx.moveTo(this.position.x, this.position.y)
                         ctx.lineTo(mob[i].position.x, mob[i].position.y)
                         spawn.shield(mob[i], mob[i].position.x, mob[i].position.y, 1, true);
-                        // me.damageReduction = 0.075 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
-                        mob[mob.length - 1].damageReduction = 0.5 * 0.075 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1) //shields are extra strong
+                        // me.damageReduction = 0.075 
+                        mob[mob.length - 1].damageReduction = 0.5 * 0.075  //shields are extra strong
                     }
                 }
                 if (!this.isShielded && this.alive) spawn.shield(this, this.position.x, this.position.y, 1, true);
@@ -6943,7 +6922,7 @@ const spawn = {
         spawn.spawnOrbitals(me, radius + 50 + 100 * Math.random())
 
         Matter.Body.setDensity(me, 0.0025); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.07 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.07
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.onDeath = function () {
@@ -7033,7 +7012,7 @@ const spawn = {
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
         };
         me.onDamage = function () { };
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.25
         me.do = function () {
             // this.armor();
             this.seePlayerCheck();
@@ -7167,49 +7146,6 @@ const spawn = {
             // this.attraction();
         };
     },
-    // exploder(x, y, radius = 40 + Math.ceil(Math.random() * 50)) {
-    //     mobs.spawn(x, y, 4, radius, "rgb(255,0,0)");
-    //     let me = mob[mob.length - 1];
-    //     me.onHit = function() { //run this function on hitting player
-    //         this.explode();
-    //     };
-    //     me.g = 0.0003; //required if using this.gravity
-    //     me.seePlayerFreq = 50 + Math.floor(Math.random() * 20)
-    //     me.do = function() {
-    //         this.gravity();
-    //         if (!(simulation.cycle % this.seePlayerFreq)) {
-    //             if (
-    //                 this.distanceToPlayer2() < this.seeAtDistance2 &&
-    //                 Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
-    //                 Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0 &&
-    //                 !m.isCloak
-    //             ) {
-    //                 this.foundPlayer();
-    //             } else if (this.seePlayer.recall) {
-    //                 for (let i = 0; i < 20; i++) {
-    //                     let history = m.history[(m.cycle - 30 * i) % 600]
-    //                     if (Matter.Query.ray(map, this.position, history.position).length === 0) {
-    //                         this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //seconds before mob falls a sleep
-    //                         this.seePlayer.position.x = history.position.x;
-    //                         this.seePlayer.position.y = history.position.y;
-
-    //                         ctx.beginPath();
-    //                         ctx.moveTo(this.position.x, this.position.y);
-    //                         ctx.lineTo(history.position.x, history.position.y);
-    //                         ctx.lineWidth = 5;
-    //                         ctx.strokeStyle = "#000";
-    //                         ctx.stroke();
-
-    //                         break
-    //                     }
-    //                 }
-    //                 this.lostPlayer();
-    //             }
-    //         }
-    //         this.checkStatus();
-    //         this.attraction();
-    //     };
-    // },
     exploder(x, y, radius = 40 + Math.ceil(Math.random() * 50)) {
         mobs.spawn(x, y, 4, radius, "rgb(255,0,0)");
         let me = mob[mob.length - 1];
@@ -7218,6 +7154,7 @@ const spawn = {
             this.explode();
         };
         me.g = 0.0004; //required if using this.gravity
+        spawn.shield(me, x, y);
         me.do = function () {
             this.gravity();
             this.seePlayerCheck();
@@ -7238,7 +7175,7 @@ const spawn = {
         me.memory = 250;
         me.laserRange = 500;
         Matter.Body.setDensity(me, 0.0022 + 0.00022 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        me.startingDamageReduction = 0.14 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.startingDamageReduction = 0.14
         me.damageReduction = 0
         me.isInvulnerable = true
 
@@ -7367,7 +7304,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.isBoss = true;
         Matter.Body.setDensity(me, 0.00165 + 0.00011 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        me.startingDamageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.startingDamageReduction = 0.1
         me.damageReduction = 0
         me.isInvulnerable = true
 
@@ -7497,7 +7434,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.isBoss = true;
         Matter.Body.setDensity(me, 0.0005 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.25 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.25
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.nextHealthThreshold = 0.75
@@ -7589,14 +7526,15 @@ const spawn = {
             }
         };
     },
-    shield(target, x, y, chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2) + tech.duplicationChance()) {
+    //chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2) + tech.duplicationChance()
+    shield(target, x, y, chance = (simulation.difficultyMode === 6 ? 3 : 1) * Math.min(0.02 + simulation.difficulty * 0.005, 0.2)) {
         if (this.allowShields && Math.random() < chance) {
             mobs.spawn(x, y, 9, target.radius + 30, "rgba(220,220,255,0.9)");
             let me = mob[mob.length - 1];
             me.stroke = "rgb(220,220,255)";
             Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
             me.shield = true;
-            me.damageReduction = 0.05 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+            me.damageReduction = 0.05
             me.isUnblockable = true
             me.collisionFilter.category = cat.mobShield
             me.collisionFilter.mask = cat.bullet;
@@ -7652,7 +7590,7 @@ const spawn = {
         Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
         me.frictionAir = 0;
         me.shield = true;
-        me.damageReduction = 0.075 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.075
         me.collisionFilter.category = cat.mobShield
         me.collisionFilter.mask = cat.bullet;
         for (let i = 0; i < nodes; ++i) {
@@ -7689,8 +7627,7 @@ const spawn = {
     },
     spawnOrbitals(who, radius, chance = Math.min(0.25 + simulation.difficulty * 0.005)) {
         if (Math.random() < chance) {
-            // simulation.difficulty = 50
-            const len = Math.floor(Math.min(15, 3 + Math.sqrt(simulation.difficulty))) // simulation.difficulty = 40 on hard mode level 10
+            const len = Math.floor(Math.min(15, 3 + Math.sqrt(simulation.difficulty)))
             const speed = (0.003 + 0.004 * Math.random() + 0.002 * Math.sqrt(simulation.difficulty)) * ((Math.random() < 0.5) ? 1 : -1)
             const offSet = 6.28 * Math.random()
             for (let i = 0; i < len; i++) spawn.orbital(who, radius, i / len * 2 * Math.PI + offSet, speed)
@@ -7747,7 +7684,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.isBoss = true;
         Matter.Body.setDensity(me, 0.0017 + 0.0002 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.1 / (tech.isScaleMobsWithDuplication ? 1 + tech.duplicationChance() : 1)
+        me.damageReduction = 0.1
 
         me.stroke = "transparent"; //used for drawGhost
         me.seeAtDistance2 = 2000000;
@@ -7956,13 +7893,18 @@ const spawn = {
                     this.force.x += -0.003;
                     player.force.x += 0.06;
                     // player.force.y -= 0.15;
+                    //remove difficulty power up if the wire breaks to prevent getting power ups and then making the difficulty harder
+                    for (let i = 0; i < powerUp.length; ++i) {
+                        if (powerUp[i].name === "difficulty") {
+                            Matter.Composite.remove(engine.world, powerUp[i]);
+                            powerUp.splice(i, 1);
+                        }
+                    }
+
                 }
 
                 //player is extra heavy from wires
-                Matter.Body.setVelocity(player, {
-                    x: player.velocity.x,
-                    y: player.velocity.y + 0.3
-                })
+                Matter.Body.setVelocity(player, { x: player.velocity.x, y: player.velocity.y + 0.3 })
 
                 //player friction from the wires
                 if (m.pos.x > 700 && player.velocity.x > -2) {
@@ -7974,10 +7916,7 @@ const spawn = {
                     })
                 }
                 //move to player
-                Matter.Body.setPosition(this, {
-                    x: m.pos.x + (42 * Math.cos(m.angle + Math.PI)),
-                    y: m.pos.y + (42 * Math.sin(m.angle + Math.PI))
-                })
+                Matter.Body.setPosition(this, { x: m.pos.x + (42 * Math.cos(m.angle + Math.PI)), y: m.pos.y + (42 * Math.sin(m.angle + Math.PI)) })
             }
             //draw wire
             ctx.beginPath();

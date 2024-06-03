@@ -587,6 +587,17 @@ summary {
     background-color: #fff;
 }
 
+
+
+
+
+
+
+
+
+
+
+
 #dmg {
     position: absolute;
     z-index: 2;
@@ -1501,4 +1512,125 @@ summary {
     stroke-dasharray: 300;
     stroke-dashoffset: 300;
     animation: dash 2.5s ease-in forwards;
+}
+
+
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 0fr 5fr 0fr;
+    line-height: 150%;
+    background-color: #fff;
+    padding: 15px 0 14px 0;
+    border-radius: 5px;
+}
+
+.far-right-column {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    font-size: 2rem;
+    font-family: monospace;
+    align-self: center;
+    justify-self: center;
+    width: 22px;
+}
+
+.far-right-column>div {
+    padding-top: 50px;
+}
+
+#difficulty-slider {
+    margin-top: 2.3rem;
+    height: 26.3rem;
+    width: 2rem;
+    writing-mode: vertical-lr;
+}
+
+.left-column {
+    grid-row: 1 / span 6
+}
+
+.right-column {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    /* to adjust the width of this column edit the "gridTemplateColumns" in the difficulty power up js code*/
+}
+
+.row {
+    transition: opacity 0.4s ease-out;
+    /* border: 2px #444 solid; */
+    /* margin-top: -2px; */
+    font-size: 1.2rem;
+    padding: 10px;
+}
+
+#constraint-1 {
+    background-color: hsl(240, 18%, 95%);
+    border-radius: 7px 7px 0 0;
+}
+
+#constraint-2 {
+    background-color: hsl(240, 18%, 93%);
+}
+
+#constraint-3 {
+    background-color: hsl(240, 18%, 89%);
+}
+
+#constraint-4 {
+    background-color: hsl(240, 18%, 85%);
+}
+
+#constraint-5 {
+    background-color: hsl(240, 18%, 81%);
+}
+
+#constraint-6 {
+    background-color: hsl(240, 18%, 77%);
+    border-radius: 0 0 7px 7px;
+}
+
+#constraint-1:hover {
+    background-color: hsl(240, 18%, 93%);
+    border: 1px #444 solid;
+    padding: 9px;
+}
+
+#constraint-2:hover {
+    background-color: hsl(240, 18%, 91%);
+    border: 1px #444 solid;
+    padding: 9px;
+}
+
+#constraint-3:hover {
+    background-color: hsl(240, 18%, 87%);
+    border: 1px #444 solid;
+    padding: 9px;
+}
+
+#constraint-4:hover {
+    background-color: hsl(240, 18%, 83%);
+    border: 1px #444 solid;
+    padding: 9px;
+}
+
+#constraint-5:hover {
+    background-color: hsl(240, 18%, 79%);
+    border: 1px #444 solid;
+    padding: 9px;
+}
+
+#constraint-6:hover {
+    background-color: hsl(240, 18%, 75%);
+    border: 1px #444 solid;
+    padding: 9px;
+}
+
+#choose-difficulty {
+    text-align: center;
+    font-size: 1.1em;
+    padding: 5px;
+    margin-top: 10px;
+    color: #333;
+    border-radius: 5px;
 }

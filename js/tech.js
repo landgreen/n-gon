@@ -248,22 +248,6 @@ const tech = {
     duplicationChance() {
         return Math.min(1, Math.max(0, (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.2 : 0) + tech.duplication + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + 0.08 * tech.isDuplicateMobs + 0.03 * tech.isMassProduction + 0.04 * tech.isHealAttract + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.6 : 0) + 0.06 * tech.isDupEnergy))
     },
-    isScaleMobsWithDuplication: false,
-    maxDuplicationEvent() {
-        if (tech.is100Duplicate && tech.duplicationChance() > 0.99) {
-            tech.is100Duplicate = false
-            const range = 1300
-            tech.isScaleMobsWithDuplication = true
-            for (let i = 0, len = 9; i < len; i++) {
-                const angle = 2 * Math.PI * i / len
-                spawn.randomLevelBoss(m.pos.x + range * Math.cos(angle), m.pos.y + range * Math.sin(angle), spawn.nonCollideBossList);
-            }
-            spawn.historyBoss(0, 0)
-            spawn.pulsarBoss(level.exit.x, level.exit.y, 70, true)
-            spawn.blockBoss(level.enter.x, level.enter.y)
-            tech.isScaleMobsWithDuplication = false
-        }
-    },
     setTechFrequency(name, frequency) {
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].name === name) tech.tech[i].frequency = frequency
@@ -2485,7 +2469,7 @@ const tech = {
     },
     {
         name: "entropic gravity",
-        description: "<strong>crouching</strong> pulls the <strong class='color-MACHO'>MACHO</strong> towards you<br> <strong>1.5x</strong> to all <strong class='color-MACHO'>MACHO</strong> effects",
+        description: "<strong>crouching</strong> pulls the <strong class='color-MACHO'>MACHO</strong> towards you<br> <strong>1.5x</strong> for all <strong class='color-MACHO'>MACHO</strong> effects",
         maxCount: 1,
         count: 0,
         frequency: 2,
@@ -2651,7 +2635,7 @@ const tech = {
         }
     },
     {
-        name: "Abelian group",
+        name: "abelian group",
         description: `<strong>4x</strong> <strong class='color-d'>damage</strong> while <strong class="color-invulnerable">invulnerable</strong>`,
         maxCount: 1,
         count: 0,
@@ -2709,7 +2693,7 @@ const tech = {
     },
     {
         name: "ground state",
-        description: "<strong>+266</strong> maximum <strong class='color-f'>energy</strong><br><strong>0.66x</strong> passive <strong class='color-f'>energy</strong> generation",
+        description: "<strong>+300</strong> maximum <strong class='color-f'>energy</strong><br><strong>0.66x</strong> passive <strong class='color-f'>energy</strong> generation",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -4270,26 +4254,6 @@ const tech = {
         }
     },
     {
-        name: "apomixis",
-        description: `when you reach <strong>100%</strong> <strong class='color-dup'>duplication</strong><br>spawn <strong>11 bosses</strong> with <strong>2x</strong> <strong>durability</strong>`,
-        maxCount: 1,
-        count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
-        // isInstant: true,
-        allowed() {
-            return tech.duplicationChance() > 0.5
-        },
-        requires: "duplication chance above 50%",
-        effect() {
-            tech.is100Duplicate = true;
-            tech.maxDuplicationEvent()
-        },
-        remove() {
-            tech.is100Duplicate = false;
-        }
-    },
-    {
         name: "stimulated emission",
         description: "<strong>+20%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>,<br><strong>collisions</strong> <span class='color-remove'>eject</span> a random <strong class='color-m'>tech</strong>",
         maxCount: 1,
@@ -4482,7 +4446,7 @@ const tech = {
     {
         name: "paradigm shift",
         descriptionFunction() {
-            return `when <strong>paused</strong> clicking a <strong class='color-m'>tech</strong> <span class='color-remove'>ejects</span> it<br><strong>–${tech.pauseEjectTech.toFixed(1)}</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} cost <em>(1.2x cost each use)</em>`
+            return `when <strong>paused</strong> clicking a <strong class='color-m'>tech</strong> <span class='color-remove'>ejects</span> it<br><strong>–${tech.pauseEjectTech.toFixed(1)}</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} cost <em>(1.3x cost each use)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -5149,7 +5113,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.isNeedleIce || (m.coupling && (m.fieldMode === 3 || m.fieldMode === 0))
+            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.isNeedleIce || (m.coupling && (m.fieldMode === 2 || m.fieldMode === 0))
         },
         requires: "a freeze effect",
         effect() {
@@ -5446,11 +5410,11 @@ const tech = {
         requires: "wave",
         effect() {
             tech.waveBeamSpeed *= 0.75;
-            tech.waveBeamDamage += 0.27 * 0.4 //this sets base  wave damage
+            tech.waveBeamDamage += 0.3 * 0.4 //this sets base  wave damage
         },
         remove() {
             tech.waveBeamSpeed = 11;
-            tech.waveBeamDamage = 0.27 //this sets base  wave damage
+            tech.waveBeamDamage = 0.3 //this sets base  wave damage
         }
     },
     {
@@ -8071,7 +8035,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldMode === 10 || m.fieldMode === 4 || m.fieldMode === 8)
+            return (m.fieldMode === 10 || m.fieldMode === 5 || m.fieldMode === 8)  //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
         },
         requires: "plasma torch, grappling hook, pilot wave",
         effect() {
@@ -8353,7 +8317,7 @@ const tech = {
     {
         name: "metamaterial absorber",  //quantum eraser
         descriptionFunction() {
-            return `for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br>there is a <strong>25%</strong> chance to spawn a random <strong>power up</strong>`
+            return `for each mob left <strong>alive</strong> after you exit a <strong>level</strong><br>there is a <strong>30%</strong> chance to spawn a random <strong>power up</strong>`
         },
         isFieldTech: true,
         maxCount: 1,
@@ -9135,7 +9099,7 @@ const tech = {
     // },
     {
         name: "return",
-        description: "return to the start of the game<br>reduce combat <strong>difficulty</strong> by <strong>2 levels</strong>",
+        description: "return to the start of the game",
         maxCount: 1,
         count: 0,
         frequency: 0,
@@ -9144,7 +9108,6 @@ const tech = {
         allowed: () => true,
         requires: "",
         effect() {
-            level.difficultyDecrease(simulation.difficultyMode * 2)
             level.onLevel = 0
             simulation.clearNow = true //end current level
         },
@@ -10657,7 +10620,7 @@ const tech = {
         remove() { }
     },
     {
-        name: "stubs",
+        name: "wall jump",
         description: "no knees or toes are drawn on the player<br>you can wall climb though",
         maxCount: 1,
         count: 0,
@@ -10670,11 +10633,12 @@ const tech = {
         requires: "",
         effect() {
             m.skin.stubs()
-            Matter.Body.scale(player.parts[3], 2, 2);
+            jumpSensor.vertices[0].x += -22
+            jumpSensor.vertices[3].x += -22
+            jumpSensor.vertices[1].x += 22
+            jumpSensor.vertices[2].x += 22
         },
-        remove() {
-            // if (this.count) m.resetSkin();
-        }
+        remove() { }
     },
     {
         name: "Sleipnir",
@@ -10768,25 +10732,6 @@ const tech = {
         }
     },
     {
-        name: "wall jump",
-        description: "jump on walls",
-        maxCount: 1,
-        count: 0,
-        frequency: 0,
-        isJunk: true,
-        allowed() {
-            return !m.isShipMode
-        },
-        requires: "",
-        effect() {
-            jumpSensor.vertices[0].x += -22
-            jumpSensor.vertices[3].x += -22
-            jumpSensor.vertices[1].x += 22
-            jumpSensor.vertices[2].x += 22
-        },
-        remove() { }
-    },
-    {
         name: "posture",
         description: "stand a bit taller",
         maxCount: 1,
@@ -10869,7 +10814,7 @@ const tech = {
     // },
     {
         name: "ship",
-        description: "fly around with no legs<br>reduce combat <strong>difficulty</strong> by <strong>1 level</strong>",
+        description: "fly around with no legs",
         maxCount: 1,
         count: 0,
         frequency: 0,
@@ -10882,7 +10827,6 @@ const tech = {
         effect() {
             m.isAltSkin = true
             m.shipMode()
-            level.difficultyDecrease(simulation.difficultyMode)
             //unlock relativistic rotation
             for (let i = 0; i < tech.tech.length; i++) {
                 if (tech.tech[i].name === "relativistic rotation") tech.tech[i].frequency = 10
@@ -10984,23 +10928,6 @@ const tech = {
         remove() { }
     },
     {
-        name: "growth hacking",
-        description: "increase combat <strong>difficulty</strong> by <strong>1 level</strong>",
-        maxCount: 1,
-        count: 0,
-        frequency: 0,
-        isInstant: true,
-        isJunk: true,
-        allowed() {
-            return true
-        },
-        requires: "",
-        effect() {
-            level.difficultyIncrease(simulation.difficultyMode)
-        },
-        remove() { }
-    },
-    {
         name: "stun",
         description: "<strong>stun</strong> all mobs for up to <strong>8</strong> seconds",
         maxCount: 9,
@@ -11046,6 +10973,23 @@ const tech = {
         remove() { }
     },
     {
+        name: "difficulty",
+        description: "spawn a power up that lets you<br>adjust the simulation <strong>difficulty</strong> parameters",
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isInstant: true,
+        isJunk: true,
+        allowed() {
+            return level.levelsCleared < 6
+        },
+        requires: "before level 6",
+        effect() {
+            powerUps.spawn(m.pos.x, m.pos.y, "difficulty");
+        },
+        remove() { }
+    },
+    {
         name: "re-research",
         description: `<strong>eject</strong> all your ${powerUps.orb.research(1)}`,
         maxCount: 9,
@@ -11080,6 +11024,31 @@ const tech = {
             spawn.suckerBoss(m.pos.x, m.pos.y - 700)
             powerUps.research.changeRerolls(-4)
             simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>--</span><br>${powerUps.research.count}`)
+        },
+        remove() { }
+    },
+    {
+        name: "apomixis",
+        description: `spawn <strong>11 bosses</strong>`,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        isInstant: true,
+        isJunk: true,
+        allowed() {
+            return tech.duplicationChance() > 0.99
+        },
+        requires: "duplication chance above 99%",
+        effect() {
+            const range = 1300
+            for (let i = 0, len = 9; i < len; i++) {
+                const angle = 2 * Math.PI * i / len
+                spawn.randomLevelBoss(m.pos.x + range * Math.cos(angle), m.pos.y + range * Math.sin(angle), spawn.nonCollideBossList);
+            }
+            spawn.historyBoss(0, 0)
+            spawn.pulsarBoss(level.exit.x, level.exit.y, 70, true)
+            spawn.blockBoss(level.enter.x, level.enter.y)
         },
         remove() { }
     },
@@ -11762,7 +11731,6 @@ const tech = {
     pauseEjectTech: null,
     isShieldPierce: null,
     isDuplicateMobs: null,
-    is100Duplicate: null,
     isDynamoBotUpgrade: null,
     isBlockPowerUps: null,
     isDamageAfterKillNoRegen: null,
