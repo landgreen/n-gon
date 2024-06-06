@@ -307,7 +307,7 @@ const tech = {
     },
     {
         name: "nitinol",
-        description: "<strong>1.3x</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>0.8x</strong> <strong class='color-defense'>damage taken</strong>",
+        description: "<strong>5x</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>5x</strong> <strong class='color-defense'>damage taken</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -319,9 +319,9 @@ const tech = {
         requires: "not skinned",
         effect() {
             m.skin.mech();
-            tech.hardLanding = 110
+            tech.hardLanding = 50
             tech.squirrelFx += 0.4;
-            tech.squirrelJump += 0.16;
+            tech.squirrelJump += 0.5;
             m.setMovement()
         },
         remove() {
