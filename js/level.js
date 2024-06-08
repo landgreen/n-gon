@@ -244,8 +244,8 @@ const level = {
         } else if (simulation.difficultyMode > 1) {
             scale = 2
         }
-        m.dmgScale = Math.pow(0.82, level.levelsCleared * scale)
-        simulation.dmgScale = Math.max(0.1, 0.25 * level.levelsCleared * scale) //damage done by mobs scales with total levels
+        m.dmgScale = Math.pow(0.84, level.levelsCleared * scale)
+        simulation.dmgScale = Math.max(0.1, 0.23 * level.levelsCleared * scale) //damage done by mobs scales with total levels
 
         //
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.043) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
