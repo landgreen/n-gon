@@ -462,58 +462,64 @@ const build = {
         if (tech.plasmaBotCount) botText += `<br>plasma-bots: ${tech.plasmaBotCount}`
         if (tech.missileBotCount) botText += `<br>missile-bots: ${tech.missileBotCount}`
 
-        let text = `<div class="pause-grid-module" style = "padding: 10px; line-height: 110%;">
-<span style = "font-size: 0.87em;">
-<span style="font-size:1.5em;font-weight: 600; float: left;">PAUSED</span> 
+        let text = `<div class="pause-grid-module" style="padding: 8px;">
+<span style="font-size:1.4em;font-weight: 600; float: left;">PAUSED</span> 
 <span style="float: right;">press ${input.key.pause} to resume</span>
 <br>
-<br>
-<button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build url</button>
-
 <input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages ? "checked" : ""}>
 <label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.15em;" >hide images</label>
 <br>
+<button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build url</button>
 <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
 <label for="hide-hud" title="hide: tech, damage taken, damage, in game console" style="font-size:1.15em;">minimal HUD</label>
-<br>
+</div>
 
-<details> <summary>difficulty</summary>
-    <div style="display: ${simulation.difficultyMode === 1 ? "block" : "none"};"><strong>+6</strong> initial <strong>power ups</strong><br><strong>5%</strong> chance for mobs to a drop <strong class='color-m'>tech</strong></div>
-    <div style="display: ${simulation.difficultyMode > 1 ? "block" : "none"};"><strong>10%</strong> chance for <strong>shielded</strong> mobs<br><strong>0.5x</strong> <strong class='color-h'>heal</strong> power ups</div>
-    <div style="display: ${simulation.difficultyMode > 2 ? "block" : "none"};"><strong>1.5x</strong> mob movement and reactions<br><strong>0.5x</strong> <strong class='color-d'>damage</strong></div>
-    <div style="display: ${simulation.difficultyMode > 3 ? "block" : "none"};"><strong>+1</strong> boss per level, <strong>-1</strong> <strong class='color-m'>tech</strong> per boss<br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>
-    <div style="display: ${simulation.difficultyMode > 4 ? "block" : "none"};"><strong>-3</strong> initial power ups<br><strong>0.5x</strong> <strong class='color-d'>damage</strong></div>
-    <div style="display: ${simulation.difficultyMode > 5 ? "block" : "none"};"><strong>10%</strong> chance for <strong>shielded</strong> mobs<br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>
+<div class="pause-grid-module">
+<details id = "simulation-variables-details" style="padding: 0 8px;line-height: 140%;">
+<summary>simulation variables</summary>
+<div class="pause-details">
+<strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)}x <span style="float: right;"><strong class='color-d'>difficulty:</strong> ${((m.dmgScale)).toPrecision(4)}x</span>
+<br><strong class='color-defense'>damage taken</strong>: ${(m.defense()).toPrecision(4)}x <span style="float: right;"><strong class='color-defense'>difficulty:</strong> ${(simulation.dmgScale).toPrecision(4)}x</span>
+<br><strong><em>fire rate</em></strong>: ${(1 / b.fireCDscale).toFixed(2)}x
+${tech.duplicationChance() ? `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance() * 100).toFixed(0)}%` : ""}
+${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
+${botText}
+<br><strong class='color-h'>health</strong>: (${(m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
+<span style="float: right;">mass: ${player.mass.toFixed(1)}</span>
+<br><strong class='color-f'>energy</strong>: (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000).toFixed(0)}/s)
+<span style="float: right;">position: (${player.position.x.toFixed(0)}, ${player.position.y.toFixed(0)})</span>
+<br><strong class='color-g'>gun</strong>: ${b.activeGun === null || b.activeGun === undefined ? "undefined" : b.guns[b.activeGun].name} &nbsp; <strong class='color-g'>ammo</strong>: ${b.activeGun === null || b.activeGun === undefined ? "0" : b.guns[b.activeGun].ammo}
+<span style="float: right;">mouse: (${simulation.mouseInGame.x.toFixed(0)}, ${simulation.mouseInGame.y.toFixed(0)})</span>
+<br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}
+<span style="float: right;">velocity: (${player.velocity.x.toFixed(2)}, ${player.velocity.y.toFixed(2)})</span>
+${tech.junkChance ? `<br><strong class='color-junk'>JUNK</strong>: ${(100 * tech.junkChance).toFixed(1)}%  ` : ""}
+<br>mobs: ${spawn.pickList[0]},  ${spawn.pickList[0]}
+<br>seed: ${Math.initialSeed} &nbsp; ${m.cycle} cycles
+<br>mobs: ${mob.length} &nbsp; blocks: ${body.length} &nbsp; bullets: ${bullet.length} &nbsp; power ups: ${powerUp.length} ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
+</div>
 </details>
-
-
-    <br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)}x <span style="float: right;"><strong class='color-d'>difficulty:</strong> ${((m.dmgScale)).toPrecision(4)}x</span>
-    <br><strong class='color-defense'>damage taken</strong>: ${(m.defense()).toPrecision(4)}x <span style="float: right;"><strong class='color-defense'>difficulty:</strong> ${(simulation.dmgScale).toPrecision(4)}x</span>
-    <br><strong><em>fire rate</em></strong>: ${(1 / b.fireCDscale).toFixed(2)}x
-    ${tech.duplicationChance() ? `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance() * 100).toFixed(0)}%` : ""}
-    ${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
-    ${botText}
-    <br>
-    <br><strong class='color-h'>health</strong>: (${(m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
-    <span style="float: right;">mass: ${player.mass.toFixed(1)}</span>
-    <br><strong class='color-f'>energy</strong>: (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000).toFixed(0)}/s)
-    <span style="float: right;">position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)})</span>
-    <br><strong class='color-g'>gun</strong>: ${b.activeGun === null || b.activeGun === undefined ? "undefined" : b.guns[b.activeGun].name} &nbsp; <strong class='color-g'>ammo</strong>: ${b.activeGun === null || b.activeGun === undefined ? "0" : b.guns[b.activeGun].ammo}
-    <span style="float: right;">mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)})</span>
-    <br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}
-    <span style="float: right;">velocity: (${player.velocity.x.toFixed(3)}, ${player.velocity.y.toFixed(3)})</span>
-    ${tech.junkChance ? `<br><strong class='color-junk'>JUNK</strong>: ${(100 * tech.junkChance).toFixed(1)}%  ` : ""}
-    <br>
-    <br>mobs: ${spawn.pickList[0]},  ${spawn.pickList[0]}
-    <br>seed: ${Math.initialSeed} &nbsp; ${m.cycle} cycles
-    <br>mobs: ${mob.length} &nbsp; blocks: ${body.length} &nbsp; bullets: ${bullet.length} &nbsp; power ups: ${powerUp.length} ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}</span></div>`;
-        // deaths: ${mobs.mobDeaths} &nbsp;
-        // if (tech.isPauseSwitchField && !simulation.isChoosing) {
-        //     const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
-        //     text += `<div class="pause-grid-module card-background" id="pause-field" ${style} >
-        //                    <div class="card-text" style="animation: fieldColorCycle 1s linear infinite alternate;">
-        //                    <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
-        //                    ${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
+</div>`
+        text += `<div class="pause-grid-module card-background" style="height:auto;">
+<details id="difficulty-parameters-details" style="padding: 0 8px;">
+<summary>difficulty parameters</summary>
+<div class="pause-details">
+        ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
+        ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>-5</strong> initial <strong>power ups</strong><br><strong>faster</strong> and <strong>more</strong> mobs per level</div>` : " "}
+        ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
+        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row"><strong>+1</strong> boss per level, <strong>-1</strong> <strong class='color-m'>tech</strong> per boss<br><strong>-1</strong> ${powerUps.orb.research()} per level</div>` : " "}
+        ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
+        ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>3x</strong> chance for <strong>shielded</strong> mobs<br><strong>-3</strong> initial power ups</div>` : " "}
+</div>
+</details>
+</div>`
+        if (!localSettings.isHideHUD) text += `<div class="pause-grid-module card-background" style="height:auto;">
+<details id = "console-log-details" style="padding: 0 8px;">
+<summary>console messages</summary>
+<div class="pause-details">
+    <div class="pause-grid-module" style="background-color: rgba(255,255,255,0.3);font-size: 0.8em;">${document.getElementById("text-log").innerHTML}</div>
+</div>
+</details>
+</div>`
         if ((tech.isPauseSwitchField || simulation.testing)) {  //&& !simulation.isChoosing
             // const fieldNameP = m.fieldUpgrades[m.fieldMode > 1 ? m.fieldMode - 1 : m.fieldUpgrades.length - 1].name
             // const fieldNameN = m.fieldUpgrades[m.fieldMode === m.fieldUpgrades.length - 2 ? 1 : m.fieldMode + 1].name
@@ -548,10 +554,16 @@ const build = {
                                                         <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div>
                                                         ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         }
-        if (!localSettings.isHideHUD) text += `<div class="pause-grid-module pause-console" style="background-color: rgba(255,255,255,0.3);">${document.getElementById("text-log").innerHTML}</div>` //show last in game console message
         let el = document.getElementById("pause-grid-left")
         el.style.display = "grid"
         el.innerHTML = text
+        requestAnimationFrame(() => {
+            if (localSettings.isAllowed) {
+                document.getElementById("simulation-variables-details").open = localSettings.pauseMenuDetailsOpen[0]
+                document.getElementById("difficulty-parameters-details").open = localSettings.pauseMenuDetailsOpen[1]
+                document.getElementById("console-log-details").open = localSettings.pauseMenuDetailsOpen[2]
+            }
+        });
     },
     generatePauseRight() {
         let text = `<div class="sort">
@@ -561,7 +573,7 @@ const build = {
                                                     <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
                                                     <button onclick="build.sortTech('damage taken')" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">damage taken</strong></button>
                                                     <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
-                                                    <input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#000;" placeholder="sort by" />
+                                                    <input type="search" id="sort-input" style="width: 5em;font-size: 0.6em;color:#000;" placeholder="sort by" />
                                                     <button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
                                                 </div>`;
         const ejectClass = (tech.isPauseEjectTech && !simulation.isChoosing) ? 'pause-eject' : ''
@@ -710,6 +722,14 @@ const build = {
         simulation.updateTechHUD();
     },
     unPauseGrid() {
+        if (localSettings.isAllowed) {
+            //save details open/close state
+            if (document.getElementById("simulation-variables-details")) localSettings.pauseMenuDetailsOpen[0] = document.getElementById("simulation-variables-details").open
+            if (document.getElementById("difficulty-parameters-details")) localSettings.pauseMenuDetailsOpen[1] = document.getElementById("difficulty-parameters-details").open
+            if (document.getElementById("console-log-details")) localSettings.pauseMenuDetailsOpen[2] = document.getElementById("console-log-details").open
+            localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        }
+
         document.getElementById("guns").style.display = "inline"
         document.getElementById("field").style.display = "inline"
         if (tech.isEnergyHealth) {
@@ -1802,6 +1822,11 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     if (localSettings.difficultyMode === undefined) localSettings.difficultyMode = "2"
     simulation.difficultyMode = localSettings.difficultyMode
     lore.setTechGoal()
+
+    if (localSettings.pauseMenuDetailsOpen === undefined) {
+        localSettings.pauseMenuDetailsOpen = [true, false, false]
+        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    }
 } else {
     console.log('setting default localSettings')
     const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
@@ -1823,6 +1848,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         key: undefined,
         isHideImages: true, //default to hide images
         isHideHUD: false,
+        pauseMenuDetailsOpen: [true, false, false]
     };
     input.setDefault()
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage

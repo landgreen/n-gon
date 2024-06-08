@@ -26,7 +26,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField("plasma torch") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField("molecular assembler") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
             // powerUps.research.count = 3
             // tech.isHookWire = true
@@ -45,19 +45,19 @@ const level = {
             // for (let i = 0; i < 1; ++i) tech.giveTech("combinatorial optimization")
             // tech.giveTech("Newtons 2nd law")
             // for (let i = 0; i < 1; ++i) tech.giveTech("lens")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("modified Newtonian dynamics")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Newtons 1st law")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("entropic gravity")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("tungsten carbide")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("nitinol")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("reaction mass")
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) b.orbitBot(m.pos, false) });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("ersatz bots") });
             // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
             // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 1; ++i) tech.giveTech("plasma-bot")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("compression engine")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(-50, -70, "difficulty", false);
             // for (let i = 0; i < 100; i++) powerUps.directSpawn(1750, -500, "coupling");
             // spawn.mapRect(575, -700, 25, 425);  //block mob line of site on testing
-            // level.testing();
+            // level.yingYang();
 
             // for (let i = 0; i < 1; ++i) spawn.laserLayer(1400, -500)
             // Matter.Body.setPosition(player, { x: -200, y: -3330 });
@@ -21353,8 +21353,8 @@ const level = {
                 },
                 choose(index) {
                     if (index == 1) {
-                        tech.squirrelFx += 0.25;
-                        tech.squirrelJump += 0.1;
+                        m.squirrelFx += 0.25;
+                        m.squirrelJump += 0.1;
                         m.setMovement();
                         powerUps.endDraft("buff");
                     } else if (index == 2) {
@@ -30504,6 +30504,7 @@ const level = {
 
             level.enter.draw();
         };
+        level.customTopLayer = () => { };
     },
     unchartedCave() {
         simulation.makeTextLog(`<strong>unchartedCave</strong> by <span class='color-var'>3xionDev</span>`);
@@ -30914,6 +30915,7 @@ const level = {
 
             level.enter.draw();
         };
+        level.customTopLayer = () => { };
     },
     dojo() { // By weird_pusheen
         simulation.makeTextLog(`<strong>dojo</strong> by <span class='color-var'>werid_pusheen</span>, fixed by <span class='color-var'>Cornbread 2100</span>`)

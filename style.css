@@ -282,11 +282,15 @@ summary {
     /* Firefox */
 }
 
-.pause-console {
-    padding: 10px;
-    margin: 5px;
-    border-radius: 10px;
-}
+/* .pause-console { */
+/* padding: 10px; */
+/* margin: 10px; */
+/* border-radius: 10px; */
+/* line-height: 140%; */
+/* font-size: 1em; */
+/* padding: 10px; */
+/* margin: -5px 0; */
+/* } */
 
 #pause-grid-left::-webkit-scrollbar {
     display: none;
@@ -1544,6 +1548,7 @@ summary {
     height: 26.3rem;
     width: 2rem;
     writing-mode: vertical-lr;
+    direction: ltr;
 }
 
 .left-column {
@@ -1562,6 +1567,13 @@ summary {
     /* margin-top: -2px; */
     font-size: 1.2rem;
     padding: 10px;
+}
+
+.pause-difficulty-row {
+    line-height: 140%;
+    font-size: 1em;
+    padding: 10px;
+    margin: -5px 0;
 }
 
 #constraint-1 {
@@ -1633,4 +1645,12 @@ summary {
     margin-top: 10px;
     color: #333;
     border-radius: 5px;
+}
+
+.pause-details {
+    background-color: hsl(240, 18%, 93%);
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 10px;
 }

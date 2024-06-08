@@ -281,7 +281,7 @@ const tech = {
     },
     tech: [{
         name: "tungsten carbide",
-        description: "<strong>+300</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
+        description: "<strong>+400</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -292,14 +292,12 @@ const tech = {
         },
         requires: "not skin",
         effect() {
-            tech.hardLanding = 70
             tech.isFallingDamage = true;
             m.setMaxHealth();
             m.addHealth(3 / simulation.healScale)
             m.skin.tungsten()
         },
         remove() {
-            tech.hardLanding = 130
             tech.isFallingDamage = false;
             m.setMaxHealth();
             if (this.count) m.resetSkin();
@@ -307,7 +305,7 @@ const tech = {
     },
     {
         name: "nitinol",
-        description: "<strong>1.3x</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>0.8x</strong> <strong class='color-defense'>damage taken</strong>",
+        description: "<strong>1.3x</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>0.17</strong> seconds of <strong>coyote time</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -319,16 +317,9 @@ const tech = {
         requires: "not skinned",
         effect() {
             m.skin.mech();
-            tech.hardLanding = 110
-            tech.squirrelFx += 0.4;
-            tech.squirrelJump += 0.16;
             m.setMovement()
         },
         remove() {
-            tech.hardLanding = 130
-            tech.squirrelFx = 1;
-            tech.squirrelJump = 1;
-            m.setMovement()
             if (this.count) m.resetSkin();
         }
     },
@@ -431,14 +422,14 @@ const tech = {
     },
     {
         name: "mass-energy equivalence",
-        description: `use ${powerUps.orb.research(2)}<br><strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong>`,
+        description: `<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
         isSkin: true,
         allowed() {
-            return (powerUps.research.count > 1 || build.isExperimentSelection) && !m.isAltSkin && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isAnnihilation //&& !tech.isAmmoFromHealth && !tech.isRewindGun
+            return !m.isAltSkin && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isAnnihilation //&& !tech.isAmmoFromHealth && !tech.isRewindGun
         },
         requires: "not piezoelectricity, CPT, annihilation",
         effect() {
@@ -451,13 +442,9 @@ const tech = {
             m.displayHealth();
             m.lastCalculatedDefense = 0 //this triggers a redraw of the defense bar
             m.skin.energy();
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
         },
         remove() {
             if (this.count > 0) {
-                powerUps.research.changeRerolls(2)
                 tech.isEnergyHealth = false;
                 document.getElementById("health").style.display = "inline"
                 document.getElementById("health-bg").style.display = "inline"
@@ -840,7 +827,7 @@ const tech = {
     {
         name: "supply chain",
         descriptionFunction() {
-            return `spawn a <strong class='color-g'>gun</strong><br>spawn ${powerUps.orb.ammo(1)} equal to current <strong class='color-ammo'>ammo</strong>`
+            return `spawn a <strong class='color-g'>gun</strong><br>spawn ${powerUps.orb.ammo(1)} equal to all your active <strong class='color-g'>gun's</strong> <strong class='color-ammo'>ammo</strong>`
         },
         maxCount: 9,
         count: 0,
@@ -852,36 +839,14 @@ const tech = {
         },
         requires: "",
         effect() {
-            //count ammo
-            let ammoCount = 0
-            for (let i = 0; i < b.guns.length; i++) {
-                if (b.guns[i].have && b.guns[i].ammo !== Infinity) ammoCount += b.guns[i].ammo / b.guns[i].ammoPack
+            let ammoCount = 0 //count ammo
+            if (b.activeGun && b.activeGun !== undefined && b.guns[b.activeGun].have && b.guns[b.activeGun].ammo !== Infinity) {
+                ammoCount += b.guns[b.activeGun].ammo / b.guns[b.activeGun].ammoPack
             }
             powerUps.spawnDelay("ammo", Math.ceil(ammoCount))
             powerUps.spawn(m.pos.x, m.pos.y, "gun");
-            // powerUps.spawnDelay("coupling", m.coupling * 2)
-            // for (let i = 0; i < b.guns.length; i++) {
-            //     if (b.guns[i].have) b.guns[i].ammo = Math.floor(2 * b.guns[i].ammo)
-            // }
-            // simulation.makeGunHUD();
-            // for (let i = 0, len = tech.tech.length; i < len; i++) {
-            //     if (tech.tech[i].name === "applied science") tech.tech[i].frequency *= 4
-            // }
         },
-        remove() {
-            // if (this.count) {
-            // m.couplingChange(-this.count * 10)
-            // for (let j = 0; j < this.count; j++) {
-            //     for (let i = 0; i < b.guns.length; i++) {
-            //         if (b.guns[i].have) b.guns[i].ammo = Math.floor(0.5 * b.guns[i].ammo)
-            //     }
-            // }
-            // simulation.makeGunHUD();
-            // for (let i = 0, len = tech.tech.length; i < len; i++) {
-            //     if (tech.tech[i].name === "applied science") tech.tech[i].frequency = 2
-            // }
-            // }
-        }
+        remove() { }
     },
     {
         name: "marginal utility",
@@ -1082,35 +1047,6 @@ const tech = {
             tech.restDamage = 1;
         }
     },
-
-    // {
-    //     name: "coyote",
-    //     description: "",
-    //     maxCount: 1,
-    //     count: 0,
-    //     frequency: 1,
-    //     frequencyDefault: 1,
-    //     allowed() { return true },
-    //     requires: "",
-    //     effect() { // good with melee builds, content skipping builds
-    //         tech.coyoteTime = 120
-    //         // simulation.gravity = function() {
-    //         //     function addGravity(bodies, magnitude) {
-    //         //         for (var i = 0; i < bodies.length; i++) {
-    //         //             bodies[i].force.y += bodies[i].mass * magnitude;
-    //         //         }
-    //         //     }
-    //         //     if (!m.isBodiesAsleep) {
-    //         //         addGravity(powerUp, simulation.g);
-    //         //         addGravity(body, simulation.g);
-    //         //     }
-    //         //     player.force.y += player.mass * simulation.g
-    //         // }
-    //     },
-    //     remove() {
-    //         tech.coyoteTime = 5
-    //     }
-    // },
     {
         name: "Newtons 1st law",
         descriptionFunction() {
@@ -3756,6 +3692,7 @@ const tech = {
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
+        isBadRandomOption: true,
         allowed() {
             return true
         },
@@ -7964,6 +7901,26 @@ const tech = {
             tech.isMassEnergy = false;
         }
     },
+    // {
+    //     name: "working mass",
+    //     // description: "after jumping jump again in <strong>midair</strong><br><strong>double jumping</strong> requires <strong>50%</strong> of current <strong class='color-f'>energy</strong><br><strong>double jumping</strong> boosts <strong class='color-speed'>speed</strong>",
+    //     description: "",
+    //     isFieldTech: true,
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 2,
+    //     frequencyDefault: 2,
+    //     allowed() {
+    //         return m.fieldMode === 4
+    //     },
+    //     requires: "molecular assembler",
+    //     effect() {
+    //         tech.isDoubleJump = true
+    //     },
+    //     remove() {
+    //         tech.isDoubleJump = false
+    //     }
+    // },
     {
         name: "electric generator",
         description: "after <strong>deflecting</strong> mobs<br><strong>molecular assembler</strong> generates <strong>+50</strong> <strong class='color-f'>energy</strong>",
@@ -10981,9 +10938,9 @@ const tech = {
         isInstant: true,
         isJunk: true,
         allowed() {
-            return level.levelsCleared < 6
+            return (level.levelsCleared < 5)
         },
-        requires: "before level 6",
+        requires: "before level 5",
         effect() {
             powerUps.spawn(m.pos.x, m.pos.y, "difficulty");
         },
@@ -11559,7 +11516,6 @@ const tech = {
     isAcidDmg: null,
     isAnnihilation: null,
     largerHeals: null,
-    squirrelFx: null,
     isCrit: null,
     isLowHealthDmg: null,
     isLowHealthDefense: null,
@@ -11623,7 +11579,6 @@ const tech = {
     isNailShot: null,
     slowFire: null,
     fastTime: null,
-    squirrelJump: null,
     isFastRadiation: null,
     isAmmoForGun: null,
     isRapidPulse: null,
@@ -11825,13 +11780,10 @@ const tech = {
     isTimeCrystals: null,
     isGroundState: null,
     isRailGun: null,
-    // isGrapple: null,
-    // isImmuneGrapple: null,
     isDronesTravel: null,
     isTechDebt: null,
     isPlasmaBall: null,
     plasmaDischarge: null,
-    coyoteTime: null,
     missileFireCD: null,
     isBotField: null,
     isFoamBall: null,
@@ -11871,7 +11823,6 @@ const tech = {
     collidePowerUps: null,
     isDilate: null,
     isDiaphragm: null,
-    hardLanding: null,
     isNoGroundDamage: null,
     isSuperBounce: null,
     isDivisor: null,
@@ -11897,4 +11848,5 @@ const tech = {
     interestRate: null,
     isImmunityDamage: null,
     isMobDeathImmunity: null,
+    isDoubleJump: null,
 }

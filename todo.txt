@@ -1,22 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
-difficulty rework
-  difficulty adjusted through a power up on the initial level
-  difficulty parameters are more precisely explained
-  JUNK tech: difficulty - spawns a difficulty power up (only works before level 6)
-
-bots no longer benefit from increased fireRate 
-shields have a chance spawn on almost all mobs (but not stealth mobs)
-level exit door animation is 33% faster
-power ups have fewer sides.  It might improve game performance, but I can't tell the difference.
-1.15x base wave bullets damage (bots, particles, and phonon)
-metamaterial absorber 25->30% chance to get power ups from mobs left alive
-apomixis is now a JUNK tech, and it requires duplication > 99%
-pilot wave field 2->3 extra choices
-plasma torch slows mobs more, and don't push mobs back as much
-  fixed bug where plasma torch didn't get tech degenerate matter
-laserLayerBoss and layerLayer do 33% less damage
-mines aren't triggered by invulnerable mobs
+you can now jump off mobs while invulnerable
+  includes time dilated
+pause display text updated with details menus
+difficulty parameters
+  0.82->0.84x damage done per level
+  1.25->1.23x damage taken per level
+tungsten carbide 300->400 health, but 0.08->0.02 seconds of coyote time and longer crouch time
+nitinol 0.08->0.17 seconds of coyote time and much less crouching on hard landings, but 0.8->1 damage taken
+mass-energy equivalence no longer costs 2 research
+long power up spawns, like from interest or supply chain:
+  will pause new spawns until total power ups are below 300 to reduce lag
+  stop spawning if you take damage
 
 bug fixes
 
@@ -34,7 +29,7 @@ add more randomize sub level map content
   left/right sides of lock
   small lab rooms
 
-powerful synergies
+list of powerful synergies
   CPT + high energy regen
   research + bot fabrication + ersatz bots + various bot upgrades
   harpoon + high fire rate + alternator + time dilation
@@ -46,26 +41,24 @@ powerful synergies
 
 *********************************************************** TODO *****************************************************
 
+tech: working mass - double jump
+  cost flat energy not a %
+  field Tech for molecular assembler and print and throw a block down on 2nd jump
+    remove block after time or keep it around?
+  credit to TNTiger17 (although I'm not looking for more code contributions)
+
 difficulty rework: explicit changes to the game to increase difficulty
   UI -
-    add difficulty display to pause menu
-      update pause menu text to match opening screen menu
-      just make it a square like field or gun on left pause column
-      add a wire attached to difficulty power up
-        like the one attached to player, but thinner
-  add new difficulty to game code
-    todo
-      check for any undocumented side effects
-        heal power ups (small effect)
-          (remove, keep, or add to parameters)
-  balance testing log:
-      difficultyMode=5 died on level 5 with a good drone build,  seemed similar balance to old why mode, maybe slightly harder...
-      difficultyMode=2 won with a good spore build,  seemed similar balance to old normal mode
+    add a wire attached to difficulty power up
+      like the one attached to player, but thinner
 
 tokamak synergy tech
   tech: stellarator - after firing a block with tokamak, heal (scale heal amount with block mass?)
   tech: inertial confinement - while charging tokamak you can fly, and invulnerable
       but energy drains
+
+after getting a new tech,gun,field draw that tech where it would be in a pause menu for a second seconds
+  this makes it easier for people to see what's going on
 
 bullets should trigger shrinking platforms level element?
 
@@ -73,7 +66,8 @@ level element - player activated elevators
   could be fast and throw player
   could just rise up slow (slow might have a bad jerky animation)
 
-tech: super balls split after 3 seconds, but they fire with less speed
+tech: super balls split after 3 seconds
+  but they lost 50% less time
 
 buff plasma torch
   buff plasma tech?
@@ -1305,6 +1299,7 @@ possible names for tech
   equivalence principle - gravity and acceleration are the same
   Casimir effect - attractive force between two close conductive plates
   difference engine - early calculator/computer
+  cyanoacrylate - superglue use for a slowing effect?
 
 ******************************************************** IMAGES ********************************************************
 

@@ -314,10 +314,7 @@ const powerUps = {
                 ctx.fillStyle = `rgba(150,150,150,0.9)`; //`rgba(221,221,221,0.6)`;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             });
-            // document.getElementById("pause-grid-right").style.opacity = "0.7"
-            // document.getElementById("pause-grid-left").style.opacity = "0.7"
         }
-        // build.pauseGrid()
     },
     endDraft(type, isCanceled = false) { //type should be a gun, tech, or field
         if (isCanceled) {
@@ -413,7 +410,7 @@ const powerUps = {
             let text = `<div>
             <div class="grid-container">
                 <div class="left-column">
-                    <input type="range" id="difficulty-slider" name="temp" type="range" step="1" value="1" min="1" max="6" list="values" />
+                    <input type="range" id="difficulty-slider" name="temp" type="range" step="1" value="1" min="1" max="6" list="values" dir="ltr"/>
                     <datalist id="values">
                         <option value="1"></option>
                         <option value="2"></option>
@@ -424,18 +421,12 @@ const powerUps = {
                     </datalist>
                 </div>
                 <div class="right-column">
-                    <div class="row" id="constraint-1"><strong>0.82x</strong> <strong class='color-d'>damage</strong> done per level
-                    <br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
-                    <div class="row" id="constraint-2"><strong>-5</strong> initial <strong>power ups</strong>
-                        <br><strong>faster</strong> and <strong>more</strong> mobs per level</div>
-                    <div class="row" id="constraint-3"><strong>0.82x</strong> <strong class='color-d'>damage</strong> done per level
-                    <br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
-                    <div class="row" id="constraint-4"><strong>+1</strong> boss per level, <strong>-1</strong> <strong class='color-m'>tech</strong> per boss
-                        <br><strong>-1</strong> ${powerUps.orb.research()} per level</div>
-                    <div class="row" id="constraint-5"><strong>0.82x</strong> <strong class='color-d'>damage</strong> done per level
-                    <br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
-                    <div class="row" id="constraint-6"><strong>3x</strong> chance for <strong>shielded</strong> mobs
-                        <br><strong>-3</strong> initial power ups</div>
+                    <div class="row" id="constraint-1"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-2"><strong>-5</strong> initial <strong>power ups</strong><br><strong>faster</strong> and <strong>more</strong> mobs per level</div>
+                    <div class="row" id="constraint-3"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-4"><strong>+1</strong> boss per level, <strong>-1</strong> <strong class='color-m'>tech</strong> per boss<br><strong>-1</strong> ${powerUps.orb.research()} per level</div>
+                    <div class="row" id="constraint-5"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-6"><strong>3x</strong> chance for <strong>shielded</strong> mobs<br><strong>-3</strong> initial power ups</div>
                 </div>
                 <div class="far-right-column">
                     <div id = "constraint-1-record">${localSettings.difficultyCompleted[1] ? "⚆" : " "}</div>
@@ -1446,18 +1437,16 @@ const powerUps = {
         },
     },
     spawnDelay(type, count, delay = 2) {
+        const lastHarmCycle = m.lastHarmCycle //stop releasing power ups if you take damage
         count *= delay
-        // let totalSpawned = 0
         let cycle = () => {
             if (count > 0) {
-                if (m.alive) requestAnimationFrame(cycle);
-                if (!simulation.paused && !simulation.isChoosing) { //&& !(simulation.cycle % 2)
+                if (m.alive && lastHarmCycle === m.lastHarmCycle) requestAnimationFrame(cycle);
+                if (!simulation.paused && !simulation.isChoosing && powerUp.length < 300) { //&& !(simulation.cycle % 2)
                     count--
                     if (!(count % delay)) {
                         const where = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }
                         powerUps.spawn(where.x, where.y, type);
-                        // totalSpawned++
-                        // if (!(totalSpawned % 10)) delay++
                     }
                 }
             }

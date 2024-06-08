@@ -83,16 +83,20 @@ const m = {
     Fx: 0.016, //run Force on ground //
     jumpForce: 0.42,
     setMovement() {
-        // m.Fx = 0.08 / mass * tech.squirrelFx 
+        // console.log(player.mass)
         // m.FxAir = 0.4 / mass / mass 
-        m.Fx = tech.baseFx * m.fieldFx * tech.squirrelFx * (tech.isFastTime ? 1.5 : 1) / player.mass //base player mass is 5
-        m.jumpForce = tech.baseJumpForce * m.fieldJump * tech.squirrelJump * (tech.isFastTime ? 1.13 : 1) / player.mass / player.mass //base player mass is 5
+        m.Fx = tech.baseFx * m.fieldFx * m.squirrelFx * (tech.isFastTime ? 1.5 : 1) / player.mass //base player mass is 5
+        m.jumpForce = tech.baseJumpForce * m.fieldJump * m.squirrelJump * (tech.isFastTime ? 1.13 : 1) / player.mass / player.mass //base player mass is 5
     },
     FxAir: 0.016, // 0.4/5/5  run Force in Air
     yOff: 70,
     yOffGoal: 70,
     onGround: false, //checks if on ground or in air
     lastOnGroundCycle: 0, //use to calculate coyote time
+    coyoteCycles: 5,
+    hardLanding: 130,
+    squirrelFx: 1,
+    squirrelJump: 1,
     standingOn: undefined,
     numTouching: 0,
     crouch: false,
@@ -210,10 +214,7 @@ const m = {
             m.crouch = true;
             m.yOffGoal = m.yOffWhen.crouch;
             if ((playerHead.position.y - player.position.y) < 0) {
-                Matter.Body.setPosition(playerHead, {
-                    x: player.position.x,
-                    y: player.position.y + 9.1740767
-                })
+                Matter.Body.setPosition(playerHead, { x: player.position.x, y: player.position.y + 9.1740767 })
             }
         }
     },
@@ -222,14 +223,12 @@ const m = {
             m.crouch = false;
             m.yOffGoal = m.yOffWhen.stand;
             if ((playerHead.position.y - player.position.y) > 0) {
-                Matter.Body.setPosition(playerHead, {
-                    x: player.position.x,
-                    y: player.position.y - 30.28592321
-                })
+                Matter.Body.setPosition(playerHead, { x: player.position.x, y: player.position.y - 30.28592321 })
             }
         }
     },
     hardLandCD: 0,
+    hardLandCDScale: 1,
     checkHeadClear() {
         if (Matter.Query.collides(headSensor, map).length > 0) {
             return false
@@ -239,7 +238,6 @@ const m = {
     },
     buttonCD_jump: 0, //cool down for player buttons
     jump() {
-        // if (!m.onGround) m.lastOnGroundCycle = 0 //m.cycle - tech.coyoteTime
         m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
         //apply a fraction of the jump force to the body the player is jumping off of
         Matter.Body.applyForce(m.standingOn, m.pos, {
@@ -260,7 +258,7 @@ const m = {
             if (!(input.down) && m.checkHeadClear() && m.hardLandCD < m.cycle) m.undoCrouch();
         } else if (input.down || m.hardLandCD > m.cycle) {
             m.doCrouch(); //on ground && not crouched and pressing s or down
-        } else if (input.up && m.buttonCD_jump + 20 < m.cycle && m.yOffWhen.stand > 23) {
+        } else if (input.up && m.buttonCD_jump + 20 < m.cycle) {
             m.jump()
         }
         const moveX = player.velocity.x - m.moverX //account for mover platforms
@@ -290,8 +288,7 @@ const m = {
     },
     airControl() {
         //check for coyote time jump
-        // if (input.up && m.buttonCD_jump + 20 + tech.coyoteTime < m.cycle && m.yOffWhen.stand > 23 && m.lastOnGroundCycle + tech.coyoteTime > m.cycle) m.jump()
-        if (input.up && m.buttonCD_jump + 20 < m.cycle && m.yOffWhen.stand > 23 && m.lastOnGroundCycle + 5 > m.cycle) m.jump()
+        if (input.up && m.buttonCD_jump + 20 < m.cycle && m.lastOnGroundCycle + m.coyoteCycles > m.cycle) m.jump()
 
         //check for short jumps   //moving up   //recently pressed jump  //but not pressing jump key now
         if (m.buttonCD_jump + 60 > m.cycle && !(input.up) && m.Vy < 0) {
@@ -545,7 +542,7 @@ const m = {
     },
     baseHealth: 1,
     setMaxHealth(isMessage) {
-        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 3 * tech.isFallingDamage
+        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 4 * tech.isFallingDamage
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
         if (isMessage) simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
@@ -565,7 +562,6 @@ const m = {
         if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.973 ** m.coupling
         if (tech.isLowHealthDefense) dmg *= 1 - Math.max(0, 1 - m.health) * 0.8
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.3
-        if (tech.squirrelFx !== 1) dmg *= 0.8//Math.pow(0.78, (tech.squirrelFx - 1) / 0.4)
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.1
         if (tech.isSpeedHarm && (tech.speedAdded + player.speed) > 0.1) dmg *= 1 - Math.min((tech.speedAdded + player.speed) * 0.0193, 0.8) //capped at speed of 55
         if (tech.isHarmReduce && input.field) dmg *= 0.1
@@ -841,10 +837,17 @@ const m = {
     isAltSkin: false,
     resetSkin() {
         simulation.isAutoZoom = true;
+        m.hardLandCDScale = 1
         m.yOffWhen.jump = 70
         m.yOffWhen.stand = 49
         m.yOffWhen.crouch = 22
         m.isAltSkin = false
+        m.coyoteCycles = 5
+        m.hardLanding = 130
+        m.squirrelFx = 1;
+        m.squirrelJump = 1;
+        requestAnimationFrame(() => { m.setMovement() })
+
         m.color = {
             hue: 0,
             sat: 0,
@@ -966,6 +969,15 @@ const m = {
             m.isAltSkin = true
             m.yOffWhen.stand = 52
             m.yOffWhen.jump = 72
+            m.coyoteCycles = 11
+            m.hardLandCDScale = 0.5
+            m.hardLanding = 160
+            m.squirrelFx = 1.4;
+            m.squirrelJump = 1.16;
+            m.setMovement()
+
+            // m.yOffWhen.jump = 70
+            // m.yOffWhen.stand = 49
             // m.yOffWhen.crouch = 22
             // m.color = {
             //     hue: 184,
@@ -992,7 +1004,7 @@ const m = {
                 ctx.lineWidth = 2;
                 ctx.stroke();
                 ctx.restore();
-                m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                m.yOff = m.yOff * 0.75 + m.yOffGoal * 0.25; //smoothly move leg height towards height goal
                 powerUps.boost.draw()
             }
             m.drawLeg = function (stroke) {
@@ -1325,6 +1337,9 @@ const m = {
             }
         },
         tungsten() {
+            m.hardLandCDScale = 2
+            m.hardLanding = 60
+            m.coyoteCycles = 0
             m.isAltSkin = true
             m.color = {
                 hue: 210,
@@ -1384,7 +1399,7 @@ const m = {
                 ctx.fill();
 
                 ctx.restore();
-                m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                m.yOff = m.yOff * 0.9 + m.yOffGoal * 0.1; //smoothly move leg height towards height goal
                 powerUps.boost.draw()
             }
             m.drawLeg = function (stroke) {
@@ -1923,6 +1938,7 @@ const m = {
         },
         cat() {
             m.isAltSkin = true
+            m.coyoteCycles = 10
             m.draw = function () {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
@@ -2275,8 +2291,6 @@ const m = {
         Matter.Body.setMass(player, mass);
         //reduce air and ground move forces
         m.setMovement()
-        // m.Fx = 0.08 / mass * tech.squirrelFx //base player mass is 5
-        // m.FxAir = 0.4 / mass / mass //base player mass is 5
         //make player stand a bit lower when holding heavy masses
         m.yOffWhen.stand = Math.max(m.yOffWhen.crouch, Math.min(49, 49 - (mass - 5) * 6))
         if (m.onGround && !m.crouch) m.yOffGoal = m.yOffWhen.stand;
@@ -3478,6 +3492,7 @@ const m = {
         setDescription() {
             return `excess <strong class='color-f'>energy</strong> used to print ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>12</strong> <strong class='color-f'>energy</strong> per second`
         },
+        doubleJumpPhase: 0,
         effect: () => {
             m.fieldMeterColor = "#ff0"
             m.eyeFillColor = m.fieldMeterColor
@@ -3588,6 +3603,21 @@ const m = {
                     m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                 }
                 m.drawRegenEnergy()
+
+                if (tech.isDoubleJump) {
+
+
+                    // if (input.up && m.buttonCD_jump + 20 < m.cycle && m.yOffWhen.stand > 23 && m.lastOnGroundCycle + 5 > m.cycle) m.jump()
+
+                    if (this.doubleJumpPhase === 0 && input.up) { //1st jump
+
+                    } else if (this.doubleJumpPhase === 0 && input.up) {
+
+                    } else { //reset
+
+                    }
+
+                }
             }
         }
     },
@@ -4060,7 +4090,7 @@ const m = {
             m.setMovement();
             b.setFireCD()
             const timeStop = () => {
-                m.immuneCycle = m.cycle + 10; //immune to harm while time is stopped,  this also disables regen
+                m.immuneCycle = m.cycle + 10; //invulnerable to harm while time is stopped,  this also disables regen
                 //draw field everywhere
                 ctx.globalCompositeOperation = "saturation"
                 ctx.fillStyle = "#ccc";
@@ -5371,8 +5401,8 @@ const m = {
                     y: drag * player.velocity.y
                 });
                 if (input.up) { //forward thrust
-                    player.force.x += thrust * Math.cos(m.angle) * tech.squirrelJump
-                    player.force.y += thrust * Math.sin(m.angle) * tech.squirrelJump
+                    player.force.x += thrust * Math.cos(m.angle) * m.squirrelJump
+                    player.force.y += thrust * Math.sin(m.angle) * m.squirrelJump
                 } else if (input.down) {
                     player.force.x -= 0.6 * thrust * Math.cos(m.angle)
                     player.force.y -= 0.6 * thrust * Math.sin(m.angle)

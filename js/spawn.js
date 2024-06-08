@@ -5915,7 +5915,6 @@ const spawn = {
         me.memory = 900;
         me.delay = 60
         me.cd = 0;
-        spawn.shield(me, x, y, 1); // bad for stealth
         me.onHit = function () {
             if (this.cd < simulation.cycle) {
                 this.cd = simulation.cycle + this.delay;
