@@ -240,11 +240,7 @@ const m = {
     jump() {
         m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
         //apply a fraction of the jump force to the body the player is jumping off of
-        Matter.Body.applyForce(m.standingOn, m.pos, {
-            x: 0,
-            y: m.jumpForce * 0.12 * Math.min(m.standingOn.mass, 5)
-        });
-
+        Matter.Body.applyForce(m.standingOn, m.pos, { x: 0, y: m.jumpForce * 0.12 * Math.min(m.standingOn.mass, 5) });
         player.force.y = -m.jumpForce; //player jump force
         Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
             x: player.velocity.x,
@@ -473,13 +469,10 @@ const m = {
             m.displayHealth();
             document.getElementById("text-log").style.display = "none"
             document.getElementById("fade-out").style.opacity = 0.9; //slowly fade to 90% white on top of canvas
-            // build.shareURL(false)
             setTimeout(function () {
                 Composite.clear(engine.world);
                 Engine.clear(engine);
                 simulation.splashReturn();
-                //if you die after clearing fewer than 4 levels the difficulty settings automatically opens
-                if ((level.levelsCleared < 4 || level.levelsCleared > 12) && !simulation.isTraining && !simulation.isCheating) document.getElementById("constraint-details").open = true;
             }, 5000);
         }
     },
@@ -3488,11 +3481,11 @@ const m = {
     },
     {
         name: "molecular assembler",
-        description: `excess <strong class='color-f'>energy</strong> used to print ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>12</strong> <strong class='color-f'>energy</strong> per second`,
+        description: `excess <strong class='color-f'>energy</strong> used to <strong class='color-print'>print</strong> ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>12</strong> <strong class='color-f'>energy</strong> per second`,
         setDescription() {
-            return `excess <strong class='color-f'>energy</strong> used to print ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>12</strong> <strong class='color-f'>energy</strong> per second`
+            return `excess <strong class='color-f'>energy</strong> used to <strong class='color-print'>print</strong> ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br><strong>12</strong> <strong class='color-f'>energy</strong> per second`
         },
-        doubleJumpPhase: 0,
+        blockJumpPhase: 0,
         effect: () => {
             m.fieldMeterColor = "#ff0"
             m.eyeFillColor = m.fieldMeterColor
@@ -3604,20 +3597,106 @@ const m = {
                 }
                 m.drawRegenEnergy()
 
-                if (tech.isDoubleJump) {
+                if (tech.isBlockJump) {
+                    if (m.onGround && m.buttonCD_jump + 10 < m.cycle) this.blockJumpPhase = 0 //reset after touching ground or block
+                    if (this.blockJumpPhase === 0 && !m.onGround) { //1st jump or fall
+                        this.blockJumpPhase = 1
+                    } else if (this.blockJumpPhase === 1 && !input.up && m.buttonCD_jump + 10 < m.cycle) { //not pressing jump
+                        this.blockJumpPhase = 2
+                    } else if (this.blockJumpPhase === 2 && input.up && m.buttonCD_jump + 10 < m.cycle) { //2nd jump
+                        this.blockJumpPhase = 3
 
-
-                    // if (input.up && m.buttonCD_jump + 20 < m.cycle && m.yOffWhen.stand > 23 && m.lastOnGroundCycle + 5 > m.cycle) m.jump()
-
-                    if (this.doubleJumpPhase === 0 && input.up) { //1st jump
-
-                    } else if (this.doubleJumpPhase === 0 && input.up) {
-
-                    } else { //reset
-
+                        //make a block
+                        const radius = 25 + Math.floor(15 * Math.random())
+                        body[body.length] = Matter.Bodies.polygon(m.pos.x, m.pos.y + 65 + radius, 4, radius, {
+                            friction: 0.05,
+                            frictionAir: 0.001,
+                            collisionFilter: {
+                                category: cat.body,
+                                mask: cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+                            },
+                            classType: "body",
+                        });
+                        const block = body[body.length - 1]
+                        //mess with the block shape (this code is horrible)
+                        Composite.add(engine.world, block); //add to world
+                        const r1 = radius * (1 + 0.4 * Math.random())
+                        const r2 = radius * (1 + 0.4 * Math.random())
+                        let angle = 0
+                        const vertices = []
+                        for (let i = 0, len = block.vertices.length; i < len; i++) {
+                            angle += 2 * Math.PI / len
+                            vertices.push({ x: block.position.x + r1 * Math.cos(angle), y: block.position.y + r2 * Math.sin(angle) })
+                        }
+                        Matter.Body.setVertices(block, vertices)
+                        Matter.Body.setAngle(block, Math.PI / 4)
+                        Matter.Body.setVelocity(block, { x: 0.9 * player.velocity.x, y: 10 });
+                        Matter.Body.applyForce(block, m.pos, { x: 0, y: m.jumpForce * 0.12 * Math.min(m.standingOn.mass, 5) });
+                        if (tech.isBlockRestitution) {
+                            block.restitution = 0.999 //extra bouncy
+                            block.friction = block.frictionStatic = block.frictionAir = 0.001
+                        }
+                        if (tech.isAddBlockMass) {
+                            const expand = function (that, massLimit) {
+                                if (that.mass < massLimit) {
+                                    const scale = 1.04;
+                                    Matter.Body.scale(that, scale, scale);
+                                    setTimeout(expand, 20, that, massLimit);
+                                }
+                            };
+                            expand(block, Math.min(20, block.mass * 3))
+                        }
+                        //jump
+                        m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
+                        let horizontalVelocity = 8 * (- input.left + input.right)
+                        Matter.Body.setVelocity(player, { x: player.velocity.x + horizontalVelocity, y: -7.5 + 0.25 * player.velocity.y });
+                        player.force.y = -m.jumpForce; //player jump force
+                    } else if (this.blockJumpPhase === 3 && m.onGround && m.buttonCD_jump + 10 < m.cycle) {
+                        //reset
+                        this.blockJumpPhase = 0 //reset
                     }
-
                 }
+
+
+                // if (tech.isBlockJump) {
+                //     //make sure only 1 ephemera is running
+                //     simulation.ephemera.push({
+                //         name: "2 jump",
+                //         mode: 0,
+                //         do() {
+                //             // console.log('hi')
+                //             if (m.buttonCD_jump + 20 < m.cycle && m.onGround) simulation.removeEphemera(this.name)
+                //             if (this.mode === 0) {
+                //                 if (!input.up) this.mode = 1
+                //             } else if (this.mode === 1) {
+                //                 if (input.up && m.buttonCD_jump + 20 < m.cycle) {
+                //                     simulation.removeEphemera(this.name)
+                //                     //make a block
+                //                     body[body.length] = Matter.Bodies.polygon(m.pos.x, m.pos.y + 80, 4, 30 + Math.floor(10 * Math.random()), {
+                //                         friction: 0.05,
+                //                         frictionAir: 0.001,
+                //                         collisionFilter: {
+                //                             category: cat.body,
+                //                             mask: cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+                //                         },
+                //                         classType: "body",
+                //                         // isPrinted: true,
+                //                     });
+                //                     const who = body[body.length - 1]
+                //                     Composite.add(engine.world, who); //add to world
+                //                     Matter.Body.setVelocity(who, { x: player.velocity.x * 0.5, y: +30 });
+                //                     Matter.Body.applyForce(who, m.pos, { x: 0, y: m.jumpForce * 0.12 * Math.min(m.standingOn.mass, 5) });
+
+                //                     //jump again
+                //                     m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
+                //                     player.force.y = -m.jumpForce; //player jump force
+                //                     Matter.Body.setVelocity(player, { x: player.velocity.x, y: -7.5 + 0.25 * player.velocity.y });
+                //                 }
+                //             }
+                //         },
+                //     })
+
+                // }
             }
         }
     },
@@ -4663,6 +4742,66 @@ const m = {
                     m.fieldRadius = 0
                 }
                 m.drawRegenEnergy("rgba(0,0,0,0.2)")
+
+                if (tech.isBlockJump) {
+                    if (m.onGround && m.buttonCD_jump + 10 < m.cycle) this.blockJumpPhase = 0 //reset after touching ground or block
+                    if (this.blockJumpPhase === 0 && !m.onGround) { //1st jump or fall
+                        this.blockJumpPhase = 1
+                    } else if (this.blockJumpPhase === 1 && !input.up && m.buttonCD_jump + 10 < m.cycle) { //not pressing jump
+                        this.blockJumpPhase = 2
+                    } else if (this.blockJumpPhase === 2 && input.up && m.buttonCD_jump + 10 < m.cycle) { //2nd jump
+                        this.blockJumpPhase = 3
+
+                        //make a block
+                        const radius = 25 + Math.floor(15 * Math.random())
+                        body[body.length] = Matter.Bodies.polygon(m.pos.x, m.pos.y + 60 + radius, 4, radius, {
+                            friction: 0.05,
+                            frictionAir: 0.001,
+                            collisionFilter: {
+                                category: cat.body,
+                                mask: cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+                            },
+                            classType: "body",
+                        });
+                        const block = body[body.length - 1]
+                        //mess with the block shape (this code is horrible)
+                        Composite.add(engine.world, block); //add to world
+                        const r1 = radius * (1 + 0.4 * Math.random())
+                        const r2 = radius * (1 + 0.4 * Math.random())
+                        let angle = 0
+                        const vertices = []
+                        for (let i = 0, len = block.vertices.length; i < len; i++) {
+                            angle += 2 * Math.PI / len
+                            vertices.push({ x: block.position.x + r1 * Math.cos(angle), y: block.position.y + r2 * Math.sin(angle) })
+                        }
+                        Matter.Body.setVertices(block, vertices)
+                        Matter.Body.setAngle(block, Math.PI / 4)
+                        Matter.Body.setVelocity(block, { x: 0.9 * player.velocity.x, y: 10 });
+                        Matter.Body.applyForce(block, m.pos, { x: 0, y: m.jumpForce * 0.12 * Math.min(m.standingOn.mass, 5) });
+                        if (tech.isBlockRestitution) {
+                            block.restitution = 0.999 //extra bouncy
+                            block.friction = block.frictionStatic = block.frictionAir = 0.001
+                        }
+                        if (tech.isAddBlockMass) {
+                            const expand = function (that, massLimit) {
+                                if (that.mass < massLimit) {
+                                    const scale = 1.04;
+                                    Matter.Body.scale(that, scale, scale);
+                                    setTimeout(expand, 20, that, massLimit);
+                                }
+                            };
+                            expand(block, Math.min(20, block.mass * 3))
+                        }
+                        //jump
+                        m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
+                        let horizontalVelocity = 8 * (- input.left + input.right)
+                        Matter.Body.setVelocity(player, { x: player.velocity.x + horizontalVelocity, y: -7.5 + 0.25 * player.velocity.y });
+                        player.force.y = -m.jumpForce; //player jump force
+                    } else if (this.blockJumpPhase === 3 && m.onGround && m.buttonCD_jump + 10 < m.cycle) {
+                        //reset
+                        this.blockJumpPhase = 0 //reset
+                    }
+                }
             }
         }
     },
@@ -5619,7 +5758,7 @@ const m = {
                                         let dmg = tech.blockDamage * m.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2 : 1);
                                         if (mob[k].isShielded) dmg *= 0.7
                                         mob[k].damage(dmg, true);
-                                        if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && m.throwCycle > m.cycle) {
+                                        if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && Math.random() < 0.5) {
                                             let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
                                             if (Math.random() < 0.4) {
                                                 type = "heal"

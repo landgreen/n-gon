@@ -1437,11 +1437,10 @@ const powerUps = {
         },
     },
     spawnDelay(type, count, delay = 2) {
-        const lastHarmCycle = m.lastHarmCycle //stop releasing power ups if you take damage
         count *= delay
         let cycle = () => {
             if (count > 0) {
-                if (m.alive && lastHarmCycle === m.lastHarmCycle) requestAnimationFrame(cycle);
+                if (m.alive) requestAnimationFrame(cycle);
                 if (!simulation.paused && !simulation.isChoosing && powerUp.length < 300) { //&& !(simulation.cycle % 2)
                     count--
                     if (!(count % delay)) {
@@ -1622,7 +1621,7 @@ const powerUps = {
 
                 for (let i = 0; i < tech.tech[choose].count; i++) {
                     powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
-                    powerUp[powerUp.length - 1].isDuplicated = true
+                    // powerUp[powerUp.length - 1].isDuplicated = true
                 }
                 // remove a random tech from the list of tech you have
                 tech.tech[choose].remove();

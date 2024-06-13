@@ -935,6 +935,11 @@ summary {
     text-shadow: 1px 0px 2px #234;
 }
 
+.color-print {
+    color: #567;
+    font-family: 'Courier New', Courier, monospace;
+}
+
 .color-defense {
     background-color: hsla(227, 9%, 71%, 0.279);
     padding: 2px;

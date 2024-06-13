@@ -1,19 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
-you can now jump off mobs while invulnerable
-  includes time dilated
-pause display text updated with details menus
-difficulty parameters
-  0.82->0.84x damage done per level
-  1.25->1.23x damage taken per level
-tungsten carbide 300->400 health, but 0.08->0.02 seconds of coyote time and longer crouch time
-nitinol 0.08->0.17 seconds of coyote time and much less crouching on hard landings, but 0.8->1 damage taken
-mass-energy equivalence no longer costs 2 research
-long power up spawns, like from interest or supply chain:
-  will pause new spawns until total power ups are below 300 to reduce lag
-  stop spawning if you take damage
+tech: working mass - in midair molecular assembler or pilot wave prints a block to jump off
 
-bug fixes
+buckling: 100%->50% chance to spawn a power up from any block that kills a mob
+  no longer requires the block to be thrown
+mobs: powerUpBoss, snakeBoss tails, cellBoss, ghoster, sucker -  all collide with blocks now
+added a few more blocks to towers level
+deprecated: 1.05->1.07 damage per removed tech
+laserLayerBoss has 33% less health and has fewer lasers at higher difficulties
+
+bugfix
+  disabled spawnDelay stopping on damage because it had too many negative tech interactions
+  metastability + paradigm shift no longer makes all ejected tech explode
 
 ******************************************************* DESIGN ******************************************************
 
@@ -36,21 +34,32 @@ list of powerful synergies
   duplication 100%
   interest + coupling, research + (peer review? or Bayesian statistics)
   electronegativity and high energy?
-    electronegativity + anyon + duplication + Maxwells demon + interest
+    electronegativity + anyon + duplication + Maxwells demon + interest + pair production
   chain reaction + invulnerable + Abelian group + parasitism = clear all mobs on level
 
 *********************************************************** TODO *****************************************************
 
-tech: working mass - double jump
-  cost flat energy not a %
-  field Tech for molecular assembler and print and throw a block down on 2nd jump
-    remove block after time or keep it around?
-  credit to TNTiger17 (although I'm not looking for more code contributions)
+make player mass an adjustable var in the skin
+  does this mess with jump height or air control?
+increase mass and movement speed at the same time
+  increase jump differently because it scales extra with mass
+    m.defaultMass = 4.5
+    m.definePlayerMass()
+  possible player.mass bad interactions
+    grapple
+
+JUNK tech - player takes damage from block collisions
+  is this gonna contribute to lag?
+
+player damage seems low
+player damage taken seems fine, or maybe increase
 
 difficulty rework: explicit changes to the game to increase difficulty
   UI -
     add a wire attached to difficulty power up
       like the one attached to player, but thinner
+
+laser: slow light is the least fun laser tech,  make it more fun
 
 tokamak synergy tech
   tech: stellarator - after firing a block with tokamak, heal (scale heal amount with block mass?)
@@ -822,11 +831,6 @@ quasarBoss: inverted pulsar boss that hits everything except where its aiming
 intro map: diegeticly draw a mouse with field highlighted
   also indicate space?
   dynamically adjust drawing after picking up a gun 
-
-increase mass and movement speed at the same time
-  increase jump differently because it scales extra with mass
-    m.defaultMass = 4.5
-    m.definePlayerMass()
 
 give history boss legs?
 

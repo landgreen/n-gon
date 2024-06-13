@@ -174,15 +174,8 @@ function collisionChecks(event) {
                         if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
                         //extra kick between player and mob              //this section would be better with forces but they don't work...
                         let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
-                        Matter.Body.setVelocity(player, {
-                            x: player.velocity.x + 8 * Math.cos(angle),
-                            y: player.velocity.y + 8 * Math.sin(angle)
-                        });
-                        Matter.Body.setVelocity(mob[k], {
-                            x: mob[k].velocity.x - 8 * Math.cos(angle),
-                            y: mob[k].velocity.y - 8 * Math.sin(angle)
-                        });
-
+                        Matter.Body.setVelocity(player, { x: player.velocity.x + 8 * Math.cos(angle), y: player.velocity.y + 8 * Math.sin(angle) });
+                        Matter.Body.setVelocity(mob[k], { x: mob[k].velocity.x - 8 * Math.cos(angle), y: mob[k].velocity.y - 8 * Math.sin(angle) });
                         if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].isDropPowerUp && m.energy > 0.1 && mob[k].damageReduction > 0) {
                             m.energy -= 0.1 //* Math.max(m.maxEnergy, m.energy) //0.33 * m.energy
                             if (m.immuneCycle === m.cycle + m.collisionImmuneCycles) m.immuneCycle = 0; //player doesn't go immune to collision damage
@@ -250,7 +243,7 @@ function collisionChecks(event) {
                                 if (mob[k].isShielded) dmg *= 0.7
 
                                 mob[k].damage(dmg, true);
-                                if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && m.throwCycle > m.cycle) {
+                                if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && Math.random() < 0.5) {
                                     options = ["coupling", "boost", "heal", "research"]
                                     if (!tech.isEnergyNoAmmo) options.push("ammo")
                                     powerUps.spawn(mob[k].position.x, mob[k].position.y, options[Math.floor(Math.random() * options.length)]);

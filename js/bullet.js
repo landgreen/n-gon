@@ -3312,8 +3312,8 @@ const b = {
                             const distB = Vector.magnitude(Vector.sub(this.position, b.position))
                             return distA < distB ? a : b
                         })
-                        if (found && m.energy > 0.05) {
-                            m.energy -= 0.05
+                        if (found && m.energy > 0.041) {
+                            m.energy -= 0.04
                             //remove the body and spawn a new drone
                             Composite.remove(engine.world, found)
                             body.splice(body.indexOf(found), 1)
@@ -3552,8 +3552,8 @@ const b = {
                             const distB = Vector.magnitude(Vector.sub(this.position, b.position))
                             return distA < distB ? a : b
                         })
-                        if (found && m.energy > 0.05) {
-                            m.energy -= 0.1
+                        if (found && m.energy > 0.091) {
+                            m.energy -= 0.09
                             //remove the body and spawn a new drone
                             Composite.remove(engine.world, found)
                             body.splice(body.indexOf(found), 1)

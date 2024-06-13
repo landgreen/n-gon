@@ -44,10 +44,9 @@ const level = {
             // requestAnimationFrame(() => { tech.giveTech("optical amplifier") });
             // for (let i = 0; i < 1; ++i) tech.giveTech("combinatorial optimization")
             // tech.giveTech("Newtons 2nd law")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("lens")
             // for (let i = 0; i < 1; ++i) tech.giveTech("tungsten carbide")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("nitinol")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("reaction mass")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("working mass")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("buckling")
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) b.orbitBot(m.pos, false) });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("ersatz bots") });
             // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
@@ -57,11 +56,11 @@ const level = {
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(-50, -70, "difficulty", false);
             // for (let i = 0; i < 100; i++) powerUps.directSpawn(1750, -500, "coupling");
             // spawn.mapRect(575, -700, 25, 425);  //block mob line of site on testing
-            // level.yingYang();
+            // level.testing();
 
-            // for (let i = 0; i < 1; ++i) spawn.laserLayer(1400, -500)
+            // for (let i = 0; i < 1; ++i) spawn.snakeSpitBoss(1400, -500)
             // Matter.Body.setPosition(player, { x: -200, y: -3330 });
-            // for (let i = 0; i < 4; ++i) spawn.ghoster(1300, -500 + 100 * Math.random())
+            // for (let i = 0; i < 4; ++i) spawn.sucker(1300, -500 + 100 * Math.random())
             // spawn.hopper(1900, -500)
             // spawn.zombie(-3000, -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)
             // for (let i = 0; i < 5; ++i) spawn.starter(1000 + 1000 * Math.random(), -500 + 300 * Math.random())
@@ -4235,7 +4234,6 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     towers() {
-        // simulation.enableConstructMode() //remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // simulation.isHorizontalFlipped = true
         level.announceMobTypes()
         const isFlipped = (simulation.isHorizontalFlipped && Math.random() < 0.33) ? true : false
@@ -4448,6 +4446,12 @@ const level = {
         spawn.bodyRect(8975, -1575, 50, 50, 0.2);
         spawn.bodyRect(5725, -1700, 125, 175, 0.2);
         spawn.bodyRect(6850, -1725, 150, 200, 0.2);
+        spawn.bodyRect(500, -400, 100, 50, 0.3);
+        spawn.bodyRect(6025, 1050, 100, 50, 0.2);
+        spawn.bodyRect(6000, -800, 75, 200, 0.2);
+        spawn.bodyRect(6775, -75, 125, 75, 0.5);
+        spawn.bodyRect(7200, 1300, 50, 200, 0.5);
+
 
         //mobs
         spawn.randomMob(5700, -75, 0);

@@ -814,7 +814,6 @@ const simulation = {
         simulation.isChoosing = false;
         b.setFireMethod()
         b.setFireCD();
-        // simulation.updateTechHUD();
         for (let i = 0; i < b.guns.length; i++) b.guns[i].isRecentlyShown = false //reset recently shown back to zero
         for (let i = 0; i < m.fieldUpgrades.length; i++) m.fieldUpgrades[i].isRecentlyShown = false //reset recently shown back to zero
         for (let i = 0; i < tech.tech.length; i++) tech.tech[i].isRecentlyShown = false //reset recently shown back to zero
@@ -827,17 +826,12 @@ const simulation = {
         powerUps.boost.endCycle = 0
         powerUps.isFieldSpawned = false
         m.setFillColors();
-        // m.maxHealth = 1
-        // m.maxEnergy = 1
-        // m.energy = 1
         input.isPauseKeyReady = true
         simulation.wipe = function () { //set wipe to normal
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
         m.hole.isOn = false
         simulation.paused = false;
-        // simulation.cycle = 0
-        // m.cycle = 0
         engine.timing.timeScale = 1;
         simulation.fpsCap = simulation.fpsCapDefault;
         simulation.isAutoZoom = true;
@@ -853,18 +847,11 @@ const simulation = {
         document.getElementById("text-log").style.display = "none"
         document.getElementById("fade-out").style.opacity = 0;
         document.title = "n-gon";
-        // simulation.makeTextLog(`input.key.up<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]`);
-        // simulation.makeTextLog(`input.key.left<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]`);
-        // simulation.makeTextLog(`input.key.down<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]`);
-        // simulation.makeTextLog(`input.key.right<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]`);
         simulation.makeTextLog(`Math.seed <span class='color-symbol'>=</span> ${Math.initialSeed}`);
         simulation.makeTextLog(`<span class='color-var'>const</span> engine <span class='color-symbol'>=</span> Engine.create(); <em>//simulation begin</em>`);
         simulation.makeTextLog(`engine.timing.timeScale <span class='color-symbol'>=</span> 1`);
-        // simulation.makeTextLog(`input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
-
-        // document.getElementById("health").style.display = "inline"
-        // document.getElementById("health-bg").style.display = "inline"
         m.alive = true;
+        m.definePlayerMass();
         m.onGround = false
         m.lastOnGroundCycle = 0
         m.health = 0;
@@ -874,23 +861,10 @@ const simulation = {
 
         //set to default field
         tech.healMaxEnergyBonus = 0
-        // m.setMaxEnergy();
         m.energy = 0
         m.immuneCycle = 0;
-        // simulation.makeTextLog(`${simulation.SVGrightMouse}<strong style='font-size:30px;'> ${m.fieldUpgrades[m.fieldMode].name}</strong><br><span class='faded'></span><br>${m.fieldUpgrades[m.fieldMode].description}`, 600);
-        // simulation.makeTextLog(`
-        // input.key.up <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]
-        // <br>input.key.left <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]
-        // <br>input.key.down <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]
-        // <br>input.key.right <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]
-        // <br>
-        // <br><span class='color-var'>m</span>.fieldMode <span class='color-symbol'>=</span> "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>"
-        // <br>input.key.field <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>right mouse</span>"]
-        // <br><span class='color-var'>m</span>.field.description <span class='color-symbol'>=</span> "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].description}</span>"
-        // `, 800);
         m.coupling = 0
         m.setField(0) //this calls m.couplingChange(), which sets max health and max energy
-        // m.energy = 0;
         //exit testing
         if (simulation.testing) {
             simulation.testing = false;

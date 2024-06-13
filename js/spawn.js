@@ -1427,7 +1427,7 @@ const spawn = {
         me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
         me.seeAtDistance2 = 1400000;
         me.cellMassMax = 70
-        me.collisionFilter.mask = cat.player | cat.bullet //| cat.body | cat.map
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body// | cat.map
         Matter.Body.setDensity(me, 0.0001 + 0.00002 * simulation.difficulty) // normal density is 0.001
         me.damageReduction = 0.17
 
@@ -1755,7 +1755,7 @@ const spawn = {
         me.seeAtDistance2 = 1000000;
         me.accelMag = 0.0002 + 0.0004 * simulation.accelScale;
         Matter.Body.setDensity(me, 0.0003); //normal is 0.001
-        me.collisionFilter.mask = cat.bullet | cat.player //| cat.body
+        me.collisionFilter.mask = cat.bullet | cat.player | cat.body
         me.memory = Infinity;
         me.seePlayerFreq = 30
         me.lockedOn = null;
@@ -2314,7 +2314,7 @@ const spawn = {
         me.seeAtDistance2 = (me.eventHorizon + 400) * (me.eventHorizon + 400); //vision limit is event horizon
         me.accelMag = 0.00012 * simulation.accelScale;
         me.frictionAir = 0.025;
-        me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body
         me.memory = Infinity;
         Matter.Body.setDensity(me, 0.015); //extra dense //normal is 0.001 //makes effective life much larger
         me.do = function () {
@@ -4263,7 +4263,7 @@ const spawn = {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
         };
         Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.25
+        me.damageReduction = 0.33
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.nextHealthThreshold = 0.75
@@ -4279,7 +4279,7 @@ const spawn = {
             }
         };
         me.lasers = [] //keeps track of static laser beams
-        me.laserLimit = 2 + (simulation.difficultyMode < 3 ? 1 : 2)
+        me.laserLimit = 2 + (simulation.difficultyMode > 2) + (simulation.difficultyMode > 4)
         me.fireDelay = Math.max(75, 140 - simulation.difficulty * 0.5)
         me.cycle = 0
         me.laserDelay = 210
@@ -5910,7 +5910,7 @@ const spawn = {
         me.alpha = 1; //used in drawGhost
         me.isNotCloaked = false; //used in drawGhost
         me.isBadTarget = true;
-        me.collisionFilter.mask = cat.bullet //| cat.body
+        me.collisionFilter.mask = cat.bullet | cat.body
         me.showHealthBar = false;
         me.memory = 900;
         me.delay = 60
@@ -5961,7 +5961,7 @@ const spawn = {
                     if (!this.isNotCloaked) {
                         this.isNotCloaked = true;
                         this.isBadTarget = false;
-                        this.collisionFilter.mask = cat.player | cat.bullet
+                        this.collisionFilter.mask = cat.player | cat.bullet | cat.body
                     }
                 }
                 //draw body
@@ -5976,7 +5976,7 @@ const spawn = {
             } else if (this.isNotCloaked) {
                 this.isNotCloaked = false;
                 this.isBadTarget = true;
-                this.collisionFilter.mask = cat.bullet; //can't touch player or walls
+                this.collisionFilter.mask = cat.bullet | cat.body; //can't touch player or walls
             }
         };
     },
@@ -7392,7 +7392,7 @@ const spawn = {
     snakeBody(x, y, radius = 10) {
         mobs.spawn(x, y, 8, radius, "rgba(0,180,180,0.4)");
         let me = mob[mob.length - 1];
-        me.collisionFilter.mask = cat.bullet | cat.player //| cat.mob //| cat.body
+        me.collisionFilter.mask = cat.bullet | cat.player | cat.body //| cat.mob 
         me.damageReduction = 0.028
         Matter.Body.setDensity(me, 0.0001); //normal is 0.001
 

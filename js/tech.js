@@ -108,20 +108,8 @@ const tech = {
             if (tech.junkChance < 0.001 || tech.junkChance === undefined) tech.junkChance = 0
         }
     },
-    giveRandomJUNK() {
-        const list = []
-        for (let i = 0; i < tech.tech.length; i++) {
-            if (tech.tech[i].isJunk) list.push(tech.tech[i].name)
-        }
-        let name = list[Math.floor(Math.random() * list.length)]
-        simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${name}</span>")<em>`);
-        tech.giveTech(name)
-    },
+
     giveTech(index = 'random') {
-        // if (Math.random() < tech.junkChance) {
-        //     tech.giveRandomJUNK();
-        //     return
-        // }
         if (index === 'random') {
             let options = [];
             for (let i = 0; i < tech.tech.length; i++) {
@@ -2342,7 +2330,7 @@ const tech = {
     {
         name: "buckling",
         descriptionFunction() {
-            return `if a <strong class='color-block'>block</strong> you threw kills a mob<br>spawn either ${powerUps.orb.coupling(1)}, ${powerUps.orb.boost(1)}, ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
+            return `if a <strong class='color-block'>block</strong> kills a mob there's a <strong>50%</strong> chance<br>to spawn either ${powerUps.orb.coupling(1)}, ${powerUps.orb.boost(1)}, ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
         },
         maxCount: 1,
         count: 0,
@@ -4291,7 +4279,7 @@ const tech = {
         remove() {
             if (this.count > 0 && m.alive) {
                 tech.damage /= this.damage
-                powerUps.spawnDelay("research", 15)
+                requestAnimationFrame(() => { powerUps.spawnDelay("research", 15) });
                 this.frequency = 0
             }
         }
@@ -4349,16 +4337,16 @@ const tech = {
         remove() {
             if (this.count > 0 && m.alive) {
                 tech.damage /= this.damage
-                powerUps.spawnDelay("ammo", this.ammo)
                 this.frequency = 0
+                requestAnimationFrame(() => { powerUps.spawnDelay("ammo", this.ammo) });
             }
         }
     },
     {
         name: "deprecated",
-        scale: 0.05,
+        scale: 0.07,
         descriptionFunction() {
-            return `after <span class='color-remove'>removing</span> this gain<br><strong>1.05x</strong> <strong class='color-d'>damage</strong> per <span class='color-remove'>removed</span> <strong class='color-m'>tech</strong><em>(${(1 + this.scale * ((this.frequency === 0 ? 0 : 1) + tech.removeCount)).toFixed(2)}x)</em>`
+            return `after <span class='color-remove'>removing</span> this gain<br><strong>${1 + this.scale}x</strong> <strong class='color-d'>damage</strong> per <span class='color-remove'>removed</span> <strong class='color-m'>tech</strong><em>(${(1 + this.scale * ((this.frequency === 0 ? 0 : 1) + tech.removeCount)).toFixed(2)}x)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -6453,7 +6441,7 @@ const tech = {
     },
     {
         name: "von Neumann probe",  //"drone repair",
-        description: "after a <strong>drone</strong> expires it will use <strong>-5</strong> <strong class='color-f'>energy</strong><br>and a nearby <strong class='color-block'>block</strong> to <strong>replicate</strong> itself",
+        description: "after a <strong>drone</strong> expires it will use <strong>-4</strong> <strong class='color-f'>energy</strong><br>and a nearby <strong class='color-block'>block</strong> to <strong>replicate</strong> itself",
         // description: "broken <strong>drones</strong> <strong>repair</strong> if the drone <strong class='color-g'>gun</strong> is active<br><strong>repairing</strong> has a <strong>25%</strong> chance to use <strong>1</strong> <strong>drone</strong>",
         isGunTech: true,
         maxCount: 1,
@@ -6461,7 +6449,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("drones")
+            return tech.haveGunCheck("drones") || (m.fieldMode === 4 && simulation.molecularMode === 3)
         },
         requires: "drones",
         effect() {
@@ -7862,8 +7850,7 @@ const tech = {
     // },
     {
         name: "additive manufacturing",
-        description: "hold <strong>crouch</strong> and use your <strong class='color-f'>field</strong> to <strong>print</strong> a <strong class='color-block'>block</strong><br> with <strong>1.8x</strong> density, <strong class='color-d'>damage</strong>, and launch speed",
-        // description: "simultaneously <strong>fire</strong> and activate your <strong class='color-f'>field</strong> to make<br>molecular assembler <strong>print</strong> a throwable <strong class='color-block'>block</strong><br><strong>+80%</strong> <strong class='color-block'>block</strong> throwing speed",
+        description: "hold <strong>crouch</strong> and use your <strong class='color-f'>field</strong> to <strong class='color-print'>print</strong> a <strong class='color-block'>block</strong><br> with <strong>1.8x</strong> density, <strong class='color-d'>damage</strong>, and launch speed",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -7879,6 +7866,29 @@ const tech = {
         remove() {
             if (this.count > 0) m.holdingTarget = null;
             tech.isPrinter = false;
+        }
+    },
+    {
+        name: "working mass",
+        // description: "molecular assembler <strong class='color-print'>prints</strong> one <strong class='color-block'>block</strong><br>to <strong>jump</strong> off while midair",
+        descriptionFunction() {
+            const fieldName = m.fieldMode === 8 ? "pilot wave" : "molecular assembler"
+            return `${fieldName} <strong class='color-print'>prints</strong> a <strong class='color-block'>block</strong><br>to <strong>jump</strong> off while midair a second time`
+        },
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return (m.fieldMode === 4 || m.fieldMode === 8)
+        },
+        requires: "molecular assembler, pilot wave",
+        effect() {
+            tech.isBlockJump = true
+        },
+        remove() {
+            tech.isBlockJump = false
         }
     },
     {
@@ -7901,26 +7911,6 @@ const tech = {
             tech.isMassEnergy = false;
         }
     },
-    // {
-    //     name: "working mass",
-    //     // description: "after jumping jump again in <strong>midair</strong><br><strong>double jumping</strong> requires <strong>50%</strong> of current <strong class='color-f'>energy</strong><br><strong>double jumping</strong> boosts <strong class='color-speed'>speed</strong>",
-    //     description: "",
-    //     isFieldTech: true,
-    //     maxCount: 1,
-    //     count: 0,
-    //     frequency: 2,
-    //     frequencyDefault: 2,
-    //     allowed() {
-    //         return m.fieldMode === 4
-    //     },
-    //     requires: "molecular assembler",
-    //     effect() {
-    //         tech.isDoubleJump = true
-    //     },
-    //     remove() {
-    //         tech.isDoubleJump = false
-    //     }
-    // },
     {
         name: "electric generator",
         description: "after <strong>deflecting</strong> mobs<br><strong>molecular assembler</strong> generates <strong>+50</strong> <strong class='color-f'>energy</strong>",
@@ -8195,7 +8185,7 @@ const tech = {
     },
     {
         name: "Lorentz transformation",
-        description: `use ${powerUps.orb.research(3)}<br><strong>1.5x</strong> <strong>movement</strong>, <strong>jumping</strong>, and <em>fire rate</em>`,
+        description: `use ${powerUps.orb.research(3)}<br><strong>1.5x</strong> movement, jumping, and <em>fire rate</em>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -9271,9 +9261,15 @@ const tech = {
         allowed: () => true,
         requires: "",
         effect() {
-            tech.giveRandomJUNK()
-            tech.giveRandomJUNK()
-            tech.giveRandomJUNK()
+            for (let i = 0; i < 3; i++) {
+                const list = []
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].isJunk) list.push(tech.tech[i].name)
+                }
+                let name = list[Math.floor(Math.random() * list.length)]
+                simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${name}</span>")<em>`);
+                tech.giveTech(name)
+            }
         },
         remove() { }
     },
@@ -11848,5 +11844,5 @@ const tech = {
     interestRate: null,
     isImmunityDamage: null,
     isMobDeathImmunity: null,
-    isDoubleJump: null,
+    isBlockJump: null,
 }
