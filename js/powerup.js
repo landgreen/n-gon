@@ -273,7 +273,7 @@ const powerUps = {
     choose(type, index) {
         if (type === "gun") {
             b.giveGuns(index)
-            let text = `b.giveGuns("<span class='color-text'>${b.guns[index].name}</span>")`
+            let text = `<div class="circle-grid gun"></div> &nbsp; b.giveGuns("<strong class='color-text'>${b.guns[index].name}</strong>")`
             if (b.inventory.length === 1) text += `<br>input.key.gun<span class='color-symbol'>:</span> ["<span class='color-text'>MouseLeft</span>"]`
             if (b.inventory.length === 2) text += `
             <br>input.key.nextGun<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.nextGun}</span>","<span class='color-text'>MouseWheel</span>"]
@@ -282,8 +282,8 @@ const powerUps = {
         } else if (type === "field") {
             m.setField(index)
         } else if (type === "tech") {
-            // if (tech.isBanish && tech.tech[index].isBanished) tech.tech[index].isBanished = false
-            simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[index].name}</span>")`);
+            // if (tech.isBanish && tech.tech[index].isBanished) tech.tech[index].isBanished = false    
+            simulation.makeTextLog(`<div class="circle-grid tech"></div> &nbsp; <span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${tech.tech[index].name}</strong>")`);
             tech.giveTech(index)
         }
         powerUps.endDraft(type);
@@ -421,11 +421,11 @@ const powerUps = {
                     </datalist>
                 </div>
                 <div class="right-column">
-                    <div class="row" id="constraint-1"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-1"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
                     <div class="row" id="constraint-2"><strong>-5</strong> initial <strong>power ups</strong><br><strong>faster</strong> and <strong>more</strong> mobs per level</div>
-                    <div class="row" id="constraint-3"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
-                    <div class="row" id="constraint-4"><strong>+1</strong> boss per level, <strong>-1</strong> <strong class='color-m'>tech</strong> per boss<br><strong>-1</strong> ${powerUps.orb.research()} per level</div>
-                    <div class="row" id="constraint-5"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-3"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-4"><strong>+1</strong> boss per level<br><strong>-1</strong> <strong class='color-m'>tech</strong> per boss</div>
+                    <div class="row" id="constraint-5"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
                     <div class="row" id="constraint-6"><strong>3x</strong> chance for <strong>shielded</strong> mobs<br><strong>-3</strong> initial power ups</div>
                 </div>
                 <div class="far-right-column">
@@ -648,7 +648,7 @@ const powerUps = {
                     let overHeal = m.health + heal * simulation.healScale - m.maxHealth //used with tech.isOverHeal
                     const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
                     m.addHealth(heal);
-                    if (healOutput > 0) simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+                    if (healOutput > 0) simulation.makeTextLog(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
                     if (tech.isOverHeal && overHeal > 0) { //tech quenching
                         overHeal *= 2 //double the over heal converted to max health
                         //make sure overHeal doesn't kill player
@@ -658,7 +658,7 @@ const powerUps = {
                         m.setMaxHealth();
                         m.damage(overHeal);
                         overHeal *= m.defense() // account for defense after m.damage() so the text log is accurate
-                        simulation.makeTextLog(`<span class='color-var'>m</span>.health <span class='color-symbol'>-=</span> ${(overHeal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+                        simulation.makeTextLog(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.health <span class='color-symbol'>-=</span> ${(overHeal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
                         simulation.drawList.push({ //add dmg to draw queue
                             x: m.pos.x,
                             y: m.pos.y,
@@ -1218,8 +1218,7 @@ const powerUps = {
                         for (let i = 0, len = tech.tech.length; i < len; i++) {
                             if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i, true)
                         }
-                        simulation.makeTextLog(`decoherence <span class='color-var'>tech</span> ejected`)
-                        simulation.makeTextLog(`options reset`)
+                        simulation.makeTextLog(`decoherence <span class='color-var'>tech</span> ejected<br>options reset`)
                     }
                 }
                 if (tech.tooManyTechChoices) {
@@ -1244,7 +1243,7 @@ const powerUps = {
                         const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options
                         if (tech.isBanish) {
                             tech.tech[choose].isBanished = true
-                            if (i === 0) simulation.makeTextLog(`options.length = ${optionLengthNoDuplicates} <span class='color-text'>//tech removed from pool by decoherence</span>`)
+                            if (i === 0) simulation.makeTextLog(`options.length = ${optionLengthNoDuplicates} <em class='color-text'>//tech removed from pool by decoherence</em>`)
                         }
                         removeOption(choose) //move from future options pool to avoid repeats on this selection
                         tech.tech[choose].isRecentlyShown = true //this flag prevents this option from being shown the next time you pick up a tech power up
@@ -1391,10 +1390,8 @@ const powerUps = {
                     if (!alreadyHasGun) text += powerUps.gunText(choose, `powerUps.choose('gun',${choose})`)
                 }
                 for (let i = 0; i < localSettings.entanglement.techIndexes.length; i++) { //add tech
-
                     let found = false;
                     let choose = undefined
-                    console.log(localSettings.entanglement.techIndexes[i])
                     for (let j = 0; j < tech.tech.length; j++) {
                         if (localSettings.entanglement.techIndexes[i] === tech.tech[j].name) {
                             choose = j;
@@ -1402,12 +1399,9 @@ const powerUps = {
                             break;
                         }
                     }
-                    // let choose = localSettings.entanglement.techIndexes[i]
-                    console.log(choose)
                     if (found && tech.tech[choose]) {
                         const isCount = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
                         if (choose === null || tech.tech[choose].count + 1 > tech.tech[choose].maxCount || !tech.tech[choose].allowed()) {
-                            // text += `<div class="choose-grid-module" style = "background-color: #efeff5; border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding-top: 6px; padding-bottom: 6px;"><div class="grid-title">${tech.tech[choose].name} <span style = "color: #aaa;font-weight: normal;font-size:80%;">- incoherent</span></div></div>`
                             text += powerUps.incoherentTechText(choose)
                         } else {
                             if (tech.tech[choose].isFieldTech) {
@@ -1428,7 +1422,6 @@ const powerUps = {
                         }
                     }
                 }
-                // document.getElementById("choose-grid").classList.add("flipX");
                 document.getElementById("choose-grid").innerHTML = text
                 powerUps.showDraft();
                 localSettings.entanglement = undefined
@@ -1557,7 +1550,8 @@ const powerUps = {
         }
     },
     addResearchToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level a research
-        if (simulation.difficultyMode < 4 && mob.length) { //don't spawn on higher difficulty settings
+        // if (simulation.difficultyMode < 4 && mob.length) { //don't spawn on higher difficulty settings
+        if (level.levelsCleared < 13 - simulation.difficultyMode * 2 && mob.length) { //don't spawn late game
             const index = Math.floor(Math.random() * mob.length)
             powerUps.spawn(mob[index].position.x, mob[index].position.y, "research");
         }
@@ -1599,7 +1593,7 @@ const powerUps = {
 
                 if (have.length) {
                     choose = have[Math.floor(Math.random() * have.length)]
-                    simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
+                    simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<strong class='color-text'>${tech.tech[choose].name}</strong>")`)
 
                     for (let i = 0; i < tech.tech[choose].count; i++) {
                         powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
@@ -1617,7 +1611,7 @@ const powerUps = {
                     return false
                 }
             } else if (tech.tech[choose].count && !tech.tech[choose].isInstant) {
-                simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<span class='color-text'>${tech.tech[choose].name}</span>")`)
+                simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<strong class='color-text'>${tech.tech[choose].name}</strong>")`)
 
                 for (let i = 0; i < tech.tech[choose].count; i++) {
                     powerUps.directSpawn(m.pos.x, m.pos.y, "tech");

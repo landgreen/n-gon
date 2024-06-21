@@ -464,12 +464,12 @@ const build = {
 
         let text = `<div class="pause-grid-module" style="padding: 8px;">
 <span style="font-size:1.4em;font-weight: 600; float: left;">PAUSED</span> 
-<span style="float: right;">press ${input.key.pause} to resume</span>
+<em style="float: right;color:#ccc;">press ${input.key.pause} to resume</em>
 <br>
 <input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages ? "checked" : ""}>
 <label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.15em;" >hide images</label>
 <br>
-<button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build url</button>
+<button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build URL</button>
 <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
 <label for="hide-hud" title="hide: tech, damage taken, damage, in game console" style="font-size:1.15em;">minimal HUD</label>
 </div>
@@ -503,18 +503,18 @@ ${tech.junkChance ? `<br><strong class='color-junk'>JUNK</strong>: ${(100 * tech
 <details id="difficulty-parameters-details" style="padding: 0 8px;">
 <summary>difficulty parameters</summary>
 <div class="pause-details">
-        ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
+        ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
         ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>-5</strong> initial <strong>power ups</strong><br><strong>faster</strong> and <strong>more</strong> mobs per level</div>` : " "}
-        ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
-        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row"><strong>+1</strong> boss per level, <strong>-1</strong> <strong class='color-m'>tech</strong> per boss<br><strong>-1</strong> ${powerUps.orb.research()} per level</div>` : " "}
-        ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>0.84x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
+        ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
+        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row"><strong>+1</strong> boss per level<br><strong>-1</strong> <strong class='color-m'>tech</strong> per boss</div>` : " "}
+        ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
         ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>3x</strong> chance for <strong>shielded</strong> mobs<br><strong>-3</strong> initial power ups</div>` : " "}
 </div>
 </details>
 </div>`
         if (!localSettings.isHideHUD) text += `<div class="pause-grid-module card-background" style="height:auto;">
 <details id = "console-log-details" style="padding: 0 8px;">
-<summary>console messages</summary>
+<summary>console log</summary>
 <div class="pause-details">
     <div class="pause-grid-module" style="background-color: rgba(255,255,255,0.3);font-size: 0.8em;">${document.getElementById("text-log").innerHTML}</div>
 </div>

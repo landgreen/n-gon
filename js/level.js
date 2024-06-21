@@ -10,7 +10,7 @@ const level = {
     levelsCleared: 0,
     //see level.populateLevels:   (initial, ... , reservoir or factory, reactor, ... , subway, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers"],
-    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft"],
+    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
@@ -26,7 +26,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField("molecular assembler") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField("time dilation") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
             // powerUps.research.count = 3
             // tech.isHookWire = true
@@ -42,13 +42,13 @@ const level = {
 
             // b.guns[8].ammo = 100000000
             // requestAnimationFrame(() => { tech.giveTech("optical amplifier") });
-            // for (let i = 0; i < 1; ++i) tech.giveTech("combinatorial optimization")
-            // tech.giveTech("Newtons 2nd law")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("tungsten carbide")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("working mass")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("buckling")
+            // tech.giveTech("1st ionization energy")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("negative feedback")
+            // for (let i = 0; i < 2; ++i) tech.giveTech("delayed-choice")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("pulse")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("mass-energy equivalence")
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) b.orbitBot(m.pos, false) });
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("ersatz bots") });
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("1st ionization energy") });
             // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
             // m.lastKillCycle = m.cycle
             // for (let i = 0; i < 1; ++i) tech.giveTech("compression engine")
@@ -56,7 +56,7 @@ const level = {
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(-50, -70, "difficulty", false);
             // for (let i = 0; i < 100; i++) powerUps.directSpawn(1750, -500, "coupling");
             // spawn.mapRect(575, -700, 25, 425);  //block mob line of site on testing
-            // level.testing();
+            // level.arena();
 
             // for (let i = 0; i < 1; ++i) spawn.snakeSpitBoss(1400, -500)
             // Matter.Body.setPosition(player, { x: -200, y: -3330 });
@@ -64,7 +64,6 @@ const level = {
             // spawn.hopper(1900, -500)
             // spawn.zombie(-3000, -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)
             // for (let i = 0; i < 5; ++i) spawn.starter(1000 + 1000 * Math.random(), -500 + 300 * Math.random())
-            // tech.addJunkTechToPool(2)
             // tech.tech[322].frequency = 100
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
@@ -78,7 +77,6 @@ const level = {
             // simulation.isAutoZoom = false; //look in close
             // simulation.zoomScale *= 0.5;
             // simulation.setZoom();
-            // tech.addJunkTechToPool(0.7)
 
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "boost");
@@ -243,7 +241,7 @@ const level = {
         } else if (simulation.difficultyMode > 1) {
             scale = 2
         }
-        m.dmgScale = Math.pow(0.84, level.levelsCleared * scale)
+        m.dmgScale = Math.pow(0.85, level.levelsCleared * scale)
         simulation.dmgScale = Math.max(0.1, 0.23 * level.levelsCleared * scale) //damage done by mobs scales with total levels
 
         //
@@ -2453,7 +2451,10 @@ const level = {
                     powerUps.spawn(2095 + 20 * (Math.random() - 0.5), -2100, "heal", false);
                     powerUps.spawn(2095 + 20 * (Math.random() - 0.5), -2060, "research", false);
                 }
-                // if (level.levelsCleared === 0) powerUps.directSpawn(-50, -70, "difficulty", false);
+                //spin the power ups to prevent them from stacking awkwardly
+                for (let i = 0; i < powerUp.length; i++) {
+                    Matter.Body.setAngularVelocity(powerUp[i], 5 * (Math.random() - 0.5))
+                }
             } else {
                 requestAnimationFrame(cycle);
             }
@@ -2581,6 +2582,14 @@ const level = {
         wires.lineTo(2600, -690)
 
         level.custom = () => {
+            //working on a message using text
+            // ctx.font = "50px Arial";
+            // ctx.fillStyle = "rgba(0,0,0,0.3)"
+            // for (let i = 0; i < 5; i++) {
+            //     const wiggle = 10
+            //     ctx.fillText("move", 500 + wiggle * Math.random(), -500 + wiggle * Math.random());
+            // }
+
             //push around power ups stuck in the tube wall
             if (!(simulation.cycle % 30)) {
                 for (let i = 0, len = powerUp.length; i < len; i++) {
@@ -11342,14 +11351,6 @@ const level = {
         anotherBoss = (x, y) => {
             if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
                 spawn.randomLevelBoss(x, y, ["historyBoss"]);
-            } else if (tech.isResearchBoss) {
-                if (powerUps.research.count > 2) {
-                    powerUps.research.changeRerolls(-3)
-                    simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 3<br>${powerUps.research.count}`)
-                } else {
-                    tech.addJunkTechToPool(0.49)
-                }
-                spawn.randomLevelBoss(x, y, ["historyBoss"]);
             }
         }
 
@@ -14281,16 +14282,6 @@ const level = {
         const anotherBoss = (x, y) => {
             if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
                 spawn.historyBoss(x, y)
-            } else if (tech.isResearchBoss) {
-                if (powerUps.research.count > 2) {
-                    powerUps.research.changeRerolls(-3)
-                    simulation.makeTextLog(
-                        `<span class='color-var'>m</span>.<span class='color-r'>research</span> <span class='color-symbol'>-=</span> 3<br>${powerUps.research.count}`
-                    )
-                } else {
-                    tech.addJunkTechToPool(0.49)
-                }
-                spawn.historyBoss(x, y)
             }
         }
 
@@ -15101,9 +15092,6 @@ const level = {
                 setTimeout(() => {
                     me.collisionFilter.mask = cat.player | cat.mob | cat.bullet;
                 }, 1000);
-            }
-            me.onDeath = function () {
-                tech.addJunkTechToPool(0.1)
             }
             Composite.add(engine.world, me.constraint);
         }
@@ -31372,7 +31360,687 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     arena() {
-        simulation.makeTextLog(`<strong>arena</strong> by <span class='color-var'>Richard0820</span>`)
+        simulation.makeTextLog(`<strong>arena</strong> by <span class='color-var'>Whyisthisnotavalable</span>`)
+        let genisis, genisisJumpSensor, genisisBody, genisisHead, genisisHeadSensor, genisisBodySensor;
+        let control = { left: false, right: false, up: false, down: false };
+        const g = {
+            spawn() {
+                //load genisis in matter.js physic engine
+                // let vector = Vertices.fromPath("0 40  50 40   50 115   0 115   30 130   20 130"); //genisis as a series of vertices
+                let vertices = Vertices.fromPath("0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40"); //genisis as a series of vertices
+                genisisBody = Bodies.fromVertices(0, 0, vertices);
+                genisisJumpSensor = Bodies.rectangle(0, 46, 36, 6, {
+                    //this sensor check if the genisis is on the ground to enable jumping
+                    sleepThreshold: 99999999999,
+                    isSensor: true
+                });
+                vertices = Vertices.fromPath("16 -82  2 -66  2 -37  43 -37  43 -66  30 -82");
+                genisisHead = Bodies.fromVertices(0, -55, vertices); //this part of the genisis lowers on crouch
+                genisisHeadSensor = Bodies.rectangle(0, -57, 48, 45, {
+                    //senses if the genisis's head is empty and can return after crouching
+                    sleepThreshold: 99999999999,
+                    isSensor: true
+                });
+                genisisBodySensor = Bodies.rectangle(0, 0, 70, 45, {
+                    sleepThreshold: 99999999999,
+                    isSensor: true
+                });
+                genisis = Body.create({
+                    //combine genisisJumpSensor and genisisBody
+                    parts: [genisisBody, genisisHead, genisisJumpSensor, genisisHeadSensor, genisisBodySensor],
+                    inertia: Infinity, //prevents genisis rotation
+                    friction: 0.002,
+                    frictionAir: 0.001,
+                    //frictionStatic: 0.5,
+                    restitution: 0,
+                    sleepThreshold: Infinity,
+                    collisionFilter: {
+                        group: 0,
+                        category: cat.mob,
+                        mask: cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield | cat.player | cat.bullet
+                    },
+                    // death() {
+                    //     g.death();
+                    // }
+                });
+                Matter.Body.setMass(genisis, g.mass);
+                Composite.add(engine.world, [genisis]);
+            },
+            health: 1000,
+            maxHealth: 1000, //set in simulation.reset()
+            cycle: 600, //starts at 600 cycles instead of 0 to prevent bugs with g.history
+            lastKillCycle: 0,
+            lastHarmCycle: 0,
+            width: 50,
+            radius: 30,
+            eyeFillColor: null,
+            fillColor: null, //set by setFillColors
+            fillColorDark: null, //set by setFillColors
+            bodyGradient: null, //set by setFillColors
+            color: {
+                hue: 0,
+                sat: 0,
+                light: 50,
+            },
+            setFillColors() {
+                g.fillColor = `hsl(${g.color.hue},${g.color.sat}%,${g.color.light}%)`
+                g.fillColorDark = `hsl(${g.color.hue},${g.color.sat}%,${g.color.light - 25}%)`
+                let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+                grd.addColorStop(0, g.fillColorDark);
+                grd.addColorStop(1, g.fillColor);
+                g.bodyGradient = grd
+            },
+            setFillColorsAlpha(alpha = 0.5) {
+                g.fillColor = `hsla(${g.color.hue},${g.color.sat}%,${g.color.light}%,${alpha})`
+                g.fillColorDark = `hsla(${g.color.hue},${g.color.sat}%,${g.color.light - 25}%,${alpha})`
+                let grd = ctx.createLinearGradient(-30, 0, 30, 0);
+                grd.addColorStop(0, g.fillColorDark);
+                grd.addColorStop(1, g.fillColor);
+                g.bodyGradient = grd
+            },
+            height: 42,
+            yOffWhen: {
+                crouch: 22,
+                stand: 49,
+                jump: 70
+            },
+            defaultMass: 5,
+            mass: 5,
+            FxNotHolding: 0.015,
+            Fx: 0.016, //run Force on ground //
+            jumpForce: 0.64,
+            setMovement() {
+                // g.Fx = 0.08 / mass * tech.squirrelFx 
+                // g.FxAir = 0.4 / mass / mass 
+                g.Fx = tech.baseFx * g.fieldFx * tech.squirrelFx * (tech.isFastTime ? 1.5 : 1) / genisis.mass //base genisis mass is 5
+                g.jumpForce = tech.baseJumpForce * g.fieldJump * tech.squirrelJump * (tech.isFastTime ? 1.13 : 1) / genisis.mass / genisis.mass //base genisis mass is 5
+            },
+            FxAir: 0.032, // 0.4/5/5  run Force in Air
+            yOff: 70,
+            yOffGoal: 70,
+            onGround: false, //checks if on ground or in air
+            lastOnGroundCycle: 0, //use to calculate coyote time
+            standingOn: undefined,
+            numTouching: 0,
+            crouch: false,
+            // isHeadClear: true,
+            spawnPos: {
+                x: 0,
+                y: 0
+            },
+            spawnVel: {
+                x: 0,
+                y: 0
+            },
+            pos: {
+                x: 0,
+                y: 0
+            },
+            yPosDifference: 24.2859, //genisis.position.y - g.pos.y  //24.285923217549026
+            // yPosDifferenceCrouched: -2.7140767824453604,
+            Sy: 0, //adds a smoothing effect to vertical only
+            Vx: 0,
+            Vy: 0,
+            friction: {
+                ground: 0.01,
+                air: 0.0025
+            },
+            airSpeedLimit: 125, // 125/mass/mass = 5
+            angle: 0,
+            walk_cycle: 0,
+            stepSize: 0,
+            flipLegs: -1,
+            hip: {
+                x: 12,
+                y: 24
+            },
+            knee: {
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 0
+            },
+            foot: {
+                x: 0,
+                y: 0
+            },
+            legLength1: 55,
+            legLength2: 45,
+            transX: 0,
+            transY: 0,
+            history: new Array(600), //[], //tracks the last second of genisis position
+            rewindCount: 0, //used with CPT
+            resetHistory() {
+                const set = {
+                    position: {
+                        x: genisis.position.x,
+                        y: genisis.position.y,
+                    },
+                    velocity: {
+                        x: genisis.velocity.x,
+                        y: genisis.velocity.y
+                    },
+                    yOff: g.yOff,
+                    angle: g.angle,
+                    health: g.health,
+                    energy: g.energy,
+                    activeGun: b.activeGun
+                }
+                for (let i = 0; i < 600; i++) { //reset history
+                    g.history[i] = set
+                }
+            },
+            move() {
+                g.pos.x = genisis.position.x;
+                g.pos.y = genisisBody.position.y - g.yOff;
+                g.Vx = genisis.velocity.x;
+                g.Vy = genisis.velocity.y;
+
+                //tracks the last 10s of genisis information
+                g.history.splice(g.cycle % 600, 1, {
+                    position: {
+                        x: genisis.position.x,
+                        y: genisis.position.y,
+                    },
+                    velocity: {
+                        x: genisis.velocity.x,
+                        y: genisis.velocity.y
+                    },
+                    yOff: g.yOff,
+                    angle: g.angle,
+                    health: g.health,
+                    energy: g.energy,
+                    activeGun: b.activeGun
+                });
+                // const back = 59  // 59 looks at 1 second ago //29 looks at 1/2 a second ago
+                // historyIndex = (g.cycle - back) % 600
+            },
+            targetX: 0,
+            targetY: 0,
+            transSmoothX: 0,
+            transSmoothY: 0,
+            lastGroundedPositionY: 0,
+            // mouseZoom: 0,
+            lookSmoothing: 0.07, //1 is instant jerky,  0.001 is slow smooth zoom, 0.07 is standard
+            look() { }, //set to lookDefault()
+            lookDefault() {
+                g.angle = Math.atan2(
+                    g.targetY - g.pos.y,
+                    g.targetX - g.pos.x
+                );
+                // //smoothed mouse look translations
+                const scale = 0.8;
+                g.transSmoothX = canvas.width2 - g.pos.x - (simulation.mouse.x - canvas.width2) * scale;
+                g.transSmoothY = canvas.height2 - g.pos.y - (simulation.mouse.y - canvas.height2) * scale;
+
+                g.transX += (g.transSmoothX - g.transX) * g.lookSmoothing;
+                g.transY += (g.transSmoothY - g.transY) * g.lookSmoothing;
+            },
+            doCrouch() {
+                if (!g.crouch) {
+                    g.crouch = true;
+                    g.yOffGoal = g.yOffWhen.crouch;
+                    if ((genisisHead.position.y - genisis.position.y) < 0) {
+                        Matter.Body.setPosition(genisisHead, {
+                            x: genisis.position.x,
+                            y: genisis.position.y + 9.1740767
+                        })
+                    }
+                }
+            },
+            undoCrouch() {
+                if (g.crouch) {
+                    g.crouch = false;
+                    g.yOffGoal = g.yOffWhen.stand;
+                    if ((genisisHead.position.y - genisis.position.y) > 0) {
+                        Matter.Body.setPosition(genisisHead, {
+                            x: genisis.position.x,
+                            y: genisis.position.y - 30.28592321
+                        })
+                    }
+                }
+            },
+            hardLandCD: 0,
+            checkHeadClear() {
+                if (Matter.Query.collides(headSensor, map).length > 0) {
+                    return false
+                } else {
+                    return true
+                }
+            },
+            buttonCD_jump: 0, //cool down for genisis buttons
+            jump() {
+                // if (!g.onGround) g.lastOnGroundCycle = 0 //g.cycle - tech.coyoteTime
+                g.buttonCD_jump = g.cycle + 20; //can't jump again until 20 cycles pass
+                //apply a fraction of the jump force to the body the genisis is jumping off of
+                Matter.Body.applyForce(g.standingOn, g.pos, {
+                    x: 0,
+                    y: g.jumpForce * 0.12 * Math.min(g.standingOn.mass, 5)
+                });
+
+                genisis.force.y = -g.jumpForce; //genisis jump force
+                Matter.Body.setVelocity(genisis, { //zero genisis y-velocity for consistent jumps
+                    x: genisis.velocity.x,
+                    y: Math.max(-10, Math.min(g.standingOn.velocity.y, 10)) //cap velocity contribution from blocks you are standing on to 10 in the vertical
+                });
+            },
+            groundControl() {
+                //check for crouch or jump
+                if (g.crouch) {
+                    if (!(control.down) && g.checkHeadClear() && g.hardLandCD < g.cycle) g.undoCrouch();
+                } else if (control.down || g.hardLandCD > g.cycle) {
+                    g.doCrouch(); //on ground && not crouched and pressing s or down
+                } else if (control.up && g.buttonCD_jump + 20 < g.cycle && g.yOffWhen.stand > 23) {
+                    g.jump()
+                }
+
+                if (control.left) {
+                    if (genisis.velocity.x > -2) {
+                        genisis.force.x -= g.Fx * 1.5
+                    } else {
+                        genisis.force.x -= g.Fx
+                    }
+                    // }
+                } else if (control.right) {
+                    if (genisis.velocity.x < 2) {
+                        genisis.force.x += g.Fx * 1.5
+                    } else {
+                        genisis.force.x += g.Fx
+                    }
+                } else {
+                    const stoppingFriction = 0.92; //come to a stop if no move key is pressed
+                    Matter.Body.setVelocity(genisis, {
+                        x: genisis.velocity.x * stoppingFriction,
+                        y: genisis.velocity.y * stoppingFriction
+                    });
+                }
+                //come to a stop if fast 
+                if (genisis.speed > 4) {
+                    const stoppingFriction = (g.crouch) ? 0.65 : 0.89; // this controls speed when crouched
+                    Matter.Body.setVelocity(genisis, {
+                        x: genisis.velocity.x * stoppingFriction,
+                        y: genisis.velocity.y * stoppingFriction
+                    });
+                }
+            },
+            airControl() {
+                //check for coyote time jump
+                // if (control.up && g.buttonCD_jump + 20 + tech.coyoteTime < g.cycle && g.yOffWhen.stand > 23 && g.lastOnGroundCycle + tech.coyoteTime > g.cycle) g.jump()
+                if (control.up && g.buttonCD_jump + 20 < g.cycle && g.yOffWhen.stand > 23 && g.lastOnGroundCycle + 5 > g.cycle) g.jump()
+
+                //check for short jumps   //moving up   //recently pressed jump  //but not pressing jump key now
+                if (g.buttonCD_jump + 60 > g.cycle && !(control.up) && g.Vy < 0) {
+                    Matter.Body.setVelocity(genisis, {
+                        //reduce genisis y-velocity every cycle
+                        x: genisis.velocity.x,
+                        y: genisis.velocity.y * 0.94
+                    });
+                }
+
+                if (control.left) {
+                    if (genisis.velocity.x > -g.airSpeedLimit / genisis.mass / genisis.mass) genisis.force.x -= g.FxAir; // move genisis   left / a
+                } else if (control.right) {
+                    if (genisis.velocity.x < g.airSpeedLimit / genisis.mass / genisis.mass) genisis.force.x += g.FxAir; //move genisis  right / d
+                }
+            },
+            alive: true,
+            dmgScale: 1, //scales all damage, but not raw .dmg //set in levels.setDifficulty
+            defaultFPSCycle: 0, //tracks when to return to normal fps
+            immuneCycle: 0, //used in engine
+            collisionImmuneCycles: 30,
+            buttonCD: 0, //cool down for genisis buttons
+            drawLeg(stroke) {
+                // if (simulation.mouseInGame.x > g.pos.x) {
+                if (g.angle > -Math.PI / 2 && g.angle < Math.PI / 2) {
+                    g.flipLegs = 1;
+                } else {
+                    g.flipLegs = -1;
+                }
+                ctx.save();
+                ctx.scale(g.flipLegs, 1); //leg lines
+                ctx.beginPath();
+                ctx.moveTo(g.hip.x, g.hip.y);
+                ctx.lineTo(g.knee.x, g.knee.y);
+                ctx.lineTo(g.foot.x, g.foot.y);
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = 7;
+                ctx.stroke();
+
+                //toe lines
+                ctx.beginPath();
+                ctx.moveTo(g.foot.x, g.foot.y);
+                ctx.lineTo(g.foot.x - 15, g.foot.y + 5);
+                ctx.moveTo(g.foot.x, g.foot.y);
+                ctx.lineTo(g.foot.x + 15, g.foot.y + 5);
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                //hip joint
+                ctx.beginPath();
+                ctx.arc(g.hip.x, g.hip.y, 11, 0, 2 * Math.PI);
+                //knee joint
+                ctx.moveTo(g.knee.x + 7, g.knee.y);
+                ctx.arc(g.knee.x, g.knee.y, 7, 0, 2 * Math.PI);
+                //foot joint
+                ctx.moveTo(g.foot.x + 6, g.foot.y);
+                ctx.arc(g.foot.x, g.foot.y, 6, 0, 2 * Math.PI);
+                ctx.fillStyle = g.fillColor;
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            },
+            calcLeg(cycle_offset, offset) {
+                g.hip.x = 12 + offset;
+                g.hip.y = 24 + offset;
+                //stepSize goes to zero if Vx is zero or not on ground (make m transition cleaner)
+                g.stepSize = 0.8 * g.stepSize + 0.2 * (7 * Math.sqrt(Math.min(9, Math.abs(g.Vx))) * g.onGround);
+                //changes to stepsize are smoothed by adding only a percent of the new value each cycle
+                const stepAngle = 0.034 * g.walk_cycle + cycle_offset;
+                g.foot.x = 2.2 * g.stepSize * Math.cos(stepAngle) + offset;
+                g.foot.y = offset + 1.2 * g.stepSize * Math.sin(stepAngle) + g.yOff + g.height;
+                const Ymax = g.yOff + g.height;
+                if (g.foot.y > Ymax) g.foot.y = Ymax;
+
+                //calculate knee position as intersection of circle from hip and foot
+                const d = Math.sqrt((g.hip.x - g.foot.x) * (g.hip.x - g.foot.x) + (g.hip.y - g.foot.y) * (g.hip.y - g.foot.y));
+                const l = (g.legLength1 * g.legLength1 - g.legLength2 * g.legLength2 + d * d) / (2 * d);
+                const h = Math.sqrt(g.legLength1 * g.legLength1 - l * l);
+                g.knee.x = (l / d) * (g.foot.x - g.hip.x) - (h / d) * (g.foot.y - g.hip.y) + g.hip.x + offset;
+                g.knee.y = (l / d) * (g.foot.y - g.hip.y) + (h / d) * (g.foot.x - g.hip.x) + g.hip.y;
+            },
+            draw() { },
+            drawDefault() {
+                ctx.fillStyle = g.fillColor;
+                g.walk_cycle += g.flipLegs * g.Vx;
+                ctx.save();
+                ctx.globalAlpha = (g.immuneCycle < g.cycle) ? 1 : 0.5 //|| (g.cycle % 40 > 20)
+                ctx.translate(g.pos.x, g.pos.y);
+                g.calcLeg(Math.PI, -3);
+                g.drawLeg("#FFFFFF");
+                g.calcLeg(0, 0);
+                g.drawLeg("#FFFFFF");
+                ctx.rotate(g.angle);
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                ctx.fillStyle = g.bodyGradient
+                ctx.fill();
+                ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                ctx.strokeStyle = "#FFFFFF";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+                g.yOff = g.yOff * 0.85 + g.yOffGoal * 0.15; //smoothly move leg height towards height goal
+            },
+            drawDamage() {
+                ctx.fillStyle = "red";
+                g.walk_cycle += g.flipLegs * g.Vx;
+                ctx.save();
+                ctx.globalAlpha = 0.7;
+                ctx.translate(g.pos.x, g.pos.y);
+                g.calcLeg(Math.PI, -3);
+                g.drawLeg("#FF0000");
+                g.calcLeg(0, 0);
+                g.drawLeg("#FF0000");
+                ctx.rotate(g.angle);
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                ctx.fillStyle = g.bodyGradient
+                ctx.fill();
+                ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                ctx.strokeStyle = "#FF0000";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+                g.yOff = g.yOff * 0.85 + g.yOffGoal * 0.15; //smoothly move leg height towards height goal
+            },
+            damage(dmg) {
+                g.health -= dmg;
+            },
+            rebirth() {
+                g.health = g.maxHealth;
+                genisis.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield | cat.player | cat.bullet
+            },
+            lastHealth: 1000,
+            drawHealth() {
+                let interpolated = this.lastHealth + (g.health - this.lastHealth) * 0.1;
+
+                ctx.save();
+                ctx.setTransform(1, 0, 0.2, 1, 0, 0); //slanted
+                ctx.fillStyle = "rgba(250, 100, 100, 0.3)";
+                ctx.fillRect(canvas.width2 / 2, canvas.height2 / 10, canvas.width2, 30);
+                const grad = ctx.createLinearGradient(0, 0, canvas.width2, 0);
+                grad.addColorStop(0, "lightblue");
+                grad.addColorStop(1, "crimson");
+
+                ctx.fillStyle = grad;
+                ctx.fillRect(canvas.width2 / 2, canvas.height2 / 10, canvas.width2 * interpolated / 1000, 30);
+                ctx.restore();
+
+                this.lastHealth = interpolated;
+            },
+            genisisOnGroundCheck(event) {
+                //runs on collisions events
+                function enter() {
+                    g.numTouching++;
+                    if (!g.onGround) {
+                        g.onGround = true;
+                        if (g.crouch) {
+                            if (g.checkHeadClear()) {
+                                g.undoCrouch();
+                            } else {
+                                g.yOffGoal = g.yOffWhen.crouch;
+                            }
+                        } else {
+                            //sets a hard land where genisis stays in a crouch for a bit and can't jump
+                            //crouch is forced in groundControl below
+                            const momentum = genisis.velocity.y * genisis.mass //genisis mass is 5 so this triggers at 26 down velocity, unless the genisis is holding something
+                            if (momentum > 130) {
+                                g.doCrouch();
+                                g.yOff = g.yOffWhen.jump;
+                                g.hardLandCD = g.cycle + Math.min(momentum / 6.5 - 6, 40)
+                                //falling damage
+                                if (tech.isFallingDamage && g.immuneCycle < g.cycle && momentum > 150) {
+                                    g.damage(Math.min(Math.sqrt(momentum - 133) * 0.01, 0.25));
+                                    if (g.immuneCycle < g.cycle + g.collisionImmuneCycles) g.immuneCycle = g.cycle + g.collisionImmuneCycles; //genisis is immune to damage for 30 cycles
+                                }
+                            } else {
+                                g.yOffGoal = g.yOffWhen.stand;
+                            }
+                        }
+                    }
+                }
+                const pairs = event.pairs;
+                for (let i = 0, j = pairs.length; i != j; ++i) {
+                    let pair = pairs[i];
+                    if (pair.bodyA === genisisJumpSensor) {
+                        g.standingOn = pair.bodyB; //keeping track to correctly provide recoil on jump
+                        if (g.standingOn.alive !== true) enter();
+                    } else if (pair.bodyB === genisisJumpSensor) {
+                        g.standingOn = pair.bodyA; //keeping track to correctly provide recoil on jump
+                        if (g.standingOn.alive !== true) enter();
+                    }
+                }
+                g.numTouching = 0;
+            },
+            genisisOffGroundCheck(event) {
+                //runs on collisions events
+                const pairs = event.pairs;
+                for (let i = 0, j = pairs.length; i != j; ++i) {
+                    if (pairs[i].bodyA === genisisJumpSensor || pairs[i].bodyB === genisisJumpSensor) {
+                        if (g.onGround && g.numTouching === 0) {
+                            g.onGround = false;
+                            g.lastOnGroundCycle = g.cycle;
+                            g.hardLandCD = 0 // disable hard landing
+                            if (g.checkHeadClear()) {
+                                if (g.crouch) {
+                                    g.undoCrouch();
+                                }
+                                g.yOffGoal = g.yOffWhen.jump;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        function GenisisCollisionChecks(event) {
+            const pairs = event.pairs;
+            for (let i = 0, j = pairs.length; i != j; i++) {
+                for (let k = 0; k < bullet.length; k++) {
+                    if (pairs[i].bodyA === bullet[k]) {
+                        collideBullet(pairs[i].bodyB);
+                        break;
+                    } else if (pairs[i].bodyB === bullet[k]) {
+                        collideBullet(pairs[i].bodyA);
+                        break;
+                    }
+
+                    function collideBullet(obj) {
+                        if (
+                            g.immuneCycle < g.cycle &&
+                            (obj === genisisBody || obj === genisisHead)
+                        ) {
+                            let dmg = Math.sqrt(Math.abs(0.000025 * Math.sqrt((bullet[k].mass + Math.sqrt(Vector.magnitude(bullet[k].velocity)) * 0.0000125))));
+                            g.damage(dmg);
+                            return;
+                        }
+                    }
+                }
+                for (let k = 0; k < mob.length; k++) {
+                    if (mob[k].alive) {
+                        if (pairs[i].bodyA === mob[k]) {
+                            collideMob(pairs[i].bodyB);
+                            break;
+                        } else if (pairs[i].bodyB === mob[k]) {
+                            collideMob(pairs[i].bodyA);
+                            break;
+                        }
+
+                        function collideMob(obj) {
+                            //genisis + mob collision
+                            if (
+                                g.immuneCycle < g.cycle &&
+                                (obj === genisisBody || obj === genisisHead) &&
+                                !mob[k].isSlowed && !mob[k].isStunned
+                            ) {
+                                let dmg = Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05);
+                                // if (g.isCloak) dmg *= 0.5
+                                if (tech.isRewindAvoidDeath && g.energy > 0.85 * Math.min(1, g.maxEnergy) && dmg > 0.01) { //CPT reversal runs in g.damage, but it stops the rest of the collision code here too
+                                    g.damage(dmg);
+                                    return
+                                }
+                                g.damage(dmg);
+
+                                if (tech.isCollisionRealitySwitch && g.alive) {
+                                    g.switchWorlds()
+                                    simulation.trails()
+                                    simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
+                                }
+                                if (tech.isPiezo) g.energy += 20.48;
+                                if (tech.isCouplingNoHit && g.coupling > 0) {
+                                    g.couplingChange(-5)
+
+                                    const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
+                                    let where = Vector.add(g.pos, Vector.mult(unit, 17))
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: where.x,
+                                        y: where.y,
+                                        radius: 22,
+                                        color: 'rgba(0, 171, 238, 0.33)',
+                                        time: 8
+                                    });
+                                    where = Vector.add(g.pos, Vector.mult(unit, 60))
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: where.x,
+                                        y: where.y,
+                                        radius: 18,
+                                        color: 'rgba(0, 171, 238, 0.5)',
+                                        time: 16
+                                    });
+                                    where = Vector.add(g.pos, Vector.mult(unit, 100))
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: where.x,
+                                        y: where.y,
+                                        radius: 14,
+                                        color: 'rgba(0, 171, 238, 0.6)',
+                                        time: 24
+                                    });
+                                    where = Vector.add(g.pos, Vector.mult(unit, 135))
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: where.x,
+                                        y: where.y,
+                                        radius: 10,
+                                        color: 'rgba(0, 171, 238, 0.7)',
+                                        time: 32
+                                    });
+                                    // simulation.drawList.push({ //add dmg to draw queue
+                                    //     x: g.pos.x,
+                                    //     y: g.pos.y,
+                                    //     radius: 150,
+                                    //     color: 'rgba(0, 171, 238, 0.33)',
+                                    //     time: 6
+                                    // });
+                                    // simulation.drawList.push({ //add dmg to draw queue
+                                    //     x: g.pos.x,
+                                    //     y: g.pos.y,
+                                    //     radius: 75,
+                                    //     color: 'rgba(0, 171, 238, 0.5)',
+                                    //     time: 16
+                                    // });
+                                    // simulation.drawList.push({ //add dmg to draw queue
+                                    //     x: g.pos.x,
+                                    //     y: g.pos.y,
+                                    //     radius: 25,
+                                    //     color: 'rgba(0, 171, 238, 0.75)',
+                                    //     time: 25
+                                    // });
+                                }
+                                if (mob[k].onHit) mob[k].onHit();
+                                if (g.immuneCycle < g.cycle + g.collisionImmuneCycles) g.immuneCycle = g.cycle + g.collisionImmuneCycles; //genisis is immune to damage for 30 cycles
+                                //extra kick between genisis and mob              //this section would be better with forces but they don't work...
+                                let angle = Math.atan2(genisis.position.y - mob[k].position.y, genisis.position.x - mob[k].position.x);
+                                Matter.Body.setVelocity(genisis, {
+                                    x: genisis.velocity.x + 8 * Math.cos(angle),
+                                    y: genisis.velocity.y + 8 * Math.sin(angle)
+                                });
+                                Matter.Body.setVelocity(mob[k], {
+                                    x: mob[k].velocity.x - 8 * Math.cos(angle),
+                                    y: mob[k].velocity.y - 8 * Math.sin(angle)
+                                });
+
+                                if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].isDropPowerUp && g.energy > 0.1 && mob[k].damageReduction > 0) {
+                                    g.energy -= 0.1 //* Math.max(g.maxEnergy, g.energy) //0.33 * g.energy
+                                    if (g.immuneCycle === g.cycle + g.collisionImmuneCycles) g.immuneCycle = 0; //genisis doesn't go immune to collision damage
+                                    mob[k].death();
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: pairs[i].activeContacts[0].vertex.x,
+                                        y: pairs[i].activeContacts[0].vertex.y,
+                                        radius: Math.sqrt(dmg) * 500,
+                                        color: "rgba(255,0,255,0.2)",
+                                        time: simulation.drawTime
+                                    });
+                                } else {
+                                    simulation.drawList.push({ //add dmg to draw queue
+                                        x: pairs[i].activeContacts[0].vertex.x,
+                                        y: pairs[i].activeContacts[0].vertex.y,
+                                        radius: Math.sqrt(dmg) * 200,
+                                        color: simulation.mobDmgColor,
+                                        time: simulation.drawTime
+                                    });
+                                }
+                                // return;
+                                // }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        g.spawn();
+        Matter.Body.setPosition(genisis, {
+            x: 7875,
+            y: -2530
+        })
         let isUsingSwordMod = false;
         for (let i = 0; i < tech.tech.length; i++) {
             if (tech.tech[i].name === 'size-weight illusion') { //to detect if the player is using the sword mod so that it won't mess up their mod. The sword mod adds this tech so if it is detected then the sword won't be removed from the gun array //Landgreen, don't add a tech with the same name
@@ -31380,40 +32048,47 @@ const level = {
             }
         }
         if (!isUsingSwordMod) {
-            (function () {
-                const e = {
-                    name: "sword",
-                    descriptionFunction() { return `swing a <b>sword</b> that <b style="color: indigo;">lifesteals</b> <strong class='color-h'>health</strong><br>drains <strong class='color-h'>health</strong> instead of ammunition<br>doesn't use <b>ammo</b>` },
-                    ammo: Infinity,
-                    ammoPack: Infinity,
-                    defaultAmmoPack: Infinity,
-                    have: false,
-                    cycle: 0,
-                    sword: undefined,
-                    bladeSegments: undefined,
-                    bladeTrails: [],
-                    angle: 0,
-                    constraint: undefined,
-                    do() {
-                        if (input.fire && m.fireCDcycle > m.cycle) {
+            const e = {
+                name: "sword",
+                descriptionFunction() { return `swing a <b>sword</b> that <b style="color: indigo;">lifesteals</b> <strong class='color-h'>health</strong><br>drains <strong class='color-h'>health</strong> instead of ammunition<br>doesn't use <b>ammo</b>` },
+                ammo: Infinity,
+                ammoPack: Infinity,
+                defaultAmmoPack: Infinity,
+                have: false,
+                cycle: 0,
+                sword: undefined,
+                swordArray: [],
+                bladeSegments: undefined,
+                bladeTrails: [],
+                angle: 0,
+                constraint: undefined,
+                charge: 0,
+                angle2: 0,
+                fire() { },
+                do() {
+                    if (this.sword && this.cycle < 1) {
+                        this.angle2 = Math.atan2(this.sword.position.y - m.pos.y, this.sword.position.x - m.pos.x);
+                    }
+                    if (this.sword) {
+                        this.cycle++;
+                    }
+                    this.normalFire();
+                    this.renderDefault();
+                    this.collision();
+                },
+                normalFire() {
+                    if (this.constraint) {
+                        this.constraint.pointA = player.position;
+                    }
+                    if (tech.isStabSword && !m.crouch && this.cycle > 0 && this.stabStatus) {
+                        if (this.sword) {
+                            this.stabStatus = false;
                             if (tech.isEnergyHealth) {
-                                m.energy -= 0.004;
-                            } else {
-                                m.health -= 0.001;
-                                m.displayHealth();
+                                m.energy = 0.01;
+                                m.immuneCycle = m.cycle + 30;
                             }
-                        }
-                        if (b.activeGun !== null && input.fire && (tech.isEnergyHealth ? m.energy >= 0.11 : m.health >= 0.11)) {
-                            if (!this.sword && b.guns[b.activeGun].name === 'sword') {
-                                Matter.Body.setMass(player, 1000);
-                                ({ sword: this.sword, bladeSegments: this.bladeSegments } = this.createAndSwingSword());
-                                this.angle = m.angle;
-                            }
-                        }
-                        if (this.sword && !input.fire) {
                             this.cycle = 0;
                             Matter.Body.setAngularVelocity(this.sword, 0);
-                            Matter.Body.setMass(player, 5)
                             Composite.remove(engine.world, this.sword);
                             this.sword.parts.forEach(part => {
                                 Composite.remove(engine.world, part);
@@ -31428,137 +32103,273 @@ const level = {
                                 this.constraint = undefined;
                             }
                             this.bladeTrails = [];
-                            m.fireCDcycle = m.cycle + 10;
+                            m.fireCDcycle = 0;
+                        }
+                    }
+
+                    if (input.fire && (tech.isEnergyHealth ? m.energy >= 0.11 : m.health >= 0.11)) {
+                        if (tech.isEnergyHealth) {
+                            m.energy -= 0.004;
                         } else {
-                            if (this.sword && (tech.isEnergyHealth ? m.energy >= 0.11 : m.health >= 0.11)) {
-                                let handle;
-                                for (let i = 0; i < bullet.length; i++) {
-                                    if (bullet[i].customName == "handle") {
-                                        handle = bullet[i];
-                                    }
+                            m.health -= 0.001;
+                            m.displayHealth();
+                        }
+                    }
+                    if (input.fire && (tech.isEnergyHealth ? m.energy >= 0.11 : m.health >= 0.11)) {
+                        if (!this.sword && b.guns[b.activeGun].name === 'sword') {
+                            ({ sword: this.sword, bladeSegments: this.bladeSegments } = this.createAndSwingSword());
+                            this.angle = m.angle;
+                        }
+                    }
+                    if (this.sword && !input.fire) {
+                        this.cycle = 0;
+                        Matter.Body.setAngularVelocity(this.sword, 0);
+                        player.force.x *= 0.01;
+                        player.force.y *= 0.01;
+                        Composite.remove(engine.world, this.sword);
+                        this.sword.parts.forEach(part => {
+                            Composite.remove(engine.world, part);
+                            const index = bullet.indexOf(part);
+                            if (index !== -1) {
+                                bullet.splice(index, 1);
+                            }
+                        });
+                        this.sword = undefined;
+                        if (this.constraint) {
+                            Composite.remove(engine.world, this.constraint);
+                            this.constraint = undefined;
+                        }
+                        this.bladeTrails = [];
+                        m.fireCDcycle = m.cycle + 10;
+                    } else {
+                        if (this.sword && (tech.isEnergyHealth ? m.energy >= 0.11 : m.health >= 0.11)) {
+                            let handle;
+                            for (let i = 0; i < bullet.length; i++) {
+                                if (bullet[i].customName == "handle") {
+                                    handle = bullet[i];
                                 }
-                                if (!(this.angle > -Math.PI / 2 && this.angle < Math.PI / 2)) {
-                                    Matter.Body.setAngularVelocity(this.sword, -Math.PI * 0.1);
-                                } else {
-                                    Matter.Body.setAngularVelocity(this.sword, Math.PI * 0.1);
-                                }
-                                if (!this.constraint && (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2)) {
-                                    this.constraint = Constraint.create({
-                                        bodyA: player,
-                                        bodyB: this.sword,
-                                        pointB: { x: -9, y: ((handle.position.y - this.sword.position.y)) },
-                                        stiffness: 0.1,
-                                        damping: 0.0001815,
-                                        length: 0,
+                            }
+                            if (tech.infinityEdge) {
+                                const newSize = Math.sqrt(0.5 * m.health) + 1;
+                                Matter.Body.scale(this.sword, newSize * (1 / (this.sword.scale == undefined ? 1 : this.sword.scale)), newSize * (1 / (this.sword.scale == undefined ? 1 : this.sword.scale)), handle.position);
+                                this.sword.scale = newSize;
+                            }
+                            if (!(this.angle > -Math.PI / 2 && this.angle < Math.PI / 2)) {
+                                Matter.Body.setAngularVelocity(this.sword, -Math.PI * 0.1);
+                            } else {
+                                Matter.Body.setAngularVelocity(this.sword, Math.PI * 0.1);
+                            }
+                            if (tech.sizeIllusion) {
+                                player.force.x += Math.cos(m.angle) * player.mass / 500;
+                                player.force.y += Math.sin(m.angle) * player.mass / 500;
+                            }
+                            if (!this.constraint && (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2)) {
+                                this.constraint = Constraint.create({
+                                    pointA: player.position,
+                                    bodyB: this.sword,
+                                    pointB: { x: -9, y: ((handle.position.y - this.sword.position.y)) },
+                                    stiffness: (tech.infinityEdge ? 0.05 : 0.1),
+                                    damping: 0.001815,
+                                    length: 0,
 
-                                    });
-                                    Composite.add(engine.world, this.constraint);
-                                } else if (!this.constraint) {
-                                    this.constraint = Constraint.create({
-                                        bodyA: player,
-                                        bodyB: this.sword,
-                                        pointB: { x: 9, y: ((handle.position.y - this.sword.position.y)) },
-                                        stiffness: 0.1,
-                                        damping: 0.0001815,
-                                        length: 0,
-                                    });
-                                    Composite.add(engine.world, this.constraint);
-                                }
-                            } else if (this.sword) {
-                                if (tech.isEnergyHealth) {
-                                    m.energy = 0.01;
-                                    m.immuneCycle = m.cycle + 30;
-                                }
-                                this.cycle = 0;
-                                Matter.Body.setAngularVelocity(this.sword, 0);
-                                Matter.Body.setMass(player, 5)
-                                Composite.remove(engine.world, this.sword);
-                                this.sword.parts.forEach(part => {
-                                    Composite.remove(engine.world, part);
-                                    const index = bullet.indexOf(part);
-                                    if (index !== -1) {
-                                        bullet.splice(index, 1);
-                                    }
                                 });
-                                this.sword = undefined;
-                                if (this.constraint) {
-                                    Composite.remove(engine.world, this.constraint);
-                                    this.constraint = undefined;
-                                }
-                                this.bladeTrails = [];
-                                m.fireCDcycle = 0;
+                                Composite.add(engine.world, this.constraint);
+                            } else if (!this.constraint) {
+                                this.constraint = Constraint.create({
+                                    pointA: player.position,
+                                    bodyB: this.sword,
+                                    pointB: { x: 9, y: ((handle.position.y - this.sword.position.y)) },
+                                    stiffness: (tech.infinityEdge ? 0.05 : 0.1),
+                                    damping: 0.001815,
+                                    length: 0,
+                                });
+                                Composite.add(engine.world, this.constraint);
                             }
+                        } else if (this.sword) {
+                            if (tech.isEnergyHealth) {
+                                m.energy = 0.01;
+                                m.immuneCycle = m.cycle + 30;
+                            }
+                            this.cycle = 0;
+                            Matter.Body.setAngularVelocity(this.sword, 0);
+                            player.force.x *= 0.01;
+                            player.force.y *= 0.01;
+                            Composite.remove(engine.world, this.sword);
+                            this.sword.parts.forEach(part => {
+                                Composite.remove(engine.world, part);
+                                const index = bullet.indexOf(part);
+                                if (index !== -1) {
+                                    bullet.splice(index, 1);
+                                }
+                            });
+                            this.sword = undefined;
+                            if (this.constraint) {
+                                Composite.remove(engine.world, this.constraint);
+                                this.constraint = undefined;
+                            }
+                            this.bladeTrails = [];
+                            m.fireCDcycle = 0;
                         }
-                        if (this.sword) {
-                            for (let i = 0; i < this.bladeSegments.length; i++) {
-                                const blade = this.bladeSegments[i];
-                                const trail = this.bladeTrails[i] || [];
-                                const vertices = blade.vertices.map(vertex => ({ x: vertex.x, y: vertex.y }));
-                                trail.push(vertices);
-                                if (trail.length > 10) {
-                                    trail.shift();
-                                }
-                                this.bladeTrails[i] = trail;
+                    }
+                },
+                createAndSwingSword(x = player.position.x, y = player.position.y, angle = m.angle) {
+                    const handleWidth = 20;
+                    const handleHeight = 150;
+                    const handle = Bodies.rectangle(x, y, handleWidth, handleHeight, spawn.propsIsNotHoldable);
+                    bullet[bullet.length] = handle;
+                    handle.customName = "handle";
+                    bullet[bullet.length - 1].do = () => { };
+                    const pommelWidth = 30;
+                    const pommelHeight = 40;
+                    const pommelVertices = [
+                        { x: x, y: y + handleHeight / 2 + pommelHeight / 2 },
+                        { x: x + pommelWidth / 2, y: y + handleHeight / 2 },
+                        { x: x, y: y + handleHeight / 2 - pommelHeight / 2 },
+                        { x: x - pommelWidth / 2, y: y + handleHeight / 2 },
+                    ];
+                    const pommel = Bodies.fromVertices(x, y + handleHeight / 2, pommelVertices, spawn.propsIsNotHoldable);
+                    bullet[bullet.length] = pommel;
+                    bullet[bullet.length - 1].do = () => { };
+                    if (tech.soundSword) {
+                        bullet[bullet.length - 1].draw = () => { };
+                    }
+                    // Blade setup
+                    const bladeWidth = 100 * (tech.soundSword ? 3 : 1);
+                    const bladeHeight = 20 * (tech.soundSword ? 3 : 1);
+                    const numBlades = 15;
+                    const extensionFactor = 5;
+                    const bladeSegments = [];
+
+                    if ((angle > -Math.PI / 2 && angle < Math.PI / 2)) {
+                        for (let i = 0; i < numBlades; i++) {
+                            const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
+                            const bladeX = x + i * (bladeWidth / 20);
+                            const bladeY = y - handleHeight / 2 - i * (bladeHeight / 4.5) * extensionFactor;
+
+                            const vertices = [
+                                { x: bladeX, y: bladeY - bladeHeight / 2 },
+                                { x: bladeX + bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                                { x: bladeX - bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                                { x: bladeX, y: bladeY - bladeHeight / 2 + 10 },
+                            ];
+
+                            const blade = Bodies.fromVertices(bladeX, bladeY, vertices, spawn.propsIsNotHoldable);
+                            bullet[bullet.length] = blade;
+                            bullet[bullet.length - 1].do = () => { };
+                            if (tech.soundSword) {
+                                bullet[bullet.length - 1].draw = () => { };
                             }
-
-                            for (let i = 0; i < this.bladeTrails.length; i++) {
-                                const trail = this.bladeTrails[i];
-
-                                const alphaStep = 1 / trail.length;
-                                let alpha = 0;
-
-                                for (let j = 0; j < trail.length; j++) {
-                                    const vertices = trail[j];
-                                    ctx.beginPath();
-                                    ctx.moveTo(vertices[0].x, vertices[0].y);
-
-                                    for (let k = 1; k < vertices.length; k++) {
-                                        ctx.lineTo(vertices[k].x, vertices[k].y);
-                                    };
-
-                                    alpha += alphaStep;
-                                    ctx.closePath();
-                                    if (tech.isEnergyHealth) {
-                                        const eyeColor = m.fieldMeterColor;
-                                        const r = eyeColor[1];
-                                        const g = eyeColor[2];
-                                        const b = eyeColor[3];
-                                        const color = `#${r}${r}${g}${g}${b}${b}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
-                                        ctx.fillStyle = color;
-                                    } else {
-                                        ctx.fillStyle = `rgba(220, 20, 60, ${alpha})`;
-                                    }
-                                    ctx.fill();
-                                }
+                            Matter.Body.rotate(blade, -Math.sin(i * (Math.PI / 270) * 15));
+                            bladeSegments.push(blade);
+                        }
+                    } else {
+                        for (let i = 0; i < numBlades; i++) {
+                            const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
+                            const mirroredBladeX = x - i * (bladeWidth / 20);
+                            const mirroredBladeY = y - handleHeight / 2 - i * (bladeHeight / 4.5) * extensionFactor;
+                            const mirroredVertices = [
+                                { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 },
+                                { x: mirroredBladeX + bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
+                                { x: mirroredBladeX - bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
+                                { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 + 10 },
+                            ];
+                            const mirroredBlade = Bodies.fromVertices(mirroredBladeX, mirroredBladeY, mirroredVertices, spawn.propsIsNotHoldable);
+                            bullet[bullet.length] = mirroredBlade;
+                            bullet[bullet.length - 1].do = () => { };
+                            if (tech.soundSword) {
+                                bullet[bullet.length - 1].draw = () => { };
                             }
-                            for (let i = 0; i < this.bladeSegments.length; i++) {
+                            Matter.Body.rotate(mirroredBlade, Math.sin(i * (Math.PI / 270) * 15));
+                            bladeSegments.push(mirroredBlade);
+                        }
+                    }
+                    bladeSegments.push(pommel);
+                    const sword = Body.create({
+                        parts: [handle, ...bladeSegments],
+                    });
+
+                    Composite.add(engine.world, sword);
+                    Matter.Body.setPosition(sword, { x, y });
+
+                    sword.collisionFilter.category = cat.bullet;
+                    sword.collisionFilter.mask = cat.mobBullet | cat.powerup | cat.mob;
+                    Body.scale(sword, -1, 1, { x, y });
+
+                    return { sword, bladeSegments };
+                },
+                renderDefault() {
+                    if (this.sword) {
+                        for (let i = 0; i < this.bladeSegments.length; i++) {
+                            const blade = this.bladeSegments[i];
+                            const trail = this.bladeTrails[i] || [];
+                            const vertices = blade.vertices.map(vertex => ({ x: vertex.x, y: vertex.y }));
+                            trail.push(vertices);
+                            if (trail.length > 10) {
+                                trail.shift();
+                            }
+                            this.bladeTrails[i] = trail;
+                        }
+
+                        for (let i = 0; i < this.bladeTrails.length; i++) {
+                            const trail = this.bladeTrails[i];
+
+                            const alphaStep = 1 / trail.length;
+                            let alpha = 0;
+
+                            for (let j = 0; j < trail.length; j++) {
+                                const vertices = trail[j];
                                 ctx.beginPath();
-                                ctx.lineJoin = "miter";
-                                ctx.miterLimit = 100;
-                                ctx.strokeStyle = tech.isEnergyHealth ? m.fieldMeterColor : tech.isAmmoSword ? "#c0c0c0" : "crimson";
-                                ctx.lineWidth = 5;
-                                ctx.fillStyle = "black";
-                                ctx.moveTo(this.bladeSegments[i].vertices[0].x, this.bladeSegments[i].vertices[0].y);
-                                for (let j = 0; j < this.bladeSegments[i].vertices.length; j++) {
-                                    ctx.lineTo(this.bladeSegments[i].vertices[j].x, this.bladeSegments[i].vertices[j].y)
+                                ctx.moveTo(vertices[0].x, vertices[0].y);
+
+                                for (let k = 1; k < vertices.length; k++) {
+                                    ctx.lineTo(vertices[k].x, vertices[k].y);
                                 };
+
+                                alpha += alphaStep;
                                 ctx.closePath();
-                                ctx.stroke();
+                                if (tech.isEnergyHealth) {
+                                    const eyeColor = m.fieldMeterColor;
+                                    const r = eyeColor[1];
+                                    const g = eyeColor[2];
+                                    const b = eyeColor[3];
+                                    const color = `#${r}${r}${g}${g}${b}${b}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+                                    ctx.fillStyle = color;
+                                } else {
+                                    ctx.fillStyle = `rgba(220, 20, 60, ${alpha})`;
+                                }
                                 ctx.fill();
-                                ctx.lineJoin = "round";
-                                ctx.miterLimit = 10;
                             }
                         }
-                        if (this.sword) {
-                            for (let i = 0; i < mob.length; i++) {
-                                if (Matter.Query.collides(this.sword, [mob[i]]).length > 0) {
-                                    const dmg = m.dmgScale * 6 * Math.sqrt(this.sword.speed);
-                                    if (m.health < 0.9) {
+                        for (let i = 0; i < this.bladeSegments.length; i++) {
+                            ctx.beginPath();
+                            ctx.lineJoin = "miter";
+                            ctx.miterLimit = 100;
+                            ctx.strokeStyle = tech.isEnergyHealth ? m.fieldMeterColor : tech.isAmmoSword ? "#c0c0c0" : "crimson";
+                            ctx.lineWidth = 5;
+                            ctx.fillStyle = "black";
+                            ctx.moveTo(this.bladeSegments[i].vertices[0].x, this.bladeSegments[i].vertices[0].y);
+                            for (let j = 0; j < this.bladeSegments[i].vertices.length; j++) {
+                                ctx.lineTo(this.bladeSegments[i].vertices[j].x, this.bladeSegments[i].vertices[j].y)
+                            };
+                            ctx.closePath();
+                            ctx.stroke();
+                            ctx.fill();
+                            ctx.lineJoin = "round";
+                            ctx.miterLimit = 10;
+                        }
+                    }
+                },
+                collision() {
+                    if (this.sword) {
+                        for (let i = 0; i < mob.length; i++) {
+                            if (Matter.Query.collides(this.sword, [mob[i]]).length > 0) {
+                                const dmg = m.dmgScale * Math.sqrt(this.sword.speed) * (tech.sizeIllusion ? 1.1 : 1) * (tech.isStabSword ? 1.5 : 1) * (tech.infinityEdge ? 1.1 : 1);
+                                if (!tech.soundSword) {
+                                    if (m.health < m.maxHealth) {
                                         if (tech.isEnergyHealth) {
                                             m.energy += 0.04;
                                         } else {
-                                            m.health += 0.001 * (dmg - mob[i].health);
-                                            if (m.health > m.maxHealth) m.health = m.maxHealth;
+                                            m.health += 0.01 * (dmg - mob[i].health);
                                             m.displayHealth();
                                         }
                                     } else {
@@ -31569,98 +32380,33 @@ const level = {
                                             m.displayHealth();
                                         }
                                     }
-                                    mob[i].damage(dmg, true);
-                                    simulation.drawList.push({
-                                        x: mob[i].position.x,
-                                        y: mob[i].position.y,
-                                        radius: Math.sqrt(dmg / this.sword.speed) * 50,
-                                        color: simulation.mobDmgColor,
-                                        time: simulation.drawTime
-                                    });
-                                    const angle = Math.atan2(mob[i].position.y - this.sword.position.y, mob[i].position.x - this.sword.position.x);
-                                    this.sword.force.x -= Math.cos(angle) * 5;
-                                    this.sword.force.y -= Math.sin(angle) * 5;
-                                    break
                                 }
+                                mob[i].damage(dmg, true);
+                                simulation.drawList.push({
+                                    x: mob[i].position.x,
+                                    y: mob[i].position.y,
+                                    radius: Math.abs(Math.log(dmg * this.sword.speed) * 40 * mob[i].damageReduction + 3),
+                                    color: (tech.soundSword ? "rgba(0, 0, 0, 0.3)" : simulation.mobDmgColor),
+                                    time: simulation.drawTime
+                                });
+                                break
                             }
                         }
-                    },
-                    createAndSwingSword(x = player.position.x, y = player.position.y, angle = m.angle) {
-                        if (this.cycle < m.cycle) {
-                            this.cycle = Infinity;
-                            m.fireCDcycle = Infinity;
-                            const handleWidth = 20;
-                            const handleHeight = 150;
-                            const handle = Bodies.rectangle(x, y, handleWidth, handleHeight, spawn.propsIsNotHoldable);
-                            bullet[bullet.length] = handle;
-                            handle.customName = "handle";
-                            bullet[bullet.length - 1].do = () => { };
-                            const bladeWidth = 100;
-                            const bladeHeight = 20;
-                            const numBlades = 15;
-                            const extensionFactor = 5;
-                            const bladeSegments = [];
-                            if ((angle > -Math.PI / 2 && angle < Math.PI / 2)) {
-                                for (let i = 0; i < numBlades; i++) {
-                                    const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
-                                    const bladeX = x + i * (bladeWidth / 20);
-                                    const bladeY = y - handleHeight / 2 - i * (bladeHeight / 4.5) * extensionFactor;
-
-                                    const vertices = [
-                                        { x: bladeX, y: bladeY - bladeHeight / 2 },
-                                        { x: bladeX + bladeWidth / 2, y: bladeY + bladeHeight / 2 },
-                                        { x: bladeX - bladeWidth / 2, y: bladeY + bladeHeight / 2 },
-                                        { x: bladeX, y: bladeY - bladeHeight / 2 + 10 },
-                                    ];
-
-                                    const blade = Bodies.fromVertices(bladeX, bladeY, vertices, spawn.propsIsNotHoldable);
-                                    bullet[bullet.length] = blade;
-                                    bullet[bullet.length - 1].do = () => { };
-                                    Matter.Body.rotate(blade, -Math.sin(i * (Math.PI / 270) * 15));
-                                    bladeSegments.push(blade);
-                                }
-                            } else {
-                                for (let i = 0; i < numBlades; i++) {
-                                    const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
-                                    const mirroredBladeX = x - i * (bladeWidth / 20);
-                                    const mirroredBladeY = y - handleHeight / 2 - i * (bladeHeight / 4.5) * extensionFactor;
-                                    const mirroredVertices = [
-                                        { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 },
-                                        { x: mirroredBladeX + bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
-                                        { x: mirroredBladeX - bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
-                                        { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 + 10 },
-                                    ];
-                                    const mirroredBlade = Bodies.fromVertices(mirroredBladeX, mirroredBladeY, mirroredVertices, spawn.propsIsNotHoldable);
-                                    bullet[bullet.length] = mirroredBlade;
-                                    bullet[bullet.length - 1].do = () => { };
-                                    Matter.Body.rotate(mirroredBlade, Math.sin(i * (Math.PI / 270) * 15));
-                                    bladeSegments.push(mirroredBlade);
-                                }
-                            }
-                            const sword = Body.create({
-                                parts: [handle, ...bladeSegments],
-                            });
-
-                            Composite.add(engine.world, sword);
-                            Matter.Body.setPosition(sword, { x, y });
-
-                            sword.collisionFilter.category = cat.bullet;
-                            sword.collisionFilter.mask = cat.mobBullet | cat.mob;
-                            Body.scale(sword, -1, 1, { x, y });
-                            // sword.frictionAir -= 0.01;
-
-                            return { sword, bladeSegments };
+                        if (Matter.Query.collides(this.sword, [genisis]).length > 0) {
+                            m.damage(-0.0142) //balanced!
                         }
-                    },
-                    fire() { }
-                };
-                b.guns.push(e);
-                const gunArray = b.guns.filter(
-                    (obj, index, self) =>
-                        index === self.findIndex((item) => item.name === obj.name)
-                );
-                b.guns = gunArray;
-            })();
+                    }
+                }
+            };
+            b.guns.push(e);
+            const gunArray = b.guns.filter(
+                (obj, index, self) =>
+                    index === self.findIndex((item) => item.name === obj.name)
+            );
+            b.guns = gunArray;
+        } else {
+            simulation.makeTextLog(`Thank you for using my sword mod<br>I'll save you the trouble of killing genisis<br><div style="font-family: monospace;">g.<span style="color: crimson;">damage</span>(Infinity)</div>`);
+            g.damage(Infinity);
         }
         simulation.makeTextLog(`<strong>arena</strong> by <span class='color-var'>Richard0820</span>`);
         let index = 0;
@@ -31673,21 +32419,13 @@ const level = {
         level.exit.y = -2530;
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
-        level.defaultZoom = 8000
+        level.defaultZoom = 2000
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#987654";
         color.map = "#765432" //custom map color
         color.block = "#876543";
         door.isClosing = true;
         door2.isClosing = true;
-        spawnStuff(1000, -3100, 4450, 3125, 50 / simulation.difficultyMode);
-        spawnStuff(5400, -2425, 200, 2250, 5 / simulation.difficultyMode);
-        spawnStuff(5625, -2425, 2000, 275, 5 / simulation.difficultyMode);
-        spawnStuff(5625, -2125, 850, 1125, 5 / simulation.difficultyMode);
-        spawnStuff(6500, -2150, 475, 650, 5 / simulation.difficultyMode);
-        spawnStuff(7000, -2125, 325, 275, 5 / simulation.difficultyMode);
-        spawnStuff(5650, -950, 300, 450, 5 / simulation.difficultyMode);
-        spawn.randomLevelBoss(4225, -575);
         for (let i = 0; i < 5; i++) {
             powerUps.spawn(-6075, -2000, "heal");
         }
@@ -31727,7 +32465,7 @@ const level = {
                 this.maxLife = this.life;
             }
 
-            draw(ctx) {
+            draw() {
                 ctx.beginPath();
                 ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -31786,7 +32524,10 @@ const level = {
             system.update();
         }
         function draw() {
-            system.particles.forEach(particle => particle.draw(ctx));
+            system.particles.forEach(particle => particle.draw());
+        }
+        for (let i = 0; i < system.particles.length; i++) {
+            system.particles[i].life = 0;
         }
         level.custom = () => {
             update();
@@ -31856,7 +32597,7 @@ const level = {
                     }
                 }
                 index2++;
-                simulation.makeTextLog(`If you want to keep this sword, visit <a href="https://github.com/Whyisthisnotavalable/n-scythe">https://github.com/Whyisthisnotavalable/n-scythe</a>. The sword is there.`)
+                setTimeout(() => { simulation.makeTextLog(`If you want to keep this sword, visit <a href="https://github.com/Whyisthisnotavalable/n-scythe">https://github.com/Whyisthisnotavalable/n-scythe</a>. The sword is there.`) }, 1000)
             }
             for (let i = 0; i < bladeSegments.length; i++) {
                 const blade = bladeSegments[i];
@@ -31934,7 +32675,419 @@ const level = {
             }
         };
         level.customTopLayer = () => { };
+        simulation.ephemera.push({
+            name: "genesis",
+            death: false,
+            pwuspawn: 0,
+            do() {
+                if (this.death === true) {
+                    b.explosion(g.pos, 200 * Math.random(), "#000000")
+                    setTimeout(() => {
+                        if (this.pwuspawn === 0) {
+                            powerUps.spawnBossPowerUp(g.pos.x, g.pos.y)
+                            this.pwuspawn++;
+                        }
+                        simulation.removeEphemera(this.name);
+                        simulation.removeEphemera("genisisScythe");
+                    }, 1000);
+                }
+                if (g.health >= 0) {
+                    if (g.health < g.maxHealth) {
+                        g.health++;
+                    }
+                    const dist = Matter.Vector.magnitudeSquared(Matter.Vector.sub(genisis.position, player.position));
+                    const time = Math.sqrt(dist) / 60;
+                    g.alive = true;
+                    g.targetX = m.pos.x + player.velocity.x * time;
+                    g.targetY = m.pos.y + player.velocity.y * time;
+                } else {
+                    this.death = true;
+                    g.alive = false;
+                }
+                if (g.alive) {
+                    g.cycle++;
+                    g.move()
+                    g.lookDefault();
+                    g.drawDefault();
+                    g.drawHealth();
+                    genisis.force.y += g.mass * simulation.g
+                    g.setFillColors();
+                    control.right = g.angle > -Math.PI * 2 / 5 && g.angle < Math.PI * 2 / 5;
+                    control.left = g.angle > Math.PI * 3 / 5 || g.angle < -Math.PI * 3 / 5;
+                    control.down = g.angle > Math.PI * 3 / 10 && g.angle < Math.PI * 7 / 10;
+                    if (Matter.Query.collides(genisis, body).length || Matter.Query.collides(genisisHead, map).length || Matter.Query.collides(genisisBodySensor, map).length && !control.down) {
+                        if (g.buttonCD_jump < g.cycle) {
+                            g.jump();
+                        }
+                    }
+                    control.up = g.angle > -Math.PI * 6 / 10 && g.angle < -Math.PI * 4 / 10;
 
+                    if (g.onGround) {
+                        g.groundControl()
+                    } else {
+                        g.airControl()
+                    }
+
+                    if (g.pos.y > simulation.fallHeight) {
+                        Matter.Body.setPosition(genisis, {
+                            x: level.exit.x,
+                            y: level.exit.y
+                        })
+                    }
+                } else {
+                    genisis.collisionFilter.mask = cat.map | cat.body;
+                    Matter.Body.setPosition(genisis, {
+                        x: 0,
+                        y: 0
+                    })
+                }
+
+                if (simulation.testing) {
+                    ctx.beginPath();
+                    let bodyDraw = genisisJumpSensor.vertices;
+                    ctx.moveTo(bodyDraw[0].x, bodyDraw[0].y);
+                    for (let j = 1; j < bodyDraw.length; ++j) {
+                        ctx.lineTo(bodyDraw[j].x, bodyDraw[j].y);
+                    }
+                    ctx.lineTo(bodyDraw[0].x, bodyDraw[0].y);
+                    ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    bodyDraw = genisisBody.vertices;
+                    ctx.moveTo(bodyDraw[0].x, bodyDraw[0].y);
+                    for (let j = 1; j < bodyDraw.length; ++j) {
+                        ctx.lineTo(bodyDraw[j].x, bodyDraw[j].y);
+                    }
+                    ctx.lineTo(bodyDraw[0].x, bodyDraw[0].y);
+                    ctx.fillStyle = "rgba(0, 255, 255, 0.25)";
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    bodyDraw = genisisHead.vertices;
+                    ctx.moveTo(bodyDraw[0].x, bodyDraw[0].y);
+                    for (let j = 1; j < bodyDraw.length; ++j) {
+                        ctx.lineTo(bodyDraw[j].x, bodyDraw[j].y);
+                    }
+                    ctx.lineTo(bodyDraw[0].x, bodyDraw[0].y);
+                    ctx.fillStyle = "rgba(255, 255, 0, 0.4)";
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    bodyDraw = genisisHeadSensor.vertices;
+                    ctx.moveTo(bodyDraw[0].x, bodyDraw[0].y);
+                    for (let j = 1; j < bodyDraw.length; ++j) {
+                        ctx.lineTo(bodyDraw[j].x, bodyDraw[j].y);
+                    }
+                    ctx.lineTo(bodyDraw[0].x, bodyDraw[0].y);
+                    ctx.fillStyle = "rgba(0, 0, 255, 0.25)";
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    bodyDraw = genisisBodySensor.vertices;
+                    ctx.moveTo(bodyDraw[0].x, bodyDraw[0].y);
+                    for (let j = 1; j < bodyDraw.length; ++j) {
+                        ctx.lineTo(bodyDraw[j].x, bodyDraw[j].y);
+                    }
+                    ctx.lineTo(bodyDraw[0].x, bodyDraw[0].y);
+                    ctx.fillStyle = "rgba(255, 0, 255, 0.25)";
+                    ctx.fill();
+                }
+
+                Events.on(engine, "collisionStart", function (event) {
+                    g.genisisOnGroundCheck(event);
+                    GenisisCollisionChecks(event);
+                });
+                Events.on(engine, "collisionActive", function (event) {
+                    g.genisisOnGroundCheck(event);
+                });
+                Events.on(engine, "collisionEnd", function (event) {
+                    g.genisisOffGroundCheck(event);
+                });
+            }
+        })
+        let evo = {
+            isLongBlade: true,
+            isScytheRange: true,
+            scytheRange: 3,
+            isScytheRad: false,
+            scytheRad: 0,
+            isDoubleScythe: false,
+            isPhaseScythe: false,
+            isMeleeScythe: false,
+            isStunScythe: false,
+        };
+        simulation.ephemera.push({
+            name: "genisisScythe",
+            cycle: 0,
+            scythe: undefined,
+            bladeSegments: undefined,
+            bladeTrails: [],
+            angle: 0,
+            constraint: undefined,
+            fireCD: 0,
+            do() {
+                if (isOwned) {
+                    if (g.health < 500 && g.health > 200) {
+                        evo = {
+                            isLongBlade: true,
+                            isScytheRange: true,
+                            scytheRange: 3,
+                            isScytheRad: false,
+                            scytheRad: 1,
+                            isDoubleScythe: true,
+                            isPhaseScythe: false,
+                            isMeleeScythe: false,
+                            isStunScythe: false,
+                        };
+                    } else if (g.health < 200 && g.health > 50) {
+                        evo = {
+                            isLongBlade: true,
+                            isScytheRange: true,
+                            scytheRange: 3,
+                            isScytheRad: true,
+                            scytheRad: 1,
+                            isDoubleScythe: true,
+                            isPhaseScythe: true,
+                            isMeleeScythe: true,
+                            isStunScythe: true,
+                        };
+                    } else if (g.health < 50) {
+                        evo = {
+                            isLongBlade: true,
+                            isScytheRange: true,
+                            scytheRange: 9,
+                            isScytheRad: true,
+                            scytheRad: 6,
+                            isDoubleScythe: true,
+                            isPhaseScythe: true,
+                            isMeleeScythe: true,
+                            isStunScythe: true,
+                        };
+                    }
+                    if (g.cycle > this.fireCD && !this.scythe) {
+                        this.fireCD = g.cycle + 30;
+                        if (!this.scythe) {
+                            ({ scythe: this.scythe, bladeSegments: this.bladeSegments } = this.createAndSwingScythe());
+                            this.angle = g.angle;
+                        }
+                    }
+                    if (this.scythe && g.cycle > this.cycle + 30 || !g.alive && this.scythe) {
+                        Composite.remove(engine.world, this.scythe);
+                        this.scythe.parts.forEach(part => {
+                            Composite.remove(engine.world, part);
+                            const index = bullet.indexOf(part);
+                            if (index !== -1) {
+                                bullet.splice(index, 1);
+                            }
+                        });
+                        this.scythe = undefined;
+                        this.bladeTrails = [];
+                    } else {
+                        if (this.scythe && !evo.isMeleeScythe) {
+                            if (!(this.angle > -Math.PI / 2 && this.angle < Math.PI / 2)) {
+                                Matter.Body.setAngularVelocity(this.scythe, -Math.PI * 0.15 - (evo.scytheRad ? evo.scytheRad * 0.1 : 0));
+                            } else {
+                                Matter.Body.setAngularVelocity(this.scythe, Math.PI * 0.15 + (evo.scytheRad ? evo.scytheRad * 0.1 : 0));
+                            }
+                            Matter.Body.setVelocity(this.scythe, {
+                                x: Math.cos(this.angle) * 30,
+                                y: Math.sin(this.angle) * 30
+                            });
+                        } else if (this.scythe && evo.isMeleeScythe) {
+                            if (!(this.angle > -Math.PI / 2 && this.angle < Math.PI / 2)) {
+                                Matter.Body.setAngularVelocity(this.scythe, -Math.PI * 0.1 + (evo.isStunScythe ? 0.1 : 0));
+                            } else {
+                                Matter.Body.setAngularVelocity(this.scythe, Math.PI * 0.1 - (evo.isStunScythe ? 0.1 : 0));
+                            }
+                            Matter.Body.setPosition(this.scythe, genisis.position);
+                        }
+                    }
+                    if (this.scythe) {
+                        for (let i = 0; i < this.bladeSegments.length; i++) {
+                            const blade = this.bladeSegments[i];
+                            const trail = this.bladeTrails[i] || [];
+                            const vertices = blade.vertices.map(vertex => ({ x: vertex.x, y: vertex.y }));
+                            trail.push(vertices);
+                            if (trail.length > 10) {
+                                trail.shift();
+                            }
+                            this.bladeTrails[i] = trail;
+                        }
+                        for (let i = 0; i < this.bladeTrails.length; i++) {
+                            const trail = this.bladeTrails[i];
+
+                            const alphaStep = 1 / trail.length;
+                            let alpha = 0;
+
+                            for (let j = 0; j < trail.length; j++) {
+                                const vertices = trail[j];
+                                ctx.beginPath();
+                                ctx.moveTo(vertices[0].x, vertices[0].y);
+
+                                for (let k = 1; k < vertices.length; k++) {
+                                    ctx.lineTo(vertices[k].x, vertices[k].y);
+                                };
+
+                                alpha += alphaStep;
+                                ctx.closePath();
+                                ctx.fillStyle = `rgba(100, 20, 255, ${alpha})`;
+                                ctx.fill();
+                            }
+                        }
+                        for (let i = 0; i < this.bladeSegments.length; i++) {
+                            ctx.beginPath();
+                            ctx.lineJoin = "miter";
+                            ctx.miterLimit = 100;
+                            ctx.strokeStyle = `rgb(100, 20, 255)`;
+                            ctx.lineWidth = 5;
+                            ctx.fillStyle = "black";
+                            ctx.moveTo(this.bladeSegments[i].vertices[0].x, this.bladeSegments[i].vertices[0].y);
+                            for (let j = 0; j < this.bladeSegments[i].vertices.length; j++) {
+                                ctx.lineTo(this.bladeSegments[i].vertices[j].x, this.bladeSegments[i].vertices[j].y)
+                            };
+                            ctx.closePath();
+                            ctx.stroke();
+                            ctx.fill();
+                            ctx.lineJoin = "round";
+                            ctx.miterLimit = 10;
+                        }
+                    }
+                    if (this.scythe) {
+                        for (let i = 0; i < mob.length; i++) {
+                            if (Matter.Query.collides(this.scythe, [mob[i]]).length > 0) {
+                                const dmg = m.dmgScale * 0.12 * 2.73 * (evo.isLongBlade ? 1.3 : 1) * (evo.scytheRange ? evo.scytheRange * 1.15 : 1) * (evo.isDoubleScythe ? 0.9 : 1) * (evo.scytheRad ? evo.scytheRad * 1.5 : 1);
+                                mob[i].damage(dmg, true);
+                                simulation.drawList.push({
+                                    x: mob[i].position.x,
+                                    y: mob[i].position.y,
+                                    radius: Math.sqrt(dmg) * 50,
+                                    color: simulation.mobDmgColor,
+                                    time: simulation.drawTime
+                                });
+                                if (!evo.isMeleeScythe) {
+                                    const angle = Math.atan2(mob[i].position.y - this.scythe.position.y, mob[i].position.x - this.scythe.position.x);
+                                    this.scythe.force.x += Math.cos(angle) * 2;
+                                    this.scythe.force.y += Math.sin(angle) * 2;
+                                }
+                                if (evo.isStunScythe) {
+                                    mobs.statusStun(mob[i], 90);
+                                }
+                                break
+                            }
+                        }
+                        if (Matter.Query.collides(this.scythe, [player]).length > 0 && m.immuneCycle < m.cycle) {
+                            const dmg = 0.02 * (evo.isLongBlade ? 1.3 : 1) * (evo.scytheRange ? evo.scytheRange * 1.15 : 1) * (evo.isDoubleScythe ? 0.9 : 1) * (evo.scytheRad ? evo.scytheRad * 1.5 : 1); // actual scythe scallings one tap the player so this is nerfed for genisis
+                            m.damage(dmg);
+                            m.immuneCycle = m.cycle + 10;
+                            simulation.drawList.push({
+                                x: player.position.x,
+                                y: player.position.y,
+                                radius: Math.sqrt(dmg) * 50,
+                                color: simulation.mobDmgColor,
+                                time: simulation.drawTime
+                            });
+                            if (!evo.isMeleeScythe) {
+                                const angle = Math.atan2(player.position.y - this.scythe.position.y, player.position.x - this.scythe.position.x);
+                                this.scythe.force.x += Math.cos(angle) * 2;
+                                this.scythe.force.y += Math.sin(angle) * 2;
+                            }
+                        }
+                    }
+                }
+            },
+            createAndSwingScythe(x = genisis.position.x, y = genisis.position.y, angle = g.angle) {
+                this.cycle = g.cycle + 60 + (evo.scytheRange * 6);
+                const handleWidth = 20;
+                const handleHeight = 200 + (evo.isLongBlade ? 30 : 0) + (evo.isMeleeScythe ? 200 : 0);
+                const handle = Bodies.rectangle(x, y, handleWidth, handleHeight, spawn.propsIsNotHoldable);
+                bullet[bullet.length] = handle;
+                bullet[bullet.length - 1].do = () => { };
+                const bladeWidth = 100;
+                const bladeHeight = 20;
+                const numBlades = 10 + (evo.isLongBlade ? 1 : 0) + (evo.isMeleeScythe ? 3 : 0);
+                const extensionFactor = 5.5;
+                const bladeSegments = [];
+                if (!evo.isDoubleScythe) {
+                    for (let i = 0; i < numBlades; i++) {
+                        const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
+                        const bladeX = x - handleWidth / 2 + i * (bladeWidth / 2) - extensionFactorFraction * (bladeWidth / 2);
+                        const bladeY = y + handleHeight / 2 - i * (bladeHeight / (3 ** i));
+
+                        const vertices = [
+                            { x: bladeX, y: bladeY - bladeHeight / 2 },
+                            { x: bladeX + bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                            { x: bladeX - bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                            { x: bladeX, y: bladeY - bladeHeight / 2 + 10 },
+                        ];
+
+                        const blade = Bodies.fromVertices(bladeX, bladeY, vertices, spawn.propsIsNotHoldable);
+                        bullet[bullet.length] = blade;
+                        bullet[bullet.length - 1].do = () => { };
+                        Matter.Body.rotate(blade, -Math.sin(i * (Math.PI / 180) * 5));
+                        bladeSegments.push(blade);
+                    }
+                } else {
+                    for (let i = 0; i < numBlades; i++) {
+                        const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
+                        const bladeX = x - handleWidth / 2 + i * (bladeWidth / 2) - extensionFactorFraction * (bladeWidth / 2);
+                        const bladeY = y + handleHeight / 2 - i * (bladeHeight / (3 ** i));
+
+                        const vertices = [
+                            { x: bladeX, y: bladeY - bladeHeight / 2 },
+                            { x: bladeX + bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                            { x: bladeX - bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                            { x: bladeX, y: bladeY - bladeHeight / 2 + 10 },
+                        ];
+
+                        const blade = Bodies.fromVertices(bladeX, bladeY, vertices, spawn.propsIsNotHoldable);
+                        bullet[bullet.length] = blade;
+                        bullet[bullet.length - 1].do = () => { };
+                        Matter.Body.rotate(blade, -Math.sin(i * (Math.PI / 180) * 5));
+                        bladeSegments.push(blade);
+                    }
+
+                    for (let i = 0; i < numBlades; i++) {
+                        const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
+                        const bladeX = x + handleWidth / 2 - i * (bladeWidth / 2) + extensionFactorFraction * (bladeWidth / 2);
+                        const bladeY = y - handleHeight / 2 - i * (bladeHeight / (3 ** i));
+
+                        const vertices = [
+                            { x: bladeX, y: bladeY - bladeHeight / 2 },
+                            { x: bladeX + bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                            { x: bladeX - bladeWidth / 2, y: bladeY + bladeHeight / 2 },
+                            { x: bladeX, y: bladeY - bladeHeight / 2 + 10 },
+                        ];
+
+                        const blade = Bodies.fromVertices(bladeX, bladeY, vertices, spawn.propsIsNotHoldable);
+                        bullet[bullet.length] = blade;
+                        bullet[bullet.length - 1].do = () => { };
+                        Matter.Body.rotate(blade, -Math.sin(i * (Math.PI / 180) * 5) + Math.PI);
+                        bladeSegments.push(blade);
+                    }
+                }
+                const scythe = Body.create({
+                    parts: [handle, ...bladeSegments],
+                });
+                Composite.add(engine.world, scythe);
+                Matter.Body.setPosition(scythe, { x, y });
+
+                scythe.collisionFilter.category = cat.body;
+                scythe.collisionFilter.mask = cat.mobBullet | cat.player;
+                if (!evo.isMeleeScythe) {
+                    setTimeout(() => {
+                        scythe.collisionFilter.mask = cat.mobBullet | cat.mob | cat.player;
+                    }, 1000)
+                }
+                if ((angle > -Math.PI / 2 && angle < Math.PI / 2)) {
+                    Body.scale(scythe, -1, 1, { x, y });
+                }
+
+                scythe.frictionAir -= 0.01;
+
+                return { scythe, bladeSegments };
+            },
+        })
         spawn.mapRect(-10000, 0, 20000, 2000);
         spawn.mapRect(-10000, -10000, 2000, 10000);
         spawn.mapRect(8000, -10000, 2000, 10000);
@@ -31946,56 +33099,54 @@ const level = {
         spawn.mapRect(4000, -10, 100, 20);
 
         spawn.mapRect(-1000, -10000, 2000, 8000);
-        spawn.mapRect(-500, -10000, 1000, 9700);
-        function createSword(x = 0, y = 0, angle = 0) { //sword asthetic
+        // spawn.mapRect(-500, -10000, 1000, 9700);
+        function createSword(x = 0, y = 0) { //sword asthetic
             const handleWidth = 20;
             const handleHeight = 150;
             const handle = Bodies.rectangle(x, y, handleWidth, handleHeight, spawn.propsIsNotHoldable);
             bullet[bullet.length] = handle;
             handle.customName = "handle";
             bullet[bullet.length - 1].do = () => { };
-            const bladeWidth = 100;
-            const bladeHeight = 20;
+            const pommelWidth = 30;
+            const pommelHeight = 40;
+            const pommelVertices = [
+                { x: x, y: y + handleHeight / 2 + pommelHeight / 2 },
+                { x: x + pommelWidth / 2, y: y + handleHeight / 2 },
+                { x: x, y: y + handleHeight / 2 - pommelHeight / 2 },
+                { x: x - pommelWidth / 2, y: y + handleHeight / 2 },
+            ];
+            const pommel = Bodies.fromVertices(x, y + handleHeight / 2, pommelVertices, spawn.propsIsNotHoldable);
+            bullet[bullet.length] = pommel;
+            bullet[bullet.length - 1].do = () => { };
+            if (tech.soundSword) {
+                bullet[bullet.length - 1].draw = () => { };
+            }
+            // Blade setup
+            const bladeWidth = 100 * (tech.soundSword ? 3 : 1);
+            const bladeHeight = 20 * (tech.soundSword ? 3 : 1);
             const numBlades = 15;
             const extensionFactor = 5;
             const bladeSegments = [];
-            if ((angle > -Math.PI / 2 && angle < Math.PI / 2)) {
-                for (let i = 0; i < numBlades; i++) {
-                    const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
-                    const bladeX = x + i * (bladeWidth / 20);
-                    const bladeY = y - handleHeight / 2 - i * (bladeHeight / 4.5) * extensionFactor;
-
-                    const vertices = [
-                        { x: bladeX, y: bladeY - bladeHeight / 2 },
-                        { x: bladeX + bladeWidth / 2, y: bladeY + bladeHeight / 2 },
-                        { x: bladeX - bladeWidth / 2, y: bladeY + bladeHeight / 2 },
-                        { x: bladeX, y: bladeY - bladeHeight / 2 + 10 },
-                    ];
-
-                    const blade = Bodies.fromVertices(bladeX, bladeY, vertices, spawn.propsIsNotHoldable);
-                    bullet[bullet.length] = blade;
-                    bullet[bullet.length - 1].do = () => { };
-                    Matter.Body.rotate(blade, -Math.sin(i * (Math.PI / 270) * 15));
-                    bladeSegments.push(blade);
+            for (let i = 0; i < numBlades; i++) {
+                const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
+                const mirroredBladeX = x - i * (bladeWidth / 20);
+                const mirroredBladeY = y - handleHeight / 2 - i * (bladeHeight / 4.5) * extensionFactor;
+                const mirroredVertices = [
+                    { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 },
+                    { x: mirroredBladeX + bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
+                    { x: mirroredBladeX - bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
+                    { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 + 10 },
+                ];
+                const mirroredBlade = Bodies.fromVertices(mirroredBladeX, mirroredBladeY, mirroredVertices, spawn.propsIsNotHoldable);
+                bullet[bullet.length] = mirroredBlade;
+                bullet[bullet.length - 1].do = () => { };
+                if (tech.soundSword) {
+                    bullet[bullet.length - 1].draw = () => { };
                 }
-            } else {
-                for (let i = 0; i < numBlades; i++) {
-                    const extensionFactorFraction = (i / (numBlades - 1)) * extensionFactor;
-                    const mirroredBladeX = x - i * (bladeWidth / 20);
-                    const mirroredBladeY = y - handleHeight / 2 - i * (bladeHeight / 4.5) * extensionFactor;
-                    const mirroredVertices = [
-                        { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 },
-                        { x: mirroredBladeX + bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
-                        { x: mirroredBladeX - bladeWidth / 2, y: mirroredBladeY + bladeHeight / 2 },
-                        { x: mirroredBladeX, y: mirroredBladeY - bladeHeight / 2 + 10 },
-                    ];
-                    const mirroredBlade = Bodies.fromVertices(mirroredBladeX, mirroredBladeY, mirroredVertices, spawn.propsIsNotHoldable);
-                    bullet[bullet.length] = mirroredBlade;
-                    bullet[bullet.length - 1].do = () => { };
-                    Matter.Body.rotate(mirroredBlade, Math.sin(i * (Math.PI / 270) * 15));
-                    bladeSegments.push(mirroredBlade);
-                }
+                Matter.Body.rotate(mirroredBlade, Math.sin(i * (Math.PI / 270) * 15));
+                bladeSegments.push(mirroredBlade);
             }
+            bladeSegments.push(pommel);
             const sword = Body.create({
                 parts: [handle, ...bladeSegments],
             });
@@ -32004,27 +33155,11 @@ const level = {
             Matter.Body.setPosition(sword, { x, y });
 
             sword.collisionFilter.category = cat.bullet;
-            sword.collisionFilter.mask = cat.bullet;
+            sword.collisionFilter.mask = cat.mobBullet | cat.powerup | cat.mob;
             Body.scale(sword, -1, 1, { x, y });
-            Body.rotate(sword, Math.PI / 1.05)
-            sword.frictionAir = -0.01;
+            Body.rotate(sword, Math.PI + Math.PI / 15)
 
             return { sword, bladeSegments };
-        }
-        function spawnStuff(x, y, width, height, num) {
-            for (let i = 0; i < num; i++) {
-                randomMob(x + width * Math.random(), y + height * Math.random(), Infinity)
-            }
-        }
-        function randomMob(x, y, chance = 1) {
-            if (spawn.spawnChance(chance) || chance === Infinity) {
-                const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
-                spawn[pick](x, y);
-            }
-            if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
-                const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
-                spawn[pick](x, y);
-            }
         }
     },
     soft() {
@@ -32582,6 +33717,386 @@ const level = {
         spawn.bodyRect(-875, 75, 25, 100);
         let hardBody = body[body.length - 1];
         hardBody.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.powerUp
+    },
+    flappyGon() { //community map by digin
+        level.announceMobTypes();
+        simulation.makeTextLog(`<strong>flappy n-gon</strong> by <span style="font-weight: bold;color: purple;">Digin</span>`);
+        setTimeout(() => { simulation.makeTextLog("<b>gravity</b> is a <b>choice</b>"); }, 1000);
+        setTimeout(() => { simulation.makeTextLog("everyone will fly"); }, 2000);
+        setTimeout(() => { simulation.makeTextLog("<b>jump from the post and find out</b>"); }, 3000);
+        level.setPosToSpawn(0, -50); //normal spawn
+        level.exit.x = 8600;
+        level.exit.y = -1100;
+        level.defaultZoom = 1800;
+        simulation.zoomTransition(level.defaultZoom);
+        document.body.style.backgroundColor = "#55FF55";
+
+        var slimey = level.hazard(-200, -10, 9000, 10);
+
+        // allow "flight"
+
+        const old_playerOffGroundCheck = playerOffGroundCheck;
+
+        playerOffGroundCheck = (event) => {
+            old_playerOffGroundCheck(event);
+            if (player.position.y < -300) {
+                m.onGround = true;
+            }
+        };
+
+        const oldNextLevel = level.nextLevel;
+        level.nextLevel = () => { // clear the flappy effects, because apparently there's no established api for this
+            playerOffGroundCheck = old_playerOffGroundCheck;
+
+            level.nextLevel = oldNextLevel;
+            oldNextLevel();
+        };
+
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); // standard bumps
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+        spawn.mapRect(level.exit.x - 100, level.exit.y + 40, 200, 100);
+
+        // room basis
+        spawn.mapRect(-200, 0, 9000, 100);
+        spawn.mapRect(-200, -1500, 9000, 100);
+        spawn.mapRect(-200, -1500, 100, 1500);
+        spawn.mapRect(8700, -1500, 100, 1500);
+
+        // somewhat randomized flappy pylons
+        const pylon = 1500; // height of the entire pylon assembly
+        for (var i = 0; i < 10; i++) {
+            var xbasis = 700 + i * 750;
+            var window = 300 + (10 - i) * 50;
+            var toph = pylon - window - 400 + (Math.random() - 0.5) * 400 - i * 50;
+            if (i == 0) { // on the first one, the lower pile will always have a height of 300
+                toph = pylon - window - 300;
+            }
+            spawn.mapRect(xbasis, -1500, 100, toph);
+            spawn.mapRect(xbasis, toph + window - pylon, 100, pylon - toph - window);
+            if (i < 9) {
+                spawn.randomMob(xbasis + 300, Math.random() * -1400);
+            }
+            else {
+                spawn.randomLevelBoss(xbasis + 300, Math.random() * -1400);
+            }
+            if (i == 5) {
+                spawn.secondaryBossChance(xbasis + 300, Math.random() * -1400);
+            }
+        }
+
+        level.custom = () => {
+            level.exit.drawAndCheck();
+            player.onGround = true;
+            level.enter.draw();
+        };
+        const slimeRise = 0.15;
+        level.customTopLayer = () => {
+            slimey.height += slimeRise;
+            slimey.min.y -= slimeRise;
+            slimey.query();
+        };
+        powerUps.addResearchToLevel();
+    },
+    rings() {
+        level.announceMobTypes();
+        simulation.makeTextLog(`<strong>rings</strong> by <span style="font-weight: bold;color: purple;">ThatLittleFrog</span>`);
+        setTimeout(() => {
+            simulation.makeTextLog("<b>go up</b>");
+        }, 2000);
+        level.setPosToSpawn(0, -2000); // spawn high up so you can go to the bottom of the lowest ring without tripping the too-low reset
+        level.exit.x = 0;
+        level.exit.y = -6400;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
+        level.defaultZoom = 1800;
+        simulation.zoomTransition(level.defaultZoom);
+        document.body.style.backgroundColor = "#d8dadf";
+
+        function mkrect(x, y, w, h) {
+            let who = body[body.length] = Bodies.rectangle(x, y, w, h, {
+                collisionFilter: {
+                    category: cat.map,
+                    mask: cat.body | cat.player | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                },
+                inertia: Infinity, //prevents rotation
+                isNotHoldable: true,
+                friction: 1,
+                frictionStatic: 1,
+                restitution: 0,
+                frictionAir: 1,
+                isStatic: true
+            });
+            Composite.add(engine.world, who);
+            who.classType = "body";
+            return body[body.length - 1];
+        }
+
+        function makeRing(x, y, linegth, thicc = 200) { // I don't feel like doing trigonometry, so linegth is slightly different from the radius
+            var _shape = [undefined, undefined, undefined, undefined];
+            _shape[0] = mkrect(x - linegth / 2 - thicc, y - linegth / 2 - thicc, linegth, thicc);
+            _shape[1] = mkrect(x - linegth / 2 - thicc, y - linegth / 2, thicc, linegth);
+            _shape[2] = mkrect(x - linegth / 2, y + linegth / 2 - thicc, linegth, thicc);
+            _shape[3] = mkrect(x + linegth / 2 - thicc, y - linegth / 2 - thicc, thicc, linegth - thicc * 2);
+            let ret = {
+                shape: _shape,
+                x: x,
+                y: y,
+                r: 0,
+                rot(ang) {
+                    this.r = ang;
+                    let offs = 0;
+                    for (let shape of this.shape) {
+                        offs += Math.PI / 2;
+                        Matter.Body.setAngle(shape, ang);
+                        if (shape == this.shape[3]) {
+                            Matter.Body.setPosition(shape, {
+                                x: this.x + Math.cos(ang + offs) * (linegth / 2 - thicc / 2) - Math.cos(ang + offs + Math.PI / 2) * thicc,
+                                y: this.y + Math.sin(ang + offs) * (linegth / 2 - thicc / 2) - Math.sin(ang + offs + Math.PI / 2) * thicc
+                            });
+                        }
+                        else {
+                            Matter.Body.setPosition(shape, {
+                                x: this.x + Math.cos(ang + offs) * (linegth / 2 - thicc / 2),
+                                y: this.y + Math.sin(ang + offs) * (linegth / 2 - thicc / 2)
+                            });
+                        }
+                    }
+                },
+                rotBy(ang) {
+                    this.rot(this.r + ang);
+                }
+            };
+            ret.rot(0);
+            return ret;
+        }
+
+        var inner = makeRing(level.enter.x, level.enter.y, 1000);
+        var mid = makeRing(level.enter.x, level.enter.y, 2500);
+        var mid2 = makeRing(level.enter.x, level.enter.y, 4000);
+        var out = makeRing(level.enter.x, level.enter.y, 6000);
+
+        spawn.randomMob(level.enter.x + 250, level.enter.y);
+
+        spawn.randomMob(level.enter.x + 1250, level.enter.y);
+        spawn.randomMob(level.enter.x - 1250, level.enter.y);
+        spawn.randomMob(level.enter.x, level.enter.y + 1250);
+        spawn.randomMob(level.enter.x, level.enter.y - 1250);
+        spawn.randomMob(level.enter.x + 1250, level.enter.y + 500);
+        spawn.randomMob(level.enter.x - 1250, level.enter.y + 500);
+        spawn.randomMob(level.enter.x + 500, level.enter.y + 1250);
+        spawn.randomMob(level.enter.x + 500, level.enter.y - 1250);
+
+        spawn.randomMob(level.enter.x + 2750, level.enter.y);
+        spawn.randomMob(level.enter.x - 2750, level.enter.y);
+        spawn.randomMob(level.enter.x, level.enter.y + 2750);
+        spawn.randomMob(level.enter.x, level.enter.y - 2750);
+        spawn.randomMob(level.enter.x + 2750, level.enter.y + 500);
+        spawn.randomMob(level.enter.x - 2750, level.enter.y + 500);
+        spawn.randomMob(level.enter.x + 500, level.enter.y + 2750);
+        spawn.randomMob(level.enter.x + 500, level.enter.y - 2750);
+
+        spawn.randomLevelBoss(level.enter.x, level.enter.y - 4250);
+        spawn.secondaryBossChance(level.enter.x, level.enter.y + 4250);
+
+        level.custom = () => {
+            level.exit.drawAndCheck();
+            level.enter.draw();
+        };
+        level.customTopLayer = () => {
+            inner.rotBy(0.01);
+            mid.rotBy(-0.005);
+            mid2.rotBy(0.003);
+            out.rotBy(-0.002);
+        };
+
+        powerUps.addResearchToLevel();
+    },
+    trial() { // trial, collab between Cirryn and Tarantula Hawk
+        simulation.makeTextLog(`<strong>trial</strong> by <span class='color-var'>Cirryn and Tarantula Hawk</span>`);
+        level.setPosToSpawn(0, -50);
+        level.exit.x = 4150;
+        level.exit.y = -30;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
+        level.defaultZoom = 1800;
+        simulation.zoomTransition(level.defaultZoom);
+        document.body.style.backgroundColor = "#d8dadf";
+        const button = level.button(2000, 0);
+        const door = level.door(3930, -300, 40, 300, 300, 10);
+        door.isClosing = false;
+        var didTrialBegin = false;
+
+        const customMob = {
+            assassin(x, y) { // modified slasher
+                mobs.spawn(x, y, 3, 30, "black");
+                let me = mob[mob.length - 1];
+                Matter.Body.rotate(me, 2 * Math.PI * Math.random());
+                me.accelMag = 0.0008 * simulation.accelScale;
+                me.torqueMagnitude = 0.00002 * me.inertia * (Math.random() > 0.5 ? -1 : 1);
+                me.frictionStatic = 0;
+                me.frictionAir = 0.08;
+                me.delay = 120 * simulation.CDScale;
+                me.cd = 0;
+                spawn.shield(me, x, y);
+                me.damageReduction = 0;
+                const start = window.performance.now(); // they only last ~ten seconds
+                const lifespan = 15000 + 700 * (Math.random() - 0.5);
+                me.onDamage = function () {
+                    Matter.Body.setAngularVelocity(me, me.angularVelocity + 1);
+                };
+                me.do = function () {
+                    this.checkStatus();
+                    this.alwaysSeePlayer();
+                    this.attraction();
+                    this.health = 1 - (window.performance.now() - start) / lifespan;
+                    if (this.health < 0) {
+                        this.death();
+                    }
+                    Matter.Body.setAngularVelocity(me, me.angularVelocity + 0.05);
+                };
+            },
+            mercenary(x, y) { // fast boi
+                mobs.spawn(x, y, 3, 60, "white");
+                let me = mob[mob.length - 1];
+                Matter.Body.rotate(me, 2 * Math.PI * Math.random());
+                me.accelMag = 0.001 * simulation.accelScale;
+                me.torqueMagnitude = 0.00001 * me.inertia * (Math.random() > 0.5 ? -1 : 1);
+                me.frictionStatic = 0;
+                me.frictionAir = 0.03;
+                me.delay = 120 * simulation.CDScale;
+                me.cd = 0;
+                spawn.shield(me, x, y);
+                me.damageReduction = 0;
+                const start = window.performance.now(); // they only last ~ten seconds
+                const lifespan = 25000 + 700 * (Math.random() - 0.5);
+                me.onDamage = function () {
+                    Matter.Body.setAngularVelocity(me, me.angularVelocity + 1);
+                };
+                me.do = function () {
+                    this.checkStatus();
+                    this.attraction();
+                    this.health = 1 - (window.performance.now() - start) / lifespan;
+                    if (this.health < 0) {
+                        this.death();
+                    }
+                    this.alwaysSeePlayer();
+                };
+            }
+            // eventually maybe add more custom mob types
+        };
+
+        function randomWave(count, source) { // generates a wave list from a source
+            // checks in spawn first, then customMob, for the sources
+            var ret = [];
+            for (var i = 0; i < count; i++) {
+                var pick = source[Math.floor(Math.random() * source.length)];
+                if (spawn[pick]) {
+                    ret.push(spawn[pick]);
+                }
+                else if (customMob[pick]) {
+                    ret.push(customMob[pick]);
+                }
+            }
+            return ret;
+        }
+
+        function wave(mobs) { // takes a list of functions that accept x,y coordinates to spawn a mob and spawns them in the ceiling
+            for (var i = 0; i < mobs.length; i++) {
+                var x = 1000 + 2400 * i / mobs.length + 200 * (Math.random() - 0.5);
+                var y = -950 - 100 * Math.random();
+                mobs[i](x, y);
+            }
+            const ammoCount = Math.random() * (10 - simulation.difficulty / 4);
+            for (var i = 0; i < ammoCount; i++) {
+                powerUps.spawn(3300, -1000, "ammo");
+            }
+        }
+
+        level.custom = () => {
+            door.openClose();
+            level.exit.drawAndCheck();
+            level.enter.draw();
+        };
+        level.customTopLayer = () => {
+            button.query();
+            button.draw();
+            door.draw();
+            if (!button.isUp && !didTrialBegin) {
+                didTrialBegin = true;
+                simulation.makeTextLog('<strong>The Trial has begun.</strong>');
+
+                setTimeout(() => {
+                    simulation.makeTextLog('<span style="color: purple;">first wave (domitable)</span>');
+                    wave(randomWave(2 + simulation.difficulty * 0.1, spawn.fullPickList));
+                }, 3000);
+
+                setTimeout(() => {
+                    simulation.makeTextLog('<span style="color: purple;">second wave (domitable)</span>');
+                    wave(randomWave(2 + simulation.difficulty * 0.1, spawn.fullPickList));
+                }, 13000);
+
+                setTimeout(() => {
+                    simulation.makeTextLog('<span style="color: purple;">third wave <strong>(indomitable)</strong></span>');
+                    wave(randomWave(4, ["assassin"]));
+                }, 23000);
+
+                setTimeout(() => {
+                    simulation.makeTextLog('<span style="color: purple;">fourth wave (domitable)</span>');
+                    wave(randomWave(4 + simulation.difficulty / 2, spawn.fullPickList));
+                }, 39000);
+
+                setTimeout(() => {
+                    simulation.makeTextLog('<span style="color: purple;">fifth wave (domitable)</span>');
+                    wave(randomWave(4 + simulation.difficulty / 2, spawn.fullPickList));
+                }, 49000);
+
+                setTimeout(() => {
+                    simulation.makeTextLog('<span style="color: purple;">sixth wave <strong>(indomitable)</strong></span>');
+                    wave(randomWave(7, ["mercenary"]));
+                }, 59000);
+
+                setTimeout(() => {
+                    simulation.makeTextLog('<span style="color: red;">seventh wave <strong>(boss)</strong></span>');
+                    spawn.randomLevelBoss(700, -1000);
+                    var mainBoss = mob[mob.length - 1];
+                    mainBoss.oldOnDeath = mainBoss.onDeath;
+                    mainBoss.onDeath = () => {
+                        door.isClosing = false;
+                        powerUps.spawn(4150, -30, "tech");
+                        powerUps.spawn(4150, -30, "tech");
+                        mainBoss.oldOnDeath();
+                    }
+                    spawn.secondaryBossChance(3500, -1000);
+                }, 86000);
+
+                door.isClosing = true;
+            }
+        };
+
+        spawn.mapRect(-100, 0, 10000, 10000); // the left half of the room
+        spawn.mapRect(-10000, -300, 9900, 10000);
+        spawn.mapRect(-100, -300, 400, 100);
+        spawn.mapRect(200, -800, 100, 500);
+        spawn.mapRect(200, -800, 500, 100);
+        spawn.mapRect(600, -1000, 100, 200);
+
+        spawn.mapRect(600, -1100, 3000, 100); // the ceiling
+
+        spawn.mapRect(3500, -1000, 100, 200); // the right half of the room
+        spawn.mapRect(3500, -800, 500, 100);
+        spawn.mapRect(3900, -800, 100, 500);
+        spawn.mapRect(3900, -300, 400, 100);
+        spawn.mapRect(4300, -300, 10000, 10000);
+
+        for (var i = 0; i < 4; i++) { // "door" at the entrance
+            spawn.bodyRect(200, -200 + i * 50, 20, 50);
+        }
+
+        for (var i = 0; i < 5; i++) { // some random rubble in the first half of the room
+            spawn.bodyRect(400 + Math.random() * 1000, -200, 40 + Math.random() * 40, 40 + Math.random() * 40);
+        }
+
+        powerUps.addResearchToLevel(); //needs to run after mobs are spawneds
     },
     // ********************************************************************************************************
     // ********************************************************************************************************

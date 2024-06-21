@@ -114,7 +114,7 @@ const spawn = {
         }
     },
     secondaryBossChance(x, y) {
-        if (simulation.difficultyMode > 2 && level.levelsCleared > 1) {
+        if (simulation.difficultyMode > 2 && level.levelsCleared > 2) {
             spawn.randomLevelBoss(x, y);
         } else {
             return false
@@ -1428,7 +1428,7 @@ const spawn = {
         me.seeAtDistance2 = 1400000;
         me.cellMassMax = 70
         me.collisionFilter.mask = cat.player | cat.bullet | cat.body// | cat.map
-        Matter.Body.setDensity(me, 0.0001 + 0.00002 * simulation.difficulty) // normal density is 0.001
+        Matter.Body.setDensity(me, 0.00012 + 0.00001 * simulation.difficulty) // normal density is 0.001
         me.damageReduction = 0.17
 
         const k = 642 //k=r^2/m

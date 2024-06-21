@@ -193,8 +193,6 @@ summary {
     gap: 10px;
     background-color: #444;
     /* padding: 10px 1px; */
-
-
     position: absolute;
     top: 50%;
     left: 50%;
@@ -212,6 +210,7 @@ summary {
     overflow: auto;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    /* box-shadow: 7px 7px 6px rgba(0, 0, 0, 0.13); */
 }
 
 
@@ -394,7 +393,7 @@ summary {
     border-top-right-radius: 0px;
     padding: 0.2em 0px;
     /* height: 210px; */
-    box-shadow: 8px 8px 7px rgba(0, 0, 50, 0.15);
+    box-shadow: 8px 8px 6px rgba(0, 0, 50, 0.15);
 }
 
 .card-background {
@@ -589,6 +588,7 @@ summary {
     border-radius: 8px;
     border: 2px #333 solid;
     background-color: #fff;
+    /* box-shadow: 8px 8px 6px rgba(0, 0, 60, 0.11); */
 }
 
 
@@ -1575,9 +1575,10 @@ summary {
 }
 
 .pause-difficulty-row {
-    line-height: 140%;
+    line-height: 130%;
     font-size: 1em;
-    padding: 10px;
+    padding: 7px 0px 7px 0px;
+    /* top | right | bottom | left */
     margin: -5px 0;
 }
 
@@ -1656,6 +1657,7 @@ summary {
     background-color: hsl(240, 18%, 93%);
     border: 1px solid #333;
     border-radius: 5px;
-    padding: 5px;
+    padding: 7px;
     margin-bottom: 10px;
+    /* box-shadow: 4px 4px 4px hsla(240, 0%, 17%, 0.14); */
 }

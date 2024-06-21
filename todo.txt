@@ -1,17 +1,37 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: working mass - in midair molecular assembler or pilot wave prints a block to jump off
+new community levels: (you can enable community maps in the settings)
+  rings by thatLittleFrog
+  flappyGon by Digin
+  trial by Cirryn and Tarantula Hawk
+  arena level updated by Whyisthisnotavalable
 
-buckling: 100%->50% chance to spawn a power up from any block that kills a mob
-  no longer requires the block to be thrown
-mobs: powerUpBoss, snakeBoss tails, cellBoss, ghoster, sucker -  all collide with blocks now
-added a few more blocks to towers level
-deprecated: 1.05->1.07 damage per removed tech
-laserLayerBoss has 33% less health and has fewer lasers at higher difficulties
+difficulty scaling:  0.84->0.85x player damage per level
+research spawn per level is no longer in the difficulty settings
+  instead players get 1 research for only the first few levels
+cell boss has less health at high difficulty
 
-bugfix
-  disabled spawnDelay stopping on damage because it had too many negative tech interactions
-  metastability + paradigm shift no longer makes all ejected tech explode
+converted JUNK tech to additive, instead of the multiplicative
+  makes the first JUNK you take do the same, but if you take too much you can get to 100%
+right aligned some text in tech descriptions
+added some circles to the in-game console messages
+
+renamed slow light -> delayed-choice - a single 0.4 second delayed 0.7x damage laser beam
+  also now works with reflection 
+plasma torch field gets 1.5x damage by default
+molecular assembler coupling 0.8->0.6 energy per second
+nail-bot upgrade 5->4x fire rate
+foam-bot upgrade 3->2.5x size and fire rate
+sound-bot upgrade 2.5->2x fire rate, damage, 1->2x wave packet length
+boom-bot upgrade reduced range, bot acceleration
+orbital-bot upgrade 1.5->2x radius
+perimeter defense 0.95->0.96x damage taken per bot
+network effect 1.05->1.04x damage per bot
+tech: working mass - cleaned up physics and logic a bit
+negative feedback scales with health below maxHealth, not health below 100
+  1.007->1.006x damage per missing health
+homeostasis scales with missing health, not health below 100
+  limit of 0.2x at 0 health
 
 ******************************************************* DESIGN ******************************************************
 
@@ -39,6 +59,17 @@ list of powerful synergies
 
 *********************************************************** TODO *****************************************************
 
+figure out how to put controls in background on initial level
+  mouse smooth makes the text position jitter when it moves sub pixels
+    hide the jitter with artificial jitter to make it seem intentional
+      make it look like the instructions are on a fuzzy TV screen
+    when player presses move buttons highlight the box/letter for those buttons
+
+a few bosses have too much health
+  probably the ones that scale with simulation.difficulty
+    Matter.Body.setDensity(me, 0.00012 + 0.00001 * simulation.difficulty) // normal density is 0.001
+  
+
 make player mass an adjustable var in the skin
   does this mess with jump height or air control?
 increase mass and movement speed at the same time
@@ -48,26 +79,19 @@ increase mass and movement speed at the same time
   possible player.mass bad interactions
     grapple
 
+tech:   -  if health === maxHealth  take 0.6x damage  
+  do 1.5x damage?
+
 JUNK tech - player takes damage from block collisions
   is this gonna contribute to lag?
 
-player damage seems low
-player damage taken seems fine, or maybe increase
-
-difficulty rework: explicit changes to the game to increase difficulty
-  UI -
-    add a wire attached to difficulty power up
-      like the one attached to player, but thinner
-
-laser: slow light is the least fun laser tech,  make it more fun
+tech: anthropic principle - cost 1 research to let you not die once per level
+  another tech that allows it to trigger multiple times
 
 tokamak synergy tech
   tech: stellarator - after firing a block with tokamak, heal (scale heal amount with block mass?)
   tech: inertial confinement - while charging tokamak you can fly, and invulnerable
       but energy drains
-
-after getting a new tech,gun,field draw that tech where it would be in a pause menu for a second seconds
-  this makes it easier for people to see what's going on
 
 bullets should trigger shrinking platforms level element?
 

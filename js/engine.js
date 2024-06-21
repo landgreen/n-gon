@@ -117,7 +117,7 @@ function collisionChecks(event) {
 
                         if (tech.isCollisionRealitySwitch && m.alive) {
                             m.switchWorlds()
-                            simulation.trails()
+                            simulation.trails(90)
                             simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
                         }
                         if (tech.isPiezo) m.energy += 20.48;
