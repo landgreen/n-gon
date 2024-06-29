@@ -668,7 +668,7 @@ const powerUps = {
                         });
                     } else if (overHeal > 0.13) { //if leftover heals spawn a new spammer heal power up
                         requestAnimationFrame(() => {
-                            powerUps.directSpawn(this.position.x, this.position.y, "heal", true, null, overHeal * 40 * (simulation.healScale ** 0.25))//    directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
+                            powerUps.directSpawn(this.position.x, this.position.y, "heal", true, null, Math.min(1, overHeal) * 40 * (simulation.healScale ** 0.25))//    directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
                         });
                     }
                     if (tech.isHealBrake) {

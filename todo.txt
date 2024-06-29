@@ -1,37 +1,22 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community levels: (you can enable community maps in the settings)
-  rings by thatLittleFrog
-  flappyGon by Digin
-  trial by Cirryn and Tarantula Hawk
-  arena level updated by Whyisthisnotavalable
+renamed MACHO -> dark matter
+tech: MACHO - dark matter is active when you are outside not inside it's range, 1.5 to dark matter effects
+tech: dark energy - inside dark matter regen 10 energy
+tech: stability - 0.3x damage taken if health equals maxHealth
+tech: instability - 2x damage if damage taken is 1x
+tech: control theory - 1.5x damage if health equals maxHealth
+tech: inertial confinement - while charging tokamak you can fly, but energy drains
+tech: stellarator - after firing a block with tokamak, spawn up to 5 heals
 
-difficulty scaling:  0.84->0.85x player damage per level
-research spawn per level is no longer in the difficulty settings
-  instead players get 1 research for only the first few levels
-cell boss has less health at high difficulty
+boss health nerf: almost every boss has ~0.8x less health
+  secondary bosses also spawn 2 ammo
+aerostat 0.85->0.9 damage on the ground
+Pauli exclusion 6->8 seconds of invulnerable after getting hit
+Gibbs free energy 2->0 research cost, 1.01->1.05 damage scales with energy below 100->maxEnergy
+cache 15->17x ammo
 
-converted JUNK tech to additive, instead of the multiplicative
-  makes the first JUNK you take do the same, but if you take too much you can get to 100%
-right aligned some text in tech descriptions
-added some circles to the in-game console messages
-
-renamed slow light -> delayed-choice - a single 0.4 second delayed 0.7x damage laser beam
-  also now works with reflection 
-plasma torch field gets 1.5x damage by default
-molecular assembler coupling 0.8->0.6 energy per second
-nail-bot upgrade 5->4x fire rate
-foam-bot upgrade 3->2.5x size and fire rate
-sound-bot upgrade 2.5->2x fire rate, damage, 1->2x wave packet length
-boom-bot upgrade reduced range, bot acceleration
-orbital-bot upgrade 1.5->2x radius
-perimeter defense 0.95->0.96x damage taken per bot
-network effect 1.05->1.04x damage per bot
-tech: working mass - cleaned up physics and logic a bit
-negative feedback scales with health below maxHealth, not health below 100
-  1.007->1.006x damage per missing health
-homeostasis scales with missing health, not health below 100
-  limit of 0.2x at 0 health
+several bug fixes
 
 ******************************************************* DESIGN ******************************************************
 
@@ -59,57 +44,19 @@ list of powerful synergies
 
 *********************************************************** TODO *****************************************************
 
-figure out how to put controls in background on initial level
-  mouse smooth makes the text position jitter when it moves sub pixels
-    hide the jitter with artificial jitter to make it seem intentional
-      make it look like the instructions are on a fuzzy TV screen
-    when player presses move buttons highlight the box/letter for those buttons
-
-a few bosses have too much health
-  probably the ones that scale with simulation.difficulty
-    Matter.Body.setDensity(me, 0.00012 + 0.00001 * simulation.difficulty) // normal density is 0.001
-  
-
-make player mass an adjustable var in the skin
-  does this mess with jump height or air control?
-increase mass and movement speed at the same time
-  increase jump differently because it scales extra with mass
-    m.defaultMass = 4.5
-    m.definePlayerMass()
-  possible player.mass bad interactions
-    grapple
-
-tech:   -  if health === maxHealth  take 0.6x damage  
-  do 1.5x damage?
-
-JUNK tech - player takes damage from block collisions
-  is this gonna contribute to lag?
-
-tech: anthropic principle - cost 1 research to let you not die once per level
-  another tech that allows it to trigger multiple times
-
-tokamak synergy tech
-  tech: stellarator - after firing a block with tokamak, heal (scale heal amount with block mass?)
-  tech: inertial confinement - while charging tokamak you can fly, and invulnerable
-      but energy drains
-
-bullets should trigger shrinking platforms level element?
-
-level element - player activated elevators
-  could be fast and throw player
-  could just rise up slow (slow might have a bad jerky animation)
-
-tech: super balls split after 3 seconds
-  but they lost 50% less time
-
-buff plasma torch
-  buff plasma tech?
-  buff plasma field defense?
-  buff plasma damage?
-
-rework energy and health HUD
-  make both diegetic?
-  should health be red or green?
+snakeBoss - boss with a tail that grows longer
+  improve behavior for when it can't see player
+    wander around looking for power ups
+      what if it gets lost?
+  eat power ups
+    eject them after you die
+    get longer after eating
+  eat mobs?
+  eat blocks?
+  modes:    recolor tail based on modes
+    hunting power ups -> small + fast : blue cyan
+    hunting player -> attack? : red/pink
+    slow high defense : white
 
 white laser
   what to name?  not much in wikipedia
@@ -119,23 +66,42 @@ white laser
   tech.laserColor = "#fff"
   tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
-bug Newton's 1st law image not showing up on github server
-  shows up on n-gon, and landgreen  github, but webp file isn't loading onto server?
-  try name change,
-  wait and see if next patch fixes it
-
 tech: atomic pile - lose 1 health if you are above the maximum energy
   generate energy for each nearby mob?
   do damage?
   plasma torch tech?
 
-boss mob - several squares that move like the snake in the game snake/light cycles
-  moves towards player (is smell history pathing good enough?)
-  doesn't have inertia/force?  or it obeys normal physics kinda?
-  gets longer when
-    you hit it with bullets?
-    it gets near a power up?
-    it gets near mobs
+make some explosions have less knock back?
+  annoying with flame test, boom bot?
+
+figure out how to put instructions for controls in background on initial level
+  mouse smooth makes the text position jitter when it moves sub pixels
+    hide the jitter with artificial jitter to make it seem intentional
+      make it look like the instructions are on a fuzzy TV screen
+    when player presses move buttons highlight the box/letter for those buttons
+  
+make player mass an adjustable var in the skin
+  does this mess with jump height or air control?
+increase mass and movement speed at the same time
+  increase jump differently because it scales extra with mass
+    m.defaultMass = 4.5
+    m.definePlayerMass()
+  possible player.mass bad interactions
+    grapple
+
+JUNK tech - player takes damage from block collisions
+  is this gonna contribute to lag?
+
+bullets should trigger shrinking platforms level element?
+
+level element - player activated elevators
+  could be fast and throw player
+  could just rise up slow (slow might have a bad jerky animation)
+
+rework energy and health HUD
+  make both diegetic?
+    how?  not sure there is a good way to do this...
+  should health be red or green?
 
 Boss mob - takes a snapshot of the positions of all mobs, player, blocks, power ups.  Then 3 seconds later it teleports everything back to those spots.
   after snap shot is stored draw outline of body positions for a second to show the change
@@ -1328,6 +1294,8 @@ possible names for tech
   Casimir effect - attractive force between two close conductive plates
   difference engine - early calculator/computer
   cyanoacrylate - superglue use for a slowing effect?
+  hysteresis - the dependence of the state of a system on its history
+  superposition - something with waves overlapping
 
 ******************************************************** IMAGES ********************************************************
 

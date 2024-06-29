@@ -26,7 +26,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField("time dilation") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField("negative mass") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
             // powerUps.research.count = 3
             // tech.isHookWire = true
@@ -43,9 +43,9 @@ const level = {
             // b.guns[8].ammo = 100000000
             // requestAnimationFrame(() => { tech.giveTech("optical amplifier") });
             // tech.giveTech("1st ionization energy")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("negative feedback")
-            // for (let i = 0; i < 2; ++i) tech.giveTech("delayed-choice")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("pulse")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("tokamak")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("inertial confinement")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("stellarator")
             // for (let i = 0; i < 1; ++i) tech.giveTech("mass-energy equivalence")
             // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) b.orbitBot(m.pos, false) });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("1st ionization energy") });
@@ -54,11 +54,11 @@ const level = {
             // for (let i = 0; i < 1; ++i) tech.giveTech("compression engine")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(-50, -70, "difficulty", false);
-            // for (let i = 0; i < 100; i++) powerUps.directSpawn(1750, -500, "coupling");
             // spawn.mapRect(575, -700, 25, 425);  //block mob line of site on testing
-            // level.arena();
-
-            // for (let i = 0; i < 1; ++i) spawn.snakeSpitBoss(1400, -500)
+            level.testing();
+            
+            // for (let i = 0; i < 1; ++i) spawn.snakeBoss(1400, -500)
+                // for (let i = 0; i < 2; i++) powerUps.directSpawn(800, -100, "coupling");
             // Matter.Body.setPosition(player, { x: -200, y: -3330 });
             // for (let i = 0; i < 4; ++i) spawn.sucker(1300, -500 + 100 * Math.random())
             // spawn.hopper(1900, -500)
@@ -68,11 +68,10 @@ const level = {
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
 
-            level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
+            // level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // for (let i = 0; i < 1; ++i) spawn.laserLayerBoss(1900, -500)
             // for (let i = 0; i < 2; i++) spawn.ghoster(level.exit.x, level.exit.y) //ghosters need to spawn after the map loads
-            // spawn.bodyRect(2425, -120, 200, 200);
             // console.log(body[body.length - 1].mass)
             // simulation.isAutoZoom = false; //look in close
             // simulation.zoomScale *= 0.5;
@@ -134,7 +133,7 @@ const level = {
                 }
             }
         }
-        if (tech.isMACHO) spawn.MACHO()
+        if (tech.isDarkMatter) spawn.darkMatter()
         for (let i = 0; i < tech.wimpCount; i++) {
             spawn.WIMP()
             mob[mob.length - 1].isDecoupling = true //so you can find it to remove
@@ -151,6 +150,7 @@ const level = {
     newLevelOrPhase() { //runs on each new level but also on final boss phases
         //used for generalist and pigeonhole principle
         tech.cancelTechCount = 0
+        tech.tokamakHealCount = 0
         tech.buffedGun++
         if (tech.buffedGun > b.inventory.length - 1) tech.buffedGun = 0;
         if (tech.isGunCycle && b.activeGun !== null && b.inventory.length) {
@@ -12651,7 +12651,7 @@ const level = {
         Promise.resolve().then(() => {
             // Clear all WIMPS and their research
             for (let i = 0; i < mob.length; i++) {
-                if (mob[i] && !mob[i].isMACHO) {
+                if (mob[i] && !mob[i].isDarkMatter) {
                     mob[i].isWIMP = true;
                 }
             }
@@ -13302,7 +13302,7 @@ const level = {
                 if (simulation.cycle % 4 === 0) {
                     let newMobPositions = [];
                     for (const i of mob) {
-                        if (!(i.isMACHO || i.isWIMP || i.isObstacle)) newMobPositions.push({
+                        if (!(i.isDarkMatter || i.isWIMP || i.isObstacle)) newMobPositions.push({
                             x: i.position.x,
                             y: i.position.y
                         });
@@ -13572,7 +13572,7 @@ const level = {
             level.setPosToSpawn(x, y);
             trapPlayer(x, y);
             for (let i = 0; i < mob.length; i++) {
-                if (mob[i].isMACHO) {
+                if (mob[i].isDarkMatter) {
                     setPos(mob[i], {
                         x,
                         y

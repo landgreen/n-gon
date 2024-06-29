@@ -547,10 +547,11 @@ const m = {
     lastCalculatedDefense: 0, //used to decided if defense bar needs to be redrawn  (in simulation.checks)
     defense() {
         let dmg = 1
+        if (tech.isMaxHealthDefense && m.health === m.maxHealth) dmg *= 0.3
         if (tech.isDiaphragm) dmg *= 0.55 + 0.35 * Math.sin(m.cycle * 0.0075);
         if (tech.isZeno) dmg *= 0.15
         if (tech.isFieldHarmReduction) dmg *= 0.6
-        if (tech.isHarmMACHO) dmg *= tech.isMoveMACHO ? 0.3 : 0.4
+        if (tech.isHarmDarkMatter) dmg *= (tech.isMoveDarkMatter || tech.isNotDarkMatter) ? 0.25 : 0.4
         if (tech.isImmortal) dmg *= 0.7
         if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.973 ** m.coupling
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.3
@@ -2364,6 +2365,30 @@ const m = {
                             ctx.lineTo(m.holdingTarget.vertices[i + 1].x, m.holdingTarget.vertices[i + 1].y);
                             ctx.fill();
                         }
+                        if (tech.isTokamakFly && m.throwCharge > 4 && m.energy > 0.01) {
+                            player.force.y -= 0.5 * player.mass * simulation.g; //add some reduced gravity
+                            // const mass = (player.mass + 10) / 3 * simulation.g //this makes it so you fly slower with larger blocks
+                            let isDrain = false
+                            const thrust = player.mass * simulation.g * Math.pow(5 / player.mass, 0.1)
+                            if (input.down) {
+                                isDrain = true
+                                player.force.y += 0.9 * thrust;
+                            } else if (input.up) {
+                                isDrain = true
+                                player.force.y -= 0.9 * thrust
+                            }
+                            if (!m.onGround) {
+                                if (input.left) {
+                                    isDrain = true
+                                    player.force.x -= 0.4 * thrust
+                                } else if (input.right) {
+                                    isDrain = true
+                                    player.force.x += 0.4 * thrust
+                                }
+                                if (isDrain) m.energy -= 0.0017;
+                            }
+
+                        }
                     } else {
                         //draw charge
                         const x = m.pos.x + 15 * Math.cos(m.angle);
@@ -2425,6 +2450,12 @@ const m = {
                         }
                     }
                     b.pulse(60 * Math.pow(m.holdingTarget.mass, 0.25), m.angle)
+                    if (tech.isTokamakHeal && tech.tokamakHealCount < 5) {
+                        tech.tokamakHealCount++
+                        let massScale = Math.min(65 * Math.sqrt(m.maxHealth), 14 * Math.pow(m.holdingTarget.mass, 0.4))
+                        if (powerUps.healGiveMaxEnergy) massScale = powerUps["heal"].size()
+                        powerUps.spawn(m.pos.x, m.pos.y, "heal", true, null, massScale * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)))  //    spawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
+                    }
                 } else { //normal throw
                     //bullet-like collisions
                     m.holdingTarget.collisionFilter.category = cat.bullet
@@ -2962,7 +2993,7 @@ const m = {
         drainCD: 0,
         effect: () => {
             m.fieldBlockCD = 0;
-            m.blockingRecoil = 1.5 //4 is normal
+            m.blockingRecoil = 1 //4 is normal
             m.fieldRange = 185
             m.fieldShieldingScale = 1.6 * Math.pow(0.5, (tech.harmonics - 2))
             // m.fieldHarmReduction = 0.66; //33% reduction
