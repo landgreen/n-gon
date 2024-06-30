@@ -55,7 +55,7 @@ const level = {
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(-50, -70, "difficulty", false);
             // spawn.mapRect(575, -700, 25, 425);  //block mob line of site on testing
-            level.testing();
+            // level.testing();
             
             // for (let i = 0; i < 1; ++i) spawn.snakeBoss(1400, -500)
                 // for (let i = 0; i < 2; i++) powerUps.directSpawn(800, -100, "coupling");
@@ -68,7 +68,7 @@ const level = {
             // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
             // for (let i = 0; i < 40; ++i) tech.giveTech()
 
-            // level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
+            level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // for (let i = 0; i < 1; ++i) spawn.laserLayerBoss(1900, -500)
             // for (let i = 0; i < 2; i++) spawn.ghoster(level.exit.x, level.exit.y) //ghosters need to spawn after the map loads
