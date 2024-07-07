@@ -12,6 +12,10 @@ Math.hash = s => {
 
 // document.getElementById("seed").placeholder = Math.initialSeed = Math.floor(Date.now() % 100000) //random every time:  just the time in milliseconds UTC
 
+window.addEventListener('error', error => {
+    simulation.makeTextLog(`<strong style='color:red;'>ERROR:</strong> ${error.message}  <u>${error.filename}:${error.lineno}</u>`)
+});
+
 document.getElementById("seed").placeholder = Math.initialSeed = String(Math.floor(Date.now() % 100000))
 Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
 Math.seededRandom = function (min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined

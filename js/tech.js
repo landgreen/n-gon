@@ -8745,7 +8745,7 @@ const tech = {
     },
     {
         name: "charmed baryons",
-        description: `<strong>0.66x</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong class='color-worm'>wormholes</strong> cost <strong>zero</strong> <strong class='color-f'>energy</strong>`,
+        description: `<strong>0.8x</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong class='color-worm'>wormholes</strong> cost <strong>zero</strong> <strong class='color-f'>energy</strong>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -8757,8 +8757,8 @@ const tech = {
         requires: "wormhole, not affine connection",
         effect() {
             tech.isFreeWormHole = true
-            tech.baseFx *= 0.66
-            tech.baseJumpForce *= 0.66
+            tech.baseFx *= 0.8
+            tech.baseJumpForce *= 0.8
             m.setMovement()
         },
         //also removed in m.setHoldDefaults() if player switches into a bad field

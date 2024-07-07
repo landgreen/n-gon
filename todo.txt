@@ -1,29 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-renamed MACHO -> dark matter
-tech: MACHO - dark matter is active when you are outside not inside it's range, 1.5 to dark matter effects
-tech: dark energy - inside dark matter regen 10 energy
-tech: stability - 0.3x damage taken if health equals maxHealth
-tech: instability - 2x damage if damage taken is 1x
-tech: control theory - 1.5x damage if health equals maxHealth
-tech: inertial confinement - while charging tokamak you can fly, but energy drains
-tech: stellarator - after firing a block with tokamak, spawn up to 5 heals
+snakeBoss - boss with a tail that grows longer after damage or eating power ups
+  maybe have it eat blocks too?
 
-boss health nerf: almost every boss has ~0.8x less health
-  secondary bosses also spawn 2 ammo
-aerostat 0.85->0.9 damage on the ground
-Pauli exclusion 6->8 seconds of invulnerable after getting hit
-Gibbs free energy 2->0 research cost, 1.01->1.05 damage scales with energy below 100->maxEnergy
-cache 15->17x ammo
+trying out putting actual system error messages directly into the in-game console
 
-several bug fixes
+charmed baryons: 0.66->0.8x movement
+grappling hook field: 0.6->0.5 damage taken
 
 ******************************************************* DESIGN ******************************************************
 
 priorities    
   synergies between tech
     difficult to achieve synergies that feel so powerful they are game breaking / changing
-  randomized content adds repeatability
+  randomized content that adds repeatability
     bosses, mobs, levels, tech
   graphical indicators of tech effects and quantity
   subtle lore woven into unexpected places
@@ -44,19 +34,11 @@ list of powerful synergies
 
 *********************************************************** TODO *****************************************************
 
-snakeBoss - boss with a tail that grows longer
-  improve behavior for when it can't see player
-    wander around looking for power ups
-      what if it gets lost?
-  eat power ups
-    eject them after you die
-    get longer after eating
-  eat mobs?
-  eat blocks?
-  modes:    recolor tail based on modes
-    hunting power ups -> small + fast : blue cyan
-    hunting player -> attack? : red/pink
-    slow high defense : white
+merge multiple power ups of the same type if nearby
+  5-10 ammo, research, coupling can merge to form a slightly larger power up version
+    check for merger possibility every 60 seconds?
+    adjust mass spawns to just spawn larger power ups versions and change?
+      spawnDelay
 
 white laser
   what to name?  not much in wikipedia
@@ -70,6 +52,9 @@ tech: atomic pile - lose 1 health if you are above the maximum energy
   generate energy for each nearby mob?
   do damage?
   plasma torch tech?
+
+field tech: molecular assembler - every time you spawn a drone/spore/... become immune to damage for time
+  scales with how much energy was used to spawn drone/...
 
 make some explosions have less knock back?
   annoying with flame test, boom bot?
@@ -1282,7 +1267,7 @@ possible names for tech
   Josephson junction - superconducting junction
   Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity 
   Unruh effect - accelerating makes heat/thermal particles
-  configuration space - holds the position of everything
+  configuration space - holds the position of everything (related to fermions/bosons and particle interactions)
   stress–energy tensor
   radioisotope thermoelectric generator - 
   retrovirus: these things make JUNK DNA so link it somehow to that tech?

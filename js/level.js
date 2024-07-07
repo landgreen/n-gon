@@ -56,9 +56,9 @@ const level = {
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(-50, -70, "difficulty", false);
             // spawn.mapRect(575, -700, 25, 425);  //block mob line of site on testing
             // level.testing();
-            
+
             // for (let i = 0; i < 1; ++i) spawn.snakeBoss(1400, -500)
-                // for (let i = 0; i < 2; i++) powerUps.directSpawn(800, -100, "coupling");
+            // for (let i = 0; i < 2; i++) powerUps.directSpawn(800, -100, "coupling");
             // Matter.Body.setPosition(player, { x: -200, y: -3330 });
             // for (let i = 0; i < 4; ++i) spawn.sucker(1300, -500 + 100 * Math.random())
             // spawn.hopper(1900, -500)

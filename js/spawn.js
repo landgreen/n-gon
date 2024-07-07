@@ -6,8 +6,8 @@ const spawn = {
         "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
         "powerUpBoss", "powerUpBossBaby", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss",
         "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss", "shieldingBoss",
-        "timeSkipBoss", "dragonFlyBoss", "beetleBoss", "sneakBoss", "mantisBoss",
-        "laserLayerBoss"
+        "timeSkipBoss", "dragonFlyBoss", "beetleBoss", "sneakBoss", "mantisBoss", "laserLayerBoss",
+        "snakeBoss",
     ],
     bossTypeSpawnOrder: [], //preset list of boss names calculated at the start of a run by the randomSeed
     bossTypeSpawnIndex: 0, //increases as the boss type cycles
@@ -3870,111 +3870,182 @@ const spawn = {
         };
     },
     snakeBoss(x, y) {
-        mobs.spawn(x, y, 0, 30, `rgba(255,0,200)`); //"rgb(221,102,119)"
+        mobs.spawn(x, y, 0, 25, `rgba(255,0,200)`); //"rgb(221,102,119)"
         let me = mob[mob.length - 1];
         me.stroke = "transparent"; //used for drawGhost
-        // Matter.Body.setStatic(me, true); //make static,    breaks game on player collision
-        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
-        me.damageReduction = 0.02
+        me.damageReduction = 0.6
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.nextHealthThreshold = 0.75
         me.invulnerableCount = 0
-
         me.history = []
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 20; i++) {
             me.history.push({ x: me.position.x + i, y: me.position.y })
         }
         me.frictionStatic = 0;
         me.friction = 0;
         me.memory = 240
         me.seePlayerFreq = 55
-        me.delay = 6 + 4 * simulation.CDScale;
+        me.delay = 4 + 2 * simulation.CDScale;//8 + 3 * simulation.CDScale;
         me.nextBlinkCycle = me.delay;
-        me.radius = 30
-        me.JumpDistance = me.radius * 2
+        me.JumpDistance = 0//set in redMode()
         // spawn.shield(me, x, y, 1);
         me.collisionFilter.mask = cat.bullet | cat.map //| cat.body  //cat.player |
+        me.powerUpNames = []
+        me.redMode = function () {
+            this.color = `rgba(255,0,200,`
+            this.fill = this.color + '1)'
+            this.JumpDistance = 20
+            let cycle = () => {
+                if (this.radius < 25) {
+                    if (m.alive && this.JumpDistance === 20) requestAnimationFrame(cycle);
+                    if (!simulation.paused && !simulation.isChoosing) {
+                        const scale = 1.01;
+                        Matter.Body.scale(this, scale, scale);
+                        this.radius *= scale;
+                    }
+                }
+            }
+            requestAnimationFrame(cycle);
+        }
+        me.redMode();
+        me.blueMode = function () {
+            this.color = `rgba(0,0,255,`//`rgba(255,0,200,`
+            this.fill = this.color + '1)'
+            this.JumpDistance = 37 //adjust this number in the IF below
+            let cycle = () => {
+                if (this.radius > 14) {
+                    if (m.alive && this.JumpDistance === 37) requestAnimationFrame(cycle);
+                    if (!simulation.paused && !simulation.isChoosing) {
+                        const scale = 0.96;
+                        Matter.Body.scale(this, scale, scale);
+                        this.radius *= scale;
+                    }
+                }
+            }
+            requestAnimationFrame(cycle);
+        }
         me.onDamage = function () {
             if (this.health < this.nextHealthThreshold) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
-                this.invulnerableCount = 90
+                this.invulnerableCount = 300
                 this.isInvulnerable = true
                 this.damageReduction = 0
-                this.laserDelay = 130
-                const where = this.history[0]
-                for (let i = 0; i < 10; i++) {
-                    this.history.unshift(where)
-                }
+                if (this.history.length < 200) for (let i = 0; i < 11; i++) this.history.unshift(this.history[0])
+                this.blueMode()
             }
         };
         me.onDeath = function () {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+
+            //respawn all eaten power ups
+            let i = 0
+            let cycle = () => {
+                if (i < this.powerUpNames.length) {
+                    if (m.alive) requestAnimationFrame(cycle);
+                    if (!simulation.paused && !simulation.isChoosing && powerUp.length < 300) {
+                        const index = Math.floor(Math.random() * this.history.length) //random segment of tail
+                        const where = { x: this.history[index].x + 25 * (Math.random() - 0.5), y: this.history[index].y + 25 * (Math.random() - 0.5) }
+                        powerUps.spawn(where.x, where.y, this.powerUpNames[i]);
+                        i++
+                    }
+                }
+            }
+            requestAnimationFrame(cycle);
         }
         me.do = function () {
-            const color = `rgba(255,0,200,${0.3 + 0.07 * Math.random()})`
+            const color = this.color + (0.35 + 0.25 * Math.random()) + ')'
+            //check for player collisions in between each segment
+            if (m.immuneCycle < m.cycle) {
+                for (let i = 0; i < this.history.length - 1; i++) {
+                    if (Matter.Query.ray([player], this.history[i], this.history[i + 1], 10).length > 0) {
+                        m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60
+                        const dmg = 0.25 * simulation.dmgScale
+                        m.damage(dmg);
+                        simulation.drawList.push({ //add dmg to draw queue
+                            x: m.pos.x,
+                            y: m.pos.y,
+                            radius: dmg * 1500,//30,
+                            color: color,
+                            time: 20
+                        });
 
-            //check for player in between each segment
-            for (let i = 0; i < this.history.length - 1; i++) {
-                if (Matter.Query.ray([player], this.history[i], this.history[i + 1], 10).length > 0) {
-                    m.damage(0.004 * simulation.dmgScale);
-                    simulation.drawList.push({ //add dmg to draw queue
-                        x: m.pos.x,
-                        y: m.pos.y,
-                        radius: 30,
-                        color: color,
-                        time: 10
-                    });
-                    break
+                        //reset tail length for a sec to prevent repeat damage
+                        for (let i = 0, len = this.history.length; i < len; i++) {
+                            this.history[i] = { x: this.position.x, y: this.position.y }
+                        }
+                        break
+                    }
                 }
             }
 
             if (this.nextBlinkCycle < simulation.cycle) { //teleport towards the player
                 this.nextBlinkCycle = simulation.cycle + this.delay;
+                if (this.isSlowed) this.nextBlinkCycle += this.delay
+                if (this.isStunned) this.nextBlinkCycle += this.delay * 3
+
                 //custom see player by history code
                 let move = (target = this.seePlayer.position) => {
                     const dist = Vector.sub(target, this.position);
+
                     Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), this.JumpDistance));
                     Matter.Body.setVelocity(this, { x: 0, y: 0 });
-                    Matter.Body.setAngle(this, 0);
+                    // Matter.Body.setAngle(this, 0);
                     Matter.Body.setAngularVelocity(this, 0)
                     //track previous locations for the tail
                     this.history.push({ x: this.position.x, y: this.position.y }) //add newest to end
                     this.history.shift() //remove first (oldest)
                 }
-                //look for close powers up in line of sight
+                //look for close power ups in line of sight
                 let close = {
-                    dist2: Infinity,
-                    targetPos: null
+                    dist: Infinity,
+                    targetPos: null,
+                    index: null,
                 }
                 for (let i = 0; i < powerUp.length; i++) {
                     if (Matter.Query.ray(map, this.position, powerUp[i].position).length === 0) {
-                        const dist = Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position))
-                        if (dist < close.dist2) {
+                        const dist = Vector.magnitude(Vector.sub(this.position, powerUp[i].position))
+                        if (dist < close.dist) {
                             close = {
-                                dist2: dist,
-                                // targetPos: { x: powerUp[i].position.x, y: powerUp[i].position.y }
-                                target: powerUp[i]
+                                dist: dist,
+                                target: powerUp[i],
+                                index: i,
                             }
                         }
                     }
                 }
-                if (close.dist2 < 5000 * 5000) {
-                    //chase power ups
+                if (close.dist < 3000) { //chase power ups if they are near
                     move(close.target.position)
+
                     //check if close to power up and eat it
-                    if (close.dist2 < 200 * 200) {
-                        //eat power up
+                    if (close.dist < this.JumpDistance + 2 * this.radius) {
+                        this.powerUpNames.push(close.target.name)  //save name to return power ups after this mob dies
+                        Matter.Composite.remove(engine.world, close.target);
+                        powerUp.splice(close.index, 1);
+                        this.health = 1 //heal to full
+                        //add more segments to tail
+                        if (this.history.length < 200) for (let i = 0; i < 4; i++) this.history.unshift(this.history[0])
+                        //draw pickup for a single cycle
+                        ctx.beginPath();
+                        ctx.moveTo(this.position.x, this.position.y);
+                        ctx.lineTo(close.target.position.x, close.target.position.y);
+                        ctx.strokeStyle = "#000"
+                        ctx.lineWidth = 4
+                        ctx.stroke();
                     }
 
-                } else if (Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 && !m.isCloak) {
+                    //go eat blocks to heal?
+                    // } else if (this.health < 0.6) {
+
+                } else if (Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 && !m.isCloak) { //chase player
                     this.seePlayer.yes = true;
                     this.locatePlayer();
                     if (!this.seePlayer.yes) this.seePlayer.yes = true;
                     move()
-                } else if (this.seePlayer.recall) {
+                } else if (this.seePlayer.recall) { //chase player's history
                     this.lostPlayer();
                     if (!m.isCloak) {
                         for (let i = 0; i < 50; i++) { //if lost player lock onto a player location in history
@@ -3998,6 +4069,7 @@ const spawn = {
                 if (this.invulnerableCount < 0) {
                     this.isInvulnerable = false
                     this.damageReduction = this.startingDamageReduction
+                    this.redMode()
                 }
                 //draw invulnerable
                 ctx.beginPath();
