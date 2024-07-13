@@ -184,15 +184,11 @@ summary {
     scrollbar-width: none;
 }
 
-
-
-
 .choose-grid-no-images {
     border-radius: 8px;
     border: 10px solid #444;
     gap: 10px;
     background-color: #444;
-    /* padding: 10px 1px; */
     position: absolute;
     top: 50%;
     left: 50%;
@@ -222,9 +218,6 @@ summary {
     line-height: 160%;
     background-color: var(--card-color);
     font-size: 0.75em;
-    /* transform-style: preserve-3d;
-    transition: transform 2s;
-    transform: rotateX(180deg); */
 }
 
 .choose-grid-module:hover {
@@ -259,9 +252,7 @@ summary {
     overflow: auto;
     max-height: 100vh;
     -ms-overflow-style: none;
-    /* IE and Edge */
     scrollbar-width: none;
-    /* Firefox */
     padding: 1px;
 }
 
@@ -276,20 +267,8 @@ summary {
     overflow: auto;
     max-height: 100vh;
     -ms-overflow-style: none;
-    /* IE and Edge */
     scrollbar-width: none;
-    /* Firefox */
 }
-
-/* .pause-console { */
-/* padding: 10px; */
-/* margin: 10px; */
-/* border-radius: 10px; */
-/* line-height: 140%; */
-/* font-size: 1em; */
-/* padding: 10px; */
-/* margin: -5px 0; */
-/* } */
 
 #pause-grid-left::-webkit-scrollbar {
     display: none;
@@ -581,6 +560,10 @@ summary {
     z-index: 12;
     font-size: 1.5em;
     transition: opacity 5s ease-in;
+
+    /* border: 1.5px #333 solid; */
+    /* border-radius: 8px; */
+    /* background-color: #fff; */
 }
 
 .details-div {
@@ -588,18 +571,7 @@ summary {
     border-radius: 8px;
     border: 2px #333 solid;
     background-color: #fff;
-    /* box-shadow: 8px 8px 6px rgba(0, 0, 60, 0.11); */
 }
-
-
-
-
-
-
-
-
-
-
 
 
 #dmg {
@@ -757,6 +729,7 @@ summary {
     /* transition: opacity 0.15s; */
     pointer-events: none;
     user-select: none;
+    /* font-family: monospace; */
 }
 
 .color-text {
@@ -998,11 +971,25 @@ summary {
 }
 
 .circle-grid {
-    width: 1.35em;
-    height: 1.35em;
+    width: 1.32em;
+    height: 1.32em;
     border-radius: 50%;
     display: inline-block;
     margin-bottom: -0.3em;
+}
+
+.circle-grid-big {
+    /* width: 1.7em;
+    height: 1.7em;
+    border-radius: 50%;
+    display: inline-block;
+    margin-bottom: -0.5em -0.5em -0.5em -0.5em; */
+    width: 1.32em;
+    height: 1.32em;
+    border-radius: 50%;
+    display: inline-block;
+    margin-bottom: -0.3em;
+    transform: scale(1.5);
 }
 
 .circle-grid-instant {
@@ -1660,7 +1647,7 @@ summary {
 }
 
 .pause-details {
-    background-color: hsl(240, 18%, 93%);
+    background-color: #e2e9ec;
     border: 1px solid #333;
     border-radius: 5px;
     padding: 7px;

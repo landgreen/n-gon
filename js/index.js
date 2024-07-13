@@ -456,15 +456,17 @@ const build = {
     generatePauseLeft() {
         //left side
         let botText = ""
-        if (tech.nailBotCount) botText += `<br>nail-bots: ${tech.nailBotCount}`
-        if (tech.orbitBotCount) botText += `<br>orbital-bots: ${tech.orbitBotCount}`
-        if (tech.boomBotCount) botText += `<br>boom-bots: ${tech.boomBotCount}`
-        if (tech.laserBotCount) botText += `<br>laser-bots: ${tech.laserBotCount}`
-        if (tech.foamBotCount) botText += `<br>foam-bots: ${tech.foamBotCount}`
-        if (tech.soundBotCount) botText += `<br>sound-bots: ${tech.soundBotCount}`
-        if (tech.dynamoBotCount) botText += `<br>dynamo-bots: ${tech.dynamoBotCount}`
-        if (tech.plasmaBotCount) botText += `<br>plasma-bots: ${tech.plasmaBotCount}`
-        if (tech.missileBotCount) botText += `<br>missile-bots: ${tech.missileBotCount}`
+        if (tech.nailBotCount) botText += `<br>nail-bots ${tech.nailBotCount}`
+        if (tech.orbitBotCount) botText += `<br>orbital-bots ${tech.orbitBotCount}`
+        if (tech.boomBotCount) botText += `<br>boom-bots ${tech.boomBotCount}`
+        if (tech.laserBotCount) botText += `<br>laser-bots ${tech.laserBotCount}`
+        if (tech.foamBotCount) botText += `<br>foam-bots ${tech.foamBotCount}`
+        if (tech.soundBotCount) botText += `<br>sound-bots ${tech.soundBotCount}`
+        if (tech.dynamoBotCount) botText += `<br>dynamo-bots ${tech.dynamoBotCount}`
+        if (tech.plasmaBotCount) botText += `<br>plasma-bots ${tech.plasmaBotCount}`
+        if (tech.missileBotCount) botText += `<br>missile-bots ${tech.missileBotCount}`
+
+        // <strong class='color-g'>${b.activeGun === null || b.activeGun === undefined ? "undefined" : b.guns[b.activeGun].name}</strong> (${b.activeGun === null || b.activeGun === undefined ? "0" : b.guns[b.activeGun].ammo})
 
         let text = `<div class="pause-grid-module" style="padding: 8px;">
 <span style="font-size:1.4em;font-weight: 600; float: left;">PAUSED</span> 
@@ -482,24 +484,33 @@ const build = {
 <details id = "simulation-variables-details" style="padding: 0 8px;line-height: 140%;">
 <summary>simulation variables</summary>
 <div class="pause-details">
-<strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)}x <span style="float: right;"><strong class='color-d'>difficulty:</strong> ${((m.dmgScale)).toPrecision(4)}x</span>
-<br><strong class='color-defense'>damage taken</strong>: ${(m.defense()).toPrecision(4)}x <span style="float: right;"><strong class='color-defense'>difficulty:</strong> ${(simulation.dmgScale).toPrecision(4)}x</span>
-<br><strong><em>fire rate</em></strong>: ${(1 / b.fireCDscale).toFixed(2)}x
-${tech.duplicationChance() ? `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance() * 100).toFixed(0)}%` : ""}
+<strong class='color-d'>damage</strong> ${((tech.damageFromTech())).toPrecision(4)}x
+<span style="float: right;"><strong class='color-d'>level</strong> ${((m.dmgScale)).toPrecision(4)}x</span>
+<br><strong class='color-defense'>damage taken</strong> ${(m.defense()).toPrecision(4)}x
+<span style="float: right;"><strong class='color-defense'>level</strong> ${(simulation.dmgScale).toPrecision(4)}x</span>
+<br><strong class='color-h'>health</strong> (${(m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
+<span style="float: right;">${powerUps.research.count} ${powerUps.orb.research()}</span>
+<br><strong class='color-f'>energy</strong> (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000).toFixed(0)}/s)
+<span style="float: right;">${tech.totalCount} ${powerUps.orb.tech()}</span>
+<br><strong><em>fire rate</em></strong> ${(1 / b.fireCDscale).toFixed(2)}x
+<span style="float: right;">mass ${player.mass.toFixed(1)}</span>
 ${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
+<br><strong class='color-dup'>duplication</strong> ${(tech.duplicationChance() * 100).toFixed(0)}%
+<span style="float: right;"><strong class='color-junk'>JUNK</strong> ${(100 * tech.junkChance).toFixed(0)}%</span>
+<br>
+<br> ${level.levelAnnounce()}
+<span style="float: right;">position (${player.position.x.toFixed(0)}, ${player.position.y.toFixed(0)})</span>
+<br>seed ${Math.initialSeed}
+<span style="float: right;">mouse (${simulation.mouseInGame.x.toFixed(0)}, ${simulation.mouseInGame.y.toFixed(0)})</span>
+<br>cycles ${m.cycle}
+<span style="float: right;">velocity (${player.velocity.x.toFixed(2)}, ${player.velocity.y.toFixed(2)})</span>
 ${botText}
-<br><strong class='color-h'>health</strong>: (${(m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
-<span style="float: right;">mass: ${player.mass.toFixed(1)}</span>
-<br><strong class='color-f'>energy</strong>: (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000).toFixed(0)}/s)
-<span style="float: right;">position: (${player.position.x.toFixed(0)}, ${player.position.y.toFixed(0)})</span>
-<br><strong class='color-g'>gun</strong>: ${b.activeGun === null || b.activeGun === undefined ? "undefined" : b.guns[b.activeGun].name} &nbsp; <strong class='color-g'>ammo</strong>: ${b.activeGun === null || b.activeGun === undefined ? "0" : b.guns[b.activeGun].ammo}
-<span style="float: right;">mouse: (${simulation.mouseInGame.x.toFixed(0)}, ${simulation.mouseInGame.y.toFixed(0)})</span>
-<br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}
-<span style="float: right;">velocity: (${player.velocity.x.toFixed(2)}, ${player.velocity.y.toFixed(2)})</span>
-${tech.junkChance ? `<br><strong class='color-junk'>JUNK</strong>: ${(100 * tech.junkChance).toFixed(1)}%  ` : ""}
-<br>mobs: ${spawn.pickList[0]},  ${spawn.pickList[0]}
-<br>seed: ${Math.initialSeed} &nbsp; ${m.cycle} cycles
-<br>mobs: ${mob.length} &nbsp; blocks: ${body.length} &nbsp; bullets: ${bullet.length} &nbsp; power ups: ${powerUp.length} ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
+<br>mobs ${mob.length} (${spawn.pickList[0]},  ${spawn.pickList[0]})
+<span style="float: right;">blocks ${body.length}</span>
+<br>bullets ${bullet.length}
+<span style="float: right;">power ups ${powerUp.length}</span>
+
+${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 </div>
 </details>
 </div>`
@@ -507,11 +518,11 @@ ${tech.junkChance ? `<br><strong class='color-junk'>JUNK</strong>: ${(100 * tech
 <details id="difficulty-parameters-details" style="padding: 0 8px;">
 <summary>difficulty parameters</summary>
 <div class="pause-details">
-        ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
-        ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>-5</strong> initial <strong>power ups</strong><br><strong>faster</strong> and <strong>more</strong> mobs per level</div>` : " "}
-        ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
-        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row"><strong>+1</strong> boss per level<br><strong>-1</strong> <strong class='color-m'>tech</strong> per boss</div>` : " "}
-        ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
+        ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
+        ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>-5</strong> initial <strong>power ups</strong><br><strong>faster</strong> mobs and <strong>more</strong> mobs</div>` : " "}
+        ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
+        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row"><strong>+1</strong> boss per level<br><strong>-1</strong> ${powerUps.orb.tech()} per boss</div>` : " "}
+        ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
         ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>3x</strong> chance for <strong>shielded</strong> mobs<br><strong>-3</strong> initial power ups</div>` : " "}
 </div>
 </details>
@@ -571,15 +582,15 @@ ${tech.junkChance ? `<br><strong class='color-junk'>JUNK</strong>: ${(100 * tech
     },
     generatePauseRight() {
         let text = `<div class="sort">
-                                                    <button onclick="build.sortTech('damage')" class='sort-button'><strong class='color-d'>damage</strong></button>
-                                                    <button onclick="build.sortTech('guntech')" class='sort-button'><strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></button>
-                                                    <button onclick="build.sortTech('fieldtech')" class='sort-button'><strong class='color-f'>field</strong><strong class='color-m'>tech</strong></button>
-                                                    <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
-                                                    <button onclick="build.sortTech('damage taken')" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">damage taken</strong></button>
-                                                    <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
-                                                    <input type="search" id="sort-input" style="width: 5em;font-size: 0.6em;color:#000;" placeholder="sort by" />
-                                                    <button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
-                                                </div>`;
+    <button onclick="build.sortTech('guntech')" class='sort-button'>${powerUps.orb.gunTech()}</button>
+    <button onclick="build.sortTech('fieldtech')" class='sort-button'>${powerUps.orb.fieldTech()}</button>
+    <button onclick="build.sortTech('damage')" class='sort-button'><strong class='color-d'>damage</strong></button>
+    <button onclick="build.sortTech('damage taken')" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">dmg taken</strong></button>
+    <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
+    <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
+    <input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#000;" placeholder="sort by" />
+    <button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
+</div>`;
         const ejectClass = (tech.isPauseEjectTech && !simulation.isChoosing) ? 'pause-eject' : ''
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0) {
@@ -924,43 +935,43 @@ ${tech.junkChance ? `<br><strong class='color-junk'>JUNK</strong>: ${(100 * tech
     // <button onclick="build.sortTech('have', true)" class='sort-button color-m' style="letter-spacing: 1px;font-weight: 800;">have</button>
     populateGrid() { //background-color:var(--build-bg-color);
         let text = `
-                            <div class="experiment-start-box">
-                                <div class="sort" style="border: 0px;">
-                                    <button onclick="build.sortTech('guntech', true)" class='sort-button'><strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></button>
-                                    <button onclick="build.sortTech('fieldtech', true)" class='sort-button'><strong class='color-f'>field</strong><strong class='color-m'>tech</strong></button>
-                                    <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d'>damage</strong></button>
-                                    <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
-                                    <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">damage taken</strong></button>
-                                    <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
-                                    <input type="search" id="sort-input" style="width: 6em;font-size: 0.6em;color:#000;" placeholder="sort by" />
-                                    <button onclick="build.sortTech('input', true)" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
-                                </div>
-                                <div>
-                                    <div style="display: grid;grid-template-columns: repeat(3, 1fr);row-gap: 10px;column-gap: 25px;grid-auto-rows: minmax(5px, auto);margin:-5px 0px 10px 25px;line-height: 100%;">
-                                        <div style="grid-column: 1;grid-row: 2 / 4;">
-                                            <svg class="SVG-button" onclick="build.startExperiment()" width="150" height="70" >
-                                                <g stroke='none' fill='#333' stroke-width="2" font-size="65px" font-family="Ariel, sans-serif">
-                                                    <text x="10" y="57">start</text>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                        <div style="grid-column: 2;grid-row: 2;">
-                                            <svg class="SVG-button" onclick="build.reset()" width="50" height="25">
-                                                <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
-                                                    <text x="5" y="18">reset</text>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                        <div style="grid-column: 2;grid-row: 3/4;">
-                                            <svg class="SVG-button" onclick="build.shareURL(true)" width="52" height="25">
-                                                <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
-                                                    <text x="5" y="18">share</text>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`
+<div class="experiment-start-box">
+    <div class="sort" style="border: 0px;">
+        <button onclick="build.sortTech('guntech', true)" class='sort-button'>${powerUps.orb.gunTech()}</button>
+        <button onclick="build.sortTech('fieldtech', true)" class='sort-button'>${powerUps.orb.fieldTech()}</button>
+        <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d'>damage</strong></button>
+        <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">dmg taken</strong></button>
+        <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
+        <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
+        <input type="search" id="sort-input" style="width: 7.5em;font-size: 0.6em;color:#000;" placeholder="sort by" />
+        <button onclick="build.sortTech('input', true)" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
+    </div>
+    <div>
+        <div style="display: grid;grid-template-columns: repeat(3, 1fr);row-gap: 10px;column-gap: 25px;grid-auto-rows: minmax(5px, auto);margin:-5px 0px 10px 25px;line-height: 100%;">
+            <div style="grid-column: 1;grid-row: 2 / 4;">
+                <svg class="SVG-button" onclick="build.startExperiment()" width="150" height="70" >
+                    <g stroke='none' fill='#333' stroke-width="2" font-size="65px" font-family="Ariel, sans-serif">
+                        <text x="10" y="57">start</text>
+                    </g>
+                </svg>
+            </div>
+            <div style="grid-column: 2;grid-row: 2;">
+                <svg class="SVG-button" onclick="build.reset()" width="50" height="25">
+                    <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
+                        <text x="5" y="18">reset</text>
+                    </g>
+                </svg>
+            </div>
+            <div style="grid-column: 2;grid-row: 3/4;">
+                <svg class="SVG-button" onclick="build.shareURL(true)" width="52" height="25">
+                    <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
+                        <text x="5" y="18">share</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>`
         const hideStyle = `style="height:auto; border: none; background-color: transparent;"`
         for (let i = 0, len = m.fieldUpgrades.length; i < len; i++) {
             const style = localSettings.isHideImages ? hideStyle : `style="background-image: url('img/field/${m.fieldUpgrades[i].name}${i === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`

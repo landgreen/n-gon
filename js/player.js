@@ -699,7 +699,7 @@ const m = {
                     tech.isDeathAvoidedThisLevel = true
                     powerUps.research.changeRerolls(-1)
                     simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
-                    for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
+                    for (let i = 0; i < 22; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     m.energy = m.maxEnergy + 0.1
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function () { //set wipe to have trails
@@ -2156,7 +2156,6 @@ const m = {
         m.fieldBlockCD = 10;
         m.fieldDamage = 1
         m.fieldHarmReduction = 1;
-        m.lastHit = 0
         m.isSneakAttack = false
         m.duplicateChance = 0
         m.grabPowerUpRange2 = 200000;
@@ -2890,7 +2889,7 @@ const m = {
     couplingDescription(couple = m.coupling) {
         switch (m.fieldMode) {
             case 0: //field emitter
-                return `<strong>all</strong> other <strong class='color-f'>field</strong> effects`
+                return `<strong>all</strong> effects`
             case 1: //standing wave
                 // return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
                 return `+${(couple * 5).toFixed(0)} maximum <strong class='color-f'>energy</strong>`
@@ -3091,7 +3090,7 @@ const m = {
     },
     {
         name: "perfect diamagnetism",
-        description: "<strong>deflecting</strong> does not drain <strong class='color-f'>energy</strong><br><strong>shield</strong> maintains <strong>functionality</strong> while inactive<br><strong>5</strong> <strong class='color-f'>energy</strong> per second",
+        description: `<strong>deflecting</strong> does not drain <strong class='color-f'>energy</strong><br><strong>shield</strong> maintains <strong>functionality</strong> while inactive<br><strong>5</strong> <strong class='color-f'>energy</strong> per second`,
         effect: () => {
             m.fieldMeterColor = "#48f" //"#0c5"
             m.eyeFillColor = m.fieldMeterColor
@@ -3326,7 +3325,7 @@ const m = {
     {
         name: "negative mass",
         //<br>hold <strong class='color-block'>blocks</strong> as if they have a lower <strong>mass</strong>
-        description: "use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br><strong>0.4x</strong> <strong class='color-defense'>damage taken</strong><br><strong>6</strong> <strong class='color-f'>energy</strong> per second",
+        description: `use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br><strong>0.4x</strong> <strong class='color-defense'>damage taken</strong><br><strong>6</strong> <strong class='color-f'>energy</strong> per second`,
         fieldDrawRadius: 0,
         effect: () => {
             m.fieldFire = true;
@@ -3572,7 +3571,7 @@ const m = {
                         bullet[bullet.length - 1].force.y += 0.005 + push.y * (Math.random() - 0.5)
                         // b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
                     } else if (simulation.molecularMode === 2) {
-                        m.energy -= 0.045;
+                        m.energy -= 0.044;
                         b.iceIX(1)
                     } else if (simulation.molecularMode === 3) {
                         if (tech.isDroneRadioactive) {
@@ -4091,7 +4090,7 @@ const m = {
     },
     {
         name: "time dilation",
-        description: "use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>1.2x</strong> movement and <strong><em>fire rate</em></strong><br><strong>12</strong> <strong class='color-f'>energy</strong> per second",
+        description: `use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>1.2x</strong> movement and <strong><em>fire rate</em></strong><br><strong>12</strong> <strong class='color-f'>energy</strong> per second`,
         set() {
             // m.fieldMeterColor = "#0fc"
             // m.fieldMeterColor = "#ff0"
@@ -4290,7 +4289,7 @@ const m = {
     },
     {
         name: "metamaterial cloaking",
-        description: "<strong>0.3x</strong> <strong class='color-defense'>damage taken</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>4.5x</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br><strong>6</strong> <strong class='color-f'>energy</strong> per second",
+        description: `<strong>0.3x</strong> <strong class='color-defense'>damage taken</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>4.5x</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br><strong>6</strong> <strong class='color-f'>energy</strong> per second`,
         effect: () => {
             m.fieldFire = true;
             m.fieldMeterColor = "#333";
@@ -4451,10 +4450,7 @@ const m = {
     },
     {
         name: "pilot wave",
-        //<br><strong class='color-block'>blocks</strong> can't <strong>collide</strong> with <strong>intangible</strong> mobs
-        //field <strong>radius</strong> decreases out of <strong>line of sight</strong>
-        //<strong>unlock</strong> <strong class='color-m'>tech</strong> from other <strong class='color-f'>fields</strong>
-        description: "use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><strong class='color-m'>tech</strong>, <strong class='color-f'>fields</strong>, and <strong class='color-g'>guns</strong> have <strong>+3</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second",
+        description: `use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><div class="circle-grid tech"></div>, <div class="circle-grid gun"></div>, and <div class="circle-grid field"></div> have <strong>+3</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second`,
         effect: () => {
             m.fieldMeterColor = "#333"
             m.eyeFillColor = m.fieldMeterColor
@@ -5231,13 +5227,13 @@ const m = {
     },
     {
         name: "grappling hook",
-        description: `use <strong class='color-f'>energy</strong> to fire a hook that <strong>pulls</strong> you<br><strong>0.6x</strong> <strong class='color-defense'>damage taken</strong><br><strong>9</strong> <strong class='color-f'>energy</strong> per second`,
+        description: `use <strong class='color-f'>energy</strong> to fire a hook that <strong>pulls</strong> you<br><strong>0.5x</strong> <strong class='color-defense'>damage taken</strong><br><strong>9</strong> <strong class='color-f'>energy</strong> per second`,
         effect: () => {
             m.fieldFire = true;
             // m.holdingMassScale = 0.01; //can hold heavier blocks with lower cost to jumping
             // m.fieldMeterColor = "#789"//"#456"
             m.eyeFillColor = m.fieldMeterColor
-            m.fieldHarmReduction = 0.6; //40% reduction
+            m.fieldHarmReduction = 0.5; //40% reduction
             m.grabPowerUpRange2 = 300000 //m.grabPowerUpRange2 = 200000;
 
             m.hold = function () {

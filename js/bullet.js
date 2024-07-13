@@ -2286,14 +2286,9 @@ const b = {
             //calculate laser collision
             let range = tech.isPlasmaRange * (120 + (m.crouch ? 400 : 300) * Math.sqrt(Math.random())) //+ 100 * Math.sin(m.cycle * 0.3);
             // const dir = m.angle // + 0.04 * (Math.random() - 0.5)
-            const path = [{
-                x: m.pos.x + 20 * Math.cos(m.angle),
-                y: m.pos.y + 20 * Math.sin(m.angle)
-            },
-            {
-                x: m.pos.x + range * Math.cos(m.angle),
-                y: m.pos.y + range * Math.sin(m.angle)
-            }
+            const path = [
+                { x: m.pos.x + 20 * Math.cos(m.angle), y: m.pos.y + 20 * Math.sin(m.angle) },
+                { x: m.pos.x + range * Math.cos(m.angle), y: m.pos.y + range * Math.sin(m.angle) }
             ];
             //check for collisions
             let best = {

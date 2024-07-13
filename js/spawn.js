@@ -5530,7 +5530,7 @@ const spawn = {
         me.torqueMagnitude = 0.00024 * me.inertia * (Math.random() > 0.5 ? -1 : 1);
         me.delay = 70 + 70 * simulation.CDScale;
         me.cd = 0;
-        me.swordRadius = 0;
+        me.swordRadius = 50;
         me.swordVertex = 1
         me.swordRadiusMax = 1100 + 20 * simulation.difficulty;
         me.swordRadiusGrowRate = me.swordRadiusMax * (0.005 + 0.0003 * simulation.difficulty)
@@ -5564,15 +5564,16 @@ const spawn = {
                 Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
             ) {
                 //find vertex farthest away from player
-                let dist = 0
-                for (let i = 0, len = this.vertices.length; i < len; i++) {
-                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
-                    if (D > dist) {
-                        dist = D
-                        this.swordVertex = i
-                    }
-                }
-                this.laserAngle = this.swordVertex / 5 * 2 * Math.PI + 0.6283
+                // let dist = 0
+                // for (let i = 0, len = this.vertices.length; i < len; i++) {
+                //     const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
+                //     if (D > dist) {
+                //         dist = D
+                //         this.swordVertex = i
+                //     }
+                // }
+                // this.laserAngle = this.swordVertex / 5 * 2 * Math.PI + 0.6283
+
                 this.sword = this.swordGrow
                 Matter.Body.setVelocity(this, { x: 0, y: 0 });
                 Matter.Body.setAngularVelocity(this, 0)
@@ -5581,6 +5582,7 @@ const spawn = {
                 this.isInvulnerable = true
                 this.frictionAir = 1
             }
+            this.laserSword(this.vertices[this.swordVertex], this.angle + this.laserAngle); //always see the tip of the sword
         }
         me.sword = me.swordWaiting //base function that changes during different aspects of the sword swing
         me.swordGrow = function () {
@@ -5606,7 +5608,7 @@ const spawn = {
             this.spinCount++
             if (this.spinCount > 80) {
                 this.sword = this.swordWaiting
-                this.swordRadius = 0
+                this.swordRadius = 50
                 this.accelMag = 0.001 * simulation.accelScale;
                 this.cd = simulation.cycle + this.delay;
                 this.damageReduction = this.startingDamageReduction

@@ -34,48 +34,10 @@ const powerUps = {
     healGiveMaxEnergy: false, //for tech 1st ionization energy
     orb: {
         research(num = 1) {
-            switch (num) {
-                case 1:
-                    return `<div class="research-circle"></div> `
-                case 2:
-                    return `<span style="position:relative;">
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:0;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:7px;"></div>
-                    </span> &nbsp; &nbsp; &nbsp; &nbsp;`
-                case 3:
-                    return `<span style="position:relative;">
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:0;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:8px;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:16px;"></div>
-                    </span> &nbsp; &nbsp; &nbsp; &nbsp; &thinsp; `
-                case 4:
-                    return `<span style="position:relative;">
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:0;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:8px;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:16px;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:24px;"></div>
-                    </span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `
-                case 5:
-                    return `<span style="position:relative;">
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:0;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:8px;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:16px;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:24px;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:32px;"></div>
-                    </span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `
-                case 6:
-                    return `<span style="position:relative;">
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:0;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:8px;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:16px;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:24px;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:32px;"></div>
-                    <div class="research-circle" style="position:absolute; top:1.5px; left:40px;"></div>
-                    </span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `
-            }
+            if (num === 1) return `<div class="research-circle"></div> `
             let text = '<span style="position:relative;">'
             for (let i = 0; i < num; i++) {
-                text += `<div class="research-circle" style="position:absolute; top:1.5px; left:${i * 8}px;"></div>`
+                text += `<div class="research-circle" style="position:absolute; top:1.5px; left:${i * 0.6}em;"></div>`
             }
             text += '</span> &nbsp; &nbsp; '
             for (let i = 0; i < num; i++) {
@@ -90,7 +52,7 @@ const powerUps = {
             }
             let text = '<span style="position:relative;">'
             for (let i = 0; i < num; i++) {
-                text += `<div class="ammo-circle" style="position:absolute; top:1.5px; left:${i * 8}px;"></div>`
+                text += `<div class="ammo-circle" style="position:absolute; top:1.5px; left:${i * 0.6}em;"></div>`
             }
             text += '</span> &nbsp; &nbsp; '
             for (let i = 0; i < num; i++) {
@@ -100,37 +62,43 @@ const powerUps = {
         },
         heal(num = 1) {
             if (powerUps.healGiveMaxEnergy) {
-                switch (num) {
-                    case 1:
-                        return `<div class="heal-circle-energy"></div>`
-                }
+                if (num === 1) return `<div class="heal-circle-energy"></div>`
+
                 let text = '<span style="position:relative;">'
                 for (let i = 0; i < num; i++) {
-                    text += `<div class="heal-circle-energy" style="position:absolute; top:1px; left:${i * 10}px;"></div>`
+                    text += `<div class="heal-circle-energy" style="position:absolute; top:1px; left:${i * 0.6}em;"></div>`
                 }
                 text += '</span> &nbsp; &nbsp; '
-                for (let i = 0; i < num; i++) {
-                    text += '&nbsp; '
-                }
+                for (let i = 0; i < num; i++) text += '&nbsp; '
                 return text
             } else {
-                switch (num) {
-                    case 1:
-                        return `<div class="heal-circle"></div>`
-                }
+                if (num === 1) return `<div class="heal-circle"></div>`
+
                 let text = '<span style="position:relative;">'
                 for (let i = 0; i < num; i++) {
-                    text += `<div class="heal-circle" style="position:absolute; top:1px; left:${i * 10}px;"></div>`
+                    text += `<div class="heal-circle" style="position:absolute; top:1px; left:${i * 0.6}em;"></div>`
                 }
                 text += '</span> &nbsp; &nbsp; '
-                for (let i = 0; i < num; i++) {
-                    text += '&nbsp; '
-                }
+                for (let i = 0; i < num; i++) text += '&nbsp; '
                 return text
             }
         },
         tech(num = 1) {
-            return `<div class="tech-circle"></div>`
+            return `<div class="circle-grid tech" style="width: 1.32em; height: 1.32em;margin-bottom: -0.3em;"></div>`
+        },
+        field(num = 1) {
+            return `<div class="circle-grid field"></div>`
+        },
+        gun(num = 1) {
+            return `<div class="circle-grid gun"></div>`
+        },
+        gunTech(num = 1) {
+            return `<div class="circle-grid tech" style="position:relative; top:-0.05em; left:0.55em;opacity:0.8;margin-left:-0.55em;"></div>
+                    <div class="circle-grid gun" style="position:relative; top:-0.05em; left:-0.55em; opacity:0.65;margin-right:-0.55em;"></div>`
+        },
+        fieldTech(num = 1) {
+            return `<div class="circle-grid tech" style="position:relative; top:-0.05em; left:0.55em;opacity:0.8;margin-left:-0.55em;"></div>
+                    <div class="circle-grid field" style="position:relative; top:-0.05em; left:-0.55em;opacity:0.65;margin-right:-0.55em;"></div>`
         },
         coupling(num = 1) {
             switch (num) {
@@ -139,7 +107,7 @@ const powerUps = {
             }
             let text = '<span style="position:relative;">'
             for (let i = 0; i < num; i++) {
-                text += `<div class="coupling-circle" style="position:absolute; top:1.5px; left:${i * 6}px;"></div>`
+                text += `<div class="coupling-circle" style="position:absolute; top:1.5px; left:${i * 0.5}em;"></div>`
             }
             text += '</span> &nbsp; &nbsp;'
             for (let i = 0; i < num; i++) {
@@ -421,11 +389,11 @@ const powerUps = {
                     </datalist>
                 </div>
                 <div class="right-column">
-                    <div class="row" id="constraint-1"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
-                    <div class="row" id="constraint-2"><strong>-5</strong> initial <strong>power ups</strong><br><strong>faster</strong> and <strong>more</strong> mobs per level</div>
-                    <div class="row" id="constraint-3"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
-                    <div class="row" id="constraint-4"><strong>+1</strong> boss per level<br><strong>-1</strong> <strong class='color-m'>tech</strong> per boss</div>
-                    <div class="row" id="constraint-5"><strong>0.85x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.23x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-1"><strong>0.87x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-2"><strong>-5</strong> initial <strong>power ups</strong><br><strong>faster</strong> mobs and <strong>more</strong> mobs</div>
+                    <div class="row" id="constraint-3"><strong>0.87x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-4"><strong>+1</strong> boss per level<br><strong>-1</strong> ${powerUps.orb.tech()} per boss</div>
+                    <div class="row" id="constraint-5"><strong>0.87x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
                     <div class="row" id="constraint-6"><strong>3x</strong> chance for <strong>shielded</strong> mobs<br><strong>-3</strong> initial power ups</div>
                 </div>
                 <div class="far-right-column">
@@ -1602,6 +1570,7 @@ const powerUps = {
                     // remove a random tech from the list of tech you have
                     tech.removeCount += tech.tech[choose].count
                     tech.tech[choose].remove();
+                    tech.totalCount -= tech.tech[choose].count
                     tech.tech[choose].count = 0;
                     tech.tech[choose].isLost = true;
                     simulation.updateTechHUD();
@@ -1619,6 +1588,7 @@ const powerUps = {
                 }
                 // remove a random tech from the list of tech you have
                 tech.tech[choose].remove();
+                tech.totalCount -= tech.tech[choose].count
                 tech.removeCount += tech.tech[choose].count
                 tech.tech[choose].count = 0;
                 tech.tech[choose].isLost = true;

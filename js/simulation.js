@@ -830,6 +830,7 @@ const simulation = {
         simulation.wipe = function () { //set wipe to normal
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
+        m.lastHit = 0
         m.hole.isOn = false
         simulation.paused = false;
         engine.timing.timeScale = 1;

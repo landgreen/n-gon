@@ -26,7 +26,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField("negative mass") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField("plasma torch") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
             // powerUps.research.count = 3
             // tech.isHookWire = true
@@ -36,29 +36,28 @@ const level = {
             // b.giveGuns("super balls") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // tech.laserColor = "#fff"
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
             // b.guns[8].ammo = 100000000
-            // requestAnimationFrame(() => { tech.giveTech("optical amplifier") });
+            // requestAnimationFrame(() => { tech.giveTech("stimulated emission") });
             // tech.giveTech("1st ionization energy")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("tokamak")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("inertial confinement")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("stellarator")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("mass-energy equivalence")
-            // requestAnimationFrame(() => { for (let i = 0; i < 10; i++) b.orbitBot(m.pos, false) });
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("1st ionization energy") });
-            // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("booby trap")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("obsolescence")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("arsenal")
+            // requestAnimationFrame(() => { for (let i = 0; i < 3; i++) tech.giveTech("mechatronics") });
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("paradigm shift") });
+            // for (let i = 0; i < 2; i++) tech.giveTech("nail-bot")
             // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 1; ++i) tech.giveTech("compression engine")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("cross-disciplinary")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(-50, -70, "difficulty", false);
             // spawn.mapRect(575, -700, 25, 425);  //block mob line of site on testing
             // level.testing();
 
             // for (let i = 0; i < 1; ++i) spawn.snakeBoss(1400, -500)
-            // for (let i = 0; i < 2; i++) powerUps.directSpawn(800, -100, "coupling");
+            // for (let i = 0; i < 20; i++) powerUps.directSpawn(0, 0, "coupling");
             // Matter.Body.setPosition(player, { x: -200, y: -3330 });
             // for (let i = 0; i < 4; ++i) spawn.sucker(1300, -500 + 100 * Math.random())
             // spawn.hopper(1900, -500)
@@ -112,7 +111,10 @@ const level = {
                 if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             }
         }
-        if (!simulation.isTraining) level.levelAnnounce();
+        if (!simulation.isTraining) {
+            document.title = "n-gon: " + level.levelAnnounce();
+            simulation.makeTextLog(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
+        }
         simulation.setupCamera(player.position);
         simulation.setZoom();
         level.addToWorld(); //add bodies to game engine
@@ -204,6 +206,19 @@ const level = {
             // if (h > healPerOrb) powerUps.spawnDelay("heal", h);
             // simulation.makeTextLog(`${(Math.ceil(tech.interestRate * 100)).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
         }
+        if (tech.ejectOld > 0) {
+            let index = null //find oldest tech that you have
+            for (let i = 0; i < tech.tech.length; i++) {
+                if (tech.tech[i].count > 0) index = i
+            }
+            if (index) { //eject it
+                const effect = Math.pow(1.1, tech.tech[index].count)
+                simulation.makeTextLog(`<strong>${(effect).toFixed(2)}x</strong> <strong class='color-d'>damage</strong> <em>//from obsolescence</em>`, 360)
+                tech.damage *= effect
+                tech.ejectOld *= effect
+                powerUps.ejectTech(index)
+            }
+        }
     },
     trainingText(say) {
         simulation.lastLogTime = 0; //clear previous messages
@@ -241,8 +256,8 @@ const level = {
         } else if (simulation.difficultyMode > 1) {
             scale = 2
         }
-        m.dmgScale = Math.pow(0.85, level.levelsCleared * scale)
-        simulation.dmgScale = Math.max(0.1, 0.23 * level.levelsCleared * scale) //damage done by mobs scales with total levels
+        m.dmgScale = Math.pow(0.87, level.levelsCleared * scale)
+        simulation.dmgScale = Math.max(0.1, 0.22 * level.levelsCleared * scale) //damage done by mobs scales with total levels
 
         //
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.043) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
@@ -268,10 +283,9 @@ const level = {
     levelAnnounce() {
         const cheating = simulation.isCheating ? "(testing)" : ""
         if (level.levelsCleared === 0) {
-            document.title = `n-gon: initial ${cheating}`;
+            return `initial ${cheating}`;
         } else {
-            document.title = `n-gon: ${level.levelsCleared} ${level.levels[level.onLevel]} ${cheating}`
-            simulation.makeTextLog(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
+            return `${level.levelsCleared} ${level.levels[level.onLevel]} ${cheating}`
         }
     },
     announceMobTypes() {
@@ -624,13 +638,12 @@ const level = {
                         let text = `
                             <div class="choose-grid-module" id = "choose-training" style = "font-size: 1em; padding:10px;color:#333;">
                                 <h2 style="text-align: center;letter-spacing: 5px;">training</h2>
-                                Begin the <strong>guided tutorial</strong> that shows you how to use your <strong class='color-f'>field</strong> and <strong class='color-g'>gun</strong>.
+                                Begin the <strong>guided tutorial</strong> that shows you how to use your ${powerUps.field.gun()} and ${powerUps.orb.gun()}.
                             </div>
                             <div class="choose-grid-module" id = "choose-unPause" style = "font-size: 1em; padding:10px;color:#333;">
                                 <h2 style="text-align: center; letter-spacing: 7px;">play</h2>
                                 Begin the <strong>standard game</strong> where you progress through <strong>13</strong> random levels and beat the final boss.
                             </div>`
-                        //use you use your <strong class='color-g'>gun</strong>, <strong class='color-f'>field</strong>, and <strong class='color-m'>tech</strong>
                         document.getElementById("choose-grid").innerHTML = text
                         //show level info
                         document.getElementById("choose-grid").style.opacity = "1"
@@ -4089,9 +4102,10 @@ const level = {
                         } else {
                             isSpawnedBoss = true
                             isDoorsLocked = true
-                            for (let i = 0; i < 9; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1700, "ammo")
-                            for (let i = 0; i < 3; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1700, "heal");
-                            const scale = Math.pow(simulation.difficulty, 0.7) //hard around 30, why around 54
+                            for (let i = 0; i < 12; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1800, "ammo")
+                            for (let i = 0; i < 5; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1700, "heal");
+                            for (let i = 0; i < 1; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1750, "research");
+                            const scale = Math.pow(simulation.difficulty, 0.7)
                             if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
                                 for (let i = 0; i < 250; i++) spawn.starter(-2700 + 2400 * Math.random(), -1300 - 500 * Math.random())
                             } else {
@@ -4112,7 +4126,6 @@ const level = {
                                     }
                                 }
                             }
-                            // spawn.secondaryBossChance(-2300, -800)
                         }
                     } else {
                         doorIn.isClosing = false
@@ -31938,7 +31951,7 @@ const level = {
                                 }
                                 if (tech.isPiezo) g.energy += 20.48;
                                 if (tech.isCouplingNoHit && g.coupling > 0) {
-                                    g.couplingChange(-5)
+                                    g.couplingChange(-3)
 
                                     const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
                                     let where = Vector.add(g.pos, Vector.mult(unit, 17))
@@ -34513,27 +34526,27 @@ const level = {
         const buttonDoor = level.button(400, 0)
 
         let instruction = 0
-        level.trainingText(`use your <strong class='color-f'>field</strong> to pick up the gun power up`)
+        level.trainingText(`use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.gun()}`)
 
         level.custom = () => {
             if (instruction === 0 && simulation.isChoosing) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up the gun power up</s>
+                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.gun()}</s>
                 <br>choose a <strong class='color-g'>gun</strong>`)
             } else if (instruction === 1 && !simulation.isChoosing) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up the gun power up
+                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.gun()}
                 <br>choose a <strong class='color-g'>gun</strong></s>
                 <br>use the <strong>left mouse</strong> button to shoot the <strong>mobs</strong>`)
             } else if (instruction === 2 && mob.length === 0) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up the gun power up
+                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.gun()}
                 <br>choose a <strong class='color-g'>gun</strong>
                 <br>use the <strong>left mouse</strong> button to shoot the <strong>mobs</strong></s>
                 <br>drop a <strong class='color-block'>block</strong> on the red button to open the door`)
             } else if (instruction === 3 && !door.isClosing) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up the gun power up
+                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.gun()}
                 <br>choose a <strong class='color-g'>gun</strong>
                 <br>use the <strong>left mouse</strong> button to shoot the <strong>mobs</strong>
                 <br>put a <strong class='color-block'>block</strong> on the red button to open the door</s>`)

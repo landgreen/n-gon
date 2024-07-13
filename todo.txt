@@ -1,52 +1,39 @@
 ******************************************************** NEXT PATCH **************************************************
 
-snakeBoss - boss with a tail that grows longer after damage or eating power ups
-  maybe have it eat blocks too?
+replaced tech, field, and gun text with orbs
+  orbs length scale with px->em
+cleaned up simulation variables text in pause menu
+some minor tech description changes
+total tech count no longer includes instant tech or removed tech
 
-trying out putting actual system error messages directly into the in-game console
+tech: planned obsolescence - at the start of each level eject your oldest tech and gain 1.1 damage
 
-charmed baryons: 0.66->0.8x movement
-grappling hook field: 0.6->0.5 damage taken
+heuristics 1.3 -> between 1 and 1.5 fire rate
+combinatorial optimization 1.35->1.4 damage
 
-******************************************************* DESIGN ******************************************************
+difficulty reduction per level 
+  0.85->0.87x damage done
+  1.23->1.22 damage taken 
 
-priorities    
-  synergies between tech
-    difficult to achieve synergies that feel so powerful they are game breaking / changing
-  randomized content that adds repeatability
-    bosses, mobs, levels, tech
-  graphical indicators of tech effects and quantity
-  subtle lore woven into unexpected places
+******************************************************** BUGS ********************************************************
 
-add more randomize sub level map content
-  left/right sides of lock
-  small lab rooms
+ants marching outline on splash screen doesn't sync right on safari
 
-list of powerful synergies
-  CPT + high energy regen
-  research + bot fabrication + ersatz bots + various bot upgrades
-  harpoon + high fire rate + alternator + time dilation
-  duplication 100%
-  interest + coupling, research + (peer review? or Bayesian statistics)
-  electronegativity and high energy?
-    electronegativity + anyon + duplication + Maxwells demon + interest + pair production
-  chain reaction + invulnerable + Abelian group + parasitism = clear all mobs on level
+player can become crouched while not touching the ground if they exit the ground while crouched
+
+fix door.isClosing actually meaning isClosed?
 
 *********************************************************** TODO *****************************************************
+
+tech - at the start of each new level eject the oldest tech you have and gain 10% damage
+
+
 
 merge multiple power ups of the same type if nearby
   5-10 ammo, research, coupling can merge to form a slightly larger power up version
     check for merger possibility every 60 seconds?
     adjust mass spawns to just spawn larger power ups versions and change?
       spawnDelay
-
-white laser
-  what to name?  not much in wikipedia
-  goes through shields?
-  damage, energy cost
-  3+ closely overlapping beams (but reflecting, not like diffusion)
-  tech.laserColor = "#fff"
-  tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
 tech: atomic pile - lose 1 health if you are above the maximum energy
   generate energy for each nearby mob?
@@ -55,9 +42,6 @@ tech: atomic pile - lose 1 health if you are above the maximum energy
 
 field tech: molecular assembler - every time you spawn a drone/spore/... become immune to damage for time
   scales with how much energy was used to spawn drone/...
-
-make some explosions have less knock back?
-  annoying with flame test, boom bot?
 
 figure out how to put instructions for controls in background on initial level
   mouse smooth makes the text position jitter when it moves sub pixels
@@ -153,8 +137,6 @@ explosions have a chance to spawn spores
 make sure healing isn't effected by simulation.healScale
   instead heal orb size should be scaled
     but the ratio between size and heal shouldn't be effected
-
-tech - destroys a random tech each new level and gains +damage each time
 
 boss - tracks the position, velocity, angle of power ups, blocks, and bullets it fires
   reactor only?
@@ -992,77 +974,6 @@ n-gon outreach ideas
   hacker news - show hacker news post
   twitch - lets play
 
-******************************************************** BUGS ********************************************************
-
-bug: maybe I can put in an event listener to reset inputs to false when you tab out to prevent key sticking
-
-bug - url sharing still broken sometimes
-    
-tech upgrade to anthropic principle to make it trigger at 50% life and 0% once per map
-
-bug? cloaking field doesn't show energy over max
-
-run more profiles of n-gon to fix performance issues
-
-bug - death while paused crashes game?
-
-bug:  possibly clearing away all bullets causes a problem
-  bullet.js 255  (.do() is missing)
-  I died and quantum immortality triggered (I had needles and ice-IX)
-  game crashed but recovered
-
-vanish element bug, crashes on touching element,  happens for 1 person maybe with junk tech?
-
-safari issues
-  once: can't pick up blocks
-    fixed on new map
-    cloaking field
-  once: after damage, locked into slow time mode
-    fixed on damage
-  3 times player head graphics not rotating
-    left/right leg flip broke
-    walk leg direction,  legs are walking backwards
-    happened maybe after power up selection menu??
-    cloaking field(at least once)
-    aiming still works
-    fixed on new map, although flip still broken (is flip a separate issue?)
-      flip fixed on new game
-
-sharing builds as html doesn't work for long lists...
-  it shouldn't be sharing undefined at all
-  probably some other problems too
-  (this might be fixed...)
-
-blocks on buttons teleport into the button endlessly if they are being slowly floated away
-  maybe add a cooldown?
-  can't reproduce
-
-ants marching outline doesn't sync right on safari anymore.
-
-door to exit in level: vats does nothing
-  did I do that?
-
-death while in power up selection menu doesn't reset properly
-  of course it's not possible to die in this menu unless you use testing and shift+X
-
-player can become crouched while not touching the ground if they exit the ground while crouched
-
-a couple times people have reported the final boss dropping extra bodies on death
-
-blue triangle boss can move backwards and aim away from you if set up properly
-  issues with dot product probably, but might not be worth fixing
-
-mouse event e.which is deprecated
-
-fix door.isClosing actually meaning isClosed?
-
-make it so that when you are immune to harm you can either jump on mobs or you pass through them
-
-is there a way to check if the player is stuck inside the map or block
-  trigger a short term non-collide if that occurs
-
-(intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
-
 ******************************************************** LEVELS ********************************************************
 
 map: observatory
@@ -1210,6 +1121,72 @@ add sounds
     // tone(445.50)
     // tone(495)
 
+******************************************************** IMAGES ********************************************************
+
+process:  discord midjourney prompts -> "pixelmator pro" adjust color, repair, scale to 384x256, export PNG -> webP? -> place in /img folder
+make n-gon a progressive web app to manage image downloads, cache
+wave function collapse opens the pause menu after it triggers alternate reality
+  this is actually good, maybe reuse this code to get pause menu to open at any time
+if pause is pressed while selecting power ups, display pause menu on top of selection menu
+***styles***
+  try --- Pastel drawing, Psychedelic art, Arabesque (cool patterns), knolling (everything spread out and placed on a flat mat)
+  try taking screen shots of fields graphics and feeding them into midJourney V4
+  technology stuff --- Dan Matutina (cute complex technology),
+    Katsuhiro Otomo (intricate space technology), Tsutomu Nihei (black and white detailed future tech)
+    infographics of all know multiverses. 1980s Japanese graphic design, dimensional astrolabe,
+    Japanese poster graphics, Ralph McQuarrie (looks like star wars), Simon Stålenhag (retro-futuristic), Yoshiyuki Tomino (detailed anime future technology)
+    isometric:  low-poly, box cutout, made in blender, Materials: matte clay
+    subtractive sculpture
+    kinetic sculpture
+  quantum stuff -- Hypertorus, Glowing Opal Pearlescent, Physics, Hydro-Dipping	Hydrodipped, Vija Celmins, Matt Molloy (photo of golden waves in the sky)
+***maybe redo***
+  laser
+  supercritical fission
+***past style themes***
+  base prompt for player on 5.2:  clean white robot spherical turret on bird legs test chamber
+  standing wave - a 3-D cyan transparent nested concentric aligned centered sphere with rings
+    by Philippe Starck 
+  perfect diamagnetism - physics magnetic field chalk diagram 
+  time dilation - graphic of a hyperbolic equation Luminogram
+  negative mass - Blacklight painting by Moebius
+  plasma torch - by Dan Mumford
+
+  metamaterial cloaking - Scientific photography by Miki Asai,   by Bruce Munro
+  molecular assembler - by Laurie Greasley 16-bit Isometric 
+  wormhole - by Tim White
+  pilot wave - none
+
+  nail gun - Screenprint
+  shotgun - blueprint by Dan McPharlin
+  grenades, missiles, explosions - vibrant fireball explosion sonic shockwave ring art by Victo Ngai --ar 3:2 --v 5 --s 750
+  spores - turquoise black spores on a white background full color scientific anatomy by Ernst Haeckel
+  drones - insect quadcopter tilt-shift photography
+  super balls - By Akari Toriyama
+  wave - sound wave oscilloscope by Paul Catherall,   concentric circles by Paul Catherall 
+    Barbara Takenaga's painting depicting a clean sound wave on aoscilloscope device --ar 3:2 --v 5
+  foam - black blobs Ink doodle
+  harpoon - iron harpoon on a rope weapon art white background by Eiichiro Oda --no fish --ar 3:2 --v 5 --s 750
+  mine - by Dan McPharlin
+  laser - complex optical scientific equipment
+    knolling photography
+
+  guns, ammo - isometric clean pixel art image cutaway of , style of tekkonkinkreet
+  defensive - Paper cutout
+  bots - hovering drone  by Laurie Greasley 16-bit Isometric 
+  generic energy tech - by Laurie Greasley
+  duplication, cancel -  by Kazumasa Nagai
+  anti-shear topology, fracture analysis, shear stress - Chemigram
+  ON/OFF - ASCII art 
+  block throwing - Bauhaus style
+  tech that adds JUNK - by Choi Jeong-hwa
+  ice IX - microscope images of ice crystals
+  tech that spawns health - glowing green balls by Enki Bilal
+  invulnerable - by Nick Veasey (photos that look like x-rays)
+  alternate reality -  Fractal art 
+  tech choice -  mandala tile Mosaic 
+  time, CPT, pause -  by Lee Bontecou
+  boost, coupling power ups tech - cyan electron orbiting a black nucleus electric field as bas-relief   //(by Kazumasa Nagai)
+  radioactive - volumetric atomic nucleus diagram by Paul Catherall
 
 ******************************************************** LORE ********************************************************
 
@@ -1279,75 +1256,32 @@ possible names for tech
   Casimir effect - attractive force between two close conductive plates
   difference engine - early calculator/computer
   cyanoacrylate - superglue use for a slowing effect?
-  hysteresis - the dependence of the state of a system on its history
   superposition - something with waves overlapping
+  math terms - integral, derivative, Laplace transform, inflection point
+  quasicrystals - something with low friction, maybe defense?
+  Coalescence - things merging together like clouds.  maybe mergin power ups?
+  trihydrogen cation - common molecule in space, dark matter tech?
 
-******************************************************** IMAGES ********************************************************
+******************************************************* DESIGN ******************************************************
 
-process:  discord midjourney prompts -> "pixelmator pro" adjust color, repair, scale to 384x256, export PNG -> webP? -> place in /img folder
-make n-gon a progressive web app to manage image downloads, cache
-wave function collapse opens the pause menu after it triggers alternate reality
-  this is actually good, maybe reuse this code to get pause menu to open at any time
-if pause is pressed while selecting power ups, display pause menu on top of selection menu
-***styles***
-  try --- Pastel drawing, Psychedelic art, Arabesque (cool patterns), knolling (everything spread out and placed on a flat mat)
-  try taking screen shots of fields graphics and feeding them into midJourney V4
-  technology stuff --- Dan Matutina (cute complex technology),
-    Katsuhiro Otomo (intricate space technology), Tsutomu Nihei (black and white detailed future tech)
-    infographics of all know multiverses. 1980s Japanese graphic design, dimensional astrolabe,
-    Japanese poster graphics, Ralph McQuarrie (looks like star wars), Simon Stålenhag (retro-futuristic), Yoshiyuki Tomino (detailed anime future technology)
-    isometric:  low-poly, box cutout, made in blender, Materials: matte clay
-    subtractive sculpture
-    kinetic sculpture
-  quantum stuff -- Hypertorus, Glowing Opal Pearlescent, Physics, Hydro-Dipping	Hydrodipped, Vija Celmins, Matt Molloy (photo of golden waves in the sky)
-***maybe redo***
-  laser
-  supercritical fission
-***past style themes***
-  base prompt for player on 5.2:  clean white robot spherical turret on bird legs test chamber
-  standing wave - a 3-D cyan transparent nested concentric aligned centered sphere with rings
-    by Philippe Starck 
-  perfect diamagnetism - physics magnetic field chalk diagram 
-  time dilation - graphic of a hyperbolic equation Luminogram
-  negative mass - Blacklight painting by Moebius
-  plasma torch - by Dan Mumford
+priorities    
+  synergies between tech
+    difficult to achieve synergies that feel so powerful they are game breaking / changing
+  randomized content that adds repeatability
+    bosses, mobs, levels, tech
+  graphical indicators of tech effects and quantity
+  subtle lore woven into unexpected places
 
-  metamaterial cloaking - Scientific photography by Miki Asai,   by Bruce Munro
-  molecular assembler - by Laurie Greasley 16-bit Isometric 
-  wormhole - by Tim White
-  pilot wave - none
+add more randomize sub level map content
+  left/right sides of lock
+  small lab rooms
 
-  nail gun - Screenprint
-  shotgun - blueprint by Dan McPharlin
-  grenades, missiles, explosions - vibrant fireball explosion sonic shockwave ring art by Victo Ngai --ar 3:2 --v 5 --s 750
-  spores - turquoise black spores on a white background full color scientific anatomy by Ernst Haeckel
-  drones - insect quadcopter tilt-shift photography
-  super balls - By Akari Toriyama
-  wave - sound wave oscilloscope by Paul Catherall,   concentric circles by Paul Catherall 
-    Barbara Takenaga's painting depicting a clean sound wave on aoscilloscope device --ar 3:2 --v 5
-  foam - black blobs Ink doodle
-  harpoon - iron harpoon on a rope weapon art white background by Eiichiro Oda --no fish --ar 3:2 --v 5 --s 750
-  mine - by Dan McPharlin
-  laser - complex optical scientific equipment
-    knolling photography
-
-  guns, ammo - isometric clean pixel art image cutaway of , style of tekkonkinkreet
-  defensive - Paper cutout
-  bots - hovering drone  by Laurie Greasley 16-bit Isometric 
-  generic energy tech - by Laurie Greasley
-  duplication, cancel -  by Kazumasa Nagai
-  anti-shear topology, fracture analysis, shear stress - Chemigram
-  ON/OFF - ASCII art 
-  block throwing - Bauhaus style
-  tech that adds JUNK - by Choi Jeong-hwa
-  ice IX - microscope images of ice crystals
-  tech that spawns health - glowing green balls by Enki Bilal
-  invulnerable - by Nick Veasey (photos that look like x-rays)
-  alternate reality -  Fractal art 
-  tech choice -  mandala tile Mosaic 
-  time, CPT, pause -  by Lee Bontecou
-  boost, coupling power ups tech - cyan electron orbiting a black nucleus electric field as bas-relief   //(by Kazumasa Nagai)
-  radioactive - volumetric atomic nucleus diagram by Paul Catherall
-
-
-
+list of powerful synergies
+  CPT + high energy regen
+  research + bot fabrication + ersatz bots + various bot upgrades
+  harpoon + high fire rate + alternator + time dilation
+  duplication 100%
+  interest + coupling, research + (peer review? or Bayesian statistics)
+  electronegativity and high energy?
+    electronegativity + anyon + duplication + Maxwells demon + interest + pair production
+  chain reaction + invulnerable + Abelian group + parasitism = clear all mobs on level

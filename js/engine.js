@@ -122,7 +122,7 @@ function collisionChecks(event) {
                         }
                         if (tech.isPiezo) m.energy += 20.48;
                         if (tech.isCouplingNoHit && m.coupling > 0) {
-                            m.couplingChange(-4)
+                            m.couplingChange(-3)
 
                             const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
                             let where = Vector.add(m.pos, Vector.mult(unit, 17))
