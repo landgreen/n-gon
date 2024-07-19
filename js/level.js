@@ -9,7 +9,7 @@ const level = {
     onLevel: -1,
     levelsCleared: 0,
     //see level.populateLevels:   (initial, ... , reservoir or factory, reactor, ... , subway, final)    added later
-    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers"],
+    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation"],
     communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
@@ -17,6 +17,8 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
             // simulation.isHorizontalFlipped = true
+            // level.levelsCleared = 4
+            // level.updateDifficulty()
             // tech.giveTech("performance")
             // m.maxHealth = m.health = 1//00000000
             // m.maxEnergy = m.energy = 10000000
@@ -45,33 +47,21 @@ const level = {
             // tech.giveTech("1st ionization energy")
             // for (let i = 0; i < 1; ++i) tech.giveTech("booby trap")
             // for (let i = 0; i < 1; ++i) tech.giveTech("obsolescence")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("arsenal")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("brainstorming")
             // requestAnimationFrame(() => { for (let i = 0; i < 3; i++) tech.giveTech("mechatronics") });
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("paradigm shift") });
-            // for (let i = 0; i < 2; i++) tech.giveTech("nail-bot")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("eternalism") });
+            // for (let i = 0; i < 2; i++) tech.giveTech("technical debt")
             // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 1; ++i) tech.giveTech("cross-disciplinary")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("determinism")
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
-            // for (let i = 0; i < 1; i++) powerUps.directSpawn(-50, -70, "difficulty", false);
+            // for (let i = 0; i < 1; i++) powerUps.directSpawn(m.pos.x, m.pos.y - 50, "difficulty", false);
             // spawn.mapRect(575, -700, 25, 425);  //block mob line of site on testing
-            // level.testing();
-
-            // for (let i = 0; i < 1; ++i) spawn.snakeBoss(1400, -500)
-            // for (let i = 0; i < 20; i++) powerUps.directSpawn(0, 0, "coupling");
-            // Matter.Body.setPosition(player, { x: -200, y: -3330 });
-            // for (let i = 0; i < 4; ++i) spawn.sucker(1300, -500 + 100 * Math.random())
-            // spawn.hopper(1900, -500)
-            // spawn.zombie(-3000, -500 + 300 * Math.random(), 30, 5, "white") // zombie(x, y, radius, sides, color)
-            // for (let i = 0; i < 5; ++i) spawn.starter(1000 + 1000 * Math.random(), -500 + 300 * Math.random())
-            // tech.tech[322].frequency = 100
-            // spawn.tetherBoss(1900, -500, { x: 1900, y: -500 })
-            // for (let i = 0; i < 40; ++i) tech.giveTech()
+            // level.flocculation();
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
-            // for (let i = 0; i < 1; ++i) spawn.laserLayerBoss(1900, -500)
+            // for (let i = 0; i < 1; ++i) spawn.snakeBoss(1900, -500)
             // for (let i = 0; i < 2; i++) spawn.ghoster(level.exit.x, level.exit.y) //ghosters need to spawn after the map loads
-            // console.log(body[body.length - 1].mass)
             // simulation.isAutoZoom = false; //look in close
             // simulation.zoomScale *= 0.5;
             // simulation.setZoom();
@@ -922,10 +912,7 @@ const level = {
             return who
         }
     },
-    elevator(x, y, width, height, maxHeight, force = 0.003, friction = {
-        up: 0.01,
-        down: 0.2
-    }, isAtTop = false) {
+    elevator(x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }, isAtTop = false) {
         x += width / 2
         y += height / 2
         maxHeight += height / 2
@@ -934,7 +921,7 @@ const level = {
         const who = body[body.length] = Bodies.rectangle(x, isAtTop ? maxHeight : y, width, height, {
             collisionFilter: {
                 category: cat.body, //cat.map,
-                mask: cat.map | cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+                mask: cat.player | cat.body | cat.bullet | cat.mob | cat.mobBullet //| cat.powerUp
             },
             inertia: Infinity, //prevents rotation
             isNotHoldable: true,
@@ -990,17 +977,69 @@ const level = {
                     x: this.holdX,
                     y: this.position.y
                 });
+            },
+            moveOnTouch() {
+                if (!m.isBodiesAsleep) {
+                    if (this.isUp) { //moving up still with high air friction
+                        this.force.y -= force * this.mass //hard force propels up, even with high friction
 
+                        if (this.position.y < maxHeight) { //switch to down mode
+                            this.isUp = false
+                            this.frictionAir = friction.down
+                            //adds a hard jerk at the top of vertical motion because it's fun
+                            Matter.Body.setPosition(this, { x: this.holdX, y: maxHeight });
+                            Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                        }
+                    } else if (this.position.y + 10 * this.velocity.y > y) { //free falling down, with only air friction
+                        //slow down early to avoid a jerky stop that can pass through blocks
+                        Matter.Body.setVelocity(this, { x: 0, y: this.velocity.y * 0.7 });
+                        //switch to up mode
+                        // if (this.position.y + this.velocity.y > y) {
+                        //     this.isUp = true
+                        //     this.frictionAir = friction.up
+                        // }
+                    }
+                    Matter.Body.setVelocity(this, { x: 0, y: this.velocity.y });
+                }
+                //draw line to show how far to will extend
+                ctx.beginPath();
+                ctx.moveTo(x, y + height / 2);
+                ctx.lineTo(x, maxHeight - height / 2);
+                ctx.strokeStyle = `rgba(0,0,0,0.2)`
+                // ctx.lineWidth = "3"
+                ctx.stroke();
+
+                //draw body
+                ctx.beginPath();
+                ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                for (let j = 1; j < this.vertices.length; j++) {
+                    ctx.lineTo(this.vertices[j].x, this.vertices[j].y);
+                }
+                ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+                ctx.lineWidth = "2"
+                ctx.strokeStyle = `#333`
+                ctx.fillStyle = `rgba(200,200,200,1)`
+                //edge limits
+                if (this.position.y < maxHeight) {
+                    Matter.Body.setPosition(this, { x: this.holdX, y: maxHeight });
+                } else if (this.position.y > y) {
+                    ctx.fillStyle = `rgba(255,255,255,${0.5 + 0.15 * Math.random()})`
+                    Matter.Body.setPosition(this, { x: this.holdX, y: y });
+                    //undoing force of gravity
+                    this.force.y -= this.mass * simulation.g;
+                    if (Matter.Query.collides(this, [player]).length) {
+                        this.isUp = true
+                        this.frictionAir = friction.up
+                    }
+                }
+                ctx.fill();
+                ctx.stroke();
+                // hold horizontal position
+                Matter.Body.setPosition(this, { x: this.holdX, y: this.position.y });
             },
             off() {
-                Matter.Body.setPosition(this, {
-                    x: this.holdX,
-                    y: this.position.y
-                });
-                Matter.Body.setVelocity(this, {
-                    x: 0,
-                    y: this.velocity.y
-                });
+                Matter.Body.setPosition(this, { x: this.holdX, y: this.position.y });
+                Matter.Body.setVelocity(this, { x: 0, y: this.velocity.y });
             },
             constraint: this.null,
             addConstraint() {
@@ -1028,73 +1067,69 @@ const level = {
         who.classType = "body"
         return who
     },
-    spring(x, y, v = "-100 0  100 0  70 40  0 50  -70 40", force = 0.01, distance = 300, angle = 0) {
-        const who = body[body.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(v), {
-            collisionFilter: {
-                category: cat.body,
-                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
-            },
-            inertia: Infinity, //prevents rotation
-            isNotHoldable: true,
-            friction: 1,
-            frictionStatic: 1,
-            restitution: 0,
-            frictionAir: 1,
-            density: 0.1,
-            isReady: true,
-            isResetting: false,
-            query() {
-                if (this.isReady) {
-                    if (Matter.Query.collides(this, [player]).length) {
-                        this.isReady = false
-                        this.constraint.stiffness = 0
-                        this.constraint.damping = 0 //0.3
-                        this.frictionAir = 0
-                        Matter.Body.setVelocity(this, {
-                            x: 0,
-                            y: 0
-                        });
-                        //show graphically  being ready?
-
-                    }
-                } else {
-                    if (this.isResetting) {
-                        this.constraint.stiffness += 0.0005
-                        if (this.constraint.stiffness > 0.1) {
-                            this.isResetting = false
-                            this.isReady = true
-                        }
-                    } else {
-                        if (Vector.magnitudeSquared(Vector.sub(this.position, {
-                            x: x,
-                            y: y
-                        })) < distance * distance) {
-                            this.force.y -= force * this.mass
-                        } else {
-                            this.constraint.damping = 1
-                            this.frictionAir = 1
-                            this.isResetting = true
-                            Matter.Body.setVelocity(this, {
-                                x: 0,
-                                y: 0
-                            });
-                        }
-                    }
-                }
-            }
-        });
-        who.constraint = Constraint.create({
-            pointA: {
-                x: who.position.x,
-                y: who.position.y
-            },
-            bodyB: who,
-            stiffness: 1,
-            damping: 1
-        });
-        Composite.add(engine.world, who.constraint);
-        return who
-    },
+    // spring(x, y, v = "-100 0  100 0  70 40  0 50  -70 40", force = 0.01, distance = 300, angle = 0) {
+    //     const who = body[body.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(v), {
+    //         collisionFilter: {
+    //             category: cat.body,
+    //             mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet //cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+    //         },
+    //         inertia: Infinity, //prevents rotation
+    //         isNotHoldable: true,
+    //         friction: 1,
+    //         frictionStatic: 1,
+    //         restitution: 0,
+    //         frictionAir: 1,
+    //         density: 0.1,
+    //         isReady: true,
+    //         isResetting: false,
+    //         query() {
+    //             if (this.isReady) {
+    //                 if (Matter.Query.collides(this, [player]).length) {
+    //                     this.isReady = false
+    //                     this.constraint.stiffness = 0
+    //                     this.constraint.damping = 0 //0.3
+    //                     this.frictionAir = 0
+    //                     Matter.Body.setVelocity(this, { x: 0, y: 0 });
+    //                     //show graphically  being ready?
+    //                 }
+    //             } else {
+    //                 if (this.isResetting) {
+    //                     this.constraint.stiffness += 0.0005
+    //                     if (this.constraint.stiffness > 0.1) {
+    //                         this.isResetting = false
+    //                         this.isReady = true
+    //                     }
+    //                 } else {
+    //                     if (Vector.magnitudeSquared(Vector.sub(this.position, {
+    //                         x: x,
+    //                         y: y
+    //                     })) < distance * distance) {
+    //                         this.force.y -= force * this.mass
+    //                     } else {
+    //                         this.constraint.damping = 1
+    //                         this.frictionAir = 1
+    //                         this.isResetting = true
+    //                         Matter.Body.setVelocity(this, {
+    //                             x: 0,
+    //                             y: 0
+    //                         });
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     });
+    //     who.constraint = Constraint.create({
+    //         pointA: {
+    //             x: who.position.x,
+    //             y: who.position.y
+    //         },
+    //         bodyB: who,
+    //         stiffness: 1,
+    //         damping: 1
+    //     });
+    //     Composite.add(engine.world, who.constraint);
+    //     return who
+    // },
     // rotor(x, y, rotate = 0, radius = 800, width = 40, density = 0.0005) {
     //     const rotor1 = Matter.Bodies.rectangle(x, y, width, radius, {
     //         density: density,
@@ -4893,7 +4928,6 @@ const level = {
                 balance1 = level.spinner(x + 200, y - 500, 30, 400, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5)) //    spinner(x, y, width, height, density = 0.001, angle=0,frictionAir=0.001,angularVelocity=0) {
                 balance2 = level.spinner(x + 200, y - 950, 30, 400, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
                 balance3 = level.spinner(x + 650, y - 750, 30, 400, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
-                // balance4 = level.spinner(x + 750, y - 1050, 25, 350, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
                 balance4 = level.spinner(x + 1250, y - 1000, 30, 400, density, angle + variance * (Math.random() - 0.5), frictionAir, angularVelocity + spinVariance * (Math.random() - 0.5))
 
                 let isInRoom = false
@@ -6758,6 +6792,260 @@ const level = {
             balance3 = level.rotor(2608, 1900, 584, 25, 0.001) //falling
             balance4 = level.rotor(9300, 2205, 25, 380, 0.001) //exit
             balance5 = level.rotor(2605, 1100, 390, 25, 0.001) //falling
+        }
+
+    },
+    flocculation() {
+        level.announceMobTypes()
+        const button0 = level.button(1125, 795)
+        const button1 = level.button(6538, 2670)
+        const button2 = level.button(1225, -100)
+        button0.isUp = true
+        button1.isUp = true
+        button2.isUp = true
+        // const hazard = level.hazard(4550, 2750, 4550, 150)
+        const hazard = level.hazard(simulation.isHorizontalFlipped ? -7200 : 675, 50, 7500, 3000) //1869
+        // hazard.min.y = 3000 //REMOVE THIS IN LIVE VERSION!!!!!   set slime to lowest level
+        let balance1, balance2, balance3, rotor1, rotor2
+
+        const drip1 = level.drip(6100, 1900, 2900, 100) // drip(x, yMin, yMax, period = 100, color = "hsla(160, 100%, 35%, 0.5)") {
+        const drip2 = level.drip(7300, 1900, 2900, 150)
+        const drip3 = level.drip(8750, 1900, 2900, 70)
+
+        //up mode triggered by player contact
+        const elevator0 = level.elevator(700, 1865, 200, 490, 1400, 0.011, { up: 0.01, down: 0.7 })
+        const elevator1 = level.elevator(3995, 2335, 210, 150, 1700, 0.011, { up: 0.01, down: 0.7 })
+
+        level.custom = () => {
+            drip1.draw();
+            drip2.draw();
+            drip3.draw();
+            if (button0.isUp) {
+                button0.query();
+                if (!button0.isUp) {  //summon second set of mobs
+                    //1 boss, 1-2 groups, 11 mobs (all on lower ground level, where the slime is leaving)
+                    spawn.randomMob(918, 2695, 0.1);
+                    spawn.randomMob(1818, 2719, 0.2);
+                    spawn.randomMob(2530, 2460, 0.2);
+                    spawn.randomMob(3109, 2665, 0.3);
+                    spawn.randomMob(3909, 2191, 0.3);
+                    spawn.randomMob(4705, 2711, 0.4);
+                    spawn.randomMob(5800, 2796, 0.5);
+                    spawn.randomMob(7287, 2757, 0.6);
+                    spawn.randomMob(5759, 2691, 0.9);
+                    spawn.randomMob(5675, 2225, 0.8);
+                    spawn.randomMob(7450, 2775, 0.8);
+
+                    spawn.randomGroup(6600, 2400, 0.1);
+                    if (simulation.difficulty > 1) spawn.randomLevelBoss(6076, 2341);
+                }
+            }
+            button0.draw();
+            if (button1.isUp) button1.query();
+            button1.draw();
+            if (button2.isUp) button2.query();
+            button2.draw();
+            ctx.fillStyle = "hsl(175, 15%, 76%)"
+            ctx.fillRect(7625, 2625, 400, 300)
+            ctx.fillStyle = "rgba(0,0,0,0.03)" //shadows
+            ctx.fillRect(6250, 1875, 700, 875)
+            ctx.fillRect(900, 1200, 600, 1725) //900, 1350, 600, 1600);
+            ctx.fillRect(3000, 1200, 1000, 1750);
+            ctx.fillRect(2200, 625, 400, 2050);
+
+            level.exit.drawAndCheck();
+            level.enter.draw();
+        };
+        level.customTopLayer = () => {
+            elevator0.moveOnTouch()
+            elevator1.moveOnTouch()
+            rotor1.rotate();
+            rotor2.rotate();
+
+            ctx.fillStyle = "#233"
+            ctx.beginPath();
+            ctx.arc(balance1.center.x, balance1.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance2.center.x, balance2.center.y)
+            ctx.arc(balance2.center.x, balance2.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance3.center.x, balance3.center.y)
+            ctx.arc(balance3.center.x, balance3.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance5.center.x, balance5.center.y)
+            ctx.arc(balance5.center.x, balance5.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(rotor1.center.x, rotor1.center.y)
+            ctx.arc(rotor1.center.x, rotor1.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(rotor2.center.x, rotor2.center.y)
+            ctx.arc(rotor2.center.x, rotor2.center.y, 9, 0, 2 * Math.PI);
+            ctx.fill();
+            hazard.query();
+            const drainRate = Math.max(1, 4 - hazard.min.y / 800)
+            hazard.level(
+                (button2.isUp || hazard.height < 1150) &&
+                (button0.isUp || hazard.height < 350) &&
+                button1.isUp
+                , drainRate) //true = hold,  false = lower
+            exitDoor.isClosing = hazard.min.y < 2900
+            exitDoor.openClose();
+            exitDoor.draw();
+        };
+
+        level.setPosToSpawn(0, -50); //normal spawn
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        level.exit.x = 7800;
+        level.exit.y = 2865;
+        const exitDoor = level.door(7637, 2680, 25, 225, 195, 5)
+
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "hsl(138, 3%, 74%)";
+        color.map = "#3d4240"
+        powerUps.spawnStartingPowerUps(3475, 1775);
+        spawn.debris(4575, 2550, 1600, 6); //16 debris per level
+        spawn.debris(750, 2550, 2250, 6); //16 debris per level
+
+        spawn.mapRect(-500, -600, 200, 800); //left entrance wall
+        spawn.mapRect(-400, -600, 3550, 200); //ceiling
+        spawn.mapRect(-400, 0, 1400, 600);
+
+        spawn.mapRect(575, 475, 250, 250);
+        Matter.Body.setAngle(map[map.length - 1], map[map.length - 1].angle - Math.PI / 4);
+        spawn.mapRect(4075, 75, 250, 250);
+        Matter.Body.setAngle(map[map.length - 1], map[map.length - 1].angle - Math.PI / 4);
+        spawn.mapRect(4259, 1559, 282.5, 282.5);
+        Matter.Body.setAngle(map[map.length - 1], map[map.length - 1].angle - Math.PI / 4);
+
+        spawn.mapRect(3140, -600, 200, 800); //right down tube wall
+        spawn.mapRect(3150, 0, 1200, 200); //tube right exit ceiling
+        spawn.mapVertex(2400, 500, "-200 -100  -100 -200   100 -200 200 -100   200 200   -200 200");
+        spawn.mapVertex(2400, 1200, "-200  -200  200 -200    200 100 100 200  -100 200 -200 100");
+        spawn.mapVertex(1200, 2150, "-300 -300   300 -300   300 200 200 300  -200 300 -300 200");
+        spawn.mapVertex(1200, 1100, "-300 -200  -200 -300   200 -300 300 -200   300 300  -300 300");
+        spawn.mapVertex(3500, 950, "-500 -450  -400 -550   400 -550 500 -450   500 450 400 550  -400 550 -500 450");
+        spawn.mapVertex(3500, 1990, "-300 -40  -230 -110   230 -110 300 -40   300 40 230 110  -230 110 -300 40");
+        // spawn.mapVertex(2400, 1940, "-200 -40  -150 -90   150 -90 200 -40   200 40 150 90  -150 90 -200 40");
+        spawn.mapRect(2200, 1850, 400, 200);
+        spawn.bodyRect(3825, 2240, 150, 75, 0.5);
+
+        spawn.mapVertex(3500, 2452, "-500 -135    500 -135    500 35 400 135  -400 135 -500 35");
+        spawn.mapVertex(1200, 2875, "-400 0  -300 -100     300 -100 400 0");
+        spawn.mapVertex(1317, 275, "-500 0  -300 -200     300 -200 550 50     550  500    -500 500");
+        spawn.mapVertex(1300, -357, "-300 0  -400 -100     400 -100 300 0");
+        spawn.bodyRect(1550, -308, 50, 208, 0.5);
+        spawn.bodyRect(2000, 965, 525, 25, 0.5);
+        spawn.mapVertex(2400, 2850, "-350 -50  -300 -100     300 -100 350 -50   350 300   -350 300");
+        spawn.mapVertex(6600, 1925, "-350 0  -450 -100     450 -100 350 0");
+        spawn.mapVertex(6600, 2875, "-400 -50  -350 -100     350 -100 400 -50   400 300   -400 300");
+
+        spawn.bodyRect(2375, 300, 100, 100, 0.6);
+        spawn.bodyRect(1025, 1775, 100, 75, 0.6);
+        spawn.bodyRect(1250, 1825, 50, 25, 0.6);
+        spawn.bodyRect(3700, 275, 125, 125, 0.6);
+        spawn.bodyRect(5875, 2725, 200, 200, 0.6);
+        spawn.bodyRect(6900, 2590, 50, 50, 0.6);
+        spawn.mapRect(4200, 2325, 250, 625);
+        spawn.mapRect(-500, 50, 1200, 3050);
+        spawn.mapRect(-500, 2900, 9600, 775);
+
+        spawn.mapRect(4400, 0, 4700, 1900);
+        spawn.mapRect(4200, 0, 200, 1700);
+        // spawn.mapRect(6250, 2675, 700, 325);
+        // spawn.mapRect(6250, 1875, 700, 150);
+
+        //exit room
+        spawn.mapRect(8000, 1775, 1100, 1375);
+        spawn.mapRect(7625, 1825, 450, 825);
+        spawn.mapRect(7625, 2625, 50, 75);
+        spawn.mapRect(7625, 2890, 400, 25);
+        spawn.mapRect(7800, 2880, 100, 25);
+
+        spawn.randomMob(2450, 250, 0.2);
+        spawn.randomMob(3250, 325, 0.2);
+        spawn.randomMob(3625, 350, 0.3);
+        spawn.randomMob(1750, -25, 0.4);
+        spawn.randomMob(1300, 1750, 0.5);
+        spawn.randomMob(2350, 1725, 0.6);
+        spawn.randomMob(3350, 1775, 0.7);
+        spawn.randomMob(1025, 750, 0.8);
+        spawn.randomMob(2400, 1775, 0.8);
+        spawn.randomMob(1250, 1725, 0.8);
+        spawn.randomMob(775, 1775, 0.9);
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+        spawn.secondaryBossChance(1822, 1336)
+
+        if (simulation.isHorizontalFlipped) { //flip the map horizontally
+            level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
+            rotor1 = level.rotor(-5600, 2390, 850, 50, 0.001, 0, 0.01, 0, 0.001) //balance(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
+            rotor2 = level.rotor(-2175, 1900, 650, 50, 0.001, 0, 0.01, 0, 0.0007)
+
+            balance1 = level.rotor(-800 - 25, -395, 25, 390, 0.001) //entrance
+            balance2 = level.rotor(-2605 - 390, 500, 390, 25, 0.001) //falling
+            balance3 = level.rotor(-2608 - 584, 1950, 584, 25, 0.001) //falling
+            balance5 = level.rotor(-2605 - 390, 1020, 390, 25, 0.001) //falling
+
+            button1.min.x = -button1.min.x - 126
+            button1.max.x = -button1.max.x + 126
+            button0.min.x = -button0.min.x - 126
+            button0.max.x = -button0.max.x + 126
+            button2.min.x = -button2.min.x - 126
+            button2.max.x = -button2.max.x + 126 // flip the button horizontally
+            drip1.x *= -1
+            drip2.x *= -1
+            drip3.x *= -1
+            elevator0.holdX *= -1
+            elevator1.holdX *= -1
+            // console.log(hazard)
+            hazard.min.x -= 840
+            hazard.max.x -= 840
+
+            level.custom = () => {
+                drip1.draw();
+                drip2.draw();
+                drip3.draw();
+
+                if (button0.isUp) {
+                    button0.query();
+                    if (!button0.isUp) {  //summon second set of mobs
+                        //1 boss, 1-2 groups, 11 mobs (all on lower ground level, where the slime is leaving)
+                        spawn.randomMob(-7475, 2800, 0.1);
+                        spawn.randomMob(-6475, 2500, 0.2);
+                        spawn.randomMob(-4575, 2775, 0.3);
+                        spawn.randomMob(-7575, 2850, 0.3);
+                        spawn.randomMob(-6425, 2575, 0.3);
+                        spawn.randomMob(-5750, 2775, 0.4);
+                        spawn.randomMob(-4675, 2800, 0.5);
+                        spawn.randomMob(-3425, 2800, 0.6);
+                        spawn.randomMob(-2475, 2475, 0.7);
+                        spawn.randomMob(-3350, 2250, 0.8);
+                        spawn.randomMob(-1275, 2725, 0.9);
+                        spawn.randomGroup(-6225, 2400, 0.1);
+                        if (simulation.difficulty > 1) spawn.randomLevelBoss(-6250, 2350);
+                    }
+                }
+                button0.draw();
+                if (button1.isUp) button1.query();
+                button1.draw();
+                if (button2.isUp) button2.query();
+                button2.draw();
+                rotor1.rotate();
+                rotor2.rotate();
+                ctx.fillStyle = "hsl(175, 15%, 76%)"
+                ctx.fillRect(-8025, 2625, 400, 300)
+                ctx.fillStyle = "rgba(0,0,0,0.03)" //shadows
+                ctx.fillRect(-6950, 1875, 700, 875)
+                ctx.fillRect(-4000, 1400, 1000, 1550);
+                ctx.fillRect(-2600, 675, 400, 2025);
+                ctx.fillRect(-1500, 1375, 600, 1500);
+
+                level.exit.drawAndCheck();
+                level.enter.draw();
+            };
+            // level.customTopLayer = () => {};
+        } else {
+            rotor1 = level.rotor(4700, 2390, 850, 50, 0.001, 0, 0.01, 0, -0.001) //balance(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
+            rotor2 = level.rotor(1525, 1900, 650, 50, 0.001, 0, 0.01, 0, -0.0007)
+            balance1 = level.rotor(800, -395, 25, 390, 0.001) //entrance
+            balance2 = level.rotor(2605, 500, 390, 25, 0.001) //falling
+            balance3 = level.rotor(2608, 1950, 584, 25, 0.001) //falling
+            balance5 = level.rotor(2605, 1020, 390, 25, 0.001) //falling
         }
 
     },

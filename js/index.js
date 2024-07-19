@@ -1476,10 +1476,12 @@ window.addEventListener("keydown", function (event) {
                 } else {
                     simulation.testing = true;
                     simulation.loop = simulation.testingLoop
-                    if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'inline'
                     if (simulation.testing) tech.setCheating();
-                    simulation.makeTextLog(
-                        `<table class="pause-table">
+                    if (simulation.isConstructionMode) {
+                        document.getElementById("construct").style.display = 'inline'
+                    } else {
+                        simulation.makeTextLog(
+                            `<table class="pause-table">
                 <tr>
                     <td class='key-input-pause'>T</td>
                     <td class='key-used'><strong>toggle testing</strong></td>
@@ -1531,8 +1533,8 @@ window.addEventListener("keydown", function (event) {
                 <tr>
                     <td class='key-input-pause'>⇧X</td>
                     <td class='key-used'>restart</td>
-                </tr>
-            </table>`, Infinity);
+                </tr></table>`, Infinity);
+                    }
                 }
             }
             break

@@ -7,7 +7,7 @@ const spawn = {
         "powerUpBoss", "powerUpBossBaby", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss",
         "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss", "shieldingBoss",
         "timeSkipBoss", "dragonFlyBoss", "beetleBoss", "sneakBoss", "mantisBoss", "laserLayerBoss",
-        "snakeBoss",
+        "snakeBoss"
     ],
     bossTypeSpawnOrder: [], //preset list of boss names calculated at the start of a run by the randomSeed
     bossTypeSpawnIndex: 0, //increases as the boss type cycles
@@ -3963,7 +3963,7 @@ const spawn = {
                 for (let i = 0; i < this.history.length - 1; i++) {
                     if (Matter.Query.ray([player], this.history[i], this.history[i + 1], 10).length > 0) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60
-                        const dmg = 0.25 * simulation.dmgScale
+                        const dmg = 0.15 * simulation.dmgScale
                         m.damage(dmg);
                         simulation.drawList.push({ //add dmg to draw queue
                             x: m.pos.x,

@@ -3648,7 +3648,7 @@ const tech = {
     },
     {
         name: "unified field theory",
-        description: `when <strong>paused</strong> you can <strong>switch</strong> ${powerUps.orb.field()} by clicking<br><strong>2x</strong> <em class='flicker'>${powerUps.orb.fieldTech()} frequency</em>`,
+        description: `when <strong>paused</strong> you can click to <strong>change</strong> your ${powerUps.orb.field()}<br><strong>2x</strong> <em class='flicker'>${powerUps.orb.fieldTech()} frequency</em>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3787,7 +3787,7 @@ const tech = {
     },
     {
         name: "determinism",
-        description: `spawn ${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}<br>only <strong>1</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ce</span></strong> for ${powerUps.orb.field()}, ${powerUps.orb.tech()}, and ${powerUps.orb.gun()}`,
+        description: `spawn ${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}<br>${powerUps.orb.field()}, ${powerUps.orb.tech()}, and ${powerUps.orb.gun()} have only <strong>1</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ce</span></strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3832,7 +3832,7 @@ const tech = {
     {
         name: "technical debt",
         descriptionFunction() {
-            return `<strong>4x</strong> <strong class='color-d'>damage</strong> but lose <strong>0.15x</strong> <strong class='color-d'>damage</strong><br>for each ${powerUps.orb.tech()} you have <em style ="float: right;">(${(tech.totalCount > 20 ? (Math.pow(0.85, tech.totalCount - 20)) : (4 - 0.15 * tech.totalCount)).toFixed(2)}x)</em>`
+            return `decrease <strong class='color-d'>damage</strong> by <strong>0.15x</strong> for each ${powerUps.orb.tech()} you have<br>increase <strong class='color-d'>damage</strong> by <strong>4x</strong><em style ="float: right;">(${(tech.totalCount > 20 ? (Math.pow(0.85, tech.totalCount - 20)) : (4 - 0.15 * tech.totalCount)).toFixed(2)}x)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -6960,7 +6960,7 @@ const tech = {
     },
     {
         name: "railgun",
-        description: `<strong>hold</strong> and <strong>release</strong> fire key to launch <strong>harpoons</strong><br>but, <strong>harpoons</strong> can't <strong>retract</strong>`,
+        description: `<strong>hold</strong> and <strong>release</strong> fire to launch <strong>harpoons</strong><br>but, <strong>harpoons</strong> can't <strong>retract</strong>`,
         // description: `<strong>+900%</strong> <strong>harpoon</strong> <strong class='color-ammo'>ammo</strong>, but it can't <strong>retract</strong><br><strong>+50%</strong> <strong>harpoon</strong> density and <strong class='color-d'>damage</strong>`,
         isGunTech: true,
         maxCount: 1,
@@ -7914,7 +7914,7 @@ const tech = {
         // description: "molecular assembler <strong class='color-print'>prints</strong> one <strong class='color-block'>block</strong><br>to <strong>jump</strong> off while midair",
         descriptionFunction() {
             const fieldName = m.fieldMode === 8 ? "pilot wave" : "molecular assembler"
-            return `pressing the <strong>jump</strong> key in <strong>midair</strong><br>will <strong class='color-print'>print</strong> a <strong class='color-block'>block</strong> to <strong>jump</strong> off`
+            return `pressing <strong>jump</strong> in <strong>midair</strong><br>will <strong class='color-print'>print</strong> a <strong class='color-block'>block</strong> to <strong>jump</strong> off`
             // return `${fieldName} <strong class='color-print'>prints</strong> a <strong class='color-block'>block</strong><br>to <strong>jump</strong> off while midair`
         },
         isFieldTech: true,
@@ -8114,7 +8114,7 @@ const tech = {
     },
     {
         name: "degenerate matter",
-        description: `if your ${powerUps.orb.field()} key is active<br><strong>0.1x</strong> <strong class='color-defense'>damage taken</strong>`,
+        description: `if your ${powerUps.orb.field()} is active<br><strong>0.1x</strong> <strong class='color-defense'>damage taken</strong>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,

@@ -1,19 +1,10 @@
 ******************************************************** NEXT PATCH **************************************************
 
-replaced tech, field, and gun text with orbs
-  orbs length scale with px->em
-cleaned up simulation variables text in pause menu
-some minor tech description changes
-total tech count no longer includes instant tech or removed tech
+new level: flocculation
 
-tech: planned obsolescence - at the start of each level eject your oldest tech and gain 1.1 damage
+snakeBoss does 40% less damage to player
 
-heuristics 1.3 -> between 1 and 1.5 fire rate
-combinatorial optimization 1.35->1.4 damage
 
-difficulty reduction per level 
-  0.85->0.87x damage done
-  1.23->1.22 damage taken 
 
 ******************************************************** BUGS ********************************************************
 
@@ -25,8 +16,28 @@ fix door.isClosing actually meaning isClosed?
 
 *********************************************************** TODO *****************************************************
 
-tech - at the start of each new level eject the oldest tech you have and gain 10% damage
+new snakeBoss type that eats mobs
+  each time it eats:
+    heal?
+      get shield if full?
+    make boss longer (if snake)
+    get shield
+    get orbitals
+    spawn spawns (little red square mobs)
+  when boss dies
+    spawn eaten mobs?
+    spawn generic mobs?
+    nothing
+  make snake new colors, width
 
+Boss mob - takes a snapshot of the positions of all mobs, player, blocks, power ups.  Then 3 seconds later it teleports everything back to those spots.
+  after snap shot is stored draw outline of body positions for a second to show the change
+  immune after snapshot?   or  immune after teleport?
+Boss mob - records the position of mobs every few cycles
+  makes a ghost copy of the mob that is delayed by a few seconds
+    ghost can damage player, but doesn't have a matter.js object
+  gives mobs short snake tails, like snakeBoss
+  brings 1 mob back to life every few seconds
 
 
 merge multiple power ups of the same type if nearby
@@ -71,10 +82,6 @@ rework energy and health HUD
   make both diegetic?
     how?  not sure there is a good way to do this...
   should health be red or green?
-
-Boss mob - takes a snapshot of the positions of all mobs, player, blocks, power ups.  Then 3 seconds later it teleports everything back to those spots.
-  after snap shot is stored draw outline of body positions for a second to show the change
-  immune after snapshot?   or  immune after teleport?
 
 flip player upside down
   how 

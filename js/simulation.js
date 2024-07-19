@@ -1928,6 +1928,17 @@ const simulation = {
             }
         });
 
+        document.body.addEventListener("wheel", (e) => {
+            if (e.deltaY > 0) {
+                simulation.setZoom(simulation.zoomScale / 0.9)
+            } else {
+                simulation.setZoom(simulation.zoomScale * 0.9)
+            }
+        });
+
+
+
+
         //undo last element added after you press z
         document.body.addEventListener("keydown", (event) => { // e.keyCode   z=90  m=77 b=66  shift = 16  c = 67
             if (simulation.testing && event.code === "KeyZ" && simulation.constructMapString.length) {
