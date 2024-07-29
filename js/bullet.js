@@ -94,7 +94,7 @@ const b = {
         }
     },
     outOfAmmo() { //triggers after firing when you have NO ammo
-        simulation.makeTextLog(`${b.guns[b.activeGun].name}.<span class='color-g'>ammo</span><span class='color-symbol'>:</span> 0`);
+        simulation.inGameConsole(`${b.guns[b.activeGun].name}.<span class='color-g'>ammo</span><span class='color-symbol'>:</span> 0`);
         m.fireCDcycle = m.cycle + 30; //fire cooldown       
         if (tech.isAmmoFromHealth) {
             const amount = 0.02
@@ -198,7 +198,7 @@ const b = {
                 }
                 if (gunTechPool.length) {
                     const index = Math.floor(Math.random() * gunTechPool.length)
-                    simulation.makeTextLog(`<span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${tech.tech[gunTechPool[index]].name}</strong>")`)
+                    simulation.inGameConsole(`<span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${tech.tech[gunTechPool[index]].name}</strong>")`)
                     tech.giveTech(gunTechPool[index]) // choose from the gun pool
                 } else {
                     tech.giveTech() //get normal tech if you can't find any gun tech
@@ -1839,6 +1839,7 @@ const b = {
             minDmgSpeed: 4,
             lookFrequency: Math.floor(7 + Math.random() * 3),
             density: tech.harpoonDensity, //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
+            foamSpawned: 0,
             beforeDmg(who) {
                 if (tech.isShieldPierce && who.isShielded) { //disable shields
                     who.isShielded = false
@@ -1861,11 +1862,12 @@ const b = {
                         }
                     }
                 }
-                if (tech.isFoamBall) {
-                    for (let i = 0, len = Math.min(30, 2 + 2 * Math.sqrt(this.mass)); i < len; i++) {
-                        const radius = 5 + 8 * Math.random()
+                if (tech.isFoamBall && this.foamSpawned < 55) {
+                    for (let i = 0, len = Math.min(30, 2 + 3 * Math.sqrt(this.mass)); i < len; i++) {
+                        const radius = 5 + 9 * Math.random()
                         const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                         b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
+                        this.foamSpawned++
                     }
                 }
                 if (tech.isHarpoonPowerUp && simulation.cycle - 480 < tech.harpoonPowerUpCycle) {
@@ -3203,7 +3205,7 @@ const b = {
             bullet[bullet.length - 1].isMutualismActive = true
         }
     },
-    delayDrones(where, droneCount = 1) {
+    delayDrones(where, droneCount = 1, deliveryCount = 0) {
         let respawnDrones = () => {
             if (droneCount > 0) {
                 requestAnimationFrame(respawnDrones);
@@ -3213,7 +3215,7 @@ const b = {
                         b.droneRadioactive({ x: where.x + 50 * (Math.random() - 0.5), y: where.y + 50 * (Math.random() - 0.5) }, 0)
                     } else {
                         b.drone({ x: where.x + 50 * (Math.random() - 0.5), y: where.y + 50 * (Math.random() - 0.5) }, 0)
-                        if (tech.isDroneGrab && deliveryCount > 0) {
+                        if (tech.isDroneGrab && deliveryCount > 0) { //
                             const who = bullet[bullet.length - 1]
                             who.isImproved = true;
                             const SCALE = 2.25
@@ -3747,7 +3749,7 @@ const b = {
         bullet[me] = Bodies.polygon(where.x, where.y, 12, radius, b.fireAttributes(dir, false));
         Composite.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
-        bullet[me].calcDensity = function () { return 0.0007 + 0.0007 * tech.isSuperHarm + 0.0004 * tech.isBulletTeleport }
+        bullet[me].calcDensity = function () { return 0.0007 + 0.0007 * tech.isSuperHarm + 0.0007 * tech.isBulletTeleport }
         Matter.Body.setDensity(bullet[me], bullet[me].calcDensity());
         bullet[me].endCycle = simulation.cycle + Math.floor(270 + 90 * Math.random());
         bullet[me].minDmgSpeed = 0;
@@ -3760,15 +3762,15 @@ const b = {
                 this.force.y += this.mass * gravity;;
                 if (Matter.Query.collides(this, [player]).length) {
                     this.endCycle = 0
-                    m.energy -= 0.04
-                    if (m.energy < 0) m.energy = 0
-                    simulation.drawList.push({ //add dmg to draw queue
-                        x: this.position.x,
-                        y: this.position.y,
-                        radius: radius,
-                        color: "#0ad",
-                        time: 15
-                    });
+                    // m.energy -= 0.04
+                    // if (m.energy < 0) m.energy = 0
+                    // simulation.drawList.push({ //add dmg to draw queue
+                    //     x: this.position.x,
+                    //     y: this.position.y,
+                    //     radius: radius,
+                    //     color: "#0ad",
+                    //     time: 15
+                    // });
                 }
             }
             bullet[me].cycle = 0
@@ -5660,7 +5662,7 @@ const b = {
             phase: 2 * Math.PI * Math.random(),
             do() {
                 if (!m.isCloak) { //if time dilation isn't active
-                    const size = 33
+                    const size = 40
                     q = Matter.Query.region(mob, {
                         min: {
                             x: this.position.x - size,

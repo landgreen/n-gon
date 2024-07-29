@@ -1,9 +1,34 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new level: flocculation
+JUNK: wikipedia - After you get a new tech you have 7 seconds to study before a quiz, 4 research if you aces the quiz.
+  this code for this works 80% of the time every time
 
-snakeBoss does 40% less damage to player
+renamed propagator->Verlet integration it's now a skin tech
+  1.6->3x damage
+  slightly increased the time skip amount
+on some skins the feet will hang lower while player is in the air
+on some skins the upper legs are skinnier
+mouse over on orbs for tech, field, and gun has a tooltip with text
+added keyword CSS style for "bot"
+added an aura around powerUpBoss so you can kinda see it inside walls
 
+quenching just gives max health from over healing instead of damaging you first
+depolarization does 0.5->0.4x damage when on cooldown
+many-worlds spawns a tech and also 3 coupling at the start of each new level
+dynamic equilibrium does 1.15x more damage and only stacks to 9->3
+orbital bots collide with a 1.2x larger range
+Zectron no longer drains energy when balls hit you, but the balls still stop
+supply chain just gives a gun and a flat 10 ammo
+
+polyurethane foam will only trigger up to 55 total foam per harpoon
+  to prevent a huge number of foam bubbles causing lag
+  no cap for super balls for now
+fixed bug with planned obsolescence + instant tech
+fixed bug with ice crystal nucleation
+applied science gives each gunTech with a short delay
+  this helps with sorting and maybe other rare bugs
+fixed bug with delivery drones and path integration
+you can no longer deflect snakeBoss, but it moves a bit slower
 
 
 ******************************************************** BUGS ********************************************************
@@ -12,9 +37,25 @@ ants marching outline on splash screen doesn't sync right on safari
 
 player can become crouched while not touching the ground if they exit the ground while crouched
 
-fix door.isClosing actually meaning isClosed?
-
 *********************************************************** TODO *****************************************************
+
+tech:  - tech have +3 choices to eject your tech
+  <eject> tech name
+    no description?
+
+harpoon tech:  - after firing 4 harpoons your next harpoon has 4x damage
+  need to track number fired
+
+JUNK tech - similar to cosmogonic myth, open and close tabs
+  after you learn a new tech open it's wiki and spawn a few research?
+  open the wiki for each tech you have,
+    tabs close after 1 minute, and you have to learn something and answer a prompt to get a reward
+
+tech:   - instead of reeling in grappling hook teleport to the hook after releasing field button
+  this might need another buff?
+    give damage immunity after teleport for 1+ seconds to balance
+
+new level - rework testChamber
 
 new snakeBoss type that eats mobs
   each time it eats:
@@ -475,7 +516,7 @@ add small SVG pics to in-game console
   when?
     one for each field?
   use stuff on physics notes:
-simulation.makeTextLog(`
+simulation.inGameConsole(`
 <svg class="SVG-title" width="160" height="120">
     <g fill="transparent" stroke="#333" stroke-width="1" transform="translate(78,75)" stroke-linecap="round">
         <path d="M-34 -34 l31 31 m6 6 l31 31    M34 -34 l-31 31 m-6 6 l-31 31"></path>
@@ -1268,6 +1309,7 @@ possible names for tech
   quasicrystals - something with low friction, maybe defense?
   Coalescence - things merging together like clouds.  maybe mergin power ups?
   trihydrogen cation - common molecule in space, dark matter tech?
+  superradiance - laser tech
 
 ******************************************************* DESIGN ******************************************************
 

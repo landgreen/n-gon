@@ -442,7 +442,7 @@ const m = {
                     simulation.clearNow = true; //triggers a map reset
                     m.switchWorlds()
                     simulation.isTextLogOpen = true;
-                    simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> 0.${len - i - 1}`, swapPeriod);
+                    simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> 0.${len - i - 1}`, swapPeriod);
                     simulation.isTextLogOpen = false;
                     simulation.wipe = function () { //set wipe to have trails
                         ctx.fillStyle = `rgba(255,255,255,${(i + 1) * (i + 1) * 0.006})`;
@@ -455,7 +455,7 @@ const m = {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
                 simulation.isTextLogOpen = true;
-                simulation.makeTextLog("simulation.amplitude <span class='color-symbol'>=</span> null");
+                simulation.inGameConsole("simulation.amplitude <span class='color-symbol'>=</span> null");
                 tech.isImmortal = false //disable future immortality
             }, 6 * swapPeriod);
         } else if (m.alive) { //normal death code here            
@@ -537,7 +537,7 @@ const m = {
     setMaxHealth(isMessage) {
         m.maxHealth = m.baseHealth + tech.extraMaxHealth + 4 * tech.isFallingDamage
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
-        if (isMessage) simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
+        if (isMessage) simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
         m.displayHealth();
     },
@@ -678,7 +678,7 @@ const m = {
     damage(dmg) {
         if (tech.isRewindAvoidDeath && (m.energy + 0.05) > Math.min(0.95, m.maxEnergy) && dmg > 0.01) {
             const steps = Math.floor(Math.min(299, 150 * m.energy))
-            simulation.makeTextLog(`<span class='color-var'>m</span>.rewind(${steps})`)
+            simulation.inGameConsole(`<span class='color-var'>m</span>.rewind(${steps})`)
             m.rewind(steps)
             return
         }
@@ -698,7 +698,7 @@ const m = {
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
                     tech.isDeathAvoidedThisLevel = true
                     powerUps.research.changeRerolls(-1)
-                    simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
+                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
                     for (let i = 0; i < 22; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     m.energy = m.maxEnergy + 0.1
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
@@ -726,7 +726,7 @@ const m = {
                     tech.isDeathAvoidedThisLevel = true
                     m.health = 0.05
                     powerUps.research.changeRerolls(-1)
-                    simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
+                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
                     <br>${powerUps.research.count}`)
                     for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
@@ -886,15 +886,21 @@ const m = {
             ctx.lineTo(m.knee.x, m.knee.y);
             ctx.lineTo(m.foot.x, m.foot.y);
             ctx.strokeStyle = stroke;
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 5;
             ctx.stroke();
 
             //toe lines
             ctx.beginPath();
             ctx.moveTo(m.foot.x, m.foot.y);
-            ctx.lineTo(m.foot.x - 14, m.foot.y + 5);
-            ctx.moveTo(m.foot.x, m.foot.y);
-            ctx.lineTo(m.foot.x + 14, m.foot.y + 5);
+            if (m.onGround) {
+                ctx.lineTo(m.foot.x - 14, m.foot.y + 5);
+                ctx.moveTo(m.foot.x, m.foot.y);
+                ctx.lineTo(m.foot.x + 14, m.foot.y + 5);
+            } else {
+                ctx.lineTo(m.foot.x - 12, m.foot.y + 8);
+                ctx.moveTo(m.foot.x, m.foot.y);
+                ctx.lineTo(m.foot.x + 12, m.foot.y + 8);
+            }
             ctx.lineWidth = 4;
             ctx.stroke();
 
@@ -923,11 +929,6 @@ const m = {
             m.yOffWhen.stand = 49
             m.yOffWhen.crouch = 22
             m.isAltSkin = false
-            m.color = {
-                hue: 0,
-                sat: 0,
-                light: 100,
-            }
 
             m.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
             m.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 10}%)`
@@ -971,15 +972,6 @@ const m = {
             m.squirrelJump = 1.16;
             m.setMovement()
 
-            // m.yOffWhen.jump = 70
-            // m.yOffWhen.stand = 49
-            // m.yOffWhen.crouch = 22
-            // m.color = {
-            //     hue: 184,
-            //     sat: 0,
-            //     light: 55,
-            // }
-            // m.setFillColors();
             m.draw = function () {
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
@@ -1059,11 +1051,6 @@ const m = {
         },
         polar() {
             m.isAltSkin = true
-            m.color = {
-                hue: 0,
-                sat: 0,
-                light: 100,
-            }
             // m.setFillColors();
             m.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
             m.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 35}%)`
@@ -1081,12 +1068,10 @@ const m = {
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
 
-
                 const diff = (m.lastKillCycle - m.cycle + tech.isDamageCooldownTime) / tech.isDamageCooldownTime
                 const color = diff < 0 ? "#fff" : "#aaa"
                 const hue = 220 + 20 * Math.sin(0.01 * m.cycle)
                 const colorInverse = diff < 0 ? `hsl(${hue}, 80%, 40%)` : "#fff"
-                // const colorInverseFade = diff < 0 ? "#ccc" : "#fff"
                 m.drawLeg(color, colorInverse);
                 m.calcLeg(0, 0);
                 m.drawLeg(color, colorInverse);
@@ -1100,21 +1085,14 @@ const m = {
                 ctx.beginPath();
                 ctx.moveTo(15, 0)
                 ctx.lineTo(28, 0)
-                // ctx.arc(15, 0, 4, 0, 2 * Math.PI);
                 ctx.strokeStyle = colorInverse;
                 ctx.lineWidth = 4;
                 ctx.stroke();
                 ctx.restore();
 
-
-                // const scale = diff>0.3 
-                // console.log(diff.toFixed(3), scale.toFixed(3))
                 ctx.beginPath();
                 ctx.ellipse(m.pos.x, m.pos.y, 24, 18, 3.14 * Math.random(), 0, 2 * Math.PI)
-                // `rgba(0,0,${100 + 30 * Math.sin(0.1 * m.cycle)},0.8)`
                 ctx.fillStyle = diff < 0 ? `hsl(${hue}, 80%, 40%)` : `rgba(255,255,255,${Math.min(Math.max(0, diff + 0.3), 1)})`
-                // ctx.fillStyle = colorInverse
-                // ctx.fillStyle = `rgba(0,0,0,${scale})`
                 ctx.fill();
 
                 m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
@@ -1134,15 +1112,21 @@ const m = {
                 ctx.lineTo(m.knee.x, m.knee.y);
                 ctx.lineTo(m.foot.x, m.foot.y);
                 ctx.strokeStyle = stroke;
-                ctx.lineWidth = 6;
+                ctx.lineWidth = 5;
                 ctx.stroke();
 
                 //toe lines
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                if (m.onGround) {
+                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                } else {
+                    ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 13, m.foot.y + 8);
+                }
                 ctx.lineWidth = 3;
                 ctx.stroke();
 
@@ -1166,22 +1150,16 @@ const m = {
             m.isAltSkin = true
             m.yOffWhen.stand = 52
             m.yOffWhen.jump = 72
-            // m.yOffWhen.crouch = 22
-            // m.color = {
-            //     hue: 184,
-            //     sat: 0,
-            //     light: 55,
-            // }
-            // m.setFillColors();
+
             m.draw = function () {
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
                 ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -1.25);
-                m.drawLeg("#606070");
+                m.drawLeg("#606080");
                 m.calcLeg(0, 0);
-                m.drawLeg("#445");
+                m.drawLeg("#446");
 
 
                 ctx.rotate(m.angle);
@@ -1193,17 +1171,14 @@ const m = {
                 ctx.beginPath();
                 const arc = 0.7 + 0.17 * Math.sin(m.cycle * 0.012)
                 ctx.arc(0, 0, 30, -arc, arc, true); //- Math.PI / 2
-                ctx.strokeStyle = "#445";
+                ctx.strokeStyle = "#446";
                 ctx.lineWidth = 2;
                 ctx.stroke();
 
                 ctx.beginPath();
                 ctx.moveTo(13, 0)
                 ctx.lineTo(20, 0)
-                // ctx.beginPath();
-                // ctx.arc(15, 0, 4, 0, 2 * Math.PI);
                 ctx.lineWidth = 5;
-                ctx.strokeStyle = "#445";
                 ctx.stroke();
 
                 ctx.restore();
@@ -1230,9 +1205,15 @@ const m = {
                 //toe lines
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x - 14, m.foot.y + 5);
-                ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x + 14, m.foot.y + 5);
+                if (m.onGround) {
+                    ctx.lineTo(m.foot.x - 14, m.foot.y + 5);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 14, m.foot.y + 5);
+                } else {
+                    ctx.lineTo(m.foot.x - 12, m.foot.y + 8);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 12, m.foot.y + 8);
+                }
                 ctx.lineWidth = 4;
                 ctx.stroke();
 
@@ -1302,16 +1283,22 @@ const m = {
                 ctx.lineTo(m.knee.x, m.knee.y);
                 ctx.lineTo(m.foot.x, m.foot.y);
                 ctx.strokeStyle = stroke;
-                ctx.lineWidth = 6;
+                ctx.lineWidth = 5;
                 ctx.stroke();
 
                 //toe lines
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x - 14, m.foot.y + 5);
-                ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x + 14, m.foot.y + 5);
-                ctx.lineWidth = 4;
+                if (m.onGround) {
+                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                } else {
+                    ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 13, m.foot.y + 8);
+                }
+                ctx.lineWidth = 3;
                 ctx.stroke();
 
                 //hip joint
@@ -1324,7 +1311,7 @@ const m = {
                 ctx.moveTo(m.foot.x + 5, m.foot.y);
                 ctx.arc(m.foot.x, m.foot.y + 1, 5, 0, 2 * Math.PI);
                 ctx.strokeStyle = "rgba(0,255,255,0.25)";
-                ctx.lineWidth = 5;
+                ctx.lineWidth = 6;
                 ctx.stroke();
                 ctx.fillStyle = m.fillColor;
                 ctx.fill();
@@ -1521,9 +1508,15 @@ const m = {
                 //toe lines
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                if (m.onGround) {
+                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                } else {
+                    ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 13, m.foot.y + 8);
+                }
                 ctx.lineWidth = 4;
                 ctx.stroke();
 
@@ -1641,9 +1634,15 @@ const m = {
                 //toe lines
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                if (m.onGround) {
+                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                } else {
+                    ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 13, m.foot.y + 8);
+                }
                 ctx.lineWidth = 4;
                 ctx.stroke();
 
@@ -1665,12 +1664,7 @@ const m = {
         },
         CPT() {
             m.isAltSkin = true
-            m.color = {
-                hue: 0,
-                sat: 0,
-                light: 100,
-            }
-            // m.setFillColors();
+
             m.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
             m.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 35}%)`
             let grd = ctx.createLinearGradient(-20, 0, 15, 0);
@@ -1718,15 +1712,21 @@ const m = {
                 ctx.lineTo(m.knee.x, m.knee.y);
                 ctx.lineTo(m.foot.x, m.foot.y);
                 ctx.strokeStyle = stroke;
-                ctx.lineWidth = 6;
+                ctx.lineWidth = 5;
                 ctx.stroke();
 
                 //toe lines
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                if (m.onGround) {
+                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                } else {
+                    ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 13, m.foot.y + 8);
+                }
                 ctx.lineWidth = 3;
                 ctx.stroke();
 
@@ -1746,14 +1746,95 @@ const m = {
                 ctx.restore();
             }
         },
+        verlet() {
+            m.isAltSkin = true
+
+            m.draw = function () {
+                ctx.fillStyle = m.fillColor;
+                m.walk_cycle += m.flipLegs * m.Vx;
+                ctx.save();
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
+                ctx.translate(m.pos.x, m.pos.y);
+                m.calcLeg(Math.PI, -2);
+                m.drawLeg("#4a4a4a");
+                m.calcLeg(0, 0);
+                m.drawLeg("#333");
+
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                ctx.fillStyle = m.bodyGradient
+                ctx.fill();
+
+                const rate = 0.09
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(0, 0, rate * (simulation.cycle + 0) % 30, 0, 2 * Math.PI);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(0, 0, rate * (simulation.cycle + 15 / rate) % 30, 0, 2 * Math.PI);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                ctx.stroke();
+
+                ctx.globalCompositeOperation = "difference";
+                ctx.rotate(m.angle);
+                ctx.beginPath();
+                ctx.arc(21, 0, 8, 0, 2 * Math.PI);
+                ctx.fillStyle = input.fire ? "#0ff" : input.field ? "#d30" : `#fff`
+                ctx.fill();
+                ctx.restore();
+
+                m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
+                powerUps.boost.draw()
+            }
+            m.drawLeg = function (stroke) {
+                // if (simulation.mouseInGame.x > m.pos.x) {
+                if (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2) {
+                    m.flipLegs = 1;
+                } else {
+                    m.flipLegs = -1;
+                }
+                ctx.save();
+                ctx.scale(m.flipLegs, 1); //leg lines
+                ctx.beginPath();
+                ctx.moveTo(m.hip.x, m.hip.y);
+                ctx.lineTo(m.knee.x, m.knee.y);
+                ctx.lineTo(m.foot.x, m.foot.y);
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                //toe lines
+                ctx.beginPath();
+                ctx.moveTo(m.foot.x, m.foot.y);
+                const footDrop = m.onGround ? 5 : 10
+                ctx.lineTo(m.foot.x - 15, m.foot.y + footDrop);
+                ctx.moveTo(m.foot.x, m.foot.y);
+                ctx.lineTo(m.foot.x + 15, m.foot.y + footDrop);
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                //hip joint
+                ctx.beginPath();
+                ctx.arc(m.hip.x, m.hip.y, 9, 0, 2 * Math.PI);
+                //knee joint
+                ctx.moveTo(m.knee.x + 5, m.knee.y);
+                ctx.arc(m.knee.x, m.knee.y, 3, 0, 2 * Math.PI);
+                //foot joint
+                ctx.moveTo(m.foot.x + 5, m.foot.y);
+                ctx.arc(m.foot.x, m.foot.y, 4, 0, 2 * Math.PI);
+                ctx.fillStyle = "#000";
+                ctx.fill();
+                // ctx.lineWidth = 2;
+                // ctx.stroke();
+                ctx.restore();
+            }
+        },
         hexagon() {
             m.isAltSkin = true
-            m.color = {
-                hue: 0,
-                sat: 0,
-                light: 100,
-            }
-            // m.setFillColors();
+
             m.fillColor = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light}%)`
             m.fillColorDark = `hsl(${m.color.hue},${m.color.sat}%,${m.color.light - 35}%)`
             let grd = ctx.createLinearGradient(-30, 0, 30, 0);
@@ -1813,9 +1894,15 @@ const m = {
                 //toe lines
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                if (m.onGround) {
+                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                } else {
+                    ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
+                    ctx.moveTo(m.foot.x, m.foot.y);
+                    ctx.lineTo(m.foot.x + 13, m.foot.y + 8);
+                }
                 ctx.lineWidth = 3;
                 ctx.stroke();
 
@@ -2188,7 +2275,7 @@ const m = {
     },
     setMaxEnergy(isMessage = true) {
         m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 3 * tech.isGroundState + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.05 * m.coupling + 0.77 * tech.isStandingWaveExpand
-        if (isMessage) simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
+        if (isMessage) simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
     drawRegenEnergy(bgColor = "rgba(0, 0, 0, 0.4)", range = 60) {
@@ -2238,6 +2325,8 @@ const m = {
             m.fieldRegen = 0.001667 //10 energy per second  plasma torch
         } else if (m.fieldMode === 8) {
             m.fieldRegen = 0.001667 //10 energy per second pilot wave
+        } else if (m.fieldMode === 9) {
+            m.fieldRegen = 0.00117 //7 energy per second wormhole
         } else if (m.fieldMode === 10) {
             m.fieldRegen = 0.0015 //9 energy per second grappling hook
         } else {
@@ -2915,7 +3004,7 @@ const m = {
         }
     },
     couplingChange(change = 0) {
-        if (change > 0 && level.onLevel !== -1) simulation.makeTextLog(`<div class="coupling-circle"></div> m.coupling <span class='color-symbol'>+=</span> ${change}`, 60); //level.onLevel !== -1  means not on lore level
+        if (change > 0 && level.onLevel !== -1) simulation.inGameConsole(`<div class="coupling-circle"></div> m.coupling <span class='color-symbol'>+=</span> ${change}`, 60); //level.onLevel !== -1  means not on lore level
         m.coupling += change
         if (m.coupling < 0) {
             //look for coupling power ups on this level and remove them to prevent exploiting tech ejections
@@ -2953,7 +3042,7 @@ const m = {
         document.getElementById("field").innerHTML = m.fieldUpgrades[index].name
         m.setHoldDefaults();
         m.fieldUpgrades[index].effect();
-        simulation.makeTextLog(`<div class="circle-grid field"></div> &nbsp; <span class='color-var'>m</span>.setField("<strong class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</strong>")<br>input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>MouseRight</span>"]`);
+        simulation.inGameConsole(`<div class="circle-grid field"></div> &nbsp; <span class='color-var'>m</span>.setField("<strong class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</strong>")<br>input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>MouseRight</span>"]`);
     },
     fieldUpgrades: [{
         name: "field emitter",
@@ -4679,7 +4768,7 @@ const m = {
     {
         name: "wormhole",
         //<strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br>
-        description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>6</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+        description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>7</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
         drain: 0,
         effect: function () {
             m.fieldMeterColor = "#bbf" //"#0c5"

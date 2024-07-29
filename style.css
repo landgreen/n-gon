@@ -9,6 +9,7 @@ body {
     margin: 0;
     overflow: hidden;
     cursor: auto;
+    /* filter: grayscale(1); */
     /* transition: background-color 0.2s ease-in-out; */
 }
 
@@ -285,7 +286,7 @@ summary {
     border: 1px solid #444;
     /* min-height: 88px; */
     line-height: 100%;
-    background-color: #fff;
+    background-color: var(--card-color);
 }
 
 .sort-button {
@@ -353,7 +354,6 @@ summary {
 
 .experiment-start-box {
     background-color: var(--card-color);
-    /* font-size: 1em; */
     position: sticky;
     top: 0;
     z-index: 10;
@@ -373,6 +373,7 @@ summary {
     padding: 0.2em 0px;
     /* height: 210px; */
     box-shadow: 8px 8px 6px rgba(0, 0, 50, 0.15);
+    /* opacity: 0.1; */
 }
 
 .card-background {
@@ -385,7 +386,7 @@ summary {
 }
 
 .card-text {
-    background-color: rgba(255, 255, 255, 1);
+    background-color: var(--card-color);
     padding: 0.5em 1em;
     border: 1px solid #444;
     margin-top: -1px;
@@ -570,7 +571,7 @@ summary {
     padding: 10px;
     border-radius: 8px;
     border: 2px #333 solid;
-    background-color: #fff;
+    background-color: var(--card-color);
 }
 
 
@@ -669,14 +670,12 @@ summary {
     z-index: 2;
     font-size: 23px;
     color: #222;
-    /* background-color: rgba(255, 255, 255, 0.4); */
     background-color: rgba(255, 255, 255, 0.2);
     line-height: 120%;
     user-select: none;
     pointer-events: none;
     padding: 0px 5px 0px 5px;
     border-radius: 5px;
-    /*border: 2px solid rgba(0, 0, 0, 0.4);*/
 }
 
 #field {
@@ -688,13 +687,11 @@ summary {
     color: #000;
     text-align: right;
     opacity: 0.7;
-    /* line-height: 140%;    */
     background-color: rgba(190, 210, 245, 0.25);
     user-select: none;
     pointer-events: none;
     padding: 0px 5px 0px 5px;
     border-radius: 5px;
-    /*border: 2px solid rgba(0, 0, 0, 0.4);*/
 }
 
 #tech {
@@ -726,10 +723,8 @@ summary {
     font-size: 1.15em;
     color: #555;
     background-color: rgba(255, 255, 255, 0.5);
-    /* transition: opacity 0.15s; */
     pointer-events: none;
     user-select: none;
-    /* font-family: monospace; */
 }
 
 .color-text {
@@ -856,6 +851,8 @@ summary {
     text-shadow: 0px -5px 9px rgb(255, 0, 204);
 }
 
+
+
 .color-dup {
     font-variant: small-caps;
     letter-spacing: 1px;
@@ -927,9 +924,24 @@ summary {
     font-weight: 100;
 }
 
+.color-bot {
+    font-variant: small-caps;
+    background-color: rgba(75, 125, 150, 0.06);
+    border: 0.1em solid #146;
+    color: #146;
+    padding: 0em 0.3em 0.08em 0.3em;
+    font-weight: 400;
+}
+
+.no-box {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+}
+
 .color-block {
-    background-color: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.1);
+    border: 0.1em solid #333;
     padding: 0.5px;
     font-weight: 100;
 }
@@ -978,20 +990,6 @@ summary {
     margin-bottom: -0.3em;
 }
 
-.circle-grid-big {
-    /* width: 1.7em;
-    height: 1.7em;
-    border-radius: 50%;
-    display: inline-block;
-    margin-bottom: -0.5em -0.5em -0.5em -0.5em; */
-    width: 1.32em;
-    height: 1.32em;
-    border-radius: 50%;
-    display: inline-block;
-    margin-bottom: -0.3em;
-    transform: scale(1.5);
-}
-
 .circle-grid-instant {
     width: 1.1em;
     height: 1.1em;
@@ -999,7 +997,6 @@ summary {
     border: 0.15em solid hsl(255, 100%, 71%);
     display: inline-block;
     margin-bottom: -0.35em;
-    /* background-color: hsla(255, 100%, 71%, 0.3); */
 }
 
 .circle-grid-skin {
@@ -1013,7 +1010,6 @@ summary {
     position: absolute;
     top: -0.05em;
     left: 0em;
-    margin-bottom: -0.3em;
 }
 
 .circle-grid-skin-eye {
@@ -1026,7 +1022,6 @@ summary {
     position: absolute;
     top: 0.45em;
     left: 0.9em;
-    margin-bottom: -0.3em;
 }
 
 .junk {
@@ -1653,4 +1648,24 @@ summary {
     padding: 7px;
     margin-bottom: 10px;
     /* box-shadow: 4px 4px 4px hsla(240, 0%, 17%, 0.14); */
+}
+
+.tooltip {}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    background-color: #fff;
+    border-radius: 0.3em;
+    padding: 0.2em 0.3em;
+    border: solid #000 1px;
+
+    position: relative;
+    z-index: 1;
+    bottom: 100%;
+    left: 0%;
+    margin-left: -50%;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
 }

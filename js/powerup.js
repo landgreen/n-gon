@@ -84,21 +84,21 @@ const powerUps = {
             }
         },
         tech(num = 1) {
-            return `<div class="circle-grid tech" style="width: 1.32em; height: 1.32em;margin-bottom: -0.3em;"></div>`
+            return `<div class="circle-grid tech tooltip" style="width: 1.32em; height: 1.32em;"><span class="tooltiptext color-m">tech</span></div>`
         },
         field(num = 1) {
-            return `<div class="circle-grid field"></div>`
+            return `<div class="circle-grid field tooltip"><span class="tooltiptext color-f">field</span></div>`
         },
         gun(num = 1) {
-            return `<div class="circle-grid gun"></div>`
+            return `<div class="circle-grid gun tooltip"><span class="tooltiptext color-g">gun</span></div>`
         },
         gunTech(num = 1) {
-            return `<div class="circle-grid tech" style="position:relative; top:-0.05em; left:0.55em;opacity:0.8;margin-left:-0.55em;"></div>
-                    <div class="circle-grid gun" style="position:relative; top:-0.05em; left:-0.55em; opacity:0.65;margin-right:-0.55em;"></div>`
+            return `<div class="circle-grid tech tooltip" style="position:relative; top:-0.05em; left:0.55em;opacity:0.8;margin-left:-0.55em;"><span class="tooltiptext"><span class="color-g">gun</span><span class="color-m">tech</span></span></div>
+                    <div class="circle-grid gun tooltip" style="position:relative; top:-0.05em; left:-0.55em; opacity:0.65;margin-right:-0.55em;"><span class="tooltiptext"><span class="color-g">gun</span><span class="color-m">tech</span></span></div>`
         },
         fieldTech(num = 1) {
-            return `<div class="circle-grid tech" style="position:relative; top:-0.05em; left:0.55em;opacity:0.8;margin-left:-0.55em;"></div>
-                    <div class="circle-grid field" style="position:relative; top:-0.05em; left:-0.55em;opacity:0.65;margin-right:-0.55em;"></div>`
+            return `<div class="circle-grid tech tooltip" style="position:relative; top:-0.05em; left:0.55em;opacity:0.8;margin-left:-0.55em;"><span class="tooltiptext"><span class="color-f">field</span><span class="color-m">tech</span></span></div>
+                    <div class="circle-grid field tooltip" style="position:relative; top:-0.05em; left:-0.55em;opacity:0.65;margin-right:-0.55em;"><span class="tooltiptext"><span class="color-f">field</span><span class="color-m">tech</span></span></div>`
         },
         coupling(num = 1) {
             switch (num) {
@@ -246,12 +246,12 @@ const powerUps = {
             if (b.inventory.length === 2) text += `
             <br>input.key.nextGun<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.nextGun}</span>","<span class='color-text'>MouseWheel</span>"]
             <br>input.key.previousGun<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.previousGun}</span>","<span class='color-text'>MouseWheel</span>"]`
-            simulation.makeTextLog(text);
+            simulation.inGameConsole(text);
         } else if (type === "field") {
             m.setField(index)
         } else if (type === "tech") {
             // if (tech.isBanish && tech.tech[index].isBanished) tech.tech[index].isBanished = false    
-            simulation.makeTextLog(`<div class="circle-grid tech"></div> &nbsp; <span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${tech.tech[index].name}</strong>")`);
+            simulation.inGameConsole(`<div class="circle-grid tech"></div> &nbsp; <span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${tech.tech[index].name}</strong>")`);
             tech.giveTech(index)
         }
         powerUps.endDraft(type);
@@ -289,7 +289,7 @@ const powerUps = {
             if (tech.isCancelDuplication) {
                 const value = 0.05
                 tech.duplication += value
-                simulation.makeTextLog(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${value}`)
+                simulation.inGameConsole(`tech.duplicationChance() <span class='color-symbol'>+=</span> ${value}`)
                 simulation.circleFlare(value);
             }
             if (tech.isCancelRerolls) {
@@ -582,7 +582,7 @@ const powerUps = {
             }
             if (tech.isResearchDamage) {
                 tech.damage *= 1.05
-                simulation.makeTextLog(`<strong>1.05x</strong> <strong class='color-d'>damage</strong>`);
+                simulation.inGameConsole(`<strong>1.05x</strong> <strong class='color-d'>damage</strong>`);
                 tech.addJunkTechToPool(0.01)
             }
             powerUps.research.currentRerollCount++
@@ -592,12 +592,12 @@ const powerUps = {
             //         const index = powerUps.tech.choiceLog.length - i - 1
             //         if (powerUps.tech.choiceLog[index] && tech.tech[powerUps.tech.choiceLog[index]]) tech.tech[powerUps.tech.choiceLog[index]].isBanished = true
             //     }
-            //     simulation.makeTextLog(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - banishLength)}`)
+            //     simulation.inGameConsole(`powerUps.tech.length: ${Math.max(0,powerUps.tech.lastTotalChoices - banishLength)}`)
             // }
             if (tech.isResearchReality) {
                 m.switchWorlds()
                 simulation.trails()
-                simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
+                simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             }
             powerUps[type].effect();
         },
@@ -616,24 +616,35 @@ const powerUps = {
                     let overHeal = m.health + heal * simulation.healScale - m.maxHealth //used with tech.isOverHeal
                     const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
                     m.addHealth(heal);
-                    if (healOutput > 0) simulation.makeTextLog(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+                    if (healOutput > 0) simulation.inGameConsole(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
                     if (tech.isOverHeal && overHeal > 0) { //tech quenching
-                        overHeal *= 2 //double the over heal converted to max health
-                        //make sure overHeal doesn't kill player
-                        if (m.health - overHeal * m.defense() < 0) overHeal = m.health - 0.01
-                        if (overHeal > m.maxHealth) overHeal = m.maxHealth  //just in case overHeal gets too big
-                        tech.extraMaxHealth += overHeal //increase max health
+                        tech.extraMaxHealth += 0.3 * overHeal //increase max health
                         m.setMaxHealth();
-                        m.damage(overHeal);
-                        overHeal *= m.defense() // account for defense after m.damage() so the text log is accurate
-                        simulation.makeTextLog(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.health <span class='color-symbol'>-=</span> ${(overHeal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+                        simulation.inGameConsole(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.maxHealth <span class='color-symbol'>+=</span> ${(0.3 * overHeal).toFixed(3)}`)
                         simulation.drawList.push({ //add dmg to draw queue
                             x: m.pos.x,
                             y: m.pos.y,
-                            radius: overHeal * 500 * simulation.healScale,
-                            color: simulation.mobDmgColor,
+                            radius: overHeal * 100 * simulation.healScale,
+                            color: "#0eb",
                             time: simulation.drawTime
                         });
+
+                        // overHeal *= 2 //double the over heal converted to max health
+                        // //make sure overHeal doesn't kill player
+                        // if (m.health - overHeal * m.defense() < 0) overHeal = m.health - 0.01
+                        // if (overHeal > m.maxHealth) overHeal = m.maxHealth  //just in case overHeal gets too big
+                        // tech.extraMaxHealth += overHeal //increase max health
+                        // m.setMaxHealth();
+                        // m.damage(overHeal);
+                        // overHeal *= m.defense() // account for defense after m.damage() so the text log is accurate
+                        // simulation.inGameConsole(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.health <span class='color-symbol'>-=</span> ${(overHeal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+                        // simulation.drawList.push({ //add dmg to draw queue
+                        //     x: m.pos.x,
+                        //     y: m.pos.y,
+                        //     radius: overHeal * 500 * simulation.healScale,
+                        //     color: simulation.mobDmgColor,
+                        //     time: simulation.drawTime
+                        // });
                     } else if (overHeal > 0.13) { //if leftover heals spawn a new spammer heal power up
                         requestAnimationFrame(() => {
                             powerUps.directSpawn(this.position.x, this.position.y, "heal", true, null, Math.min(1, overHeal) * 40 * (simulation.healScale ** 0.25))//    directSpawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
@@ -731,8 +742,6 @@ const powerUps = {
         }
     },
     cancelText(type) {
-        // if (localSettings.isHideImages) {          }
-
         if (tech.isSuperDeterminism) {
             return `<div></div>`
         } else if (tech.isCancelTech && tech.cancelTechCount === 0) {
@@ -873,7 +882,7 @@ const powerUps = {
                     <div class="circle-grid-skin"></div>
                     <div class="circle-grid-skin-eye"></div>
                 </span>
-                &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
+                &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
     },
     fieldTechText(choose, click) {
@@ -1186,7 +1195,7 @@ const powerUps = {
                         for (let i = 0, len = tech.tech.length; i < len; i++) {
                             if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i, true)
                         }
-                        simulation.makeTextLog(`decoherence <span class='color-var'>tech</span> ejected<br>options reset`)
+                        simulation.inGameConsole(`decoherence <span class='color-var'>tech</span> ejected<br>options reset`)
                     }
                 }
                 if (tech.tooManyTechChoices) {
@@ -1211,7 +1220,7 @@ const powerUps = {
                         const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options
                         if (tech.isBanish) {
                             tech.tech[choose].isBanished = true
-                            if (i === 0) simulation.makeTextLog(`options.length = ${optionLengthNoDuplicates} <em class='color-text'>//tech removed from pool by decoherence</em>`)
+                            if (i === 0) simulation.inGameConsole(`options.length = ${optionLengthNoDuplicates} <em class='color-text'>//tech removed from pool by decoherence</em>`)
                         }
                         removeOption(choose) //move from future options pool to avoid repeats on this selection
                         tech.tech[choose].isRecentlyShown = true //this flag prevents this option from being shown the next time you pick up a tech power up
@@ -1504,7 +1513,7 @@ const powerUps = {
                 powerUps.spawn(x, y + 40, "heal", false)
                 powerUps.spawn(x, y - 40, "heal", false)
             }
-            if (tech.isResearchReality) powerUps.spawnDelay("research", 5)
+            if (tech.isResearchReality) powerUps.spawnDelay("research", 6)
             if (tech.isBanish) powerUps.spawnDelay("research", 2)
             if (tech.isCouplingNoHit) powerUps.spawnDelay("coupling", 9)
             // if (tech.isRerollDamage) powerUps.spawnDelay("research", 1)
@@ -1561,7 +1570,7 @@ const powerUps = {
 
                 if (have.length) {
                     choose = have[Math.floor(Math.random() * have.length)]
-                    simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<strong class='color-text'>${tech.tech[choose].name}</strong>")`)
+                    simulation.inGameConsole(`<span class='color-var'>tech</span>.remove("<strong class='color-text'>${tech.tech[choose].name}</strong>")`)
 
                     for (let i = 0; i < tech.tech[choose].count; i++) {
                         powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
@@ -1580,7 +1589,7 @@ const powerUps = {
                     return false
                 }
             } else if (tech.tech[choose].count && !tech.tech[choose].isInstant) {
-                simulation.makeTextLog(`<span class='color-var'>tech</span>.remove("<strong class='color-text'>${tech.tech[choose].name}</strong>")`)
+                simulation.inGameConsole(`<span class='color-var'>tech</span>.remove("<strong class='color-text'>${tech.tech[choose].name}</strong>")`)
 
                 for (let i = 0; i < tech.tech[choose].count; i++) {
                     powerUps.directSpawn(m.pos.x, m.pos.y, "tech");

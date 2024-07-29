@@ -38,7 +38,7 @@ const lore = {
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
         // document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
-        simulation.makeTextLog(`<span class='color-var'>lore</span>.unlockTesting()`, Infinity);
+        simulation.inGameConsole(`<span class='color-var'>lore</span>.unlockTesting()`, Infinity);
 
         sound.portamento(50)
         sound.portamento(83.333)
@@ -48,7 +48,7 @@ const lore = {
         color: "#f20",
         voice: undefined,
         text: function (say) {
-            simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
+            simulation.inGameConsole(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
             lore.talkingColor = this.color
             const utterance = new SpeechSynthesisUtterance(say);
             utterance.lang = "en-AU" //"en-IN"; //de-DE  en-GB  fr-FR  en-US en-AU
@@ -61,7 +61,7 @@ const lore = {
         voice: undefined,
         text: function (say) {
             if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
-                simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
+                simulation.inGameConsole(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
                 lore.talkingColor = this.color
                 if (lore.isSpeech) {
                     const utterance = new SpeechSynthesisUtterance(say);
@@ -95,7 +95,7 @@ const lore = {
         color: "#f20",
         text: function (say) {
             if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
-                simulation.makeTextLog(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
+                simulation.inGameConsole(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
                 lore.talkingColor = this.color
                 if (lore.isSpeech) {
                     utterance = new SpeechSynthesisUtterance(say);
@@ -622,8 +622,8 @@ const lore = {
                     console.log(`https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`)
                     console.log(`Latitude: ${latitude} °, Longitude: ${longitude} °`)
                     lore.miriam.text("We tracked the location down to this Latitude and Longitude:")
-                    simulation.makeTextLog(`Latitude: ${latitude} °, Longitude: ${longitude} °`, Infinity);
-                    simulation.makeTextLog(`https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`, Infinity);
+                    simulation.inGameConsole(`Latitude: ${latitude} °, Longitude: ${longitude} °`, Infinity);
+                    simulation.inGameConsole(`https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`, Infinity);
                 }
 
                 function error() {
@@ -769,13 +769,13 @@ const lore = {
             },
             () => {
                 lore.miriam.text("We can spawn power ups with this command:")
-                simulation.makeTextLog(`powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
+                simulation.inGameConsole(`powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
                 powerUps.spawn(player.position.x, player.position.y - 100, "heal")
             },
             () => {
                 setTimeout(() => {
                     lore.miriam.text("or we can make a bunch of them:")
-                    simulation.makeTextLog(`for (let i = 0; i < 100; i++) powerUps.spawn(0, 500, "coupling")`, Infinity);
+                    simulation.inGameConsole(`for (let i = 0; i < 100; i++) powerUps.spawn(0, 500, "coupling")`, Infinity);
                     for (let i = 0; i < 100; i++) powerUps.spawn(5 - 10 * Math.random(), -500 * Math.random(), "coupling")
                 }, 2000);
             },
@@ -798,9 +798,9 @@ const lore = {
                     count++
                     if (mob.length === 0 || count > 3600 + 900 * mob.length) {
                         lore.miriam.text("I'll spawn some more power ups for you.")
-                        simulation.makeTextLog(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
+                        simulation.inGameConsole(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
                         for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100 - i * 20, "heal")
-                        simulation.makeTextLog(`for (let i = 0; i < 10; i++) powerUps.spawn(player.position.x, player.position.y - 100, "ammo")`, Infinity);
+                        simulation.inGameConsole(`for (let i = 0; i < 10; i++) powerUps.spawn(player.position.x, player.position.y - 100, "ammo")`, Infinity);
                         for (let i = 0; i < 10; i++) powerUps.spawn(player.position.x, player.position.y - 100 - i * 20, "ammo")
                         spawn.dragonFlyBoss(-1400, -300);
                         spawn.dragonFlyBoss(1400, -300);
@@ -820,9 +820,9 @@ const lore = {
                     count++
                     if (mob.length === 0 || count > 3600 + 900 * mob.length) {
                         lore.anand.text("DragonFlyBoss is my favorite.")
-                        simulation.makeTextLog(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
+                        simulation.inGameConsole(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "heal")`, Infinity);
                         for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100 - i * 20, "heal")
-                        simulation.makeTextLog(`for (let i = 0; i < 10; i++) powerUps.spawn(player.position.x, player.position.y - 100, "ammo")`, Infinity);
+                        simulation.inGameConsole(`for (let i = 0; i < 10; i++) powerUps.spawn(player.position.x, player.position.y - 100, "ammo")`, Infinity);
                         for (let i = 0; i < 10; i++) powerUps.spawn(player.position.x, player.position.y - 100 - i * 20, "ammo")
                         spawn.historyBoss(0, -400);
                         spawn.powerUpBossBaby(-1500, -100);
@@ -841,7 +841,7 @@ const lore = {
                     count++
                     if (mob.length === 0 || count > 3600 + 900 * mob.length) {
                         lore.miriam.text("Here are some extra tech.")
-                        simulation.makeTextLog(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "tech")`, Infinity);
+                        simulation.inGameConsole(`for (let i = 0; i < 6; i++) powerUps.spawn(player.position.x, player.position.y - 100, "tech")`, Infinity);
                         for (let i = 0; i < 6; i++) powerUps.spawn(0, -200 - i * 40, "tech")
                         spawn.historyBoss(0, -400);
                         spawn.blinkBoss(-1400, -300);
@@ -902,7 +902,7 @@ const lore = {
                                 x: 0,
                                 y: -500
                             })
-                            simulation.makeTextLog(`Matter.Body.setPosition(player, { x: 0, y: -500 })`, 180);
+                            simulation.inGameConsole(`Matter.Body.setPosition(player, { x: 0, y: -500 })`, 180);
                         }, 1500);
 
                     } else if (m.alive) {
@@ -1180,7 +1180,7 @@ const lore = {
     //             return product_Range(r + 1, n) / product_Range(1, n - r);
     //         }
     //     }
-    //     simulation.makeTextLog(`n <span class='color-symbol'>=</span> ${combinations(tech.tech.length + b.guns.length + m.fieldUpgrades.length, 50).toExponential(10)}`, Infinity);
+    //     simulation.inGameConsole(`n <span class='color-symbol'>=</span> ${combinations(tech.tech.length + b.guns.length + m.fieldUpgrades.length, 50).toExponential(10)}`, Infinity);
     //     lore.miriam.text(`There are roughly 5 times 10 to the 60 possible combinations. `)
     // },
     // () => { lore.miriam.text("Even if each simulation took 1 nano-second,") },

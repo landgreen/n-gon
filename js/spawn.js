@@ -151,26 +151,12 @@ const spawn = {
                 const sub = Vector.sub(player.position, this.position)
                 const mag = Vector.magnitude(sub)
                 // follow physics
-                // Matter.Body.setVelocity(this, { x: 0, y: 0 });
-                // const where = Vector.add(this.position, Vector.mult(Vector.normalise(sub), this.chaseSpeed))
-                // if (mag > 10) Matter.Body.setPosition(this, { x: where.x, y: where.y });
-
-                // if (true) {
-                //     if (m.crouch) {
-                //         if (Vector.magnitude(Vector.sub(this.position, m.pos)) > this.radius) {
-                //             attract *= 40
-                //         } else {
-                //             Matter.Body.setVelocity(this, Vector.mult(this.velocity, 0.9)); //friction
-                //         }
-
-                //     }
-                // }
-
                 if (tech.isMoveDarkMatter && m.crouch && input.down) {
                     Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.97), Vector.mult(player.velocity, 0.03)))
                     Matter.Body.setPosition(this, Vector.add(Vector.mult(this.position, 0.95), Vector.mult(player.position, 0.05)))
                 }
-                const force = Vector.mult(Vector.normalise(sub), 0.000000003)
+
+                const force = Vector.mult(Vector.normalise(sub), 0.000000003 * (this.distanceToPlayer() > 4000 ? 3 : 1))
                 this.force.x += force.x
                 this.force.y += force.y
 
@@ -977,9 +963,9 @@ const spawn = {
 
                 //add lore level as next level if player took lore tech earlier in the game
                 if (lore.techCount > (lore.techGoal - 1) && !simulation.isCheating) {
-                    simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`, 360);
+                    simulation.inGameConsole(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`, 360);
                     setTimeout(function () {
-                        simulation.makeTextLog(`level.levels.push("<span class='lore-text'>null</span>")`, 720);
+                        simulation.inGameConsole(`level.levels.push("<span class='lore-text'>null</span>")`, 720);
                         unlockExit()
                         level.levels.push("null")
                     }, 4000);
@@ -991,14 +977,14 @@ const spawn = {
                         if (!simulation.paused && !simulation.onTitlePage) {
                             count++
                             if (count < 660) {
-                                if (count === 1 && simulation.difficultyMode < 5) simulation.makeTextLog(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
-                                if (!(count % 60)) simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> ${((count / 60 - Math.random()) * 0.1).toFixed(3)}`);
+                                if (count === 1 && simulation.difficultyMode < 5) simulation.inGameConsole(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
+                                if (!(count % 60)) simulation.inGameConsole(`simulation.analysis <span class='color-symbol'>=</span> ${((count / 60 - Math.random()) * 0.1).toFixed(3)}`);
                             } else if (count === 660) {
-                                simulation.makeTextLog(`simulation.analysis <span class='color-symbol'>=</span> 1 <em>//analysis complete</em>`);
+                                simulation.inGameConsole(`simulation.analysis <span class='color-symbol'>=</span> 1 <em>//analysis complete</em>`);
                             } else if (count === 780) {
-                                simulation.makeTextLog(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`)
+                                simulation.inGameConsole(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`)
                             } else if (count === 1020) {
-                                simulation.makeTextLog(`Engine.clear(engine) <em>//simulation successful</em>`);
+                                simulation.inGameConsole(`Engine.clear(engine) <em>//simulation successful</em>`);
                             } else if (count === 1260) {
                                 // tech.isImmortal = false;
                                 // m.death()
@@ -1031,7 +1017,7 @@ const spawn = {
                         if (simulation.testing || simulation.difficultyMode > 4) {
                             unlockExit()
                             setTimeout(function () {
-                                simulation.makeTextLog(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
+                                simulation.inGameConsole(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
                             }, 1500);
                         } else {
                             if (!simulation.onTitlePage) requestAnimationFrame(loop);
@@ -1811,47 +1797,20 @@ const spawn = {
                 Matter.Body.setVelocity(mob[mob.length - 1], { x: this.velocity.x, y: this.velocity.y })
             }
             for (let i = 0; i < powerUp.length; i++) powerUp[i].collisionFilter.mask = cat.map | cat.powerUp
+            for (let i = 0; i < 40; i++) this.colors();
         };
-
-        //steal all power ups
-        // for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
-        //     powerUp[i].collisionFilter.mask = 0
-        //     Matter.Body.setPosition(powerUp[i], this.vertices[i])
-        //     Matter.Body.setVelocity(powerUp[i], {
-        //         x: 0,
-        //         y: 0
-        //     })
-        // }
-        // me.powerUpList = []
-        // me.constrainPowerUps = function() {
-        //     for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
-        //         //remove other constraints on power up
-        //         for (let i = 0, len = cons.length; i < len; ++i) {
-        //             if (cons[i].bodyB === powerUp[i] || cons[i].bodyA === powerUp[i]) {
-        //                 Matter.Composite.remove(engine.world, cons[i]);
-        //                 cons.splice(i, 1);
-        //                 break;
-        //             }
-        //         }
-
-        //         //add to list
-        //         this.powerUpList.push(powerUp[i])
-        //         //position and stop
-        //         powerUp[i].collisionFilter.mask = 0
-        //         Matter.Body.setPosition(powerUp[i], this.vertices[i])
-        //         Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 })
-        //         //add constraint
-        //         cons[cons.length] = Constraint.create({
-        //             pointA: this.vertices[i],
-        //             bodyB: powerUp[i],
-        //             stiffness: 1,
-        //             damping: 1
-        //         });
-        //         Composite.add(engine.world, cons[cons.length - 1]);
-        //     }
-        //     for (let i = 0; i < this.powerUpList.length; i++) {}
-        // }
-        // me.constrainPowerUps()
+        me.colors = function () {
+            const unit = Vector.rotate({ x: 1, y: 0 }, Math.random() * 6.28)
+            const where = Vector.add(this.position, Vector.mult(unit, 700 - 500 * Math.random() * Math.random()))
+            const colors = ["#0ae", "#f55", "#f7b", "#0eb", "#467", "hsl(246,100%,77%)", "#0cf", "#26a"]
+            simulation.drawList.push({ //add dmg to draw queue
+                x: where.x,
+                y: where.y,
+                radius: 5 + 10 * Math.random(),
+                color: colors[Math.floor(Math.random() * colors.length)], //#0cf
+                time: 17//4 + Math.floor(15 * Math.random())
+            });
+        }
         me.do = function () {
             this.stroke = `hsl(0,0%,${80 + 25 * Math.sin(simulation.cycle * 0.01)}%)`
             if (this.isInvulnerable) {
@@ -1870,12 +1829,6 @@ const spawn = {
                     this.damageReduction = this.startingDamageReduction
                 }
             }
-            //steal all power ups
-            // for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
-            //     powerUp[i].collisionFilter.mask = 0
-            //     Matter.Body.setPosition(powerUp[i], this.vertices[i])
-            //     Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 })
-            // }
             if (this.alive) {
                 for (let i = 0; i < Math.min(powerUp.length, this.vertices.length); i++) {
                     powerUp[i].collisionFilter.mask = 0
@@ -1887,6 +1840,9 @@ const spawn = {
             this.seePlayerCheckByDistance();
             this.attraction();
             this.checkStatus();
+
+            //aura around boss so it can bee seen more easily even when inside walls
+            if (!(simulation.cycle % 5)) this.colors();
         };
     },
 
@@ -3873,9 +3829,10 @@ const spawn = {
         mobs.spawn(x, y, 0, 25, `rgba(255,0,200)`); //"rgb(221,102,119)"
         let me = mob[mob.length - 1];
         me.stroke = "transparent"; //used for drawGhost
-        Matter.Body.setDensity(me, 0.03); //extra dense //normal is 0.001 //makes effective life much larger
+        me.isUnblockable = true;
+        Matter.Body.setDensity(me, 0.033); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
-        me.damageReduction = 0.6
+        me.damageReduction = 0.5
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.nextHealthThreshold = 0.75
@@ -3888,7 +3845,7 @@ const spawn = {
         me.friction = 0;
         me.memory = 240
         me.seePlayerFreq = 55
-        me.delay = 4 + 2 * simulation.CDScale;//8 + 3 * simulation.CDScale;
+        me.delay = 5 + 2 * simulation.CDScale;//8 + 3 * simulation.CDScale;
         me.nextBlinkCycle = me.delay;
         me.JumpDistance = 0//set in redMode()
         // spawn.shield(me, x, y, 1);

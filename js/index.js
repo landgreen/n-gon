@@ -13,7 +13,7 @@ Math.hash = s => {
 // document.getElementById("seed").placeholder = Math.initialSeed = Math.floor(Date.now() % 100000) //random every time:  just the time in milliseconds UTC
 
 window.addEventListener('error', error => {
-    simulation.makeTextLog(`<strong style='color:red;'>ERROR:</strong> ${error.message}  <u>${error.filename}:${error.lineno}</u>`)
+    simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${error.message}  <u>${error.filename}:${error.lineno}</u>`)
 });
 
 document.getElementById("seed").placeholder = Math.initialSeed = String(Math.floor(Date.now() % 100000))
@@ -138,7 +138,7 @@ function beforeUnloadEventListener(event) {
     event.preventDefault();
     if (tech.isExitPrompt) {
         tech.damage *= 1.25
-        simulation.makeTextLog(`damage <span class='color-symbol'>*=</span> ${1.25}`)
+        simulation.inGameConsole(`damage <span class='color-symbol'>*=</span> ${1.25}`)
         if (Math.random() < 0.25) {
             removeEventListener('beforeunload', beforeUnloadEventListener);
         }
@@ -456,15 +456,15 @@ const build = {
     generatePauseLeft() {
         //left side
         let botText = ""
-        if (tech.nailBotCount) botText += `<br>nail-bots ${tech.nailBotCount}`
-        if (tech.orbitBotCount) botText += `<br>orbital-bots ${tech.orbitBotCount}`
-        if (tech.boomBotCount) botText += `<br>boom-bots ${tech.boomBotCount}`
-        if (tech.laserBotCount) botText += `<br>laser-bots ${tech.laserBotCount}`
-        if (tech.foamBotCount) botText += `<br>foam-bots ${tech.foamBotCount}`
-        if (tech.soundBotCount) botText += `<br>sound-bots ${tech.soundBotCount}`
-        if (tech.dynamoBotCount) botText += `<br>dynamo-bots ${tech.dynamoBotCount}`
-        if (tech.plasmaBotCount) botText += `<br>plasma-bots ${tech.plasmaBotCount}`
-        if (tech.missileBotCount) botText += `<br>missile-bots ${tech.missileBotCount}`
+        if (tech.nailBotCount) botText += `<br><strong class='color-bot no-box'>nail-bots ${tech.nailBotCount}</strong>`
+        if (tech.orbitBotCount) botText += `<br><strong class='color-bot no-box'>orbital-bots ${tech.orbitBotCount}</strong>`
+        if (tech.boomBotCount) botText += `<br><strong class='color-bot no-box'>boom-bots ${tech.boomBotCount}</strong>`
+        if (tech.laserBotCount) botText += `<br><strong class='color-bot no-box'>laser-bots ${tech.laserBotCount}</strong>`
+        if (tech.foamBotCount) botText += `<br><strong class='color-bot no-box'>foam-bots ${tech.foamBotCount}</strong>`
+        if (tech.soundBotCount) botText += `<br><strong class='color-bot no-box'>sound-bots ${tech.soundBotCount}</strong>`
+        if (tech.dynamoBotCount) botText += `<br><strong class='color-bot no-box'>dynamo-bots ${tech.dynamoBotCount}</strong>`
+        if (tech.plasmaBotCount) botText += `<br><strong class='color-bot no-box'>plasma-bots ${tech.plasmaBotCount}</strong>`
+        if (tech.missileBotCount) botText += `<br><strong class='color-bot no-box'>missile-bots ${tech.missileBotCount}</strong>`
 
         // <strong class='color-g'>${b.activeGun === null || b.activeGun === undefined ? "undefined" : b.guns[b.activeGun].name}</strong> (${b.activeGun === null || b.activeGun === undefined ? "0" : b.guns[b.activeGun].ammo})
 
@@ -497,6 +497,7 @@ const build = {
 ${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
 <br><strong class='color-dup'>duplication</strong> ${(tech.duplicationChance() * 100).toFixed(0)}%
 <span style="float: right;"><strong class='color-junk'>JUNK</strong> ${(100 * tech.junkChance).toFixed(0)}%</span>
+${botText}
 <br>
 <br> ${level.levelAnnounce()}
 <span style="float: right;">position (${player.position.x.toFixed(0)}, ${player.position.y.toFixed(0)})</span>
@@ -504,7 +505,6 @@ ${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.c
 <span style="float: right;">mouse (${simulation.mouseInGame.x.toFixed(0)}, ${simulation.mouseInGame.y.toFixed(0)})</span>
 <br>cycles ${m.cycle}
 <span style="float: right;">velocity (${player.velocity.x.toFixed(2)}, ${player.velocity.y.toFixed(2)})</span>
-${botText}
 <br>mobs ${mob.length} (${spawn.pickList[0]},  ${spawn.pickList[0]})
 <span style="float: right;">blocks ${body.length}</span>
 <br>bullets ${bullet.length}
@@ -784,7 +784,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                                 <span style="position:relative;">
                                     <div class="circle-grid-skin"></div>
                                     <div class="circle-grid-skin-eye"></div>
-                                </span> &nbsp; &nbsp; &nbsp;&nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
+                                </span> &nbsp; &nbsp; &nbsp; &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
                                 ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     gunTechText(i) {
@@ -1100,7 +1100,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             // url += `&level=${Math.abs(Number(document.getElementById("starting-level").value))}`
             // alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         } else {
-            simulation.makeTextLog("n-gon build URL copied to clipboard.<br>Paste into browser address bar.")
+            simulation.inGameConsole("n-gon build URL copied to clipboard.<br>Paste into browser address bar.")
         }
         console.log('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         console.log(url)
@@ -1465,14 +1465,14 @@ window.addEventListener("keydown", function (event) {
         case input.key.testing:
             if (m.alive && localSettings.loreCount > 0 && !simulation.paused && !build.isExperimentSelection) {
                 if (simulation.difficultyMode > 4) {
-                    simulation.makeTextLog("<em>testing mode disabled for this difficulty</em>");
+                    simulation.inGameConsole("<em>testing mode disabled for this difficulty</em>");
                     break
                 }
                 if (simulation.testing) {
                     simulation.testing = false;
                     simulation.loop = simulation.normalLoop
                     if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'none'
-                    simulation.makeTextLog("", 0);
+                    simulation.inGameConsole("", 0);
                 } else {
                     simulation.testing = true;
                     simulation.loop = simulation.testingLoop
@@ -1480,7 +1480,7 @@ window.addEventListener("keydown", function (event) {
                     if (simulation.isConstructionMode) {
                         document.getElementById("construct").style.display = 'inline'
                     } else {
-                        simulation.makeTextLog(
+                        simulation.inGameConsole(
                             `<table class="pause-table">
                 <tr>
                     <td class='key-input-pause'>T</td>

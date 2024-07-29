@@ -28,7 +28,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField("plasma torch") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField("grappling hook") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
             // powerUps.research.count = 3
             // tech.isHookWire = true
@@ -37,34 +37,29 @@ const level = {
             // m.damage(0.1);
             // b.giveGuns("super balls") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("wave") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // tech.laserColor = "#fff"
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
             // b.guns[8].ammo = 100000000
             // requestAnimationFrame(() => { tech.giveTech("stimulated emission") });
             // tech.giveTech("1st ionization energy")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("booby trap")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("obsolescence")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("brainstorming")
-            // requestAnimationFrame(() => { for (let i = 0; i < 3; i++) tech.giveTech("mechatronics") });
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("eternalism") });
-            // for (let i = 0; i < 2; i++) tech.giveTech("technical debt")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("emergence")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("foam-bot")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Bitter electromagnet")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("wikipedia") });
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("field coupling") });
+            // for (let i = 0; i < 1; i++) tech.giveTech("Verlet integration")
             // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 1; ++i) tech.giveTech("determinism")
-            // for (let i = 0; i < 3; i++) powerUps.directSpawn(450, -50, "tech");
+            // for (let i = 0; i < 1; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(m.pos.x, m.pos.y - 50, "difficulty", false);
             // spawn.mapRect(575, -700, 25, 425);  //block mob line of site on testing
-            // level.flocculation();
+            // level.testing();
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
-            // for (let i = 0; i < 1; ++i) spawn.snakeBoss(1900, -500)
-            // for (let i = 0; i < 2; i++) spawn.ghoster(level.exit.x, level.exit.y) //ghosters need to spawn after the map loads
-            // simulation.isAutoZoom = false; //look in close
-            // simulation.zoomScale *= 0.5;
-            // simulation.setZoom();
+            // for (let i = 0; i < 1; ++i) spawn.powerUpBoss(1900, -500)
+            // for (let i = 0; i < 3; i++) spawn.starter(1900, -500) //ghosters need to spawn after the map loads
 
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "boost");
@@ -103,7 +98,7 @@ const level = {
         }
         if (!simulation.isTraining) {
             document.title = "n-gon: " + level.levelAnnounce();
-            simulation.makeTextLog(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
+            simulation.inGameConsole(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
         }
         simulation.setupCamera(player.position);
         simulation.setZoom();
@@ -151,13 +146,14 @@ const level = {
         }
         if (tech.isGunChoice && Number.isInteger(tech.buffedGun) && b.inventory.length) {
             var gun = b.guns[b.inventory[tech.buffedGun]].name
-            simulation.makeTextLog(`pigeonhole principle: <strong>${(1.3 * Math.max(0, b.inventory.length)).toFixed(2)}x</strong> <strong class='color-d'>damage</strong> for <strong class="highlight">${gun}</strong>`, 600);
+            simulation.inGameConsole(`pigeonhole principle: <strong>${(1.3 * Math.max(0, b.inventory.length)).toFixed(2)}x</strong> <strong class='color-d'>damage</strong> for <strong class="highlight">${gun}</strong>`, 600);
         }
         if (tech.isSwitchReality && level.levelsCleared !== 0) {
-            simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
+            simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             m.switchWorlds()
             simulation.trails()
-            powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "tech", false);
+            powerUps.spawn(player.position.x + 50, player.position.y - Math.random() * 50, "tech", false);
+            powerUps.spawnDelay("coupling", 3);
         }
         if (tech.isHealLowHealth) {
             const len = tech.isEnergyHealth ? 5 * Math.max(0, m.maxEnergy - m.energy) : 5 * Math.max(0, m.maxHealth - m.health)
@@ -169,22 +165,22 @@ const level = {
                 const ammoPerOrb = b.guns[b.activeGun].ammoPack
                 const a = Math.ceil(rate * b.guns[b.activeGun].ammo / ammoPerOrb)
                 powerUps.spawnDelay("ammo", a, 4);
-                simulation.makeTextLog(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${a > 20 ? a + powerUps.orb.ammo(1) : powerUps.orb.ammo(a)}`)
+                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${a > 20 ? a + powerUps.orb.ammo(1) : powerUps.orb.ammo(a)}`)
             }
             if (powerUps.research.count > 0) {
                 const r = Math.ceil(rate * powerUps.research.count)
-                simulation.makeTextLog(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-r'>research</span> <span class='color-symbol'>=</span> ${r > 20 ? r + powerUps.orb.research(1) : powerUps.orb.research(r)}`)
+                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-r'>research</span> <span class='color-symbol'>=</span> ${r > 20 ? r + powerUps.orb.research(1) : powerUps.orb.research(r)}`)
                 powerUps.spawnDelay("research", r, 4);
             }
             if (m.coupling > 0) {
                 const c = Math.ceil(rate * m.coupling)
                 powerUps.spawnDelay("coupling", c, 4);
-                simulation.makeTextLog(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
+                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
             }
             const healPerOrb = (powerUps.heal.size() / 40 / (simulation.healScale ** 0.25)) ** 2
             const h = Math.ceil(rate * m.health / healPerOrb)
             powerUps.spawnDelay("heal", h, 4);
-            simulation.makeTextLog(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
+            simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
 
             // trying to spawn smaller heals
             // const healPerOrb = (powerUps.heal.size() / 40 / (simulation.healScale ** 0.25)) ** 2
@@ -194,18 +190,20 @@ const level = {
             // const overHeal = h - Math.floor(h)
             // powerUps.spawn(m.pos.x, m.pos.y, "heal", true, null, Math.max(0.25, overHeal) * 40 * (simulation.healScale ** 0.25))
             // if (h > healPerOrb) powerUps.spawnDelay("heal", h);
-            // simulation.makeTextLog(`${(Math.ceil(tech.interestRate * 100)).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
+            // simulation.inGameConsole(`${(Math.ceil(tech.interestRate * 100)).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
         }
-        if (tech.ejectOld > 0) {
+        if (tech.isEjectOld) {
             let index = null //find oldest tech that you have
             for (let i = 0; i < tech.tech.length; i++) {
-                if (tech.tech[i].count > 0) index = i
+                if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
+                    index = i
+                }
             }
+            console.log(index)
             if (index) { //eject it
                 const effect = Math.pow(1.1, tech.tech[index].count)
-                simulation.makeTextLog(`<strong>${(effect).toFixed(2)}x</strong> <strong class='color-d'>damage</strong> <em>//from obsolescence</em>`, 360)
+                simulation.inGameConsole(`<strong>${(effect).toFixed(2)}x</strong> <strong class='color-d'>damage</strong> <em>//from obsolescence</em>`, 360)
                 tech.damage *= effect
-                tech.ejectOld *= effect
                 powerUps.ejectTech(index)
             }
         }
@@ -213,7 +211,7 @@ const level = {
     trainingText(say) {
         simulation.lastLogTime = 0; //clear previous messages
         simulation.isTextLogOpen = true
-        simulation.makeTextLog(`<span style="font-size: 120%;line-height: 120%;"><span style="color:#51f;">supervised.learning</span>(<span style="color:#777; font-size: 80%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span><br>${say}</span>`, Infinity)
+        simulation.inGameConsole(`<span style="font-size: 120%;line-height: 120%;"><span style="color:#51f;">supervised.learning</span>(<span style="color:#777; font-size: 80%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span><br>${say}</span>`, Infinity)
         simulation.isTextLogOpen = false
     },
     trainingBackgroundColor: "#e1e1e1",
@@ -279,8 +277,8 @@ const level = {
         }
     },
     announceMobTypes() {
-        simulation.makeTextLog(`spawn<span class='color-symbol'>.</span>${spawn.pickList[0]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span>`)
-        simulation.makeTextLog(`spawn<span class='color-symbol'>.</span>${spawn.pickList[1]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span>`)
+        simulation.inGameConsole(`spawn<span class='color-symbol'>.</span>${spawn.pickList[0]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span>`)
+        simulation.inGameConsole(`spawn<span class='color-symbol'>.</span>${spawn.pickList[1]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span>`)
     },
     disableExit: false,
     nextLevel() {
@@ -443,7 +441,7 @@ const level = {
                 if (index !== -1) {
                     level.communityLevels.splice(index, 1);
                     // console.log('removed level:', remove[i])
-                    requestAnimationFrame(() => { simulation.makeTextLog(`banned level: <strong style="color: '#f00';">${remove[i]}</strong>`); });
+                    requestAnimationFrame(() => { simulation.inGameConsole(`banned level: <strong style="color: '#f00';">${remove[i]}</strong>`); });
                 }
             }
             // console.log('community levels after', level.communityLevels)
@@ -454,7 +452,7 @@ const level = {
                 if (index !== -1) {
                     level.playableLevels.splice(index, 1);
                     // console.log('removed level:', remove[i])
-                    requestAnimationFrame(() => { simulation.makeTextLog(`banned level: <strong style="color: '#f00';">${remove[i]}</strong>`); });
+                    requestAnimationFrame(() => { simulation.inGameConsole(`banned level: <strong style="color: '#f00';">${remove[i]}</strong>`); });
                 }
             }
             // console.log('Landgreen levels after', level.playableLevels)
@@ -628,7 +626,7 @@ const level = {
                         let text = `
                             <div class="choose-grid-module" id = "choose-training" style = "font-size: 1em; padding:10px;color:#333;">
                                 <h2 style="text-align: center;letter-spacing: 5px;">training</h2>
-                                Begin the <strong>guided tutorial</strong> that shows you how to use your ${powerUps.field.gun()} and ${powerUps.orb.gun()}.
+                                Begin the <strong>guided tutorial</strong> that shows you how to use your ${powerUps.field()} and ${powerUps.orb.gun()}.
                             </div>
                             <div class="choose-grid-module" id = "choose-unPause" style = "font-size: 1em; padding:10px;color:#333;">
                                 <h2 style="text-align: center; letter-spacing: 7px;">play</h2>
@@ -2531,8 +2529,8 @@ const level = {
                 //bonus power ups for clearing runs in the last game
                 if (!simulation.isCheating && localSettings.levelsClearedLastGame > 1) {
                     for (let i = 0; i < localSettings.levelsClearedLastGame / 3; i++) powerUps.spawn(2095 + 2 * Math.random(), -1270 - 50 * i, "tech", false); //spawn a tech for levels cleared in last game
-                    simulation.makeTextLog(`for (let i <span class='color-symbol'>=</span> 0; i <span class='color-symbol'><</span> localSettings.levelsClearedLastGame <span class='color-symbol'>/</span> 3; i<span class='color-symbol'>++</span>)`);
-                    simulation.makeTextLog(`{ powerUps.spawn(m.pos.x, m.pos.y, "tech") <em>//simulation superposition</em>}`);
+                    simulation.inGameConsole(`for (let i <span class='color-symbol'>=</span> 0; i <span class='color-symbol'><</span> localSettings.levelsClearedLastGame <span class='color-symbol'>/</span> 3; i<span class='color-symbol'>++</span>)`);
+                    simulation.inGameConsole(`{ powerUps.spawn(m.pos.x, m.pos.y, "tech") <em>//simulation superposition</em>}`);
                     localSettings.levelsClearedLastGame = 0 //after getting bonus power ups reset run history
                     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                 }
@@ -2981,7 +2979,7 @@ const level = {
                     if (gateButton.isUp) {
                         gateButton.query();
                         if (!gateButton.isUp) {
-                            simulation.makeTextLog(`station gate opened`, 360);
+                            simulation.inGameConsole(`station gate opened`, 360);
                             if (stationNumber > 0) {
                                 if (!isExitOpen && gatesOpenRight < stationNumber) level.newLevelOrPhase() //run some new level tech effects
                                 gatesOpenRight = stationNumber
@@ -2993,7 +2991,7 @@ const level = {
                                 gatesOpenRight = stationNumber
                             }
                             if (Math.abs(stationNumber) > 0 && ((Math.abs(stationNumber) + 1) % stationList.length) === 0) {
-                                simulation.makeTextLog(`level exit opened`, 360);
+                                simulation.inGameConsole(`level exit opened`, 360);
                                 isExitOpen = true;
                             }
                         }
@@ -8574,7 +8572,7 @@ const level = {
 
     },
     stronghold() { // player made level  by    Francois 👑 from discord
-        simulation.makeTextLog(`<strong>stronghold</strong> by <span class='color-var'>Francois</span>`);
+        simulation.inGameConsole(`<strong>stronghold</strong> by <span class='color-var'>Francois</span>`);
 
         const boost1 = level.boost(1470, -250, 1080)
         const boost2 = level.boost(-370, 0, 800)
@@ -8744,7 +8742,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     basement() { // player made level  by    Francois 👑 from discord
-        simulation.makeTextLog(`<strong>basement</strong> by <span class='color-var'>Francois</span>`);
+        simulation.inGameConsole(`<strong>basement</strong> by <span class='color-var'>Francois</span>`);
         let button, door, buttonDoor, buttonPlateformEnd, doorPlateform
         let isLevelReversed = Math.random();
         if (isLevelReversed < 0.7) {
@@ -9028,7 +9026,7 @@ const level = {
         powerUps.chooseRandomPowerUp(3100, 1630);
     },
     // detours() { //by Francois from discord
-    //     simulation.makeTextLog(`<strong>detours</strong> by <span class='color-var'>Francois</span>`);
+    //     simulation.inGameConsole(`<strong>detours</strong> by <span class='color-var'>Francois</span>`);
     //     level.setPosToSpawn(0, 0); //lower start
     //     level.exit.y = 150;
     //     spawn.mapRect(level.enter.x, 45, 100, 20);
@@ -9341,7 +9339,7 @@ const level = {
     //     }
     // },
     house() { //by Francois from discord
-        simulation.makeTextLog(`<strong>house</strong> by <span class='color-var'>Francois</span>`);
+        simulation.inGameConsole(`<strong>house</strong> by <span class='color-var'>Francois</span>`);
         const rotor = level.rotor(4251, -325, 120, 20, 200, 0, 0.01, 0, -0.0001);
         const hazard = level.hazard(4350, -1000, 300, 110);
         const doorBedroom = level.door(1152, -1150, 25, 250, 250);
@@ -9817,7 +9815,7 @@ const level = {
         }
     },
     perplex() { //by Oranger from discord
-        simulation.makeTextLog(`<strong>perplex</strong> by <span class='color-var'>Oranger</span>`);
+        simulation.inGameConsole(`<strong>perplex</strong> by <span class='color-var'>Oranger</span>`);
         document.body.style.backgroundColor = "#dcdcde";
         level.setPosToSpawn(-600, 400);
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -10003,7 +10001,7 @@ const level = {
         spawn.secondaryBossChance(7725, 2275)
     },
     coliseum() {
-        simulation.makeTextLog(`<strong>coliseum</strong> by <span class='color-var'>iNoobBoi</span>`);
+        simulation.inGameConsole(`<strong>coliseum</strong> by <span class='color-var'>iNoobBoi</span>`);
         level.custom = () => {
             level.exit.drawAndCheck();
 
@@ -10154,7 +10152,7 @@ const level = {
         spawn.secondaryBossChance(6600, 600)
     },
     crossfire() {
-        simulation.makeTextLog(`<strong>crossfire</strong> by <span class='color-var'>iNoobBoi</span>`);
+        simulation.inGameConsole(`<strong>crossfire</strong> by <span class='color-var'>iNoobBoi</span>`);
 
         //*1.5
         //Level Setup
@@ -10319,7 +10317,7 @@ const level = {
         spawn.debris(9300, -900, 400, debrisCount);
     },
     vats() { // Made by Dablux#6610 on Discord
-        simulation.makeTextLog(`<strong>vats</strong> by <span class='color-var'>Dablux</span>`);
+        simulation.inGameConsole(`<strong>vats</strong> by <span class='color-var'>Dablux</span>`);
 
         simulation.zoomScale = 1500;
         level.setPosToSpawn(4400, -1060)
@@ -10761,7 +10759,7 @@ const level = {
         }
     },
     ngon() { //make by Oranger
-        simulation.makeTextLog(`<strong>"ngon"</strong> by <span class='color-var'>Oranger</span>`);
+        simulation.inGameConsole(`<strong>"ngon"</strong> by <span class='color-var'>Oranger</span>`);
 
         document.body.style.backgroundColor = "#dcdcde";
         let needGravity = [];
@@ -11166,7 +11164,7 @@ const level = {
         }
     },
     tunnel() { // by Scarlettt
-        simulation.makeTextLog(`<strong>tunnel</strong> by <span class='color-var'>Scarlettt</span>`);
+        simulation.inGameConsole(`<strong>tunnel</strong> by <span class='color-var'>Scarlettt</span>`);
 
         level.custom = () => {
             level.exit.drawAndCheck();
@@ -11640,7 +11638,7 @@ const level = {
         }
     },
     run() {
-        simulation.makeTextLog(`<strong>run</strong> by <span class='color-var'>iNoobBoi</span>`);
+        simulation.inGameConsole(`<strong>run</strong> by <span class='color-var'>iNoobBoi</span>`);
 
         addPartToMap = (len) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
             map[len].collisionFilter.category = cat.map;
@@ -11689,14 +11687,14 @@ const level = {
                 addPartToMap(map.length - 1);
                 simulation.draw.setPaths();
 
-                simulation.makeTextLog(`<strong>UNKNOWN</strong>: "Well done. Now climb."`, 600);
-                simulation.makeTextLog(`<strong>UNKNOWN</strong>: "I left a gift at the top."`, 600);
+                simulation.inGameConsole(`<strong>UNKNOWN</strong>: "Well done. Now climb."`, 600);
+                simulation.inGameConsole(`<strong>UNKNOWN</strong>: "I left a gift at the top."`, 600);
 
                 climbTime = true;
             } //toggles on a mapRect when player passes a certain area
 
             if (m.pos.x > 9000 && endTime === false) {
-                simulation.makeTextLog("<strong>UNKNOWN</strong>: \"Good luck. I hope you get out of here.\"", 600);
+                simulation.inGameConsole("<strong>UNKNOWN</strong>: \"Good luck. I hope you get out of here.\"", 600);
                 endTime = true;
             }
 
@@ -11877,11 +11875,11 @@ const level = {
 
             //Mob Spawning
             setTimeout(() => {
-                simulation.makeTextLog("<strong>UNKNOWN</strong>: \"You cannot kill them.\"", 600);
+                simulation.inGameConsole("<strong>UNKNOWN</strong>: \"You cannot kill them.\"", 600);
             }, 2000);
 
             setTimeout(() => {
-                simulation.makeTextLog("<strong>UNKNOWN</strong>: \"But I have slowed them down for you.\"", 600);
+                simulation.inGameConsole("<strong>UNKNOWN</strong>: \"But I have slowed them down for you.\"", 600);
             }, 6000);
 
 
@@ -11897,7 +11895,7 @@ const level = {
                 spawn[runMobList[Math.floor(Math.random() * runMobList.length)]](6600, -1000);
 
                 setTimeout(() => {
-                    simulation.makeTextLog("<strong>UNKNOWN</strong>: \"Run.\"", 600);
+                    simulation.inGameConsole("<strong>UNKNOWN</strong>: \"Run.\"", 600);
                 }, 10000);
             } //some of the mobs
             if (simulation.difficulty > 20) {
@@ -11907,7 +11905,7 @@ const level = {
                 spawn[runMobList[Math.floor(Math.random() * runMobList.length)]](7400, -800);
 
                 setTimeout(() => {
-                    simulation.makeTextLog("<strong>UNKNOWN</strong>: \"RUN!\"", 600);
+                    simulation.inGameConsole("<strong>UNKNOWN</strong>: \"RUN!\"", 600);
                 }, 11000);
             } //most of the mobs
             if (simulation.difficulty > 30) {
@@ -11917,7 +11915,7 @@ const level = {
                 spawn[runMobList[Math.floor(Math.random() * runMobList.length)]](7500, -300);
 
                 setTimeout(() => {
-                    simulation.makeTextLog("<strong>UNKNOWN</strong>: \"GET OUT OF HERE.\"", 600);
+                    simulation.inGameConsole("<strong>UNKNOWN</strong>: \"GET OUT OF HERE.\"", 600);
                 }, 12000);
             } //all the mobs
 
@@ -11926,7 +11924,7 @@ const level = {
                 spawn.randomLevelBoss(-2200, -700, ["powerUpBossBaby", "blockBoss", "revolutionBoss"]);
 
                 setTimeout(() => {
-                    simulation.makeTextLog("<strong>UNKNOWN</strong>: \"They are coming for you.\"", 600);
+                    simulation.inGameConsole("<strong>UNKNOWN</strong>: \"They are coming for you.\"", 600);
                 }, 14000);
             }
             anotherBoss(-1800, -700); //custom second boss spawn
@@ -11982,7 +11980,7 @@ const level = {
         }
     },
     islands() {
-        simulation.makeTextLog(`<strong>islands</strong> by <span class='color-var'>Richard0820</span>`);
+        simulation.inGameConsole(`<strong>islands</strong> by <span class='color-var'>Richard0820</span>`);
 
         const boost1 = level.boost(58500, -18264, 1300);
         let portal2, portal3;
@@ -12327,7 +12325,7 @@ const level = {
         powerUps.spawn(3000, -230, "heal");
     },
     temple() {
-        simulation.makeTextLog(`<strong>temple</strong> by <span class='color-var'>Scar1337</span>`);
+        simulation.inGameConsole(`<strong>temple</strong> by <span class='color-var'>Scar1337</span>`);
 
         const V = Vector;
         const Equation = (function () {
@@ -13489,7 +13487,7 @@ const level = {
                 if (!isInBounds) {
                     m.damage(0.1 * simulation.difficultyMode);
                     trapPlayer(level.enter.x, level.enter.y);
-                    simulation.makeTextLog("<span style='color: #f00'>" + name + "</span>: &nbsp; You thought I could let you get away with that?");
+                    simulation.inGameConsole("<span style='color: #f00'>" + name + "</span>: &nbsp; You thought I could let you get away with that?");
                 }
             },
             room0() {
@@ -13895,7 +13893,7 @@ const level = {
             setPos(a, b);
             freeze(a);
         };
-        const makeLore = (x, t) => simulation.makeTextLog(`<h2 style='color: #f00; display: inline-block'>${name}:</h2> &nbsp; <h3 style='display: inline-block'>${x}</h3>`, t);
+        const makeLore = (x, t) => simulation.inGameConsole(`<h2 style='color: #f00; display: inline-block'>${name}:</h2> &nbsp; <h3 style='display: inline-block'>${x}</h3>`, t);
         level.custom = () => {
             // All the logic gets handled here. How nice!
             for (const i in LogicHandler) {
@@ -13924,7 +13922,7 @@ const level = {
         };
     },
     dripp() {
-        simulation.makeTextLog(`<strong>dripp</strong> by <span class='color-var'>M. B.</span>`);
+        simulation.inGameConsole(`<strong>dripp</strong> by <span class='color-var'>M. B.</span>`);
 
         const door = level.door(780, -350, 15, 400, 265);
         const buttonDoor = level.button(420, -10);
@@ -14119,7 +14117,7 @@ const level = {
     },
     biohazard() {
         // MAP BY INOOBBOI AND THESHWARMA
-        simulation.makeTextLog(`<strong>biohazard</strong> by <span class='color-var'>INOOBBOI</span> and <span class='color-var'>THESHWARMA</span>`);
+        simulation.inGameConsole(`<strong>biohazard</strong> by <span class='color-var'>INOOBBOI</span> and <span class='color-var'>THESHWARMA</span>`);
 
         // set here for the cutscene later
         level.setPosToSpawn(-2800, -150)
@@ -15266,7 +15264,7 @@ const level = {
         anotherBoss(0, 0) //will only spawn historyBoss if there is an additional boss
     },
     stereoMadness() {
-        simulation.makeTextLog(`<strong>stereoMadness</strong> by <span class='color-var'>Richard0820</span>`);
+        simulation.inGameConsole(`<strong>stereoMadness</strong> by <span class='color-var'>Richard0820</span>`);
         let totalCoin = 0;
         const hunter = function (x, y, radius = 30) { //doesn't stop chasing until past 105000
             mobs.spawn(x, y, 6, radius, "black");
@@ -15280,7 +15278,7 @@ const level = {
             me.memory = Infinity;
             me.seeAtDistance2 = Infinity;
             Matter.Body.setDensity(me, 1)
-            simulation.makeTextLog(`<b style="color: #3498DB;">Ω:</b><em style="color: #141414;"><b> Intruder Detected</b></em>`);
+            simulation.inGameConsole(`<b style="color: #3498DB;">Ω:</b><em style="color: #141414;"><b> Intruder Detected</b></em>`);
             me.boost = 10;
             me.do = function () {
                 if (me.boost == 1 && m.fieldMode == 3 || m.fieldMode == 9 && me.boost == 1) {
@@ -15463,7 +15461,7 @@ const level = {
                 innerBar.style.backgroundColor = m.eyeFillColor;
             }
             if (m.pos.x > 25360 && textlogOne == 0) {
-                simulation.makeTextLog(`<div><em>A stong force pushes you forward...</em></div>`)
+                simulation.inGameConsole(`<div><em>A stong force pushes you forward...</em></div>`)
                 textlogOne++;
             }
             if (m.pos.x < -3000) {
@@ -15473,12 +15471,12 @@ const level = {
                 });
 
                 if (textlogTwo == 0)
-                    simulation.makeTextLog(`<div><em>A strong force pushes you away...</em></div>`);
+                    simulation.inGameConsole(`<div><em>A strong force pushes you away...</em></div>`);
                 textlogTwo++;
             }
             if (m.pos.y > 1055) {
                 Matter.Body.setPosition(player, { x: 0, y: -150 });
-                simulation.makeTextLog(`<div><em>There is nowhere to run...</em></div>`);
+                simulation.inGameConsole(`<div><em>There is nowhere to run...</em></div>`);
                 m.damage(0.1 * simulation.difficultyMode);
             }
             if (m.alive == false && barThere == true) {
@@ -16080,7 +16078,7 @@ const level = {
                 }
                 document.body.style.transitionDuration = "0ms";
                 document.body.style.backgroundColor = "#696969";
-                simulation.makeTextLog(`<div><em>You have earned: </em><b>` + Math.min(3, totalCoin) + `</b><em> tech</em></div>`)
+                simulation.inGameConsole(`<div><em>You have earned: </em><b>` + Math.min(3, totalCoin) + `</b><em> tech</em></div>`)
                 if (barThere == true) { //only runs once
                     document.body.removeChild(bar);
                     for (let i = 0, len = Math.min(3, totalCoin); i < len; i++) powerUps.directSpawn(player.position.x, player.position.y, "tech");
@@ -16846,7 +16844,7 @@ const level = {
         hunter(0, -1000)
     },
     yingYang() {
-        simulation.makeTextLog(`<strong>yingYang</strong> by <span class='color-var'>Richard0820</span>`);
+        simulation.inGameConsole(`<strong>yingYang</strong> by <span class='color-var'>Richard0820</span>`);
 
         let destroyed = false;
         const lock = level.door(425, -1400, 50, 300, 300);
@@ -17198,7 +17196,7 @@ const level = {
         powerUps.addResearchToLevel()
     },
     staircase() {
-        simulation.makeTextLog(`<strong>staircase</strong> by <span class='color-var'>ryanbear</span>`);
+        simulation.inGameConsole(`<strong>staircase</strong> by <span class='color-var'>ryanbear</span>`);
 
         level.custom = () => {
             level.exit.drawAndCheck();
@@ -17286,7 +17284,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     fortress() {
-        simulation.makeTextLog(`<strong>fortress</strong> by <span class='color-var'>Desboot</span>`);
+        simulation.inGameConsole(`<strong>fortress</strong> by <span class='color-var'>Desboot</span>`);
         const boost1 = level.boost(3600, -250, 1000)
         const boost2 = level.boost(60, -604, 1000)
         const boost3 = level.boost(2160, -1260, 1000)
@@ -17427,7 +17425,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     commandeer() {
-        simulation.makeTextLog(`<strong>commandeer</strong> by <span class='color-var'>Desboot</span>`);
+        simulation.inGameConsole(`<strong>commandeer</strong> by <span class='color-var'>Desboot</span>`);
 
         let waterFallWidth = 400
         let waterFallX = 15900
@@ -18030,7 +18028,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     clock() {
-        simulation.makeTextLog(`<strong>clock</strong> by <span class='color-var'>Cornbread 2100</span>`);
+        simulation.inGameConsole(`<strong>clock</strong> by <span class='color-var'>Cornbread 2100</span>`);
 
         function drawBackgroundGear(x, y, r1, r2, rot, color, speed, numTeeth = 5, toothWidth = 75, linew = 2) {
             var vertices = getGearVertices(x, y, r1, r2, numTeeth, simulation.cycle * speed + rot, toothWidth / 100);
@@ -19768,7 +19766,7 @@ const level = {
         }
     },
     buttonbutton() {
-        simulation.makeTextLog(`<strong>buttonbutton</strong> by <span class='color-var'>||Destabilized E||</span>`);
+        simulation.inGameConsole(`<strong>buttonbutton</strong> by <span class='color-var'>||Destabilized E||</span>`);
         const mover = level.mover(1425, -1949, 600, 25); //x,y,width.height,VxGoal,force
 
         let portal
@@ -19875,7 +19873,7 @@ const level = {
         spawn.randomLevelBoss(1840, 675)
     },
     movers() {
-        simulation.makeTextLog(`<strong>movers</strong> by <span class='color-var'>ryanbear</span>`);
+        simulation.inGameConsole(`<strong>movers</strong> by <span class='color-var'>ryanbear</span>`);
         level.custom = () => {
             level.exit.drawAndCheck();
             level.enter.draw();
@@ -20028,7 +20026,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     downpour() {
-        simulation.makeTextLog(`<strong>Downpour</strong> by <span class='color-var'>DesBoot</span>`);
+        simulation.inGameConsole(`<strong>Downpour</strong> by <span class='color-var'>DesBoot</span>`);
         let mobsspawned = 0
         const laser = level.hazard(7492, -2612, 10, 500, 0.3) //laserintro
 
@@ -20063,7 +20061,7 @@ const level = {
         // color.map = "#444" //custom map color
 
 
-        //simulation.makeTextLog(stopcycle)
+        //simulation.inGameConsole(stopcycle)
         level.custom = () => {
             do {
 
@@ -20090,17 +20088,17 @@ const level = {
                 // }
                 // if (rainCount > 12) {  
                 //     rainCount = 1
-                //     simulation.makeTextLog(rainCount)
+                //     simulation.inGameConsole(rainCount)
 
                 // } else {
                 //     rainCount = rainCount + 1
-                //     simulation.makeTextLog(rainCount)
+                //     simulation.inGameConsole(rainCount)
                 // }
             } while (Math.random() < 0.8);
-            //simulation.makeTextLog(stopcycle)
-            //simulation.makeTextLog(m.cycle)
+            //simulation.inGameConsole(stopcycle)
+            //simulation.inGameConsole(m.cycle)
             // ctx.fillStyle = "rgba(228,255,0,0.8)"
-            // //simulation.makeTextLog(stopcycle)
+            // //simulation.inGameConsole(stopcycle)
             // ctx.fillRect(50.4, -1210.0, 100, 100)
             // stopcycle = m.cycle + Math.random * 600;
             //stopcycle = m.cycles + Math.random * 600
@@ -22895,7 +22893,7 @@ const level = {
         Object.assign(spawn, obj); //ez
     },
     superNgonBros() {
-        simulation.makeTextLog(`<strong>Super N-gon Bros</strong> by <span class='color-var'>DesBoot</span>`);
+        simulation.inGameConsole(`<strong>Super N-gon Bros</strong> by <span class='color-var'>DesBoot</span>`);
 
         let bowserKilled = 0
         let flagY = -750
@@ -23019,19 +23017,19 @@ const level = {
             me.onDeath = function () {
                 if (Math.random() < 0.1) {
                     spawn.randomSmallMob(me.position.x, me.position.y - 75);
-                    simulation.makeTextLog('mob')
+                    simulation.inGameConsole('mob')
                 } else {
                     if (Math.random() < 0.07) {
                         powerUps.spawn(me.position.x, me.position.y + (75 * (player.velocity.y / Math.abs(player.velocity.y))), "tech", true);
-                        simulation.makeTextLog('tech')
+                        simulation.inGameConsole('tech')
                     } else {
                         if (Math.random() < 0.4) {
                             powerUps.spawn(me.position.x, me.position.y + (75 * (player.velocity.y / Math.abs(player.velocity.y))), "heal", true);
-                            simulation.makeTextLog('heal')
+                            simulation.inGameConsole('heal')
                         } else {
                             //if (Math.random() < 0.8){
                             powerUps.spawn(me.position.x, me.position.y + (75 * (player.velocity.y / Math.abs(player.velocity.y))), "ammo", true);
-                            simulation.makeTextLog('ammo')
+                            simulation.inGameConsole('ammo')
                             //}
                         }
                     }
@@ -23079,7 +23077,7 @@ const level = {
                 firstElevatorY -= 5
             }
 
-            //simulation.makeTextLog(firstElevatorY)
+            //simulation.inGameConsole(firstElevatorY)
             elevator1.move();
             elevator2.move();
             if (player.position.x > 0 && player.position.y < -9000 && player.position.y > -10000) {
@@ -23095,7 +23093,7 @@ const level = {
             portal[3].query()
             portal2[2].query()
             portal2[3].query()
-            //simulation.makeTextLog(firstBlockBroken)
+            //simulation.inGameConsole(firstBlockBroken)
             level.exit.drawAndCheck();
             if (player.position.x > 4100 && secondMobsReached == 0) {
                 secondMobsSpawned = 1
@@ -23138,7 +23136,7 @@ const level = {
             level.enter.draw();
             if (finalRoomReached == 0 && player.position.x > 21150) {
                 finalRoomReached = 1
-                simulation.makeTextLog('Thank you M, but our techs are in another castle!')
+                simulation.inGameConsole('Thank you M, but our techs are in another castle!')
             }
             //mobs
             if (firstMobsSpawned == 1 && firstMobsReached == 0) {
@@ -23414,7 +23412,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     underpass() {
-        simulation.makeTextLog(`<strong>underpass</strong> by <span class='color-var'>Richard0820</span>`);
+        simulation.inGameConsole(`<strong>underpass</strong> by <span class='color-var'>Richard0820</span>`);
 
         let key = false;
         const door = level.door(2650, -825, 50, 250, 250, 10);
@@ -26295,7 +26293,7 @@ const level = {
     },
     cantilever() { // made by Eclipse#7932 on discord, (TheSpudguy)(@PurpleSunsetGames on github)
         // simulation.enableConstructMode();
-        simulation.makeTextLog(`<strong>underpass</strong> by <span class='color-var'>Eclipse#7932</span>`);
+        simulation.inGameConsole(`<strong>underpass</strong> by <span class='color-var'>Eclipse#7932</span>`);
 
         level.setPosToSpawn(0, -50); //normal spawn
         level.exit.x = 5500;
@@ -26358,7 +26356,7 @@ const level = {
         powerUps.addResearchToLevel(); //needs to run after mobs are spawned
     },
     tlinat() { // _Destined_ formerly Richard0820#2652
-        simulation.makeTextLog(`<strong>tlinat</strong> by <span class='color-var'>Richard0820</span>`);
+        simulation.inGameConsole(`<strong>tlinat</strong> by <span class='color-var'>Richard0820</span>`);
         simulation.fallHeight = 1 / 0, level.setPosToSpawn(0, -1e3), level.exit.x = 5100, level.exit.y = 3770, spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20), spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20), level.defaultZoom = 3000, simulation.zoomTransition(level.defaultZoom), document.body.style.backgroundColor = "#d8dadf";
         let e = 0,
             t = 0;
@@ -26498,7 +26496,7 @@ const level = {
                 n(o[l], e + 250 * l - Math.abs(1.5 * e), t)
             }
         }
-        simulation.makeTextLog(`<img src="https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/Hotpot-removed.png" width="100" height="100" style="background-image: radial-gradient(circle, gray, black, transparent)"><br>Look up<br><em>Walk right to tp to maze</em><br><b>Exit is at the bottom left</b>`), Matter.Body.scale(player.parts[3], 2, 2), level.custom = () => {
+        simulation.inGameConsole(`<img src="https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/Hotpot-removed.png" width="100" height="100" style="background-image: radial-gradient(circle, gray, black, transparent)"><br>Look up<br><em>Walk right to tp to maze</em><br><b>Exit is at the bottom left</b>`), Matter.Body.scale(player.parts[3], 2, 2), level.custom = () => {
             if (level.exit.drawAndCheck(), level.enter.draw(), player.position.y > 1e5 && Matter.Body.setPosition(player, {
                 x: 5100,
                 y: -5925
@@ -26508,7 +26506,7 @@ const level = {
                     y: -5925
                 }), e++;
                 for (let e = 0; e < map.length; e++) Math.random() < .75 && ghoster(map[e].position.x, map[e].position.y);
-                simulation.makeTextLog("Watch out for <b>ghosters</b><br>Peace ✌️")
+                simulation.inGameConsole("Watch out for <b>ghosters</b><br>Peace ✌️")
             }
             player.position.x > level.exit.x && player.position.x < level.exit.x + 100 && player.position.y > level.exit.y - 150 && player.position.y < level.exit.y - 0 && player.velocity.y < .15 && 0 == t && (t++, Matter.Body.scale(player.parts[3], .5, .5))
         }, level.customTopLayer = () => {
@@ -26581,7 +26579,7 @@ const level = {
     },
     ruins() { // by SiddhUPe
         // simulation.enableConstructMode()
-        simulation.makeTextLog(`<strong>ruins</strong> by <span class='color-var'>SiddhUPe</span>`);
+        simulation.inGameConsole(`<strong>ruins</strong> by <span class='color-var'>SiddhUPe</span>`);
 
         level.setPosToSpawn(0, -50); //normal spawn
         level.exit.x = 19531;
@@ -27662,7 +27660,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     ace() {
-        simulation.makeTextLog(`<strong>ace</strong> by <span class='color-var'>Richard0820</span>`);
+        simulation.inGameConsole(`<strong>ace</strong> by <span class='color-var'>Richard0820</span>`);
         let isDestroyed = false;
         const ace = {
             spawnOrbitals(who, radius, chance = Math.min(0.25 + simulation.difficulty * 0.005)) {
@@ -28935,7 +28933,7 @@ const level = {
         }
     },
     crimsonTowers() {
-        simulation.makeTextLog(`crimsonTowers by Richard0820. Thank you desboot for the video: <a href="https://www.youtube.com/watch?v=hkdY0mDF2SY&feature=youtu.be&ab_channel=DesBoot">Source</a>`)
+        simulation.inGameConsole(`crimsonTowers by Richard0820. Thank you desboot for the video: <a href="https://www.youtube.com/watch?v=hkdY0mDF2SY&feature=youtu.be&ab_channel=DesBoot">Source</a>`)
         const ace = {
             spawnOrbitals(who, radius, chance = Math.min(0.25 + simulation.difficulty * 0.005)) {
                 if (Math.random() < chance) {
@@ -30070,8 +30068,8 @@ const level = {
         level.exit.x = map[272].position.x;
     },
     LaunchSite() {
-        simulation.makeTextLog(`<strong>Launch Site</strong> by <span class='color-var'>Des Boot</span>`);
-        simulation.makeTextLog(`The rain stopped...`);
+        simulation.inGameConsole(`<strong>Launch Site</strong> by <span class='color-var'>Des Boot</span>`);
+        simulation.inGameConsole(`The rain stopped...`);
         level.setPosToSpawn(0, -50); //normal spawn
         const elevatortoggle = level.toggle(13650, 3000)
         let newMobsSpawned = false;
@@ -30486,7 +30484,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     shipwreck() {
-        simulation.makeTextLog(`<strong>shipwreck</strong> by <span class='color-var'>3xionDev</span>`);
+        simulation.inGameConsole(`<strong>shipwreck</strong> by <span class='color-var'>3xionDev</span>`);
         level.setPosToSpawn(0, -50); //normal spawn
         level.exit.x = 1500;
         level.exit.y = -1875;
@@ -30800,7 +30798,7 @@ const level = {
         level.customTopLayer = () => { };
     },
     unchartedCave() {
-        simulation.makeTextLog(`<strong>unchartedCave</strong> by <span class='color-var'>3xionDev</span>`);
+        simulation.inGameConsole(`<strong>unchartedCave</strong> by <span class='color-var'>3xionDev</span>`);
         level.setPosToSpawn(0, -50); //normal spawn
         level.exit.x = 20985;
         level.exit.y = 2816;
@@ -31211,7 +31209,7 @@ const level = {
         level.customTopLayer = () => { };
     },
     dojo() { // By weird_pusheen
-        simulation.makeTextLog(`<strong>dojo</strong> by <span class='color-var'>werid_pusheen</span>, fixed by <span class='color-var'>Cornbread 2100</span>`)
+        simulation.inGameConsole(`<strong>dojo</strong> by <span class='color-var'>werid_pusheen</span>, fixed by <span class='color-var'>Cornbread 2100</span>`)
         const vanishes = [];
         const smoofes = [];
         const leftRotor = level.rotor(-550, 900, 950, 25);
@@ -31661,7 +31659,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     arena() {
-        simulation.makeTextLog(`<strong>arena</strong> by <span class='color-var'>Whyisthisnotavalable</span>`)
+        simulation.inGameConsole(`<strong>arena</strong> by <span class='color-var'>Whyisthisnotavalable</span>`)
         let genisis, genisisJumpSensor, genisisBody, genisisHead, genisisHeadSensor, genisisBodySensor;
         let control = { left: false, right: false, up: false, down: false };
         const g = {
@@ -32235,7 +32233,7 @@ const level = {
                                 if (tech.isCollisionRealitySwitch && g.alive) {
                                     g.switchWorlds()
                                     simulation.trails()
-                                    simulation.makeTextLog(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
+                                    simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
                                 }
                                 if (tech.isPiezo) g.energy += 20.48;
                                 if (tech.isCouplingNoHit && g.coupling > 0) {
@@ -32706,10 +32704,10 @@ const level = {
             );
             b.guns = gunArray;
         } else {
-            simulation.makeTextLog(`Thank you for using my sword mod<br>I'll save you the trouble of killing genisis<br><div style="font-family: monospace;">g.<span style="color: crimson;">damage</span>(Infinity)</div>`);
+            simulation.inGameConsole(`Thank you for using my sword mod<br>I'll save you the trouble of killing genisis<br><div style="font-family: monospace;">g.<span style="color: crimson;">damage</span>(Infinity)</div>`);
             g.damage(Infinity);
         }
-        simulation.makeTextLog(`<strong>arena</strong> by <span class='color-var'>Richard0820</span>`);
+        simulation.inGameConsole(`<strong>arena</strong> by <span class='color-var'>Richard0820</span>`);
         let index = 0;
         let index2 = 0;
         let { sword: sword, bladeSegments: bladeSegments } = createSword();
@@ -32898,7 +32896,7 @@ const level = {
                     }
                 }
                 index2++;
-                setTimeout(() => { simulation.makeTextLog(`If you want to keep this sword, visit <a href="https://github.com/Whyisthisnotavalable/n-scythe">https://github.com/Whyisthisnotavalable/n-scythe</a>. The sword is there.`) }, 1000)
+                setTimeout(() => { simulation.inGameConsole(`If you want to keep this sword, visit <a href="https://github.com/Whyisthisnotavalable/n-scythe">https://github.com/Whyisthisnotavalable/n-scythe</a>. The sword is there.`) }, 1000)
             }
             for (let i = 0; i < bladeSegments.length; i++) {
                 const blade = bladeSegments[i];
@@ -33464,9 +33462,9 @@ const level = {
         }
     },
     soft() {
-        simulation.makeTextLog(`<img src="https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/Hotpot-removed.png" width="100" height="100" style="background-image: radial-gradient(circle, gray, black, transparent)">`);
-        simulation.makeTextLog(`<strong>soft</strong> by <span class='color-var'>Richard0820</span>`);
-        simulation.makeTextLog("<em>The lasers deal less damage the higher level you are</em>")
+        simulation.inGameConsole(`<img src="https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/Hotpot-removed.png" width="100" height="100" style="background-image: radial-gradient(circle, gray, black, transparent)">`);
+        simulation.inGameConsole(`<strong>soft</strong> by <span class='color-var'>Richard0820</span>`);
+        simulation.inGameConsole("<em>The lasers deal less damage the higher level you are</em>")
         const portals = [];
         portals.push(level.portal({
             x: -1525,
@@ -33943,7 +33941,7 @@ const level = {
                     soft.annihilate(clothArray[0]);
                     clothArray.splice(0, 1);
                 }, 1000); //prevents bugs
-                simulation.makeTextLog("Couldn't be so simple, could it?", 2000 * Math.random());
+                simulation.inGameConsole("Couldn't be so simple, could it?", 2000 * Math.random());
                 index1++;
             }
         };
@@ -34021,10 +34019,10 @@ const level = {
     },
     flappyGon() { //community map by digin
         level.announceMobTypes();
-        simulation.makeTextLog(`<strong>flappy n-gon</strong> by <span style="font-weight: bold;color: purple;">Digin</span>`);
-        setTimeout(() => { simulation.makeTextLog("<b>gravity</b> is a <b>choice</b>"); }, 1000);
-        setTimeout(() => { simulation.makeTextLog("everyone will fly"); }, 2000);
-        setTimeout(() => { simulation.makeTextLog("<b>jump from the post and find out</b>"); }, 3000);
+        simulation.inGameConsole(`<strong>flappy n-gon</strong> by <span style="font-weight: bold;color: purple;">Digin</span>`);
+        setTimeout(() => { simulation.inGameConsole("<b>gravity</b> is a <b>choice</b>"); }, 1000);
+        setTimeout(() => { simulation.inGameConsole("everyone will fly"); }, 2000);
+        setTimeout(() => { simulation.inGameConsole("<b>jump from the post and find out</b>"); }, 3000);
         level.setPosToSpawn(0, -50); //normal spawn
         level.exit.x = 8600;
         level.exit.y = -1100;
@@ -34100,9 +34098,9 @@ const level = {
     },
     rings() {
         level.announceMobTypes();
-        simulation.makeTextLog(`<strong>rings</strong> by <span style="font-weight: bold;color: purple;">ThatLittleFrog</span>`);
+        simulation.inGameConsole(`<strong>rings</strong> by <span style="font-weight: bold;color: purple;">ThatLittleFrog</span>`);
         setTimeout(() => {
-            simulation.makeTextLog("<b>go up</b>");
+            simulation.inGameConsole("<b>go up</b>");
         }, 2000);
         level.setPosToSpawn(0, -2000); // spawn high up so you can go to the bottom of the lowest ring without tripping the too-low reset
         level.exit.x = 0;
@@ -34213,7 +34211,7 @@ const level = {
         powerUps.addResearchToLevel();
     },
     trial() { // trial, collab between Cirryn and Tarantula Hawk
-        simulation.makeTextLog(`<strong>trial</strong> by <span class='color-var'>Cirryn and Tarantula Hawk</span>`);
+        simulation.inGameConsole(`<strong>trial</strong> by <span class='color-var'>Cirryn and Tarantula Hawk</span>`);
         level.setPosToSpawn(0, -50);
         level.exit.x = 4150;
         level.exit.y = -30;
@@ -34324,40 +34322,40 @@ const level = {
             door.draw();
             if (!button.isUp && !didTrialBegin) {
                 didTrialBegin = true;
-                simulation.makeTextLog('<strong>The Trial has begun.</strong>');
+                simulation.inGameConsole('<strong>The Trial has begun.</strong>');
 
                 setTimeout(() => {
-                    simulation.makeTextLog('<span style="color: purple;">first wave (domitable)</span>');
+                    simulation.inGameConsole('<span style="color: purple;">first wave (domitable)</span>');
                     wave(randomWave(2 + simulation.difficulty * 0.1, spawn.fullPickList));
                 }, 3000);
 
                 setTimeout(() => {
-                    simulation.makeTextLog('<span style="color: purple;">second wave (domitable)</span>');
+                    simulation.inGameConsole('<span style="color: purple;">second wave (domitable)</span>');
                     wave(randomWave(2 + simulation.difficulty * 0.1, spawn.fullPickList));
                 }, 13000);
 
                 setTimeout(() => {
-                    simulation.makeTextLog('<span style="color: purple;">third wave <strong>(indomitable)</strong></span>');
+                    simulation.inGameConsole('<span style="color: purple;">third wave <strong>(indomitable)</strong></span>');
                     wave(randomWave(4, ["assassin"]));
                 }, 23000);
 
                 setTimeout(() => {
-                    simulation.makeTextLog('<span style="color: purple;">fourth wave (domitable)</span>');
+                    simulation.inGameConsole('<span style="color: purple;">fourth wave (domitable)</span>');
                     wave(randomWave(4 + simulation.difficulty / 2, spawn.fullPickList));
                 }, 39000);
 
                 setTimeout(() => {
-                    simulation.makeTextLog('<span style="color: purple;">fifth wave (domitable)</span>');
+                    simulation.inGameConsole('<span style="color: purple;">fifth wave (domitable)</span>');
                     wave(randomWave(4 + simulation.difficulty / 2, spawn.fullPickList));
                 }, 49000);
 
                 setTimeout(() => {
-                    simulation.makeTextLog('<span style="color: purple;">sixth wave <strong>(indomitable)</strong></span>');
+                    simulation.inGameConsole('<span style="color: purple;">sixth wave <strong>(indomitable)</strong></span>');
                     wave(randomWave(7, ["mercenary"]));
                 }, 59000);
 
                 setTimeout(() => {
-                    simulation.makeTextLog('<span style="color: red;">seventh wave <strong>(boss)</strong></span>');
+                    simulation.inGameConsole('<span style="color: red;">seventh wave <strong>(boss)</strong></span>');
                     spawn.randomLevelBoss(700, -1000);
                     var mainBoss = mob[mob.length - 1];
                     mainBoss.oldOnDeath = mainBoss.onDeath;
