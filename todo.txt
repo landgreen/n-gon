@@ -1,37 +1,78 @@
 ******************************************************** NEXT PATCH **************************************************
 
-JUNK: wikipedia - After you get a new tech you have 7 seconds to study before a quiz, 4 research if you aces the quiz.
-  this code for this works 80% of the time every time
+difficulty
+  difficulty level 6 adds flat damage and damage taken
+  bonus tech no longer spawns on level 2 and 3 on difficulty level 6
+  at the end of subway you get 1 tech, but not on difficulty level 6
+  difficulty level 3 and 5 add a random constraint that changes each level
+constraints are effects that only last until the level ends
+  50% JUNK chance
+  4x shielded mob chance
+  power ups are sent to next level
+  +33% chance for mobs to respawn
+  -1 choice
+  2x ammo costs
+  duplication is set to zero
+  50% max energy
+  50% max health
+  bots follow slow
+  full damage taken after boss dies
+  0.1x damage after a power up
+  mob death heals mobs
+  mobs heal for your lost health
+  periodically spawn WIMPs
+ 
+exciton damage boost power up has a chance to spawn without the tech (~3%/mob)
+  damage boost has a unique gel/hair aura for each skin
+  damage boost timer no longer ticks with time dilation field
+JUNK tech: stationary - thrown blocks can't move, but they still have momentum
+added a classic n-gon link for the previous patch in settings
+  but images are disabled to save space
+on levels where you can fall endlessly, power ups will also fall endlessly
+  they no longer teleport to the exit, sorry
 
-renamed propagator->Verlet integration it's now a skin tech
-  1.6->3x damage
-  slightly increased the time skip amount
-on some skins the feet will hang lower while player is in the air
-on some skins the upper legs are skinnier
-mouse over on orbs for tech, field, and gun has a tooltip with text
-added keyword CSS style for "bot"
-added an aura around powerUpBoss so you can kinda see it inside walls
+Newton's 1st and 2nd laws are field tech, and they give twice the effect
+abelian group 4->3x damage while invulnerable
+bot fabrication price increases after 5->4 bots
+wikipedia 4->3 research per correct quiz
+upgraded sound bots fire fewer waves but do more damage per wave
+  not much changed except improved performance, I think
+incendiary ammunition drones explode when they run out of durability not on the first hit
+  this allows better synergy with other drone tech
+grappling hook retract momentum no longer scales with distance
+  this should give you more control
+pressing the 3rd button in factory will remove blocks resting on the second block
+  preventing an endless toggle
 
-quenching just gives max health from over healing instead of damaging you first
-depolarization does 0.5->0.4x damage when on cooldown
-many-worlds spawns a tech and also 3 coupling at the start of each new level
-dynamic equilibrium does 1.15x more damage and only stacks to 9->3
-orbital bots collide with a 1.2x larger range
-Zectron no longer drains energy when balls hit you, but the balls still stop
-supply chain just gives a gun and a flat 10 ammo
-
-polyurethane foam will only trigger up to 55 total foam per harpoon
-  to prevent a huge number of foam bubbles causing lag
-  no cap for super balls for now
-fixed bug with planned obsolescence + instant tech
-fixed bug with ice crystal nucleation
-applied science gives each gunTech with a short delay
-  this helps with sorting and maybe other rare bugs
-fixed bug with delivery drones and path integration
-you can no longer deflect snakeBoss, but it moves a bit slower
-
+bug fixes
+  fleas no longer die early after hitting a high health target only once
+  something with super ball density calculations for tech rebound
+  grabbing a big block can make grappling hook go flying
+    added 3 potential fixes, but the bug is too rare know if it's fixed
 
 ******************************************************** BUGS ********************************************************
+
+figure out why seeded random isn't making runs the same:
+  shuffle is being used for a wide variety of things that don't need a seeded random
+    make two shuffle functions?
+  check which of these is working
+    level order
+    is flipped
+    constraint order
+    mob type order
+    boss order
+    gun, field, tech options
+  make field options offered precalculated so it doesn't depend on player choices?
+  generate all constraints at the start of the game
+    doesn't seem to be determined by the seed...
+    display future constraints in pause menu?
+
+at start of level game go stuck in pause state
+  no crash or bug report
+  occur level 8
+  after 2 levels of sending power ups to next level
+  auto drones grabbed a power up and game froze while in power up mode
+  running code to exit pause kinda worked
 
 ants marching outline on splash screen doesn't sync right on safari
 
@@ -39,23 +80,69 @@ player can become crouched while not touching the ground if they exit the ground
 
 *********************************************************** TODO *****************************************************
 
+each difficulty setting adds a chance for a random effect
+  make some effects only possible on certain levels, or with certain bosses?
+  not implemented random constraint ideas________________________
+    if player takes too long on a level
+      spawn mobs at the end of player's history
+        give a warning before they spawn
+        black holes, sneakers, bullets
+    mob death spawns something
+      bullets
+    bosses heals nearby mobs
+    ammo power ups give 0.7x ammo
+    2x energy costs
+    0.5x energy regen from all sources
+    2x research costs
+    mobs slowly regen health
+    exit door takes 10x time to open,
+      and while door is opening (ghosters, suckers) attack?
+    can't pause while choosing tech, gun, field similar to eternalism
+    can't have more then 15 bullets
+    bots do 0.5x damage
+    remove 2 random tech and return them next level
+    too niche
+      player damage is 0.25x while player is invulnerable
+      all hazards: lasers and slime do 3x damage
+      player lasers and radiation do 0.5x damage
+      explosions do 0.5x damage
+      freeze effects last 0.25x time
+
+tech: - randomize constraints somehow
+    in pause interface or power up selection menu?
+    each time you research the current constraints also randomize?
+    only allowed if difficulty is high enough
+
+tech:  - when you get a bot, get a second bot
+
+tech:  - boost power ups also give 0.1x damage taken
+
 tech:  - tech have +3 choices to eject your tech
   <eject> tech name
     no description?
 
+copy negative-player as a boss?  or a JUNK tech?
+  code is in community map (not sure which)
+
 harpoon tech:  - after firing 4 harpoons your next harpoon has 4x damage
   need to track number fired
 
-JUNK tech - similar to cosmogonic myth, open and close tabs
-  after you learn a new tech open it's wiki and spawn a few research?
-  open the wiki for each tech you have,
-    tabs close after 1 minute, and you have to learn something and answer a prompt to get a reward
+tech:  - after killing a Boss
+  heal to full
+  gain 3x damage for the rest of the level
+
+tech: clicking on this tech in the pause menu will teleport you to the next level
 
 tech:   - instead of reeling in grappling hook teleport to the hook after releasing field button
   this might need another buff?
     give damage immunity after teleport for 1+ seconds to balance
 
 new level - rework testChamber
+
+skin with wheel instead of legs
+
+Boss (or mob) that quickly moves towards player, but they moves perpendicularly to player, like dodging
+  could respond to when player presses fire key or to when it takes damage
 
 new snakeBoss type that eats mobs
   each time it eats:
@@ -79,13 +166,6 @@ Boss mob - records the position of mobs every few cycles
     ghost can damage player, but doesn't have a matter.js object
   gives mobs short snake tails, like snakeBoss
   brings 1 mob back to life every few seconds
-
-
-merge multiple power ups of the same type if nearby
-  5-10 ammo, research, coupling can merge to form a slightly larger power up version
-    check for merger possibility every 60 seconds?
-    adjust mass spawns to just spawn larger power ups versions and change?
-      spawnDelay
 
 tech: atomic pile - lose 1 health if you are above the maximum energy
   generate energy for each nearby mob?
@@ -159,9 +239,6 @@ after picking up research gain ____
 
 tech: Energy generation increases with you velocity
   Newtons' 3rd law?
-
-after clicking on a new tech (or getting it in any way) animate adding the tech to your collection
-  fade in on right side text list?
 
 tech - getting caught in an explosion gives you _____
   damage for 10 seconds?
@@ -1310,6 +1387,9 @@ possible names for tech
   Coalescence - things merging together like clouds.  maybe mergin power ups?
   trihydrogen cation - common molecule in space, dark matter tech?
   superradiance - laser tech
+  cryocoolers - freezing effects
+  metaphysics - maybe this changes something deep and universal about physics?  not sure
+  cork - used as a heat shield for rockets
 
 ******************************************************* DESIGN ******************************************************
 

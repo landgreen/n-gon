@@ -36,29 +36,29 @@ const level = {
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("super balls") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("spores") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // tech.laserColor = "#fff"
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
             // b.guns[8].ammo = 100000000
             // requestAnimationFrame(() => { tech.giveTech("stimulated emission") });
-            // tech.giveTech("1st ionization energy")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("emergence")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("foam-bot")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Bitter electromagnet")
+            // tech.giveTech("Hilbert space")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("decoherence")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("mass-energy equivalence")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("depolarization")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("wikipedia") });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("field coupling") });
-            // for (let i = 0; i < 1; i++) tech.giveTech("Verlet integration")
+            // for (let i = 0; i < 1; i++) tech.giveTech("interest")
             // m.lastKillCycle = m.cycle
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(450, -50, "tech");
-            // for (let i = 0; i < 1; i++) powerUps.directSpawn(m.pos.x, m.pos.y - 50, "difficulty", false);
-            // spawn.mapRect(575, -700, 25, 425);  //block mob line of site on testing
-            // level.testing();
+            // for (let i = 0; i < 3; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 50, "boost", false);
+            // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
+            // level.satellite();
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
-            // for (let i = 0; i < 1; ++i) spawn.powerUpBoss(1900, -500)
+            // for (let i = 0; i < 1; ++i) spawn.revolutionBoss(1900, -500)
             // for (let i = 0; i < 3; i++) spawn.starter(1900, -500) //ghosters need to spawn after the map loads
 
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
@@ -96,10 +96,6 @@ const level = {
                 if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             }
         }
-        if (!simulation.isTraining) {
-            document.title = "n-gon: " + level.levelAnnounce();
-            simulation.inGameConsole(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
-        }
         simulation.setupCamera(player.position);
         simulation.setZoom();
         level.addToWorld(); //add bodies to game engine
@@ -133,6 +129,29 @@ const level = {
             powerUps.directSpawn(flip * localSettings.entanglement.position.x, localSettings.entanglement.position.y, "entanglement", false);
         }
         level.newLevelOrPhase()
+        if (!simulation.isTraining) {
+            simulation.inGameConsole(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
+            document.title = "n-gon: " + level.levelAnnounce();
+        }
+
+        level.setConstraints()
+        if (!localSettings.isHideHUD) {
+            requestAnimationFrame(() => {
+                //grow and get bright
+                document.getElementById("right-HUD-constraint").style.opacity = 1
+                document.getElementById("right-HUD-constraint").style.fontSize = "23px"
+                document.getElementById("right-HUD-constraint").style.top = simulation.difficultyMode > 4 ? "6px" : "9px"
+                setTimeout(() => {
+                    if (m.alive) {
+                        //fade to background
+                        document.getElementById("right-HUD-constraint").style.opacity = 0.35
+                        document.getElementById("right-HUD-constraint").style.fontSize = "20px"
+                        document.getElementById("right-HUD-constraint").style.top = "12px"
+                    }
+                }, 5000);
+            });
+        }
+
     },
     newLevelOrPhase() { //runs on each new level but also on final boss phases
         //used for generalist and pigeonhole principle
@@ -161,12 +180,23 @@ const level = {
         }
         if (tech.interestRate > 0) {
             const rate = ((level[level.levels[level.onLevel]].name === "final" || level[level.levels[level.onLevel]].name === "subway") ? 1 / 3 : 1) * tech.interestRate //this effect triggers extra times on these final levels
-            if (b.activeGun !== null && b.activeGun !== undefined && b.guns[b.activeGun].ammo !== Infinity) {
-                const ammoPerOrb = b.guns[b.activeGun].ammoPack
-                const a = Math.ceil(rate * b.guns[b.activeGun].ammo / ammoPerOrb)
-                powerUps.spawnDelay("ammo", a, 4);
-                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${a > 20 ? a + powerUps.orb.ammo(1) : powerUps.orb.ammo(a)}`)
+
+            let ammoSum = 0
+            for (let i = 0; i < b.inventory.length; i++) {
+                if (b.guns[b.inventory[i]].ammo !== Infinity) ammoSum += b.guns[b.inventory[i]].ammo / b.guns[b.inventory[i]].ammoPack
             }
+            if (ammoSum > 0 && b.inventory.length > 0) {
+                const amount = Math.ceil(rate * ammoSum / b.inventory.length)
+                powerUps.spawnDelay("ammo", amount, 4);
+                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${amount > 20 ? amount + powerUps.orb.ammo(1) : powerUps.orb.ammo(amount)}`)
+            }
+
+            // if (b.activeGun !== null && b.activeGun !== undefined && b.guns[b.activeGun].ammo !== Infinity) {
+            //     const ammoPerOrb = b.guns[b.activeGun].ammoPack
+            //     const a = Math.ceil(rate * b.guns[b.activeGun].ammo / ammoPerOrb)
+            //     powerUps.spawnDelay("ammo", a, 4);
+            //     simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${a > 20 ? a + powerUps.orb.ammo(1) : powerUps.orb.ammo(a)}`)
+            // }
             if (powerUps.research.count > 0) {
                 const r = Math.ceil(rate * powerUps.research.count)
                 simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-r'>research</span> <span class='color-symbol'>=</span> ${r > 20 ? r + powerUps.orb.research(1) : powerUps.orb.research(r)}`)
@@ -199,7 +229,6 @@ const level = {
                     index = i
                 }
             }
-            console.log(index)
             if (index) { //eject it
                 const effect = Math.pow(1.1, tech.tech[index].count)
                 simulation.inGameConsole(`<strong>${(effect).toFixed(2)}x</strong> <strong class='color-d'>damage</strong> <em>//from obsolescence</em>`, 360)
@@ -221,23 +250,6 @@ const level = {
         simulation.difficulty = level.levelsCleared * simulation.difficultyMode
         if (simulation.isTraining) simulation.difficulty = 1
 
-        //  old
-        // normal mode     m.dmgScale = 1, 0.81, 0.63, 0.5
-        //    why mode     m.dmgScale = 1, 0.56, 0.3, 0.17
-        //  new
-        //constraint 0,1   m.dmgScale = 1, 0.8, 0.6, 0.5
-        //constraint 2,3   m.dmgScale = 1,
-        //constraint 4,5   m.dmgScale = 1, 0.5, 0.3, 0.15
-
-        //  old
-        //normal:  simulation.dmgScale = 0.1, 0.5  ,1   ,1.5  ,2  ,2.5
-        //hard:    simulation.dmgScale = 0.1, 1    ,2   ,3    ,4  ,5
-        //why:     simulation.dmgScale = 0.1, 1.25 ,2.5 ,3.75 ,5  ,6.25
-        //  new
-        //0,1:     simulation.dmgScale = 0.1, 0.5  ,1   ,1.5  ,2  ,2.5
-        //2,3:     simulation.dmgScale = 0.1, 1    ,2   ,3    ,4  ,5
-        //3,4:     simulation.dmgScale = 0.1, 1.25 ,2.5 ,3.75 ,5  ,6.25
-
         let scale = 1
         if (simulation.difficultyMode > 3) {
             scale = 3
@@ -245,9 +257,12 @@ const level = {
             scale = 2
         }
         m.dmgScale = Math.pow(0.87, level.levelsCleared * scale)
-        simulation.dmgScale = Math.max(0.1, 0.22 * level.levelsCleared * scale) //damage done by mobs scales with total levels
+        simulation.dmgScale = Math.max(0.1, 0.22 * level.levelsCleared * scale) //damage done by mobs scales with total levels //a bigger number means the player takes more damage
+        if (simulation.difficultyMode === 6) {
+            m.dmgScale *= 0.5
+            simulation.dmgScale *= 2
+        }
 
-        //
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.043) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
         if (simulation.difficultyMode === 1) {
             simulation.accelScale = 1.1
@@ -257,17 +272,283 @@ const level = {
             simulation.CDScale = Math.max(0.15, Math.pow(0.964, simulation.difficulty))
         }
     },
-    // difficultyIncrease(num = 1) {
-    //     for (let i = 0; i < num; i++) {
-    //         simulation.difficulty++
-    //         m.dmgScale *= 0.89; //damage done by player decreases each level
-    //         if (simulation.accelScale < 6) simulation.accelScale *= 1.024 //mob acceleration increases each level
-    //         if (simulation.CDScale > 0.15) simulation.CDScale *= 0.964 //mob CD time decreases each level
-    //     }
-    //     simulation.dmgScale = Math.max(0.1, 0.25 * simulation.difficulty) //damage done by mobs scales with total levels
-    //     simulation.healScale = 1 / (1 + simulation.difficulty * 0.043) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
-    //     // console.log(`CD = ${simulation.CDScale}`)
-    // },
+    constraintIndex: 0,
+    setConstraints() {
+        //populate array with possible constraints and reset constraints
+        level.constraintDescription1 = level.constraintDescription2 = ""
+        const possible = []
+        for (let i = 0; i < level.constraint.length; i++) {
+            level.constraint[i].remove()
+            possible.push(i)
+        }
+        if (level.levels[level.onLevel] !== "null" && level.levels[level.onLevel] !== "initial" && !simulation.isTraining && m.alive && level.levelsCleared) {
+            if (simulation.difficultyMode > 2 && possible.length) {
+                //choose a random constraint from possible array and remove it from that array
+                // const index = possible[Math.floor(possible.length * Math.random())]
+                // const index = level.constraintIndex
+                // level.constraintIndex = 0 //REMOVE THIS FROM LIVE GAME, FOR TESTING ONLY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                level.constraint[level.constraintIndex].effect()
+                possible.splice(level.constraintIndex, 1)
+                //generate text to describe the active constraints for the pause menu
+                level.constraintDescription1 = level.constraint[level.constraintIndex].description
+                // simulation.inGameConsole(`<span class='constraint'>${level.constraint[level.constraintIndex].description}</span>`, 900);
+
+                level.constraintIndex++
+                if (level.constraintIndex > level.constraint.length - 1) level.constraintIndex = 0
+
+                if (simulation.difficultyMode > 4 && possible.length) {
+                    // const index = possible[Math.floor(possible.length * Math.random())]
+                    level.constraint[level.constraintIndex].effect()
+                    possible.splice(level.constraintIndex, 1)
+                    level.constraintDescription2 += level.constraint[level.constraintIndex].description
+                    // simulation.inGameConsole(`<span class='constraint'>${level.constraint[level.constraintIndex].description}</span>`, 900);
+
+                    level.constraintIndex++
+                    if (level.constraintIndex > level.constraint.length - 1) level.constraintIndex = 0
+                }
+                document.getElementById("right-HUD-constraint").style.display = "block";
+            } else {
+                document.getElementById("right-HUD-constraint").style.display = "none";
+            }
+        } else {
+            document.getElementById("right-HUD-constraint").style.display = "none";
+        }
+        //update HUD with constraints
+        let text = `${level.constraintDescription1}`
+        if (simulation.difficultyMode > 4 && level.constraintDescription2) {
+            text += `<br>${level.constraintDescription2}`
+        }
+        document.getElementById("right-HUD-constraint").innerHTML = text
+        if (level.constraintDescription1) {
+            if (level.constraintDescription2) {
+                document.getElementById("right-HUD").style.top = "80px";
+            } else {
+                document.getElementById("right-HUD").style.top = "57px"; //make room for tech list in "right-HUD"
+            }
+        } else {
+            document.getElementById("right-HUD").style.top = "15px";
+        }
+    },
+    constraintDescription1: "", //used in pause menu and console
+    constraintDescription2: "",
+    constraint: [
+        {
+            description: "0.5x max health",
+            effect() {
+                level.isReducedHealth = true
+                m.setMaxHealth()
+            },
+            remove() {
+                if (level.isReducedHealth) {
+                    level.isReducedHealth = false
+                    m.setMaxHealth()
+                    m.addHealth(level.reducedHealthLost);
+                    level.reducedHealthLost = 0
+                } else {
+                    level.isReducedHealth = false
+                }
+
+            }
+        },
+        {
+            description: "periodically spawn WIMPs",
+            effect() {
+                simulation.ephemera.push({
+                    name: "WIMPS",
+                    time: 0,
+                    levelName: level.levels[level.onLevel],
+                    do() {
+                        this.time++
+                        if (level.levels[level.onLevel] === this.levelName) {
+                            if (!(this.time % 900)) spawn.WIMP(level.enter.x, level.enter.y)
+                        } else {
+                            simulation.removeEphemera(this.name);
+                        }
+                    },
+                })
+            },
+            remove() {
+
+            }
+        },
+        {
+            description: "0.1x damage after getting power ups",
+            effect() {
+                level.isNoDamage = true
+                level.noDamageCycle = 0
+            },
+            remove() {
+                level.isNoDamage = false
+                level.noDamageCycle = 0
+            }
+        },
+        {
+            description: "mobs heal for your lost health",
+            effect() {
+                level.isMobHealPlayerDamage = true
+            },
+            remove() {
+                level.isMobHealPlayerDamage = false
+            }
+        },
+        {
+            description: "mob death heals nearby mobs",
+            effect() {
+                level.isMobDeathHeal = true
+            },
+            remove() {
+                level.isMobDeathHeal = false
+            }
+        },
+        {
+            description: "full damage taken after boss dies",
+            // description: "after boss dies damage taken = 1",
+            effect() {
+                level.noDefenseSetting = 1 //defense goes to zero once equal to 2
+            },
+            remove() {
+                level.noDefenseSetting = 0
+            }
+        },
+        {
+            description: "4x shielded mobs",
+            effect() {
+                level.isMobShields = true
+            },
+            remove() {
+                level.isMobShields = false
+            }
+        },
+        {
+            description: "50% JUNK chance",
+            effect() {
+                level.junkAdded = 0.5
+            },
+            remove() {
+                level.junkAdded = 0
+            }
+        },
+        {
+            description: "-1 choice",
+            effect() {
+                level.fewerChoices = true
+            },
+            remove() {
+                level.fewerChoices = false
+            }
+        },
+        {
+            description: "power ups in stasis",
+            effect() {
+                level.isNextLevelPowerUps = true
+                //remove all current power ups
+                for (let i = powerUp.length - 1; i > -1; i--) {
+                    powerUps.powerUpStorage.push({ name: powerUp[i].name, size: powerUp[i].size })
+                    Matter.Composite.remove(engine.world, powerUp[i]);
+                    powerUp.splice(i, 1)
+                }
+            },
+            remove() {
+                level.isNextLevelPowerUps = false
+                if (powerUps.powerUpStorage.length) {
+                    const delay = 5
+                    let i = 0
+                    let cycle = () => {
+                        if (powerUps.powerUpStorage.length && m.alive && powerUp.length < 300) {
+                            requestAnimationFrame(cycle);
+                            if (!simulation.paused && !simulation.isChoosing) {
+                                if (!(simulation.cycle % delay)) {
+                                    const where = { x: m.pos.x + 70 * (Math.random() - 0.5), y: m.pos.y + 70 * (Math.random() - 0.5) }
+                                    powerUps.directSpawn(where.x, where.y, powerUps.powerUpStorage[i].name, true, powerUps.powerUpStorage[i].size);
+                                    powerUps.powerUpStorage.splice(i, 1);
+                                }
+                            }
+                        } else {
+                            powerUps.powerUpStorage = []
+                        }
+                    }
+                    requestAnimationFrame(cycle);
+                }
+            }
+        },
+        {
+            description: "33% of mobs respawn",
+            effect() {
+                level.isMobRespawn = true
+            },
+            remove() {
+                level.isMobRespawn = false
+            }
+        },
+        {
+            description: "0 duplication",
+            effect() {
+                level.isNoDuplicate = true
+            },
+            remove() {
+                level.isNoDuplicate = false
+            }
+        },
+        {
+            description: "2x ammo cost",
+            effect() {
+                level.is2xAmmo = true
+            },
+            remove() {
+                level.is2xAmmo = false
+            }
+        },
+        {
+            description: "0.5x max energy",
+            effect() {
+                level.isReducedEnergy = true
+                m.setMaxEnergy()
+            },
+            remove() {
+                if (level.isReducedEnergy) {
+                    level.isReducedEnergy = false
+                    m.setMaxEnergy()
+                } else {
+                    level.isReducedEnergy = false
+                }
+
+            }
+        },
+        {
+            description: "slow bots",
+            effect() {
+                level.isSlowBots = true
+                b.clearPermanentBots();
+                b.respawnBots();
+            },
+            remove() {
+                if (level.isSlowBots) {
+                    level.isSlowBots = false
+                    b.clearPermanentBots();
+                    b.respawnBots();
+                } else {
+                    level.isSlowBots = false
+                }
+
+            }
+        },
+    ],
+    isMobShields: false,
+    junkAdded: 0,
+    isNextLevelPowerUps: false,
+    isMobRespawn: false,
+    fewerChoices: false,
+    isNoDuplicate: false,
+    is2xAmmo: false,
+    isReducedEnergy: false,
+    isSlowBots: false,
+    noDefenseSetting: 0,
+    isMobDeathHeal: false,
+    isMobHealPlayerDamage: false,
+    isNoDamage: false,
+    noDamageCycle: 0,
+    reducedHealthLost: 0,
+    isReducedHealth: false,
     levelAnnounce() {
         const cheating = simulation.isCheating ? "(testing)" : ""
         if (level.levelsCleared === 0) {
@@ -310,8 +591,6 @@ const level = {
             } else {
                 if (level.onLevel > level.levels.length - 1) level.onLevel = 0;
             }
-
-
             //reset lost tech display
             for (let i = 0; i < tech.tech.length; i++) {
                 if (tech.tech[i].isLost) tech.tech[i].isLost = false;
@@ -321,7 +600,8 @@ const level = {
             simulation.clearNow = true; //triggers in simulation.clearMap to remove all physics bodies and setup for new map
 
             //pop up new level info screen for a few seconds    //|| level.levels[level.onLevel] === "subway"
-            if (!localSettings.isHideHUD && !simulation.isCheating && m.alive && (level.levels[level.onLevel] === "final" || level.levels[level.onLevel] === "reactor")) {
+            if (!localSettings.isHideHUD && m.alive && (level.levels[level.onLevel] === "final" || level.levels[level.onLevel] === "reactor")) {
+                // if (!localSettings.isHideHUD && m.alive) {
                 //pause
                 if (!simulation.paused) {
                     simulation.paused = true;
@@ -330,7 +610,8 @@ const level = {
                 //build level info
                 document.getElementById("choose-grid").style.gridTemplateColumns = "250px"
                 //onclick="level.unPause()"
-                let text = `<div><div class="card-background" style="height:auto; border: none; background-color: transparent; line-height: 160%; background-color: var(--card-color); font-size: 1.15em;"> <div class="card-text">`
+                // if (level.levels[level.onLevel] === "final") { //|| level.levels[level.onLevel] === "reactor"
+                let text = `<div class="card-background" style="height:auto; border: none; background-color: transparent; line-height: 160%; background-color: var(--card-color); font-size: 1.15em;"> <div class="card-text">`
                 for (let i = 0; i < level.levels.length; i++) {
                     if (i < level.levelsCleared) {
                         text += `<div style="user-select: none;">${level.levels[i]}</div>`
@@ -345,14 +626,14 @@ const level = {
                         // text += `</div>`
                     }
                 }
-                text += `</div> </div></div>`
+                text += `</div></div>`
 
                 document.getElementById("choose-grid").innerHTML = text
                 //show level info
                 document.getElementById("choose-grid").style.opacity = "1"
                 document.getElementById("choose-grid").style.transitionDuration = "0.25s"; //how long is the fade in on
                 document.getElementById("choose-grid").style.visibility = "visible"
-
+                // }
                 simulation.draw.cons();
                 simulation.draw.body();
                 level.customTopLayer();
@@ -386,37 +667,6 @@ const level = {
                 }
                 requestAnimationFrame(newLevelDraw);
             }
-            // else {
-            //     //pause
-            //     if (!simulation.paused) {
-            //         simulation.paused = true;
-            //         simulation.isChoosing = true; //stops p from un pausing on key down
-            //     }
-            //     let count = countMax = simulation.testing ? 0 : 60
-            //     let newLevelDraw = () => {
-            //         count--
-            //         if (count > 0) {
-            //             requestAnimationFrame(newLevelDraw);
-            //         } else { //unpause
-            //             // if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 30; //player is immune to damage for 30 cycles
-            //             if (simulation.paused) requestAnimationFrame(cycle);
-            //             if (m.alive) simulation.paused = false;
-            //             simulation.isChoosing = false; //stops p from un pausing on key down
-            //             build.unPauseGrid()
-            //         }
-            //         //draw
-            //         simulation.wipe();
-            //         m.look();
-            //         simulation.camera();
-            //         const scale = 30
-            //         ctx.setLineDash([scale * (countMax - count), scale * count]);
-            //         simulation.draw.wireFrame();
-            //         ctx.setLineDash([]);
-            //         ctx.restore();
-            //         simulation.drawCursor();
-            //     }
-            //     requestAnimationFrame(newLevelDraw);
-            // }
         }
     },
     unPause() {
@@ -515,21 +765,6 @@ const level = {
         level.exit.x = -level.exit.x - 100 //minus the 100 because of the width of the graphic
     },
     exitCount: 0,
-    // playerExitCheck() {
-    //     if (
-    //         player.position.x > level.exit.x &&
-    //         player.position.x < level.exit.x + 100 &&
-    //         player.position.y > level.exit.y - 150 &&
-    //         player.position.y < level.exit.y - 40 &&
-    //         player.velocity.y < 0.1
-    //     ) {
-    //         level.exitCount++
-    //         if (level.exitCount > 120) {
-    //             level.exitCount = 0
-    //             level.nextLevel()
-    //         }
-    //     }
-    // },
     setPosToSpawn(xPos, yPos) {
         m.spawnPos.x = m.pos.x = xPos;
         m.spawnPos.y = m.pos.y = yPos;
@@ -626,7 +861,7 @@ const level = {
                         let text = `
                             <div class="choose-grid-module" id = "choose-training" style = "font-size: 1em; padding:10px;color:#333;">
                                 <h2 style="text-align: center;letter-spacing: 5px;">training</h2>
-                                Begin the <strong>guided tutorial</strong> that shows you how to use your ${powerUps.field()} and ${powerUps.orb.gun()}.
+                                Begin the <strong>guided tutorial</strong> that shows you how to use your ${powerUps.orb.field()} and ${powerUps.orb.gun()}.
                             </div>
                             <div class="choose-grid-module" id = "choose-unPause" style = "font-size: 1em; padding:10px;color:#333;">
                                 <h2 style="text-align: center; letter-spacing: 7px;">play</h2>
@@ -1296,10 +1531,7 @@ const level = {
                                     y: list[0].position.y
                                 })
                             }
-                            Matter.Body.setVelocity(list[0], {
-                                x: 0,
-                                y: 0
-                            });
+                            Matter.Body.setVelocity(list[0], { x: 0, y: 0 });
                         }
                     }
                     this.isUp = false;
@@ -2714,8 +2946,13 @@ const level = {
         spawn.mapRect(3000, -2800, 2600, 4600); //right wall
 
         // spawn.mapRect(-250, 0, 3600, 1800); //ground
-        spawn.mapRect(-250, 0, 2300, 1800); //split roof        
-        spawn.mapRect(2150, 0, 1200, 1800); //split roof
+        spawn.mapRect(-250, 0, 2300, 1800); //ground
+
+        Matter.Body.setVelocity(map[map.length - 1], {
+            x: 10,
+            y: -10
+        });
+        spawn.mapRect(2150, 0, 1200, 1800); //ground
         spawn.mapRect(2025, -3, 25, 15); //lip on power up chamber
         spawn.mapRect(2150, -3, 25, 15); //lip on power up chamber
 
@@ -2923,7 +3160,6 @@ const level = {
         level.exit.x = 0;
         level.exit.y = -9000;
         // spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump disabled for performance
-
         const stationWidth = 9000
         let stationNumber = 0;
         let stationCustom = () => { }
@@ -3004,6 +3240,7 @@ const level = {
                     if (isExitOpen) {
                         level.exit.x = x - 50;
                         level.exit.y = -260;
+                        if (simulation.difficultyMode < 6) powerUps.spawn(level.exit.x, level.exit.y - 100, "tech");
                     } else {
                         var gateButton = level.button(x - 62, -237, 125, false) //x, y, width = 126, isSpawnBase = true
                         gateButton.isUp = true
@@ -4178,8 +4415,7 @@ const level = {
                         // powerUps.spawnBossPowerUp(-3600, -100)
                         powerUps.spawn(-3650, -50, "tech")
                         powerUps.spawn(-3650, -150, "tech")
-                        powerUps.spawn(-3650, -300, "tech")
-                        // if (player.position.x < 2760 && player.position.x > 210) {}
+                        if (simulation.difficultyMode < 6) powerUps.spawn(-3650, -300, "tech")
                     }
                 }
             };
@@ -4669,6 +4905,23 @@ const level = {
                 if (!buttonLeft.isUp) {
                     setMoverDirection(7)
                     buttonRight.isUp = true //flip the other button up
+
+                    //remove any blocks on top of right button
+                    const badBlocks = Matter.Query.region(body, buttonRight)
+                    //figure out block's index
+                    for (let j = 0; j < badBlocks.length; j++) {
+                        let index = null
+                        for (let i = 0; i < body.length; i++) {
+                            if (badBlocks[j] === body[i]) index = i
+                        }
+                        //remove block
+                        console.log(index, j)
+                        if (index) {
+                            Matter.Composite.remove(engine.world, badBlocks[j]);
+                            body.splice(index, 1);
+                        }
+                    }
+
                 }
             } else if (buttonRight.isUp) {
                 buttonRight.query();
@@ -4690,7 +4943,7 @@ const level = {
                 }
             }
 
-            if (button1.isUp) {
+            if (button1.isUp) { //opens up secondary zone
                 button1.query();
                 if (!button1.isUp) {
                     isPowerLeft = false
@@ -5375,7 +5628,7 @@ const level = {
                     powerUps.directSpawn(x + 998, y - 333, "tech", false);
                 }
                 const powerUp1 = powerUp[powerUp.length - 1]
-                powerUp1.holdPosition = { x: powerUp1.position.x, y: powerUp1.position.y }
+                if (powerUp1) powerUp1.holdPosition = { x: powerUp1.position.x, y: powerUp1.position.y }
                 let isSpawnedMobs = false
                 doCustom.push(
                     () => {
@@ -5384,7 +5637,7 @@ const level = {
                         // if (!isInRoom && m.pos.x > x - 100 && m.pos.x < x + 2000 && m.pos.y > y - 1300 && m.pos.y < y) { //is player inside this room?
                         //     isInRoom = true
                         // } else 
-                        if (powerUp1.velocity.y !== 0) { //don't run this code if power up is gone //hack:  powerUp1.velocity.y !== 0 seems to only be true if the power up up doesn't exist and is no longer being affected by gravity
+                        if (powerUp1 && powerUp1.velocity.y !== 0) { //don't run this code if power up is gone //hack:  powerUp1.velocity.y !== 0 seems to only be true if the power up doesn't exist and is no longer being affected by gravity
                             ctx.strokeStyle = "#f0f"
                             ctx.lineWidth = 2;
                             if (Vector.magnitudeSquared(Vector.sub(m.pos, powerUp1.position)) < 90000) { //zone radius is 300
@@ -5446,10 +5699,7 @@ const level = {
                                 x: powerUp1.holdPosition.x + 4 * Math.random(), //1300 -2
                                 y: powerUp1.holdPosition.y + 4 * Math.random() //335 -2
                             });
-                            Matter.Body.setVelocity(powerUp1, {
-                                x: 0,
-                                y: 0
-                            });
+                            Matter.Body.setVelocity(powerUp1, { x: 0, y: 0 });
                         } else if (!isSpawnedMobs) {
                             isSpawnedMobs = true
                             if (chamberY === -650) { //lower chamber
@@ -7226,7 +7476,7 @@ const level = {
     },
     rooftops() {
         level.announceMobTypes()
-        level.fallMode = "start";
+
         // level.fallPosition = { x: 5000, y:-4000}
         const elevator = level.elevator(1450, -990, 235, 45, -2000)
         const boost1 = level.boost(4950, 0, 1100)
@@ -7267,6 +7517,9 @@ const level = {
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#dcdcde";
 
+
+
+        // level.fallMode = "start";
         let isBackwards = false
         if (Math.random() < 0.75) {
             //normal direction start in top left
@@ -7409,6 +7662,12 @@ const level = {
                     ctx.fillRect(650 - 440, -2300, 440, 300)
                 }
             };
+        }
+        level.fallMode = "position"; //must set level.fallModeBounds in this mode to prevent player getting stuck left or right
+        if (level.enter.x > level.exit.x) {
+            level.fallModeBounds = { left: level.exit.x, right: level.enter.x } //used with level.fallMode = "position";
+        } else {
+            level.fallModeBounds = { left: level.enter.x, right: level.exit.x } //used with level.fallMode = "position";
         }
     },
     aerie() {
@@ -10318,8 +10577,8 @@ const level = {
     },
     vats() { // Made by Dablux#6610 on Discord
         simulation.inGameConsole(`<strong>vats</strong> by <span class='color-var'>Dablux</span>`);
-
-        simulation.zoomScale = 1500;
+        level.defaultZoom = 1500
+        simulation.zoomTransition(level.defaultZoom)
         level.setPosToSpawn(4400, -1060)
         spawn.mapRect(level.enter.x, level.enter.y + 30, 100, 20)
         level.exit.x = 3900;
@@ -11481,8 +11740,8 @@ const level = {
         let isButtonTapped = false;
 
         // if (b.inventory.length < 5) powerUps.spawn(3800, -3200, "gun");
-        powerUps.spawn(3900, -3100, "heal", true, null, 30);
-        powerUps.spawn(3900, -3100, "heal", true, null, 30);
+        powerUps.spawn(3900, -3100, "heal", true, 30);
+        powerUps.spawn(3900, -3100, "heal", true, 30);
 
         // path to the third room
         spawn.mapRect(2000, -1850, 50, 200);
@@ -12445,7 +12704,7 @@ const level = {
                 // applying forces to player doesn't seem to work inside this method, not sure why
                 powerUps.spawn(this.position.x + 20, this.position.y, "ammo");
                 if (Math.random() > 0.5) powerUps.spawn(this.position.x, this.position.y, "ammo");
-                if (Math.random() > 0.3) powerUps.spawn(this.position.x, this.position.y, "heal", true, null, 30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
+                if (Math.random() > 0.3) powerUps.spawn(this.position.x, this.position.y, "heal", true, 30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
             };
             me.damageReduction = 0.25
             me.do = function () {
@@ -12548,7 +12807,7 @@ const level = {
             me.onDeath = function () {
                 powerUps.spawn(this.position.x + 20, this.position.y, "ammo");
                 if (Math.random() > 0.5) powerUps.spawn(this.position.x, this.position.y, "ammo");
-                if (Math.random() > 0.3) powerUps.spawn(this.position.x, this.position.y, "heal", true, null, 30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
+                if (Math.random() > 0.3) powerUps.spawn(this.position.x, this.position.y, "heal", true, 30 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals) * Math.sqrt(0.1 + Math.random() * 0.5));
             };
             me.damageReduction = 0.25
             me.do = function () {
@@ -13380,8 +13639,8 @@ const level = {
                     relocateWIMPs(level.exit.x, level.exit.y);
                     relocateTo(50, -2050);
                     simulation.fallHeight = -1000;
-                    // simulation.setZoom(1800);
-                    simulation.zoomTransition(1800)
+                    level.defaultZoom = 1800
+                    simulation.zoomTransition(level.defaultZoom)
 
                     templePlayer.startAnim = -1;
                     templePlayer.drawExit = false;
@@ -34012,7 +34271,7 @@ const level = {
 
         powerUps.addResearchToLevel()
         powerUps.directSpawn(-775, 125, "tech");
-        powerUp[powerUp.length - 1].collisionFilter.mask = cat.map | cat.body | cat.powerUp
+        if (!level.isNextLevelPowerUps && powerUp[powerUp.length - 1]) powerUp[powerUp.length - 1].collisionFilter.mask = cat.map | cat.body | cat.powerUp
         spawn.bodyRect(-875, 75, 25, 100);
         let hardBody = body[body.length - 1];
         hardBody.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.powerUp

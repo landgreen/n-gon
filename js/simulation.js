@@ -419,15 +419,6 @@ const simulation = {
         simulation.boldActiveGunHUD();
     },
     updateTechHUD() {
-
-        // tech.tech.sort((a, b) => {
-        //     console.log(a.cycle, b.cycle)
-        //     if (a.cycle === undefined && b.cycle !== undefined) return -1;
-        //     if (a.cycle !== undefined && b.cycle === undefined) return 1;
-        //     if (a.cycle === undefined && b.cycle === undefined) return 0;
-        //     if (a.cycle !== b.cycle) return a.cycle - b.cycle;
-        // });
-
         let text = ""
         for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
             if (tech.tech[i].isLost) {
@@ -436,21 +427,55 @@ const simulation = {
             } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
                 if (text) text += "<br>" //add a new line, but not on the first line
                 text += tech.tech[i].name
-                // if (tech.tech[i].nameInfo) {
-                //     text += tech.tech[i].nameInfo
-                //     tech.tech[i].addNameInfo();
-                // }
                 if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
             }
         }
-        document.getElementById("tech").innerHTML = text
+        document.getElementById("right-HUD").innerHTML = text
+
+
+        // let text = ""
+        // if (simulation.difficultyMode > 2 && level.constraintDescription1) {
+        //     text += `<span class='constraint'>${level.constraintDescription1}</span>`
+        //     // text += `${level.constraintDescription1}`
+        // }
+        // if (simulation.difficultyMode > 4 && level.constraintDescription2) {
+        //     text += `<br><span class='constraint'>${level.constraintDescription2}</span>`
+        // }
+        // for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
+        //     if (tech.tech[i].isLost) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
+        //     } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += tech.tech[i].name
+        //         if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
+        //     }
+        // }
+        // document.getElementById("right-HUD").innerHTML = text
+
+        // let constraints = ""
+        // if (simulation.difficultyMode > 2 && level.constraintDescription1) {
+        //     constraints += `<span class='constraint' style="opacity: 0.35;">${level.constraintDescription1}</span>`
+        //     // text += `${level.constraintDescription1}`
+        // }
+        // if (simulation.difficultyMode > 4 && level.constraintDescription2) {
+        //     constraints += `<br><span class='constraint' style="opacity: 0.35;">${level.constraintDescription2}</span>`
+        // }
+        // let text = ""
+        // for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
+        //     if (tech.tech[i].isLost) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
+        //     } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += tech.tech[i].name
+        //         if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
+        //     }
+        // }
+        // document.getElementById("right-HUD").innerHTML = constraints + `<div class="right-HUD-tech">` + text + `</div>`
     },
     lastLogTime: 0,
     isTextLogOpen: true,
-    // <!-- <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
-    // <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#7ce" stroke="none" /> -->
-    // SVGleftMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#149" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
-    // SVGrightMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#0cf" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
     inGameConsole(text, time = 240) {
         if (!localSettings.isHideHUD && simulation.isTextLogOpen && !build.isExperimentSelection) {
             if (simulation.lastLogTime > m.cycle) { //if there is an older message
@@ -757,11 +782,11 @@ const simulation = {
         document.getElementById("health").style.display = "inline"
         document.getElementById("health-bg").style.display = "inline";
         if (!localSettings.isHideHUD) {
-            document.getElementById("tech").style.display = "inline"
+            document.getElementById("right-HUD").style.display = "inline"
             document.getElementById("defense-bar").style.display = "inline"
             document.getElementById("damage-bar").style.display = "inline"
         } else {
-            document.getElementById("tech").style.display = "none"
+            document.getElementById("right-HUD").style.display = "none"
             document.getElementById("defense-bar").style.display = "none"
             document.getElementById("damage-bar").style.display = "none"
         }
@@ -787,10 +812,11 @@ const simulation = {
         } else {
             Composite.add(engine.world, [player])
         }
+        shuffle(level.constraint)
         level.populateLevels()
-
         input.endKeySensing();
         simulation.ephemera = []
+        powerUps.powerUpStorage = []
         tech.setupAllTech(); //sets tech to default values
         b.resetAllGuns();
         tech.duplication = 0;
@@ -843,6 +869,7 @@ const simulation = {
         level.onLevel = 0;
         level.levelsCleared = 0;
         level.updateDifficulty()
+        // level.setConstraints()
 
         simulation.clearNow = true;
         document.getElementById("text-log").style.display = "none"
@@ -948,7 +975,7 @@ const simulation = {
                                 },
                             })
                             const before = { x: player.position.x, y: player.position.y, }
-                            let posXClamped = Math.min(Math.max(level.fallModeBounds.left, player.position.x), level.fallModeBounds.right)
+                            const posXClamped = Math.min(Math.max(level.fallModeBounds.left, player.position.x), level.fallModeBounds.right)
                             Matter.Body.setPosition(player, { x: posXClamped, y: level.enter.y - 4000 });
 
                             // translate camera smoothly to preserve illusion to endless fall
@@ -1042,7 +1069,6 @@ const simulation = {
                                 },
                             })
                         }
-
                         if (tech.isZeno) {
                             if (tech.isEnergyHealth) {
                                 m.energy *= 0.95
@@ -1054,28 +1080,41 @@ const simulation = {
                         }
                         if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
 
-                        fallCheck = function (who, save = false) {
-                            let i = who.length;
-                            while (i--) {
-                                if (who[i].position.y > simulation.fallHeight) {
-                                    if (save) {
-                                        Matter.Body.setVelocity(who[i], { x: 0, y: 0 });
-                                        Matter.Body.setPosition(who[i], {
-                                            x: level.exit.x + 30 * (Math.random() - 0.5),
-                                            y: level.exit.y + 30 * (Math.random() - 0.5)
-                                        });
-                                    } else {
-                                        Matter.Composite.remove(engine.world, who[i]);
-                                        who.splice(i, 1);
-                                    }
+
+
+                        let i = body.length;
+                        while (i--) {
+                            if (body[i].position.y > simulation.fallHeight) {
+                                Matter.Composite.remove(engine.world, body[i]);
+                                body.splice(i, 1);
+                            }
+                        }
+                        i = powerUp.length
+                        while (i--) {
+                            if (powerUp[i].position.y > simulation.fallHeight) {
+                                Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 });
+                                if (level.fallMode === "position") {
+                                    const posXClamped = Math.min(Math.max(level.fallModeBounds.left, powerUp[i].position.x), level.fallModeBounds.right)
+                                    Matter.Body.setPosition(powerUp[i], { x: posXClamped, y: level.enter.y - 3000 });
+                                } else {
+                                    Matter.Body.setPosition(powerUp[i], {
+                                        x: level.exit.x + 30 * (Math.random() - 0.5),
+                                        y: level.exit.y + 30 * (Math.random() - 0.5)
+                                    });
                                 }
                             }
-                        };
-                        fallCheck(body);
-                        fallCheck(powerUp, true);
-                        let i = mob.length;
+                        }
+                        i = mob.length;
                         while (i--) {
-                            if (mob[i].position.y > simulation.fallHeight) mob[i].death();
+                            if (mob[i].position.y > simulation.fallHeight) {
+                                if (mob[i].isBoss && level.fallMode === "position") {
+                                    Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
+                                    const posXClamped = Math.min(Math.max(level.fallModeBounds.left, mob[i].position.x), level.fallModeBounds.right)
+                                    Matter.Body.setPosition(mob[i], { x: posXClamped, y: level.enter.y - 3000 });
+                                } else {
+                                    mob[i].death();
+                                }
+                            }
                         }
 
                     }

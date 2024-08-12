@@ -443,7 +443,7 @@ const build = {
         build.generatePauseLeft() //makes the left side of the pause menu with the tech
         build.generatePauseRight() //makes the right side of the pause menu with the tech
         // build.sortTech('') //sorts tech into the order the player got them using tech.tech[i].cycle = m.cycle
-        document.getElementById("tech").style.display = "none"
+        document.getElementById("right-HUD").style.display = "none"
         document.getElementById("guns").style.display = "none"
         document.getElementById("field").style.display = "none"
         document.getElementById("health").style.display = "none"
@@ -496,7 +496,7 @@ const build = {
 <span style="float: right;">mass ${player.mass.toFixed(1)}</span>
 ${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
 <br><strong class='color-dup'>duplication</strong> ${(tech.duplicationChance() * 100).toFixed(0)}%
-<span style="float: right;"><strong class='color-junk'>JUNK</strong> ${(100 * tech.junkChance).toFixed(0)}%</span>
+<span style="float: right;"><strong class='color-junk'>JUNK</strong> ${(100 * (tech.junkChance + level.junkAdded)).toFixed(0)}%</span>
 ${botText}
 <br>
 <br> ${level.levelAnnounce()}
@@ -518,15 +518,16 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 <details id="difficulty-parameters-details" style="padding: 0 8px;">
 <summary>difficulty parameters</summary>
 <div class="pause-details">
-        ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
-        ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>-5</strong> initial <strong>power ups</strong><br><strong>faster</strong> mobs and <strong>more</strong> mobs</div>` : " "}
-        ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
-        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row"><strong>+1</strong> boss per level<br><strong>-1</strong> ${powerUps.orb.tech()} per boss</div>` : " "}
-        ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong> done per level<br><strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
-        ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>3x</strong> chance for <strong>shielded</strong> mobs<br><strong>-3</strong> initial power ups</div>` : " "}
+        ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.2x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> boss on each level</div>` : " "}
+        ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>more</strong> mob per level<br><strong>faster</strong> mobs per level</div>` : " "}
+        ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.2x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> random <strong class="constraint">constraint</strong> on each level</div>` : " "}
+        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row"><strong>+1</strong> boss on each level<br>bosses spawn <strong>1</strong> fewer ${powerUps.orb.tech()}</div>` : " "}
+        ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.2x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> random <strong class="constraint">constraint</strong> on each level</div>` : " "}
+        ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> initial <strong class='color-d'>damage</strong><br><strong>2x</strong> initial <strong class='color-defense'>damage taken</strong></div>` : " "}        
 </div>
 </details>
-</div>`
+${simulation.difficultyMode > 2 ? `<details id="constraints-details" style="padding: 0 8px;"><summary>active constraints</summary><div class="pause-details"><span class="constraint">${level.constraintDescription1}<br>${level.constraintDescription2}</span></div></details>` : ""}
+ </div>`
         if (!localSettings.isHideHUD) text += `<div class="pause-grid-module card-background" style="height:auto;">
 <details id = "console-log-details" style="padding: 0 8px;">
 <summary>console log</summary>
@@ -577,6 +578,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
                 document.getElementById("simulation-variables-details").open = localSettings.pauseMenuDetailsOpen[0]
                 document.getElementById("difficulty-parameters-details").open = localSettings.pauseMenuDetailsOpen[1]
                 document.getElementById("console-log-details").open = localSettings.pauseMenuDetailsOpen[2]
+                if (document.getElementById("constraints-details")) document.getElementById("constraints-details").open = localSettings.pauseMenuDetailsOpen[3]
             }
         });
     },
@@ -742,6 +744,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             if (document.getElementById("simulation-variables-details")) localSettings.pauseMenuDetailsOpen[0] = document.getElementById("simulation-variables-details").open
             if (document.getElementById("difficulty-parameters-details")) localSettings.pauseMenuDetailsOpen[1] = document.getElementById("difficulty-parameters-details").open
             if (document.getElementById("console-log-details")) localSettings.pauseMenuDetailsOpen[2] = document.getElementById("console-log-details").open
+            if (document.getElementById("constraints-details")) localSettings.pauseMenuDetailsOpen[3] = document.getElementById("constraints-details").open
             localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         }
 
@@ -755,7 +758,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
             document.getElementById("health-bg").style.display = "inline"
         }
         if (!localSettings.isHideHUD) {
-            document.getElementById("tech").style.display = "inline"
+            document.getElementById("right-HUD").style.display = "inline"
             document.getElementById("defense-bar").style.display = "inline"
             document.getElementById("damage-bar").style.display = "inline"
         }
@@ -1404,7 +1407,6 @@ window.addEventListener("keydown", function (event) {
             simulation.previousGun();
             break
         case input.key.pause:
-
             if (input.isPauseKeyReady && m.alive && !build.isExperimentSelection) {
                 input.isPauseKeyReady = false
                 setTimeout(function () { input.isPauseKeyReady = true }, 300);
@@ -1464,7 +1466,7 @@ window.addEventListener("keydown", function (event) {
             break
         case input.key.testing:
             if (m.alive && localSettings.loreCount > 0 && !simulation.paused && !build.isExperimentSelection) {
-                if (simulation.difficultyMode > 4) {
+                if (simulation.difficultyMode > 5) {
                     simulation.inGameConsole("<em>testing mode disabled for this difficulty</em>");
                     break
                 }
@@ -1686,7 +1688,7 @@ window.addEventListener("keydown", function (event) {
             case "l":
                 document.getElementById("field").style.display = "none"
                 document.getElementById("guns").style.display = "none"
-                document.getElementById("tech").style.display = "none"
+                document.getElementById("right-HUD").style.display = "none"
                 break
         }
     }
@@ -1841,7 +1843,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     lore.setTechGoal()
 
     if (localSettings.pauseMenuDetailsOpen === undefined) {
-        localSettings.pauseMenuDetailsOpen = [true, false, false]
+        localSettings.pauseMenuDetailsOpen = [true, false, false, true]
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     }
 } else {
@@ -1865,7 +1867,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         key: undefined,
         isHideImages: true, //default to hide images
         isHideHUD: false,
-        pauseMenuDetailsOpen: [true, false, false]
+        pauseMenuDetailsOpen: [true, false, false, true]
     };
     input.setDefault()
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage

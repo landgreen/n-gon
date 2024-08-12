@@ -114,7 +114,7 @@ const spawn = {
         }
     },
     secondaryBossChance(x, y) {
-        if (simulation.difficultyMode > 2 && level.levelsCleared > 2) {
+        if (simulation.difficultyMode > 3 && level.levelsCleared > 1) {
             spawn.randomLevelBoss(x, y);
             powerUps.directSpawn(x - 30, y, "ammo");
             powerUps.directSpawn(x + 30, y, "ammo");
@@ -1014,7 +1014,7 @@ const spawn = {
                                 return
                             }
                         }
-                        if (simulation.testing || simulation.difficultyMode > 4) {
+                        if (simulation.testing || simulation.difficultyMode > 5) {
                             unlockExit()
                             setTimeout(function () {
                                 simulation.inGameConsole(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
@@ -2347,7 +2347,7 @@ const spawn = {
                 ctx.fill();
             }
         }
-        if (simulation.difficultyMode === 6) spawn.shield(me, x, y);
+        if (level.isMobShields) spawn.shield(me, x, y);
     },
     // timeBoss(x, y, radius = 25) {
     //     mobs.spawn(x, y, 12, radius, "#000");
@@ -7726,7 +7726,7 @@ const spawn = {
         };
     },
     //chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2) + tech.duplicationChance()
-    shield(target, x, y, chance = (simulation.difficultyMode === 6 ? 3 : 1) * Math.min(0.02 + simulation.difficulty * 0.005, 0.2)) {
+    shield(target, x, y, chance = (level.isMobShields ? 3.25 : 1) * Math.min(0.02 + simulation.difficulty * 0.005, 0.2)) {
         if (this.allowShields && Math.random() < chance) {
             mobs.spawn(x, y, 9, target.radius + 30, "rgba(220,220,255,0.9)");
             let me = mob[mob.length - 1];
@@ -8086,7 +8086,7 @@ const spawn = {
             if (this.freeOfWires) {
                 this.gravity();
             } else {
-                if (m.pos.x > breakingPoint) {
+                if (m.pos.x > breakingPoint || simulation.isCheating) {
                     this.freeOfWires = true;
                     this.fill = "#000"
                     this.force.x += -0.003;
@@ -8158,7 +8158,7 @@ const spawn = {
             if (this.freeOfWires) {
                 this.gravity();
             } else {
-                if (m.pos.x > breakingPoint) {
+                if (m.pos.x > breakingPoint || simulation.isCheating) {
                     this.freeOfWires = true;
                     this.force.x -= 0.0004;
                     this.fill = "#222";
@@ -8210,7 +8210,7 @@ const spawn = {
             if (this.freeOfWires) {
                 this.gravity();
             } else {
-                if (m.pos.x > breakingPoint) {
+                if (m.pos.x > breakingPoint || simulation.isCheating) {
                     this.freeOfWires = true;
                     this.force.x += -0.0003;
                     this.fill = "#333";
@@ -8261,7 +8261,7 @@ const spawn = {
             if (this.freeOfWires) {
                 this.gravity();
             } else {
-                if (m.pos.x > breakingPoint) {
+                if (m.pos.x > breakingPoint || simulation.isCheating) {
                     this.freeOfWires = true;
                     this.force.x += -0.0006;
                     this.fill = "#111";
@@ -8312,7 +8312,7 @@ const spawn = {
             if (this.freeOfWires) {
                 this.gravity();
             } else {
-                if (m.pos.x > breakingPoint) {
+                if (m.pos.x > breakingPoint || simulation.isCheating) {
                     this.freeOfWires = true;
                     this.force.x += -0.0005;
                     this.fill = "#222";

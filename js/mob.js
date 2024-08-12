@@ -794,27 +794,6 @@ const mobs = {
                     }
                 }
             },
-            // invulnerability() {
-            //     if (this.isInvulnerable) {
-            //         if (this.invulnerabilityCountDown > 0) {
-            //             this.invulnerabilityCountDown--
-            //             //graphics //draw a super shield?
-            //             ctx.beginPath();
-            //             let vertices = this.vertices;
-            //             ctx.moveTo(vertices[0].x, vertices[0].y);
-            //             for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
-            //             ctx.lineTo(vertices[0].x, vertices[0].y);
-            //             ctx.lineWidth = 20;
-            //             // ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
-            //             // ctx.fill();
-            //             ctx.strokeStyle = "rgba(255,255,255,0.4)";
-            //             ctx.stroke();
-            //         } else {
-            //             this.isInvulnerable = false
-            //             this.damageReduction = this.startingDamageReduction
-            //         }
-            //     }
-            // },
             grow() {
                 if (this.seePlayer.recall) {
                     if (this.radius < 80) {
@@ -926,10 +905,7 @@ const mobs = {
                     spawn.bomb(this.position.x, this.position.y + this.radius * 0.7, 9 + Math.ceil(this.radius / 15), 5);
                     //add spin and speed
                     Matter.Body.setAngularVelocity(mob[mob.length - 1], (Math.random() - 0.5) * 0.5);
-                    Matter.Body.setVelocity(mob[mob.length - 1], {
-                        x: this.velocity.x,
-                        y: this.velocity.y
-                    });
+                    Matter.Body.setVelocity(mob[mob.length - 1], { x: this.velocity.x, y: this.velocity.y });
                     //spin for mob as well
                     Matter.Body.setAngularVelocity(this, (Math.random() - 0.5) * 0.25);
                 }
@@ -1164,11 +1140,22 @@ const mobs = {
                 // console.log(this.shieldCount)
 
                 if (this.isDropPowerUp) {
-                    // if (true) {
-                    //     //killing a mob heals for the last damage you took
-
-
-                    // }
+                    if (level.isMobDeathHeal) {
+                        for (let i = 0; i < mob.length; i++) {
+                            if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 1000000 && mob[i].alive) { //1000
+                                if (mob[i].health < 1) {
+                                    mob[i].health = 1
+                                    simulation.drawList.push({
+                                        x: mob[i].position.x,
+                                        y: mob[i].position.y,
+                                        radius: mob[i].radius + 20,
+                                        color: "rgba(0,255,100,0.5)",
+                                        time: 10
+                                    });
+                                }
+                            }
+                        }
+                    }
                     if (this.isSoonZombie) { //spawn zombie on death
                         this.leaveBody = false;
                         let count = 5 //delay spawn cycles
@@ -1197,6 +1184,34 @@ const mobs = {
                                 y: this.velocity.x + (Math.random() - 0.5) * 10
                             });
                         }
+                    }
+                    if (level.isMobRespawn && !this.isBoss && 0.33 > Math.random()) {
+                        simulation.drawList.push({
+                            x: this.position.x,
+                            y: this.position.y,
+                            radius: 30,
+                            color: `#fff`,
+                            time: 20
+                        });
+                        simulation.drawList.push({
+                            x: this.position.x,
+                            y: this.position.y,
+                            radius: 20,
+                            color: `#fff`,
+                            time: 40
+                        });
+                        simulation.drawList.push({
+                            x: this.position.x,
+                            y: this.position.y,
+                            radius: 10,
+                            color: `#fff`,
+                            time: 60
+                        });
+                        setTimeout(() => {
+                            const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
+                            const size = 16 + Math.ceil(Math.random() * 15)
+                            spawn[pick](this.position.x, this.position.y, size);
+                        }, 1000);
                     }
                     if (tech.healSpawn && Math.random() < tech.healSpawn) {
                         powerUps.spawn(this.position.x + 20 * (Math.random() - 0.5), this.position.y + 20 * (Math.random() - 0.5), "heal");
@@ -1288,6 +1303,9 @@ const mobs = {
                     if (tech.cloakDuplication && !this.isBoss) {
                         tech.cloakDuplication -= 0.01
                         powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+                    }
+                    if (level.noDefenseSetting && this.isBoss) {
+                        level.noDefenseSetting = 2
                     }
                 } else if (tech.isShieldAmmo && this.shield && this.shieldCount === 1) {
                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"

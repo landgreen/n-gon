@@ -694,22 +694,44 @@ summary {
     border-radius: 5px;
 }
 
-#tech {
+#right-HUD {
     position: absolute;
     top: 15px;
     right: 15px;
     z-index: 2;
     font-size: 20px;
-    color: #222;
     text-align: right;
-    opacity: 0.35;
     line-height: 120%;
-    background-color: rgba(255, 255, 255, 0.4);
     user-select: none;
     pointer-events: none;
+    /*border: 2px solid rgba(0, 0, 0, 0.4);*/
+    color: #222;
     padding: 0px 5px 0px 5px;
     border-radius: 5px;
-    /*border: 2px solid rgba(0, 0, 0, 0.4);*/
+    opacity: 0.35;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+#right-HUD-constraint {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    z-index: 2;
+    font-size: 20px;
+    text-align: right;
+    line-height: 120%;
+    user-select: none;
+    pointer-events: none;
+    padding: 5px 10px 5px 10px;
+    border-radius: 8px;
+    color: #624;
+    opacity: 0.35;
+    background-color: rgba(255, 215, 241, 0.4);
+    /* color: rgb(141, 23, 88);
+    opacity: 0.35;
+    background-color: rgba(141, 23, 88, 0.1); */
+    /* font-weight: 400; */
+    transition: all 0.5s linear;
 }
 
 #text-log {
@@ -725,6 +747,12 @@ summary {
     background-color: rgba(255, 255, 255, 0.5);
     pointer-events: none;
     user-select: none;
+}
+
+.constraint {
+    color: rgb(141, 23, 88);
+    /* font-weight: 100; */
+    /* text-decoration: underline; */
 }
 
 .color-text {
