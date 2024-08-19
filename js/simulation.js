@@ -1012,7 +1012,7 @@ const simulation = {
                     if (isNaN(player.position.x)) m.death();
                     if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
                         if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) {
-                            m.energy += m.maxEnergy * 0.05
+                            m.energy += m.maxEnergy * 0.05 * level.isReducedRegen
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: m.pos.x,
                                 y: m.pos.y - 45,
@@ -1024,7 +1024,7 @@ const simulation = {
                         if (tech.isHealthRecovery) {
                             if (tech.isEnergyHealth) {
                                 if (m.immuneCycle < m.cycle) {
-                                    m.energy += m.maxEnergy * 0.005
+                                    m.energy += m.maxEnergy * 0.005 * level.isReducedRegen
                                     simulation.drawList.push({ //add dmg to draw queue
                                         x: m.pos.x,
                                         y: m.pos.y,

@@ -1498,7 +1498,7 @@ const b = {
                         if (this.pickUpTarget) {
                             if (tech.isReel && this.blockDist > 150) {
                                 // console.log(0.0003 * Math.min(this.blockDist, 1000))
-                                m.energy += 0.00113 * Math.min(this.blockDist, 800) //max 0.352 energy
+                                m.energy += 0.00113 * Math.min(this.blockDist, 800) * level.isReducedRegen //max 0.352 energy
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: m.pos.x,
                                     y: m.pos.y,
@@ -2925,7 +2925,7 @@ const b = {
                 if (!who.isInvulnerable) {
                     if (tech.iceEnergy && !who.shield && !who.isShielded && who.isDropPowerUp && who.alive && m.immuneCycle < m.cycle) {
                         setTimeout(() => {
-                            if (!who.alive) m.energy += tech.iceEnergy * 0.8
+                            if (!who.alive) m.energy += tech.iceEnergy * 0.8 * level.isReducedRegen
                         }, 10);
                     }
                     mobs.statusSlow(who, tech.iceIXFreezeTime)
@@ -4683,7 +4683,7 @@ const b = {
                     if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250 && m.immuneCycle < m.cycle) { //give energy
                         Matter.Body.setAngularVelocity(this, this.spin)
                         if (this.isUpgraded) {
-                            m.energy += 0.12
+                            m.energy += 0.12 * level.isReducedRegen
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: this.position.x,
                                 y: this.position.y,
@@ -4692,7 +4692,7 @@ const b = {
                                 time: simulation.drawTime
                             });
                         } else {
-                            m.energy += 0.04
+                            m.energy += 0.04 * level.isReducedRegen
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: this.position.x,
                                 y: this.position.y,
@@ -4705,7 +4705,7 @@ const b = {
                 }
 
                 if (!m.isCloak) { //if cloaking field isn't active
-                    const size = 33
+                    const size = 33 - 6 * isKeep
                     q = Matter.Query.region(mob, {
                         min: {
                             x: this.position.x - size,
@@ -4760,7 +4760,7 @@ const b = {
             minDmgSpeed: 2,
             // lookFrequency: 56 + Math.floor(17 * Math.random()) - isUpgraded * 20,
             lastLookCycle: simulation.cycle + 60 * Math.random(),
-            delay: Math.floor((tech.isNailBotUpgrade ? 22 : 85)),
+            delay: Math.floor((tech.isNailBotUpgrade ? 22 : 85) + 10 * isKeep),
             acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100,
             endCycle: Infinity,
@@ -4895,7 +4895,7 @@ const b = {
             lookFrequency: 60 + Math.floor(17 * Math.random()) - 50 * tech.isFoamBotUpgrade,
             cd: 0,
             fireCount: 0,
-            fireLimit: 5 + 2 * tech.isFoamBotUpgrade,
+            fireLimit: 5 + 2 * tech.isFoamBotUpgrade - isKeep,
             delay: Math.floor((200 + (tech.isFoamBotUpgrade ? 0 : 200))),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
             acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100, //how far from the player the bot will move
@@ -4968,7 +4968,7 @@ const b = {
             lookFrequency: 17 + Math.floor(7 * Math.random()) - 3 * tech.isSoundBotUpgrade,
             cd: 0,
             fireCount: 0,
-            fireLimit: 5,
+            fireLimit: 5 - isKeep,
             delay: Math.floor(140),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
             acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100, //how far from the player the bot will move
@@ -5136,7 +5136,7 @@ const b = {
             lookFrequency: 20 + Math.floor(7 * Math.random()) - 13 * tech.isLaserBotUpgrade,
             range: (600 + 375 * tech.isLaserBotUpgrade) * (1 + 0.12 * Math.random()),
             drainThreshold: 0.15 + 0.5 * Math.random() + (tech.isEnergyHealth ? 0.3 : 0),// laser bot will not attack if the player is below this energy
-            drain: (0.57 - 0.43 * tech.isLaserBotUpgrade) * tech.laserDrain,
+            drain: (0.57 - 0.43 * tech.isLaserBotUpgrade + isKeep * 0.08) * tech.laserDrain,
             laserDamage: 0.75 + 0.75 * tech.isLaserBotUpgrade,
             endCycle: Infinity,
             classType: "bullet",
@@ -5313,7 +5313,7 @@ const b = {
             restitution: 1,
             dmg: 0,
             minDmgSpeed: 0,
-            lookFrequency: 43 + Math.floor(7 * Math.random()) - 13 * tech.isBoomBotUpgrade,
+            lookFrequency: 43 + Math.floor(7 * Math.random()) - 15 * tech.isBoomBotUpgrade,
             acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             attackAcceleration: 0.012 + 0.005 * tech.isBoomBotUpgrade,
             range: 500 * (1 + 0.1 * Math.random()) + 250 * tech.isBoomBotUpgrade + !isKeep * 100,
@@ -5443,11 +5443,7 @@ const b = {
                     const DIST = Vector.magnitude(sub);
                     const unit = Vector.normalise(sub)
                     if (DIST < tech.isPlasmaRange * 450 && m.energy > this.drainThreshold) {
-                        m.energy -= 0.0013 //0.004; //normal plasma field is 0.00008 + m.fieldRegen = 0.00108
-                        // if (m.energy < 0) {
-                        //     m.fieldCDcycle = m.cycle + 120;
-                        //     m.energy = 0;
-                        // }
+                        m.energy -= 0.001
                         //calculate laser collision
                         let best;
                         let range = tech.isPlasmaRange * (120 + 300 * Math.sqrt(Math.random()))
@@ -5466,9 +5462,9 @@ const b = {
                                 // Matter.Body.applyForce(best.who, path[1], force)
                                 //push mobs away
                                 if (best.who.speed > 3) {
-                                    const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.005 * Math.min(5, best.who.mass))
+                                    const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.004 * Math.min(5, best.who.mass))
                                     Matter.Body.applyForce(best.who, path[1], force)
-                                    Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.4, y: best.who.velocity.y * 0.4 });
+                                    Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.5, y: best.who.velocity.y * 0.5 });
                                 } else {
                                     const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
                                     Matter.Body.applyForce(best.who, path[1], force)
@@ -5558,7 +5554,7 @@ const b = {
                     }
                 }
             },
-            range: 190 + 170 * tech.isOrbitBotUpgrade + !isKeep * 60 * (0.5 - Math.random()), //range is set in bot upgrade too!
+            range: 160 + 170 * tech.isOrbitBotUpgrade + !isKeep * 100 * (0.5 - Math.random()), //range is set in bot upgrade too!
             orbitalSpeed: 0,
             phase: 2 * Math.PI * Math.random(),
             do() {
@@ -7211,8 +7207,6 @@ const b = {
                     const DRAIN = (tech.isRailEnergy ? 0 : 0.002)
                     //exit railgun charging without firing
                     if (m.energy < DRAIN) {
-                        // m.energy += 0.025 + this.charge * 22 * this.drain
-                        // m.energy -= this.drain
                         m.fireCDcycle = m.cycle + 120; // cool down if out of energy
                         this.endCycle = 0;
                         this.charge = 0
@@ -7292,7 +7286,7 @@ const b = {
                         const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), m.crouch ? 0.03 : 0.06)
                         player.force.x -= recoil.x
                         player.force.y -= recoil.y
-                        const harpoonSize = tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1
+                        const harpoonSize = tech.isLargeHarpoon ? 1 + 0.07 * Math.sqrt(this.ammo) : 1
                         const thrust = 0.15 * (this.charge)
                         if (tech.extraHarpoons) {
                             let targetCount = 0
@@ -7452,10 +7446,7 @@ const b = {
                 if (tech.extraHarpoons && !m.crouch) { //multiple harpoons
                     const SPREAD = 0.2
                     let angle = m.angle - SPREAD * tech.extraHarpoons / 2;
-                    const dir = {
-                        x: Math.cos(angle),
-                        y: Math.sin(angle)
-                    }; //make a vector for the player's direction of length 1; used in dot product
+                    const dir = { x: Math.cos(angle), y: Math.sin(angle) }; //make a vector for the player's direction of length 1; used in dot product
                     const range = 450 * (tech.isFilament ? 1 + 0.012 * Math.min(110, this.ammo) : 1)
                     let targetCount = 0
                     for (let i = 0, len = mob.length; i < len; ++i) {

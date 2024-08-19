@@ -1,54 +1,33 @@
 ******************************************************** NEXT PATCH **************************************************
 
-difficulty
-  difficulty level 6 adds flat damage and damage taken
-  bonus tech no longer spawns on level 2 and 3 on difficulty level 6
-  at the end of subway you get 1 tech, but not on difficulty level 6
-  difficulty level 3 and 5 add a random constraint that changes each level
-constraints are effects that only last until the level ends
-  50% JUNK chance
-  4x shielded mob chance
-  power ups are sent to next level
-  +33% chance for mobs to respawn
-  -1 choice
-  2x ammo costs
-  duplication is set to zero
-  50% max energy
-  50% max health
-  bots follow slow
-  full damage taken after boss dies
-  0.1x damage after a power up
-  mob death heals mobs
-  mobs heal for your lost health
-  periodically spawn WIMPs
- 
-exciton damage boost power up has a chance to spawn without the tech (~3%/mob)
-  damage boost has a unique gel/hair aura for each skin
-  damage boost timer no longer ticks with time dilation field
-JUNK tech: stationary - thrown blocks can't move, but they still have momentum
-added a classic n-gon link for the previous patch in settings
-  but images are disabled to save space
-on levels where you can fall endlessly, power ups will also fall endlessly
-  they no longer teleport to the exit, sorry
+tech: hidden-variable theory - after choosing a fieldtech gain 1.15x damage
+  for pilot wave only
+polariton - boosts also give 0.3x damage taken
 
-Newton's 1st and 2nd laws are field tech, and they give twice the effect
-abelian group 4->3x damage while invulnerable
-bot fabrication price increases after 5->4 bots
-wikipedia 4->3 research per correct quiz
-upgraded sound bots fire fewer waves but do more damage per wave
-  not much changed except improved performance, I think
-incendiary ammunition drones explode when they run out of durability not on the first hit
-  this allows better synergy with other drone tech
-grappling hook retract momentum no longer scales with distance
-  this should give you more control
-pressing the 3rd button in factory will remove blocks resting on the second block
-  preventing an endless toggle
+constraints
+  removed
+    full damage taken after boss dies
+      wording is too unclear
+  new
+    0.5x energy regen from all sources
+  balanced
+    slow bots
+      bots have roughly 15% reduction in damage in addition to a slow follow speed
+    mob death heals mobs
+      has 1000->700 range and 1->0.33 healing
+    periodically spawn WIMPs
+      has a 30s delay and a 15->6s spawn rate
+    50->40% JUNK chance
 
-bug fixes
-  fleas no longer die early after hitting a high health target only once
-  something with super ball density calculations for tech rebound
-  grabbing a big block can make grappling hook go flying
-    added 3 potential fixes, but the bug is too rare know if it's fixed
+
+heuristics gives (1-1.5x)->(1-2x) fire rate and +5% JUNK
+autonomous defense harpoon now scale from Bessemer process
+  but at half the rate since there are 6 harpoons
+Bessemer process and rail gun scale at 0.1->0.07
+
+bugs
+  crash with training level "heal" and power ups
+  set difficulty mode level 2 for training
 
 ******************************************************** BUGS ********************************************************
 
@@ -80,19 +59,36 @@ player can become crouched while not touching the ground if they exit the ground
 
 *********************************************************** TODO *****************************************************
 
+procedural animation 
+  https://www.youtube.com/watch?v=qlfh_rv6khY
+
+maybe no constraints on final boss and reactor?
+
+constraints balance
+  50% JUNK chance
+  4x shielded mob chance
+  power ups are sent to next level
+  +33% chance for mobs to respawn
+  -1 choice
+  2x ammo costs
+    maybe nerf...
+  0 duplication
+  50% max energy
+  50% max health
+  bots follow slow
+  0.1x damage after a power up
+  mob death heals mobs
+  mobs heal for your lost health
+  periodically spawn WIMPs
+  0.5x energy regen
+
 each difficulty setting adds a chance for a random effect
   make some effects only possible on certain levels, or with certain bosses?
   not implemented random constraint ideas________________________
-    if player takes too long on a level
-      spawn mobs at the end of player's history
-        give a warning before they spawn
-        black holes, sneakers, bullets
     mob death spawns something
-      bullets
+      mob bullets
     bosses heals nearby mobs
     ammo power ups give 0.7x ammo
-    2x energy costs
-    0.5x energy regen from all sources
     2x research costs
     mobs slowly regen health
     exit door takes 10x time to open,
@@ -107,6 +103,12 @@ each difficulty setting adds a chance for a random effect
       player lasers and radiation do 0.5x damage
       explosions do 0.5x damage
       freeze effects last 0.25x time
+
+tech: - lower damage taken over 10s to 0x but after taking damage increase damage taken to 1x
+  isn't this just CPT skin with less steps?
+  maybe skin 
+
+tech: - freezing grenades/explosions
 
 tech: - randomize constraints somehow
     in pause interface or power up selection menu?

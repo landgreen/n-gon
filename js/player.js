@@ -542,6 +542,8 @@ const m = {
             m.maxHealth *= 0.5
         }
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
+        document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - m.defense())) + "px";
+
         if (isMessage) simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
         m.displayHealth();
@@ -551,8 +553,8 @@ const m = {
     lastCalculatedDamage: 0, //used to decided if damage bar needs to be redrawn  (in simulation.checks)
     lastCalculatedDefense: 0, //used to decided if defense bar needs to be redrawn  (in simulation.checks)
     defense() {
-        if (level.noDefenseSetting === 2) return 1 //zero defense constraint
         let dmg = 1
+        if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
         if (tech.isMaxHealthDefense && m.health === m.maxHealth) dmg *= 0.3
         if (tech.isDiaphragm) dmg *= 0.55 + 0.35 * Math.sin(m.cycle * 0.0075);
         if (tech.isZeno) dmg *= 0.15
@@ -794,7 +796,7 @@ const m = {
                         color: "rgba(0,255,100,0.5)",
                         time: 10
                     });
-                    mob[i].health += dmg * 10
+                    mob[i].health += dmg * 7
                     if (mob[i].health > 1) mob[i].health = 1
                 }
             }
@@ -2509,11 +2511,11 @@ const m = {
         }
     },
     regenEnergy() { //used in drawRegenEnergy  // rewritten by some tech
-        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen;
+        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen * level.isReducedRegen;
         if (m.energy < 0) m.energy = 0
     },
     regenEnergyDefault() {
-        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen;
+        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen * level.isReducedRegen;
         if (m.energy < 0) m.energy = 0
     },
     lookingAt(who) {
@@ -2696,7 +2698,7 @@ const m = {
                 if (tech.isTokamak && m.throwCharge > 4) { //remove the block body and pulse  in the direction you are facing
                     //m.throwCharge > 5 seems to be when the field full colors in a block you are holding
                     m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
-                    if (m.immuneCycle < m.cycle) m.energy += 0.25 * Math.sqrt(m.holdingTarget.mass) * Math.min(5, m.throwCharge)
+                    if (m.immuneCycle < m.cycle) m.energy += 0.25 * Math.sqrt(m.holdingTarget.mass) * Math.min(5, m.throwCharge) * level.isReducedRegen
                     m.throwCharge = 0;
                     m.definePlayerMass() //return to normal player mass
                     //remove block before pulse, so it doesn't get in the way
@@ -3051,7 +3053,7 @@ const m = {
                 m.pushMass(mob[i]);
 
                 if (tech.deflectEnergy && !mob[i].isInvulnerable && !mob[i].isShielded) {
-                    m.energy += tech.deflectEnergy
+                    m.energy += tech.deflectEnergy * level.isReducedRegen
                 }
             }
         }
@@ -5049,7 +5051,7 @@ const m = {
                                             Matter.Composite.remove(engine.world, body[i]);
                                             body.splice(i, 1);
                                             m.fieldRange *= 0.8
-                                            if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling
+                                            if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                             if (tech.isWormholeWorms) { //pandimensional spermia
                                                 b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                                 Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
@@ -5071,10 +5073,8 @@ const m = {
                                         Matter.Composite.remove(engine.world, body[i]);
                                         body.splice(i, 1);
                                         m.fieldRange *= 0.8
-                                        // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
-                                        // if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.5
-                                        if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling
-                                        if (m.fieldMode === 0 || m.fieldMode === 9) m.energy += 0.02 * m.coupling
+                                        if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling * level.isReducedRegen
+                                        if (m.fieldMode === 0 || m.fieldMode === 9) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                         if (tech.isWormholeWorms) { //pandimensional spermia
                                             b.worm(Vector.add(m.hole.pos1, Vector.rotate({
                                                 x: m.fieldRange * 0.4,
@@ -5825,7 +5825,7 @@ const m = {
                                         return
                                     }
                                     m.damage(dmg);
-                                    if (tech.isPiezo) m.energy += 20.48;
+                                    if (tech.isPiezo) m.energy += 20.48 * level.isReducedRegen;
                                     if (tech.isStimulatedEmission) powerUps.ejectTech()
                                     if (mob[k].onHit) mob[k].onHit();
                                     if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles

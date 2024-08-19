@@ -54,7 +54,7 @@ const level = {
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(450, -50, "tech");
             // for (let i = 0; i < 3; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 50, "boost", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
-            // level.satellite();
+            // level.heal();
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
@@ -129,7 +129,9 @@ const level = {
             powerUps.directSpawn(flip * localSettings.entanglement.position.x, localSettings.entanglement.position.y, "entanglement", false);
         }
         level.newLevelOrPhase()
-        if (!simulation.isTraining) {
+        if (simulation.isTraining) {
+            simulation.difficultyMode = 2
+        } else {
             simulation.inGameConsole(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
             document.title = "n-gon: " + level.levelAnnounce();
         }
@@ -333,6 +335,15 @@ const level = {
     constraintDescription2: "",
     constraint: [
         {
+            description: "0.5x energy regen",
+            effect() {
+                level.isReducedRegen = 0.5
+            },
+            remove() {
+                level.isReducedRegen = 1
+            }
+        },
+        {
             description: "0.5x max health",
             effect() {
                 level.isReducedHealth = true
@@ -351,7 +362,7 @@ const level = {
             }
         },
         {
-            description: "periodically spawn WIMPs",
+            description: "after 30 seconds spawn WIMPs",
             effect() {
                 simulation.ephemera.push({
                     name: "WIMPS",
@@ -360,7 +371,7 @@ const level = {
                     do() {
                         this.time++
                         if (level.levels[level.onLevel] === this.levelName) {
-                            if (!(this.time % 900)) spawn.WIMP(level.enter.x, level.enter.y)
+                            if (this.time > 1800 && !(this.time % 360)) spawn.WIMP(level.enter.x, level.enter.y)
                         } else {
                             simulation.removeEphemera(this.name);
                         }
@@ -383,7 +394,7 @@ const level = {
             }
         },
         {
-            description: "mobs heal for your lost health",
+            description: "mobs heal after you take damage",
             effect() {
                 level.isMobHealPlayerDamage = true
             },
@@ -400,16 +411,16 @@ const level = {
                 level.isMobDeathHeal = false
             }
         },
-        {
-            description: "full damage taken after boss dies",
-            // description: "after boss dies damage taken = 1",
-            effect() {
-                level.noDefenseSetting = 1 //defense goes to zero once equal to 2
-            },
-            remove() {
-                level.noDefenseSetting = 0
-            }
-        },
+        // {
+        //     description: "full damage taken after boss dies",
+        //     // description: "after boss dies damage taken = 1",
+        //     effect() {
+        //         level.noDefenseSetting = 1 //defense goes to zero once equal to 2
+        //     },
+        //     remove() {
+        //         level.noDefenseSetting = 0
+        //     }
+        // },
         {
             description: "4x shielded mobs",
             effect() {
@@ -420,9 +431,9 @@ const level = {
             }
         },
         {
-            description: "50% JUNK chance",
+            description: "40% JUNK chance",
             effect() {
-                level.junkAdded = 0.5
+                level.junkAdded = 0.4
             },
             remove() {
                 level.junkAdded = 0
@@ -542,13 +553,14 @@ const level = {
     is2xAmmo: false,
     isReducedEnergy: false,
     isSlowBots: false,
-    noDefenseSetting: 0,
+    // noDefenseSetting: 0,
     isMobDeathHeal: false,
     isMobHealPlayerDamage: false,
     isNoDamage: false,
     noDamageCycle: 0,
     reducedHealthLost: 0,
     isReducedHealth: false,
+    isReducedRegen: 1,
     levelAnnounce() {
         const cheating = simulation.isCheating ? "(testing)" : ""
         if (level.levelsCleared === 0) {
@@ -1239,7 +1251,7 @@ const level = {
                 ctx.moveTo(x, y + height / 2);
                 ctx.lineTo(x, maxHeight - height / 2);
                 ctx.strokeStyle = `rgba(0,0,0,0.2)`
-                // ctx.lineWidth = "3"
+                ctx.lineWidth = "2"
                 ctx.stroke();
 
                 //draw body
@@ -35293,9 +35305,9 @@ const level = {
         spawn.mapRect(1375, -16, 50, 50);
         spawn.mapRect(1400, -8, 50, 25);
         spawn.mapRect(750, -24, 650, 100);
-        powerUps.directSpawn(875, -40, "heal", false, null, 15);
-        powerUps.directSpawn(1075, -50, "heal", false, null, 25);
-        powerUps.directSpawn(1275, -65, "heal", false, null, 35);
+        powerUps.directSpawn(875, -40, "heal", false, 15);
+        powerUps.directSpawn(1075, -50, "heal", false, 25);
+        powerUps.directSpawn(1275, -65, "heal", false, 35);
 
         const door = level.door(1612.5, -175, 25, 190, 185, 3)
         spawn.mapRect(1600, -1200, 500, 850); //exit roof

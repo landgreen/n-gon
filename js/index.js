@@ -138,7 +138,8 @@ function beforeUnloadEventListener(event) {
     event.preventDefault();
     if (tech.isExitPrompt) {
         tech.damage *= 1.25
-        simulation.inGameConsole(`damage <span class='color-symbol'>*=</span> ${1.25}`)
+        // simulation.inGameConsole(`<strong class='color-d'>damage</strong> <span class='color-symbol'>*=</span> ${1.25}`)
+        simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.25} //beforeunload`);
         if (Math.random() < 0.25) {
             removeEventListener('beforeunload', beforeUnloadEventListener);
         }
@@ -490,7 +491,7 @@ const build = {
 <span style="float: right;"><strong class='color-defense'>level</strong> ${(simulation.dmgScale).toPrecision(4)}x</span>
 <br><strong class='color-h'>health</strong> (${(m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
 <span style="float: right;">${powerUps.research.count} ${powerUps.orb.research()}</span>
-<br><strong class='color-f'>energy</strong> (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000).toFixed(0)}/s)
+<br><strong class='color-f'>energy</strong> (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000 * level.isReducedRegen).toFixed(0)}/s)
 <span style="float: right;">${tech.totalCount} ${powerUps.orb.tech()}</span>
 <br><strong><em>fire rate</em></strong> ${(1 / b.fireCDscale).toFixed(2)}x
 <span style="float: right;">mass ${player.mass.toFixed(1)}</span>

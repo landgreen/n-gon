@@ -1085,7 +1085,7 @@ const mobs = {
                         if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 33% dmg at max range of 3000
                         dmg *= this.damageReduction
                         //energy and heal drain should be calculated after damage boosts
-                        if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon
+                        if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon * level.isReducedRegen
                         dmg /= Math.sqrt(this.mass)
                     }
 
@@ -1142,9 +1142,10 @@ const mobs = {
                 if (this.isDropPowerUp) {
                     if (level.isMobDeathHeal) {
                         for (let i = 0; i < mob.length; i++) {
-                            if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 1000000 && mob[i].alive) { //1000
+                            if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 && mob[i].alive) { //700
                                 if (mob[i].health < 1) {
-                                    mob[i].health = 1
+                                    mob[i].health += 0.33 + this.isBoss
+                                    if (mob[i].health > 1) mob[i].health = 1
                                     simulation.drawList.push({
                                         x: mob[i].position.x,
                                         y: mob[i].position.y,
@@ -1303,9 +1304,6 @@ const mobs = {
                     if (tech.cloakDuplication && !this.isBoss) {
                         tech.cloakDuplication -= 0.01
                         powerUps.setPowerUpMode(); //needed after adjusting duplication chance
-                    }
-                    if (level.noDefenseSetting && this.isBoss) {
-                        level.noDefenseSetting = 2
                     }
                 } else if (tech.isShieldAmmo && this.shield && this.shieldCount === 1) {
                     let type = tech.isEnergyNoAmmo ? "heal" : "ammo"

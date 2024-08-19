@@ -144,7 +144,7 @@ const spawn = {
         }
         me.do = function () {
             if (!simulation.isTimeSkipping) {
-                const scale = (tech.isMoveDarkMatter || tech.isNotDarkMatter) ? 1.6 : 1
+                const scale = ((tech.isMoveDarkMatter || tech.isNotDarkMatter) ? 1.6 : 1) * level.isReducedRegen
                 const sine = Math.sin(simulation.cycle * 0.015)
                 this.radius = 111 * tech.isDarkStar + 370 * (1 + 0.1 * sine)
                 //chase player
@@ -7726,7 +7726,7 @@ const spawn = {
         };
     },
     //chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2) + tech.duplicationChance()
-    shield(target, x, y, chance = (level.isMobShields ? 3.25 : 1) * Math.min(0.02 + simulation.difficulty * 0.005, 0.2)) {
+    shield(target, x, y, chance = (level.isMobShields ? 4 : 1) * Math.min(0.02 + simulation.difficulty * 0.005, 0.2)) {
         if (this.allowShields && Math.random() < chance) {
             mobs.spawn(x, y, 9, target.radius + 30, "rgba(220,220,255,0.9)");
             let me = mob[mob.length - 1];

@@ -120,7 +120,7 @@ function collisionChecks(event) {
                             simulation.trails(90)
                             simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
                         }
-                        if (tech.isPiezo) m.energy += 20.48;
+                        if (tech.isPiezo) m.energy += 20.48 * level.isReducedRegen;
                         if (tech.isCouplingNoHit && m.coupling > 0) {
                             m.couplingChange(-3)
 
@@ -162,10 +162,12 @@ function collisionChecks(event) {
                             const maxCount = 10 + 3 * tech.extraHarpoons //scale the number of hooks fired
                             let count = maxCount - 1
                             const angle = Math.atan2(mob[k].position.y - player.position.y, mob[k].position.x - player.position.x);
-                            b.harpoon(m.pos, mob[k], angle, 0.75, true, 7) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
+
+                            const mass = 0.75 * (tech.isLargeHarpoon ? 1 + 0.05 * Math.sqrt(this.ammo) : 1)
+                            b.harpoon(m.pos, mob[k], angle, mass, true, 7) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
                             bullet[bullet.length - 1].drain = 0
                             for (; count > 0; count--) {
-                                b.harpoon(m.pos, mob[k], angle + count * 2 * Math.PI / maxCount, 0.75, true, 7)
+                                b.harpoon(m.pos, mob[k], angle + count * 2 * Math.PI / maxCount, mass, true, 7)
                                 bullet[bullet.length - 1].drain = 0
                             }
                         }

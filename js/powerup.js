@@ -503,6 +503,7 @@ const powerUps = {
         endCycle: 0,
         duration: null, //set by "tech: band gap"
         damage: null, //set by "tech: band gap"
+        isDefense: false,
         effect() {
             powerUps.animatePowerUpGrab('rgba(255, 0, 0, 0.5)')
             powerUps.boost.endCycle = simulation.cycle + Math.floor(Math.max(0, powerUps.boost.endCycle - simulation.cycle) * 0.6) + powerUps.boost.duration //duration+seconds plus 2/3 of current time left
@@ -605,7 +606,7 @@ const powerUps = {
             }
             if (tech.isResearchDamage) {
                 tech.damage *= 1.05
-                simulation.inGameConsole(`<strong>1.05x</strong> <strong class='color-d'>damage</strong>`);
+                simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.05} //peer review`);
                 tech.addJunkTechToPool(0.01)
             }
             powerUps.research.currentRerollCount++
@@ -1448,7 +1449,7 @@ const powerUps = {
     onPickUp(who) {
         powerUps.research.currentRerollCount = 0
         if (tech.isTechDamage && who.name === "tech") m.damage(0.1)
-        if (tech.isMassEnergy) m.energy += 2;
+        if (tech.isMassEnergy) m.energy += 2 * level.isReducedRegen;
         if (tech.isMineDrop && bullet.length < 150 && Math.random() < 0.5) {
             if (tech.isLaserMine && input.down) {
                 b.laserMine(who.position)
