@@ -184,7 +184,7 @@ const simulation = {
     fpsCapDefault: 72, //use to change fpsCap back to normal after a hit from a mob
     isCommunityMaps: false,
     cyclePaused: 0,
-    fallHeight: 6000, //below this y position the player dies
+    fallHeight: 6000, //below this y position the player will teleport to start, take damage, or teleport to the sky based on the value of  level.fallMode
     lastTimeStamp: 0, //tracks time stamps for measuring delta
     delta: 1000 / 60, //speed of game engine //looks like it has to be 16.6666 to match player input
     buttonCD: 0,
@@ -192,10 +192,11 @@ const simulation = {
     levelsCleared: 0,
     difficultyMode: 2, //normal difficulty is 2
     difficulty: 0,
-    dmgScale: null, //set in levels.setDifficulty
+    constraint: 0,
+    dmgScale: null,
     healScale: 1,
-    accelScale: null, //set in levels.setDifficulty
-    CDScale: null, //set in levels.setDifficulty
+    accelScale: null,
+    CDScale: null,
     molecularMode: Math.floor(4 * Math.random()), //0 spores, 1 missile, 2 ice IX, 3 drones //randomize molecular assembler field type
     // dropFPS(cap = 40, time = 15) {
     //   simulation.fpsCap = cap
@@ -418,39 +419,64 @@ const simulation = {
         simulation.boldActiveGunHUD();
     },
     updateTechHUD() {
-
-        // tech.tech.sort((a, b) => {
-        //     console.log(a.cycle, b.cycle)
-        //     if (a.cycle === undefined && b.cycle !== undefined) return -1;
-        //     if (a.cycle !== undefined && b.cycle === undefined) return 1;
-        //     if (a.cycle === undefined && b.cycle === undefined) return 0;
-        //     if (a.cycle !== b.cycle) return a.cycle - b.cycle;
-        // });
-
         let text = ""
         for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
             if (tech.tech[i].isLost) {
                 if (text) text += "<br>" //add a new line, but not on the first line
                 text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
-            } else if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
+            } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
                 if (text) text += "<br>" //add a new line, but not on the first line
                 text += tech.tech[i].name
-                if (tech.tech[i].nameInfo) {
-                    text += tech.tech[i].nameInfo
-                    tech.tech[i].addNameInfo();
-                }
                 if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
             }
         }
-        document.getElementById("tech").innerHTML = text
+        document.getElementById("right-HUD").innerHTML = text
+
+
+        // let text = ""
+        // if (simulation.difficultyMode > 2 && level.constraintDescription1) {
+        //     text += `<span class='constraint'>${level.constraintDescription1}</span>`
+        //     // text += `${level.constraintDescription1}`
+        // }
+        // if (simulation.difficultyMode > 4 && level.constraintDescription2) {
+        //     text += `<br><span class='constraint'>${level.constraintDescription2}</span>`
+        // }
+        // for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
+        //     if (tech.tech[i].isLost) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
+        //     } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += tech.tech[i].name
+        //         if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
+        //     }
+        // }
+        // document.getElementById("right-HUD").innerHTML = text
+
+        // let constraints = ""
+        // if (simulation.difficultyMode > 2 && level.constraintDescription1) {
+        //     constraints += `<span class='constraint' style="opacity: 0.35;">${level.constraintDescription1}</span>`
+        //     // text += `${level.constraintDescription1}`
+        // }
+        // if (simulation.difficultyMode > 4 && level.constraintDescription2) {
+        //     constraints += `<br><span class='constraint' style="opacity: 0.35;">${level.constraintDescription2}</span>`
+        // }
+        // let text = ""
+        // for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
+        //     if (tech.tech[i].isLost) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
+        //     } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += tech.tech[i].name
+        //         if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
+        //     }
+        // }
+        // document.getElementById("right-HUD").innerHTML = constraints + `<div class="right-HUD-tech">` + text + `</div>`
     },
     lastLogTime: 0,
     isTextLogOpen: true,
-    // <!-- <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
-    // <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#7ce" stroke="none" /> -->
-    // SVGleftMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#149" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
-    // SVGrightMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#0cf" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
-    makeTextLog(text, time = 240) {
+    inGameConsole(text, time = 240) {
         if (!localSettings.isHideHUD && simulation.isTextLogOpen && !build.isExperimentSelection) {
             if (simulation.lastLogTime > m.cycle) { //if there is an older message
                 document.getElementById("text-log").innerHTML = document.getElementById("text-log").innerHTML + '<br>' + text;
@@ -625,8 +651,8 @@ const simulation = {
     restoreCamera() {
         ctx.restore();
     },
-    trails() {
-        const swapPeriod = 150
+    trails(swapPeriod = 150) {
+        // const swapPeriod = 150
         const len = 30
         for (let i = 0; i < len; i++) {
             setTimeout(function () {
@@ -756,11 +782,11 @@ const simulation = {
         document.getElementById("health").style.display = "inline"
         document.getElementById("health-bg").style.display = "inline";
         if (!localSettings.isHideHUD) {
-            document.getElementById("tech").style.display = "inline"
+            document.getElementById("right-HUD").style.display = "inline"
             document.getElementById("defense-bar").style.display = "inline"
             document.getElementById("damage-bar").style.display = "inline"
         } else {
-            document.getElementById("tech").style.display = "none"
+            document.getElementById("right-HUD").style.display = "none"
             document.getElementById("defense-bar").style.display = "none"
             document.getElementById("damage-bar").style.display = "none"
         }
@@ -786,12 +812,13 @@ const simulation = {
         } else {
             Composite.add(engine.world, [player])
         }
+        shuffle(level.constraint)
         level.populateLevels()
-
         input.endKeySensing();
         simulation.ephemera = []
+        powerUps.powerUpStorage = []
         tech.setupAllTech(); //sets tech to default values
-        b.removeAllGuns();
+        b.resetAllGuns();
         tech.duplication = 0;
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
             if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
@@ -813,7 +840,6 @@ const simulation = {
         simulation.isChoosing = false;
         b.setFireMethod()
         b.setFireCD();
-        // simulation.updateTechHUD();
         for (let i = 0; i < b.guns.length; i++) b.guns[i].isRecentlyShown = false //reset recently shown back to zero
         for (let i = 0; i < m.fieldUpgrades.length; i++) m.fieldUpgrades[i].isRecentlyShown = false //reset recently shown back to zero
         for (let i = 0; i < tech.tech.length; i++) tech.tech[i].isRecentlyShown = false //reset recently shown back to zero
@@ -826,17 +852,13 @@ const simulation = {
         powerUps.boost.endCycle = 0
         powerUps.isFieldSpawned = false
         m.setFillColors();
-        // m.maxHealth = 1
-        // m.maxEnergy = 1
-        // m.energy = 1
         input.isPauseKeyReady = true
         simulation.wipe = function () { //set wipe to normal
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
+        m.lastHit = 0
         m.hole.isOn = false
         simulation.paused = false;
-        // simulation.cycle = 0
-        // m.cycle = 0
         engine.timing.timeScale = 1;
         simulation.fpsCap = simulation.fpsCapDefault;
         simulation.isAutoZoom = true;
@@ -846,27 +868,18 @@ const simulation = {
 
         level.onLevel = 0;
         level.levelsCleared = 0;
-        //resetting difficulty
-        // simulation.difficulty = 0;
-        level.setDifficulty()
-        simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
+        level.updateDifficulty()
+        // level.setConstraints()
 
         simulation.clearNow = true;
         document.getElementById("text-log").style.display = "none"
         document.getElementById("fade-out").style.opacity = 0;
         document.title = "n-gon";
-        // simulation.makeTextLog(`input.key.up<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]`);
-        // simulation.makeTextLog(`input.key.left<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]`);
-        // simulation.makeTextLog(`input.key.down<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]`);
-        // simulation.makeTextLog(`input.key.right<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]`);
-        simulation.makeTextLog(`Math.seed <span class='color-symbol'>=</span> ${Math.initialSeed}`);
-        simulation.makeTextLog(`<span class='color-var'>const</span> engine <span class='color-symbol'>=</span> Engine.create(); <em>//simulation begin</em>`);
-        simulation.makeTextLog(`engine.timing.timeScale <span class='color-symbol'>=</span> 1`);
-        // simulation.makeTextLog(`input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
-
-        // document.getElementById("health").style.display = "inline"
-        // document.getElementById("health-bg").style.display = "inline"
+        simulation.inGameConsole(`Math.seed <span class='color-symbol'>=</span> ${Math.initialSeed}`);
+        simulation.inGameConsole(`<span class='color-var'>const</span> engine <span class='color-symbol'>=</span> Engine.create(); <em>//simulation begin</em>`);
+        simulation.inGameConsole(`engine.timing.timeScale <span class='color-symbol'>=</span> 1`);
         m.alive = true;
+        m.definePlayerMass();
         m.onGround = false
         m.lastOnGroundCycle = 0
         m.health = 0;
@@ -876,23 +889,10 @@ const simulation = {
 
         //set to default field
         tech.healMaxEnergyBonus = 0
-        // m.setMaxEnergy();
         m.energy = 0
         m.immuneCycle = 0;
-        // simulation.makeTextLog(`${simulation.SVGrightMouse}<strong style='font-size:30px;'> ${m.fieldUpgrades[m.fieldMode].name}</strong><br><span class='faded'></span><br>${m.fieldUpgrades[m.fieldMode].description}`, 600);
-        // simulation.makeTextLog(`
-        // input.key.up <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]
-        // <br>input.key.left <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]
-        // <br>input.key.down <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]
-        // <br>input.key.right <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]
-        // <br>
-        // <br><span class='color-var'>m</span>.fieldMode <span class='color-symbol'>=</span> "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>"
-        // <br>input.key.field <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>right mouse</span>"]
-        // <br><span class='color-var'>m</span>.field.description <span class='color-symbol'>=</span> "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].description}</span>"
-        // `, 800);
         m.coupling = 0
         m.setField(0) //this calls m.couplingChange(), which sets max health and max energy
-        // m.energy = 0;
         //exit testing
         if (simulation.testing) {
             simulation.testing = false;
@@ -933,22 +933,8 @@ const simulation = {
                         m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
                         if (m.energy > 1000000) m.energy = 1000000
                     }
-                    if (tech.isFlipFlopEnergy && m.immuneCycle < m.cycle) {
-                        if (tech.isFlipFlopOn) {
-                            if (m.immuneCycle < m.cycle) m.energy += 0.2;
-                        } else {
-                            m.energy -= 0.01;
-                            if (m.energy < 0) m.energy = 0
-                        }
-                    }
-                    if (tech.relayIce && tech.isFlipFlopOn) {
-                        for (let j = 0; j < tech.relayIce; j++) {
-                            for (let i = 0, len = 3 + Math.ceil(9 * Math.random()); i < len; i++) b.iceIX(2)
-                        }
-                    }
-
                     if (m.pos.y > simulation.fallHeight) { // if 4000px deep
-                        if (level.isEndlessFall) {
+                        if (level.fallMode === "start") {
                             //infinite falling.  teleport to sky after falling
 
                             simulation.ephemera.push({
@@ -957,7 +943,6 @@ const simulation = {
                                 do() {
                                     this.count--
                                     if (this.count < 0 || m.onGround) simulation.removeEphemera(this.name)
-                                    // console.log(player.velocity.y)
                                     if (player.velocity.y > 70) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
                                     if (player.velocity.y > 90) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
                                 },
@@ -976,13 +961,36 @@ const simulation = {
                             m.angle = Math.atan2(simulation.mouseInGame.y - m.pos.y, simulation.mouseInGame.x - m.pos.x);
                             // move bots
                             for (let i = 0; i < bullet.length; i++) {
-                                if (bullet[i].botType) {
-                                    Matter.Body.setPosition(bullet[i], Vector.sub(bullet[i].position, change));
-                                    // Matter.Body.setPosition(bullet[i], Vector.add(player.position, { x: 250 * (Math.random() - 0.5), y: 250 * (Math.random() - 0.5) }));
-                                    // Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
-                                }
+                                if (bullet[i].botType) Matter.Body.setPosition(bullet[i], Vector.sub(bullet[i].position, change));
                             }
-                        } else {
+                        } else if (level.fallMode === "position") { //fall and stay in the same horizontal position
+                            simulation.ephemera.push({
+                                name: "slow player",
+                                count: 180, //cycles before it self removes
+                                do() {
+                                    this.count--
+                                    if (this.count < 0 || m.onGround) simulation.removeEphemera(this.name)
+                                    if (player.velocity.y > 70) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
+                                    if (player.velocity.y > 90) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
+                                },
+                            })
+                            const before = { x: player.position.x, y: player.position.y, }
+                            const posXClamped = Math.min(Math.max(level.fallModeBounds.left, player.position.x), level.fallModeBounds.right)
+                            Matter.Body.setPosition(player, { x: posXClamped, y: level.enter.y - 4000 });
+
+                            // translate camera smoothly to preserve illusion to endless fall
+                            const change = { x: before.x - posXClamped, y: before.y - player.position.y }
+                            m.transX += change.x
+                            m.transY += change.y
+                            simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
+                            simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
+                            m.angle = Math.atan2(simulation.mouseInGame.y - m.pos.y, simulation.mouseInGame.x - m.pos.x);
+
+                            // move bots
+                            for (let i = 0; i < bullet.length; i++) {
+                                if (bullet[i].botType) Matter.Body.setPosition(bullet[i], Vector.sub(bullet[i].position, change));
+                            }
+                        } else { //get hurt and go to start
                             Matter.Body.setVelocity(player, { x: 0, y: 0 });
                             Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
                             // m.damage(0.02 * simulation.difficultyMode);
@@ -1004,7 +1012,7 @@ const simulation = {
                     if (isNaN(player.position.x)) m.death();
                     if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
                         if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) {
-                            m.energy += m.maxEnergy * 0.05
+                            m.energy += m.maxEnergy * 0.05 * level.isReducedRegen
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: m.pos.x,
                                 y: m.pos.y - 45,
@@ -1016,7 +1024,7 @@ const simulation = {
                         if (tech.isHealthRecovery) {
                             if (tech.isEnergyHealth) {
                                 if (m.immuneCycle < m.cycle) {
-                                    m.energy += m.maxEnergy * 0.005
+                                    m.energy += m.maxEnergy * 0.005 * level.isReducedRegen
                                     simulation.drawList.push({ //add dmg to draw queue
                                         x: m.pos.x,
                                         y: m.pos.y,
@@ -1049,7 +1057,7 @@ const simulation = {
                                 do() {
                                     if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
                                         this.count--
-                                        // console.log('halp, stuck in map!', Matter.Query.point(map, m.pos))
+
                                         if (this.count < 0) {
                                             simulation.removeEphemera(this.name)
                                             Matter.Body.setVelocity(player, { x: 0, y: 0 });
@@ -1061,7 +1069,6 @@ const simulation = {
                                 },
                             })
                         }
-
                         if (tech.isZeno) {
                             if (tech.isEnergyHealth) {
                                 m.energy *= 0.95
@@ -1073,28 +1080,41 @@ const simulation = {
                         }
                         if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
 
-                        fallCheck = function (who, save = false) {
-                            let i = who.length;
-                            while (i--) {
-                                if (who[i].position.y > simulation.fallHeight) {
-                                    if (save) {
-                                        Matter.Body.setVelocity(who[i], { x: 0, y: 0 });
-                                        Matter.Body.setPosition(who[i], {
-                                            x: level.exit.x + 30 * (Math.random() - 0.5),
-                                            y: level.exit.y + 30 * (Math.random() - 0.5)
-                                        });
-                                    } else {
-                                        Matter.Composite.remove(engine.world, who[i]);
-                                        who.splice(i, 1);
-                                    }
+
+
+                        let i = body.length;
+                        while (i--) {
+                            if (body[i].position.y > simulation.fallHeight) {
+                                Matter.Composite.remove(engine.world, body[i]);
+                                body.splice(i, 1);
+                            }
+                        }
+                        i = powerUp.length
+                        while (i--) {
+                            if (powerUp[i].position.y > simulation.fallHeight) {
+                                Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 });
+                                if (level.fallMode === "position") {
+                                    const posXClamped = Math.min(Math.max(level.fallModeBounds.left, powerUp[i].position.x), level.fallModeBounds.right)
+                                    Matter.Body.setPosition(powerUp[i], { x: posXClamped, y: level.enter.y - 3000 });
+                                } else {
+                                    Matter.Body.setPosition(powerUp[i], {
+                                        x: level.exit.x + 30 * (Math.random() - 0.5),
+                                        y: level.exit.y + 30 * (Math.random() - 0.5)
+                                    });
                                 }
                             }
-                        };
-                        fallCheck(body);
-                        fallCheck(powerUp, true);
-                        let i = mob.length;
+                        }
+                        i = mob.length;
                         while (i--) {
-                            if (mob[i].position.y > simulation.fallHeight) mob[i].death();
+                            if (mob[i].position.y > simulation.fallHeight) {
+                                if (mob[i].isBoss && level.fallMode === "position") {
+                                    Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
+                                    const posXClamped = Math.min(Math.max(level.fallModeBounds.left, mob[i].position.x), level.fallModeBounds.right)
+                                    Matter.Body.setPosition(mob[i], { x: posXClamped, y: level.enter.y - 3000 });
+                                } else {
+                                    mob[i].death();
+                                }
+                            }
                         }
 
                     }
@@ -1116,7 +1136,7 @@ const simulation = {
     clearNow: false,
     clearMap() {
         level.isProcedural = false;
-        level.isEndlessFall = false;
+        level.fallMode = "";
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (m.alive) {
             if (tech.isLongitudinal) b.guns[3].waves = []; //empty array of wave bullets
@@ -1134,15 +1154,6 @@ const simulation = {
                 if (tech.ammoCap) b.guns[10].ammo = Math.min(tech.ammoCap, b.guns[10].ammo)
                 simulation.updateGunHUD();
             }
-
-            // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun is mine
-            //     if (b.guns[i].name === "mine") {
-            //         b.guns[i].ammo += count
-            //         if (tech.ammoCap) b.guns[i].ammo = Math.min(tech.ammoCap, b.guns[i].ammo)
-            //         simulation.updateGunHUD();
-            //         break;
-            //     }
-            // }
 
             if (tech.isMutualism && !tech.isEnergyHealth) {
                 for (let i = 0; i < bullet.length; i++) {
@@ -1227,7 +1238,7 @@ const simulation = {
             }
 
             //respawn drones in animation frame
-            requestAnimationFrame(() => { b.delayDrones({ x: level.enter.x + 50, y: level.enter.y - 60 }, droneCount) });
+            requestAnimationFrame(() => { b.delayDrones({ x: level.enter.x + 50, y: level.enter.y - 60 }, droneCount, deliveryCount) });
 
             //respawn spores in animation frame
             let respawnSpores = () => {
@@ -1296,7 +1307,7 @@ const simulation = {
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].isDropPowerUp && mob[i].alive) count++
             }
-            count *= 0.25 //to fake the 25% chance, this makes it not random, and more predictable
+            count *= 0.3 //to fake the 25% chance, this makes it not random, and more predictable
             let cycle = () => { //run after waiting a cycle for the map to be cleared
                 const types = ["heal", "ammo", "heal", "ammo", "research", "coupling", "boost", "tech", "gun", "field"]
                 for (let i = 0; i < count; i++) powerUps.spawnDelay(types[Math.floor(Math.random() * types.length)], 1)
@@ -1370,7 +1381,6 @@ const simulation = {
     //       window.getSelection().addRange(range);
     //       document.execCommand("copy");
     //       window.getSelection().removeAllRanges();
-    //       console.log(`spawn.mapRect(${simulation.getCoords.pos1.x}, ${simulation.getCoords.pos1.y}, ${simulation.getCoords.pos2.x - simulation.getCoords.pos1.x}, ${simulation.getCoords.pos2.y - simulation.getCoords.pos1.y}); //`);
     //     }
     //   }
     // },
@@ -1544,15 +1554,9 @@ const simulation = {
             const circleCollisions = [];
             for (const line of outerCollisions) {
                 for (const vertex of line) {
-                    // console.log('hi')
                     const distance = Math.sqrt((vertex.x - pos.x) ** 2 + (vertex.y - pos.y) ** 2)
                     const angle = Math.atan2(vertex.y - pos.y, vertex.x - pos.x);
-                    // const queryPoint = {
-                    //     x: Math.cos(angle) * (distance - 1) + pos.x,
-                    //     y: Math.sin(angle) * (distance - 1) + pos.y
-                    // }
                     const queryPoint = { x: Math.cos(angle + Math.PI) + vertex.x, y: Math.sin(angle + Math.PI) + vertex.y }
-
                     if (Math.abs(distance - radius) < 1 && Matter.Query.ray(map, pos, queryPoint).length == 0) circleCollisions.push(vertex)
                 }
             }
@@ -1917,7 +1921,6 @@ const simulation = {
                 const y = round(simulation.constructMouseDownPosition.y)
                 const dx = Math.max(25, round(simulation.mouseInGame.x) - x)
                 const dy = Math.max(25, round(simulation.mouseInGame.y) - y)
-                // console.log(e.button)
                 if (e.button === 1) {
                     if (level.isProcedural) {
                         simulation.outputMapString(`spawn.randomMob(x+${x}, ${y}, 0);\n`);
@@ -1964,9 +1967,20 @@ const simulation = {
             }
         });
 
+        document.body.addEventListener("wheel", (e) => {
+            if (e.deltaY > 0) {
+                simulation.setZoom(simulation.zoomScale / 0.9)
+            } else {
+                simulation.setZoom(simulation.zoomScale * 0.9)
+            }
+        });
+
+
+
+
         //undo last element added after you press z
-        document.body.addEventListener("keydown", (e) => { // e.keyCode   z=90  m=77 b=66  shift = 16  c = 67
-            if (simulation.testing && e.keyCode === 90 && simulation.constructMapString.length) {
+        document.body.addEventListener("keydown", (event) => { // e.keyCode   z=90  m=77 b=66  shift = 16  c = 67
+            if (simulation.testing && event.code === "KeyZ" && simulation.constructMapString.length) {
                 if (simulation.constructMapString[simulation.constructMapString.length - 1][6] === 'm') { //remove map from current level
                     const index = map.length - 1
                     Matter.Composite.remove(engine.world, map[index]);

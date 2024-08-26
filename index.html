@@ -11,6 +11,7 @@
     <meta property="og:title" content="n-gon">
     <meta name="twitter:title" content="n-gon">
     <meta name="twitter:description" content="Browser-based side scrolling video game with the matter.js physics engine.">
+    <!-- <meta http-equiv="refresh" content="0; url=https://landgreen.github.io/n-gon/"> -->
     <title>n-gon</title>
     <link rel="stylesheet" href="style.css">
     <link rel='shortcut icon' href='favicon.ico' type='image/x-icon' />
@@ -19,7 +20,8 @@
 <body>
     <div id='guns'></div>
     <div id='field'></div>
-    <div id='tech'></div>
+    <div id='right-HUD-constraint'></div>
+    <div id='right-HUD'></div>
     <div id="text-log"></div>
     <div id="fade-out"></div>
     <div id="health-bg"></div>
@@ -45,24 +47,17 @@
     <svg class="SVG-button" id="training-button" width="120" height="45" style="border: 2px #333 solid;" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame(false, true)">
         <text x="10" y="33">training</text>
     </svg>
-    <div id='info'>
-        <div id="settings">
+    
+    <div id='info'>        
+        <div id="settings" >
             <details id = 'settings-details'>
                 <summary>settings</summary>
                 <div style="line-height: 150%;" class="details-div">
-                    <label for="difficulty-select" title="effects: number of mobs, damage done by mobs, damage done to mobs, mob speed, heal effects">combat difficulty:</label>
-                    <select name="difficulty-select" id="difficulty-select" style="background-color: #fff">
-                        <option value="1">easy</option>
-                        <option value="2" selected>normal ⚆</option>
-                        <option value="4">hard ⚆</option>
-                        <option value="5">why ⚇</option>
-                    </select>
-                    <br>
                     <input onclick="build.showImages('settings')" type="checkbox" id="hide-images" name="hide-images" style="width:17px; height:17px;">
                     <label for="hide-images" title="hide images for fields, guns, and tech">hide images</label>
                     <br>
                     <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" style="width:17px; height:17px;">
-                    <label for="hide-hud" title="hide: tech, defense, damage, in game console, new level animation">minimal HUD</label>
+                    <label for="hide-hud" title="hide: tech, damage taken, damage, in game console, new level animation">minimal HUD</label>
                     <br>
                     <label for="fps-select" title="use this to slow the game down">limit frames per second:</label>
                     <select name="fps-select" id="fps-select">
@@ -76,54 +71,9 @@
                     <br>
                     <input type="checkbox" id="community-maps" name="community-maps" style="width:17px; height:17px;">
                     <label for="community-maps" title="add about 18 player made levels to the random n-gon level pool">community maps</label>
-                    <!-- style="font-size: 1.5em; color: #058;" -->
-
-                    <!-- <br>
-					<label for="body-damage" title="allow damage from the ground and large fast moving blocks">collision damage from blocks:</label>
-					<input type="checkbox" id="body-damage" name="body-damage" checked style="width:17px; height:17px;"> -->
                     <br>
                     <label for="banned" title="type banned levels with a space between them.  Example:  run temple biohazard">banned levels:</label>
                     <input id="banned" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="false" style="width: 182px;" />
-                    <!-- <input list="ban-suggest" id="banned" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="false" style="width: 182px;" />
-                    <datalist id="ban-suggest">
-                        <option value="testChamber">
-                        <option value="lock">
-                        <option value="sewers">
-                        <option value="satellite">
-                        <option value="aerie">
-                        <option value="office">
-                        <option value="highrise">
-                        <option value="warehouse">
-                        <option value="skyscrapers">
-                        <option value="rooftops">
-                        <option value="pavilion">
-                        <option value="labs">
-                        <option value="______">
-                        <option value="fortress">
-                        <option value="biohazard">
-                        <option value="islands">
-                        <option value="tunnel">
-                        <option value="clock">
-                        <option value="coliseum">
-                        <option value="staircase">
-                        <option value="perplex">
-                        <option value="n-gon">
-                        <option value="downpour">
-                        <option value="buttonbutton">
-                        <option value="vats">
-                        <option value="underpass">
-                        <option value="yingYang">
-                        <option value="basement">
-                        <option value="stronghold">
-                        <option value="commandeer">
-                        <option value="stereoMadness">
-                        <option value="house">
-                        <option value="dripp">
-                        <option value="superNgonBros">
-                        <option value="crossfire">
-                        <option value="temple">
-                        <option value="run">
-                    </datalist> -->
                     <br>
                     <label for="classic-select" title="play older versions of n-gon">classic n-gon:</label>
                     <select name="classic-select" id="classic-select" onChange="window.location.href=this.value">
@@ -140,6 +90,7 @@
                         <option value="classic/7-15-2020/">n-gon: summer-2020</option>
                         <option value="classic/6-1-2021/">n-gon: spring-2021</option>
                         <option value="classic/11-1-2022/">n-gon: fall-2022</option>
+                        <option value="classic/7-29-2024/">n-gon: summer-2024</option>
                         <option value="" selected>current version</option>
                     </select>
                     <br>
@@ -205,7 +156,6 @@
                         <tr>
                             <th>PAUSE</th>
                             <td id='key-pause' class='key-input'>P</td>
-                            <!-- <td class='key-used'>Escape</td> -->
                             <td></td>
                         </tr>
                         <tr id="control-testing">
@@ -214,7 +164,6 @@
                             <td></td>
                         </tr>
                     </table>
-
                     <br><button id="control-reset" type="button">reset</button><span style="font-size: 60%;"> to default keys</span>
                 </div>
             </details>
@@ -242,6 +191,7 @@
             </details>
         </div>
     </div>
+
     <svg id='splash' class="intro ui" viewBox="0 0 800 800" onclick="simulation.startGame()">
         <g class="fade-in" transform="translate(100,210) scale(34)" fill='#afafaf' stroke='none'>
             <path d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" />
