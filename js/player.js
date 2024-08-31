@@ -987,6 +987,121 @@ const m = {
                 powerUps.boost.draw()
             }
         },
+        egg() {
+            m.isAltSkin = true
+            m.yOffWhen.stand = 52
+            m.yOffWhen.jump = 72
+            m.coyoteCycles = 11
+            m.hardLandCDScale = 0.5
+            m.hardLanding = 160
+            m.squirrelFx = 1.4;
+            m.squirrelJump = 1.16;
+            m.setMovement()
+
+            m.draw = function () {
+                if (powerUps.boost.endCycle > simulation.cycle) {
+                    //gel that acts as if the wind is blowing it when player moves
+                    ctx.save();
+                    ctx.translate(m.pos.x, m.pos.y);
+                    m.velocitySmooth = Vector.add(Vector.mult(m.velocitySmooth, 0.8), Vector.mult(player.velocity, 0.2))
+                    ctx.rotate(Math.atan2(m.velocitySmooth.y, m.velocitySmooth.x))
+                    ctx.beginPath();
+                    const radius = 39
+                    const mag = 14 * Vector.magnitude(m.velocitySmooth) + radius
+                    ctx.arc(0, 0, radius, -Math.PI / 2, Math.PI / 2);
+                    ctx.bezierCurveTo(-radius, radius, -radius, 0, -mag, 0); // bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
+                    ctx.bezierCurveTo(-radius, 0, -radius, -radius, 0, -radius);
+
+                    // const time = (powerUps.boost.endCycle - m.cycle) / powerUps.boost.duration
+                    const time = Math.min(0.5, (powerUps.boost.endCycle - simulation.cycle) / powerUps.boost.duration)
+
+                    ctx.fillStyle = `rgba(0,0,0,${0.04 + 0.3 * time})`
+                    ctx.fill()
+                    // ctx.strokeStyle = "#333"
+                    // ctx.lineWidth = 1
+                    // ctx.stroke();
+                    ctx.restore();
+                }
+
+                m.walk_cycle += m.flipLegs * m.Vx;
+                ctx.save();
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.5 //|| (m.cycle % 40 > 20)
+                ctx.translate(m.pos.x, m.pos.y);
+                m.calcLeg(Math.PI, -1.25);
+                m.drawLeg("#606060");
+                m.calcLeg(0, 0);
+                m.drawLeg("#444");
+
+                ctx.rotate(m.angle);
+                ctx.beginPath();
+                // ctx.arc(0, 0, 30, 0, 2 * Math.PI);
+                ctx.ellipse(0, 0, 0.9 * 31, 1.05 * 31, 0, 0, 2 * Math.PI);
+                ctx.fillStyle = m.bodyGradient
+                ctx.fill();
+                // ctx.arc(15, 0, 4, 0, 2 * Math.PI);
+                ctx.ellipse(15, 0, 0.8 * 4, 1.1 * 4, 0, 0, 2 * Math.PI);
+
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+                m.yOff = m.yOff * 0.75 + m.yOffGoal * 0.25; //smoothly move leg height towards height goal
+            }
+            m.drawLeg = function (stroke) {
+                if (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2) {
+                    m.flipLegs = 1;
+                } else {
+                    m.flipLegs = -1;
+                }
+                const hip = { x: m.hip.x - 5, y: m.hip.y + 5 }
+                const sub = Vector.sub(m.knee, hip)
+                const off = Vector.mult(Vector.rotate(Vector.normalise(sub), Math.PI / 2), 8)
+                const kneeBraceHigh = Vector.add(hip, off)
+                const kneeBraceLow = Vector.add(kneeBraceHigh, Vector.mult(sub, 0.9))
+                const foot = { x: m.foot.x - 10, y: m.foot.y - 15 }
+                ctx.save();
+                ctx.scale(m.flipLegs, 1); //leg lines
+                ctx.beginPath();
+                ctx.moveTo(hip.x, hip.y);
+                ctx.lineTo(m.knee.x, m.knee.y);
+                ctx.lineTo(foot.x, foot.y);
+                //extra upper leg brace
+                ctx.moveTo(kneeBraceHigh.x, kneeBraceHigh.y);
+                ctx.lineTo(kneeBraceLow.x, kneeBraceLow.y);
+                ctx.lineTo(m.knee.x, m.knee.y);
+
+                ctx.strokeStyle = stroke;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                //foot
+                ctx.beginPath();
+                ctx.moveTo(foot.x, foot.y);
+                ctx.quadraticCurveTo(m.foot.x - 30, m.foot.y + 12, m.foot.x + 13, m.foot.y + 3);
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                //hip joint
+                ctx.beginPath();
+                ctx.arc(m.hip.x, m.hip.y - 2, 11, 0, 2 * Math.PI);
+                //knee joint
+                ctx.moveTo(m.knee.x + 3, m.knee.y);
+                ctx.arc(m.knee.x, m.knee.y, 3, 0, 2 * Math.PI);
+                //knee brace
+                // ctx.moveTo(kneeBraceHigh.x + 4, kneeBraceHigh.y);
+                // ctx.arc(kneeBraceHigh.x, kneeBraceHigh.y, 4, 0, 2 * Math.PI);
+                ctx.moveTo(kneeBraceLow.x + 2.5, kneeBraceLow.y);
+                ctx.arc(kneeBraceLow.x, kneeBraceLow.y, 2.5, 0, 2 * Math.PI);
+                //foot joint
+                ctx.moveTo(foot.x + 2.5, foot.y);
+                ctx.arc(foot.x, foot.y, 2.5, 0, 2 * Math.PI);
+                ctx.fillStyle = "#f6f6f6"//m.fillColor;
+                ctx.fill();
+                ctx.lineWidth = 1;
+                // ctx.strokeStyle = "#333"
+                ctx.stroke();
+                ctx.restore();
+            }
+        },
         mech() {
             m.isAltSkin = true
             m.yOffWhen.stand = 52
@@ -1031,6 +1146,7 @@ const m = {
                 m.drawLeg("#606060");
                 m.calcLeg(0, 0);
                 m.drawLeg("#444");
+
                 ctx.rotate(m.angle);
                 ctx.beginPath();
                 ctx.arc(0, 0, 30, 0, 2 * Math.PI);

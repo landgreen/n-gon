@@ -30,6 +30,20 @@ const mobs = {
             // }
         }
     },
+    defaultHealthBar() {
+        for (let i = 0, len = mob.length; i < len; i++) {
+            if (mob[i].seePlayer.recall && mob[i].showHealthBar) {
+                const h = mob[i].radius * 0.3;
+                const w = mob[i].radius * 2;
+                const x = mob[i].position.x - w / 2;
+                const y = mob[i].position.y - w * 0.7;
+                ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                ctx.fillRect(x, y, w, h);
+                ctx.fillStyle = "rgba(255,0,0,0.7)";
+                ctx.fillRect(x, y, w * mob[i].health, h);
+            }
+        }
+    },
     healthBar() {
         for (let i = 0, len = mob.length; i < len; i++) {
             if (mob[i].seePlayer.recall && mob[i].showHealthBar) {
@@ -1010,8 +1024,9 @@ const mobs = {
                     this.death(); //death with no power up
                 }
             },
-            healthBar() { //draw health by mob //most health bars are drawn in mobs.healthbar();
-                if (this.seePlayer.recall) {
+            //draw health by mob //most health bars are drawn in mobs.healthBar(); , not this
+            healthBar() {
+                if (this.seePlayer.recall && !level.isHideHealth) {
                     const h = this.radius * 0.3;
                     const w = this.radius * 2;
                     const x = this.position.x - w / 2;

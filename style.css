@@ -434,6 +434,15 @@ summary {
     line-height: 160%;
     /* background-color: var(--card-color); */
     font-size: 1em;
+    position: sticky;
+    top: 0px;
+    z-index: 10;
+}
+
+.sticky {
+    position: sticky;
+    top: 0px;
+    z-index: 10;
 }
 
 /* keeps 5 columns at 1440px */

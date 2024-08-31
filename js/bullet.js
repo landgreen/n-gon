@@ -6723,10 +6723,7 @@ const b = {
                 //     }
                 // } else {
                 m.fireCDcycle = m.cycle + tech.missileFireCD * b.fireCDscale / countReduction; // cool down
-                const direction = {
-                    x: Math.cos(m.angle),
-                    y: Math.sin(m.angle)
-                }
+                const direction = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
                 // const where = {
                 //     x: m.pos.x + 30 * direction.x,
                 //     y: m.pos.y + 30 * direction.y
@@ -6752,23 +6749,17 @@ const b = {
                     let count = 0
                     const fireMissile = () => {
                         if (m.crouch) {
-                            b.missile({
-                                x: m.pos.x + 30 * direction.x,
-                                y: m.pos.y + 30 * direction.y
-                            }, m.angle, 20, sqrtCountReduction)
+                            b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, 20, sqrtCountReduction)
                             bullet[bullet.length - 1].force.x += 0.5 * push.x * (Math.random() - 0.5)
                             bullet[bullet.length - 1].force.y += 0.004 + 0.5 * push.y * (Math.random() - 0.5)
                         } else {
-                            b.missile({
-                                x: m.pos.x + 30 * direction.x,
-                                y: m.pos.y + 30 * direction.y
-                            }, m.angle, -15, sqrtCountReduction)
+                            b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, -15, sqrtCountReduction)
                             bullet[bullet.length - 1].force.x += push.x * (Math.random() - 0.5)
                             bullet[bullet.length - 1].force.y += 0.005 + push.y * (Math.random() - 0.5)
                         }
                     }
                     const cycle = () => {
-                        if ((simulation.paused || m.isBodiesAsleep) && m.alive) {
+                        if ((simulation.paused) && m.alive) {
                             requestAnimationFrame(cycle)
                         } else {
                             count++
@@ -6781,15 +6772,9 @@ const b = {
                     requestAnimationFrame(cycle);
                 } else {
                     if (m.crouch) {
-                        b.missile({
-                            x: m.pos.x + 40 * direction.x,
-                            y: m.pos.y + 40 * direction.y
-                        }, m.angle, 25)
+                        b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle, 25)
                     } else {
-                        b.missile({
-                            x: m.pos.x + 40 * direction.x,
-                            y: m.pos.y + 40 * direction.y
-                        }, m.angle, -12)
+                        b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle, -12)
                         bullet[bullet.length - 1].force.y += 0.04 * (Math.random() - 0.2)
                     }
                 }

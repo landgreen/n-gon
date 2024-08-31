@@ -1497,7 +1497,7 @@ const tech = {
         descriptionFunction() {
             return `${powerUps.orb.boost(1)} also give <strong>0.3x</strong> <strong class='color-defense'>damage taken</strong><br>for <strong>${(powerUps.boost.duration / 60).toFixed(0)}</strong> seconds</span>`
         },
-        maxCount: 9,
+        maxCount: 1,
         count: 1,
         frequency: 2,
         frequencyDefault: 2,
@@ -3598,7 +3598,7 @@ const tech = {
         allowed() {
             return !tech.isSuperDeterminism
         },
-        requires: "not superdeterminism",
+        requires: "not, superdeterminism",
         bonusResearch: 7,
         effect() {
             tech.isBanish = true
@@ -3612,6 +3612,24 @@ const tech = {
                 }
             }
             tech.isBanish = false
+        }
+    },
+    {
+        name: "coherence",
+        description: `after observing a ${powerUps.orb.tech()} <strong class='color-choice'><span>ch</span><span>oi</span><span>ce</span></strong><br>that <strong class='color-choice'><span>ch</span><span>oi</span><span>ce</span></strong> is available for all <strong>all</strong> future ${powerUps.orb.tech()}`,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return tech.isBanish
+        },
+        requires: "decoherence",
+        effect() {
+            tech.isRetain = true
+        },
+        remove() {
+            tech.isRetain = false
         }
     },
     {
@@ -3743,9 +3761,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return !tech.isSuperDeterminism && !tech.isNoDraftPause
+            return !tech.isSuperDeterminism
         },
-        requires: "not superdeterminism, eternalism",
+        requires: "not superdeterminism",
         effect() {
             tech.isPauseSwitchField = true;
             for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -3763,7 +3781,7 @@ const tech = {
     },
     {
         name: "eternalism",
-        description: `<strong>1.25x</strong> <strong class='color-d'>damage</strong><br><strong>time</strong> can't be <strong>paused</strong> <em style ="float: right;">(time can still be dilated)</em>`,
+        description: `<strong>1.3x</strong> <strong class='color-d'>damage</strong>, but <strong>time</strong> doesn't <strong>pause</strong><br>while <strong class='color-choice'><span>ch</span><span>oos</span><span>ing</span></strong> ${powerUps.orb.field()}, ${powerUps.orb.tech()}, or ${powerUps.orb.gun()}`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3772,7 +3790,7 @@ const tech = {
             return !tech.isPauseSwitchField && !tech.isPauseEjectTech && !tech.isWormHolePause
         },
         requires: "not unified field theory, paradigm shift, invariant",
-        damage: 1.25,
+        damage: 1.3,
         effect() {
             tech.damage *= this.damage
             tech.isNoDraftPause = true
@@ -3960,7 +3978,7 @@ const tech = {
     {
         name: "dark patterns",
         description: "<strong>1.3x</strong> <strong class='color-d'>damage</strong><br><strong>+15%</strong> <strong class='color-junk'>JUNK</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>",
-        maxCount: 9,
+        maxCount: 3,
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
@@ -4604,9 +4622,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return !tech.isSuperDeterminism && !tech.isNoDraftPause
+            return !tech.isSuperDeterminism
         },
-        requires: "not superdeterminism, eternalism",
+        requires: "not superdeterminism",
         effect() {
             tech.isPauseEjectTech = true;
         },
@@ -6181,7 +6199,7 @@ const tech = {
     {
         name: "water shielding",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Radiation_protection#Radiation_shielding' class="link">water shielding</a>`,
-        description: "reduce <strong class='color-p'>radioactive</strong> effects on you by <strong>0.8x</strong><br><em>neutron bomb, drones, explosions, slime</em>",
+        description: "reduce <strong class='color-p'>radioactive</strong> effects on you by <strong>0.2x</strong><br><em>neutron bomb, drones, explosions, slime</em>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -7735,7 +7753,7 @@ const tech = {
         // },
         name: "electronegativity",
         descriptionFunction() {
-            return `<strong>1.0023x</strong> <strong class='color-d'>damage</strong> per <strong class='color-f'>energy</strong><br><em style ="float: right;">(${(1 + 0.23 * m.energy).toFixed(2)} at current energy, ${(1 + 0.23 * m.maxEnergy).toFixed(2)}x at maximum energy)</em>`
+            return `<strong>1.0023x</strong> <strong class='color-d'>damage</strong> per <strong class='color-f'>energy</strong><br><em style ="float: right;">(${(1 + 0.23 * m.energy).toFixed(2)}x, ${(1 + 0.23 * m.maxEnergy).toFixed(2)}x at max energy)</em>`
         },
         // description: "<strong>+1%</strong> <strong class='color-d'>damage</strong> per <strong>8</strong> stored <strong class='color-f'>energy</strong>",
         isFieldTech: true,
@@ -11020,7 +11038,7 @@ const tech = {
     },
     {
         name: "rhythm",
-        description: "you oscillate up and down",
+        description: "you oscillate up and down<br>also you look like an egg",
         maxCount: 1,
         count: 0,
         frequency: 0,
@@ -11031,6 +11049,7 @@ const tech = {
         },
         requires: "",
         effect() {
+            m.skin.egg();
             setInterval(() => {
                 m.yOffWhen.stand = 53 + 28 * Math.sin(simulation.cycle * 0.2)
                 if (m.onGround && !m.crouch) m.yOffGoal = m.yOffWhen.stand
@@ -11929,6 +11948,7 @@ const tech = {
     cancelTechCount: null,
     isBotDamage: null,
     isBanish: null,
+    isRetain: null,
     isMaxEnergyTech: null,
     isLowEnergyDamage: null,
     isRewindBot: null,
