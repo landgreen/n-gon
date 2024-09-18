@@ -12,6 +12,10 @@ Math.hash = s => {
 
 // document.getElementById("seed").placeholder = Math.initialSeed = Math.floor(Date.now() % 100000) //random every time:  just the time in milliseconds UTC
 
+window.addEventListener('error', error => {
+    simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${error.message}  <u>${error.filename}:${error.lineno}</u>`)
+});
+
 document.getElementById("seed").placeholder = Math.initialSeed = String(Math.floor(Date.now() % 100000))
 Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
 Math.seededRandom = function (min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined
@@ -134,7 +138,8 @@ function beforeUnloadEventListener(event) {
     event.preventDefault();
     if (tech.isExitPrompt) {
         tech.damage *= 1.25
-        simulation.makeTextLog(`damage <span class='color-symbol'>*=</span> ${1.25}`)
+        // simulation.inGameConsole(`<strong class='color-d'>damage</strong> <span class='color-symbol'>*=</span> ${1.25}`)
+        simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.25} //beforeunload`);
         if (Math.random() < 0.25) {
             removeEventListener('beforeunload', beforeUnloadEventListener);
         }
@@ -439,7 +444,7 @@ const build = {
         build.generatePauseLeft() //makes the left side of the pause menu with the tech
         build.generatePauseRight() //makes the right side of the pause menu with the tech
         // build.sortTech('') //sorts tech into the order the player got them using tech.tech[i].cycle = m.cycle
-        document.getElementById("tech").style.display = "none"
+        document.getElementById("right-HUD").style.display = "none"
         document.getElementById("guns").style.display = "none"
         document.getElementById("field").style.display = "none"
         document.getElementById("health").style.display = "none"
@@ -452,68 +457,86 @@ const build = {
     generatePauseLeft() {
         //left side
         let botText = ""
-        if (tech.nailBotCount) botText += `<br>nail-bots: ${tech.nailBotCount}`
-        if (tech.orbitBotCount) botText += `<br>orbital-bots: ${tech.orbitBotCount}`
-        if (tech.boomBotCount) botText += `<br>boom-bots: ${tech.boomBotCount}`
-        if (tech.laserBotCount) botText += `<br>laser-bots: ${tech.laserBotCount}`
-        if (tech.foamBotCount) botText += `<br>foam-bots: ${tech.foamBotCount}`
-        if (tech.soundBotCount) botText += `<br>sound-bots: ${tech.soundBotCount}`
-        if (tech.dynamoBotCount) botText += `<br>dynamo-bots: ${tech.dynamoBotCount}`
-        if (tech.plasmaBotCount) botText += `<br>plasma-bots: ${tech.plasmaBotCount}`
-        if (tech.missileBotCount) botText += `<br>missile-bots: ${tech.missileBotCount}`
+        if (tech.nailBotCount) botText += `<br><strong class='color-bot no-box'>nail-bots ${tech.nailBotCount}</strong>`
+        if (tech.orbitBotCount) botText += `<br><strong class='color-bot no-box'>orbital-bots ${tech.orbitBotCount}</strong>`
+        if (tech.boomBotCount) botText += `<br><strong class='color-bot no-box'>boom-bots ${tech.boomBotCount}</strong>`
+        if (tech.laserBotCount) botText += `<br><strong class='color-bot no-box'>laser-bots ${tech.laserBotCount}</strong>`
+        if (tech.foamBotCount) botText += `<br><strong class='color-bot no-box'>foam-bots ${tech.foamBotCount}</strong>`
+        if (tech.soundBotCount) botText += `<br><strong class='color-bot no-box'>sound-bots ${tech.soundBotCount}</strong>`
+        if (tech.dynamoBotCount) botText += `<br><strong class='color-bot no-box'>dynamo-bots ${tech.dynamoBotCount}</strong>`
+        if (tech.plasmaBotCount) botText += `<br><strong class='color-bot no-box'>plasma-bots ${tech.plasmaBotCount}</strong>`
+        if (tech.missileBotCount) botText += `<br><strong class='color-bot no-box'>missile-bots ${tech.missileBotCount}</strong>`
 
-        let text = `<div class="pause-grid-module" style = "padding: 10px; line-height: 110%;">
-<span style = "font-size: 0.87em;">
-<span style="font-size:1.5em;font-weight: 600; float: left;">PAUSED</span> 
-<span style="float: right;">press ${input.key.pause} to resume</span>
-<br>
-<br>
-<button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build url</button>
+        // <strong class='color-g'>${b.activeGun === null || b.activeGun === undefined ? "undefined" : b.guns[b.activeGun].name}</strong> (${b.activeGun === null || b.activeGun === undefined ? "0" : b.guns[b.activeGun].ammo})
 
+        let text = `<div class="pause-grid-module" style="padding: 8px;">
+<span style="font-size:1.4em;font-weight: 600; float: left;">PAUSED</span> 
+<em style="float: right;color:#ccc;">press ${input.key.pause} to resume</em>
+<br>
 <input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages ? "checked" : ""}>
 <label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.15em;" >hide images</label>
 <br>
+<button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build URL</button>
 <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
 <label for="hide-hud" title="hide: tech, damage taken, damage, in game console" style="font-size:1.15em;">minimal HUD</label>
+</div>
+
+<div class="pause-grid-module">
+<details id = "simulation-variables-details" style="padding: 0 8px;line-height: 140%;">
+<summary>simulation variables</summary>
+<div class="pause-details">
+<strong class='color-d'>damage</strong> ${((tech.damageFromTech())).toPrecision(4)}x
+<span style="float: right;"><strong class='color-d'>level</strong> ${((m.dmgScale)).toPrecision(4)}x</span>
+<br><strong class='color-defense'>damage taken</strong> ${(m.defense()).toPrecision(4)}x
+<span style="float: right;"><strong class='color-defense'>level</strong> ${(simulation.dmgScale).toPrecision(4)}x</span>
+<br><strong class='color-h'>health</strong> (${(m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
+<span style="float: right;">${powerUps.research.count} ${powerUps.orb.research()}</span>
+<br><strong class='color-f'>energy</strong> (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000 * level.isReducedRegen).toFixed(0)}/s)
+<span style="float: right;">${tech.totalCount} ${powerUps.orb.tech()}</span>
+<br><strong><em>fire rate</em></strong> ${(1 / b.fireCDscale).toFixed(2)}x
+<span style="float: right;">mass ${player.mass.toFixed(1)}</span>
+${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
+<br><strong class='color-dup'>duplication</strong> ${(tech.duplicationChance() * 100).toFixed(0)}%
+<span style="float: right;"><strong class='color-junk'>JUNK</strong> ${(100 * (tech.junkChance + level.junkAdded)).toFixed(0)}%</span>
+${botText}
 <br>
+<br> ${level.levelAnnounce()}
+<span style="float: right;">position (${player.position.x.toFixed(0)}, ${player.position.y.toFixed(0)})</span>
+<br>seed ${Math.initialSeed}
+<span style="float: right;">mouse (${simulation.mouseInGame.x.toFixed(0)}, ${simulation.mouseInGame.y.toFixed(0)})</span>
+<br>cycles ${m.cycle}
+<span style="float: right;">velocity (${player.velocity.x.toFixed(2)}, ${player.velocity.y.toFixed(2)})</span>
+<br>mobs ${mob.length} (${spawn.pickList[0]},  ${spawn.pickList[0]})
+<span style="float: right;">blocks ${body.length}</span>
+<br>bullets ${bullet.length}
+<span style="float: right;">power ups ${powerUp.length}</span>
 
-<details> <summary>difficulty</summary>
-    <div style="display: ${simulation.difficultyMode === 1 ? "block" : "none"};"><strong>+6</strong> initial <strong>power ups</strong><br><strong>5%</strong> chance for mobs to a drop <strong class='color-m'>tech</strong></div>
-    <div style="display: ${simulation.difficultyMode > 1 ? "block" : "none"};"><strong>10%</strong> chance for <strong>shielded</strong> mobs<br><strong>0.5x</strong> <strong class='color-h'>heal</strong> power ups</div>
-    <div style="display: ${simulation.difficultyMode > 2 ? "block" : "none"};"><strong>1.5x</strong> mob movement and reactions<br><strong>0.5x</strong> <strong class='color-d'>damage</strong></div>
-    <div style="display: ${simulation.difficultyMode > 3 ? "block" : "none"};"><strong>+1</strong> boss per level, <strong>-1</strong> <strong class='color-m'>tech</strong> per boss<br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>
-    <div style="display: ${simulation.difficultyMode > 4 ? "block" : "none"};"><strong>-3</strong> initial power ups<br><strong>0.5x</strong> <strong class='color-d'>damage</strong></div>
-    <div style="display: ${simulation.difficultyMode > 5 ? "block" : "none"};"><strong>10%</strong> chance for <strong>shielded</strong> mobs<br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>
+${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
+</div>
 </details>
-
-
-    <br><strong class='color-d'>damage</strong>: ${((tech.damageFromTech())).toPrecision(4)}x <span style="float: right;"><strong class='color-d'>difficulty:</strong> ${((m.dmgScale)).toPrecision(4)}x</span>
-    <br><strong class='color-defense'>damage taken</strong>: ${(m.defense()).toPrecision(4)}x <span style="float: right;"><strong class='color-defense'>difficulty:</strong> ${(simulation.dmgScale).toPrecision(4)}x</span>
-    <br><strong><em>fire rate</em></strong>: ${(1 / b.fireCDscale).toFixed(2)}x
-    ${tech.duplicationChance() ? `<br><strong class='color-dup'>duplication</strong>: ${(tech.duplicationChance() * 100).toFixed(0)}%` : ""}
-    ${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
-    ${botText}
-    <br>
-    <br><strong class='color-h'>health</strong>: (${(m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
-    <span style="float: right;">mass: ${player.mass.toFixed(1)}</span>
-    <br><strong class='color-f'>energy</strong>: (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000).toFixed(0)}/s)
-    <span style="float: right;">position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)})</span>
-    <br><strong class='color-g'>gun</strong>: ${b.activeGun === null || b.activeGun === undefined ? "undefined" : b.guns[b.activeGun].name} &nbsp; <strong class='color-g'>ammo</strong>: ${b.activeGun === null || b.activeGun === undefined ? "0" : b.guns[b.activeGun].ammo}
-    <span style="float: right;">mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)})</span>
-    <br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}
-    <span style="float: right;">velocity: (${player.velocity.x.toFixed(3)}, ${player.velocity.y.toFixed(3)})</span>
-    ${tech.junkChance ? `<br><strong class='color-junk'>JUNK</strong>: ${(100 * tech.junkChance).toFixed(1)}%  ` : ""}
-    <br>
-    <br>mobs: ${spawn.pickList[0]},  ${spawn.pickList[0]}
-    <br>seed: ${Math.initialSeed} &nbsp; ${m.cycle} cycles
-    <br>mobs: ${mob.length} &nbsp; blocks: ${body.length} &nbsp; bullets: ${bullet.length} &nbsp; power ups: ${powerUp.length} ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}</span></div>`;
-        // deaths: ${mobs.mobDeaths} &nbsp;
-        // if (tech.isPauseSwitchField && !simulation.isChoosing) {
-        //     const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
-        //     text += `<div class="pause-grid-module card-background" id="pause-field" ${style} >
-        //                    <div class="card-text" style="animation: fieldColorCycle 1s linear infinite alternate;">
-        //                    <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
-        //                    ${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
+</div>`
+        text += `<div class="pause-grid-module card-background" style="height:auto;">
+<details id="difficulty-parameters-details" style="padding: 0 8px;">
+<summary>difficulty parameters</summary>
+<div class="pause-details">
+        ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.2x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> boss on each level</div>` : " "}
+        ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>more</strong> mob per level<br><strong>faster</strong> mobs per level</div>` : " "}
+        ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.2x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> random <strong class="constraint">constraint</strong> on each level</div>` : " "}
+        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row"><strong>+1</strong> boss on each level<br>bosses spawn <strong>1</strong> fewer ${powerUps.orb.tech()}</div>` : " "}
+        ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.2x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> random <strong class="constraint">constraint</strong> on each level</div>` : " "}
+        ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> initial <strong class='color-d'>damage</strong><br><strong>2x</strong> initial <strong class='color-defense'>damage taken</strong></div>` : " "}        
+</div>
+</details>
+${simulation.difficultyMode > 2 ? `<details id="constraints-details" style="padding: 0 8px;"><summary>active constraints</summary><div class="pause-details"><span class="constraint">${level.constraintDescription1}<br>${level.constraintDescription2}</span></div></details>` : ""}
+ </div>`
+        if (!localSettings.isHideHUD) text += `<div class="pause-grid-module card-background" style="height:auto;">
+<details id = "console-log-details" style="padding: 0 8px;">
+<summary>console log</summary>
+<div class="pause-details">
+    <div class="pause-grid-module" style="background-color: rgba(255,255,255,0.3);font-size: 0.8em;">${document.getElementById("text-log").innerHTML}</div>
+</div>
+</details>
+</div>`
         if ((tech.isPauseSwitchField || simulation.testing)) {  //&& !simulation.isChoosing
             // const fieldNameP = m.fieldUpgrades[m.fieldMode > 1 ? m.fieldMode - 1 : m.fieldUpgrades.length - 1].name
             // const fieldNameN = m.fieldUpgrades[m.fieldMode === m.fieldUpgrades.length - 2 ? 1 : m.fieldMode + 1].name
@@ -548,22 +571,29 @@ const build = {
                                                         <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div>
                                                         ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         }
-        if (!localSettings.isHideHUD) text += `<div class="pause-grid-module pause-console" style="background-color: rgba(255,255,255,0.3);">${document.getElementById("text-log").innerHTML}</div>` //show last in game console message
         let el = document.getElementById("pause-grid-left")
         el.style.display = "grid"
         el.innerHTML = text
+        requestAnimationFrame(() => {
+            if (localSettings.isAllowed) {
+                document.getElementById("simulation-variables-details").open = localSettings.pauseMenuDetailsOpen[0]
+                document.getElementById("difficulty-parameters-details").open = localSettings.pauseMenuDetailsOpen[1]
+                document.getElementById("console-log-details").open = localSettings.pauseMenuDetailsOpen[2]
+                if (document.getElementById("constraints-details")) document.getElementById("constraints-details").open = localSettings.pauseMenuDetailsOpen[3]
+            }
+        });
     },
     generatePauseRight() {
         let text = `<div class="sort">
-                                                    <button onclick="build.sortTech('damage')" class='sort-button'><strong class='color-d'>damage</strong></button>
-                                                    <button onclick="build.sortTech('guntech')" class='sort-button'><strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></button>
-                                                    <button onclick="build.sortTech('fieldtech')" class='sort-button'><strong class='color-f'>field</strong><strong class='color-m'>tech</strong></button>
-                                                    <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
-                                                    <button onclick="build.sortTech('damage taken')" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">damage taken</strong></button>
-                                                    <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
-                                                    <input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#000;" placeholder="sort by" />
-                                                    <button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
-                                                </div>`;
+    <button onclick="build.sortTech('guntech')" class='sort-button'>${powerUps.orb.gunTech()}</button>
+    <button onclick="build.sortTech('fieldtech')" class='sort-button'>${powerUps.orb.fieldTech()}</button>
+    <button onclick="build.sortTech('damage')" class='sort-button'><strong class='color-d'>damage</strong></button>
+    <button onclick="build.sortTech('damage taken')" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">dmg taken</strong></button>
+    <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
+    <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
+    <input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#000;" placeholder="sort by" />
+    <button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
+</div>`;
         const ejectClass = (tech.isPauseEjectTech && !simulation.isChoosing) ? 'pause-eject' : ''
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0) {
@@ -710,6 +740,15 @@ const build = {
         simulation.updateTechHUD();
     },
     unPauseGrid() {
+        if (localSettings.isAllowed) {
+            //save details open/close state
+            if (document.getElementById("simulation-variables-details")) localSettings.pauseMenuDetailsOpen[0] = document.getElementById("simulation-variables-details").open
+            if (document.getElementById("difficulty-parameters-details")) localSettings.pauseMenuDetailsOpen[1] = document.getElementById("difficulty-parameters-details").open
+            if (document.getElementById("console-log-details")) localSettings.pauseMenuDetailsOpen[2] = document.getElementById("console-log-details").open
+            if (document.getElementById("constraints-details")) localSettings.pauseMenuDetailsOpen[3] = document.getElementById("constraints-details").open
+            localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        }
+
         document.getElementById("guns").style.display = "inline"
         document.getElementById("field").style.display = "inline"
         if (tech.isEnergyHealth) {
@@ -720,7 +759,7 @@ const build = {
             document.getElementById("health-bg").style.display = "inline"
         }
         if (!localSettings.isHideHUD) {
-            document.getElementById("tech").style.display = "inline"
+            document.getElementById("right-HUD").style.display = "inline"
             document.getElementById("defense-bar").style.display = "inline"
             document.getElementById("damage-bar").style.display = "inline"
         }
@@ -749,7 +788,7 @@ const build = {
                                 <span style="position:relative;">
                                     <div class="circle-grid-skin"></div>
                                     <div class="circle-grid-skin-eye"></div>
-                                </span> &nbsp; &nbsp; &nbsp;&nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
+                                </span> &nbsp; &nbsp; &nbsp; &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
                                 ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     gunTechText(i) {
@@ -900,43 +939,43 @@ const build = {
     // <button onclick="build.sortTech('have', true)" class='sort-button color-m' style="letter-spacing: 1px;font-weight: 800;">have</button>
     populateGrid() { //background-color:var(--build-bg-color);
         let text = `
-                            <div class="experiment-start-box">
-                                <div class="sort" style="border: 0px;">
-                                    <button onclick="build.sortTech('guntech', true)" class='sort-button'><strong class='color-g'>gun</strong><strong class='color-m'>tech</strong></button>
-                                    <button onclick="build.sortTech('fieldtech', true)" class='sort-button'><strong class='color-f'>field</strong><strong class='color-m'>tech</strong></button>
-                                    <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d'>damage</strong></button>
-                                    <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
-                                    <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">damage taken</strong></button>
-                                    <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
-                                    <input type="search" id="sort-input" style="width: 6em;font-size: 0.6em;color:#000;" placeholder="sort by" />
-                                    <button onclick="build.sortTech('input', true)" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
-                                </div>
-                                <div>
-                                    <div style="display: grid;grid-template-columns: repeat(3, 1fr);row-gap: 10px;column-gap: 25px;grid-auto-rows: minmax(5px, auto);margin:-5px 0px 10px 25px;line-height: 100%;">
-                                        <div style="grid-column: 1;grid-row: 2 / 4;">
-                                            <svg class="SVG-button" onclick="build.startExperiment()" width="150" height="70" >
-                                                <g stroke='none' fill='#333' stroke-width="2" font-size="65px" font-family="Ariel, sans-serif">
-                                                    <text x="10" y="57">start</text>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                        <div style="grid-column: 2;grid-row: 2;">
-                                            <svg class="SVG-button" onclick="build.reset()" width="50" height="25">
-                                                <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
-                                                    <text x="5" y="18">reset</text>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                        <div style="grid-column: 2;grid-row: 3/4;">
-                                            <svg class="SVG-button" onclick="build.shareURL(true)" width="52" height="25">
-                                                <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
-                                                    <text x="5" y="18">share</text>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`
+<div class="experiment-start-box">
+    <div class="sort" style="border: 0px;">
+        <button onclick="build.sortTech('guntech', true)" class='sort-button'>${powerUps.orb.gunTech()}</button>
+        <button onclick="build.sortTech('fieldtech', true)" class='sort-button'>${powerUps.orb.fieldTech()}</button>
+        <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d'>damage</strong></button>
+        <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">dmg taken</strong></button>
+        <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
+        <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
+        <input type="search" id="sort-input" style="width: 7.5em;font-size: 0.6em;color:#000;" placeholder="sort by" />
+        <button onclick="build.sortTech('input', true)" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
+    </div>
+    <div>
+        <div style="display: grid;grid-template-columns: repeat(3, 1fr);row-gap: 10px;column-gap: 25px;grid-auto-rows: minmax(5px, auto);margin:-5px 0px 10px 25px;line-height: 100%;">
+            <div style="grid-column: 1;grid-row: 2 / 4;">
+                <svg class="SVG-button" onclick="build.startExperiment()" width="150" height="70" >
+                    <g stroke='none' fill='#333' stroke-width="2" font-size="65px" font-family="Ariel, sans-serif">
+                        <text x="10" y="57">start</text>
+                    </g>
+                </svg>
+            </div>
+            <div style="grid-column: 2;grid-row: 2;">
+                <svg class="SVG-button" onclick="build.reset()" width="50" height="25">
+                    <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
+                        <text x="5" y="18">reset</text>
+                    </g>
+                </svg>
+            </div>
+            <div style="grid-column: 2;grid-row: 3/4;">
+                <svg class="SVG-button" onclick="build.shareURL(true)" width="52" height="25">
+                    <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
+                        <text x="5" y="18">share</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>`
         const hideStyle = `style="height:auto; border: none; background-color: transparent;"`
         for (let i = 0, len = m.fieldUpgrades.length; i < len; i++) {
             const style = localSettings.isHideImages ? hideStyle : `style="background-image: url('img/field/${m.fieldUpgrades[i].name}${i === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
@@ -1065,7 +1104,7 @@ const build = {
             // url += `&level=${Math.abs(Number(document.getElementById("starting-level").value))}`
             // alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         } else {
-            simulation.makeTextLog("n-gon build URL copied to clipboard.<br>Paste into browser address bar.")
+            simulation.inGameConsole("n-gon build URL copied to clipboard.<br>Paste into browser address bar.")
         }
         console.log('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
         console.log(url)
@@ -1369,7 +1408,6 @@ window.addEventListener("keydown", function (event) {
             simulation.previousGun();
             break
         case input.key.pause:
-
             if (input.isPauseKeyReady && m.alive && !build.isExperimentSelection) {
                 input.isPauseKeyReady = false
                 setTimeout(function () { input.isPauseKeyReady = true }, 300);
@@ -1383,7 +1421,7 @@ window.addEventListener("keydown", function (event) {
                     // level.levelAnnounce();
                     document.body.style.cursor = "none";
                     requestAnimationFrame(cycle);
-                } else if (!tech.isNoDraftPause) {
+                } else {  //if (!tech.isNoDraftPause)
                     simulation.paused = true;
                     build.pauseGrid()
                     document.body.style.cursor = "auto";
@@ -1429,22 +1467,24 @@ window.addEventListener("keydown", function (event) {
             break
         case input.key.testing:
             if (m.alive && localSettings.loreCount > 0 && !simulation.paused && !build.isExperimentSelection) {
-                if (simulation.difficultyMode > 4) {
-                    simulation.makeTextLog("<em>testing mode disabled for this difficulty</em>");
+                if (simulation.difficultyMode > 5) {
+                    simulation.inGameConsole("<em>testing mode disabled for this difficulty</em>");
                     break
                 }
                 if (simulation.testing) {
                     simulation.testing = false;
                     simulation.loop = simulation.normalLoop
                     if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'none'
-                    simulation.makeTextLog("", 0);
+                    simulation.inGameConsole("", 0);
                 } else {
                     simulation.testing = true;
                     simulation.loop = simulation.testingLoop
-                    if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'inline'
                     if (simulation.testing) tech.setCheating();
-                    simulation.makeTextLog(
-                        `<table class="pause-table">
+                    if (simulation.isConstructionMode) {
+                        document.getElementById("construct").style.display = 'inline'
+                    } else {
+                        simulation.inGameConsole(
+                            `<table class="pause-table">
                 <tr>
                     <td class='key-input-pause'>T</td>
                     <td class='key-used'><strong>toggle testing</strong></td>
@@ -1496,8 +1536,8 @@ window.addEventListener("keydown", function (event) {
                 <tr>
                     <td class='key-input-pause'>⇧X</td>
                     <td class='key-used'>restart</td>
-                </tr>
-            </table>`, Infinity);
+                </tr></table>`, Infinity);
+                    }
                 }
             }
             break
@@ -1649,7 +1689,7 @@ window.addEventListener("keydown", function (event) {
             case "l":
                 document.getElementById("field").style.display = "none"
                 document.getElementById("guns").style.display = "none"
-                document.getElementById("tech").style.display = "none"
+                document.getElementById("right-HUD").style.display = "none"
                 break
         }
     }
@@ -1802,6 +1842,11 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     if (localSettings.difficultyMode === undefined) localSettings.difficultyMode = "2"
     simulation.difficultyMode = localSettings.difficultyMode
     lore.setTechGoal()
+
+    if (localSettings.pauseMenuDetailsOpen === undefined) {
+        localSettings.pauseMenuDetailsOpen = [true, false, false, true]
+        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    }
 } else {
     console.log('setting default localSettings')
     const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
@@ -1823,6 +1868,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         key: undefined,
         isHideImages: true, //default to hide images
         isHideHUD: false,
+        pauseMenuDetailsOpen: [true, false, false, true]
     };
     input.setDefault()
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage

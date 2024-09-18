@@ -419,15 +419,6 @@ const simulation = {
         simulation.boldActiveGunHUD();
     },
     updateTechHUD() {
-
-        // tech.tech.sort((a, b) => {
-        //     console.log(a.cycle, b.cycle)
-        //     if (a.cycle === undefined && b.cycle !== undefined) return -1;
-        //     if (a.cycle !== undefined && b.cycle === undefined) return 1;
-        //     if (a.cycle === undefined && b.cycle === undefined) return 0;
-        //     if (a.cycle !== b.cycle) return a.cycle - b.cycle;
-        // });
-
         let text = ""
         for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
             if (tech.tech[i].isLost) {
@@ -436,22 +427,56 @@ const simulation = {
             } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
                 if (text) text += "<br>" //add a new line, but not on the first line
                 text += tech.tech[i].name
-                // if (tech.tech[i].nameInfo) {
-                //     text += tech.tech[i].nameInfo
-                //     tech.tech[i].addNameInfo();
-                // }
                 if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
             }
         }
-        document.getElementById("tech").innerHTML = text
+        document.getElementById("right-HUD").innerHTML = text
+
+
+        // let text = ""
+        // if (simulation.difficultyMode > 2 && level.constraintDescription1) {
+        //     text += `<span class='constraint'>${level.constraintDescription1}</span>`
+        //     // text += `${level.constraintDescription1}`
+        // }
+        // if (simulation.difficultyMode > 4 && level.constraintDescription2) {
+        //     text += `<br><span class='constraint'>${level.constraintDescription2}</span>`
+        // }
+        // for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
+        //     if (tech.tech[i].isLost) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
+        //     } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += tech.tech[i].name
+        //         if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
+        //     }
+        // }
+        // document.getElementById("right-HUD").innerHTML = text
+
+        // let constraints = ""
+        // if (simulation.difficultyMode > 2 && level.constraintDescription1) {
+        //     constraints += `<span class='constraint' style="opacity: 0.35;">${level.constraintDescription1}</span>`
+        //     // text += `${level.constraintDescription1}`
+        // }
+        // if (simulation.difficultyMode > 4 && level.constraintDescription2) {
+        //     constraints += `<br><span class='constraint' style="opacity: 0.35;">${level.constraintDescription2}</span>`
+        // }
+        // let text = ""
+        // for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
+        //     if (tech.tech[i].isLost) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
+        //     } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
+        //         if (text) text += "<br>" //add a new line, but not on the first line
+        //         text += tech.tech[i].name
+        //         if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
+        //     }
+        // }
+        // document.getElementById("right-HUD").innerHTML = constraints + `<div class="right-HUD-tech">` + text + `</div>`
     },
     lastLogTime: 0,
     isTextLogOpen: true,
-    // <!-- <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#789" stroke="none" />
-    // <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#7ce" stroke="none" /> -->
-    // SVGleftMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M832.41,106.64 V323.55 H651.57 V256.64 c0-82.5,67.5-150,150-150 Z" fill="#149" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
-    // SVGrightMouse: '<svg viewBox="750 0 200 765" class="mouse-icon" width="40px" height = "60px" stroke-linecap="round" stroke-linejoin="round" stroke-width="25px" stroke="#000" fill="none">  <path fill="#fff" stroke="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M827,112 h30 a140,140,0,0,1,140,140 v68 h-167 z" fill="#0cf" stroke="none" />  <path fill="none" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />  <path d="M657 317 h 340 h-170 v-207" />  <ellipse fill="#fff" cx="827.57" cy="218.64" rx="29" ry="68" />  </svg>',
-    makeTextLog(text, time = 240) {
+    inGameConsole(text, time = 240) {
         if (!localSettings.isHideHUD && simulation.isTextLogOpen && !build.isExperimentSelection) {
             if (simulation.lastLogTime > m.cycle) { //if there is an older message
                 document.getElementById("text-log").innerHTML = document.getElementById("text-log").innerHTML + '<br>' + text;
@@ -757,11 +782,11 @@ const simulation = {
         document.getElementById("health").style.display = "inline"
         document.getElementById("health-bg").style.display = "inline";
         if (!localSettings.isHideHUD) {
-            document.getElementById("tech").style.display = "inline"
+            document.getElementById("right-HUD").style.display = "inline"
             document.getElementById("defense-bar").style.display = "inline"
             document.getElementById("damage-bar").style.display = "inline"
         } else {
-            document.getElementById("tech").style.display = "none"
+            document.getElementById("right-HUD").style.display = "none"
             document.getElementById("defense-bar").style.display = "none"
             document.getElementById("damage-bar").style.display = "none"
         }
@@ -787,10 +812,11 @@ const simulation = {
         } else {
             Composite.add(engine.world, [player])
         }
+        shuffle(level.constraint)
         level.populateLevels()
-
         input.endKeySensing();
         simulation.ephemera = []
+        powerUps.powerUpStorage = []
         tech.setupAllTech(); //sets tech to default values
         b.resetAllGuns();
         tech.duplication = 0;
@@ -814,7 +840,6 @@ const simulation = {
         simulation.isChoosing = false;
         b.setFireMethod()
         b.setFireCD();
-        // simulation.updateTechHUD();
         for (let i = 0; i < b.guns.length; i++) b.guns[i].isRecentlyShown = false //reset recently shown back to zero
         for (let i = 0; i < m.fieldUpgrades.length; i++) m.fieldUpgrades[i].isRecentlyShown = false //reset recently shown back to zero
         for (let i = 0; i < tech.tech.length; i++) tech.tech[i].isRecentlyShown = false //reset recently shown back to zero
@@ -827,17 +852,13 @@ const simulation = {
         powerUps.boost.endCycle = 0
         powerUps.isFieldSpawned = false
         m.setFillColors();
-        // m.maxHealth = 1
-        // m.maxEnergy = 1
-        // m.energy = 1
         input.isPauseKeyReady = true
         simulation.wipe = function () { //set wipe to normal
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
+        m.lastHit = 0
         m.hole.isOn = false
         simulation.paused = false;
-        // simulation.cycle = 0
-        // m.cycle = 0
         engine.timing.timeScale = 1;
         simulation.fpsCap = simulation.fpsCapDefault;
         simulation.isAutoZoom = true;
@@ -848,23 +869,17 @@ const simulation = {
         level.onLevel = 0;
         level.levelsCleared = 0;
         level.updateDifficulty()
+        // level.setConstraints()
 
         simulation.clearNow = true;
         document.getElementById("text-log").style.display = "none"
         document.getElementById("fade-out").style.opacity = 0;
         document.title = "n-gon";
-        // simulation.makeTextLog(`input.key.up<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]`);
-        // simulation.makeTextLog(`input.key.left<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]`);
-        // simulation.makeTextLog(`input.key.down<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]`);
-        // simulation.makeTextLog(`input.key.right<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]`);
-        simulation.makeTextLog(`Math.seed <span class='color-symbol'>=</span> ${Math.initialSeed}`);
-        simulation.makeTextLog(`<span class='color-var'>const</span> engine <span class='color-symbol'>=</span> Engine.create(); <em>//simulation begin</em>`);
-        simulation.makeTextLog(`engine.timing.timeScale <span class='color-symbol'>=</span> 1`);
-        // simulation.makeTextLog(`input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
-
-        // document.getElementById("health").style.display = "inline"
-        // document.getElementById("health-bg").style.display = "inline"
+        simulation.inGameConsole(`Math.seed <span class='color-symbol'>=</span> ${Math.initialSeed}`);
+        simulation.inGameConsole(`<span class='color-var'>const</span> engine <span class='color-symbol'>=</span> Engine.create(); <em>//simulation begin</em>`);
+        simulation.inGameConsole(`engine.timing.timeScale <span class='color-symbol'>=</span> 1`);
         m.alive = true;
+        m.definePlayerMass();
         m.onGround = false
         m.lastOnGroundCycle = 0
         m.health = 0;
@@ -874,23 +889,10 @@ const simulation = {
 
         //set to default field
         tech.healMaxEnergyBonus = 0
-        // m.setMaxEnergy();
         m.energy = 0
         m.immuneCycle = 0;
-        // simulation.makeTextLog(`${simulation.SVGrightMouse}<strong style='font-size:30px;'> ${m.fieldUpgrades[m.fieldMode].name}</strong><br><span class='faded'></span><br>${m.fieldUpgrades[m.fieldMode].description}`, 600);
-        // simulation.makeTextLog(`
-        // input.key.up <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.up}</span>", "<span class='color-text'>ArrowUp</span>"]
-        // <br>input.key.left <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]
-        // <br>input.key.down <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]
-        // <br>input.key.right <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]
-        // <br>
-        // <br><span class='color-var'>m</span>.fieldMode <span class='color-symbol'>=</span> "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</span>"
-        // <br>input.key.field <span class='color-symbol'>=</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>right mouse</span>"]
-        // <br><span class='color-var'>m</span>.field.description <span class='color-symbol'>=</span> "<span class='color-text'>${m.fieldUpgrades[m.fieldMode].description}</span>"
-        // `, 800);
         m.coupling = 0
         m.setField(0) //this calls m.couplingChange(), which sets max health and max energy
-        // m.energy = 0;
         //exit testing
         if (simulation.testing) {
             simulation.testing = false;
@@ -973,7 +975,7 @@ const simulation = {
                                 },
                             })
                             const before = { x: player.position.x, y: player.position.y, }
-                            let posXClamped = Math.min(Math.max(level.fallModeBounds.left, player.position.x), level.fallModeBounds.right)
+                            const posXClamped = Math.min(Math.max(level.fallModeBounds.left, player.position.x), level.fallModeBounds.right)
                             Matter.Body.setPosition(player, { x: posXClamped, y: level.enter.y - 4000 });
 
                             // translate camera smoothly to preserve illusion to endless fall
@@ -1010,7 +1012,7 @@ const simulation = {
                     if (isNaN(player.position.x)) m.death();
                     if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
                         if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) {
-                            m.energy += m.maxEnergy * 0.05
+                            m.energy += m.maxEnergy * 0.05 * level.isReducedRegen
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: m.pos.x,
                                 y: m.pos.y - 45,
@@ -1022,7 +1024,7 @@ const simulation = {
                         if (tech.isHealthRecovery) {
                             if (tech.isEnergyHealth) {
                                 if (m.immuneCycle < m.cycle) {
-                                    m.energy += m.maxEnergy * 0.005
+                                    m.energy += m.maxEnergy * 0.005 * level.isReducedRegen
                                     simulation.drawList.push({ //add dmg to draw queue
                                         x: m.pos.x,
                                         y: m.pos.y,
@@ -1067,7 +1069,6 @@ const simulation = {
                                 },
                             })
                         }
-
                         if (tech.isZeno) {
                             if (tech.isEnergyHealth) {
                                 m.energy *= 0.95
@@ -1079,28 +1080,41 @@ const simulation = {
                         }
                         if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
 
-                        fallCheck = function (who, save = false) {
-                            let i = who.length;
-                            while (i--) {
-                                if (who[i].position.y > simulation.fallHeight) {
-                                    if (save) {
-                                        Matter.Body.setVelocity(who[i], { x: 0, y: 0 });
-                                        Matter.Body.setPosition(who[i], {
-                                            x: level.exit.x + 30 * (Math.random() - 0.5),
-                                            y: level.exit.y + 30 * (Math.random() - 0.5)
-                                        });
-                                    } else {
-                                        Matter.Composite.remove(engine.world, who[i]);
-                                        who.splice(i, 1);
-                                    }
+
+
+                        let i = body.length;
+                        while (i--) {
+                            if (body[i].position.y > simulation.fallHeight) {
+                                Matter.Composite.remove(engine.world, body[i]);
+                                body.splice(i, 1);
+                            }
+                        }
+                        i = powerUp.length
+                        while (i--) {
+                            if (powerUp[i].position.y > simulation.fallHeight) {
+                                Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 });
+                                if (level.fallMode === "position") {
+                                    const posXClamped = Math.min(Math.max(level.fallModeBounds.left, powerUp[i].position.x), level.fallModeBounds.right)
+                                    Matter.Body.setPosition(powerUp[i], { x: posXClamped, y: level.enter.y - 3000 });
+                                } else {
+                                    Matter.Body.setPosition(powerUp[i], {
+                                        x: level.exit.x + 30 * (Math.random() - 0.5),
+                                        y: level.exit.y + 30 * (Math.random() - 0.5)
+                                    });
                                 }
                             }
-                        };
-                        fallCheck(body);
-                        fallCheck(powerUp, true);
-                        let i = mob.length;
+                        }
+                        i = mob.length;
                         while (i--) {
-                            if (mob[i].position.y > simulation.fallHeight) mob[i].death();
+                            if (mob[i].position.y > simulation.fallHeight) {
+                                if (mob[i].isBoss && level.fallMode === "position") {
+                                    Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
+                                    const posXClamped = Math.min(Math.max(level.fallModeBounds.left, mob[i].position.x), level.fallModeBounds.right)
+                                    Matter.Body.setPosition(mob[i], { x: posXClamped, y: level.enter.y - 3000 });
+                                } else {
+                                    mob[i].death();
+                                }
+                            }
                         }
 
                     }
@@ -1224,7 +1238,7 @@ const simulation = {
             }
 
             //respawn drones in animation frame
-            requestAnimationFrame(() => { b.delayDrones({ x: level.enter.x + 50, y: level.enter.y - 60 }, droneCount) });
+            requestAnimationFrame(() => { b.delayDrones({ x: level.enter.x + 50, y: level.enter.y - 60 }, droneCount, deliveryCount) });
 
             //respawn spores in animation frame
             let respawnSpores = () => {
@@ -1952,6 +1966,17 @@ const simulation = {
                 simulation.constructMouseDownPosition.y = simulation.mouseInGame.y
             }
         });
+
+        document.body.addEventListener("wheel", (e) => {
+            if (e.deltaY > 0) {
+                simulation.setZoom(simulation.zoomScale / 0.9)
+            } else {
+                simulation.setZoom(simulation.zoomScale * 0.9)
+            }
+        });
+
+
+
 
         //undo last element added after you press z
         document.body.addEventListener("keydown", (event) => { // e.keyCode   z=90  m=77 b=66  shift = 16  c = 67

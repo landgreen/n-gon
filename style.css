@@ -9,6 +9,7 @@ body {
     margin: 0;
     overflow: hidden;
     cursor: auto;
+    /* filter: grayscale(1); */
     /* transition: background-color 0.2s ease-in-out; */
 }
 
@@ -184,17 +185,11 @@ summary {
     scrollbar-width: none;
 }
 
-
-
-
 .choose-grid-no-images {
     border-radius: 8px;
     border: 10px solid #444;
     gap: 10px;
     background-color: #444;
-    /* padding: 10px 1px; */
-
-
     position: absolute;
     top: 50%;
     left: 50%;
@@ -212,6 +207,7 @@ summary {
     overflow: auto;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    /* box-shadow: 7px 7px 6px rgba(0, 0, 0, 0.13); */
 }
 
 
@@ -223,9 +219,6 @@ summary {
     line-height: 160%;
     background-color: var(--card-color);
     font-size: 0.75em;
-    /* transform-style: preserve-3d;
-    transition: transform 2s;
-    transform: rotateX(180deg); */
 }
 
 .choose-grid-module:hover {
@@ -260,9 +253,7 @@ summary {
     overflow: auto;
     max-height: 100vh;
     -ms-overflow-style: none;
-    /* IE and Edge */
     scrollbar-width: none;
-    /* Firefox */
     padding: 1px;
 }
 
@@ -277,15 +268,7 @@ summary {
     overflow: auto;
     max-height: 100vh;
     -ms-overflow-style: none;
-    /* IE and Edge */
     scrollbar-width: none;
-    /* Firefox */
-}
-
-.pause-console {
-    padding: 10px;
-    margin: 5px;
-    border-radius: 10px;
 }
 
 #pause-grid-left::-webkit-scrollbar {
@@ -303,12 +286,12 @@ summary {
     border: 1px solid #444;
     /* min-height: 88px; */
     line-height: 100%;
-    background-color: #fff;
+    background-color: var(--card-color);
 }
 
 .sort-button {
     border: 1px #333 solid;
-    border-radius: 0.5em;
+    border-radius: 0.4em;
     background-color: #fff;
     font-size: 0.5em;
     /* padding: 0.3em; */
@@ -371,7 +354,6 @@ summary {
 
 .experiment-start-box {
     background-color: var(--card-color);
-    /* font-size: 1em; */
     position: sticky;
     top: 0;
     z-index: 10;
@@ -390,7 +372,8 @@ summary {
     border-top-right-radius: 0px;
     padding: 0.2em 0px;
     /* height: 210px; */
-    box-shadow: 8px 8px 7px rgba(0, 0, 50, 0.15);
+    box-shadow: 8px 8px 6px rgba(0, 0, 50, 0.15);
+    /* opacity: 0.1; */
 }
 
 .card-background {
@@ -403,7 +386,7 @@ summary {
 }
 
 .card-text {
-    background-color: rgba(255, 255, 255, 1);
+    background-color: var(--card-color);
     padding: 0.5em 1em;
     border: 1px solid #444;
     margin-top: -1px;
@@ -451,6 +434,15 @@ summary {
     line-height: 160%;
     /* background-color: var(--card-color); */
     font-size: 1em;
+    position: sticky;
+    top: 0px;
+    z-index: 10;
+}
+
+.sticky {
+    position: sticky;
+    top: 0px;
+    z-index: 10;
 }
 
 /* keeps 5 columns at 1440px */
@@ -578,24 +570,18 @@ summary {
     z-index: 12;
     font-size: 1.5em;
     transition: opacity 5s ease-in;
+
+    /* border: 1.5px #333 solid; */
+    /* border-radius: 8px; */
+    /* background-color: #fff; */
 }
 
 .details-div {
     padding: 10px;
     border-radius: 8px;
     border: 2px #333 solid;
-    background-color: #fff;
+    background-color: var(--card-color);
 }
-
-
-
-
-
-
-
-
-
-
 
 
 #dmg {
@@ -693,14 +679,12 @@ summary {
     z-index: 2;
     font-size: 23px;
     color: #222;
-    /* background-color: rgba(255, 255, 255, 0.4); */
     background-color: rgba(255, 255, 255, 0.2);
     line-height: 120%;
     user-select: none;
     pointer-events: none;
     padding: 0px 5px 0px 5px;
     border-radius: 5px;
-    /*border: 2px solid rgba(0, 0, 0, 0.4);*/
 }
 
 #field {
@@ -712,31 +696,51 @@ summary {
     color: #000;
     text-align: right;
     opacity: 0.7;
-    /* line-height: 140%;    */
     background-color: rgba(190, 210, 245, 0.25);
     user-select: none;
     pointer-events: none;
     padding: 0px 5px 0px 5px;
     border-radius: 5px;
-    /*border: 2px solid rgba(0, 0, 0, 0.4);*/
 }
 
-#tech {
+#right-HUD {
     position: absolute;
     top: 15px;
     right: 15px;
     z-index: 2;
     font-size: 20px;
-    color: #222;
     text-align: right;
-    opacity: 0.35;
     line-height: 120%;
-    background-color: rgba(255, 255, 255, 0.4);
     user-select: none;
     pointer-events: none;
+    /*border: 2px solid rgba(0, 0, 0, 0.4);*/
+    color: #222;
     padding: 0px 5px 0px 5px;
     border-radius: 5px;
-    /*border: 2px solid rgba(0, 0, 0, 0.4);*/
+    opacity: 0.35;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+#right-HUD-constraint {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    z-index: 2;
+    font-size: 20px;
+    text-align: right;
+    line-height: 120%;
+    user-select: none;
+    pointer-events: none;
+    padding: 5px 10px 5px 10px;
+    border-radius: 8px;
+    color: #624;
+    opacity: 0.35;
+    background-color: rgba(255, 215, 241, 0.4);
+    /* color: rgb(141, 23, 88);
+    opacity: 0.35;
+    background-color: rgba(141, 23, 88, 0.1); */
+    /* font-weight: 400; */
+    transition: all 0.5s linear;
 }
 
 #text-log {
@@ -750,9 +754,14 @@ summary {
     font-size: 1.15em;
     color: #555;
     background-color: rgba(255, 255, 255, 0.5);
-    /* transition: opacity 0.15s; */
     pointer-events: none;
     user-select: none;
+}
+
+.constraint {
+    color: rgb(141, 23, 88);
+    /* font-weight: 100; */
+    /* text-decoration: underline; */
 }
 
 .color-text {
@@ -868,10 +877,18 @@ summary {
     text-shadow: 0px 0px 7px #000;
 }
 
-.color-MACHO {
+.color-dark-matter {
     color: #246;
     text-shadow: 0px 0px 7px #246;
 }
+
+.color-tokamak {
+    color: #5c3ab8;
+    font-weight: 100;
+    text-shadow: 0px -5px 9px rgb(255, 0, 204);
+}
+
+
 
 .color-dup {
     font-variant: small-caps;
@@ -931,6 +948,11 @@ summary {
     text-shadow: 1px 0px 2px #234;
 }
 
+.color-print {
+    color: #567;
+    font-family: 'Courier New', Courier, monospace;
+}
+
 .color-defense {
     background-color: hsla(227, 9%, 71%, 0.279);
     padding: 2px;
@@ -939,9 +961,24 @@ summary {
     font-weight: 100;
 }
 
+.color-bot {
+    font-variant: small-caps;
+    background-color: rgba(75, 125, 150, 0.06);
+    border: 0.1em solid #146;
+    color: #146;
+    padding: 0em 0.3em 0.08em 0.3em;
+    font-weight: 400;
+}
+
+.no-box {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+}
+
 .color-block {
-    background-color: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.1);
+    border: 0.1em solid #333;
     padding: 0.5px;
     font-weight: 100;
 }
@@ -983,8 +1020,8 @@ summary {
 }
 
 .circle-grid {
-    width: 1.35em;
-    height: 1.35em;
+    width: 1.32em;
+    height: 1.32em;
     border-radius: 50%;
     display: inline-block;
     margin-bottom: -0.3em;
@@ -997,7 +1034,6 @@ summary {
     border: 0.15em solid hsl(255, 100%, 71%);
     display: inline-block;
     margin-bottom: -0.35em;
-    /* background-color: hsla(255, 100%, 71%, 0.3); */
 }
 
 .circle-grid-skin {
@@ -1011,7 +1047,6 @@ summary {
     position: absolute;
     top: -0.05em;
     left: 0em;
-    margin-bottom: -0.3em;
 }
 
 .circle-grid-skin-eye {
@@ -1024,7 +1059,6 @@ summary {
     position: absolute;
     top: 0.45em;
     left: 0.9em;
-    margin-bottom: -0.3em;
 }
 
 .junk {
@@ -1544,6 +1578,7 @@ summary {
     height: 26.3rem;
     width: 2rem;
     writing-mode: vertical-lr;
+    direction: ltr;
 }
 
 .left-column {
@@ -1562,6 +1597,14 @@ summary {
     /* margin-top: -2px; */
     font-size: 1.2rem;
     padding: 10px;
+}
+
+.pause-difficulty-row {
+    line-height: 130%;
+    font-size: 1em;
+    padding: 7px 0px 7px 0px;
+    /* top | right | bottom | left */
+    margin: -5px 0;
 }
 
 #constraint-1 {
@@ -1633,4 +1676,33 @@ summary {
     margin-top: 10px;
     color: #333;
     border-radius: 5px;
+}
+
+.pause-details {
+    background-color: #e2e9ec;
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 7px;
+    margin-bottom: 10px;
+    /* box-shadow: 4px 4px 4px hsla(240, 0%, 17%, 0.14); */
+}
+
+.tooltip {}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    background-color: #fff;
+    border-radius: 0.3em;
+    padding: 0.2em 0.3em;
+    border: solid #000 1px;
+
+    position: relative;
+    z-index: 1;
+    bottom: 100%;
+    left: 0%;
+    margin-left: -50%;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
 }
