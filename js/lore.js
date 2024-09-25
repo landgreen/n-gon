@@ -358,7 +358,6 @@ const lore = {
                 setInterval(() => {
                     if (Math.random() < 0.5) {
                         spawn[spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]](1000 * (Math.random() - 0.5), -500 + 200 * (Math.random() - 0.5));
-                        // level.difficultyIncrease(simulation.difficultyMode)
                     } else {
                         spawn.randomLevelBoss(500 * (Math.random() - 0.5), -500 + 200 * (Math.random() - 0.5))
                     }
@@ -693,9 +692,6 @@ const lore = {
                 setInterval(() => {
                     spawn[spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]](1000 * (Math.random() - 0.5), -500 + 200 * (Math.random() - 0.5));
                 }, 500); //every 1/2 seconds
-                // setInterval(() => {
-                //     level.difficultyIncrease(simulation.difficultyMode)
-                // }, 5000); //every 5 seconds
             },
             () => {
                 lore.talkingColor = "#dff";

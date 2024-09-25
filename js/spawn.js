@@ -48,7 +48,7 @@ const spawn = {
         // spawn.pickList.push(spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]);
     },
     spawnChance(chance) {
-        const difficultyChance = simulation.difficultyMode === 1 ? 1 : simulation.difficulty
+        const difficultyChance = (simulation.difficultyMode === 1) ? 1 : simulation.difficulty
         return (Math.random() < chance + 0.07 * difficultyChance) && (mob.length < -1 + 16 * Math.log10(simulation.difficulty + 1))
     },
     randomMob(x, y, chance = 1) {
@@ -114,7 +114,7 @@ const spawn = {
         }
     },
     secondaryBossChance(x, y) {
-        if (simulation.difficultyMode > 3 && level.levelsCleared > 1) {
+        if (simulation.difficultyMode > 2 && level.levelsCleared > 1) {
             spawn.randomLevelBoss(x, y);
             powerUps.directSpawn(x - 30, y, "ammo");
             powerUps.directSpawn(x + 30, y, "ammo");
@@ -977,7 +977,7 @@ const spawn = {
                         if (!simulation.paused && !simulation.onTitlePage) {
                             count++
                             if (count < 660) {
-                                if (count === 1 && simulation.difficultyMode < 5) simulation.inGameConsole(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
+                                if (count === 1 && simulation.difficultyMode < 6) simulation.inGameConsole(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
                                 if (!(count % 60)) simulation.inGameConsole(`simulation.analysis <span class='color-symbol'>=</span> ${((count / 60 - Math.random()) * 0.1).toFixed(3)}`);
                             } else if (count === 660) {
                                 simulation.inGameConsole(`simulation.analysis <span class='color-symbol'>=</span> 1 <em>//analysis complete</em>`);
@@ -2966,6 +2966,16 @@ const spawn = {
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     ctx.setTransform(1, 0, 0, 1, 0, 0); //reset warp effect
+                    if (simulation.isInvertedVertical) { //redo vertical camera effects
+                        ctx.translate(0, canvas.height); // Move the origin down to the bottom
+                        ctx.scale(1, -1); // Flip vertically
+                        //flip mouse Y
+                        simulation.isInvertedVertical = true
+                        mouseMove = function (e) {
+                            simulation.mouse.x = e.clientX;
+                            simulation.mouse.y = window.innerHeight - e.clientY;
+                        }
+                    }
                     ctx.setLineDash([]) //reset stroke dash effect
                 })
             })
@@ -4647,7 +4657,7 @@ const spawn = {
 
                 if (simulation.cycle % this.laserInterval > this.laserInterval / 2) {
                     const seeRange = 8000;
-                    best = {
+                    let best = {
                         x: null,
                         y: null,
                         dist2: Infinity,

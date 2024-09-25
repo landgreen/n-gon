@@ -162,8 +162,7 @@ function collisionChecks(event) {
                             const maxCount = 10 + 3 * tech.extraHarpoons //scale the number of hooks fired
                             let count = maxCount - 1
                             const angle = Math.atan2(mob[k].position.y - player.position.y, mob[k].position.x - player.position.x);
-
-                            const mass = 0.75 * (tech.isLargeHarpoon ? 1 + 0.05 * Math.sqrt(this.ammo) : 1)
+                            const mass = 0.75 * ((tech.isLargeHarpoon) ? 1 + Math.min(0.05 * Math.sqrt(b.guns[9].ammo), 10) : 1)
                             b.harpoon(m.pos, mob[k], angle, mass, true, 7) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
                             bullet[bullet.length - 1].drain = 0
                             for (; count > 0; count--) {
@@ -222,9 +221,9 @@ function collisionChecks(event) {
                             return;
                         }
                         //mob + body collisions
-                        if (obj.classType === "body" && obj.speed > 6) {
+                        if (obj.classType === "body" && obj.speed > 9) {
                             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
-                            if (v > 9) {
+                            if (v > 11) {
                                 if (tech.blockDmg) { //electricity
                                     Matter.Body.setVelocity(mob[k], { x: 0.5 * mob[k].velocity.x, y: 0.5 * mob[k].velocity.y });
                                     if (tech.isBlockRadiation && !mob[k].isShielded && !mob[k].isMobBullet) {

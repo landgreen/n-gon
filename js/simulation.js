@@ -431,48 +431,6 @@ const simulation = {
             }
         }
         document.getElementById("right-HUD").innerHTML = text
-
-
-        // let text = ""
-        // if (simulation.difficultyMode > 2 && level.constraintDescription1) {
-        //     text += `<span class='constraint'>${level.constraintDescription1}</span>`
-        //     // text += `${level.constraintDescription1}`
-        // }
-        // if (simulation.difficultyMode > 4 && level.constraintDescription2) {
-        //     text += `<br><span class='constraint'>${level.constraintDescription2}</span>`
-        // }
-        // for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
-        //     if (tech.tech[i].isLost) {
-        //         if (text) text += "<br>" //add a new line, but not on the first line
-        //         text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
-        //     } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
-        //         if (text) text += "<br>" //add a new line, but not on the first line
-        //         text += tech.tech[i].name
-        //         if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
-        //     }
-        // }
-        // document.getElementById("right-HUD").innerHTML = text
-
-        // let constraints = ""
-        // if (simulation.difficultyMode > 2 && level.constraintDescription1) {
-        //     constraints += `<span class='constraint' style="opacity: 0.35;">${level.constraintDescription1}</span>`
-        //     // text += `${level.constraintDescription1}`
-        // }
-        // if (simulation.difficultyMode > 4 && level.constraintDescription2) {
-        //     constraints += `<br><span class='constraint' style="opacity: 0.35;">${level.constraintDescription2}</span>`
-        // }
-        // let text = ""
-        // for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
-        //     if (tech.tech[i].isLost) {
-        //         if (text) text += "<br>" //add a new line, but not on the first line
-        //         text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
-        //     } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
-        //         if (text) text += "<br>" //add a new line, but not on the first line
-        //         text += tech.tech[i].name
-        //         if (tech.tech[i].count > 1) text += ` (${tech.tech[i].count}x)`
-        //     }
-        // }
-        // document.getElementById("right-HUD").innerHTML = constraints + `<div class="right-HUD-tech">` + text + `</div>`
     },
     lastLogTime: 0,
     isTextLogOpen: true,
@@ -585,6 +543,97 @@ const simulation = {
             })
         }
     },
+    isInvertedVertical: false,
+    flipCameraVertical(frames = 1, passFunction = () => { }) {
+        if (!simulation.isInvertedVertical) {
+            if (frames > 0) {
+                let count = 0
+                const loop = () => {
+                    if (m.alive) {
+                        if (simulation.paused) {
+                            requestAnimationFrame(loop);
+                        } else {
+                            count++
+                            ctx.setTransform(1, 0, 0, 1, 0, 0); ///reset to avoid build up of transformations
+                            if (count === frames) {
+                                // Flip the canvas vertically
+                                ctx.translate(0, canvas.height); // Move the origin down to the bottom
+                                ctx.scale(1, -1); // Flip vertically
+                                simulation.isInvertedVertical = true
+                                //flip mouse Y again to make sure it caught
+                                mouseMove = function (e) {
+                                    simulation.mouse.x = e.clientX;
+                                    simulation.mouse.y = window.innerHeight - e.clientY;
+                                }
+                            } else {
+                                requestAnimationFrame(loop);
+                                ctx.translate(0, canvas.height * count / frames);
+                                ctx.scale(1, 1 - 2 * count / frames);
+                            }
+                            if (count === Math.floor(frames / 2)) {
+                                //flip mouse Y at the 1/2 way point
+                                mouseMove = function (e) {
+                                    simulation.mouse.x = e.clientX;
+                                    simulation.mouse.y = window.innerHeight - e.clientY;
+                                }
+                                //passFunction probably flips the map elements 
+                                passFunction()
+                            }
+                        }
+                    }
+                }
+                requestAnimationFrame(loop);
+            } else {
+                // Flip the canvas vertically
+                ctx.translate(0, canvas.height); // Move the origin down to the bottom
+                ctx.scale(1, -1); // Flip vertically
+                //flip mouse Y
+                simulation.isInvertedVertical = true
+                mouseMove = function (e) {
+                    simulation.mouse.x = e.clientX;
+                    simulation.mouse.y = window.innerHeight - e.clientY;
+                }
+            }
+        }
+    },
+    unFlipCameraVertical(frames = 0, passFunction = () => { }) {
+        if (frames) {
+            let count = 0
+            const loop = () => {
+                if (m.alive) {
+                    if (simulation.paused) {
+                        requestAnimationFrame(loop);
+                    } else {
+                        count++
+                        ctx.setTransform(1, 0, 0, 1, 0, 0); ///reset to avoid build up of transformations
+                        if (count === frames) {
+                            // requestAnimationFrame(() => { ctx.reset(); });
+                            // ctx.translate(0, 0);
+                            // ctx.scale(1, 1);
+                            simulation.isInvertedVertical = false
+                            //flip mouse Y again to make sure it caught
+                            mouseMove = mouseMoveDefault
+
+                        } else {
+                            requestAnimationFrame(loop);
+                            ctx.translate(0, canvas.height - canvas.height * count / frames);
+                            ctx.scale(1, -1 + 2 * count / frames);
+                        }
+                        if (count === Math.floor(frames / 2)) {
+                            mouseMove = mouseMoveDefault//flip mouse Y at the 1/2 way point
+                            passFunction()//passFunction probably draws new map elements 
+                        }
+                    }
+                }
+            }
+            requestAnimationFrame(loop);
+        } else {
+            ctx.reset();
+            ctx.font = "25px Arial";
+            simulation.isInvertedVertical = false
+            mouseMove = mouseMoveDefault
+        }
+    },
     translatePlayerAndCamera(where) {
         //infinite falling.  teleport to sky after falling
         const before = { x: player.position.x, y: player.position.y, }
@@ -595,6 +644,7 @@ const simulation = {
         m.transY += change.y
         simulation.mouseInGame.x = (simulation.mouse.x - canvas.width2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.width2 - m.transX;
         simulation.mouseInGame.y = (simulation.mouse.y - canvas.height2) / simulation.zoom * simulation.edgeZoomOutSmooth + canvas.height2 - m.transY;
+
         m.angle = Math.atan2(simulation.mouseInGame.y - m.pos.y, simulation.mouseInGame.x - m.pos.x);
 
         //is there a reason to update m.pos here?
@@ -800,6 +850,8 @@ const simulation = {
         document.getElementById("pause-grid-left").style.opacity = "1"
         ctx.globalCompositeOperation = "source-over"
         ctx.shadowBlur = 0;
+
+        mouseMove = mouseMoveDefault
         requestAnimationFrame(() => {
             ctx.setTransform(1, 0, 0, 1, 0, 0); //reset warp effect
             ctx.setLineDash([]) //reset stroke dash effect
@@ -812,7 +864,7 @@ const simulation = {
         } else {
             Composite.add(engine.world, [player])
         }
-        shuffle(level.constraint)
+        // shuffle(level.constraint)
         level.populateLevels()
         input.endKeySensing();
         simulation.ephemera = []
@@ -993,8 +1045,6 @@ const simulation = {
                         } else { //get hurt and go to start
                             Matter.Body.setVelocity(player, { x: 0, y: 0 });
                             Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
-                            // m.damage(0.02 * simulation.difficultyMode);
-                            // m.energy -= 0.02 * simulation.difficultyMode
                             // move bots
                             for (let i = 0; i < bullet.length; i++) {
                                 if (bullet[i].botType) {
@@ -1137,6 +1187,7 @@ const simulation = {
     clearMap() {
         level.isProcedural = false;
         level.fallMode = "";
+        simulation.unFlipCameraVertical()
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (m.alive) {
             if (tech.isLongitudinal) b.guns[3].waves = []; //empty array of wave bullets
@@ -1199,6 +1250,7 @@ const simulation = {
         m.drop();
         m.hole.isOn = false;
         simulation.drawList = [];
+        mobs.maxMobBody = 40
 
         if (tech.isHealAttract && m.alive) { //send health power ups to the next level
             let healCount = 0

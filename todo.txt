@@ -1,23 +1,31 @@
 ******************************************************** NEXT PATCH **************************************************
 
-subway
-  2 new subway stations
-  more visible button graphics on subway
+new level testChamber2
+  New camera flip effect
+  new laser level element now has collisions with blocks
+  elevators are less deadly to mobs at low speeds
 
-new constraints
-  no health bars
-  no pause while choosing
+difficulty level progression reworked
+no constraints on final boss
+new constraint - healing disabled
 
-tech: coherence - past choices are added to all future tech
-  requires decoherence
-  research and cancel buttons have a sticky scroll positioning
-eternalism: you can't pause while choosing, but you can otherwise pause now
-  1.25->1.3 damage
+quenching 0.3->0.4x overheal converted to max health
+tungsten carbide 400->500 extra max health
+paradigm shift's  health loss is no longer reduced by damage taken reduction
+coherence no longer remembers tech that is set to zero frequency, like removed tech
 
-bugs
-  MIRV missiles now interact with time dilation properly
+JUNK tech: pet the bot - lets you pet your bots
+JUNK tech: the upside down - flip everything
+
+bug
+  prevented possible duplicate choices with coherence tech
+  fixed issues with showing and hiding health bars on that constraint
+  fixed crash from autonomous defense
+  mass-energy mode wasn't getting any benefit from damage taken reduction
+    it now gets square root of damage taken reduction
 
 ******************************************************** BUGS ********************************************************
+
 
 figure out why seeded random isn't making runs the same:
   shuffle is being used for a wide variety of things that don't need a seeded random
@@ -47,29 +55,35 @@ player can become crouched while not touching the ground if they exit the ground
 
 *********************************************************** TODO *****************************************************
 
+new level based laser element
+  !!update new version into other levels
+
+level technique: pairs of touch activated elevators jump on one to get high enough to jump on the next one
+
+flip player upside down
+  fieldTech: negative mass?
+  JUNK tech?
+  final boss effect
+    maybe just flip player camera and mouse
+  level effect flip map vertically also
+    new subway station
+    new full level
+      needs a device that will flip gravity
+    update to old level so it is more surreal
+      levels with few effects, just blocks and map
+      levels with a roof or infinite fall
+        towers, lab
+      
+
+
+
+
+constraints should show future constraints in pause menu
+  pre calculate all constraints for up to 13 levels?
+    loop constraints after that
+
 procedural animation 
   https://www.youtube.com/watch?v=qlfh_rv6khY
-
-maybe no constraints on final boss and reactor?
-
-constraints balance
-  40% JUNK chance
-  -1 choice
-  no health bars
-  4x shielded mob chance
-  +33% chance for mobs to respawn
-  2x ammo costs
-    too hard
-  0 duplication
-  power ups in stasis
-  0.1x damage after a power up
-  0.5x energy regen
-  50% max energy
-  50% max health
-  bots follow slow
-  periodically spawn WIMPs
-  mob death heals mobs
-  mobs heal for your lost health
 
 not implemented random constraint ideas________________________
   mob death spawns something
@@ -83,21 +97,10 @@ not implemented random constraint ideas________________________
   can't have more then 15 bullets
     how to code?
   remove 2 random tech and return them next level
-  too niche
-    player damage is 0.25x while player is invulnerable
-    all hazards: lasers and slime do 3x damage
-    player lasers and radiation do 0.5x damage
-    explosions do 0.5x damage
-    freeze effects last 0.25x time
 
 tech: ice-VII - 1.5x duration for ice-IX
 
-tech: - freezing grenades/explosions
-
-tech: - randomize constraints somehow
-    in pause interface or power up selection menu?
-    each time you research the current constraints also randomize?
-    only allowed if difficulty is high enough
+tech:  - freezing grenades/explosions
 
 tech:  - when you get a bot, get a second bot
 
@@ -106,8 +109,6 @@ tech:  - after killing a Boss
   gain 3x damage for the rest of the level
 
 new level - rework testChamber
-
-skin with wheel instead of legs
 
 Boss (or mob) that quickly moves towards player, but they moves perpendicularly to player, like dodging
   could respond to when player presses fire key or to when it takes damage
@@ -155,9 +156,6 @@ increase mass and movement speed at the same time
   possible player.mass bad interactions
     grapple
 
-JUNK tech - player takes damage from block collisions
-  is this gonna contribute to lag?
-
 bullets should trigger shrinking platforms level element?
 
 level element - player activated elevators
@@ -167,18 +165,6 @@ level element - player activated elevators
 rework energy and health HUD
   make both diegetic?
     how?  not sure there is a good way to do this...
-  should health be red or green?
-
-flip player upside down
-  how 
-    rotate player in matter.js
-      make sure floor sensor works
-    flip player crouch direction
-    redraw legs, orb
-    flip gravity
-  when to use?
-    fieldTech: negative mass?
-    effect in level
 
 tech - after a power up is duplicated
   update text to random effect after choosing tech, or after each trigger, or on first display of tech

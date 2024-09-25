@@ -347,6 +347,75 @@ const powerUps = {
         })
 
     },
+    instructions: {
+        name: "instructions",
+        color: "rgba(100,125,140,0.35)",
+        size() {
+            return 150
+        },
+        effect() {
+            requestAnimationFrame(() => { //add a background behind the power up menu
+                ctx.fillStyle = `rgba(150,150,150,0.9)`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            });
+            powerUps.animatePowerUpGrab('rgba(0, 0, 0,0.6)')
+
+            if (!simulation.paused) {
+                simulation.paused = true;
+                simulation.isChoosing = true; //stops p from un pausing on key down
+                document.body.style.cursor = "auto";
+                document.getElementById("choose-grid").style.pointerEvents = "auto";
+                document.getElementById("choose-grid").style.transitionDuration = "0s";
+            }
+            //build level info
+            document.getElementById("choose-grid").classList.add('choose-grid-no-images');
+            document.getElementById("choose-grid").classList.remove('choose-grid');
+            document.getElementById("choose-grid").style.gridTemplateColumns = "800px"//adjust this to increase the width of the whole menu, but mostly the center column
+            let lore = localSettings.loreCount > 0 ? "lore.unlockTesting()               //press T to enter testing" : ""
+            let text = `<div class="grid-container"><pre> <strong>//console commands</strong>
+ powerUps.instructions.effect()     //reproduce this message
+ tech.giveTech("name")              //replace "name" with tech name
+ m.setField("name")                 //standing wave  perfect diamagnetism  negative mass  molecular assembler  plasma torch  time dilation  metamaterial cloaking  pilot wave  wormhole  grappling hook
+ b.giveGuns("name")                 //nail gun  shotgun  super balls  wave  missiles  grenades  spores  drones  foam  harpoon  mine  laser
+ tech.damage *= 2                   //2x damage
+ m.immuneCycle = Infinity           //immune to damage            
+ m.energy = 0                       //set energy
+ m.health = 1                       //set health
+ m.maxHealth = 1                    //set max health
+ m.energy = 1                       //set energy
+ m.maxEnergy = 1                    //set max energy
+ simulation.enableConstructMode()   //press T to build with mouse
+ ${lore}
+
+ //tech gun field heal ammo research coupling boost instructions entanglement
+ powerUps.spawn(m.pos.x, m.pos.y, "name")
+ Matter.Body.setPosition(player, simulation.mouseInGame);
+ spawn.bodyRect(simulation.mouseInGame.x, simulation.mouseInGame.y, 50, 50)
+ spawn.randomLevelBoss(simulation.mouseInGame.x, simulation.mouseInGame.y)
+
+             <strong>chrome</strong>                     <strong>firefox</strong>
+ <strong>Win/Linux:</strong> Ctrl + Shift + J        Ctrl + Shift + J
+       <strong>Mac:</strong> Cmd + Option + J        Cmd + Shift + J</pre></div>
+<div class="choose-grid-module" id="exit" style="text-align: center;font-size: 1.3rem;">exit</div>`
+            document.getElementById("choose-grid").innerHTML = text
+            //show level info
+            document.getElementById("choose-grid").style.opacity = "1"
+            document.getElementById("choose-grid").style.transitionDuration = "0.3s"; //how long is the fade in on
+            document.getElementById("choose-grid").style.visibility = "visible"
+            document.getElementById("exit").addEventListener("click", () => {
+                level.unPause()
+                document.body.style.cursor = "none";
+                //reset hide image style
+                if (localSettings.isHideImages) {
+                    document.getElementById("choose-grid").classList.add('choose-grid-no-images');
+                    document.getElementById("choose-grid").classList.remove('choose-grid');
+                } else {
+                    document.getElementById("choose-grid").classList.add('choose-grid');
+                    document.getElementById("choose-grid").classList.remove('choose-grid-no-images');
+                }
+            });
+        },
+    },
     difficulty: {
         name: "difficulty",
         color: "#000",
@@ -371,12 +440,19 @@ const powerUps = {
             //build level info
             document.getElementById("choose-grid").classList.add('choose-grid-no-images');
             document.getElementById("choose-grid").classList.remove('choose-grid');
-            document.getElementById("choose-grid").style.gridTemplateColumns = "505px" //adjust this to increase the width of the whole menu, but mostly the center column
+            document.getElementById("choose-grid").style.gridTemplateColumns = "390px" //adjust this to increase the width of the whole menu, but mostly the center column
+
+            //<div class="row" id="constraint-1"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> boss on each level</div>
+            //<div class="row" id="constraint-2"><strong>more</strong> mobs per level<br><strong>faster</strong> mobs per level</div>
+            //<div class="row" id="constraint-3"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> random <strong class="constraint">constraint</strong> on each level</div>
+            //<div class="row" id="constraint-4"><strong>+1</strong> boss on each level<br>bosses spawn <strong>1</strong> fewer ${powerUps.orb.tech()}</div>
+            //<div class="row" id="constraint-5"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> random <strong class="constraint">constraint</strong> on each level</div>
+            //<div class="row" id="constraint-6"><strong>0.5x</strong> initial <strong class='color-d'>damage</strong><br><strong>2x</strong> initial <strong class='color-defense'>damage taken</strong></div>
 
             let text = `<div>
             <div class="grid-container">
                 <div class="left-column">
-                    <input type="range" id="difficulty-slider" name="temp" type="range" step="1" value="1" min="1" max="6" list="values" dir="ltr"/>
+                    <input type="range" id="difficulty-slider" name="temp" type="range" step="1" value="1" min="1" max="7" list="values" dir="ltr"/>
                     <datalist id="values">
                         <option value="1"></option>
                         <option value="2"></option>
@@ -384,23 +460,26 @@ const powerUps = {
                         <option value="4"></option>
                         <option value="5"></option>
                         <option value="6"></option>
+                        <option value="7"></option>
                     </datalist>
                 </div>
                 <div class="right-column">
-                    <div class="row" id="constraint-1"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> boss on each level</div>
-                    <div class="row" id="constraint-2"><strong>more</strong> mob per level<br><strong>faster</strong> mobs per level</div>
-                    <div class="row" id="constraint-3"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> random <strong class="constraint">constraint</strong> on each level</div>
-                    <div class="row" id="constraint-4"><strong>+1</strong> boss on each level<br>bosses spawn <strong>1</strong> fewer ${powerUps.orb.tech()}</div>
-                    <div class="row" id="constraint-5"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> random <strong class="constraint">constraint</strong> on each level</div>
+                    <div class="row" id="constraint-1"><strong>0.85x</strong> <strong class='color-d'>damage</strong> per level<br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-2">spawn <strong>more</strong> mobs<br>mobs move <strong>faster</strong></div>
+                    <div class="row" id="constraint-3">spawn a <strong>2nd</strong> boss each level<br>bosses spawn <strong>0.5x</strong> power ups</div>
+                    <div class="row" id="constraint-4"><strong>0.85x</strong> <strong class='color-d'>damage</strong> per level<br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
+                    <div class="row" id="constraint-5"><strong>+1</strong> random <strong class="constraint">constraint</strong> each level<br>fewer initial power ups</div>
                     <div class="row" id="constraint-6"><strong>0.5x</strong> initial <strong class='color-d'>damage</strong><br><strong>2x</strong> initial <strong class='color-defense'>damage taken</strong></div>
+                    <div class="row" id="constraint-7"><strong>+1</strong> random <strong class="constraint">constraint</strong> each level<br>fewer ${powerUps.orb.tech()} spawn</div>
                 </div>
                 <div class="far-right-column">
                     <div id = "constraint-1-record">${localSettings.difficultyCompleted[1] ? "⚆" : " "}</div>
                     <div id = "constraint-2-record">${localSettings.difficultyCompleted[2] ? "⚆" : " "}</div>
                     <div id = "constraint-3-record">${localSettings.difficultyCompleted[3] ? "⚆" : " "}</div>
                     <div id = "constraint-4-record">${localSettings.difficultyCompleted[4] ? "⚆" : " "}</div>
-                    <div id = "constraint-5-record">${localSettings.difficultyCompleted[5] ? "⚇" : " "}</div>
+                    <div id = "constraint-5-record">${localSettings.difficultyCompleted[5] ? "⚆" : " "}</div>
                     <div id = "constraint-6-record">${localSettings.difficultyCompleted[6] ? "⚇" : " "}</div>
+                    <div id = "constraint-6-record">${localSettings.difficultyCompleted[7] ? "⚇" : " "}</div>
                 </div>
             </div>
             <div class="choose-grid-module" id="choose-difficulty">
@@ -433,7 +512,7 @@ const powerUps = {
             });
 
             let setDifficultyText = function (isReset = true) {
-                for (let i = 1; i < 7; i++) {
+                for (let i = 1; i < 8; i++) {
                     const id = document.getElementById("constraint-" + i)
                     if (simulation.difficultyMode < i) {
                         id.style.opacity = "0.15"
@@ -456,7 +535,7 @@ const powerUps = {
                 setDifficultyText()
                 level.setConstraints()
             });
-            for (let i = 1; i < 7; i++) {
+            for (let i = 1; i < 8; i++) {
                 document.getElementById("constraint-" + i).addEventListener("click", () => {
                     simulation.difficultyMode = i
                     document.getElementById("difficulty-slider").value = simulation.difficultyMode
@@ -632,7 +711,7 @@ const powerUps = {
                     m.addHealth(heal);
                     if (healOutput > 0) simulation.inGameConsole(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
                     if (tech.isOverHeal && overHeal > 0) { //tech quenching
-                        tech.extraMaxHealth += 0.3 * overHeal //increase max health
+                        tech.extraMaxHealth += 0.4 * overHeal //increase max health
                         m.setMaxHealth();
                         simulation.inGameConsole(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.maxHealth <span class='color-symbol'>+=</span> ${(0.3 * overHeal).toFixed(3)}`)
                         simulation.drawList.push({ //add dmg to draw queue
@@ -925,78 +1004,6 @@ const powerUps = {
                 &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
     },
-    // junkTechText(choose, click) { //old code with yahoo images
-    //     const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-    //     const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-size: contain;background-repeat: no-repeat;background-image: url('img/junk.webp');"`
-    //     if (!localSettings.isHideImages) {
-    //         setTimeout(() => { //delay so that the html element exists
-    //             if (tech.tech[choose].url === undefined) { //if on url has been set yet
-    //                 const url = "https://images.search.yahoo.com/search/images?p=" + tech.tech[choose].name;
-    //                 fetch(url, { signal: AbortSignal.timeout(1000) }) //give up if it takes over 1 second
-    //                     .then((response) => response.text())
-    //                     .then((html) => {
-    //                         const parser = new DOMParser();
-    //                         const doc = parser.parseFromString(html, "text/html");
-    //                         const elements = doc.getElementsByClassName("ld");
-    //                         // console.log(i, elements[i].getAttribute("data"), JSON.parse(elements[i].getAttribute("data")).iurl)
-    //                         const index = Math.floor(Math.random() * 4) //randomly choose from the first 4 images
-    //                         if (parseInt(JSON.parse(elements[index].getAttribute("data")).s.slice(0, -2)) < 500) { //make sure it isn't too big
-    //                             tech.tech[choose].url = JSON.parse(elements[index].getAttribute("data")).iurl //store the url
-    //                             document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')` //make the url the background image
-    //                         } else if (parseInt(JSON.parse(elements[index + 1].getAttribute("data")).s.slice(0, -2)) < 500) { //try a different images and see if it is smaller
-    //                             tech.tech[choose].url = JSON.parse(elements[index + 1].getAttribute("data")).iurl
-    //                             document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
-    //                         } else if (parseInt(JSON.parse(elements[index + 2].getAttribute("data")).s.slice(0, -2)) < 500) { //try a different images and see if it is smaller
-    //                             tech.tech[choose].url = JSON.parse(elements[index + 2].getAttribute("data")).iurl
-    //                             document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
-    //                         }
-    //                     });
-    //             } else {
-    //                 document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
-    //             }
-    //         }, 1);
-    //     }
-    //     return `<div id = "junk-${choose}" class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
-    //             <div class="card-text">
-    //             <div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
-    //             ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
-    // },
-    // junkTechText(choose, click) {
-    //     const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-    //     const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-size: contain;background-repeat: no-repeat;background-image: url('img/junk.webp');"`
-    //     if (!localSettings.isHideImages) {
-    //         setTimeout(() => { //delay so that the html element exists
-    //             if (tech.tech[choose].url === undefined) { //if on url has been set yet
-    //                 const url = "https://images.search.yahoo.com/search/images?p=" + tech.tech[choose].name;
-    //                 fetch(url, { signal: AbortSignal.timeout(1000) }) //give up if it takes over 1 second
-    //                     .then((response) => response.text())
-    //                     .then((html) => {
-    //                         const parser = new DOMParser();
-    //                         const doc = parser.parseFromString(html, "text/html");
-    //                         const elements = doc.getElementsByClassName("ld");
-    //                         // console.log(i, elements[i].getAttribute("data"), JSON.parse(elements[i].getAttribute("data")).iurl)
-    //                         const index = Math.floor(Math.random() * 4) //randomly choose from the first 4 images
-    //                         if (parseInt(JSON.parse(elements[index].getAttribute("data")).s.slice(0, -2)) < 500) { //make sure it isn't too big
-    //                             tech.tech[choose].url = JSON.parse(elements[index].getAttribute("data")).iurl //store the url
-    //                             document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')` //make the url the background image
-    //                         } else if (parseInt(JSON.parse(elements[index + 1].getAttribute("data")).s.slice(0, -2)) < 500) { //try a different images and see if it is smaller
-    //                             tech.tech[choose].url = JSON.parse(elements[index + 1].getAttribute("data")).iurl
-    //                             document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
-    //                         } else if (parseInt(JSON.parse(elements[index + 2].getAttribute("data")).s.slice(0, -2)) < 500) { //try a different images and see if it is smaller
-    //                             tech.tech[choose].url = JSON.parse(elements[index + 2].getAttribute("data")).iurl
-    //                             document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
-    //                         }
-    //                     });
-    //             } else {
-    //                 document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
-    //             }
-    //         }, 1);
-    //     }
-    //     return `<div id = "junk-${choose}" class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
-    //             <div class="card-text">
-    //             <div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
-    //             ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
-    // },
     junkTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-size: contain;background-repeat: no-repeat;background-image: url('img/junk.webp');"`
@@ -1249,7 +1256,7 @@ const powerUps = {
                         for (let i = 0, len = powerUps.retainList.length; i < len; i++) {
                             //find index from name and add tech to options
                             for (let j = 0, len = tech.tech.length; j < len; j++) {
-                                if (tech.tech[j].name === powerUps.retainList[i] && tech.tech[j].count < tech.tech[j].maxCount && tech.tech[j].allowed()) { //&& !tech.tech[j].isRecentlyShown
+                                if (tech.tech[j].name === powerUps.retainList[i] && tech.tech[j].count < tech.tech[j].maxCount && tech.tech[j].allowed() && tech.tech[j].frequency > 0) { //&& !tech.tech[j].isRecentlyShown
                                     addTech(j)
                                 }
                             }
@@ -1276,7 +1283,7 @@ const powerUps = {
                             //this flag prevents this option from being shown the next time you pick up a tech power up
                             //check if not extra choices from "path integral"
                             tech.tech[choose].isRecentlyShown = true
-                            if (tech.isRetain) powerUps.retainList.push(tech.tech[choose].name)
+                            if (tech.isRetain && !powerUps.retainList.includes(tech.tech[choose].name)) powerUps.retainList.push(tech.tech[choose].name)
                             addTech(choose)
                         }
                     }
@@ -1504,7 +1511,7 @@ const powerUps = {
             } else {
                 powerUpChance()
             }
-            if (simulation.difficultyMode < 4) {//don't spawn second power up on difficulties with a second boss
+            if (simulation.difficultyMode < 3) {//don't spawn second power up on difficulties with a second boss
                 powerUpChance()
             }
             function powerUpChance() {
@@ -1550,7 +1557,6 @@ const powerUps = {
         }
     },
     addResearchToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level a research
-        // if (simulation.difficultyMode < 4 && mob.length) { //don't spawn on higher difficulty settings
         if ((level.levelsCleared < 17 - simulation.difficultyMode * 3) && mob.length) { //don't spawn late game
             const index = Math.floor(Math.random() * mob.length)
             powerUps.spawn(mob[index].position.x, mob[index].position.y, "research");
@@ -1558,7 +1564,7 @@ const powerUps = {
     },
     spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
         if (level.levelsCleared < 4) { //runs on first 4 levels on all difficulties
-            if (level.levelsCleared > 1 && simulation.difficultyMode < 6) powerUps.spawn(x, y, "tech")
+            if (level.levelsCleared > 1 && simulation.difficultyMode < 7) powerUps.spawn(x, y, "tech")
             if (b.inventory.length === 0) {
                 powerUps.spawn(x, y, "gun", false); //first gun
             } else if (tech.totalCount === 0) { //first tech
@@ -1638,7 +1644,7 @@ const powerUps = {
             // }
             tech.tech[index].frequency = 0 //banish tech
             powerUps.ejectTech(index)
-            if (m.immuneCycle < m.cycle) m.damage(tech.pauseEjectTech * 0.01)
+            if (m.immuneCycle < m.cycle) m.damage(tech.pauseEjectTech * 0.01, false)
             tech.pauseEjectTech *= 1.3
             document.getElementById(`${index}-pause-tech`).style.textDecoration = "line-through"
             document.getElementById(`${index}-pause-tech`).style.animation = ""

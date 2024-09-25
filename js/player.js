@@ -528,7 +528,7 @@ const m = {
         // }
     },
     addHealth(heal) {
-        if (!tech.isEnergyHealth) {
+        if (!tech.isEnergyHealth && !level.isNoHeal) {
             m.health += heal * simulation.healScale;
             if (m.health > m.maxHealth) m.health = m.maxHealth;
             m.displayHealth();
@@ -536,7 +536,7 @@ const m = {
     },
     baseHealth: 1,
     setMaxHealth(isMessage) {
-        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 4 * tech.isFallingDamage
+        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 5 * tech.isFallingDamage
         if (level.isReducedHealth) {
             level.reducedHealthLost = Math.max(0, m.health - m.maxHealth * 0.5)
             m.maxHealth *= 0.5
@@ -683,7 +683,7 @@ const m = {
         }
     },
     collisionImmuneCycles: 30,
-    damage(dmg) {
+    damage(dmg, isDefense = true) {
         if (tech.isRewindAvoidDeath && (m.energy + 0.05) > Math.min(0.95, m.maxEnergy) && dmg > 0.01) {
             const steps = Math.floor(Math.min(299, 150 * m.energy))
             simulation.inGameConsole(`<span class='color-var'>m</span>.rewind(${steps})`)
@@ -701,6 +701,7 @@ const m = {
             }
         }
         if (tech.isEnergyHealth) {
+            if (isDefense) dmg *= Math.pow(m.defense(), 0.5)
             m.energy -= 0.9 * dmg / Math.sqrt(simulation.healScale) //scale damage with heal reduction difficulty
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
@@ -727,15 +728,14 @@ const m = {
                 return;
             }
         } else {
-            dmg *= m.defense()
+            if (isDefense) dmg *= m.defense()
             m.health -= dmg;
             if (m.health < 0 || isNaN(m.health)) {
                 if (tech.isDeathAvoid && powerUps.research.count > 0 && !tech.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
                     tech.isDeathAvoidedThisLevel = true
                     m.health = 0.05
                     powerUps.research.changeRerolls(-1)
-                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span>
-                    <br>${powerUps.research.count}`)
+                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
                     for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function () { //set wipe to have trails

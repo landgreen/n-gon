@@ -349,7 +349,7 @@ const tech = {
     },
     tech: [{
         name: "tungsten carbide",
-        description: "<strong>+400</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
+        description: "<strong>+500</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -362,7 +362,7 @@ const tech = {
         effect() {
             tech.isFallingDamage = true;
             m.setMaxHealth();
-            m.addHealth(3 / simulation.healScale)
+            m.addHealth(5 / simulation.healScale)
             m.skin.tungsten()
         },
         remove() {
@@ -535,8 +535,13 @@ const tech = {
         remove() {
             if (this.count > 0) {
                 tech.isEnergyHealth = false;
-                document.getElementById("health").style.display = "inline"
-                document.getElementById("health-bg").style.display = "inline"
+                if (tech.isEnergyHealth) {
+                    document.getElementById("health").style.display = "none"
+                    document.getElementById("health-bg").style.display = "none"
+                } else if (!level.isHideHealth) {
+                    document.getElementById("health").style.display = "inline"
+                    document.getElementById("health-bg").style.display = "inline"
+                }
                 document.getElementById("dmg").style.backgroundColor = "#f67";
                 m.health = Math.max(Math.min(m.maxHealth, m.energy), 0.1);
                 simulation.mobDmgColor = "rgba(255,0,0,0.7)"
@@ -878,7 +883,7 @@ const tech = {
         },
         requires: "at least 2 guns",
         effect() {
-            const delay = 20
+            const delay = 30
             let i = (b.inventory.length) * delay
             let gunIndex = -1
             let cycle = () => {
@@ -3325,7 +3330,7 @@ const tech = {
     {
         name: "quenching",
         descriptionFunction() {
-            return `<strong>0.3x</strong> of ${powerUps.orb.heal()} over<strong class='color-h'>healing</strong><br>is added to <strong>maximum</strong> <strong class='color-h'>health</strong>`
+            return `<strong>0.4x</strong> of ${powerUps.orb.heal()} over<strong class='color-h'>healing</strong><br>is added to <strong>maximum</strong> <strong class='color-h'>health</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -10700,6 +10705,24 @@ const tech = {
         remove() { }
     },
     {
+        name: "the upside down",
+        description: `Flip the universe until the end of the level.<br>I'll give you 1.1x <strong class='color-d'>damage</strong> as well.`,
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isInstant: true,
+        isJunk: true,
+        allowed() {
+            return true
+        },
+        requires: "",
+        effect() {
+            simulation.flipCameraVertical(900)
+            tech.damage *= 1.1
+        },
+        remove() { }
+    },
+    {
         name: "rewind",
         description: "every 10 seconds <strong class='color-rewind'>rewind</strong> <strong>2</strong> seconds",
         maxCount: 9,
@@ -11133,6 +11156,46 @@ const tech = {
             }
         },
         remove() { }
+    },
+    {
+        name: "pet bots",
+        description: "pet your <strong class='color-bot'>bots</strong>",
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isJunk: true,
+        isInstant: true,
+        allowed() {
+            return b.totalBots()
+        },
+        requires: "",
+        effect() {
+            simulation.ephemera.push({
+                name: "pet",
+                count: 0,
+                do() {
+                    this.count++
+                    if (!(this.count % 420)) {
+                        for (let i = 0; i < bullet.length; i++) {
+                            if (bullet[i].botType && Math.random() < 0.3) {
+                                simulation.inGameConsole(`${bullet[i].botType}<span class='color-symbol'>-</span>bot.pet<span class='color-symbol'>()</span>`)
+                                if (m.onGround && !m.crouch) {
+                                    m.yOffGoal = m.yOffWhen.crouch;
+                                    setTimeout(() => {
+                                        if (!m.crouch) m.yOffGoal = m.yOffWhen.stand;
+                                    }, 1000);
+                                    if (m.immuneCycle < m.cycle + 90) m.immuneCycle = m.cycle + 90
+                                }
+                                if (Math.random() < 0.3) break
+                            }
+                        }
+
+                    }
+                }
+            })
+        },
+        remove() {
+        }
     },
     {
         name: "assimilation",
