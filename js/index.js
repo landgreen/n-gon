@@ -474,12 +474,13 @@ const build = {
 
         // <strong class='color-g'>${b.activeGun === null || b.activeGun === undefined ? "undefined" : b.guns[b.activeGun].name}</strong> (${b.activeGun === null || b.activeGun === undefined ? "0" : b.guns[b.activeGun].ammo})
 
+        // <br>
+        // <input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages ? "checked" : ""}>
+        // <label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.15em;" >hide images</label>
+
         let text = `<div class="pause-grid-module" style="padding: 8px;">
 <span style="font-size:1.4em;font-weight: 600; float: left;">PAUSED</span> 
 <em style="float: right;color:#ccc;">press ${input.key.pause} to resume</em>
-<br>
-<input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages ? "checked" : ""}>
-<label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.15em;" >hide images</label>
 <br>
 <button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build URL</button>
 <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>

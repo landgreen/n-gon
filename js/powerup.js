@@ -351,9 +351,10 @@ const powerUps = {
         name: "instructions",
         color: "rgba(100,125,140,0.35)",
         size() {
-            return 150
+            return 130
         },
         effect() {
+            Matter.Body.setVelocity(player, { x: 0, y: 0 });//power up is so big it launches the player,  this stops that
             requestAnimationFrame(() => { //add a background behind the power up menu
                 ctx.fillStyle = `rgba(150,150,150,0.9)`;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -372,7 +373,7 @@ const powerUps = {
             document.getElementById("choose-grid").classList.remove('choose-grid');
             document.getElementById("choose-grid").style.gridTemplateColumns = "800px"//adjust this to increase the width of the whole menu, but mostly the center column
             let lore = localSettings.loreCount > 0 ? "lore.unlockTesting()               //press T to enter testing" : ""
-            let text = `<div class="grid-container"><pre> <strong>//console commands</strong>
+            let text = `<div class="grid-container" style = "font-size:1rem;"><pre> <strong>//console commands</strong>
  powerUps.instructions.effect()     //reproduce this message
  tech.giveTech("name")              //replace "name" with tech name
  m.setField("name")                 //standing wave  perfect diamagnetism  negative mass  molecular assembler  plasma torch  time dilation  metamaterial cloaking  pilot wave  wormhole  grappling hook
@@ -382,17 +383,13 @@ const powerUps = {
  m.energy = 0                       //set energy
  m.health = 1                       //set health
  m.maxHealth = 1                    //set max health
- m.energy = 1                       //set energy
  m.maxEnergy = 1                    //set max energy
  simulation.enableConstructMode()   //press T to build with mouse
  ${lore}
-
- //tech gun field heal ammo research coupling boost instructions entanglement
- powerUps.spawn(m.pos.x, m.pos.y, "name")
+ powerUps.spawn(m.pos.x, m.pos.y, "name") //tech gun field heal ammo research coupling boost instructions entanglement
  Matter.Body.setPosition(player, simulation.mouseInGame);
  spawn.bodyRect(simulation.mouseInGame.x, simulation.mouseInGame.y, 50, 50)
  spawn.randomLevelBoss(simulation.mouseInGame.x, simulation.mouseInGame.y)
-
              <strong>chrome</strong>                     <strong>firefox</strong>
  <strong>Win/Linux:</strong> Ctrl + Shift + J        Ctrl + Shift + J
        <strong>Mac:</strong> Cmd + Option + J        Cmd + Shift + J</pre></div>

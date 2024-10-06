@@ -691,8 +691,8 @@ const m = {
             return
         }
         m.lastHarmCycle = m.cycle
-        if (tech.isDroneOnDamage && bullet.length < 150) { //chance to build a drone on damage  from tech
-            const len = Math.min((dmg - 0.06 * Math.random()) * 80, 60) / tech.droneEnergyReduction * (tech.isEnergyHealth ? 0.5 : 1)
+        if (tech.isDroneOnDamage && bullet.length < 180) { //chance to build a drone on damage from tech
+            const len = Math.min((dmg - 0.045 * Math.random()) * 95, 65) / tech.droneEnergyReduction * (tech.isEnergyHealth ? 0.5 : 1)
             for (let i = 0; i < len; i++) {
                 if (Math.random() < 0.5) b.drone({
                     x: m.pos.x + 30 * Math.cos(m.angle) + 100 * (Math.random() - 0.5),
@@ -3074,6 +3074,51 @@ const m = {
         }
     },
     minEnergyToDeflect: 0.05,
+    bulletsToBlocks(who) {
+        if (who.isMobBullet && !who.isInvulnerable && who.mass < 10 && body.length < mobs.maxMobBody) {
+            // spawn block
+            body[body.length] = Matter.Bodies.polygon(who.position.x, who.position.y, who.vertices.length, who.radius, {
+                friction: 0.05,
+                frictionAir: 0.001,
+                collisionFilter: {
+                    category: cat.bullet,
+                    mask: cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield
+                },
+                classType: "body",
+                isPrinted: true,
+                radius: 10, //used to grow and warp the shape of the block
+                density: 0.002, //double density for 2x damage
+            });
+            const block = body[body.length - 1]
+            Composite.add(engine.world, block); //add to world
+            //reverse velocity and make sure it's above 40
+            const unit = Vector.mult(Vector.normalise(who.velocity), -Math.max(40, who.speed))
+            Matter.Body.setVelocity(block, unit);
+
+            simulation.ephemera.push({
+                name: "remove block",
+                count: 120, //cycles before it self removes
+                do() {
+                    this.count--
+                    if (this.count < 0) {
+                        simulation.removeEphemera(this.name)
+                        Matter.Composite.remove(engine.world, block);
+                        //find block
+                        for (let i = 0; i < body.length; i++) {
+                            if (body[i] === block) {
+                                body.splice(i, 1);
+                                break
+                            }
+                        }
+
+                    }
+                },
+            })
+            //remove mob bullet
+            Matter.Composite.remove(engine.world, who); //remove from physics early to avoid collisions with block
+            who.alive = false
+        }
+    },
     pushMass(who, fieldBlockCost = (0.025 + Math.sqrt(who.mass) * Vector.magnitude(Vector.sub(who.velocity, player.velocity)) * 0.002) * m.fieldShieldingScale) {
         if (m.energy > m.minEnergyToDeflect) { //shield needs at least some of the cost to block
             if (who.isShielded) fieldBlockCost *= 2; //shielded mobs take more energy to block
@@ -3108,6 +3153,7 @@ const m = {
                     }
                 }
             }
+            m.bulletsToBlocks(who)
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
                 Matter.Body.setVelocity(who, { x: 0.5 * who.velocity.x, y: 0.5 * who.velocity.y });
@@ -3282,7 +3328,8 @@ const m = {
             case 6: //time dilation
                 return `<strong>+${(1 + 0.05 * couple).toFixed(2)}x</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
             case 7: //cloaking
-                return `<strong>${(1 + 3.3 * couple).toFixed(3)}x</strong> ambush <strong class='color-d'>damage</strong>`
+                // return `<strong>${(1 + 3.3 * couple).toFixed(3)}x</strong> ambush <strong class='color-d'>damage</strong>`
+                return `<strong>${(1 + 0.05 * couple).toFixed(3)}x</strong> ambush <strong class='color-d'>damage</strong>`
             case 8: //pilot wave
                 return `<strong>${(1 + 0.05 * couple).toFixed(2)}x</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong>`
             case 9: //wormhole
@@ -3577,6 +3624,7 @@ const m = {
                                     ctx.stroke();
                                 }
                             }
+                            m.bulletsToBlocks(mob[i])
                             if (tech.isStunField) mobs.statusStun(mob[i], tech.isStunField)
                             //mob knock backs
                             const massRoot = Math.sqrt(Math.max(1, mob[i].mass));
@@ -4809,7 +4857,7 @@ const m = {
                 }
                 this.drawRegenEnergyCloaking()
                 if (m.isSneakAttack && m.sneakAttackCycle + Math.min(100, 0.66 * (m.cycle - m.enterCloakCycle)) > m.cycle) { //show sneak attack status
-                    m.fieldDamage = 4.5 * (1 + 0.033 * m.coupling)
+                    m.fieldDamage = 4.5 * (1 + 0.05 * m.coupling)
                     const timeLeft = (m.sneakAttackCycle + Math.min(100, 0.66 * (m.cycle - m.enterCloakCycle)) - m.cycle) * 0.5
                     ctx.beginPath();
                     ctx.arc(m.pos.x, m.pos.y, 32, 0, 2 * Math.PI);

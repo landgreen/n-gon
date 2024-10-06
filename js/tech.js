@@ -2635,25 +2635,6 @@ const tech = {
         }
     },
     {
-        name: "ablative drones",
-        descriptionFunction() {
-            return `after losing ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} there is a chance<br>to rebuild your broken parts as <strong>drones</strong>`
-        },
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        allowed: () => true,
-        requires: "",
-        effect() {
-            tech.isDroneOnDamage = true;
-            // for (let i = 0; i < 4; i++) b.drone()
-        },
-        remove() {
-            tech.isDroneOnDamage = false;
-        }
-    },
-    {
         name: "non-Newtonian armor",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Non-Newtonian_fluid' class="link">non-Newtonian armor</a>`,
         description: "after mob <strong>collisions</strong><br><strong>0.3x</strong> <strong class='color-defense'>damage taken</strong> for <strong>10</strong> seconds",
@@ -4574,7 +4555,7 @@ const tech = {
         name: "deprecated",
         scale: 0.08,
         descriptionFunction() {
-            return `after <span class='color-remove'>removing</span> this gain<br><strong>${1 + this.scale}x</strong> <strong class='color-d'>damage</strong> per <span class='color-remove'>removed</span> ${powerUps.orb.tech()}<em style ="float: right;">(${(1 + this.scale * ((this.frequency === 0 ? 0 : 1) + tech.removeCount)).toFixed(2)}x)</em>`
+            return `after <span class='color-remove'>removing</span> this gain <strong>${1 + this.scale}x</strong> <strong class='color-d'>damage</strong><br>per ${powerUps.orb.tech()} <span class='color-remove'>removed</span> this game<em style ="float: right;">(${(1 + this.scale * ((this.frequency === 0 ? 0 : 1) + tech.removeCount)).toFixed(2)}x)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -6607,7 +6588,7 @@ const tech = {
         allowed() {
             return tech.haveGunCheck("drones", false) && !tech.isDroneRespawn && tech.bulletsLastLonger === 1 && !tech.isDronesTravel && (build.isExperimentSelection || powerUps.research.count > 1)
         },
-        requires: "drones, not drone repair, anti-shear topology, autonomous navigation",
+        requires: "drones, not drone repair, anti-shear topology, autonomous navigation, ",
         effect() {
             const num = 5
             tech.isForeverDrones += num
@@ -6638,6 +6619,27 @@ const tech = {
             tech.isForeverDrones = 0
             // if (this.count && !tech.haveGunCheck("drones", false)) b.giveGuns("drones")
             // if (this.count > 0) powerUps.research.changeRerolls(2)
+        }
+    },
+    {
+        name: "ablative drones",
+        descriptionFunction() {
+            return `after losing ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} there is a chance<br>to rebuild your broken parts as <strong>drones</strong>`
+        },
+        isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return (tech.haveGunCheck("drones") && !tech.isForeverDrones) || (m.fieldMode === 4 && simulation.molecularMode === 3)
+        },
+        requires: "drones, not fault tolerance",
+        effect() {
+            tech.isDroneOnDamage = true;
+        },
+        remove() {
+            tech.isDroneOnDamage = false;
         }
     },
     {

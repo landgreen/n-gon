@@ -1,31 +1,26 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new level testChamber2
-  New camera flip effect
-  new laser level element now has collisions with blocks
-  elevators are less deadly to mobs at low speeds
+new level: gravityObservatory
 
-difficulty level progression reworked
-no constraints on final boss
-new constraint - healing disabled
+level: testChamber2 renamed gravityInterferometer
+  it has been added to the levels that are extra hard and only show up late game
+  it also got a bit hard with the addition of 1 more laser
 
-quenching 0.3->0.4x overheal converted to max health
-tungsten carbide 400->500 extra max health
-paradigm shift's  health loss is no longer reduced by damage taken reduction
-coherence no longer remembers tech that is set to zero frequency, like removed tech
+deflected mob bullets are converted into small blocks
+ablative drones is now a gun tech for drones
+  it makes ~33% more drones
+1.033->1.05x sneak attack damage per coupling for cloaking field
 
-JUNK tech: pet the bot - lets you pet your bots
-JUNK tech: the upside down - flip everything
-
-bug
-  prevented possible duplicate choices with coherence tech
-  fixed issues with showing and hiding health bars on that constraint
-  fixed crash from autonomous defense
-  mass-energy mode wasn't getting any benefit from damage taken reduction
-    it now gets square root of damage taken reduction
+bug fixes
+  extended vertical flip to edge cases:
+    trail left by snakeBoss
+    laser array from boss and mobs
+    springer,spiderBoss,mantisBoss constraints
+  subway: dark matter no longer removed if it gets too far from the player
+  training: fixed potential lock out from running out of ammo
+  training: fixed accidental difficulty increase
 
 ******************************************************** BUGS ********************************************************
-
 
 figure out why seeded random isn't making runs the same:
   shuffle is being used for a wide variety of things that don't need a seeded random
@@ -55,27 +50,38 @@ player can become crouched while not touching the ground if they exit the ground
 
 *********************************************************** TODO *****************************************************
 
+considering removing generative   AI images from n-gon
+  pros: (of removing images)
+    the novelty of the images has worn off
+    cleaner UI without them
+    reduce the total size of n-gon by about 1/3
+    reduce the complexity of the code
+    avoid ire of people that hate generative AI
+  cons: (of removing images)
+    some people might like them
+
+make a level selector power up
+  it shows up when you enter testing mode on the initial level
+  check box for community maps?
+
+deflecting with field converts mob bullets to blocks that despawn after a few seconds
+  default for all fields that can deflect
+
+add more tips:
+  download latest version of n-gon
+  https://codeload.github.com/landgreen/n-gon/zip/refs/heads/master
+
+
 new level based laser element
   !!update new version into other levels
 
 level technique: pairs of touch activated elevators jump on one to get high enough to jump on the next one
 
-flip player upside down
-  fieldTech: negative mass?
-  JUNK tech?
-  final boss effect
-    maybe just flip player camera and mouse
-  level effect flip map vertically also
-    new subway station
-    new full level
-      needs a device that will flip gravity
-    update to old level so it is more surreal
-      levels with few effects, just blocks and map
-      levels with a roof or infinite fall
-        towers, lab
+new vertical flip level
+  long horizontal
+  several buttons
+    shorten flip time?
       
-
-
 
 
 constraints should show future constraints in pause menu
@@ -1343,6 +1349,8 @@ possible names for tech
   cork - used as a heat shield for rockets
   P = NP - something with speeding up calculation times
   transistivity - something where a>b and b>c ->  a>c
+  lenticular - looks different from different angles (lasers?)
+  De Sitter space - simple model of universe related to general relativity (mass-energy?)
 
 ******************************************************* DESIGN ******************************************************
 

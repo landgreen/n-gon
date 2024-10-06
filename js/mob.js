@@ -658,29 +658,6 @@ const mobs = {
                                 this.cons.length = 100 + 1.5 * this.radius;
                                 this.cons2.length = 100 + 1.5 * this.radius;
                             }
-
-
-
-                            // if (!(simulation.cycle % (this.seePlayerFreq * 2))) {
-                            //     const unit = Vector.normalise(Vector.sub(this.seePlayer.position, this.position))
-                            //     const goal = Vector.add(this.position, Vector.mult(unit, stepRange))
-                            //     this.springTarget.x = goal.x;
-                            //     this.springTarget.y = goal.y;
-                            //     // this.springTarget.x = this.seePlayer.position.x;
-                            //     // this.springTarget.y = this.seePlayer.position.y;
-                            //     this.cons.length = -200;
-                            //     this.cons2.length = 100 + 1.5 * this.radius;
-                            // } else if (!(simulation.cycle % this.seePlayerFreq)) {
-                            //     const unit = Vector.normalise(Vector.sub(this.seePlayer.position, this.position))
-                            //     const goal = Vector.add(this.position, Vector.mult(unit, stepRange))
-                            //     this.springTarget2.x = goal.x;
-                            //     this.springTarget2.y = goal.y;
-                            //     // this.springTarget2.x = this.seePlayer.position.x;
-                            //     // this.springTarget2.y = this.seePlayer.position.y;
-                            //     this.cons.length = 100 + 1.5 * this.radius;
-                            //     this.cons2.length = -200;
-                            // }
-
                         }
                     }
                 }

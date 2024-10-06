@@ -935,6 +935,7 @@ const simulation = {
         m.onGround = false
         m.lastOnGroundCycle = 0
         m.health = 0;
+        level.isNoHeal = false
         m.addHealth(0.25)
         m.drop();
         m.holdingTarget = null
@@ -1185,6 +1186,7 @@ const simulation = {
     },
     clearNow: false,
     clearMap() {
+        level.isVerticalFLipLevel = false
         level.isProcedural = false;
         level.fallMode = "";
         simulation.unFlipCameraVertical()
@@ -1957,6 +1959,7 @@ const simulation = {
     },
     enableConstructMode() {
         level.isProcedural = false //this is set to be true in levels like labs that need x+ and y+ in front of positions
+        level.isVerticalFLipLevel = false
         simulation.isConstructionMode = true;
         simulation.isHorizontalFlipped = false;
         simulation.isAutoZoom = false;
@@ -1983,8 +1986,17 @@ const simulation = {
                     simulation.outputMapString(`${Math.floor(simulation.constructMouseDownPosition.x)}, ${Math.floor(simulation.constructMouseDownPosition.y)}`);
                 } else if (simulation.mouseInGame.x > simulation.constructMouseDownPosition.x && simulation.mouseInGame.y > simulation.constructMouseDownPosition.y) { //make sure that the width and height are positive
                     if (e.button === 0) { //add map
+                        // if (level.isProcedural) {
+                        //     simulation.outputMapString(`spawn.mapRect(x+${x}, ${y}, ${dx}, ${dy});\n`);
+                        // } else {
+                        //     simulation.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});\n`);
+                        // }
                         if (level.isProcedural) {
                             simulation.outputMapString(`spawn.mapRect(x+${x}, ${y}, ${dx}, ${dy});\n`);
+                        } else if (level.isVerticalFLipLevel) {
+                            console.log('hi')
+                            simulation.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});\n`);
+                            simulation.outputMapString(`//spawn.mapRect(${x}, ${-y - dy}, ${dx}, ${dy});\n`);
                         } else {
                             simulation.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});\n`);
                         }
