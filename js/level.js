@@ -8,8 +8,8 @@ const level = {
     defaultZoom: 1400,
     onLevel: -1,
     levelsCleared: 0,
-    //see level.populateLevels:   (initial, ... , (reservoir, factory, or gravityInterferometer), reactor, ... , subway, final)    added later
-    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravityObservatory"],
+    uniqueLevels: ["initial", "reservoir", "factory", "interferometer", "reactor", "subway", "final"], //see level.populateLevels:   (initial, ... , (reservoir, factory, or interferometer), reactor, ... , subway, final)    added later
+    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron"],
     communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
@@ -56,10 +56,10 @@ const level = {
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("field coupling") });
             // for (let i = 0; i < 1; i++) tech.giveTech("interest")
             // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 4; i++) powerUps.directSpawn(450, -50, "tech");
+            // for (let i = 0; i < 1; i++) powerUps.directSpawn(450, -50, "warp");
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
-            // level.gravityInterferometer();
+            // level.interferometer();
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
@@ -778,8 +778,9 @@ const level = {
             }
             level.levels = shuffle(level.levels); //shuffles order of maps with seeded random
             level.levels.length = 9 //remove any extra levels past 9
-            pick = ["gravityInterferometer", "factory", "reservoir"]
+            pick = ["interferometer", "factory", "reservoir"]
             level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, pick[Math.floor(Math.random() * pick.length)]); //add level to the back half of the randomized levels list
+
             level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
             if (!build.isExperimentSelection || (build.hasExperimentalMode && !simulation.isCheating)) { //experimental mode is endless, unless you only have an experiment Tech
                 level.levels.unshift("initial"); //add level to the start of the randomized levels list
@@ -3041,7 +3042,13 @@ const level = {
         wires.lineTo(2355, -690)
         wires.lineTo(2600, -690)
 
+        let isSpawnedWarp = false
         level.custom = () => {
+            if (!isSpawnedWarp && simulation.testing) {
+                isSpawnedWarp = true
+                powerUps.directSpawn(m.pos.x, -900, "warp")
+                // powerUps.directSpawn(2100, -1200, "warp")
+            }
             //working on a message using text
             // ctx.font = "50px Arial";
             // ctx.fillStyle = "rgba(0,0,0,0.3)"
@@ -7049,7 +7056,7 @@ const level = {
         }
 
     },
-    gravityInterferometer() {
+    interferometer() {
         level.isVerticalFLipLevel = true
         mobs.maxMobBody = 20 //normally 40, but set to 10 to avoid too much clutter
         simulation.fallHeight = 4000
@@ -7084,8 +7091,8 @@ const level = {
             frictionAir: 1,
             classType: "body",
             holdX: 1762,
-            maxHeight: -1600,
-            minHeight: 100,
+            maxHeight: -1580,
+            minHeight: 130,
             verticalForce: 0.03,
             isUp: false,
             drag: 0.01,
@@ -7182,13 +7189,13 @@ const level = {
             lasers.push(level.laser({ x: -100, y: 1990 }, { x: -100, y: -2000 })) ////x, y, width, height, damage = 0.002)
             spawn.mapRect(-112, 1990, 25, 25); //laser entrance
 
-            balance.push(level.rotor(-1250, 1700, 400, 25, 0.01, 0, 0.5)) //balance(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
-            balance.push(level.rotor(-750, 1700, 400, 25, 0.01, Math.PI / 2, 0.5))
-            balance.push(level.rotor(-275, 1650, 550, 32, 0.01, 0, 0.5))
+            balance.push(level.rotor(-1250, 1755, 400, 25, 0.01, 0, 0.5)) //balance(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
+            balance.push(level.rotor(-750, 1755, 400, 25, 0.01, Math.PI / 2, 0.5))
+            balance.push(level.rotor(-275, 1675, 550, 32, 0.01, 0, 0.5))
 
             lasers.push(level.laser({ x: -1625, y: -850 }, { x: 1980, y: -850 })) ////x, y, width, height, damage = 0.002)
-            spawn.mapRect(1980, -862, 25, 25); //laser entrance
-            balance.push(level.rotor(1000, -910, 550, 32, 0.01, 0, 0.5))
+            // spawn.mapRect(1980, -862, 25, 25); //laser entrance
+            // balance.push(level.rotor(1000, -910, 550, 32, 0.01, 0, 0.5))
 
             //left side
             //level entrance
@@ -7205,7 +7212,6 @@ const level = {
             spawn.mapVertex(-1375, 835, "-250 -475  0 -500  250 -475   250 475  -250 475");
             spawn.mapVertex(-850, 840, "-225 -475  0 -500  225 -475   225 475  -225 475");
             spawn.mapVertex(-350, 840, "-225 -475  0 -500  225 -475   225 475  -225 475");
-
 
             //lower right side
             //far right wall ledges
@@ -7233,14 +7239,12 @@ const level = {
             spawn.mapRect(475, 1987, 550, 50);
 
             //ceiling zone
-            spawn.mapRect(1200, -1625, 400, 25);
-            spawn.mapRect(-75, -1625, 1075, 25);
+            spawn.mapRect(1200, -1600, 400, 25);
+            spawn.mapRect(-75, -1725, 1075, 25);
             spawn.mapRect(-575, -1625, 450, 25);
             spawn.mapRect(-1075, -1850, 450, 25);
-            spawn.mapRect(325, -1825, 575, 25);
             spawn.mapRect(-1075, -1425, 450, 25);
             spawn.mapRect(-1675, -1588, 550, 25);
-
         }
         let buildVerticalFLippedMap = function () { // flip Y with this -> spawn.mapRect(x, -y - h, w, h);
             buttons.push(level.button(-1895, 1600, 126, true, true, "hsl(330, 100%, 50%)"))
@@ -7267,14 +7271,13 @@ const level = {
             lasers.push(level.laser({ x: -100, y: -1990 }, { x: -100, y: 2000 })) ////x, y, width, height, damage = 0.002)
             spawn.mapRect(-112, -1990 - 25, 25, 25); //laser entrance
 
-            balance.push(level.rotor(-1250, -1700 - 25, 400, 25, 0.01, 0, 0.5)) //balance(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
-            balance.push(level.rotor(-750, -1700 - 25, 400, 25, 0.01, Math.PI / 2, 0.5))
-            balance.push(level.rotor(-250, -1650 - 32, 500, 32, 0.01, 0, 0.5))
+            balance.push(level.rotor(-1250, -1755 - 25, 400, 25, 0.01, 0, 0.5)) //balance(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
+            balance.push(level.rotor(-750, -1755 - 25, 400, 25, 0.01, Math.PI / 2, 0.5))
+            balance.push(level.rotor(-250, -1675 - 32, 500, 32, 0.01, 0, 0.5))
 
             lasers.push(level.laser({ x: -1625, y: 850 }, { x: 1980, y: 850 })) ////x, y, width, height, damage = 0.002)
-            spawn.mapRect(1980, 862 - 25, 25, 25); //laser entrance
-            balance.push(level.rotor(1000, 910 - 32, 550, 32, 0.01, 0, 0.5))
-
+            // spawn.mapRect(1980, 862 - 25, 25, 25); //laser entrance
+            // balance.push(level.rotor(1000, 910 - 32, 550, 32, 0.01, 0, 0.5))
 
             //left side
             //level entrance
@@ -7313,11 +7316,11 @@ const level = {
             spawn.mapRect(475, -1987 - 50, 550, 50);
 
             //ceiling zone
-            spawn.mapRect(1200, 1625 - 25, 400, 25);
-            spawn.mapRect(-75, 1625 - 25, 1075, 25);
+            spawn.mapRect(1200, 1575, 400, 25);
+            spawn.mapRect(-75, 1700, 1075, 25);
             spawn.mapRect(-575, 1625 - 25, 450, 25);
             spawn.mapRect(-1075, 1850 - 25, 450, 25);
-            spawn.mapRect(325, 1825 - 25, 575, 25);
+
             spawn.mapRect(-1075, 1425 - 25, 450, 25);
             spawn.mapRect(-1675, 1588 - 25, 550, 25);
         }
@@ -7386,6 +7389,10 @@ const level = {
         buildNormalMap()
         level.custom = () => {
             elevator.move()
+            // console.log(elevator)
+            lasers[lasers.length - 1].look.y = elevator.position.y
+            lasers[lasers.length - 1].position.y = elevator.position.y
+
             for (let i = 0; i < buttons.length; i++) {
                 buttons[i].draw()
                 if (buttons[i].isUp && !isFlipping) {
@@ -7500,13 +7507,17 @@ const level = {
                 ctx.fillRect(-2025, 2025 - 450, 400, 450);
                 //shadows
                 ctx.fillStyle = "rgba(0,0,0,0.08)"
+                ctx.fillRect(-2025, -2075, 900, 775);
+                ctx.fillRect(-1075, -2025, 450, 725);
+                ctx.fillRect(-575, -2025, 450, 725);
+
                 ctx.fillRect(175, -250 - 725, 325, 725);
                 ctx.fillRect(650, -350 - 975, 475, 975);
                 ctx.fillRect(375, -1650 - 400, 750, 400);
                 //ceiling
                 ctx.fillStyle = "rgba(0,0,0,0.04)"
-                ctx.fillRect(1225, 2025 - 425, 350, 425);
-                ctx.fillRect(-50, 2025 - 425, 1025, 425);
+                ctx.fillRect(1225, 2025 - 450, 350, 450);
+                ctx.fillRect(-50, 1700, 1025, 325);
                 ctx.fillRect(-550, 2025 - 425, 400, 425);
                 ctx.fillRect(-1050, 2025 - 625, 400, 625);
                 ctx.fillRect(-1625, 2025 - 450, 475, 450);
@@ -7514,13 +7525,17 @@ const level = {
                 ctx.fillRect(-2025, -2025, 400, 450);
                 //shadows
                 ctx.fillStyle = "rgba(0,0,0,0.08)"
+                ctx.fillRect(-2025, 1300, 900, 775);
+                ctx.fillRect(-1075, 1300, 450, 725);
+                ctx.fillRect(-575, 1300, 450, 725);
+
                 ctx.fillRect(175, 250, 325, 725);
                 ctx.fillRect(650, 350, 475, 975);
                 ctx.fillRect(375, 1650, 750, 400);
                 //ceiling
                 ctx.fillStyle = "rgba(0,0,0,0.04)"
-                ctx.fillRect(1225, -2025, 350, 425);
-                ctx.fillRect(-50, -2025, 1025, 425);
+                ctx.fillRect(1225, -2025, 350, 450);
+                ctx.fillRect(-50, -2025, 1025, 325);
                 ctx.fillRect(-550, -2025, 400, 425);
                 ctx.fillRect(-1050, -2025, 400, 625);
                 ctx.fillRect(-1625, -2025, 475, 450);
@@ -7569,7 +7584,7 @@ const level = {
         spawn.randomLevelBoss(-875, -200);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
-    gravityObservatory() {
+    gravitron() {
         mobs.maxMobBody = 25 //normally 40, but set lower to avoid too much clutter
         level.isVerticalFLipLevel = true
         simulation.fallHeight = 4000
@@ -7778,13 +7793,13 @@ const level = {
         buildNormalMap()
         level.custom = () => {
             //stuff floats near buttons
-            if ((player.position.x > -3505 && player.position.x < -3075) ||
-                (player.position.x > 0 && player.position.x < 425) ||
-                (player.position.x > 3575)) {
-                if (player.position.y > 0) {
-                    player.force.y -= 0.8 * simulation.g * player.mass
-                }
-            }
+            // if ((player.position.x > -3505 && player.position.x < -3075) ||
+            //     (player.position.x > 0 && player.position.x < 425) ||
+            //     (player.position.x > 3575)) {
+            //     if (player.position.y > 0) {
+            //         player.force.y -= 0.8 * simulation.g * player.mass
+            //     }
+            // }
             for (let i = 0; i < body.length; i++) {
                 if ((body[i].position.x > -3505 && body[i].position.x < -3075) ||
                     (body[i].position.x > 0 && body[i].position.x < 425) ||
@@ -31644,6 +31659,7 @@ const level = {
         level.setPosToSpawn(0, -50); //normal spawn
         const elevatortoggle = level.toggle(13650, 3000)
         let newMobsSpawned = false;
+        let leverTimer = 0;
         level.exit.x = 11900;
         level.exit.y = -800;
         const boost1 = level.boost(12050, 200, 1000)
@@ -31670,6 +31686,24 @@ const level = {
         powerUps.spawn(8650, 2000, "ammo")
         level.custom = () => {
 
+            ctx.fillStyle = `rgba(68, 68, 68)`
+            ctx.fillRect(11450, 700, 50, 125);
+            ctx.fillRect(11425, 750, 75, 75);
+            if (newMobsSpawned) {
+                // ctx.fillStyle = `#00FFFF22`;
+                ctx.fillStyle = `rgba(0, 255, 255, ${leverTimer / 5})`
+                ctx.fillRect(11500, 700, 450, 2375 + 100)
+                ctx.fill()
+                ctx.fillStyle = `#00f2ff`
+                ctx.fillRect(11500 + Math.floor(Math.random() * 450), 700, 5, 2375 + 100)
+                ctx.fillRect(11500 + Math.floor(Math.random() * 450), 700, 5, 2375 + 100)
+                ctx.fill()
+
+                if (m.pos.x > 11500 && m.pos.x < 11950 && m.pos.y > 800 && m.pos.y < 2700) {
+                    player.force.y -= m.mass * simulation.g + (input.down ? 0 : 0.012 * 4);
+                }
+            }
+
             //light rain
             ctx.beginPath()
             ctx.fillStyle = "rgba(30,150,117,255)"
@@ -31687,8 +31721,8 @@ const level = {
 
             elevatortoggle.query();
             if (elevatortoggle.isOn) {
-                elevator1.move();
                 if (newMobsSpawned == false) {
+                    leverTimer += 0.0125;
                     //last room mobs
                     spawn.randomSmallMob(11723.3, -127.5);
                     spawn.randomSmallMob(10525.2, 727.5);
@@ -31698,8 +31732,11 @@ const level = {
                     spawn.randomGroup(11066.3, 560.4, 0.4);
                     newMobsSpawned = true;
                 }
-
             };
+
+            if (leverTimer > 0 && leverTimer < 1) {
+                leverTimer += 0.0125
+            }
 
             ctx.fillStyle = "rgba(0,0,0,0.3)"
             ctx.beginPath()
@@ -31730,6 +31767,7 @@ const level = {
             ctx.lineTo(12050, -280)
             ctx.lineTo(11950, -280)
             ctx.fill()
+
             //ladder
             ctx.fillRect(12065, -770, 20, 870)
             ctx.fillRect(12115, -770, 20, 870)
@@ -31748,11 +31786,6 @@ const level = {
             ctx.fillRect(12055, -60, 90, 15)
             ctx.fillRect(12055, 0, 90, 15)
             ctx.fillRect(12055, 60, 90, 15)
-
-            //elevator line
-            ctx.fillStyle = "rgba(0,0,0,0.8)"
-            ctx.fillRect(11724, 800, 1, 3500)
-
 
             //post rocket shadows
             ctx.fillStyle = "rgba(0,0,0,0.3)"
@@ -31773,6 +31806,7 @@ const level = {
             ctx.lineTo(5700, 2300)
             ctx.lineTo(5884.8, 380.1)
             ctx.fill()
+
             //boss room shadow
             ctx.fillRect(11950, 2000, 5000, 1100)
             ctx.fillRect(12150, -25, 3000, 250)
@@ -31781,7 +31815,6 @@ const level = {
             level.exit.drawAndCheck();
 
             level.enter.draw();
-
         }
 
         level.customTopLayer = () => {
@@ -31790,19 +31823,16 @@ const level = {
             } else {
                 ctx.fillStyle = `rgba(68, 68, 68, 68)`
             }
+
             ctx.fillRect(12150, -30, 1600, 1000)
             mover.draw();
-
 
             //vanishing platform
             vanisher.query();
 
-
             //rocket
-
             ctx.fillStyle = "rgba(202,88,0,1)"
             ctx.fillRect(6800, -1000, 600, 2800)
-            //ctx.beginPath()
             ctx.beginPath()
             ctx.moveTo(7400, -998)//base right
             ctx.lineTo(7350, -1400)//1/3rd up
@@ -31819,18 +31849,21 @@ const level = {
             ctx.fillRect(6800, 1700, 600, 300)
             ctx.fillRect(6450, -400, 250, 2100)
             ctx.fillRect(7500, -400, 250, 2100)
+
             //right engine
             ctx.beginPath()
             ctx.moveTo(6450, -398)//base right
             ctx.lineTo(6575, -900)//peak
             ctx.lineTo(6700, -398)//baseleft
             ctx.fill()
+
             //right engine
             ctx.beginPath()
             ctx.moveTo(7500, -398)//base right
             ctx.lineTo(7625, -900)//peak
             ctx.lineTo(7750, -398)//baseleft
             ctx.fill()
+
             //right wing
             ctx.beginPath()
             ctx.moveTo(6910, 450)
@@ -31839,6 +31872,7 @@ const level = {
             ctx.lineTo(6250, 1600)
             ctx.lineTo(6780, 1030)
             ctx.fill()
+
             //left wing
             ctx.beginPath()
             ctx.moveTo((7100 - 6910) + 7100, 450)
@@ -31859,8 +31893,8 @@ const level = {
             ctx.lineTo(6900, 2)//baseleft
             ctx.fill()
 
-            ctx.fillStyle = "rgba(0,0,0,1)"
             //right wing outline
+            ctx.fillStyle = "rgba(0,0,0,1)"
             ctx.beginPath()
             ctx.moveTo((7100 - 6250) + 7100, 1700)
             ctx.lineTo((7100 - 6250) + 7100, 1600)
@@ -31869,6 +31903,7 @@ const level = {
             ctx.lineTo((7100 - 6800) + 7100, 1030)
             ctx.lineTo((7100 - 6290) + 7100, 1600)
             ctx.fill()
+
             //left wing outline
             ctx.beginPath()
             ctx.moveTo(6250, 1700)
@@ -31878,16 +31913,24 @@ const level = {
             ctx.lineTo(6800, 1030)
             ctx.lineTo(6290, 1600)
             ctx.fill()
-
             ctx.fillRect(6800, 2000, 600, 50)
             ctx.fillRect(6850, 2050, 500, 150)
 
 
 
+            //light
+            if (elevatortoggle.isOn) {
+                ctx.fillStyle = `rgba(242, 255, 0, ${3 * Math.sqrt(leverTimer) / 10})`
+                ctx.beginPath()
+                ctx.moveTo(13070, 2012)
+                ctx.lineTo(12930, 2012)
+                ctx.lineTo(12230, 2700)
+                ctx.lineTo(13770, 2700)
+                ctx.fill()
+            }
 
             //shadows
             ctx.fillStyle = "rgba(0,0,0,0.3)"
-            //ctx.fillRect(-272, -580, 1700, 600)
             ctx.beginPath()
             ctx.moveTo(1800, -400)
             ctx.lineTo(2500, 300)
@@ -31901,15 +31944,9 @@ const level = {
             ctx.lineTo(1522.9, 2431.8)
             ctx.lineTo(983.5, 887.3)
             ctx.fill()
-            //ctx.rect(6800, 0, 600, 1800)
-
-            //move elevator
-            //elevator1.move();
-            //elevator2.move();
-
-
-
         };
+
+        //GEOMETRY
 
         //vanishing platform
         var vanisher = level.vanish(10250, 201, 500, 20);
@@ -31925,20 +31962,14 @@ const level = {
         spawn.mapRect(9500, -1500, 500, 2300);
 
 
-        //-9000, +2000
         spawn.mapRect(2500, 0, 3200, 500);
         spawn.mapRect(5700, 0, 500, 2300);
-
         spawn.mapRect(1800, 1100, 800, 2600);
         spawn.mapRect(2600, 1660, 1800, 2040);
         spawn.mapRect(1800, -495, 200, 100);
         spawn.mapVertex(2400, -230, "0 10  900 510  800 510  750 510  0 110");
 
-
-
-
         //stairs
-
         spawn.mapRect(2600, 1150, 50, 550);
         spawn.mapRect(2650, 1200, 50, 500);
         spawn.mapRect(2700, 1250, 50, 450);
@@ -31956,9 +31987,7 @@ const level = {
         spawn.mapRect(4685, 1300, 50, 550);
         spawn.mapRect(4400, 2000, 550, 50);
         spawn.mapRect(5150, 1000, 550, 50);
-
         spawn.mapVertex(5500, 1550, "0 0  -500 600  100 0  -400 600");
-
 
         //second room
         spawn.mapRect(8000, 0, 1500, 2300);
@@ -31979,6 +32008,9 @@ const level = {
         spawn.mapRect(10850, 2100, 450, 50);
         spawn.mapRect(10900, 2050, 400, 50);
         spawn.mapRect(10950, 2000, 550, 700);
+
+        //light
+        spawn.mapRect(12925, 2000, 150, 12);
 
         //roof over stairs
         spawn.mapRect(9500, 1200, 1000, 500);
@@ -32005,10 +32037,9 @@ const level = {
         spawn.mapRect(11800, -1500, 350, 400);
         spawn.mapRect(12150, -1500, 3000, 1500);
         spawn.mapRect(13700, 0, 2000, 800);
-
         spawn.mapRect(13200, 550, 50, 300);
 
-
+        //MOBS
 
 
         //mobs in first room
@@ -32024,9 +32055,6 @@ const level = {
         spawn.randomMob(13381.7, 2437.2, 0.8);
         spawn.randomGroup(10472.4, 2079.0, 0.4);
 
-
-
-
         //boss room
         spawn.randomLevelBoss(12786, 2461, ["launcherBoss", "laserTargetingBoss", "blinkBoss", "streamBoss", "historyBoss", "grenadierBoss", "blockBoss", "revolutionBoss", "slashBoss"]);
         spawn.mapRect(13500, 3000, 500, 400);
@@ -32034,11 +32062,6 @@ const level = {
 
         //extra boss
         spawn.randomLevelBoss(12808.8, 527.0, ["blinkBoss"]);
-
-        //elavators
-        const elevator1 = level.elevator(11500, 2680, 450, 20, 800, 0.0025, { up: 0.1, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
-        //const elevator2 = level.elevator(11500, 1821, 20, 675, 1121, 0.0025, { up: 0.1, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
-        //const elevator1 = level.elevator(-1625, -90, 310, 800, -2000, 0.0025, { up: 0.1, down: 0.2 }) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
 
 
 
@@ -32053,6 +32076,7 @@ const level = {
         // if (simulation.difficulty > 1) spawn.randomLevelBoss(2200, -1300);
         // spawn.secondaryBossChance(100, -1500)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
+
     },
     shipwreck() {
         simulation.inGameConsole(`<strong>shipwreck</strong> by <span class='color-var'>3xionDev</span>`);

@@ -1,24 +1,14 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new level: gravityObservatory
+images have been disabled
+  I think they don't fit stylistically
 
-level: testChamber2 renamed gravityInterferometer
-  it has been added to the levels that are extra hard and only show up late game
-  it also got a bit hard with the addition of 1 more laser
+ new power up: level WARP
+  it shows up when you enter testing mode on the initial level
+interferometer horizontal laser now moves with the elevator
+LaunchSite community map updated
 
-deflected mob bullets are converted into small blocks
-ablative drones is now a gun tech for drones
-  it makes ~33% more drones
-1.033->1.05x sneak attack damage per coupling for cloaking field
-
-bug fixes
-  extended vertical flip to edge cases:
-    trail left by snakeBoss
-    laser array from boss and mobs
-    springer,spiderBoss,mantisBoss constraints
-  subway: dark matter no longer removed if it gets too far from the player
-  training: fixed potential lock out from running out of ammo
-  training: fixed accidental difficulty increase
+some minor bug fixes
 
 ******************************************************** BUGS ********************************************************
 
@@ -50,22 +40,8 @@ player can become crouched while not touching the ground if they exit the ground
 
 *********************************************************** TODO *****************************************************
 
-considering removing generative   AI images from n-gon
-  pros: (of removing images)
-    the novelty of the images has worn off
-    cleaner UI without them
-    reduce the total size of n-gon by about 1/3
-    reduce the complexity of the code
-    avoid ire of people that hate generative AI
-  cons: (of removing images)
-    some people might like them
-
-make a level selector power up
-  it shows up when you enter testing mode on the initial level
-  check box for community maps?
-
-deflecting with field converts mob bullets to blocks that despawn after a few seconds
-  default for all fields that can deflect
+extended vertical flip to edge cases:
+  !!stored circular graphics     simulation.drawList.push
 
 add more tips:
   download latest version of n-gon

@@ -373,8 +373,9 @@ const powerUps = {
             document.getElementById("choose-grid").classList.remove('choose-grid');
             document.getElementById("choose-grid").style.gridTemplateColumns = "800px"//adjust this to increase the width of the whole menu, but mostly the center column
             let lore = localSettings.loreCount > 0 ? "lore.unlockTesting()               //press T to enter testing" : ""
-            let text = `<div class="grid-container" style = "font-size:1rem;"><pre> <strong>//console commands</strong>
+            let text = `<div class="grid-container" style = "font-size:1rem;padding: 0px;"><pre> <strong>//console commands</strong>
  powerUps.instructions.effect()     //reproduce this message
+ powerUps.warp.effect()             //warp to any level
  tech.giveTech("name")              //replace "name" with tech name
  m.setField("name")                 //standing wave  perfect diamagnetism  negative mass  molecular assembler  plasma torch  time dilation  metamaterial cloaking  pilot wave  wormhole  grappling hook
  b.giveGuns("name")                 //nail gun  shotgun  super balls  wave  missiles  grenades  spores  drones  foam  harpoon  mine  laser
@@ -386,14 +387,18 @@ const powerUps = {
  m.maxEnergy = 1                    //set max energy
  simulation.enableConstructMode()   //press T to build with mouse
  ${lore}
- powerUps.spawn(m.pos.x, m.pos.y, "name") //tech gun field heal ammo research coupling boost instructions entanglement
+
  Matter.Body.setPosition(player, simulation.mouseInGame);
  spawn.bodyRect(simulation.mouseInGame.x, simulation.mouseInGame.y, 50, 50)
- spawn.randomLevelBoss(simulation.mouseInGame.x, simulation.mouseInGame.y)
-             <strong>chrome</strong>                     <strong>firefox</strong>
+ spawn.randomLevelBoss(simulation.mouseInGame.x, simulation.mouseInGame.y) 
+ powerUps.spawn(m.pos.x, m.pos.y, "name") //tech gun field heal ammo research coupling boost instructions entanglement
+ 
+ //this URL downloads newest version of n-gon 
+ https://codeload.github.com/landgreen/n-gon/zip/refs/heads/master
+
+              <strong>chrome</strong>                     <strong>firefox</strong>
  <strong>Win/Linux:</strong> Ctrl + Shift + J        Ctrl + Shift + J
-       <strong>Mac:</strong> Cmd + Option + J        Cmd + Shift + J</pre></div>
-<div class="choose-grid-module" id="exit" style="text-align: center;font-size: 1.3rem;">exit</div>`
+       <strong>Mac:</strong> Cmd + Option + J        Cmd + Shift + J</pre></div><div class="choose-grid-module" id="exit" style="text-align: center;font-size: 1.3rem;">exit</div>`
             document.getElementById("choose-grid").innerHTML = text
             //show level info
             document.getElementById("choose-grid").style.opacity = "1"
@@ -410,6 +415,77 @@ const powerUps = {
                     document.getElementById("choose-grid").classList.add('choose-grid');
                     document.getElementById("choose-grid").classList.remove('choose-grid-no-images');
                 }
+            });
+        },
+    },
+    warp: {
+        name: "warp",
+        color: "rgb(110,155,160)",
+        size() {
+            return 30
+        },
+        load(name) {
+            level.levels[level.onLevel + 1] = name
+            powerUps.warp.exit()
+            level.nextLevel();
+            // simulation.clearNow = true
+        },
+        exit() {
+            level.unPause()
+            document.body.style.cursor = "none";
+            //reset hide image style
+            if (localSettings.isHideImages) {
+                document.getElementById("choose-grid").classList.add('choose-grid-no-images');
+                document.getElementById("choose-grid").classList.remove('choose-grid');
+            } else {
+                document.getElementById("choose-grid").classList.add('choose-grid');
+                document.getElementById("choose-grid").classList.remove('choose-grid-no-images');
+            }
+        },
+        effect() {
+            requestAnimationFrame(() => { //add a background behind the power up menu
+                ctx.fillStyle = `rgba(150,150,150,0.9)`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            });
+            powerUps.animatePowerUpGrab('rgba(0, 0, 0,0.6)')
+
+            if (!simulation.paused) {
+                simulation.paused = true;
+                simulation.isChoosing = true; //stops p from un pausing on key down
+                document.body.style.cursor = "auto";
+                document.getElementById("choose-grid").style.pointerEvents = "auto";
+                document.getElementById("choose-grid").style.transitionDuration = "0s";
+            }
+            //build level info
+            document.getElementById("choose-grid").classList.add('choose-grid-no-images');
+            document.getElementById("choose-grid").classList.remove('choose-grid');
+            document.getElementById("choose-grid").style.gridTemplateColumns = "200px"//adjust this to increase the width of the whole menu, but mostly the center column
+            let levelChoices = `<div class="choose-grid-module" style="font-size: 1.5rem;color:rgb(110,155,160);text-align:center;"><strong>WARP</strong></div>`
+            levelChoices += `<div class="choose-grid-module" style="font-size: 1rem;color:rgb(110,155,160);background-color:#444;text-align:center;">level.uniqueLevels</div>`
+            for (let i = 0; i < level.uniqueLevels.length; i++) {
+                levelChoices += `<div class="choose-grid-module" style="font-size: 1rem;padding-left:5px;" onclick="powerUps.warp.load('${level.uniqueLevels[i]}')">${level.uniqueLevels[i]}</div>`   //id="uniqueLevels-warp-${i}"
+            }
+            levelChoices += `<div class="choose-grid-module" style="color:rgb(110,155,160);background-color:#444;text-align:center;">level.playableLevels</div>`
+            for (let i = 0; i < level.playableLevels.length; i++) {
+                levelChoices += `<div class="choose-grid-module" style="padding-left:5px;" onclick="powerUps.warp.load('${level.playableLevels[i]}')">${level.playableLevels[i]}</div>`
+            }
+            levelChoices += `<div class="choose-grid-module" style="color:rgb(110,155,160);background-color:#444;text-align:center;">level.communityLevels</div>`
+            for (let i = 0; i < level.communityLevels.length; i++) {
+                levelChoices += `<div class="choose-grid-module" style="padding-left:5px;" onclick="powerUps.warp.load('${level.communityLevels[i]}')">${level.communityLevels[i]}</div>`
+            }
+            levelChoices += `<div class="choose-grid-module" style="color:rgb(110,155,160);background-color:#444;text-align:center;">level.trainingLevels</div>`
+            for (let i = 0; i < level.trainingLevels.length; i++) {
+                levelChoices += `<div class="choose-grid-module" style="padding-left:5px;" onclick="powerUps.warp.load('${level.trainingLevels[i]}')">${level.trainingLevels[i]}</div>`
+            }
+            let text = `${levelChoices} <div class="choose-grid-module" id="exit" style="font-size: 1.4rem;color:rgb(110,155,160);text-align:right;padding-right:5px;"><strong>exit</strong></div>`
+            document.getElementById("choose-grid").innerHTML = text
+            //show level info
+            document.getElementById("choose-grid").style.opacity = "1"
+            document.getElementById("choose-grid").style.transitionDuration = "0.3s"; //how long is the fade in on
+            document.getElementById("choose-grid").style.visibility = "visible"
+
+            document.getElementById("exit").addEventListener("click", () => {
+                powerUps.warp.exit()
             });
         },
     },
