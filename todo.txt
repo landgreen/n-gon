@@ -1,16 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
-images have been disabled
-  I think they don't fit stylistically
+images are back as an option due to public outcry
 
- new power up: level WARP
-  it shows up when you enter testing mode on the initial level
-interferometer horizontal laser now moves with the elevator
-LaunchSite community map updated
+bug fixes
+  getting a power up quickly after warp, difficulty or instructions power ups was making the screen go blank
+  heuristics resets on death properly now
 
-some minor bug fixes
 
 ******************************************************** BUGS ********************************************************
+
+
+  can't consistenly reproduce, but it happened several times this way
+    on initial level I press T and took the warp and exited it,  then I too a field and the screen went blank
 
 figure out why seeded random isn't making runs the same:
   shuffle is being used for a wide variety of things that don't need a seeded random

@@ -727,9 +727,9 @@ const level = {
         simulation.isChoosing = false; //stops p from un pausing on key down
         build.unPauseGrid()
         document.getElementById("choose-grid").style.opacity = "0"
-        setTimeout(() => {
-            document.getElementById("choose-grid").style.visibility = "hidden"
-        }, 1000);
+        document.getElementById("choose-grid").style.visibility = "hidden"
+        // setTimeout(() => {
+        // }, 1000);
     },
     populateLevels() { //run a second time if URL is loaded
         if (document.getElementById("banned").value) { //remove levels from ban list in settings

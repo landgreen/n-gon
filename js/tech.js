@@ -1287,13 +1287,14 @@ const tech = {
         },
         refundAmount: 0,
         remove() {
-            if (this.count && m.alive) {
-                for (let i = 0; i < this.totalRate.length; i++) tech.fireRate *= this.totalRate[i]
+            if (this.count) {
+                // for (let i = 0; i < this.totalRate.length; i++) tech.fireRate *= this.totalRate[i]
                 if (this.refundAmount > 0) {
                     tech.removeJunkTechFromPool(this.refundAmount)
                     this.refundAmount = 0
                 }
             }
+            tech.fireRate = 1
             this.totalRate.length = 0
             b.setFireCD();
         }

@@ -381,6 +381,7 @@ const powerUps = {
  b.giveGuns("name")                 //nail gun  shotgun  super balls  wave  missiles  grenades  spores  drones  foam  harpoon  mine  laser
  tech.damage *= 2                   //2x damage
  m.immuneCycle = Infinity           //immune to damage            
+ m.coyoteCycles = Infinity          //air jumps
  m.energy = 0                       //set energy
  m.health = 1                       //set health
  m.maxHealth = 1                    //set max health
