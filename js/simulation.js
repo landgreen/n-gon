@@ -3,73 +3,151 @@
 const simulation = {
     loop() { }, //main game loop, gets set to normal or testing loop
     normalLoop() {
-        simulation.gravity();
-        Engine.update(engine, simulation.delta);
-        simulation.wipe();
-        simulation.textLog();
-        if (m.onGround) {
-            m.groundControl()
-        } else {
-            m.airControl()
+        try {
+            simulation.gravity();
+            Engine.update(engine, simulation.delta);
+            simulation.wipe();
+            simulation.textLog();
+            if (m.onGround) {
+                m.groundControl()
+            } else {
+                m.airControl()
+            }
+            m.move();
+            m.look();
+            simulation.camera();
+            level.custom();
+            powerUps.do();
+            mobs.draw();
+            simulation.draw.cons();
+            simulation.draw.body();
+            if (!m.isBodiesAsleep) mobs.loop();
+            mobs.healthBar();
+            m.draw();
+            m.hold();
+            level.customTopLayer();
+            simulation.draw.drawMapPath();
+            b.fire();
+            b.bulletRemove();
+            b.bulletDraw();
+            if (!m.isBodiesAsleep) b.bulletDo();
+            simulation.drawCircle();
+            simulation.runEphemera();
+            ctx.restore();
+        } catch (error) {
+            simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${(error.stack && error.stack.replace(/\n/g, "<br>")) || (error.message + ` <u>${error.filename}:${error.lineno}</u>`)}`);
+        } finally {
+            simulation.drawCursor();
         }
-        m.move();
-        m.look();
-        simulation.camera();
-        level.custom();
-        powerUps.do();
-        mobs.draw();
-        simulation.draw.cons();
-        simulation.draw.body();
-        if (!m.isBodiesAsleep) mobs.loop();
-        mobs.healthBar();
-        m.draw();
-        m.hold();
-        level.customTopLayer();
-        simulation.draw.drawMapPath();
-        b.fire();
-        b.bulletRemove();
-        b.bulletDraw();
-        if (!m.isBodiesAsleep) b.bulletDo();
-        simulation.drawCircle();
-        simulation.runEphemera();
-        ctx.restore();
-        simulation.drawCursor();
     },
     testingLoop() {
-        simulation.gravity();
-        Engine.update(engine, simulation.delta);
-        simulation.wipe();
-        simulation.textLog();
-        if (m.onGround) {
-            m.groundControl()
-        } else {
-            m.airControl()
-        }
-        m.move();
-        m.look();
-        simulation.camera();
-        level.custom();
-        m.draw();
-        m.hold();
-        level.customTopLayer();
-        simulation.draw.wireFrame();
-        if (input.fire && m.fireCDcycle < m.cycle) {
-            m.fireCDcycle = m.cycle + 15; //fire cooldown       
-            for (let i = 0, len = mob.length; i < len; i++) {
-                if (Vector.magnitudeSquared(Vector.sub(mob[i].position, simulation.mouseInGame)) < mob[i].radius * mob[i].radius) {
-                    console.log(mob[i])
+        try {
+            simulation.gravity();
+            Engine.update(engine, simulation.delta);
+            simulation.wipe();
+            simulation.textLog();
+            if (m.onGround) {
+                m.groundControl()
+            } else {
+                m.airControl()
+            }
+            m.move();
+            m.look();
+            simulation.camera();
+            level.custom();
+            m.draw();
+            m.hold();
+            level.customTopLayer();
+            simulation.draw.wireFrame();
+            if (input.fire && m.fireCDcycle < m.cycle) {
+                m.fireCDcycle = m.cycle + 15; //fire cooldown       
+                for (let i = 0, len = mob.length; i < len; i++) {
+                    if (Vector.magnitudeSquared(Vector.sub(mob[i].position, simulation.mouseInGame)) < mob[i].radius * mob[i].radius) {
+                        console.log(mob[i])
+                    }
                 }
             }
+            simulation.draw.cons();
+            simulation.draw.testing();
+            simulation.drawCircle();
+            simulation.runEphemera();
+            simulation.constructCycle()
+        } catch (error) {
+            simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${(error.stack && error.stack.replace(/\n/g, "<br>")) || (error.message + ` <u>${error.filename}:${error.lineno}</u>`)}`);
+        } finally {
+            ctx.restore();
+            simulation.testingOutput();
+            simulation.drawCursor();
         }
-        simulation.draw.cons();
-        simulation.draw.testing();
-        simulation.drawCircle();
-        simulation.runEphemera();
-        simulation.constructCycle()
-        ctx.restore();
-        simulation.testingOutput();
-        simulation.drawCursor();
     },
+    // normalLoop() {
+    //     simulation.gravity();
+    //     Engine.update(engine, simulation.delta);
+    //     simulation.wipe();
+    //     simulation.textLog();
+    //     if (m.onGround) {
+    //         m.groundControl()
+    //     } else {
+    //         m.airControl()
+    //     }
+    //     m.move();
+    //     m.look();
+    //     simulation.camera();
+    //     level.custom();
+    //     powerUps.do();
+    //     mobs.draw();
+    //     simulation.draw.cons();
+    //     simulation.draw.body();
+    //     if (!m.isBodiesAsleep) mobs.loop();
+    //     mobs.healthBar();
+    //     m.draw();
+    //     m.hold();
+    //     level.customTopLayer();
+    //     simulation.draw.drawMapPath();
+    //     b.fire();
+    //     b.bulletRemove();
+    //     b.bulletDraw();
+    //     if (!m.isBodiesAsleep) b.bulletDo();
+    //     simulation.drawCircle();
+    //     simulation.runEphemera();
+    //     ctx.restore();
+    //     simulation.drawCursor();
+    // },
+    // testingLoop() {
+    //     simulation.gravity();
+    //     Engine.update(engine, simulation.delta);
+    //     simulation.wipe();
+    //     simulation.textLog();
+    //     if (m.onGround) {
+    //         m.groundControl()
+    //     } else {
+    //         m.airControl()
+    //     }
+    //     m.move();
+    //     m.look();
+    //     simulation.camera();
+    //     level.custom();
+    //     m.draw();
+    //     m.hold();
+    //     level.customTopLayer();
+    //     simulation.draw.wireFrame();
+    //     if (input.fire && m.fireCDcycle < m.cycle) {
+    //         m.fireCDcycle = m.cycle + 15; //fire cooldown       
+    //         for (let i = 0, len = mob.length; i < len; i++) {
+    //             if (Vector.magnitudeSquared(Vector.sub(mob[i].position, simulation.mouseInGame)) < mob[i].radius * mob[i].radius) {
+    //                 console.log(mob[i])
+    //             }
+    //         }
+    //     }
+    //     simulation.draw.cons();
+    //     simulation.draw.testing();
+    //     simulation.drawCircle();
+    //     simulation.runEphemera();
+    //     simulation.constructCycle()
+    //     ctx.restore();
+    //     simulation.testingOutput();
+    //     simulation.drawCursor();
+    // },
     isTimeSkipping: false,
     timeSkip(cycles = 60) {
         simulation.isTimeSkipping = true;
@@ -864,7 +942,7 @@ const simulation = {
         } else {
             Composite.add(engine.world, [player])
         }
-        // shuffle(level.constraint)
+        shuffle(level.constraint)
         level.populateLevels()
         input.endKeySensing();
         simulation.ephemera = []
@@ -889,6 +967,7 @@ const simulation = {
         tech.plasmaBotCount = 0;
         tech.missileBotCount = 0;
 
+        m.isSwitchingWorlds = false
         simulation.isChoosing = false;
         b.setFireMethod()
         b.setFireCD();
@@ -935,7 +1014,7 @@ const simulation = {
         m.onGround = false
         m.lastOnGroundCycle = 0
         m.health = 0;
-        level.isNoHeal = false
+        level.isLowHeal = false
         m.addHealth(0.25)
         m.drop();
         m.holdingTarget = null

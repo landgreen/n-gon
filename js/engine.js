@@ -163,10 +163,10 @@ function collisionChecks(event) {
                             let count = maxCount - 1
                             const angle = Math.atan2(mob[k].position.y - player.position.y, mob[k].position.x - player.position.x);
                             const mass = 0.75 * ((tech.isLargeHarpoon) ? 1 + Math.min(0.05 * Math.sqrt(b.guns[9].ammo), 10) : 1)
-                            b.harpoon(m.pos, mob[k], angle, mass, true, 7) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
+                            b.harpoon(m.pos, mob[k], angle, mass, true, 7, false) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
                             bullet[bullet.length - 1].drain = 0
                             for (; count > 0; count--) {
-                                b.harpoon(m.pos, mob[k], angle + count * 2 * Math.PI / maxCount, mass, true, 7)
+                                b.harpoon(m.pos, mob[k], angle + count * 2 * Math.PI / maxCount, mass, true, 7, false)
                                 bullet[bullet.length - 1].drain = 0
                             }
                         }
@@ -245,8 +245,7 @@ function collisionChecks(event) {
 
                                 mob[k].damage(dmg, true);
                                 if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && Math.random() < 0.5) {
-                                    options = ["coupling", "boost", "heal", "research"]
-                                    if (!tech.isEnergyNoAmmo) options.push("ammo")
+                                    options = ["coupling", "boost", "heal", "research", "ammo"]
                                     powerUps.spawn(mob[k].position.x, mob[k].position.y, options[Math.floor(Math.random() * options.length)]);
                                 }
 

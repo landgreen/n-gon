@@ -374,7 +374,7 @@ const b = {
     explosionRange() {
         return tech.explosiveRadius * (tech.isExplosionHarm ? 1.7 : 1) * (tech.isSmallExplosion ? 0.7 : 1) * (tech.isExplodeRadio ? 1.25 : 1)
     },
-    explosion(where, radius, color = "rgba(255,25,0,0.6)") { // typically explode is used for some bullets with .onEnd
+    explosion(where, radius, color = "rgba(255,25,0,0.6)", reducedKnock = 1) { // typically explode is used for some bullets with .onEnd
         radius *= tech.explosiveRadius
 
         let dist, sub, knock;
@@ -525,7 +525,7 @@ const b = {
                         if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
                         mob[i].damage(dmg * damageScale * m.dmgScale);
                         mob[i].locatePlayer();
-                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg * damageScale) * mob[i].mass * (mob[i].isBoss ? 0.003 : 0.01));
+                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg * damageScale) * mob[i].mass * (mob[i].isBoss ? 0.003 : 0.01) * reducedKnock);
                         if (tech.isStun) {
                             mobs.statusStun(mob[i], 30)
                         } else if (!mob[i].isInvulnerable) {
@@ -536,7 +536,7 @@ const b = {
                         damageScale *= 0.87 //reduced damage for each additional explosion target
                     } else if (!mob[i].seePlayer.recall && dist < alertRange) {
                         mob[i].locatePlayer();
-                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg * damageScale) * mob[i].mass * (mob[i].isBoss ? 0 : 0.006));
+                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg * damageScale) * mob[i].mass * (mob[i].isBoss ? 0 : 0.006 * reducedKnock));
                         if (tech.isStun) {
                             mobs.statusStun(mob[i], 30)
                         } else if (!mob[i].isInvulnerable) {
@@ -630,11 +630,8 @@ const b = {
                     count++
                     if (count < 84) requestAnimationFrame(cycle);
                     if (!(count % 7)) {
-                        const unit = Vector.rotate({
-                            x: 1,
-                            y: 0
-                        }, 6.28 * Math.random())
-                        b.explosion(Vector.add(where, Vector.mult(unit, size * (count * 0.01 + 0.03 * Math.random()))), size * (0.4 + Math.random() * 0.35), `hsla(${360 * Math.random()},100%,66%,0.6)`); //makes bullet do explosive damage at end
+                        const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
+                        b.explosion(Vector.add(where, Vector.mult(unit, size * (count * 0.01 + 0.03 * Math.random()))), size * (0.4 + Math.random() * 0.35), `hsla(${360 * Math.random()},100%,66%,0.6)`, 0.2); //makes bullet do explosive damage at end
                     }
                 }
             }
@@ -656,7 +653,7 @@ const b = {
                             x: 1,
                             y: 0
                         }, curl * 6.28 * count / 18 + off)
-                        b.explosion(Vector.add(where, Vector.mult(unit, size * 0.75)), size * 0.7, color); //makes bullet do explosive damage at end
+                        b.explosion(Vector.add(where, Vector.mult(unit, size * 0.75)), size * 0.7, color, 0.5); //makes bullet do explosive damage at end
                     }
                 }
             }
@@ -677,7 +674,7 @@ const b = {
                     if (count < 30 && m.alive) requestAnimationFrame(cycle);
                     if (count === 0) {
                         const color = `hsla(${360 * Math.random()},100%,66%,0.6)`
-                        b.explosion(where, size * 0.8, color);
+                        b.explosion(where, size * 0.8, color, 0.5);
                     }
                     if (count === 8) {
                         const color = `hsla(${360 * Math.random()},100%,66%,0.6)`
@@ -686,7 +683,7 @@ const b = {
                                 x: 1,
                                 y: 0
                             }, 6.28 * i / len)
-                            b.explosion(Vector.add(where, Vector.mult(unit, 1.1 * range)), size * 0.6, color); //makes bullet do explosive damage at end
+                            b.explosion(Vector.add(where, Vector.mult(unit, 1.1 * range)), size * 0.6, color, 0.5); //makes bullet do explosive damage at end
                         }
                     }
                     if (count === 16) {
@@ -696,7 +693,7 @@ const b = {
                                 x: 1,
                                 y: 0
                             }, 6.28 * i / len)
-                            b.explosion(Vector.add(where, Vector.mult(unit, 1.4 * range)), size * 0.45, color); //makes bullet do explosive damage at end
+                            b.explosion(Vector.add(where, Vector.mult(unit, 1.4 * range)), size * 0.45, color, 0.5); //makes bullet do explosive damage at end
                         }
                     }
                     count++
@@ -1611,6 +1608,7 @@ const b = {
                         Matter.Body.setVelocity(this.caughtPowerUp, { x: 0, y: 0 })
                     } else {
                         for (let i = 0, len = powerUp.length; i < len; ++i) {
+                            if (tech.isEnergyNoAmmo && powerUp[i].name === "ammo") continue
                             const radius = powerUp[i].circleRadius + 50
                             if (Vector.magnitudeSquared(Vector.sub(this.vertices[2], powerUp[i].position)) < radius * radius) {
                                 if (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) {
@@ -1906,6 +1904,7 @@ const b = {
                     Matter.Body.setVelocity(this.caughtPowerUp, { x: 0, y: 0 })
                 } else { //&& simulation.cycle % 2 
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
+                        if (tech.isEnergyNoAmmo && powerUp[i].name === "ammo") continue
                         const radius = powerUp[i].circleRadius + 50
                         if (Vector.magnitudeSquared(Vector.sub(this.vertices[2], powerUp[i].position)) < radius * radius && !powerUp[i].isGrabbed) {
                             if (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) {
@@ -3307,9 +3306,11 @@ const b = {
                             for (let i = 0, len = powerUp.length; i < len; ++i) { //grab, but don't lock onto nearby power up
                                 if (
                                     Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 &&
-                                    (powerUp[i].name !== "heal" || m.health < 0.97 * m.maxHealth || tech.isDroneGrab) &&
-                                    (powerUp[i].name !== "field" || !tech.isSuperDeterminism)
-                                    // &&(b.inventory.length > 1 || powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
+                                    !(
+                                        (m.health > 0.93 * m.maxHealth && !tech.isDroneGrab && powerUp[i].name === "heal") ||
+                                        (tech.isSuperDeterminism && powerUp[i].name === "field") ||
+                                        ((tech.isEnergyNoAmmo || b.inventory.length === 0) && powerUp[i].name === "ammo")
+                                    )
                                 ) {
                                     //draw pickup for a single cycle
                                     ctx.beginPath();
@@ -3337,11 +3338,11 @@ const b = {
                             //look for power ups to lock onto
                             let closeDist = Infinity;
                             for (let i = 0, len = powerUp.length; i < len; ++i) {
-                                if (
-                                    (powerUp[i].name !== "heal" || m.health < 0.97 * m.maxHealth || tech.isDroneGrab) &&
-                                    (powerUp[i].name !== "field" || !tech.isSuperDeterminism)
-                                    // &&(b.inventory.length > 1 || powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
-                                ) {
+                                if (!(
+                                    (m.health > 0.93 * m.maxHealth && !tech.isDroneGrab && powerUp[i].name === "heal") ||
+                                    (tech.isSuperDeterminism && powerUp[i].name === "field") ||
+                                    ((tech.isEnergyNoAmmo || b.inventory.length === 0) && powerUp[i].name === "ammo")
+                                )) {
                                     if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 && !simulation.isChoosing) {
                                         //draw pickup for a single cycle
                                         ctx.beginPath();
@@ -3543,9 +3544,11 @@ const b = {
                                 for (let i = 0, len = powerUp.length; i < len; ++i) {
                                     if (
                                         Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 &&
-                                        (powerUp[i].name !== "heal" || m.health < 0.93 * m.maxHealth || tech.isDroneGrab) &&
-                                        (powerUp[i].name !== "field" || !tech.isSuperDeterminism)
-                                        // &&(powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
+                                        !(
+                                            (m.health > 0.93 * m.maxHealth && !tech.isDroneGrab && powerUp[i].name === "heal") ||
+                                            (tech.isSuperDeterminism && powerUp[i].name === "field") ||
+                                            ((tech.isEnergyNoAmmo || b.inventory.length === 0) && powerUp[i].name === "ammo")
+                                        )
                                     ) {
                                         //draw pickup for a single cycle
                                         ctx.beginPath();
@@ -3574,11 +3577,11 @@ const b = {
                                 //look for power ups to lock onto
                                 let closeDist = Infinity;
                                 for (let i = 0, len = powerUp.length; i < len; ++i) {
-                                    if (
-                                        (powerUp[i].name !== "heal" || m.health < 0.93 * m.maxHealth || tech.isDroneGrab) &&
-                                        (powerUp[i].name !== "field" || !tech.isSuperDeterminism)
-                                        // &&(powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity || tech.isDroneGrab)
-                                    ) {
+                                    if (!(
+                                        (m.health > 0.93 * m.maxHealth && !tech.isDroneGrab && powerUp[i].name === "heal") ||
+                                        (tech.isSuperDeterminism && powerUp[i].name === "field") ||
+                                        ((tech.isEnergyNoAmmo || b.inventory.length === 0) && powerUp[i].name === "ammo")
+                                    )) {
                                         if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 && !simulation.isChoosing) {
                                             //draw pickup for a single cycle
                                             ctx.beginPath();

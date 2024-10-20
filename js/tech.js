@@ -917,7 +917,7 @@ const tech = {
                             //give the tech that was found for this gun
                             if (gunTechPool.length) {
                                 const index = Math.floor(Math.random() * gunTechPool.length)
-                                simulation.inGameConsole(`<span class='color-var'>tech</span>.giveTech("<span class='color-text'>${tech.tech[gunTechPool[index]].name}</span>")`, 360)
+                                simulation.inGameConsole(`<span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${tech.tech[gunTechPool[index]].name}</strong>")`, 360)
                                 tech.giveTech(gunTechPool[index]) // choose from the gun pool
                                 simulation.boldActiveGunHUD();
                             }
@@ -1103,7 +1103,7 @@ const tech = {
     },
     {
         name: "non-renewables",
-        description: `<strong>2x</strong> <strong class='color-d'>damage</strong><br>${powerUps.orb.ammo()} can't <strong>spawn</strong>`,
+        description: `<strong>2x</strong> <strong class='color-d'>damage</strong><br>you can't pickup ${powerUps.orb.ammo()}`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -1116,15 +1116,17 @@ const tech = {
         effect() {
             tech.damage *= this.damage
             tech.isEnergyNoAmmo = true;
+            powerUps.ammo.color = "#c1c6c9"//"#abb3b8"// "#535e63"
         },
         remove() {
             if (this.count && m.alive) tech.damage /= this.damage
             tech.isEnergyNoAmmo = false;
+            powerUps.ammo.color = "#467"
         }
     },
     {
         name: "desublimated ammunition",
-        description: `if <strong>crouching</strong><br>alternating shots use no <strong class='color-ammo'>ammo</strong>`,
+        description: `if <strong>crouching</strong><br>alternating shots cost no <strong class='color-ammo'>ammo</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -2420,6 +2422,24 @@ const tech = {
         }
     },
     {
+        name: "Halbach array",
+        description: "throwing a <strong class='color-block'>block</strong> will<br>also throw other nearby <strong class='color-block'>blocks</strong>",
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
+        },
+        requires: "mass driver, printer, not wormhole, pilot wave, tokamak",
+        effect() {
+            tech.isGroupThrow = true
+        },
+        remove() {
+            tech.isGroupThrow = false
+        }
+    },
+    {
         name: "inflation",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Inflation_(cosmology)' class="link">inflation</a>`,
         description: "if <strong>holding</strong> a <strong class='color-block'>block</strong> <strong>0.1x</strong> <strong class='color-defense'>damage taken</strong><br>after <strong>throwing</strong> a <strong class='color-block'>block</strong> it expands <strong>3x</strong>",
@@ -2430,7 +2450,7 @@ const tech = {
         allowed() {
             return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
         },
-        requires: "mass driver, not pilot wave, tokamak, wormhole",
+        requires: "mass driver, printer, not pilot wave, tokamak, wormhole",
         effect() {
             tech.isAddBlockMass = true
         },
@@ -2448,7 +2468,7 @@ const tech = {
         allowed() {
             return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
         },
-        requires: "mass driver, not pilot wave, tokamak, wormhole",
+        requires: "mass driver, printer, not pilot wave, tokamak, wormhole",
         effect() {
             tech.isBlockRestitution = true
         },
@@ -2466,7 +2486,7 @@ const tech = {
         allowed() {
             return (tech.blockDamage > 0.075 || tech.isPrinter) && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.iceIXOnDeath
         },
-        requires: "mass driver, no other mob death tech",
+        requires: "mass driver, printer, no other mob death tech",
         effect() {
             tech.isMobBlockFling = true
         },
@@ -2486,7 +2506,7 @@ const tech = {
         allowed() {
             return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && !tech.isTokamak
         },
-        requires: "mass driver, not pilot wave, tokamak",
+        requires: "mass driver, printer, not pilot wave, tokamak",
         effect() {
             tech.isBlockPowerUps = true
         },
@@ -2688,7 +2708,7 @@ const tech = {
         },
         requires: "",
         effect() {
-            m.collisionImmuneCycles += 480;
+            m.collisionImmuneCycles += 420;
             if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
         },
         remove() {
@@ -5994,9 +6014,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("grenades") && !tech.isVacuumBomb && !tech.isSmartRadius
+            return tech.haveGunCheck("grenades") && !tech.isVacuumBomb && !tech.isSmartRadius && !tech.isEnergyHealth
         },
-        requires: "grenades, not vacuum bomb, shaped charges",
+        requires: "grenades, not vacuum bomb, shaped charges, mass-energy",
         effect() {
             tech.isImmuneExplosion = true;
             tech.isRPG = true;
@@ -7281,7 +7301,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return ((tech.haveGunCheck("wave") && tech.isInfiniteWaveAmmo) || tech.haveGunCheck("laser") || (tech.haveGunCheck("harpoon") && !tech.isRailGun)) && !tech.isEnergyNoAmmo
+            return ((tech.haveGunCheck("wave") && tech.isInfiniteWaveAmmo) || tech.haveGunCheck("laser") || (tech.haveGunCheck("harpoon") && !tech.isRailGun))
         },
         requires: "harpoon, laser, wave, frequency, not railgun, non-renewables",
         effect() {

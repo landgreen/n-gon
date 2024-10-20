@@ -316,101 +316,127 @@ const m = {
         m.isHolding = true;
     },
     alive: false,
+    isSwitchingWorlds: false,
     switchWorlds() {
-        powerUps.boost.endCycle = 0
-        const totalGuns = b.inventory.length
-        //track ammo/ ammoPack count
-        let ammoCount = 0
-        for (let i = 0, len = b.inventory.length; i < len; i++) {
-            if (b.guns[b.inventory[i]].ammo !== Infinity) {
-                ammoCount += b.guns[b.inventory[i]].ammo / b.guns[b.inventory[i]].ammoPack
-            } else {
-                ammoCount += 5
-            }
-        }
-
-        simulation.isTextLogOpen = false; //prevent console spam
-        //remove all tech and count current tech total
-        let totalTech = 0;
-        for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (tech.tech[i].isJunk) tech.tech[i].frequency = 0
-            if (tech.tech[i].count > 0 && !tech.tech[i].isLore) {
-                if (tech.tech[i].frequencyDefault) {
-                    tech.tech[i].frequency = tech.tech[i].frequencyDefault
+        if (!m.isSwitchingWorlds) {
+            powerUps.boost.endCycle = 0
+            const totalGuns = b.inventory.length
+            //track ammo/ ammoPack count
+            let ammoCount = 0
+            for (let i = 0, len = b.inventory.length; i < len; i++) {
+                if (b.guns[b.inventory[i]].ammo !== Infinity) {
+                    ammoCount += b.guns[b.inventory[i]].ammo / b.guns[b.inventory[i]].ammoPack
                 } else {
-                    tech.tech[i].frequency = 1
-                }
-                if (
-                    !tech.tech[i].isNonRefundable &&
-                    // !tech.tech[i].isFromAppliedScience &&
-                    !tech.tech[i].isAltRealityTech
-                ) {
-                    totalTech += tech.tech[i].count
-                    tech.tech[i].remove();
-                    tech.tech[i].isLost = false
-                    tech.tech[i].count = 0
+                    ammoCount += 5
                 }
             }
-        }
-        // lore.techCount = 0;
-        // tech.removeLoreTechFromPool();
-        // tech.addLoreTechToPool();
-        // tech.removeJunkTechFromPool();
-        tech.junkChance = 0;
-        tech.duplication = 0;
-        tech.extraMaxHealth = 0;
-        tech.totalCount = 0;
-        tech.removeCount = 0;
-        const randomBotCount = b.totalBots()
-        b.zeroBotCount()
-        //remove all bullets, respawn bots
-        for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
-        bullet = [];
 
-        //randomize health
-        m.health = m.health * (1 + 0.5 * (Math.random() - 0.5))
-        if (m.health > 1) m.health = 1;
-        m.displayHealth();
-        //randomize field
-        m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1)))
-        //removes guns and ammo  
-        b.inventory = [];
-        b.activeGun = null;
-        b.inventoryGun = 0;
-        for (let i = 0, len = b.guns.length; i < len; ++i) {
-            b.guns[i].have = false;
-            if (b.guns[i].ammo !== Infinity) {
-                b.guns[i].ammo = 0;
-                b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
-            }
-        }
-        //give random guns
-        for (let i = 0; i < totalGuns; i++) b.giveGuns()
-
-        //randomize ammo based on ammo/ammoPack count
-        for (let i = 0, len = b.inventory.length; i < len; i++) {
-            if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (2.5 + 0.3 * (Math.random() - 0.5))))
-        }
-        // console.log(b.activeGun)
-        //randomize tech
-        for (let i = 0; i < totalTech; i++) {
-            //find what tech I could get
-            let options = [];
+            simulation.isTextLogOpen = false; //prevent console spam
+            //remove all tech and count current tech total
+            let totalTech = 0;
             for (let i = 0, len = tech.tech.length; i < len; i++) {
-                if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isBadRandomOption && !tech.tech[i].isLore && !tech.tech[i].isJunk) {
-                    for (let j = 0; j < tech.tech[i].frequency; j++) options.push(i);
+                if (tech.tech[i].isJunk) tech.tech[i].frequency = 0
+                if (tech.tech[i].count > 0 && !tech.tech[i].isLore) {
+                    if (tech.tech[i].frequencyDefault) {
+                        tech.tech[i].frequency = tech.tech[i].frequencyDefault
+                    } else {
+                        tech.tech[i].frequency = 1
+                    }
+                    if (
+                        !tech.tech[i].isNonRefundable &&
+                        // !tech.tech[i].isFromAppliedScience &&
+                        !tech.tech[i].isAltRealityTech
+                    ) {
+                        totalTech += tech.tech[i].count
+                        tech.tech[i].remove();
+                        tech.tech[i].isLost = false
+                        tech.tech[i].count = 0
+                    }
                 }
             }
-            //add a new tech from options pool
-            if (options.length > 0) tech.giveTech(options[Math.floor(Math.random() * options.length)])
+            // lore.techCount = 0;
+            // tech.removeLoreTechFromPool();
+            // tech.addLoreTechToPool();
+            // tech.removeJunkTechFromPool();
+            tech.junkChance = 0;
+            tech.duplication = 0;
+            tech.extraMaxHealth = 0;
+            tech.totalCount = 0;
+            tech.removeCount = 0;
+            const randomBotCount = b.totalBots()
+            b.zeroBotCount()
+            //remove all bullets, respawn bots
+            for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
+            bullet = [];
+
+            //randomize health
+            m.health = m.health * (1 + 0.5 * (Math.random() - 0.5))
+            if (m.health > 1) m.health = 1;
+            m.displayHealth();
+            //randomize field
+            m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1)))
+            //removes guns and ammo  
+            b.inventory = [];
+            b.activeGun = null;
+            b.inventoryGun = 0;
+            for (let i = 0, len = b.guns.length; i < len; ++i) {
+                b.guns[i].have = false;
+                if (b.guns[i].ammo !== Infinity) {
+                    b.guns[i].ammo = 0;
+                    b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+                }
+            }
+            //give random guns
+            for (let i = 0; i < totalGuns; i++) b.giveGuns()
+
+            //randomize ammo based on ammo/ammoPack count
+            for (let i = 0, len = b.inventory.length; i < len; i++) {
+                if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.max(0, Math.floor(ammoCount / b.inventory.length * b.guns[b.inventory[i]].ammoPack * (2.5 + 0.3 * (Math.random() - 0.5))))
+            }
+
+
+            //randomize tech
+            // for (let i = 0; i < totalTech; i++) {
+            //     let options = [];
+            //     for (let i = 0, len = tech.tech.length; i < len; i++) {
+            //         if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isBadRandomOption && !tech.tech[i].isLore && !tech.tech[i].isJunk) {
+            //             for (let j = 0; j < tech.tech[i].frequency; j++) options.push(i);
+            //         }
+            //     }
+            //     if (options.length > 0) tech.giveTech(options[Math.floor(Math.random() * options.length)]) //add a new tech from options pool
+
+            // }
+            let loop = () => {
+                if (!(m.cycle % 10)) {
+                    if (totalTech > 0 && m.alive) {
+                        totalTech--
+                        let options = [];
+                        for (let i = 0, len = tech.tech.length; i < len; i++) {
+                            if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isBadRandomOption && !tech.tech[i].isLore && !tech.tech[i].isJunk) {
+                                for (let j = 0; j < tech.tech[i].frequency; j++) options.push(i);
+                            }
+                        }
+                        if (options.length > 0) tech.giveTech(options[Math.floor(Math.random() * options.length)]) //add a new tech from options pool
+                        requestAnimationFrame(loop);
+                    } else {
+                        m.isSwitchingWorlds = false
+                    }
+                } else if (m.alive) {
+                    requestAnimationFrame(loop);
+                } else {
+                    m.isSwitchingWorlds = false
+                }
+            }
+            requestAnimationFrame(loop);
+
+            b.respawnBots();
+            for (let i = 0; i < randomBotCount; i++) b.randomBot()
+            simulation.makeGunHUD(); //update gun HUD
+            simulation.updateTechHUD();
+            simulation.isTextLogOpen = true;
+            m.drop();
+            if (simulation.paused) build.pauseGrid() //update the build when paused
         }
-        b.respawnBots();
-        for (let i = 0; i < randomBotCount; i++) b.randomBot()
-        simulation.makeGunHUD(); //update gun HUD
-        simulation.updateTechHUD();
-        simulation.isTextLogOpen = true;
-        m.drop();
-        if (simulation.paused) build.pauseGrid() //update the build when paused
     },
     dmgScale: null, //scales all damage, but not raw .dmg 
     death() {
@@ -440,8 +466,8 @@ const m = {
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
                     spawn.setSpawnList(); //new mob types
-                    simulation.clearNow = true; //triggers a map reset
-                    m.switchWorlds()
+                    // simulation.clearNow = true; //triggers a map reset
+                    // m.switchWorlds()
                     simulation.isTextLogOpen = true;
                     simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> 0.${len - i - 1}`, swapPeriod);
                     simulation.isTextLogOpen = false;
@@ -528,8 +554,8 @@ const m = {
         // }
     },
     addHealth(heal) {
-        if (!tech.isEnergyHealth && !level.isNoHeal) {
-            m.health += heal * simulation.healScale;
+        if (!tech.isEnergyHealth) {
+            m.health += heal * simulation.healScale * (level.isLowHeal ? 0.5 : 1);
             if (m.health > m.maxHealth) m.health = m.maxHealth;
             m.displayHealth();
         }
@@ -2765,6 +2791,29 @@ const m = {
 
                         }
                     } else {
+                        if (tech.isGroupThrow) {
+                            const range = 810000
+
+                            for (let i = 0; i < body.length; i++) {
+                                const sub = Vector.sub(m.pos, body[i].position)
+                                const dist2 = Vector.magnitudeSquared(sub)
+                                if (dist2 < range) {
+                                    body[i].force.y -= body[i].mass * (simulation.g * 1.01); //remove a bit more then standard gravity
+                                    if (dist2 > 40000) {
+                                        const f = Vector.mult(Vector.normalise(sub), 0.0008 * body[i].mass)
+                                        body[i].force.x += f.x
+                                        body[i].force.y += f.y
+                                        Matter.Body.setVelocity(body[i], { x: 0.96 * body[i].velocity.x, y: 0.96 * body[i].velocity.y });
+                                    }
+                                }
+                            }
+                            ctx.beginPath();
+                            ctx.arc(m.pos.x, m.pos.y, Math.sqrt(range), 0, 2 * Math.PI);
+                            ctx.fillStyle = "rgba(245,245,255,0.15)";
+                            ctx.fill();
+                            // ctx.globalCompositeOperation = "difference";
+                            // ctx.globalCompositeOperation = "source-over";
+                        }
                         //draw charge
                         const x = m.pos.x + 15 * Math.cos(m.angle);
                         const y = m.pos.y + 15 * Math.sin(m.angle);
@@ -2884,6 +2933,21 @@ const m = {
                             }
                         };
                         expand(m.holdingTarget, Math.min(20, m.holdingTarget.mass * 3))
+                    }
+                    if (tech.isGroupThrow) {
+                        const range = 810000
+                        for (let i = 0; i < body.length; i++) {
+                            if (body[i] !== m.holdingTarget) {
+                                const dist2 = Vector.magnitudeSquared(Vector.sub(m.pos, body[i].position))
+                                if (dist2 < range) {
+                                    const blockSpeed = 90 * charge * Math.min(0.85, 0.8 / Math.pow(body[i].mass, 0.25)) * Math.pow((range - dist2) / range, 0.2)
+                                    Matter.Body.setVelocity(body[i], {
+                                        x: body[i].velocity.x * 0.5 + Math.cos(m.angle) * blockSpeed,
+                                        y: body[i].velocity.y * 0.5 + Math.sin(m.angle) * blockSpeed
+                                    });
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -3041,6 +3105,7 @@ const m = {
     grabPowerUp() { //look for power ups to grab with field
         if (m.fireCDcycle < m.cycle) m.fireCDcycle = m.cycle - 1
         for (let i = 0, len = powerUp.length; i < len; ++i) {
+            if (tech.isEnergyNoAmmo && powerUp[i].name === "ammo") continue
             const dxP = m.pos.x - powerUp[i].position.x;
             const dyP = m.pos.y - powerUp[i].position.y;
             const dist2 = dxP * dxP + dyP * dyP + 10;
@@ -3868,15 +3933,9 @@ const m = {
                         }
                         //add extra friction for horizontal motion
                         if (input.down || input.up || input.left || input.right) {
-                            Matter.Body.setVelocity(player, {
-                                x: player.velocity.x * 0.99,
-                                y: player.velocity.y * 0.98
-                            });
+                            Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.98 });
                         } else { //slow rise and fall
-                            Matter.Body.setVelocity(player, {
-                                x: player.velocity.x * 0.99,
-                                y: player.velocity.y * 0.98
-                            });
+                            Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.98 });
                         }
                         // if (tech.isFreezeMobs) {
                         //     const ICE_DRAIN = 0.0005
@@ -4967,6 +5026,8 @@ const m = {
 
                         //grab power ups into the field
                         for (let i = 0, len = powerUp.length; i < len; ++i) {
+                            if (tech.isEnergyNoAmmo && powerUp[i].name === "ammo") continue
+
                             const dxP = m.fieldPosition.x - powerUp[i].position.x;
                             const dyP = m.fieldPosition.y - powerUp[i].position.y;
                             const dist2 = dxP * dxP + dyP * dyP + 200;
@@ -4978,14 +5039,11 @@ const m = {
                                 powerUp[i].force.x += 0.05 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
                                 powerUp[i].force.y += 0.05 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
                                 //extra friction
-                                Matter.Body.setVelocity(powerUp[i], {
-                                    x: powerUp[i].velocity.x * 0.11,
-                                    y: powerUp[i].velocity.y * 0.11
-                                });
+                                Matter.Body.setVelocity(powerUp[i], { x: powerUp[i].velocity.x * 0.11, y: powerUp[i].velocity.y * 0.11 });
                                 if (
                                     dist2 < 5000 &&
                                     !simulation.isChoosing &&
-                                    (powerUp[i].name !== "heal" || m.maxHealth - m.health > 0.01 || tech.isOverHeal)
+                                    (tech.isOverHeal || powerUp[i].name !== "heal" || m.maxHealth - m.health > 0.01)
                                     // (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth)
                                     // (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity)
                                 ) { //use power up if it is close enough
@@ -5104,13 +5162,13 @@ const m = {
     {
         name: "wormhole",
         //<strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br>
-        description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+7%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>7</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+        description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>7</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
         drain: 0,
         effect: function () {
             m.fieldMeterColor = "#bbf" //"#0c5"
             m.eyeFillColor = m.fieldMeterColor
 
-            m.duplicateChance = 0.07
+            m.duplicateChance = 0.08
             m.fieldRange = 0
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
 
@@ -5146,6 +5204,7 @@ const m = {
 
                     //suck power ups
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
+                        if (tech.isEnergyNoAmmo && powerUp[i].name === "ammo") continue
                         //which hole is closer
                         const dxP1 = m.hole.pos1.x - powerUp[i].position.x;
                         const dyP1 = m.hole.pos1.y - powerUp[i].position.y;
@@ -5165,26 +5224,6 @@ const m = {
                             powerUp[i].force.y += 4 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
                             Matter.Body.setVelocity(powerUp[i], { x: powerUp[i].velocity.x * 0.05, y: powerUp[i].velocity.y * 0.05 });
                             if (dist2 < 1000 && !simulation.isChoosing) { //use power up if it is close enough
-
-                                // if (true) { //AoE radiation effect
-                                //     const range = 800
-
-                                //     for (let i = 0, len = mob.length; i < len; ++i) {
-                                //         if (mob[i].alive && !mob[i].isShielded) {
-                                //             dist = Vector.magnitude(Vector.sub(powerUp[i].position, mob[i].position)) - mob[i].radius;
-                                //             if (dist < range) mobs.statusDoT(mob[i], 0.5) //apply radiation damage status effect on direct hits
-                                //         }
-                                //     }
-
-                                //     simulation.drawList.push({
-                                //         x: powerUp[i].position.x,
-                                //         y: powerUp[i].position.y,
-                                //         radius: range,
-                                //         color: "rgba(0,150,200,0.3)",
-                                //         time: 4
-                                //     });
-                                // }
-
                                 m.fieldRange *= 0.8
                                 powerUps.onPickUp(powerUp[i]);
                                 powerUp[i].effect();
@@ -6053,7 +6092,7 @@ const m = {
                                         if (mob[k].isShielded) dmg *= 0.7
                                         mob[k].damage(dmg, true);
                                         if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && Math.random() < 0.5) {
-                                            let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
+                                            let type = "ammo"
                                             if (Math.random() < 0.4) {
                                                 type = "heal"
                                             } else if (Math.random() < 0.4 && !tech.isSuperDeterminism) {

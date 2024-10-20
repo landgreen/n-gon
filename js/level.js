@@ -30,7 +30,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField("standing wave") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField("negative mass") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
             // powerUps.research.count = 3
             // tech.isHookWire = true
@@ -38,21 +38,21 @@ const level = {
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("spores") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // tech.laserColor = "#fff"
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
             // b.guns[8].ammo = 100000000
-            // requestAnimationFrame(() => { tech.giveTech("stimulated emission") });
+            // requestAnimationFrame(() => { tech.giveTech("non-renewables") });
             // tech.giveTech("dark matter")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("entropic gravity")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("nitinol")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("many-worlds")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("quantum immortality")
             // m.skin.egg();
 
-            // for (let i = 0; i < 1; ++i) tech.giveTech("depolarization")
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("wikipedia") });
+            // for (let i = 0; i < 1; ++i) tech.giveTech("non-renewables")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("quasiparticles") });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("field coupling") });
             // for (let i = 0; i < 1; i++) tech.giveTech("interest")
             // m.lastKillCycle = m.cycle
@@ -64,7 +64,7 @@ const level = {
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
 
-            // for (let i = 0; i < 1; ++i) spawn.snakeBoss(1900, -500)
+            // for (let i = 0; i < 5; ++i) spawn.sneaker(1900, -500)
             // for (let i = 0; i < 1; i++) spawn.mantisBoss(1900, -500)
 
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
@@ -77,7 +77,7 @@ const level = {
             // for (let i = 0; i < 5; i++) tech.giveTech("undefined")
             // lore.techCount = 1
             // level.levelsCleared = 10
-            // localSettings.loreCount = 2 //this sets what conversation is heard
+            // localSettings.loreCount = 1 //this sets what conversation is heard
             // localSettings.levelsClearedLastGame = 10
             // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
@@ -333,12 +333,12 @@ const level = {
     constraintDescription2: "",
     constraint: [
         {
-            description: "healing disabled",
+            description: "0.5x healing",
             effect() {
-                level.isNoHeal = true
+                level.isLowHeal = true
             },
             remove() {
-                level.isNoHeal = false
+                level.isLowHeal = false
             }
         },
         {
@@ -599,7 +599,7 @@ const level = {
     isReducedRegen: 1,
     isHideHealth: false,
     isNoPause: false,
-    isNoHeal: false,
+    isLowHeal: false,
     levelAnnounce() {
         const cheating = simulation.isCheating ? "(testing)" : ""
         if (level.levelsCleared === 0) {

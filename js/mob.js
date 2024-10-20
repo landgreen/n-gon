@@ -1299,7 +1299,7 @@ const mobs = {
                         powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                     }
                 } else if (tech.isShieldAmmo && this.shield && this.shieldCount === 1) {
-                    let type = tech.isEnergyNoAmmo ? "heal" : "ammo"
+                    let type = "ammo"
                     if (Math.random() < 0.4) {
                         type = "heal"
                     } else if (Math.random() < 0.3 && !tech.isSuperDeterminism) {

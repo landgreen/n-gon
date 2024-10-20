@@ -293,7 +293,7 @@ const powerUps = {
             if (tech.isCancelRerolls) {
                 for (let i = 0, len = 8 + 4 * Math.random(); i < len; i++) {
                     let spawnType
-                    if (Math.random() < 0.4 && !tech.isEnergyNoAmmo) {
+                    if (Math.random() < 0.4) {
                         spawnType = "ammo"
                     } else if (Math.random() < 0.33 && !tech.isSuperDeterminism) {
                         spawnType = "research"
@@ -461,24 +461,24 @@ const powerUps = {
             document.getElementById("choose-grid").classList.add('choose-grid-no-images');
             document.getElementById("choose-grid").classList.remove('choose-grid');
             document.getElementById("choose-grid").style.gridTemplateColumns = "200px"//adjust this to increase the width of the whole menu, but mostly the center column
-            let levelChoices = `<div class="choose-grid-module" style="font-size: 1.5rem;color:rgb(110,155,160);text-align:center;"><strong>WARP</strong></div>`
-            levelChoices += `<div class="choose-grid-module" style="font-size: 1rem;color:rgb(110,155,160);background-color:#444;text-align:center;">level.uniqueLevels</div>`
+            let text = `<div class="choose-grid-module" style="font-size: 1.5rem;color:rgb(110,155,160);text-align:center;"><strong>WARP</strong></div>`
+            text += `<div class="choose-grid-module" id="exit" style="font-size: 1rem;color:rgb(110,155,160);text-align:right;padding-right:5px;"><strong>cancel</strong></div>`
+            text += `<div class="choose-grid-module" style="font-size: 1rem;color:rgb(110,155,160);background-color:#444;text-align:center;">level.uniqueLevels</div>`
             for (let i = 0; i < level.uniqueLevels.length; i++) {
-                levelChoices += `<div class="choose-grid-module" style="font-size: 1rem;padding-left:5px;" onclick="powerUps.warp.load('${level.uniqueLevels[i]}')">${level.uniqueLevels[i]}</div>`   //id="uniqueLevels-warp-${i}"
+                text += `<div class="choose-grid-module" style="font-size: 1rem;padding-left:5px;" onclick="powerUps.warp.load('${level.uniqueLevels[i]}')">${level.uniqueLevels[i]}</div>`   //id="uniqueLevels-warp-${i}"
             }
-            levelChoices += `<div class="choose-grid-module" style="color:rgb(110,155,160);background-color:#444;text-align:center;">level.playableLevels</div>`
+            text += `<div class="choose-grid-module" style="color:rgb(110,155,160);background-color:#444;text-align:center;">level.playableLevels</div>`
             for (let i = 0; i < level.playableLevels.length; i++) {
-                levelChoices += `<div class="choose-grid-module" style="padding-left:5px;" onclick="powerUps.warp.load('${level.playableLevels[i]}')">${level.playableLevels[i]}</div>`
+                text += `<div class="choose-grid-module" style="padding-left:5px;" onclick="powerUps.warp.load('${level.playableLevels[i]}')">${level.playableLevels[i]}</div>`
             }
-            levelChoices += `<div class="choose-grid-module" style="color:rgb(110,155,160);background-color:#444;text-align:center;">level.communityLevels</div>`
+            text += `<div class="choose-grid-module" style="color:rgb(110,155,160);background-color:#444;text-align:center;">level.communityLevels</div>`
             for (let i = 0; i < level.communityLevels.length; i++) {
-                levelChoices += `<div class="choose-grid-module" style="padding-left:5px;" onclick="powerUps.warp.load('${level.communityLevels[i]}')">${level.communityLevels[i]}</div>`
+                text += `<div class="choose-grid-module" style="padding-left:5px;" onclick="powerUps.warp.load('${level.communityLevels[i]}')">${level.communityLevels[i]}</div>`
             }
-            levelChoices += `<div class="choose-grid-module" style="color:rgb(110,155,160);background-color:#444;text-align:center;">level.trainingLevels</div>`
+            text += `<div class="choose-grid-module" style="color:rgb(110,155,160);background-color:#444;text-align:center;">level.trainingLevels</div>`
             for (let i = 0; i < level.trainingLevels.length; i++) {
-                levelChoices += `<div class="choose-grid-module" style="padding-left:5px;" onclick="powerUps.warp.load('${level.trainingLevels[i]}')">${level.trainingLevels[i]}</div>`
+                text += `<div class="choose-grid-module" style="padding-left:5px;" onclick="powerUps.warp.load('${level.trainingLevels[i]}')">${level.trainingLevels[i]}</div>`
             }
-            let text = `${levelChoices} <div class="choose-grid-module" id="exit" style="font-size: 1.4rem;color:rgb(110,155,160);text-align:right;padding-right:5px;"><strong>exit</strong></div>`
             document.getElementById("choose-grid").innerHTML = text
             //show level info
             document.getElementById("choose-grid").style.opacity = "1"
@@ -1777,10 +1777,7 @@ const powerUps = {
         }
     },
     spawn(x, y, name, moving = true, size = powerUps[name].size()) {
-        if (
-            (!tech.isSuperDeterminism || (name !== 'research')) &&
-            !(tech.isEnergyNoAmmo && name === 'ammo')
-        ) {
+        if ((!tech.isSuperDeterminism || (name !== 'research'))) {
             if (tech.isBoostReplaceAmmo && name === 'ammo') {
                 name = 'boost'
                 size = powerUps[name].size()

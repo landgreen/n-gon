@@ -1,17 +1,26 @@
 ******************************************************** NEXT PATCH **************************************************
 
-images are back as an option due to public outcry
+tech: Halbach array - throwing a block will also throw other nearby blocks
+
+tech non-renewables now spawns ammo, but ammo can't be picked up
+grenade tech that cause multiple explosions have less knock back for mobs
+constraint:  0->0.5x healing
+wormhole 7->8% duplication
+many worlds takes a few frames between each tech given
 
 bug fixes
-  getting a power up quickly after warp, difficulty or instructions power ups was making the screen go blank
-  heuristics resets on death properly now
-
+ harpoon ammo gain on autonomous defense fixed
+ constraints are properly randomized again
 
 ******************************************************** BUGS ********************************************************
 
-
-  can't consistenly reproduce, but it happened several times this way
-    on initial level I press T and took the warp and exited it,  then I too a field and the screen went blank
+  couple reports of crashes from many-worlds
+    around level 5-7
+    for me crash on factory level 7
+    might be linked to having all the guns?
+    the crash was in matter.js something about collisions and undefined
+      maybe too many things were spawned in the same spot?
+    also occurs when you just gain many random tech in testing mode
 
 figure out why seeded random isn't making runs the same:
   shuffle is being used for a wide variety of things that don't need a seeded random
@@ -41,29 +50,13 @@ player can become crouched while not touching the ground if they exit the ground
 
 *********************************************************** TODO *****************************************************
 
+make a text orb for JUNK text to make JUNK more clear
+
 extended vertical flip to edge cases:
   !!stored circular graphics     simulation.drawList.push
 
-add more tips:
-  download latest version of n-gon
-  https://codeload.github.com/landgreen/n-gon/zip/refs/heads/master
-
-
 new level based laser element
   !!update new version into other levels
-
-level technique: pairs of touch activated elevators jump on one to get high enough to jump on the next one
-
-new vertical flip level
-  long horizontal
-  several buttons
-    shorten flip time?
-      
-
-
-constraints should show future constraints in pause menu
-  pre calculate all constraints for up to 13 levels?
-    loop constraints after that
 
 procedural animation 
   https://www.youtube.com/watch?v=qlfh_rv6khY
@@ -93,7 +86,7 @@ tech:  - after killing a Boss
 
 new level - rework testChamber
 
-Boss (or mob) that quickly moves towards player, but they moves perpendicularly to player, like dodging
+Boss (or mob) that quickly moves towards player, but then moves perpendicularly to player, like dodging
   could respond to when player presses fire key or to when it takes damage
 
 new snakeBoss type that eats mobs
@@ -139,12 +132,6 @@ increase mass and movement speed at the same time
   possible player.mass bad interactions
     grapple
 
-bullets should trigger shrinking platforms level element?
-
-level element - player activated elevators
-  could be fast and throw player
-  could just rise up slow (slow might have a bad jerky animation)
-
 rework energy and health HUD
   make both diegetic?
     how?  not sure there is a good way to do this...
@@ -157,12 +144,6 @@ tech - after a power up is duplicated
     2x current energy
     gain 1.01x damage permanently
   cool name: 
-
-field tech: negative mass - quickly pull/teleport in all nearby blocks and then fire them away from player
-  how does player triggers effect?
-    picking up a block pulls in all nearby blocks, throwing block fires all nearby blocks
-    taking damage
-  auto aim 50% of blocks at mobs
 
 after picking up heals gain ____
   0.1x damage taken for 12s
