@@ -954,6 +954,7 @@ const simulation = {
             if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
+            if (b.guns[i].name === "super balls v2") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "harpoon") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "foam") b.guns[i].chooseFireMethod()
         }
