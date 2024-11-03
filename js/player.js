@@ -23,7 +23,7 @@ const m = {
         player = Body.create({
             //combine jumpSensor and playerBody
             parts: [playerBody, playerHead, jumpSensor, headSensor],
-            inertia: Infinity, //prevents player rotation
+            inertia: 1, //prevents player rotation
             friction: 0.002,
             frictionAir: 0.001,
             //frictionStatic: 0.5,
