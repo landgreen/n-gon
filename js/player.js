@@ -23,7 +23,7 @@ const m = {
         player = Body.create({
             //combine jumpSensor and playerBody
             parts: [playerBody, playerHead, jumpSensor, headSensor],
-            inertia: 0.001, //prevents player rotation
+            inertia: Infinity, //prevents player rotation
             friction: 0.002,
             frictionAir: 0.001,
             //frictionStatic: 0.5,
@@ -45,7 +45,7 @@ const m = {
     lastKillCycle: 0,
     lastHarmCycle: 0,
     width: 50,
-    radius: 30,
+    radius: 60,
     eyeFillColor: null,
     fillColor: null, //set by setFillColors
     fillColorDark: null, //set by setFillColors
