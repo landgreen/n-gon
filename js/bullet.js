@@ -5633,6 +5633,7 @@ const b = {
     //9 harpoon
     //10 mine
     //11 laser
+    //12 super balls v2
     guns: [
         {
             name: "nail gun", // 0
@@ -6326,7 +6327,7 @@ const b = {
             fire() { }
         },
         {
-            name: "super balls v2", //2
+            name: "super balls v2", //12
             descriptionFunction() {
                 return `fire <strong>3</strong> balls that retain<br><strong>momentum</strong> and <strong>kinetic energy</strong> after <strong>collisions</strong><br><strong>${this.ammoPack.toFixed(0)}</strong> balls per ${powerUps.orb.ammo()}`
             },
