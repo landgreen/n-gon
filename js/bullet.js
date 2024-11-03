@@ -6326,6 +6326,91 @@ const b = {
             fire() { }
         },
         {
+            name: "super balls v2", //2
+            descriptionFunction() {
+                return `fire <strong>3</strong> balls that retain<br><strong>momentum</strong> and <strong>kinetic energy</strong> after <strong>collisions</strong><br><strong>${this.ammoPack.toFixed(0)}</strong> balls per ${powerUps.orb.ammo()}`
+            },
+            ammo: 0,
+            ammoPack: 4.05,
+            defaultAmmoPack: 4.05,
+            have: false,
+            // num: 5,
+            do() { },
+            foamBall() { },
+            fireOne() {
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 27 : 19) * b.fireCDscale); // cool down
+                const speed = m.crouch ? 43 : 36
+                b.superBall({
+                    x: m.pos.x + 30 * Math.cos(m.angle),
+                    y: m.pos.y + 30 * Math.sin(m.angle)
+                }, {
+                    x: speed * Math.cos(m.angle),
+                    y: speed * Math.sin(m.angle)
+                }, 21 * tech.bulletSize)
+            },
+            fireMulti() {
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCDscale); // cool down
+                const SPREAD = m.crouch ? 0.08 : 0.13
+                const num = 3 + Math.floor(tech.extraSuperBalls * Math.random())
+                const speed = m.crouch ? 43 : 36
+                if (tech.isBulletTeleport) {
+                    for (let i = 0; i < num; i++) {
+                        b.superBall({
+                            x: m.pos.x + 30 * Math.cos(m.angle),
+                            y: m.pos.y + 30 * Math.sin(m.angle)
+                        }, {
+                            x: speed * Math.cos(m.angle),
+                            y: speed * Math.sin(m.angle)
+                        }, 11 * tech.bulletSize)
+                    }
+                } else {
+                    let dir = m.angle - SPREAD * (num - 1) / 2;
+                    for (let i = 0; i < num; i++) {
+                        b.superBall({
+                            x: m.pos.x + 30 * Math.cos(dir),
+                            y: m.pos.y + 30 * Math.sin(dir)
+                        }, {
+                            x: speed * Math.cos(dir),
+                            y: speed * Math.sin(dir)
+                        }, 11 * tech.bulletSize)
+                        dir += SPREAD;
+                    }
+                }
+            },
+            fireQueue() {
+                m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCDscale); // cool down
+                const num = 2 + 3 + Math.floor(tech.extraSuperBalls * Math.random()) //2 extra 
+                const speed = m.crouch ? 43 : 36
+
+                const delay = Math.floor((m.crouch ? 18 : 12) * b.fireCDscale)
+                m.fireCDcycle = m.cycle + delay; // cool down
+                function cycle() {
+                    count++
+                    b.superBall({
+                        x: m.pos.x + 30 * Math.cos(m.angle),
+                        y: m.pos.y + 30 * Math.sin(m.angle)
+                    }, {
+                        x: speed * Math.cos(m.angle),
+                        y: speed * Math.sin(m.angle)
+                    }, 11 * tech.bulletSize)
+                    if (count < num && m.alive) requestAnimationFrame(cycle);
+                    m.fireCDcycle = m.cycle + delay; // cool down                  
+                }
+                let count = 0
+                requestAnimationFrame(cycle);
+            },
+            chooseFireMethod() { //set in simulation.startGame
+                if (tech.oneSuperBall) {
+                    this.fire = this.fireOne
+                } else if (tech.superBallDelay) {
+                    this.fire = this.fireQueue
+                } else {
+                    this.fire = this.fireMulti
+                }
+            },
+            fire() { }
+        },
+        {
             name: "wave", //3
             // description: `emit <strong>wave packets</strong> that propagate through <strong>solids</strong><br>waves <strong class='color-s'>slow</strong> mobs<br><strong>115</strong> packets per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
