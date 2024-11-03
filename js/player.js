@@ -45,7 +45,7 @@ const m = {
     lastKillCycle: 0,
     lastHarmCycle: 0,
     width: 50,
-    radius: 60,
+    radius: 30,
     eyeFillColor: null,
     fillColor: null, //set by setFillColors
     fillColorDark: null, //set by setFillColors
