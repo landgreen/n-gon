@@ -23,7 +23,7 @@ const b = {
     },
     fire() { },
     fireNormal() {
-        if (b.inventory.length && b.activeGun !== null) {
+        if (b.inventory.length && (b.activeGun !== null && b.activeGun !== undefined)) {
             if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire)) {
                 if (b.guns[b.activeGun].ammo > 0) {
                     b.fireWithAmmo()
@@ -36,7 +36,7 @@ const b = {
         }
     },
     fireNotMove() { //added  && player.speed < 0.5 && m.onGround  
-        if (b.inventory.length && b.activeGun !== null) {
+        if (b.inventory.length && (b.activeGun !== null && b.activeGun !== undefined)) {
             if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire) && player.speed < 2.5 && m.onGround && Math.abs(m.yOff - m.yOffGoal) < 1) {
                 if (b.guns[b.activeGun].ammo > 0) {
                     b.fireWithAmmo()
@@ -49,7 +49,7 @@ const b = {
         }
     },
     fireAlwaysFire() { //added  && player.speed < 0.5 && m.onGround  //removed input.fire && (!input.field || m.fieldFire)
-        if (b.inventory.length && b.activeGun !== null) {
+        if (b.inventory.length && (b.activeGun !== null && b.activeGun !== undefined)) {
             if (m.fireCDcycle < m.cycle && player.speed < 0.5 && m.onGround && Math.abs(m.yOff - m.yOffGoal) < 1) {
                 if (b.guns[b.activeGun].ammo > 0) {
                     b.fireWithAmmo()
@@ -60,7 +60,7 @@ const b = {
         }
     },
     fireFloat() { //added  && player.speed < 0.5 && m.onGround  
-        if (b.inventory.length && b.activeGun !== null) {
+        if (b.inventory.length && (b.activeGun !== null && b.activeGun !== undefined)) {
             if (input.fire && (!input.field || m.fieldFire)) {
                 if (m.fireCDcycle < m.cycle) {
                     if (b.guns[b.activeGun].ammo > 0) {
@@ -116,7 +116,7 @@ const b = {
         }
     },
     refundAmmo() { //triggers after firing when you removed ammo for a gun, but didn't need to
-        if (tech.crouchAmmoCount && m.crouch && b.activeGun !== null) {
+        if (tech.crouchAmmoCount && m.crouch && (b.activeGun !== null && b.activeGun !== undefined)) {
             tech.crouchAmmoCount--
             if ((tech.crouchAmmoCount) % 2) {
                 b.guns[b.activeGun].ammo++;
@@ -377,7 +377,7 @@ const b = {
     explosion(where, radius, color = "rgba(255,25,0,0.6)", reducedKnock = 1) { // typically explode is used for some bullets with .onEnd
         radius *= tech.explosiveRadius
 
-        let dist, sub, knock;
+        let knock;
         let dmg = radius * 0.019
         if (tech.isExplosionHarm) radius *= 1.7 //    1/sqrt(2) radius -> area
         if (tech.isSmallExplosion) {
@@ -385,10 +385,13 @@ const b = {
             radius *= 0.7
             dmg *= 1.7
         }
+        let sub = Vector.sub(where, player.position);
+        let dist = Vector.magnitude(sub);
+        if (tech.isSmartRadius && radius > dist - 50) radius = Math.max(dist - 50, 1)
 
         if (tech.isExplodeRadio) { //radiation explosion
             radius *= 1.25; //alert range
-            if (tech.isSmartRadius) radius = Math.max(Math.min(radius, Vector.magnitude(Vector.sub(where, player.position)) - 25), 1)
+            // if (tech.isSmartRadius) radius = Math.max(Math.min(radius, Vector.magnitude(Vector.sub(where, player.position)) - 25), 1)
             color = "rgba(25,139,170,0.25)"
             simulation.drawList.push({ //add dmg to draw queue
                 x: where.x,
@@ -425,7 +428,7 @@ const b = {
                 }
             }
         } else { //normal explosions
-            if (tech.isSmartRadius) radius = Math.max(Math.min(radius, Vector.magnitude(Vector.sub(where, player.position)) - 25), 1)
+            // if (tech.isSmartRadius) radius = Math.max(Math.min(radius, Vector.magnitude(Vector.sub(where, player.position)) - 25), 1)
             simulation.drawList.push({ //add dmg to draw queue
                 x: where.x,
                 y: where.y,
@@ -444,9 +447,6 @@ const b = {
 
             //player damage and knock back
             if (m.immuneCycle < m.cycle) {
-                sub = Vector.sub(where, player.position);
-                dist = Vector.magnitude(sub);
-
                 if (dist < radius) {
                     if (simulation.dmgScale) {
                         const harm = tech.isExplosionHarm ? 0.067 : 0.05
@@ -7716,10 +7716,7 @@ const b = {
                 } else {
                     m.fireCDcycle = m.cycle
                     m.energy -= drain
-                    const where = {
-                        x: m.pos.x + 20 * Math.cos(m.angle),
-                        y: m.pos.y + 20 * Math.sin(m.angle)
-                    }
+                    const where = { x: m.pos.x + 20 * Math.cos(m.angle), y: m.pos.y + 20 * Math.sin(m.angle) }
                     b.laser(where, {
                         x: where.x + 3000 * Math.cos(m.angle),
                         y: where.y + 3000 * Math.sin(m.angle)

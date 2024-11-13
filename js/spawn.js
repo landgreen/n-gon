@@ -42,6 +42,7 @@ const spawn = {
         spawn.pickList.splice(0, 1);
         const push = spawn.mobTypeSpawnOrder[spawn.mobTypeSpawnIndex++ % spawn.mobTypeSpawnOrder.length]
         spawn.pickList.push(push);
+
         // if (spawn.mobTypeSpawnIndex > spawn.mobTypeSpawnOrder.length) spawn.mobTypeSpawnIndex = 0
         //each level has 2 mobs: one new mob and one from the last level
         // spawn.pickList.splice(0, 1);
@@ -116,8 +117,8 @@ const spawn = {
     secondaryBossChance(x, y) {
         if (simulation.difficultyMode > 2 && level.levelsCleared > 1) {
             spawn.randomLevelBoss(x, y);
-            powerUps.directSpawn(x - 30, y, "ammo");
-            powerUps.directSpawn(x + 30, y, "ammo");
+            powerUps.spawn(x - 30, y, "ammo");
+            powerUps.spawn(x + 30, y, "ammo");
         } else {
             return false
         }

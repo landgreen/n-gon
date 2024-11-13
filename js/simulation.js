@@ -2,152 +2,152 @@
 //*********************************************************************
 const simulation = {
     loop() { }, //main game loop, gets set to normal or testing loop
-    normalLoop() {
-        try {
-            simulation.gravity();
-            Engine.update(engine, simulation.delta);
-            simulation.wipe();
-            simulation.textLog();
-            if (m.onGround) {
-                m.groundControl()
-            } else {
-                m.airControl()
-            }
-            m.move();
-            m.look();
-            simulation.camera();
-            level.custom();
-            powerUps.do();
-            mobs.draw();
-            simulation.draw.cons();
-            simulation.draw.body();
-            if (!m.isBodiesAsleep) mobs.loop();
-            mobs.healthBar();
-            m.draw();
-            m.hold();
-            level.customTopLayer();
-            simulation.draw.drawMapPath();
-            b.fire();
-            b.bulletRemove();
-            b.bulletDraw();
-            if (!m.isBodiesAsleep) b.bulletDo();
-            simulation.drawCircle();
-            simulation.runEphemera();
-            ctx.restore();
-        } catch (error) {
-            simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${(error.stack && error.stack.replace(/\n/g, "<br>")) || (error.message + ` <u>${error.filename}:${error.lineno}</u>`)}`);
-        } finally {
-            simulation.drawCursor();
-        }
-    },
-    testingLoop() {
-        try {
-            simulation.gravity();
-            Engine.update(engine, simulation.delta);
-            simulation.wipe();
-            simulation.textLog();
-            if (m.onGround) {
-                m.groundControl()
-            } else {
-                m.airControl()
-            }
-            m.move();
-            m.look();
-            simulation.camera();
-            level.custom();
-            m.draw();
-            m.hold();
-            level.customTopLayer();
-            simulation.draw.wireFrame();
-            if (input.fire && m.fireCDcycle < m.cycle) {
-                m.fireCDcycle = m.cycle + 15; //fire cooldown       
-                for (let i = 0, len = mob.length; i < len; i++) {
-                    if (Vector.magnitudeSquared(Vector.sub(mob[i].position, simulation.mouseInGame)) < mob[i].radius * mob[i].radius) {
-                        console.log(mob[i])
-                    }
-                }
-            }
-            simulation.draw.cons();
-            simulation.draw.testing();
-            simulation.drawCircle();
-            simulation.runEphemera();
-            simulation.constructCycle()
-        } catch (error) {
-            simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${(error.stack && error.stack.replace(/\n/g, "<br>")) || (error.message + ` <u>${error.filename}:${error.lineno}</u>`)}`);
-        } finally {
-            ctx.restore();
-            simulation.testingOutput();
-            simulation.drawCursor();
-        }
-    },
     // normalLoop() {
-    //     simulation.gravity();
-    //     Engine.update(engine, simulation.delta);
-    //     simulation.wipe();
-    //     simulation.textLog();
-    //     if (m.onGround) {
-    //         m.groundControl()
-    //     } else {
-    //         m.airControl()
+    //     try {
+    //         simulation.gravity();
+    //         Engine.update(engine, simulation.delta);
+    //         simulation.wipe();
+    //         simulation.textLog();
+    //         if (m.onGround) {
+    //             m.groundControl()
+    //         } else {
+    //             m.airControl()
+    //         }
+    //         m.move();
+    //         m.look();
+    //         simulation.camera();
+    //         level.custom();
+    //         powerUps.do();
+    //         mobs.draw();
+    //         simulation.draw.cons();
+    //         simulation.draw.body();
+    //         if (!m.isBodiesAsleep) mobs.loop();
+    //         mobs.healthBar();
+    //         m.draw();
+    //         m.hold();
+    //         level.customTopLayer();
+    //         simulation.draw.drawMapPath();
+    //         b.fire();
+    //         b.bulletRemove();
+    //         b.bulletDraw();
+    //         if (!m.isBodiesAsleep) b.bulletDo();
+    //         simulation.drawCircle();
+    //         simulation.runEphemera();
+    //         ctx.restore();
+    //     } catch (error) {
+    //         simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${(error.stack && error.stack.replace(/\n/g, "<br>")) || (error.message + ` <u>${error.filename}:${error.lineno}</u>`)}`);
+    //     } finally {
+    //         simulation.drawCursor();
     //     }
-    //     m.move();
-    //     m.look();
-    //     simulation.camera();
-    //     level.custom();
-    //     powerUps.do();
-    //     mobs.draw();
-    //     simulation.draw.cons();
-    //     simulation.draw.body();
-    //     if (!m.isBodiesAsleep) mobs.loop();
-    //     mobs.healthBar();
-    //     m.draw();
-    //     m.hold();
-    //     level.customTopLayer();
-    //     simulation.draw.drawMapPath();
-    //     b.fire();
-    //     b.bulletRemove();
-    //     b.bulletDraw();
-    //     if (!m.isBodiesAsleep) b.bulletDo();
-    //     simulation.drawCircle();
-    //     simulation.runEphemera();
-    //     ctx.restore();
-    //     simulation.drawCursor();
     // },
     // testingLoop() {
-    //     simulation.gravity();
-    //     Engine.update(engine, simulation.delta);
-    //     simulation.wipe();
-    //     simulation.textLog();
-    //     if (m.onGround) {
-    //         m.groundControl()
-    //     } else {
-    //         m.airControl()
-    //     }
-    //     m.move();
-    //     m.look();
-    //     simulation.camera();
-    //     level.custom();
-    //     m.draw();
-    //     m.hold();
-    //     level.customTopLayer();
-    //     simulation.draw.wireFrame();
-    //     if (input.fire && m.fireCDcycle < m.cycle) {
-    //         m.fireCDcycle = m.cycle + 15; //fire cooldown       
-    //         for (let i = 0, len = mob.length; i < len; i++) {
-    //             if (Vector.magnitudeSquared(Vector.sub(mob[i].position, simulation.mouseInGame)) < mob[i].radius * mob[i].radius) {
-    //                 console.log(mob[i])
+    //     try {
+    //         simulation.gravity();
+    //         Engine.update(engine, simulation.delta);
+    //         simulation.wipe();
+    //         simulation.textLog();
+    //         if (m.onGround) {
+    //             m.groundControl()
+    //         } else {
+    //             m.airControl()
+    //         }
+    //         m.move();
+    //         m.look();
+    //         simulation.camera();
+    //         level.custom();
+    //         m.draw();
+    //         m.hold();
+    //         level.customTopLayer();
+    //         simulation.draw.wireFrame();
+    //         if (input.fire && m.fireCDcycle < m.cycle) {
+    //             m.fireCDcycle = m.cycle + 15; //fire cooldown       
+    //             for (let i = 0, len = mob.length; i < len; i++) {
+    //                 if (Vector.magnitudeSquared(Vector.sub(mob[i].position, simulation.mouseInGame)) < mob[i].radius * mob[i].radius) {
+    //                     console.log(mob[i])
+    //                 }
     //             }
     //         }
+    //         simulation.draw.cons();
+    //         simulation.draw.testing();
+    //         simulation.drawCircle();
+    //         simulation.runEphemera();
+    //         simulation.constructCycle()
+    //     } catch (error) {
+    //         simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${(error.stack && error.stack.replace(/\n/g, "<br>")) || (error.message + ` <u>${error.filename}:${error.lineno}</u>`)}`);
+    //     } finally {
+    //         ctx.restore();
+    //         simulation.testingOutput();
+    //         simulation.drawCursor();
     //     }
-    //     simulation.draw.cons();
-    //     simulation.draw.testing();
-    //     simulation.drawCircle();
-    //     simulation.runEphemera();
-    //     simulation.constructCycle()
-    //     ctx.restore();
-    //     simulation.testingOutput();
-    //     simulation.drawCursor();
     // },
+    normalLoop() {
+        simulation.gravity();
+        Engine.update(engine, simulation.delta);
+        simulation.wipe();
+        simulation.textLog();
+        if (m.onGround) {
+            m.groundControl()
+        } else {
+            m.airControl()
+        }
+        m.move();
+        m.look();
+        simulation.camera();
+        level.custom();
+        powerUps.do();
+        mobs.draw();
+        simulation.draw.cons();
+        simulation.draw.body();
+        if (!m.isBodiesAsleep) mobs.loop();
+        mobs.healthBar();
+        m.draw();
+        m.hold();
+        level.customTopLayer();
+        simulation.draw.drawMapPath();
+        b.fire();
+        b.bulletRemove();
+        b.bulletDraw();
+        if (!m.isBodiesAsleep) b.bulletDo();
+        simulation.drawCircle();
+        simulation.runEphemera();
+        ctx.restore();
+        simulation.drawCursor();
+    },
+    testingLoop() {
+        simulation.gravity();
+        Engine.update(engine, simulation.delta);
+        simulation.wipe();
+        simulation.textLog();
+        if (m.onGround) {
+            m.groundControl()
+        } else {
+            m.airControl()
+        }
+        m.move();
+        m.look();
+        simulation.camera();
+        level.custom();
+        m.draw();
+        m.hold();
+        level.customTopLayer();
+        simulation.draw.wireFrame();
+        if (input.fire && m.fireCDcycle < m.cycle) {
+            m.fireCDcycle = m.cycle + 15; //fire cooldown       
+            for (let i = 0, len = mob.length; i < len; i++) {
+                if (Vector.magnitudeSquared(Vector.sub(mob[i].position, simulation.mouseInGame)) < mob[i].radius * mob[i].radius) {
+                    console.log(mob[i])
+                }
+            }
+        }
+        simulation.draw.cons();
+        simulation.draw.testing();
+        simulation.drawCircle();
+        simulation.runEphemera();
+        simulation.constructCycle()
+        ctx.restore();
+        simulation.testingOutput();
+        simulation.drawCursor();
+    },
     isTimeSkipping: false,
     timeSkip(cycles = 60) {
         simulation.isTimeSkipping = true;
@@ -712,7 +712,7 @@ const simulation = {
             mouseMove = mouseMoveDefault
         }
     },
-    translatePlayerAndCamera(where) {
+    translatePlayerAndCamera(where, isTranslateBots = true) {
         //infinite falling.  teleport to sky after falling
         const before = { x: player.position.x, y: player.position.y, }
         Matter.Body.setPosition(player, { x: where.x, y: where.y });
@@ -728,14 +728,15 @@ const simulation = {
         //is there a reason to update m.pos here?
         // m.pos.x = player.position.x;
         // m.pos.y = playerBody.position.y - m.yOff;
-
-        for (let i = 0; i < bullet.length; i++) {
-            if (bullet[i].botType) {
-                if (Vector.magnitudeSquared(Vector.sub(bullet[i].position, player.position)) > 1000000) { //far away bots teleport to player
-                    Matter.Body.setPosition(bullet[i], Vector.add(player.position, { x: 250 * (Math.random() - 0.5), y: 250 * (Math.random() - 0.5) }));
-                    Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
-                } else { //close bots maintain relative distance to player on teleport
-                    Matter.Body.setPosition(bullet[i], Vector.sub(bullet[i].position, change));
+        if (isTranslateBots) {
+            for (let i = 0; i < bullet.length; i++) {
+                if (bullet[i].botType) {
+                    if (Vector.magnitudeSquared(Vector.sub(bullet[i].position, player.position)) > 1000000) { //far away bots teleport to player
+                        Matter.Body.setPosition(bullet[i], Vector.add(player.position, { x: 250 * (Math.random() - 0.5), y: 250 * (Math.random() - 0.5) }));
+                        Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
+                    } else { //close bots maintain relative distance to player on teleport
+                        Matter.Body.setPosition(bullet[i], Vector.sub(bullet[i].position, change));
+                    }
                 }
             }
         }
@@ -996,7 +997,7 @@ const simulation = {
         simulation.makeGunHUD();
         simulation.lastLogTime = 0;
         mobs.mobDeaths = 0
-
+        level.isFlipped = false
         level.onLevel = 0;
         level.levelsCleared = 0;
         level.updateDifficulty()

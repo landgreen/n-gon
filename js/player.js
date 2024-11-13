@@ -455,6 +455,7 @@ const m = {
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
             spawn.setSpawnList(); //new mob types
+            level.isFlipped = false
             simulation.clearNow = true; //triggers a map reset
 
             m.switchWorlds()
@@ -3389,7 +3390,7 @@ const m = {
             case 4: //assembler
                 return `<strong>+${(0.6 * couple).toFixed(1)}</strong> <strong class='color-f'>energy</strong> per second`
             case 5: //plasma
-                return `<strong>${(1 + 0.015 * couple).toFixed(3)}x</strong> <strong class='color-d'>damage</strong>`
+                return `<strong>${(1 + 0.025 * couple).toFixed(3)}x</strong> <strong class='color-d'>damage</strong>`
             case 6: //time dilation
                 return `<strong>+${(1 + 0.05 * couple).toFixed(2)}x</strong> longer <strong style='letter-spacing: 2px;'>stopped time</strong>` //<strong>movement</strong>, <strong>jumping</strong>, and 
             case 7: //cloaking

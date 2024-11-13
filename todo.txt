@@ -1,16 +1,30 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: Halbach array - throwing a block will also throw other nearby blocks
+new level substructure
+  featured element - motion triggered lasers
 
-tech non-renewables now spawns ammo, but ammo can't be picked up
-grenade tech that cause multiple explosions have less knock back for mobs
-constraint:  0->0.5x healing
-wormhole 7->8% duplication
-many worlds takes a few frames between each tech given
+futures exchange 5->6% duplication per cancel
+plasma torch coupling 0.015->0.025x damage per coupling
+Gibbs free energy  1.005->1.006x damage per missing energy
+compound lens arc adds 25->30 degrees
+instability 2->2.5x damage when damage taken is 1x
+constraint: after 30->40 seconds spawn WIMPs
+constraint: 0.1->0.3x damage after getting power ups
+renamed holographic principle -> charmed baryons
 
-bug fixes
- harpoon ammo gain on autonomous defense fixed
- constraints are properly randomized again
+updates to community map: downpour
+updated lasers in labs and testChamber to the new more realistic laser
+
+bugs
+  returning to the old console.log system from last patch
+    I rather read bugs in the browser console not the n-gon console
+  bots properly follow player when level flips vertically
+  community map: arena's sword is properly removed at end of level
+  rewrote shaped charge to be better at protecting you from all explosions
+  pause correctly lists both mobs types for the level
+  for quasiparticles "boost" replaces ammo in more edge cases
+  bug with removing surfactant setting b.activeGun false and crashing game with checking active gun
+    not sure if this is fixed or not?
 
 ******************************************************** BUGS ********************************************************
 
@@ -50,13 +64,38 @@ player can become crouched while not touching the ground if they exit the ground
 
 *********************************************************** TODO *****************************************************
 
+rework focuser mobs to fire blue laser instead of charging player
+  like in classic 7-1-2017
+  this makes more sense that a bean is focusing
+
+
+!!conformal - similar rules for small and big scales  linked to holographic principle
+!!holonomy - parallel transport of a vector leads to movement (applies to curved space)
+  when far away from your wormhole regenerate 1% of your max energy per second
+  when far away from your wormhole reduce damage taken
+  heal last hit damage after enter wormhole
+!!quasar - plasma torch from both ends
+  only after wormhole eats a block fire?
+    or just increase plasma length after eating block?
+
+
+new level element - motion trigger for laser
+new level heist
+  above - a building with rooms and doors like office/warehouse
+  below - long indoor tunnels like sewers
+    dark colors
+    narrow branching paths
+  elements
+    motion triggered lasers
+    doors opened by buttons
+      button that opens 1 door, but closes another when down
+        make the button down state easier, have extra power ups
+
+
 make a text orb for JUNK text to make JUNK more clear
 
 extended vertical flip to edge cases:
   !!stored circular graphics     simulation.drawList.push
-
-new level based laser element
-  !!update new version into other levels
 
 procedural animation 
   https://www.youtube.com/watch?v=qlfh_rv6khY
@@ -839,9 +878,6 @@ mob/boss that fires a laser at player, but give player time to avoid
   they target where player was 1 second ago
   they turn to face player?
 
-tech rocket jump - jumping produces an explosion at your feet that lets you jump extra high, but does some damage
-  require electric reactive armor?
-
 Plasma Burner: upgrade for plasma torch, basically just a jet engine. does high damage, but short range, mostly for player movement.
   maybe reduce gravity to really low then apply a vector away from mouse direction
 
@@ -850,17 +886,6 @@ auto-gon - auto battler with n-gon mob AI and tech
     they fight other mobs and bosses
   similar research and tech system to n-gon
   some mobs can fire player weapons
-
-tech: relativistic jets:
-  small particles that shot out from front and back poles and end up in a wide variety of spirals
-    slow trickle when charging and several more when firing
-  
-Tech: Make player smol
-
-adapt the cloaking graphics to make a flashlight cone visual effect
-  put code in level.do?
-
-be nice if block throwing had a projected path
 
 Pilot wave tech
   Energy use is increased, but you can now shape blocks using pressure
@@ -1234,11 +1259,8 @@ look up sci-fi science ideas here  https://projectrho.com/public_html/rocket/
 
 possible names for tech
   sidereal - with respect to the stars  (an extra rotation for time keeping)
-  holonomy -  parallel transport of a vector leads to movement (applies to curved space)
-  holographic - 2-D surface can predict the 3-D space behind it?  I think
   entropic gravity - gravity is emergent in a holographic way
     (maybe a field tech for negative mass)
-  conformal - similar rules for small and big scales  linked to holographic principle
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   swarm intelligence - for a drone tech
   metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity
@@ -1307,8 +1329,11 @@ possible names for tech
   cork - used as a heat shield for rockets
   P = NP - something with speeding up calculation times
   transistivity - something where a>b and b>c ->  a>c
-  lenticular - looks different from different angles (lasers?)
+  lenticular - looks different from different angles (lasers?, cloaking?)
+    every few seconds pick a random skin tech?
   De Sitter space - simple model of universe related to general relativity (mass-energy?)
+  active optics - something with lasers?  maybe something with diffuse beam getting smaller
+  Quintessence - related to dark energy
 
 ******************************************************* DESIGN ******************************************************
 
@@ -1333,3 +1358,23 @@ list of powerful synergies
   electronegativity and high energy?
     electronegativity + anyon + duplication + Maxwells demon + interest + pair production
   chain reaction + invulnerable + Abelian group + parasitism = clear all mobs on level
+
+
+************************************************* COMMUNITY LINKS *************************************************
+
+load old commits
+  www.cornbread2100.com/n-gon-loader
+
+n-gon fork
+  kgurchiek.github.io/n-gon-portal-gun
+  3xiondev.github.io/n-gon-upgraded
+  coaldeficit.github.io/c-gon
+  c-rxxp-y.github.io/n-gon-enhanced
+
+bookmarlet
+  github.com/Whyisthisnotavalable/n-scythe
+  github.com/kgurchiek/n-gon-mobile
+  github.com/kgurchiek/n-gon-controller
+text
+  ngon.fandom.com/wiki/N-gon
+  github.com/3xionDev/n-docs
