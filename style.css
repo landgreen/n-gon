@@ -124,21 +124,45 @@ summary {
     background-color: #eee;
 }
 
+.SVG-button-splash {
+    border: 2px #333 solid;
+    border-radius: 8px;
+    background-color: #fff;
+    transition: opacity 5s ease-in;
+}
+
+.SVG-button-splash:hover {
+    background-color: #eee;
+}
+
+#start-button {
+    position: absolute;
+    bottom: 108px;
+    right: 4px;
+    z-index: 12;
+    /* top-left | top-right | bottom-right | bottom-left */
+    /* border-radius: 8px 8px 0 0; */
+}
+
+#training-button {
+    position: absolute;
+    bottom: 56px;
+    right: 4px;
+    z-index: 12;
+    /* border-radius: 8px 0px 0 0; */
+}
+
 #experiment-button {
     position: absolute;
     bottom: 4px;
     right: 4px;
     z-index: 12;
-    transition: opacity 5s ease-in;
+    /* border-radius: 8px 0 8px 8px; */
 }
 
-#training-button {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    z-index: 12;
-    transition: opacity 5s ease-in;
-}
+
+
+
 
 #construct {
     display: none;
@@ -570,6 +594,7 @@ summary {
     z-index: 12;
     font-size: 1.5em;
     transition: opacity 5s ease-in;
+    width: 100%;
 
     /* border: 1.5px #333 solid; */
     /* border-radius: 8px; */

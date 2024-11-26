@@ -1,7 +1,7 @@
 const tech = {
     totalCount: null,
     removeCount: 0,
-    setupAllTech() {
+    resetAllTech() {
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             tech.tech[i].isLost = false
             tech.tech[i].isBanished = false
@@ -12,24 +12,15 @@ const tech = {
             } else if (tech.tech[i].frequencyDefault) {
                 tech.tech[i].frequency = tech.tech[i].frequencyDefault
             } else {
-                tech.tech[i].frequency = 2
+                tech.tech[i].frequency = 1
             }
             if (tech.tech[i].name === "heals" || tech.tech[i].name === "ammo" || tech.tech[i].name === "research") tech.tech[i].value = tech.tech[i].defaultValue
         }
-        //remove lore if it's your first time playing since it's confusing
-        //also remove lore if cheating
+        m.resetSkin();
         tech.removeCount = 0;
         tech.pauseEjectTech = 1; //used in paradigm shift
         lore.techCount = 0;
-        if (simulation.isCheating || localSettings.runCount < 1) { //simulation.isCommunityMaps ||
-            for (let i = 0, len = tech.tech.length; i < len; i++) {
-                if (tech.tech[i].isLore) {
-                    tech.tech[i].frequency = 0;
-                    tech.tech[i].count = 0;
-                }
-            }
-        }
-
+        tech.duplication = 0;
         tech.damage = 1
         tech.junkChance = 0;
         tech.extraMaxHealth = 0;
@@ -66,7 +57,7 @@ const tech = {
         tech.removeCount += totalRemoved
         tech.tech[index].count = 0;
         tech.totalCount -= totalRemoved
-        simulation.updateTechHUD();
+        // simulation.updateTechHUD();
         tech.tech[index].isLost = true
         simulation.updateTechHUD();
         return totalRemoved //return the total number of tech removed
@@ -1115,11 +1106,19 @@ const tech = {
             tech.damage *= this.damage
             tech.isEnergyNoAmmo = true;
             powerUps.ammo.color = "#c1c6c9"//"#abb3b8"// "#535e63"
+
+            for (let i = 0; i < powerUp.length; i++) {
+                if (powerUp[i].name === "ammo") powerUp[i].color = powerUps.ammo.color
+            }
+
         },
         remove() {
             if (this.count && m.alive) tech.damage /= this.damage
             tech.isEnergyNoAmmo = false;
             powerUps.ammo.color = "#467"
+            for (let i = 0; i < powerUp.length; i++) {
+                if (powerUp[i].name === "ammo") powerUp[i].color = powerUps.ammo.color
+            }
         }
     },
     {
@@ -2119,7 +2118,7 @@ const tech = {
         name: "bot fabrication",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">bot fabrication</a>`,
         descriptionFunction() {
-            return `after you collect ${powerUps.orb.research(2 + Math.floor(0.25 * b.totalBots()))}use them<br>to construct a random <strong class='color-bot'>bot</strong> <em style ="float: right;">(+1 cost every 4 bots)</em>`
+            return `after you collect ${powerUps.orb.research(2 + Math.floor(0.25 * b.totalBots()))}use them<br>to construct a random <strong class='color-bot'>bot</strong> <em style ="float: right;">(+1 cost every 3 bots)</em>`
         },
         // description: `if you collect ${powerUps.orb.research(2)}use them to build a<br>random <strong class='color-bot'>bot</strong> <em>(+1 cost every 5 bots)</em>`,
         maxCount: 1,
@@ -3540,6 +3539,7 @@ const tech = {
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
+        isAltRealityTech: true,
         allowed() {
             return true
         },
@@ -3553,7 +3553,7 @@ const tech = {
     },
     {
         name: "many-worlds",
-        description: `at the start of each <strong>level</strong> spawn ${powerUps.orb.tech()} ${powerUps.orb.coupling(3)}<br>and enter an <strong class='alt'>alternate reality</strong>`,
+        description: `at the start of each <strong>level</strong> spawn ${powerUps.orb.tech()}<br>and enter an <strong class='alt'>alternate reality</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -4048,7 +4048,7 @@ const tech = {
     {
         name: "research",
         descriptionFunction() {
-            return `spawn ${this.value > 36 ? this.value + powerUps.orb.research(1) : powerUps.orb.research(this.value)} <br>next time increase amount spawned by +5${powerUps.orb.research(1)}`
+            return `spawn ${this.value > 36 ? this.value + powerUps.orb.research(1) : powerUps.orb.research(this.value)} <br>next time increase amount spawned by +4${powerUps.orb.research(1)}`
         },
         maxCount: 9,
         count: 0,
@@ -4062,7 +4062,7 @@ const tech = {
         defaultValue: 8,
         effect() {
             powerUps.spawnDelay("research", this.value);
-            this.value += 5
+            this.value += 4
         },
         remove() { }
     },
@@ -4661,7 +4661,7 @@ const tech = {
             // if (tech.isDeterminism) count -= 4 //remove the bonus tech
             // if (tech.isSuperDeterminism) count -= 4 //remove the bonus tech
             // const removeCount = tech.removeCount
-            // tech.setupAllTech(); // remove all tech
+            // tech.resetAllTech(); // remove all tech
             // tech.removeCount = removeCount
             // if (simulation.isCheating) tech.setCheating();
             // lore.techCount = 0;
@@ -8894,7 +8894,7 @@ const tech = {
             tech.isWormHolePause = true
         },
         remove() {
-            if (tech.isWormHolePause && m.isBodiesAsleep) m.wakeCheck();
+            if (tech.isWormHolePause && m.isTimeDilated) m.wakeCheck();
             tech.isWormHolePause = false
         }
     },

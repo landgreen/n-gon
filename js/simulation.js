@@ -21,7 +21,7 @@ const simulation = {
     //         mobs.draw();
     //         simulation.draw.cons();
     //         simulation.draw.body();
-    //         if (!m.isBodiesAsleep) mobs.loop();
+    //         if (!m.isTimeDilated) mobs.loop();
     //         mobs.healthBar();
     //         m.draw();
     //         m.hold();
@@ -30,7 +30,7 @@ const simulation = {
     //         b.fire();
     //         b.bulletRemove();
     //         b.bulletDraw();
-    //         if (!m.isBodiesAsleep) b.bulletDo();
+    //         if (!m.isTimeDilated) b.bulletDo();
     //         simulation.drawCircle();
     //         simulation.runEphemera();
     //         ctx.restore();
@@ -98,7 +98,7 @@ const simulation = {
         mobs.draw();
         simulation.draw.cons();
         simulation.draw.body();
-        if (!m.isBodiesAsleep) mobs.loop();
+        if (!m.isTimeDilated) mobs.loop();
         mobs.healthBar();
         m.draw();
         m.hold();
@@ -107,7 +107,7 @@ const simulation = {
         b.fire();
         b.bulletRemove();
         b.bulletDraw();
-        if (!m.isBodiesAsleep) b.bulletDo();
+        if (!m.isTimeDilated) b.bulletDo();
         simulation.drawCircle();
         simulation.runEphemera();
         ctx.restore();
@@ -183,10 +183,10 @@ const simulation = {
             Engine.update(engine, simulation.delta);
             // level.custom();
             // level.customTopLayer();
-            if (!m.isBodiesAsleep) mobs.loop();
+            if (!m.isTimeDilated) mobs.loop();
             if (m.fieldMode !== 7) m.hold();
             b.bulletRemove();
-            if (!m.isBodiesAsleep) b.bulletDo();
+            if (!m.isTimeDilated) b.bulletDo();
             simulation.runEphemera();
         }
         simulation.isTimeSkipping = false;
@@ -223,7 +223,7 @@ const simulation = {
     //     mobs.draw();
     //     simulation.draw.cons();
     //     simulation.draw.body();
-    //     if (!m.isBodiesAsleep) {
+    //     if (!m.isTimeDilated) {
     //         // mobs.loop();
     //     }
     //     mobs.healthBar();
@@ -235,7 +235,7 @@ const simulation = {
     //     b.fire();
     //     b.bulletRemove();
     //     b.bulletDraw();
-    //     if (!m.isBodiesAsleep) b.bulletDo();
+    //     if (!m.isTimeDilated) b.bulletDo();
     //     simulation.drawCircle();
     //     // simulation.clip();
     //     ctx.restore();
@@ -425,7 +425,7 @@ const simulation = {
             if (simulation.drawList[i].time) {
                 simulation.drawList[i].time--;
             } else {
-                if (!m.isBodiesAsleep) simulation.drawList.splice(i, 1); //remove when timer runs out
+                if (!m.isTimeDilated) simulation.drawList.splice(i, 1); //remove when timer runs out
             }
         }
     },
@@ -496,6 +496,32 @@ const simulation = {
         }
         simulation.boldActiveGunHUD();
     },
+    // updateTechHUD() {
+    //     let text = ""
+    //     for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
+    //         if (tech.tech[i].isLost) {
+    //             if (text) text += "<br>" //add a new line, but not on the first line
+    //             text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
+    //         } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
+    //             if (text) text += "<br>" //add a new line, but not on the first line
+    //             text += `<span id = "${tech.tech[i].name}">${tech.tech[i].name}${tech.tech[i].count > 1 ? ` (${tech.tech[i].count}x)` : ""}</span>`
+
+    //             // document.getElementById(tech.tech[i].name).style.fontWeight = 'bold';
+    //             // simulation.ephemera.push({
+    //             //     name: "bold",
+    //             //     count: 180,
+    //             //     do() {
+    //             //         this.count--
+    //             //         if (this.count < 0) {
+    //             //             simulation.removeEphemera(this.name)
+    //             //             if (document.getElementById(tech.tech[i].name)) document.getElementById(tech.tech[i].name).style.fontWeight = 'normal';
+    //             //         }
+    //             //     }
+    //             // })
+    //         }
+    //     }
+    //     document.getElementById("right-HUD").innerHTML = text
+    // },
     updateTechHUD() {
         let text = ""
         for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
@@ -837,7 +863,7 @@ const simulation = {
                 bodies[i].force.y += bodies[i].mass * magnitude;
             }
         }
-        if (!m.isBodiesAsleep) {
+        if (!m.isTimeDilated) {
             addGravity(powerUp, simulation.g);
             addGravity(body, simulation.g);
         }
@@ -865,6 +891,8 @@ const simulation = {
         document.getElementById("experiment-button").style.opacity = "0";
         document.getElementById("training-button").style.display = "inline"
         document.getElementById("training-button").style.opacity = "0";
+        document.getElementById("start-button").style.display = "inline"
+        document.getElementById("start-button").style.opacity = "0";
         document.getElementById("experiment-grid").style.display = "none"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"
@@ -878,6 +906,7 @@ const simulation = {
         setTimeout(() => {
             document.getElementById("experiment-button").style.opacity = "1";
             document.getElementById("training-button").style.opacity = "1";
+            document.getElementById("start-button").style.opacity = "1";
             document.getElementById("info").style.opacity = "1";
             document.getElementById("splash").style.opacity = "1";
         }, 200);
@@ -904,6 +933,7 @@ const simulation = {
         document.getElementById("info").style.display = "none";
         document.getElementById("experiment-button").style.display = "none";
         document.getElementById("training-button").style.display = "none";
+        document.getElementById("start-button").style.display = "none";
         // document.getElementById("experiment-button").style.opacity = "0";
         document.getElementById("splash").onclick = null; //removes the onclick effect so the function only runs once
         document.getElementById("splash").style.display = "none"; //hides the element that spawned the function
@@ -948,9 +978,8 @@ const simulation = {
         input.endKeySensing();
         simulation.ephemera = []
         powerUps.powerUpStorage = []
-        tech.setupAllTech(); //sets tech to default values
+        tech.resetAllTech(); //sets tech to default values
         b.resetAllGuns();
-        tech.duplication = 0;
         for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
             if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
@@ -958,15 +987,7 @@ const simulation = {
             if (b.guns[i].name === "harpoon") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "foam") b.guns[i].chooseFireMethod()
         }
-        tech.dynamoBotCount = 0;
-        tech.nailBotCount = 0;
-        tech.laserBotCount = 0;
-        tech.orbitBotCount = 0;
-        tech.foamBotCount = 0;
-        tech.soundBotCount = 0;
-        tech.boomBotCount = 0;
-        tech.plasmaBotCount = 0;
-        tech.missileBotCount = 0;
+        b.zeroBotCount()
 
         m.isSwitchingWorlds = false
         simulation.isChoosing = false;
@@ -1044,12 +1065,12 @@ const simulation = {
             simulation.ephemera.push({
                 name: "dmgDefBars", count: 0, do() {
                     if (!(m.cycle % 15)) { //4 times a second
-                        const defense = m.defense()             //update defense bar
+                        const defense = m.defense() //* simulation.dmgScale           //update defense bar
                         if (m.lastCalculatedDefense !== defense) {
                             document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
                             m.lastCalculatedDefense = defense
                         }
-                        const damage = tech.damageFromTech()             //update damage bar
+                        const damage = tech.damageFromTech() //* m.dmgScale           //update damage bar
                         if (m.lastCalculatedDamage !== damage) {
                             document.getElementById("damage-bar").style.height = Math.floor((Math.atan(0.25 * damage - 0.25) + 0.25) * 0.53 * canvas.height) + "px";
                             m.lastCalculatedDamage = damage

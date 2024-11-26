@@ -195,7 +195,7 @@ const spawn = {
                 ctx.strokeStyle = "#000"
                 ctx.lineWidth = 1;
                 ctx.stroke();
-                if (tech.isDarkStar && !m.isCloak) { //&& !m.isBodiesAsleep
+                if (tech.isDarkStar && !m.isCloak) { //&& !m.isTimeDilated
                     ctx.fillStyle = "rgba(10,0,40,0.4)"
                     ctx.fill()
                     //damage mobs
@@ -3896,7 +3896,7 @@ const spawn = {
             if (this.health < this.nextHealthThreshold) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
-                this.invulnerableCount = 300
+                this.invulnerableCount = 240
                 this.isInvulnerable = true
                 this.damageReduction = 0
                 if (this.history.length < 200) for (let i = 0; i < 11; i++) this.history.unshift(this.history[0])

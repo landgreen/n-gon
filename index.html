@@ -39,20 +39,22 @@
     <div style="position: absolute; top:0;right:0;">
         <div id="pause-grid-right" class="pause-grid"></div>
     </div>
-    <svg class="SVG-button" id="experiment-button" width="170" height="45" style="border: 2px #333 solid;">
-        <g stroke='none' fill='#333' stroke-width="2" font-size="30px" font-family="Arial, sans-serif">
-            <text x="10" y="33">experiment</text>
-        </g>
+    <svg class="SVG-button SVG-button-splash" id="start-button" width="82" height="45" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame()">
+        <text x="10" y="32">start</text>
     </svg>
-    <svg class="SVG-button" id="training-button" width="120" height="45" style="border: 2px #333 solid;" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame(false, true)">
-        <text x="10" y="33">training</text>
+    <svg class="SVG-button SVG-button-splash" id="training-button" width="120" height="45"  stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame(false, true)">
+        <text x="10" y="32">training</text>
     </svg>
+    <svg class="SVG-button SVG-button-splash" id="experiment-button" width="170" height="45">
+        <text stroke='none' fill='#333' stroke-width="2" font-size="30px" font-family="Arial, sans-serif" x="10" y="32">experiment</text>
+    </svg>
+
     
     <div id='info'>        
-        <div id="settings" >
-            <details id = 'settings-details'>
+        <div>
+            <details id='settings-details'>
                 <summary>settings</summary>
-                <div style="line-height: 150%;" class="details-div">
+                <div class="details-div" style="max-width: 24rem; line-height: 150%;">
                     <input onclick="build.showImages('settings')" type="checkbox" id="hide-images" name="hide-images" style="width:17px; height:17px;">
                     <label for="hide-images" title="hide images for fields, guns, and tech">hide images</label>
                     <br>
@@ -103,7 +105,7 @@
         <div>
             <details id="control-details">
                 <summary>controls</summary>
-                <div class="details-div">
+                <div class="details-div" style="max-width: 24rem;">
                     To change controls click a box
                     <br>and press an unused key.
                     <br><br>
@@ -171,13 +173,13 @@
         <div>
             <details id="updates">
                 <summary>updates</summary>
-                <div id="updates-div" class="details-div" style="font-size: 70%;height: 400px;overflow: scroll;max-width: 800px;"></div>
+                <div id="updates-div" class="details-div" style="font-size: 70%;height: 400px;overflow: scroll;max-width: 50rem;"></div>
             </details>
         </div>
         <div>
             <details>
                 <summary>about</summary>
-                <div class="details-div" style="max-width: 450px;">
+                <div class="details-div" style="max-width: 24rem;">
                     n-gon is a solo project written in JavaScript, CSS, and HTML using the matter.js 2-D physics library. It's free and open source on <a href="https://github.com/landgreen/n-gon">Github</a>.
                     <a id="github" href="https://github.com/landgreen/n-gon" aria-label="github">
                         <svg viewBox="0 0 100 16" xmlns="http://www.w3.org/2000/svg" fill="#1B1F23">

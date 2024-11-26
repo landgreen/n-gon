@@ -31,7 +31,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField("negative mass") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField("time dilation") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
             // powerUps.research.count = 3
             // tech.isHookWire = true
@@ -52,7 +52,7 @@ const level = {
             // for (let i = 0; i < 1; ++i) tech.giveTech("quantum immortality")
             // m.skin.egg();
 
-            // for (let i = 0; i < 1; ++i) tech.giveTech("non-renewables")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("many-worlds")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("quasiparticles") });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("field coupling") });
             // for (let i = 0; i < 1; i++) tech.giveTech("interest")
@@ -178,10 +178,9 @@ const level = {
         }
         if (tech.isSwitchReality && level.levelsCleared !== 0) {
             simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
-            m.switchWorlds()
+            m.switchWorlds("many-worlds")
             simulation.trails()
             powerUps.spawn(player.position.x + 50, player.position.y - Math.random() * 50, "tech", false);
-            powerUps.spawnDelay("coupling", 3);
         }
         if (tech.isHealLowHealth) {
             const len = tech.isEnergyHealth ? 5 * Math.max(0, m.maxEnergy - m.energy) : 5 * Math.max(0, m.maxHealth - m.health)
@@ -1075,7 +1074,7 @@ const level = {
             y: who.position.y
         }
         who.rotate = function () {
-            if (!m.isBodiesAsleep) {
+            if (!m.isTimeDilated) {
                 Matter.Body.applyForce(this, {
                     x: this.position.x + 100,
                     y: this.position.y + 100
@@ -1089,7 +1088,7 @@ const level = {
         }
         // if (rotate) {
         //     rotor.rotate = function() {
-        //         if (!m.isBodiesAsleep) {
+        //         if (!m.isTimeDilated) {
         //             Matter.Body.applyForce(rotor, {
         //                 x: rotor.position.x + 100,
         //                 y: rotor.position.y + 100
@@ -1241,7 +1240,7 @@ const level = {
             frictionAir: 0.001,
             holdX: x,
             move() {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     if (this.isUp) { //moving up still with high air friction
                         this.force.y -= force * this.mass //hard force propels up, even with high friction
 
@@ -1274,7 +1273,7 @@ const level = {
                 Matter.Body.setPosition(this, { x: this.holdX, y: this.position.y });
             },
             moveOnTouch() {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     if (this.isUp) { //moving up still with high air friction
                         this.force.y -= force * this.mass //hard force propels up, even with high friction
 
@@ -1477,7 +1476,7 @@ const level = {
 
     //     if (rotate) {
     //         rotor.rotate = function() {
-    //             if (!m.isBodiesAsleep) {
+    //             if (!m.isTimeDilated) {
     //                 Matter.Body.applyForce(rotor, {
     //                     x: rotor.position.x + 100,
     //                     y: rotor.position.y + 100
@@ -1802,7 +1801,7 @@ const level = {
             query() {
                 if (this.isThere) {
                     if (this.isTouched) {
-                        if (!m.isBodiesAsleep) {
+                        if (!m.isTimeDilated) {
                             this.fadeCount--
                             Matter.Body.setVertices(this, this.shrinkVertices(Math.max(this.fadeCount / this.fadeTime, 0.03)))
                         }
@@ -1820,7 +1819,7 @@ const level = {
                         this.fadeCount = this.fadeTime;
                     }
                 } else {
-                    if (!m.isBodiesAsleep) {
+                    if (!m.isTimeDilated) {
                         this.returnCount--
                         if (this.returnCount < 1) {
                             Matter.Body.setPosition(this, {
@@ -1901,7 +1900,7 @@ const level = {
             restitution: 0,
             isClosing: false,
             openClose() {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     if (this.isClosing) {
                         if (this.position.y < y) { //try to close
                             if ( //if clear of stuff
@@ -1961,7 +1960,7 @@ const level = {
             restitution: 0,
             isClosing: false,
             openClose(isSetPaths = false) {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     if (this.isClosing) {
                         if (this.position.y < y) { //try to close
                             if ( //if clear of stuff
@@ -2192,7 +2191,7 @@ const level = {
             dropCycle: 0,
             speed: 0,
             draw() {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     if (this.dropCycle < simulation.cycle) { //reset
                         this.dropCycle = simulation.cycle + this.period + Math.floor(40 * Math.random())
                         this.y = yMin
@@ -2218,50 +2217,11 @@ const level = {
             look: p2,
             color: color,
             query() {
-                let best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null }
-                best = vertexCollision(this.position, this.look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
-                // hitting player
-                if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
-                    m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                    const dmg = damage * simulation.dmgScale;
-                    m.damage(dmg);
-                    simulation.drawList.push({ //add dmg to draw queue
-                        x: best.x,
-                        y: best.y,
-                        radius: dmg * 1500,
-                        color: "rgba(255,0,0,0.5)",
-                        time: 20
-                    });
-                }
-                //draw
-                if (best.dist2 === Infinity) best = this.look;
-                ctx.beginPath();
-                ctx.moveTo(this.position.x, this.position.y);
-                ctx.lineTo(best.x, best.y);
-                ctx.strokeStyle = this.color;
-                ctx.lineWidth = 5;
-                ctx.setLineDash([50 + 200 * Math.random(), 50 * Math.random()]);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            },
-            countDown: 0,
-            countTotal: 480,
-            countDelay: 440,
-            motionQuery() {
-                let best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null }
-                best = vertexCollision(this.position, this.look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
-
-                if (this.countDown === 0) {
-                    if ((best.who === playerBody || best.who === playerHead)) this.countDown = this.countTotal // hitting player
-                    ctx.strokeStyle = `rgba(255,255,255,0.4)`;
-                    ctx.lineWidth = 8 + 3 * Math.sin(simulation.cycle * 0.3);
-                } else if (this.countDown > this.countDelay) {
-                    ctx.strokeStyle = `rgba(255,255,255,0.8)`;
-                    ctx.lineWidth = 11;
-                    this.countDown--
-                } else {
-                    this.countDown--
-                    if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) { // hitting player
+                if (!m.isTimeDilated) {
+                    let best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null }
+                    best = vertexCollision(this.position, this.look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
+                    // hitting player
+                    if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
                         const dmg = damage * simulation.dmgScale;
                         m.damage(dmg);
@@ -2273,17 +2233,60 @@ const level = {
                             time: 20
                         });
                     }
+                    //draw
+                    if (best.dist2 === Infinity) best = this.look;
+                    ctx.beginPath();
+                    ctx.moveTo(this.position.x, this.position.y);
+                    ctx.lineTo(best.x, best.y);
                     ctx.strokeStyle = this.color;
                     ctx.lineWidth = 5;
                     ctx.setLineDash([50 + 200 * Math.random(), 50 * Math.random()]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
                 }
-                //draw
-                if (best.dist2 === Infinity) best = this.look;
-                ctx.beginPath();
-                ctx.moveTo(this.position.x, this.position.y);
-                ctx.lineTo(best.x, best.y);
-                ctx.stroke();
-                ctx.setLineDash([]);
+            },
+            countDown: 0,
+            countTotal: 480,
+            countDelay: 440,
+            motionQuery() {
+                if (!m.isTimeDilated) {
+                    let best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null }
+                    best = vertexCollision(this.position, this.look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
+
+                    if (this.countDown === 0) {
+                        if ((best.who === playerBody || best.who === playerHead)) this.countDown = this.countTotal // hitting player
+                        ctx.strokeStyle = `rgba(255,255,255,0.4)`;
+                        ctx.lineWidth = 8 + 3 * Math.sin(simulation.cycle * 0.3);
+                    } else if (this.countDown > this.countDelay) {
+                        ctx.strokeStyle = `rgba(255,255,255,0.8)`;
+                        ctx.lineWidth = 11;
+                        this.countDown--
+                    } else {
+                        this.countDown--
+                        if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) { // hitting player
+                            m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
+                            const dmg = damage * simulation.dmgScale;
+                            m.damage(dmg);
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: best.x,
+                                y: best.y,
+                                radius: dmg * 1500,
+                                color: "rgba(255,0,0,0.5)",
+                                time: 20
+                            });
+                        }
+                        ctx.strokeStyle = this.color;
+                        ctx.lineWidth = 5;
+                        ctx.setLineDash([50 + 200 * Math.random(), 50 * Math.random()]);
+                    }
+                    //draw
+                    if (best.dist2 === Infinity) best = this.look;
+                    ctx.beginPath();
+                    ctx.moveTo(this.position.x, this.position.y);
+                    ctx.lineTo(best.x, best.y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
             },
         }
     },
@@ -2365,21 +2368,21 @@ const level = {
             //     }
             // },
             levelRise(growRate = 1) {
-                if (this.height < this.maxHeight && !m.isBodiesAsleep) {
+                if (this.height < this.maxHeight && !m.isTimeDilated) {
                     this.height += growRate
                     this.min.y -= growRate
                     this.max.y = this.min.y + this.height
                 }
             },
             levelFall(fallRate = 1) {
-                if (this.height > 0 && !m.isBodiesAsleep) {
+                if (this.height > 0 && !m.isTimeDilated) {
                     this.height -= fallRate
                     this.min.y += fallRate
                     this.max.y = this.min.y + this.height
                 }
             },
             level(isFill, growSpeed = 1) {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     if (isFill) {
                         if (this.height < this.maxHeight) {
                             this.height += growSpeed
@@ -2414,7 +2417,7 @@ const level = {
             VxGoal: VxGoal,
             force: force,
             push() {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     const touchingPlayer = Matter.Query.collides(this, [jumpSensor])
                     if (touchingPlayer.length) {
                         m.moverX = this.VxGoal
@@ -2496,7 +2499,7 @@ const level = {
             VxGoal: VxGoal,
             force: force,
             move() {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     Matter.Body.setPosition(this, { x: this.position.x + this.VxGoal, y: this.position.y }); //horizontal movement
                     const touchingPlayer = Matter.Query.collides(this, [jumpSensor])
                     if (touchingPlayer.length) {
@@ -3182,7 +3185,7 @@ const level = {
         // spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
         spawn.mapRect(-2750, -2800, 2600, 2515);
         spawn.mapRect(-3275, -185, 3125, 1985);
-        powerUps.directSpawn(-2315, -3050, "instructions", false);
+        requestAnimationFrame(() => { powerUps.directSpawn(-2315, -3050, "instructions", false); });
         spawn.mapRect(-3275, -2800, 400, 3250);
         spawn.mapRect(-2775, -575, 50, 25);
         spawn.mapRect(-2775, -950, 50, 25);
@@ -4650,7 +4653,7 @@ const level = {
                         //draw slime fill
                         ctx.fillStyle = `hsla(160, 100%, 43%,${0.3 + 0.07 * Math.random()})`
                         ctx.fillRect(waterFallX, -5050, waterFallWidth, 6175 - slime.height)
-                        if (!m.isBodiesAsleep) {
+                        if (!m.isTimeDilated) {
                             waterFallWidth = 0.98 * waterFallWidth + 4.7 * Math.random()
                             waterFallSmoothX = 0.98 * waterFallSmoothX + 3.5 * Math.random()
                             waterFallX = 1857 - waterFallSmoothX
@@ -4766,7 +4769,7 @@ const level = {
                         //draw slime fill
                         ctx.fillStyle = `hsla(160, 100%, 43%,${0.3 + 0.07 * Math.random()})`
                         ctx.fillRect(waterFallX, -5050, waterFallWidth, 6175 - slime.height)
-                        if (!m.isBodiesAsleep) {
+                        if (!m.isTimeDilated) {
                             waterFallWidth = 0.98 * waterFallWidth + 4.7 * Math.random()
                             waterFallSmoothX = 0.98 * waterFallSmoothX + 3.5 * Math.random()
                             waterFallX = waterFallSmoothX - 1985
@@ -5383,7 +5386,7 @@ const level = {
                                 }
                             }
                         }
-                        if (mob.length < 100 && !m.isBodiesAsleep) {
+                        if (mob.length < 100 && !m.isTimeDilated) {
                             block2Mob(0)
                             block2Mob(1)
                             block2Mob(2)
@@ -7134,7 +7137,7 @@ const level = {
             drag: 0.01,
             move() {
                 this.force.y -= this.mass * simulation.g; //undo gravity
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     if (level.isFlipped) {
                         ctx.fillStyle = "#ccc"
                         ctx.fillRect(this.holdX, -this.maxHeight, 5, this.maxHeight - this.minHeight) //draw path
@@ -7936,31 +7939,25 @@ const level = {
         // spawn.bodyRect(1900, 1875, 100, 125, 0.5);
         spawn.bodyRect(-2569, 825, 25, 165);
 
-        spawn.randomMob(-3750, -400, 0.2);
-        spawn.randomMob(-3425, -600, 0.2);
-        spawn.randomMob(-3225, -625, 0.3);
-        spawn.randomMob(-2850, -500, 0.3);
-        spawn.randomMob(-2450, -675, 0.3);
-        spawn.randomMob(-2150, -650, 0.4);
-        spawn.randomMob(-1650, -500, 0.4);
-        spawn.randomMob(-1325, 275, 0.4);
-        spawn.randomMob(-825, 425, 0.5);
-        spawn.randomMob(-400, -575, 0.5);
-        spawn.randomMob(-1275, -900, 0.5);
-        spawn.randomMob(-675, -775, 0.6);
-        spawn.randomMob(150, -725, 0.6);
-        spawn.randomMob(475, 925, 0.7);
-        spawn.randomMob(1500, 550, 0.7);
-        spawn.randomMob(1850, 500, 0.7);
-        spawn.randomMob(2025, 925, 0.8);
-        spawn.randomMob(1575, 875, 0.8);
-        spawn.randomMob(2650, 650, 0.9);
-        spawn.randomMob(3100, 700, 0.9);
-        spawn.randomMob(3050, 100, 1);
-        spawn.randomMob(2350, 100, 1);
-        spawn.randomMob(3400, 875, 1);
-        spawn.randomMob(3375, -725, 1);
-        spawn.randomMob(3925, 100, 1);
+        spawn.randomMob(-2275, -675, 0);
+        spawn.randomMob(-1200, 475, 0);
+        spawn.randomMob(525, 875, 0.1);
+        spawn.randomMob(1975, 900, 0.2);
+        spawn.randomMob(2800, 875, 0.2);
+        spawn.randomMob(-3275, -600, 0.3);
+        spawn.randomMob(-1250, -900, 0.3);
+        spawn.randomMob(-475, -600, 0.3);
+        spawn.randomMob(-1750, 850, 0.4);
+        spawn.randomMob(1700, 525, 0.4);
+        spawn.randomMob(2925, 175, 0.5);
+        spawn.randomMob(-2300, -825, 0.5);
+        spawn.randomMob(-1625, -450, 0.6);
+        spawn.randomMob(-225, 900, 0.6);
+        spawn.randomMob(275, -775, 0.7);
+        spawn.randomMob(2800, 875, 0.8);
+        spawn.randomMob(3825, -750, 0.9);
+        spawn.randomMob(2825, 150, 1);
+        spawn.randomMob(-1900, 875, 1);
 
         powerUps.spawnStartingPowerUps(-825, -600);
         spawn.randomLevelBoss(1550, 200);
@@ -7982,11 +7979,11 @@ const level = {
         const boost2 = level.boost(3400, 1000, 1750)
 
         const lasers = []
-        const center = { x: 2800, y: 300 }
+        const center = { x: 2800, y: 200 }
         map[map.length] = Matter.Bodies.polygon(center.x, center.y, 20, 100) //center circle with lasers
         lasers.push(level.laser({ x: center.x, y: center.y }, { x: center.x, y: center.y })) //oscillating laser
         lasers[lasers.length - 1].oscillate = function () {
-            const angle = Math.PI / 2 - 1.55 * Math.sin(0.02 * simulation.cycle) //oscillate around circle
+            const angle = -0.45 + Math.PI / 2 - 1.47 * Math.sin(0.02 * simulation.cycle) //oscillate around circle
             this.position = {
                 x: center.x + 102 * Math.cos(angle),
                 y: center.y + 102 * Math.sin(angle)
@@ -7998,7 +7995,7 @@ const level = {
         }
         lasers.push(level.laser({ x: center.x, y: center.y }, { x: center.x, y: center.y })) //oscillating laser
         lasers[lasers.length - 1].oscillate = function () {
-            const angle = -Math.PI / 2 + 1.55 * Math.sin(0.02 * simulation.cycle) //oscillate around circle
+            const angle = -0.45 + -Math.PI / 2 + 1.47 * Math.sin(0.02 * simulation.cycle) //oscillate around circle
             this.position = {
                 x: center.x + 102 * Math.cos(angle),
                 y: center.y + 102 * Math.sin(angle)
@@ -8066,7 +8063,7 @@ const level = {
             boost2.query();
 
             ctx.fillStyle = "#cacfcf"
-            ctx.fillRect(2787, -425, 25, 800);
+            ctx.fillRect(2787, -425, 25, 650);
             ctx.fillRect(-600, -1050, 400, 1800);
 
             level.exit.drawAndCheck();
@@ -20336,7 +20333,7 @@ const level = {
                 restitution: 0,
                 isClosing: false,
                 openClose() {
-                    if (!m.isBodiesAsleep) {
+                    if (!m.isTimeDilated) {
                         if (this.isClosing) {
                             if (this.position.x > x) { //try to close
                                 if ( //if clear of stuff
@@ -21006,7 +21003,7 @@ const level = {
             drawBackgroundGear(-1010, -2380, 30, 100, -0.1, "#ccc", 0.05);
 
             // pendulum gears
-            if (!m.isBodiesAsleep) smallGearPosRot += Math.sin((simulation.cycle - startCycle) / 50) * 0.3 - Math.sin((simulation.cycle - startCycle - 1) / 50) * 0.3;
+            if (!m.isTimeDilated) smallGearPosRot += Math.sin((simulation.cycle - startCycle) / 50) * 0.3 - Math.sin((simulation.cycle - startCycle - 1) / 50) * 0.3;
             if (smallGearPosRot > 0.1) smallGearPosRot = 0.1;
             if (smallGearPosRot < -0.1) smallGearPosRot = -0.1;
             var circ = 2 * Math.PI * 150;
@@ -24558,7 +24555,7 @@ const level = {
             }
             me.waves = [];
             me.doLongitudinal = function () {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();
@@ -27286,7 +27283,7 @@ const level = {
                     ctx.fillRect(-50000, -50000, 100000, 100000)
                     ctx.globalCompositeOperation = "source-over"
                     // stop time
-                    // m.isBodiesAsleep = true;
+                    // m.isTimeDilated = true;
                     // function sleep(who) {
                     // for (let i = 0, len = who.length; i < len; ++i) {
                     // if (!who[i].isSleeping) {
@@ -27683,7 +27680,7 @@ const level = {
             }
             me.waves = [];
             me.doLongitudinal = function () {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();

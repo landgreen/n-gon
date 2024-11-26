@@ -1066,8 +1066,7 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
         b.activeGun = null;
         b.inventoryGun = 0;
         simulation.makeGunHUD();
-        tech.setupAllTech();
-        m.resetSkin();
+        tech.resetAllTech();
         build.populateGrid();
         document.getElementById("field-0").classList.add("build-field-selected");
         document.getElementById("experiment-grid").style.display = "grid"
@@ -1168,6 +1167,7 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
 function openExperimentMenu() {
     document.getElementById("experiment-button").style.display = "none";
     document.getElementById("training-button").style.display = "none";
+    document.getElementById("start-button").style.display = "none";
     const el = document.getElementById("experiment-grid")
     el.style.display = "grid"
     document.body.style.overflowY = "scroll";

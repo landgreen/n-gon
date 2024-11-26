@@ -116,7 +116,7 @@ function collisionChecks(event) {
                         m.damage(dmg); //normal damage
 
                         if (tech.isCollisionRealitySwitch && m.alive) {
-                            m.switchWorlds()
+                            m.switchWorlds("Hilbert space")
                             simulation.trails(90)
                             simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
                         }

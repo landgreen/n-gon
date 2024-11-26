@@ -1,30 +1,24 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new level substructure
-  featured element - motion triggered lasers
+reworked m.switchWorlds() (used in many-worlds and similar effects)
+  no longer has extra bot build up
+  effects that carry over into next world:
+    your total tech count
+    effects of non-removeable tech, like determinism
+mass production research ramps up by 5->4 each time
+bot fabrications cost ramp is increased to (+1 per 4)-->(+1 per 3)
+lowered minimum threshold for making small heals from over healing to 13->20 health
+snakeBoss invulnerable phase is 5->4 seconds long
 
-futures exchange 5->6% duplication per cancel
-plasma torch coupling 0.015->0.025x damage per coupling
-Gibbs free energy  1.005->1.006x damage per missing energy
-compound lens arc adds 25->30 degrees
-instability 2->2.5x damage when damage taken is 1x
-constraint: after 30->40 seconds spawn WIMPs
-constraint: 0.1->0.3x damage after getting power ups
-renamed holographic principle -> charmed baryons
+time dilation disables level based lasers
+adjusted laser sensor paths on substructure level
 
-updates to community map: downpour
-updated lasers in labs and testChamber to the new more realistic laser
+move splash screen buttons to bottom right
+added a start button
+details menus in splash screen now have individual widths instead of sharing with each other
 
 bugs
-  returning to the old console.log system from last patch
-    I rather read bugs in the browser console not the n-gon console
-  bots properly follow player when level flips vertically
-  community map: arena's sword is properly removed at end of level
-  rewrote shaped charge to be better at protecting you from all explosions
-  pause correctly lists both mobs types for the level
-  for quasiparticles "boost" replaces ammo in more edge cases
-  bug with removing surfactant setting b.activeGun false and crashing game with checking active gun
-    not sure if this is fixed or not?
+  non-renewables change color for ammo power ups on current level
 
 ******************************************************** BUGS ********************************************************
 
@@ -63,6 +57,15 @@ ants marching outline on splash screen doesn't sync right on safari
 player can become crouched while not touching the ground if they exit the ground while crouched
 
 *********************************************************** TODO *****************************************************
+
+animate adding new tech or guns or field to the text menu
+  css transitions or trigger an animation?
+  bold for 3-5 seconds
+    is bold going to move other text up and down?
+  dark opacity 1 font  
+
+new level - something with movers
+
 
 rework focuser mobs to fire blue laser instead of charging player
   like in classic 7-1-2017

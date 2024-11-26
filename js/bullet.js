@@ -624,7 +624,7 @@ const b = {
     clusterExplode(where, size) { //can occur after grenades detonate
         const cycle = () => {
             if (m.alive) {
-                if (simulation.paused || m.isBodiesAsleep) {
+                if (simulation.paused || m.isTimeDilated) {
                     requestAnimationFrame(cycle)
                 } else {
                     count++
@@ -643,7 +643,7 @@ const b = {
         const color = `hsla(${360 * Math.random()},100%,66%,0.6)`
         const cycle = () => {
             if (m.alive) {
-                if (simulation.paused || m.isBodiesAsleep) {
+                if (simulation.paused || m.isTimeDilated) {
                     requestAnimationFrame(cycle)
                 } else {
                     count++
@@ -668,7 +668,7 @@ const b = {
         const range = size * Math.sqrt(b.explosionRange())
         const cycle = () => {
             if (m.alive) {
-                if (simulation.paused || m.isBodiesAsleep) {
+                if (simulation.paused || m.isTimeDilated) {
                     requestAnimationFrame(cycle)
                 } else {
                     if (count < 30 && m.alive) requestAnimationFrame(cycle);
@@ -4505,14 +4505,15 @@ const b = {
         }
     },
     zeroBotCount() { //remove all bots
-        tech.dynamoBotCount = 0
-        tech.laserBotCount = 0
-        tech.nailBotCount = 0
-        tech.foamBotCount = 0
-        tech.soundBotCount = 0
-        tech.boomBotCount = 0
-        tech.orbitBotCount = 0
-        tech.missileBotCount = 0
+        tech.dynamoBotCount = 0;
+        tech.nailBotCount = 0;
+        tech.laserBotCount = 0;
+        tech.orbitBotCount = 0;
+        tech.foamBotCount = 0;
+        tech.soundBotCount = 0;
+        tech.boomBotCount = 0;
+        tech.plasmaBotCount = 0;
+        tech.missileBotCount = 0;
     },
     respawnBots() {
         for (let i = 0; i < tech.dynamoBotCount; i++) b.dynamoBot({
@@ -5032,7 +5033,7 @@ const b = {
                 } else { //fire mode: quickly fire at targets and doesn't follow player
                     this.fire()
                 }
-                if (!m.isBodiesAsleep) { //update current waves
+                if (!m.isTimeDilated) { //update current waves
                     ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();
@@ -5713,7 +5714,7 @@ const b = {
                     b.needle()
 
                     function cycle() {
-                        if (simulation.paused || m.isBodiesAsleep) {
+                        if (simulation.paused || m.isTimeDilated) {
                             requestAnimationFrame(cycle)
                         } else {
                             count++
@@ -5728,7 +5729,7 @@ const b = {
                     b.needle()
 
                     function cycle() {
-                        if (simulation.paused || m.isBodiesAsleep) {
+                        if (simulation.paused || m.isTimeDilated) {
                             requestAnimationFrame(cycle)
                         } else {
                             count++
@@ -6356,7 +6357,7 @@ const b = {
             },
             do() { },
             do360Longitudinal() {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();
@@ -6453,7 +6454,7 @@ const b = {
                 })
             },
             doLongitudinal() {
-                if (!m.isBodiesAsleep) {
+                if (!m.isTimeDilated) {
                     ctx.strokeStyle = "rgba(0,0,0,0.6)" //"000";
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();

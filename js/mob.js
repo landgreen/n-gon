@@ -1232,7 +1232,7 @@ const mobs = {
                         });
                     }
 
-                    if (tech.isVerlet && !m.isBodiesAsleep) {
+                    if (tech.isVerlet && !m.isTimeDilated) {
                         requestAnimationFrame(() => {
                             simulation.timePlayerSkip(this.isBoss ? 60 : 30)
                             simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
