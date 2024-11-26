@@ -591,7 +591,7 @@ summary {
     position: absolute;
     bottom: 3px;
     left: 3px;
-    z-index: 12;
+    z-index: 10;
     font-size: 1.5em;
     transition: opacity 5s ease-in;
     width: 100%;
