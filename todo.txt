@@ -1,24 +1,6 @@
 ******************************************************** NEXT PATCH **************************************************
 
-reworked m.switchWorlds() (used in many-worlds and similar effects)
-  no longer has extra bot build up
-  effects that carry over into next world:
-    your total tech count
-    effects of non-removeable tech, like determinism
-mass production research ramps up by 5->4 each time
-bot fabrications cost ramp is increased to (+1 per 4)-->(+1 per 3)
-lowered minimum threshold for making small heals from over healing to 13->20 health
-snakeBoss invulnerable phase is 5->4 seconds long
-
-time dilation disables level based lasers
-adjusted laser sensor paths on substructure level
-
-move splash screen buttons to bottom right
-added a start button
-details menus in splash screen now have individual widths instead of sharing with each other
-
-bugs
-  non-renewables change color for ammo power ups on current level
+reworked focuser mobs to fire blue energy draining laser instead of charging player
 
 ******************************************************** BUGS ********************************************************
 
@@ -58,18 +40,18 @@ player can become crouched while not touching the ground if they exit the ground
 
 *********************************************************** TODO *****************************************************
 
-animate adding new tech or guns or field to the text menu
-  css transitions or trigger an animation?
-  bold for 3-5 seconds
-    is bold going to move other text up and down?
-  dark opacity 1 font  
-
-new level - something with movers
-
-
-rework focuser mobs to fire blue laser instead of charging player
-  like in classic 7-1-2017
-  this makes more sense that a bean is focusing
+new level - something with movers, rubber band blocks
+button/switch input ideas from Cocoon game
+  pick up blocks that have a rubber band attached to a sliding switch
+    as player moves the vector direction of the rubber band will move the slider left or right
+    use this to open doors, move larger blocks, ...
+  switches that toggle left, right when player presses input.field while standing nearby
+    replace laser off on switch?
+    platform that rises up when player presses input.field while standing
+  How to instruct player to use field on these?
+    color with field #0ff
+    draw field effect
+    make it still functional without the field button
 
 
 !!conformal - similar rules for small and big scales  linked to holographic principle
@@ -81,47 +63,14 @@ rework focuser mobs to fire blue laser instead of charging player
   only after wormhole eats a block fire?
     or just increase plasma length after eating block?
 
-
-new level element - motion trigger for laser
-new level heist
-  above - a building with rooms and doors like office/warehouse
-  below - long indoor tunnels like sewers
-    dark colors
-    narrow branching paths
-  elements
-    motion triggered lasers
-    doors opened by buttons
-      button that opens 1 door, but closes another when down
-        make the button down state easier, have extra power ups
-
-
 make a text orb for JUNK text to make JUNK more clear
-
-extended vertical flip to edge cases:
-  !!stored circular graphics     simulation.drawList.push
 
 procedural animation 
   https://www.youtube.com/watch?v=qlfh_rv6khY
 
-not implemented random constraint ideas________________________
-  mob death spawns something
-    mob bullets
-  bosses heals nearby mobs
-  ammo power ups give 0.7x ammo
-  2x research costs
-  mobs slowly regen health
-  exit door takes 10x time to open,
-    and while door is opening (ghosters, suckers) attack?
-  can't have more then 15 bullets
-    how to code?
-  remove 2 random tech and return them next level
-
 tech: ice-VII - 1.5x duration for ice-IX
-
 tech:  - freezing grenades/explosions
-
 tech:  - when you get a bot, get a second bot
-
 tech:  - after killing a Boss
   heal to full
   gain 3x damage for the rest of the level
@@ -159,12 +108,6 @@ tech: atomic pile - lose 1 health if you are above the maximum energy
   do damage?
   plasma torch tech?
 
-figure out how to put instructions for controls in background on initial level
-  mouse smooth makes the text position jitter when it moves sub pixels
-    hide the jitter with artificial jitter to make it seem intentional
-      make it look like the instructions are on a fuzzy TV screen
-    when player presses move buttons highlight the box/letter for those buttons
-  
 make player mass an adjustable var in the skin
   does this mess with jump height or air control?
 increase mass and movement speed at the same time
@@ -174,10 +117,6 @@ increase mass and movement speed at the same time
   possible player.mass bad interactions
     grapple
 
-rework energy and health HUD
-  make both diegetic?
-    how?  not sure there is a good way to do this...
-
 tech - after a power up is duplicated
   update text to random effect after choosing tech, or after each trigger, or on first display of tech
   pick 1 effect at random
@@ -185,7 +124,7 @@ tech - after a power up is duplicated
     summon JUNK bots for 10 seconds
     2x current energy
     gain 1.01x damage permanently
-  cool name: 
+  cool name:
 
 after picking up heals gain ____
   0.1x damage taken for 12s
@@ -201,42 +140,8 @@ tech - getting caught in an explosion gives you _____
   damage for 10 seconds?
   heals
 
-tech - limit total number of tech to like 10?
-
-tech - destroying blocks gives _____
-
-removeJunkTechFromPool doesn't seem to remove the correct amount
-
-wormholes that end inside wall check to see if the space before the wall is safe and end there instead
-  can use laser code
-
-tech:  - (1 + 0.01)x for each tech, gun, field you've picked up
-  scales with born rule, duplication, remove tech
-
 explosions have a chance to spawn spores
   infinite feedback loop with spores that explode?
-
-make sure healing isn't effected by simulation.healScale
-  instead heal orb size should be scaled
-    but the ratio between size and heal shouldn't be effected
-
-boss - tracks the position, velocity, angle of power ups, blocks, and bullets it fires
-  reactor only?
-  will rewind time
-    after damage threshold?
-  does it track player bullets? 
-
-button/switch input ideas from Cocoon game
-  pick up blocks that have a rubber band attached to a sliding switch
-    as player moves the vector direction of the rubber band will move the slider left or right
-    use this to open doors, move larger blocks, ...
-  switches that toggle left, right when player presses input.field while standing nearby
-    replace laser off on switch?
-    platform that rises up when player presses input.field while standing
-  How to instruct player to use field on these?
-    color with field #0ff
-    draw field effect
-    make it still functional without the field button
 
 tech - getting a new gun also gives you 2 random tech for that gun
   or a field?

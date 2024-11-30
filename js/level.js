@@ -60,12 +60,12 @@ const level = {
             // for (let i = 0; i < 1; i++) powerUps.directSpawn(450, -50, "warp");
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
-            // level.substructure();
+            // level.cocoon();
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
 
-            // for (let i = 0; i < 5; ++i) spawn.sneaker(1900, -500)
+            // for (let i = 0; i < 1; ++i) spawn.shieldingBoss(1900, -500)
             // for (let i = 0; i < 1; i++) spawn.mantisBoss(1900, -500)
 
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
@@ -3093,8 +3093,9 @@ const level = {
             // ctx.font = "50px Arial";
             // ctx.fillStyle = "rgba(0,0,0,0.3)"
             // for (let i = 0; i < 5; i++) {
-            //     const wiggle = 10
+            //     const wiggle = 2
             //     ctx.fillText("move", 500 + wiggle * Math.random(), -500 + wiggle * Math.random());
+            //     ctx.fillText("move", 500, -400);
             // }
 
             //push around power ups stuck in the tube wall
@@ -8153,6 +8154,46 @@ const level = {
         powerUps.directSpawn(2475, -650, "heal");
         powerUps.directSpawn(2100, 925, "heal");
         powerUps.directSpawn(625, -100, "heal");
+    },
+    cocoon() {
+        // simulation.fallHeight = 4000
+        level.announceMobTypes()
+        level.setPosToSpawn(-3800, 950);
+        level.exit.x = 3750
+        level.exit.y = -625
+        level.defaultZoom = 2000
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d0d5d5";
+        color.map = "#444"
+
+
+
+
+
+        level.custom = () => {
+            level.exit.drawAndCheck();
+            level.enter.draw();
+        };
+        level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(0,255,255,0.1)" //"#d4f4f4" //exit
+            ctx.fillRect(3535, -1050, 500, 475);
+
+            //shadows
+            ctx.fillStyle = "rgba(0,20,60,0.09)"
+            // ctx.fillRect(-4025, -1050, 1750, 2275);
+        };
+        //boxes center on zero,zero with deep walls to hide background
+        spawn.mapRect(4000, -2000, 2000, 4000); //right map wall
+        spawn.mapRect(-6000, -2000, 2000, 4000); //left map wall
+        spawn.mapRect(-6000, -4000, 12000, 3000); //map ceiling
+        spawn.mapRect(-6000, 1000, 12000, 3000); //floor
+
+
+        // spawn.randomMob(2825, 75, 0.9);
+        // spawn.randomLevelBoss(2400, 600);
+        // spawn.secondaryBossChance(800, -300)
+        // powerUps.spawnStartingPowerUps(600, 375);
+        // powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     lock() {
         level.announceMobTypes()
