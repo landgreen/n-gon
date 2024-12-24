@@ -643,7 +643,7 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
             }
         }
         document.getElementById("sort-input").addEventListener('keydown', pressEnterSort);
-        requestAnimationFrame(() => { document.getElementById("sort-input").focus(); });
+        // requestAnimationFrame(() => { document.getElementById("sort-input").focus(); });
     },
     sortTech(find, isExperiment = false) {
         const sortKeyword = (a, b) => {
@@ -729,6 +729,8 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
                 return 0;
             });
         } else if (find === 'damage') {
+            tech.tech.sort(sortKeyword);
+        } else if (find === 'damage taken') {
             tech.tech.sort(sortKeyword);
         } else if (find === 'defense') {
             tech.tech.sort(sortKeyword);
@@ -954,8 +956,8 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
         <button onclick="build.sortTech('fieldtech', true)" class='sort-button'>${powerUps.orb.fieldTech()}</button>
         <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d'>damage</strong></button>
         <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong style="letter-spacing: 1px;font-weight: 100;">dmg taken</strong></button>
-        <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
-        <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
+        <button onclick="build.sortTech('heal', true)" class='sort-button'><strong class='color-h'>heal</strong></button>
+        <button onclick="build.sortTech('energy', true)" class='sort-button'><strong class='color-f'>energy</strong></button>
         <input type="search" id="sort-input" style="width: 7.5em;font-size: 0.6em;color:#000;" placeholder="sort by" />
         <button onclick="build.sortTech('input', true)" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
     </div>
@@ -1416,11 +1418,13 @@ window.addEventListener("keydown", function (event) {
                     build.pauseGrid()
 
                 } else if (simulation.paused) {
-                    build.unPauseGrid()
-                    simulation.paused = false;
-                    // level.levelAnnounce();
-                    document.body.style.cursor = "none";
-                    requestAnimationFrame(cycle);
+                    if (document.activeElement !== document.getElementById('sort-input')) {
+                        build.unPauseGrid()
+                        simulation.paused = false;
+                        // level.levelAnnounce();
+                        document.body.style.cursor = "none";
+                        requestAnimationFrame(cycle);
+                    }
                 } else {  //if (!tech.isNoDraftPause)
                     simulation.paused = true;
                     build.pauseGrid()
@@ -1542,7 +1546,7 @@ window.addEventListener("keydown", function (event) {
             }
             break
     }
-    if (b.inventory.length > 1 && !simulation.testing && !tech.isGunCycle) {
+    if (b.inventory.length > 1 && !simulation.testing && !(tech.isGunChoice || tech.isGunCycle)) {
         switch (event.code) {
             case "Digit1":
                 simulation.switchToGunInInventory(0);

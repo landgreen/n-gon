@@ -41,23 +41,15 @@ const mobs = {
                 ctx.fillRect(x, y, w, h);
                 ctx.fillStyle = "rgba(255,0,0,0.7)";
                 ctx.fillRect(x, y, w * mob[i].health, h);
+                // if (mob[i].isInvulnerable) {
+                //     ctx.strokeStyle = "rgba(255,255,255,1)";
+                //     ctx.lineWidth = 5
+                //     ctx.strokeRect(x, y, w, h);
+                // }
             }
         }
     },
-    healthBar() {
-        for (let i = 0, len = mob.length; i < len; i++) {
-            if (mob[i].seePlayer.recall && mob[i].showHealthBar) {
-                const h = mob[i].radius * 0.3;
-                const w = mob[i].radius * 2;
-                const x = mob[i].position.x - w / 2;
-                const y = mob[i].position.y - w * 0.7;
-                ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
-                ctx.fillRect(x, y, w, h);
-                ctx.fillStyle = "rgba(255,0,0,0.7)";
-                ctx.fillRect(x, y, w * mob[i].health, h);
-            }
-        }
-    },
+    healthBar() { },
     statusSlow(who, cycles = 60) {
         applySlow(who)
         //look for mobs near the target
@@ -1384,7 +1376,7 @@ const mobs = {
             //replace dead mob with a regular body
             replace(i) {
                 //if there are too many bodies don't turn into blocks to help performance
-                if (this.leaveBody && body.length < mobs.maxMobBody && this.mass < 200 && this.radius > 18) {
+                if (this.leaveBody && body.length < mobs.maxMobBody && this.mass < 200 && this.mass > 2 && this.radius > 18) {
                     let v = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //might help with vertex collision issue, not sure
                     if (v.length > 5 && body.length < 35 && Math.random() < 0.25) {
                         const cutPoint = 3 + Math.floor((v.length - 6) * Math.random()) //Math.floor(v.length / 2)
@@ -1397,6 +1389,8 @@ const mobs = {
                         body[len].collisionFilter.category = cat.body;
                         body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
                         body[len].classType = "body";
+                        body[len].frictionAir = 0.001
+                        body[len].friction = 0.05
                         Composite.add(engine.world, body[len]); //add to world
 
                         const len2 = body.length;
@@ -1406,6 +1400,8 @@ const mobs = {
                         body[len2].collisionFilter.category = cat.body;
                         body[len2].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
                         body[len2].classType = "body";
+                        body[len2].frictionAir = 0.001
+                        body[len2].friction = 0.05
                         Composite.add(engine.world, body[len2]); //add to world
 
                         //large mobs shrink so they don't block paths
@@ -1429,8 +1425,9 @@ const mobs = {
                         body[len].collisionFilter.category = cat.body;
                         body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
                         body[len].classType = "body";
+                        body[len].frictionAir = 0.001
+                        body[len].friction = 0.05
                         Composite.add(engine.world, body[len]); //add to world
-
                         //large mobs shrink so they don't block paths
                         if (body[len].mass > 9) {
                             const massLimit = 7 + 4 * Math.random()

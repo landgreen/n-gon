@@ -67,7 +67,7 @@ const tech = {
         tech.junkChance += percent
         if (tech.junkChance < 0.001 || tech.junkChance === undefined) tech.junkChance = 0
         if (tech.junkChance > 1) tech.junkChance = 1
-        simulation.inGameConsole(`<strong>+${(100 * percent).toFixed(0)}%</strong> <span class='color-text'>JUNK</span><span class='color-var'>tech</span> chance (${(100 * tech.junkChance).toFixed(0)} total chance)`)
+        simulation.inGameConsole(`<strong>+${(100 * percent).toFixed(0)}%</strong> <span class='color-text'>JUNK</span><span class='color-var'>tech</span> chance (${(100 * tech.junkChance).toFixed(0)}% total chance)`)
         // tech.junkChance += (1 - tech.junkChance) * percent
         return percent
 
@@ -266,7 +266,7 @@ const tech = {
     damageFromTech() {
         let dmg = tech.damage * m.fieldDamage
         if (level.isNoDamage && (m.cycle - 180 < level.noDamageCycle)) dmg *= 0.3
-        if (tech.isMaxHealthDamage && m.health === m.maxHealth) dmg *= 1.5
+        if (tech.isMaxHealthDamage && m.health === m.maxHealth) dmg *= 2
         if (tech.noDefenseSettingDamage && m.defense() === 1) dmg *= 2.5
         if (tech.isImmunityDamage && m.immuneCycle > m.cycle) dmg *= 3
         if (tech.isPowerUpDamage) dmg *= 1 + 0.07 * powerUp.length
@@ -275,7 +275,7 @@ const tech = {
         if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.9
         if (tech.isNoGroundDamage) dmg *= m.onGround ? 0.9 : 2
         if (tech.isDilate) dmg *= 1.9 + 1.1 * Math.sin(m.cycle * 0.01)
-        if (tech.isGunChoice && tech.buffedGun === b.inventoryGun) dmg *= 1 + 0.3 * b.inventory.length
+        if (tech.isGunChoice) dmg *= 1 + 0.4 * b.inventory.length
         if (powerUps.boost.endCycle > simulation.cycle) dmg *= 1 + powerUps.boost.damage
         if (m.coupling && (m.fieldMode === 0 || m.fieldMode === 5)) dmg *= 1 + 0.025 * m.coupling
         if (tech.isVerlet) dmg *= 3
@@ -781,13 +781,16 @@ const tech = {
     {
         name: "pigeonhole principle",
         descriptionFunction() {
-            let info = ""
-            if (this.count > 0 && Number.isInteger(tech.buffedGun) && b.inventory.length) {
-                let gun = b.guns[b.inventory[tech.buffedGun]].name
-                info = `<br>this level: <strong>${(1.3 * Math.max(0, b.inventory.length)).toFixed(2)}x</strong> <strong class='color-d'>damage</strong> for <strong class="highlight">${gun}</strong>`
-            }
-            return `<span style = 'font-size:95%;'>a new ${powerUps.orb.gun()} in your inventory is <strong>chosen</strong> each <strong>level</strong><br>if it's equipped, <strong>1.3x</strong> <strong class='color-d'>damage</strong> per ${powerUps.orb.gun()} in your inventory${info}</span>`
+            return `<strong>1.4x</strong> <strong class='color-d'>damage</strong> per ${powerUps.orb.gun()}, but your equipped ${powerUps.orb.gun()}<br>cycles each level and you can't <strong>switch</strong>`
         },
+        // descriptionFunction() {
+        //     let info = ""
+        //     if (this.count > 0 && Number.isInteger(tech.buffedGun) && b.inventory.length) {
+        //         let gun = b.guns[b.inventory[tech.buffedGun]].name
+        //         info = `<br>this level: <strong>${(1.3 * Math.max(0, b.inventory.length)).toFixed(2)}x</strong> <strong class='color-d'>damage</strong> for <strong class="highlight">${gun}</strong>`
+        //     }
+        //     return `<span style = 'font-size:95%;'>a new ${powerUps.orb.gun()} in your inventory is <strong>chosen</strong> each <strong>level</strong><br>if it's equipped, <strong>1.3x</strong> <strong class='color-d'>damage</strong> per ${powerUps.orb.gun()} in your inventory${info}</span>`
+        // },
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -807,7 +810,7 @@ const tech = {
     },
     {
         name: "generalist",
-        description: `spawn <strong>7</strong> ${powerUps.orb.gun()}, but you can't <strong>switch</strong> ${powerUps.orb.gun()}<br>your equipped ${powerUps.orb.gun()} cycles after each level`,
+        description: `spawn <strong>7</strong> ${powerUps.orb.gun()}, but your equipped ${powerUps.orb.gun()}<br>cycles each level and you can't <strong>switch</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -815,9 +818,9 @@ const tech = {
         isInstant: true,
         isBadRandomOption: true,
         allowed() {
-            return (b.inventory.length < b.guns.length - 5) && (b.inventory.length > 1)
+            return (b.inventory.length < b.guns.length - 5) && b.inventory.length > 1
         },
-        requires: "at least 2 guns, at least 5 unclaimed guns",
+        requires: "you have at least 2 guns and 5 unclaimed guns",
         effect() {
             tech.isGunCycle = true;
             for (let i = 0; i < 7; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "gun");
@@ -982,7 +985,7 @@ const tech = {
             if (this.count === 0) this.gun = Math.floor(Math.random() * (b.guns.length - 1)) //don't pick laser
             return `<strong>2x</strong> <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)} for <strong class='color-g'>${b.guns[this.gun].name}</strong>`
         },
-        maxCount: 9,
+        maxCount: 1,
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
@@ -1432,7 +1435,7 @@ const tech = {
         name: "zoospore vector",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Disease_vector' class="link">zoospore vector</a>`,
         descriptionFunction() {
-            return `after mobs <strong>die</strong> there is a <strong>10%</strong> chance<br>they grow ${b.guns[6].nameString('s')}`
+            return `after mobs <strong>die</strong> there is a <strong>13%</strong> chance<br>they grow ${b.guns[6].nameString('s')}`
         },
         // description: "after mobs <strong>die</strong><br>they have a <strong>+10%</strong> chance to grow <strong class='color-p' style='letter-spacing: 2px;'>spores</strong>",
         maxCount: 9,
@@ -1444,7 +1447,7 @@ const tech = {
         },
         requires: "no other mob death tech",
         effect() {
-            tech.sporesOnDeath += 0.1;
+            tech.sporesOnDeath += 0.13;
             // if (tech.isSporeWorm) {
             //     for (let i = 0; i < 4; i++) b.worm(m.pos)
             // } else {
@@ -2890,7 +2893,7 @@ const tech = {
     },
     {
         name: "overcharge",
-        description: "<strong>+88</strong> maximum <strong class='color-f'>energy</strong><br><strong>+4%</strong> <strong class='color-junk'>JUNK</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>",
+        description: "<strong>+100</strong> maximum <strong class='color-f'>energy</strong><br><strong>+5%</strong> <strong class='color-junk'>JUNK</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>",
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -2900,9 +2903,9 @@ const tech = {
         },
         requires: "",
         effect() {
-            tech.bonusEnergy += 0.88
+            tech.bonusEnergy += 1
             m.setMaxEnergy()
-            this.refundAmount += tech.addJunkTechToPool(0.04)
+            this.refundAmount += tech.addJunkTechToPool(0.05)
         },
         refundAmount: 0,
         remove() {
@@ -3063,7 +3066,7 @@ const tech = {
     {
         name: "stability",
         descriptionFunction() {
-            return `<strong>0.3x</strong> <strong class='color-defense'>damage taken</strong><br>while your <strong class='color-h'>health</strong> is at maximum`
+            return `<strong>0.2x</strong> <strong class='color-defense'>damage taken</strong><br>while your <strong class='color-h'>health</strong> is at maximum`
         },
         maxCount: 1,
         count: 0,
@@ -3103,7 +3106,7 @@ const tech = {
     {
         name: "control theory",
         descriptionFunction() {
-            return `<strong>1.5x</strong> <strong class='color-d'>damage</strong><br>while your <strong class='color-h'>health</strong> is at maximum`
+            return `<strong>2x</strong> <strong class='color-d'>damage</strong><br>while your <strong class='color-h'>health</strong> is at maximum`
         },
         maxCount: 1,
         count: 0,
@@ -3329,7 +3332,7 @@ const tech = {
     {
         name: "quenching",
         descriptionFunction() {
-            return `<strong>0.4x</strong> of ${powerUps.orb.heal()} over<strong class='color-h'>healing</strong><br>is added to <strong>maximum</strong> <strong class='color-h'>health</strong>`
+            return `<strong>0.5x</strong> of ${powerUps.orb.heal()} over<strong class='color-h'>healing</strong><br>is added to <strong>maximum</strong> <strong class='color-h'>health</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -3455,7 +3458,7 @@ const tech = {
             return true
         },
         requires: "",
-        rate: 0.06,
+        rate: 0.05,
         effect() {
             tech.interestRate += this.rate;
         },
@@ -4318,7 +4321,7 @@ const tech = {
     },
     {
         name: "replication",
-        description: "<strong>+10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+15%</strong> <strong class='color-junk'>JUNK</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>",
+        description: "<strong>+10%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>+10%</strong> <strong class='color-junk'>JUNK</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>",
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -4331,7 +4334,7 @@ const tech = {
             tech.duplicateChance += 0.1
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.1);
-            this.refundAmount += tech.addJunkTechToPool(0.15)
+            this.refundAmount += tech.addJunkTechToPool(0.10)
         },
         refundAmount: 0,
         remove() {
@@ -5532,7 +5535,7 @@ const tech = {
     },
     {
         name: "phase velocity",
-        description: "wave particles <strong>propagate</strong> faster as <strong>solids</strong><br><strong>1.4x</strong> wave <strong class='color-d'>damage</strong>",
+        description: "wave particles <strong>propagate</strong> faster as <strong>solids</strong><br><strong>1.5x</strong> wave <strong class='color-d'>damage</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -5584,11 +5587,11 @@ const tech = {
         requires: "wave",
         effect() {
             tech.waveBeamSpeed *= 0.75;
-            tech.waveBeamDamage += 0.3 * 0.4 //this sets base  wave damage
+            tech.waveBeamDamage *= 1.4 //this sets base  wave damage
         },
         remove() {
             tech.waveBeamSpeed = 11;
-            tech.waveBeamDamage = 0.3 //this sets base  wave damage
+            tech.waveBeamDamage = 0.4 //this sets base  wave damage
         }
     },
     {

@@ -1015,7 +1015,7 @@ const spawn = {
                                 return
                             }
                         }
-                        if (simulation.testing || simulation.difficultyMode > 5) {
+                        if (simulation.testing || simulation.difficultyMode > 6) {
                             unlockExit()
                             setTimeout(function () {
                                 simulation.inGameConsole(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
@@ -2704,7 +2704,10 @@ const spawn = {
                     this.isInvulnerable = false
                     this.damageReduction = this.startingDamageReduction
                     for (let i = 0; i < this.babyList.length; i++) {
-                        if (this.babyList[i].alive) this.babyList[i].damageReduction = this.startingDamageReduction
+                        if (this.babyList[i].alive) {
+                            this.babyList[i].isInvulnerable = false
+                            this.babyList[i].damageReduction = this.startingDamageReduction
+                        }
                     }
                 }
             } else if (this.invulnerabilityCountDown < 0) {
@@ -6022,7 +6025,7 @@ const spawn = {
                     simulation.drawList.push({
                         x: this.position.x,
                         y: this.position.y,
-                        radius: 3000,
+                        radius: 5000,
                         color: `rgba(0, 0, 0,${1 - 0.1 * i})`,
                         time: (i + 2) * 4
                     });

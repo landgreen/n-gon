@@ -1568,9 +1568,9 @@ summary {
 }
 
 .draw-lines4 {
-    stroke-dasharray: 300;
-    stroke-dashoffset: 300;
-    animation: dash 2.5s ease-in forwards;
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+    animation: dash 3.5s ease-in forwards;
 }
 
 

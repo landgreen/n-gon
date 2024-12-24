@@ -782,7 +782,7 @@ const m = {
     defense() {
         let dmg = 1
         if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
-        if (tech.isMaxHealthDefense && m.health === m.maxHealth) dmg *= 0.3
+        if (tech.isMaxHealthDefense && m.health === m.maxHealth) dmg *= 0.2
         if (tech.isDiaphragm) dmg *= 0.55 + 0.35 * Math.sin(m.cycle * 0.0075);
         if (tech.isZeno) dmg *= 0.15
         if (tech.isFieldHarmReduction) dmg *= 0.6
@@ -1773,7 +1773,7 @@ const m = {
         tungsten() {
             m.hardLandCDScale = 2
             m.hardLanding = 60
-            m.coyoteCycles = 0
+            // m.coyoteCycles = 0
             m.isAltSkin = true
             m.color = {
                 hue: 210,

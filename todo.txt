@@ -1,16 +1,44 @@
 ******************************************************** NEXT PATCH **************************************************
 
-reworked focuser mobs to fire blue energy draining laser instead of charging player
+new level corridor
+  new level element fizzler - it removes blocks
+interferometer has wider platforms, a few helpful blocks, and fewer mobs
+level constraints are announced in console
+
+foam gun no longer pushes the player back when firing
+wave gun buffs
+  1.2x base damage
+  1.1x base ammo
+  0.1->0.13x speed in map
+  0.25->0.30x speed in blocks
+  tech: phase velocity 1.4->1.5x damage
+pigeonhole principle gives 1.3->1.4 damage per gun
+  you can no longer switch guns, your gun cycles each level
+quenching 0.4->0.5x overheal converts into max health
+tungsten carbide no longer has reduced coyote cycles
+control theory 1.5->2x damage at max health
+stability 0.3->0.2 damage taken at max health
+overcharge +88->100 max energy, 4->5% JUNK
+zoospore vector 10->13% chance for spores on mob death
+replication 15->10% JUNK
+interest 6->5% of your power ups spawn each level
+
+updated "about" details menu
+  moved classic n-gon to here from settings
+  added links to community content in "about"
+    Are there more links I should add?
+  added an n-gon SVG head image
+
+bugs
+  fixed outline on splash screen doesn't sync right on safari browser
+  fixed possible lock out on training levels: "hold", "throw", "throwAt"
+    from losing block behind a door
+  shortcut sort buttons in experiment mode properly order tech without clicking sort
+  fixed/increased the horizontal velocity contribution for some guns
+    this makes bullets shot on moving platforms more realistic
+    nail gun, super balls, foam, harpoon
 
 ******************************************************** BUGS ********************************************************
-
-  couple reports of crashes from many-worlds
-    around level 5-7
-    for me crash on factory level 7
-    might be linked to having all the guns?
-    the crash was in matter.js something about collisions and undefined
-      maybe too many things were spawned in the same spot?
-    also occurs when you just gain many random tech in testing mode
 
 figure out why seeded random isn't making runs the same:
   shuffle is being used for a wide variety of things that don't need a seeded random
@@ -27,32 +55,17 @@ figure out why seeded random isn't making runs the same:
     doesn't seem to be determined by the seed...
     display future constraints in pause menu?
 
-at start of level game go stuck in pause state
-  no crash or bug report
-  occur level 8
-  after 2 levels of sending power ups to next level
-  auto drones grabbed a power up and game froze while in power up mode
-  running code to exit pause kinda worked
-
-ants marching outline on splash screen doesn't sync right on safari
-
 player can become crouched while not touching the ground if they exit the ground while crouched
 
 *********************************************************** TODO *****************************************************
 
-new level - something with movers, rubber band blocks
-button/switch input ideas from Cocoon game
-  pick up blocks that have a rubber band attached to a sliding switch
-    as player moves the vector direction of the rubber band will move the slider left or right
-    use this to open doors, move larger blocks, ...
-  switches that toggle left, right when player presses input.field while standing nearby
-    replace laser off on switch?
-    platform that rises up when player presses input.field while standing
-  How to instruct player to use field on these?
-    color with field #0ff
-    draw field effect
-    make it still functional without the field button
-
+tech: demineralization - 0.2x damage taken, but it slowly reduces effect
+  increase to full:
+    at start of level?
+    when you get the tech
+  decrease:
+    over time
+    at start of new level
 
 !!conformal - similar rules for small and big scales  linked to holographic principle
 !!holonomy - parallel transport of a vector leads to movement (applies to curved space)
@@ -288,16 +301,6 @@ make a lemming that walks until it hits a wall and then turns around robotically
   body or mob?
   can't be killed?
 
-use ephemera to replace some bad code
-  JUNK?
-  request animation stuff
-  simulation checks
-    damage and defense bars
-      disable and enable ephemera with settings
-
-perfect diamagnatism - invulnerable while field is active?
-  also drain energy while field is active?
-
 mobs attack mines
   mines periodically set all mobs to have player location to be the mine
     is this going to work with all mob vision types?
@@ -311,23 +314,8 @@ Tech: relativity
 wormhole tech - teleport away mobs with mass below 3 when they get too near the player
     short CD, small energy cost, only mobs below a mass
 
-extend brainstorming animation timers to fps cap?
-  will it be smoother or choppier?
-  anything else needs to hit limited fps on a high fps monitor?
-
-perfect diamagnatism could bounce on mobs, or even map elements?
-  could work like a rocket jump?
-
 tech: Bose Einstein condensate - freezes enemies in pilot wave, and drains some energy?
-
-make super balls with Zectron deflectable with field
-  but is there a simple way to do this?
-
-set mob health bar colors based on status effects?
-  make mob damage immunity a mob status effect?
   
-tech: rail gun area damage effect, but for all harpoon mode
-
 mob status effect - vulnerability
   mobs take 4x damage for __ time
     afterwards mobs go back to normal damage taken
@@ -1242,6 +1230,7 @@ possible names for tech
   De Sitter space - simple model of universe related to general relativity (mass-energy?)
   active optics - something with lasers?  maybe something with diffuse beam getting smaller
   Quintessence - related to dark energy
+  biofilm - something defensive?  related to spores?
 
 ******************************************************* DESIGN ******************************************************
 
@@ -1277,12 +1266,13 @@ n-gon fork
   kgurchiek.github.io/n-gon-portal-gun
   3xiondev.github.io/n-gon-upgraded
   coaldeficit.github.io/c-gon
-  c-rxxp-y.github.io/n-gon-enhanced
+  n-gon-enhanced.vercel.app
 
 bookmarlet
   github.com/Whyisthisnotavalable/n-scythe
   github.com/kgurchiek/n-gon-mobile
   github.com/kgurchiek/n-gon-controller
+
 text
   ngon.fandom.com/wiki/N-gon
   github.com/3xionDev/n-docs
