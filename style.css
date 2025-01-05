@@ -746,6 +746,18 @@ summary {
     background-color: rgba(255, 255, 255, 0.4);
 }
 
+.constraint-module {
+    line-height: 160%;
+    padding: 20px;
+    border-radius: 5px;
+    font-size: 1.2em;
+    font-family: monospace;
+    font-weight: 800;
+    text-align: center;
+    color: #624;
+    background-color: rgba(255, 240, 250, 1);
+}
+
 #right-HUD-constraint {
     position: absolute;
     top: 12px;
@@ -768,6 +780,39 @@ summary {
     transition: all 0.5s linear;
 }
 
+.constraint {
+    color: rgb(141, 23, 88);
+}
+
+.metallic-sparkle {
+    background: linear-gradient(90deg,
+            #c38aa6,
+            #e6c0d9,
+            #dca4c6,
+            #c38aa6,
+            #e6c0d9,
+            #dca4c6,
+            #c38aa6);
+    background-size: 200% 100%;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 4s infinite linear;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 #text-log {
     z-index: 2;
     position: absolute;
@@ -781,12 +826,6 @@ summary {
     background-color: rgba(255, 255, 255, 0.5);
     pointer-events: none;
     user-select: none;
-}
-
-.constraint {
-    color: rgb(141, 23, 88);
-    /* font-weight: 100; */
-    /* text-decoration: underline; */
 }
 
 .color-text {

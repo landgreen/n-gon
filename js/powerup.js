@@ -256,6 +256,8 @@ const powerUps = {
         powerUps.endDraft(type);
     },
     showDraft() {
+        simulation.isChoosing = true; //stops p from un pausing on key down
+
         //disable clicking for 1/2 a second to prevent mistake clicks
         document.getElementById("choose-grid").style.pointerEvents = "none";
         document.body.style.cursor = "none";
@@ -264,7 +266,6 @@ const powerUps = {
             document.getElementById("choose-grid").style.pointerEvents = "auto";
             document.getElementById("choose-grid").style.transitionDuration = "0s";
         }, 400);
-        simulation.isChoosing = true; //stops p from un pausing on key down
 
         if (!simulation.paused) {
             if (tech.isNoDraftPause || level.isNoPause) {
@@ -909,7 +910,7 @@ const powerUps = {
         }
     },
     cancelText(type) {
-        if (tech.isSuperDeterminism) {
+        if (tech.isSuperDeterminism || type === "constraint") {
             return `<div></div>`
         } else if (tech.isCancelTech && tech.cancelTechCount === 0) {
             return `<div class='cancel-card sticky' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;"><span class="color-randomize">randomize</span></div>`
@@ -940,7 +941,9 @@ const powerUps = {
     },
     researchAndCancelText(type) {
         let text = `<div class='research-cancel'>`
-        if (type === "entanglement") {
+        if (type === "constraint") {
+            return
+        } else if (type === "entanglement") {
             text += `<span class='research-card entanglement flipX' style="width: 275px;" onclick='powerUps.endDraft("${type}",true)'><span style="letter-spacing: 6px;">entanglement</span></span>`
         } else if (tech.isJunkResearch && powerUps.research.currentRerollCount < 2) {
             text += `<span onclick="powerUps.research.use('${type}')" class='research-card' style="width: 275px;float: left;">` // style = "margin-left: 192px; margin-right: -192px;"
@@ -1008,6 +1011,12 @@ const powerUps = {
         return text
     },
     hideStyle: `style="height:auto; border: none; background-color: transparent;"`,
+    constraintText(choose, click) {
+        return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+        <div class="card-text">
+        <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div>
+        ${m.fieldUpgrades[choose].description}</div></div>`
+    },
     gunText(choose, click) {
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/gun/${b.guns[choose].name}.webp');"`
         return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}" ${style}>
@@ -1607,6 +1616,8 @@ const powerUps = {
                     }
                 }
             }
+            powerUps.spawn(x + 25, y - 25, "ammo", false);
+            if (simulation.difficultyMode > 5) powerUps.spawn(x - 25, y - 50, "ammo", false);
             if (tech.isAddRemoveMaxHealth) {
                 powerUps.spawn(x + 20, y, "tech", false)
                 powerUps.spawn(x - 20, y, "research", false)

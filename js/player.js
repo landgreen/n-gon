@@ -782,9 +782,9 @@ const m = {
     defense() {
         let dmg = 1
         if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
-        if (tech.isMaxHealthDefense && m.health === m.maxHealth) dmg *= 0.2
+        if (tech.isMaxHealthDefense && m.health === m.maxHealth) dmg *= 0.1
         if (tech.isDiaphragm) dmg *= 0.55 + 0.35 * Math.sin(m.cycle * 0.0075);
-        if (tech.isZeno) dmg *= 0.15
+        if (tech.isZeno) dmg *= 0.2
         if (tech.isFieldHarmReduction) dmg *= 0.6
         if (tech.isHarmDarkMatter) dmg *= (tech.isMoveDarkMatter || tech.isNotDarkMatter) ? 0.25 : 0.4
         if (tech.isImmortal) dmg *= 0.7
@@ -795,12 +795,20 @@ const m = {
         if (tech.isHarmReduce && input.field) dmg *= 0.1
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.05
         if (tech.isBotArmor) dmg *= 0.96 ** b.totalBots()
-        if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.3;
+        if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.4;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.isTurret && m.crouch) dmg *= 0.3;
         if (tech.isFirstDer && b.inventory[0] === b.activeGun) dmg *= 0.85 ** b.inventory.length
         // if (tech.isLowHealthDefense) dmg *= Math.pow(0.3, Math.max(0, (tech.isEnergyHealth ? m.maxEnergy - m.energy : m.maxHealth - m.health)))
         if (tech.isLowHealthDefense) dmg *= Math.pow(0.2, Math.max(0, 1 - (tech.isEnergyHealth ? m.energy / m.maxEnergy : m.health / m.maxHealth)))
+        if (tech.isRemineralize) {
+            //reduce mineral percent based on time since last check
+            const seconds = (simulation.cycle - tech.mineralLastCheck) / 60
+            tech.mineralLastCheck = simulation.cycle
+            tech.mineralDamage = 1 + (tech.mineralDamage - 1) * Math.pow(0.9, seconds);
+            tech.mineralDamageReduction = 1 - (1 - tech.mineralDamageReduction) * Math.pow(0.9, seconds);
+            dmg *= tech.mineralDamageReduction
+        }
         // return tech.isEnergyHealth ? Math.pow(dmg, 0.7) : dmg //defense has less effect
         // dmg *= m.fieldHarmReduction
         return dmg * m.fieldHarmReduction
@@ -2736,10 +2744,10 @@ const m = {
         m.fieldThreshold = Math.cos((m.fieldArc) * Math.PI)
     },
     setHoldDefaults() {
-        if (tech.isFreeWormHole && m.fieldMode !== 9) { //not wormhole
-            const removed = tech.removeTech("charmed baryon") //neutronum can get player stuck so it has to be removed if player has wrong field
-            if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
-        }
+        // if (tech.isFreeWormHole && m.fieldMode !== 9) { //not wormhole
+        //     const removed = tech.removeTech("charmed baryon") //neutronum can get player stuck so it has to be removed if player has wrong field
+        //     if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
+        // }
         if (tech.isNeutronium && m.fieldMode !== 3) { //not negative mass field
             const removed = tech.removeTech("neutronium") //neutronum can get player stuck so it has to be removed if player has wrong field
             if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
@@ -2835,7 +2843,7 @@ const m = {
         } else if (m.fieldMode === 8) {
             m.fieldRegen = 0.001667 //10 energy per second pilot wave
         } else if (m.fieldMode === 9) {
-            m.fieldRegen = 0.00117 //7 energy per second wormhole
+            m.fieldRegen = 0.001334 //8 energy per second wormhole
         } else if (m.fieldMode === 10) {
             m.fieldRegen = 0.0015 //9 energy per second grappling hook
         } else {
@@ -4011,14 +4019,14 @@ const m = {
     {
         name: "negative mass",
         //<br>hold <strong class='color-block'>blocks</strong> as if they have a lower <strong>mass</strong>
-        description: `use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br><strong>0.4x</strong> <strong class='color-defense'>damage taken</strong><br><strong>6</strong> <strong class='color-f'>energy</strong> per second`,
+        description: `use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br><strong>0.5x</strong> <strong class='color-defense'>damage taken</strong><br><strong>6</strong> <strong class='color-f'>energy</strong> per second`,
         fieldDrawRadius: 0,
         effect: () => {
             m.fieldFire = true;
             m.holdingMassScale = 0.01; //can hold heavier blocks with lower cost to jumping
             m.fieldMeterColor = "#333"
             m.eyeFillColor = m.fieldMeterColor
-            m.fieldHarmReduction = 0.4;
+            m.fieldHarmReduction = 0.5;
             m.fieldDrawRadius = 0;
 
             m.hold = function () {
@@ -4032,8 +4040,7 @@ const m = {
                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                     m.grabPowerUp();
                     m.lookForPickUp();
-                    const DRAIN = 0.00035
-                    if (m.energy > DRAIN && m.fieldCDcycle < m.cycle) {
+                    if (m.energy > tech.negativeMassCost && m.fieldCDcycle < m.cycle) {
                         if (tech.isFlyFaster) {
                             //look for nearby objects to make zero-g
                             function moveThis(who, range, mag = 1.06) {
@@ -4065,13 +4072,13 @@ const m = {
                                 moveThis(powerUp, this.fieldDrawRadius, 0);
                                 moveThis(body, this.fieldDrawRadius, 0);
                             } else if (input.up) { //up
-                                m.energy -= 5 * DRAIN;
+                                m.energy -= 5 * tech.negativeMassCost;
                                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 1100 * 0.03;
                                 player.force.y -= 2.25 * player.mass * simulation.g;
                                 moveThis(powerUp, this.fieldDrawRadius, 1.8);
                                 moveThis(body, this.fieldDrawRadius, 1.8);
                             } else {
-                                m.energy -= DRAIN;
+                                m.energy -= tech.negativeMassCost;
                                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 800 * 0.03;
                                 player.force.y -= 1.07 * player.mass * simulation.g; // slow upward drift
                                 moveThis(powerUp, this.fieldDrawRadius);
@@ -4109,13 +4116,13 @@ const m = {
                                 verticalForce(powerUp, this.fieldDrawRadius, 0.7);
                                 verticalForce(body, this.fieldDrawRadius, 0.7);
                             } else if (input.up) { //up
-                                m.energy -= 5 * DRAIN;
+                                m.energy -= 5 * tech.negativeMassCost;
                                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 850 * 0.03;
                                 player.force.y -= 1.45 * player.mass * simulation.g;
                                 verticalForce(powerUp, this.fieldDrawRadius, 1.38);
                                 verticalForce(body, this.fieldDrawRadius, 1.38);
                             } else {
-                                m.energy -= DRAIN;
+                                m.energy -= tech.negativeMassCost;
                                 this.fieldDrawRadius = this.fieldDrawRadius * 0.97 + 650 * 0.03;
                                 player.force.y -= 1.07 * player.mass * simulation.g; // slow upward drift
                                 verticalForce(powerUp, this.fieldDrawRadius);
@@ -5051,7 +5058,7 @@ const m = {
                         }
                     }
                     if (tech.isCloakStun) { //stun nearby mobs after exiting cloak
-                        let isMobsAround = false
+                        // let isMobsAround = false
                         const stunRange = m.fieldDrawRadius * 1.25
                         // const drain = 0.01
                         // if (m.energy > drain) {
@@ -5358,7 +5365,7 @@ const m = {
     {
         name: "wormhole",
         //<strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br>
-        description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>7</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+        description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>8</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
         drain: 0,
         effect: function () {
             m.fieldMeterColor = "#bbf" //"#0c5"
@@ -5454,8 +5461,10 @@ const m = {
                                             if (tech.isWormholeWorms) { //pandimensional spermia
                                                 b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                                 Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
-                                                // for (let i = 0, len = Math.ceil(1.25 * Math.random()); i < len; i++) {
-                                                // }
+                                                if (Math.random() < 0.5) { //chance for a second worm
+                                                    b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
+                                                    Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
+                                                }
                                             }
                                             break
                                         }
@@ -5475,13 +5484,12 @@ const m = {
                                         if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                         if (m.fieldMode === 0 || m.fieldMode === 9) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                         if (tech.isWormholeWorms) { //pandimensional spermia
-                                            b.worm(Vector.add(m.hole.pos1, Vector.rotate({
-                                                x: m.fieldRange * 0.4,
-                                                y: 0
-                                            }, 2 * Math.PI * Math.random())))
+                                            b.worm(Vector.add(m.hole.pos1, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                             Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), 5));
-                                            // for (let i = 0, len = Math.ceil(1.25 * Math.random()); i < len; i++) {
-                                            // }
+                                            if (Math.random() < 0.5) { //chance for a second worm
+                                                b.worm(Vector.add(m.hole.pos1, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
+                                                Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), 5));
+                                            }
                                         }
                                         break
                                     }
@@ -6239,8 +6247,8 @@ const m = {
                                         y: mob[k].velocity.y - 8 * Math.sin(angle)
                                     });
 
-                                    if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].isDropPowerUp && m.energy > 0.34 * m.maxEnergy) {
-                                        m.energy -= 0.33 * Math.max(m.maxEnergy, m.energy)
+                                    if (tech.isAnnihilation && !mob[k].shield && !mob[k].isShielded && !mob[k].isBoss && mob[k].isDropPowerUp && m.energy > 0.08) {
+                                        m.energy -= 0.08 //* Math.max(m.maxEnergy, m.energy) //0.33 * m.energy
                                         m.immuneCycle = 0; //player doesn't go immune to collision damage
                                         mob[k].death();
                                         simulation.drawList.push({ //add dmg to draw queue

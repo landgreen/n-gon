@@ -2180,7 +2180,7 @@ const b = {
             const d = Vector.sub(path[path.length - 1], path[path.length - 2]);
             const nn = Vector.mult(n, 2 * Vector.dot(d, n));
             const r = Vector.normalise(Vector.sub(d, nn));
-            path[path.length] = Vector.add(Vector.mult(r, 3000), path[path.length - 1]);
+            path[path.length] = Vector.add(Vector.mult(r, 5000), path[path.length - 1]);
         };
 
         checkForCollisions();
@@ -3929,7 +3929,7 @@ const b = {
         bullet[me] = Bodies.rectangle(pos.x, pos.y, 25 * tech.bulletSize, 2 * tech.bulletSize, b.fireAttributes(Math.atan2(velocity.y, velocity.x)));
         Matter.Body.setVelocity(bullet[me], velocity);
         Composite.add(engine.world, bullet[me]); //add bullet to world
-        bullet[me].endCycle = simulation.cycle + 60 + 18 * Math.random();
+        bullet[me].endCycle = simulation.cycle + 80 + 18 * Math.random();
         bullet[me].dmg = tech.isNailRadiation ? 0 : dmg
         bullet[me].beforeDmg = function (who) { //beforeDmg is rewritten with ice crystal tech
             if (tech.isNailRadiation) mobs.statusDoT(who, dmg * (tech.isFastRadiation ? 1.3 : 0.44), tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
@@ -6744,8 +6744,12 @@ const b = {
             isDischarge: false,
             knockBack: 0.0005, //set in tech: cavitation
             applyKnock(velocity) {
-                player.force.x -= this.knockBack * velocity.x
-                player.force.y -= 2 * this.knockBack * velocity.y
+                player.force.x -= 0.7 * this.knockBack * velocity.x
+                if (velocity.y > 0) {
+                    player.force.y -= 4.3 * this.knockBack * velocity.y
+                } else {
+                    player.force.y -= this.knockBack * velocity.y
+                }
             },
             chooseFireMethod() {
                 if (tech.isFoamPressure) {
@@ -6771,7 +6775,7 @@ const b = {
                 }
                 const position = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                 b.foam(position, Vector.rotate(velocity, spread), radius)
-                // this.applyKnock(velocity)
+                this.applyKnock(velocity)
                 m.fireCDcycle = m.cycle + Math.floor(1.5 * b.fireCDscale);
             },
             doCharges() {
@@ -6798,7 +6802,7 @@ const b = {
                             y: m.pos.y + 30 * Math.sin(m.angle)
                         }
                         b.foam(position, Vector.rotate(velocity, spread), radius)
-                        // this.applyKnock(velocity)
+                        this.applyKnock(velocity)
                         this.charge -= 0.75
                         m.fireCDcycle = m.cycle + 2; //disable firing and adding more charge until empty
                     } else if (!input.fire) {
@@ -6826,7 +6830,7 @@ const b = {
                 const position = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
 
                 b.foam(position, Vector.rotate(velocity, spread), radius)
-                // this.applyKnock(velocity)
+                this.applyKnock(velocity)
                 m.fireCDcycle = m.cycle + Math.floor(1.5 * b.fireCDscale);
                 this.charge += 1 + tech.isCapacitor
             },
@@ -7386,8 +7390,8 @@ const b = {
                     m.energy -= drain
                     const where = { x: m.pos.x + 20 * Math.cos(m.angle), y: m.pos.y + 20 * Math.sin(m.angle) }
                     b.laser(where, {
-                        x: where.x + 3000 * Math.cos(m.angle),
-                        y: where.y + 3000 * Math.sin(m.angle)
+                        x: where.x + 5000 * Math.cos(m.angle),
+                        y: where.y + 5000 * Math.sin(m.angle)
                     }, tech.laserDamage / b.fireCDscale * this.lensDamage);
                 }
             },

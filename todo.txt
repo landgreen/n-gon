@@ -1,42 +1,65 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new level corridor
-  new level element fizzler - it removes blocks
-interferometer has wider platforms, a few helpful blocks, and fewer mobs
-level constraints are announced in console
+tech: demineralization - after mobs die gain 0.85x damage taken, effect stacks, but fades 10% every second
+tech: remineralization - after mobs die gain 1.08x damage, effect stacks, but fades 10% every second
+tech: equivalence principle - negative mass field doesn't cost energy
+new JUNK tech: aerodynamics
 
-foam gun no longer pushes the player back when firing
-wave gun buffs
-  1.2x base damage
-  1.1x base ammo
-  0.1->0.13x speed in map
-  0.25->0.30x speed in blocks
-  tech: phase velocity 1.4->1.5x damage
-pigeonhole principle gives 1.3->1.4 damage per gun
-  you can no longer switch guns, your gun cycles each level
-quenching 0.4->0.5x overheal converts into max health
-tungsten carbide no longer has reduced coyote cycles
-control theory 1.5->2x damage at max health
-stability 0.3->0.2 damage taken at max health
-overcharge +88->100 max energy, 4->5% JUNK
-zoospore vector 10->13% chance for spores on mob death
-replication 15->10% JUNK
-interest 6->5% of your power ups spawn each level
+interferometer
+  slower elevator and lasers 
+  wider side ledges
+  large laser blocking blocks
+flocculation
+  fewer mobs
+  it's easier to get out of the slime
+pavilion
+  move vanish elements
+  easier traversal
+  secret tunnel
+  removed debris, but added power ups and blocks
+corridor
+  limited to bosses that don't interact with the movers poorly
+gravitron, substructure, corridor, interferometer
+  added more heal and ammo power ups to match other levels
+because some newer levels are zoomed out more
+  laser max range is 3000->5000
+  nails last 1/3 of a second longer
+bosses spawn an extra ammo power up
+  and 2 extra ammo on the hardest 2 difficulties
+slasher mob's laserSwords will now damage a cloaked player
+constraint announcement text looks more like computer code style to match game theme
 
-updated "about" details menu
-  moved classic n-gon to here from settings
-  added links to community content in "about"
-    Are there more links I should add?
-  added an n-gon SVG head image
+foam recoil is back: 1->0.7x horizontal force and 2->4.3x vertical up force
+  this makes it less annoying to horizontally and easier to kinda fly/float
+negative mass field damage reduction 0.4->0.5x
+holographic principle no longer slows player movement
+  added 2 research cost
+fermion gives 6->5 seconds of invulnerability after mobs die
+stability 0.2->0.1x damage taken at max health
+non-Newtonian armor 0.3->0.4x damage taken after collisions
+Zeno's paradox 0.15->0.2x damage taken
+annihilation energy cost 10->8 to destroy mobs after collisions
+radiative equilibrium damage is 3->4x for 8->4 seconds
+aerostat can be taken 1->3 times
+dynamic equilibrium damage increased by 6->8x damage per last damage taken
+aerostat no longer has 0.9x damage for being on the ground
+launch system 1.2->1.3x ammo for missiles
+research says that repeatedly entering alternate realities builds up some positive effects
+  Hilbert space 4x->3x damage
+  Ψ(t) collapse 6->4 research on boss death
+transdimensional worms: 50% chance for a second worm per block in wormhole
+wormhole 7->8 energy regen per second
+hidden-variable theory 1.15->1.2 damage after choosing a field tech
+ghoster mobs are less likely to get knocked far away from the player for long periods of time
 
-bugs
-  fixed outline on splash screen doesn't sync right on safari browser
-  fixed possible lock out on training levels: "hold", "throw", "throwAt"
-    from losing block behind a door
-  shortcut sort buttons in experiment mode properly order tech without clicking sort
-  fixed/increased the horizontal velocity contribution for some guns
-    this makes bullets shot on moving platforms more realistic
-    nail gun, super balls, foam, harpoon
+bug fixes
+  dynamic equilibrium was set to 100 times higher frequency then normal
+  when constraints hide health bar's it's now hidden in the pause menu
+  mobs aiming at cloaked player
+    snakeBoss more intelligently chases player for a few seconds
+    pulsarBoss aims at player's history 3 seconds in past
+    pulsar will not stop firing
+      but it will still not fire at cloaked player
 
 ******************************************************** BUGS ********************************************************
 
@@ -59,14 +82,20 @@ player can become crouched while not touching the ground if they exit the ground
 
 *********************************************************** TODO *****************************************************
 
-tech: demineralization - 0.2x damage taken, but it slowly reduces effect
-  increase to full:
-    at start of level?
-    when you get the tech
-  decrease:
-    over time
-    at start of new level
+tech synergy ideas
+  a tech that spawns mobs that the player can use to trigger mob death tech
 
+wormhole field needs a buff
+  it's good on wide open maps, but it needs a defensive effect on more closed maps
+  fix?
+    increase energy regen?
+    new tech?
+      a way to make more blocks
+        the block can feed into worms/coupling energy 
+
+  
+tech:  - remove the research costs of all tech
+  there's about 15 tech with a research cost
 !!conformal - similar rules for small and big scales  linked to holographic principle
 !!holonomy - parallel transport of a vector leads to movement (applies to curved space)
   when far away from your wormhole regenerate 1% of your max energy per second
@@ -178,6 +207,31 @@ improve new player experience
 -40% foam ammo gain
 When foam is in an explosion it also explodes with size proportional to the size of the foam bubble
 Requires foam, explosion source, not aerogel
+
+new level similar to ash tray maze
+  !!not sure how this works with theme (most levels are locations that have industrial stuff)
+  this might work as another line of sight level?
+    could be fine without line of sight if rooms don't exist until they open up?
+  where to put in game sequence?
+  watch a run through   https://www.youtube.com/watch?v=nudSXUMBEV4
+    close off doors as player gets close
+    open up doors as player gets close
+    holes in the floor
+    slide large walls back to open up levels below
+    show a zone, then close it off, but eventually reveal it later
+    rise up pillars during combat
+    small maze rooms, 1-2 really huge rooms, long corridors, medium combat rooms
+  triggers for changes
+    clearing mobs in a zone
+      or time based if player is too slow
+    player gets close to a zone
+  make map elements shift around as player moves through the game
+    start with map elements filling everywhere and slow open up new zones
+  need a cool way to animate adding and removing map elements
+    maybe for the entire level redraw the map every 15 cycles?
+      simulation.draw.setPaths() //update map graphics
+    slide map around
+    small map squares that each add in sequentially
 
 Cosmological natural selection:  do something with black holes
   spawn black hole mobs
@@ -1210,7 +1264,6 @@ possible names for tech
   amalgam, amalgamation - the action, process, or result of combining or uniting. 
   thermoplastic - the stuff in 3-D printers, use for molecular assembler tech
   ergosphere - region of a spinning black hole that might allow FTL or alternate realities.
-  equivalence principle - gravity and acceleration are the same
   Casimir effect - attractive force between two close conductive plates
   difference engine - early calculator/computer
   cyanoacrylate - superglue use for a slowing effect?
@@ -1255,24 +1308,3 @@ list of powerful synergies
   electronegativity and high energy?
     electronegativity + anyon + duplication + Maxwells demon + interest + pair production
   chain reaction + invulnerable + Abelian group + parasitism = clear all mobs on level
-
-
-************************************************* COMMUNITY LINKS *************************************************
-
-load old commits
-  www.cornbread2100.com/n-gon-loader
-
-n-gon fork
-  kgurchiek.github.io/n-gon-portal-gun
-  3xiondev.github.io/n-gon-upgraded
-  coaldeficit.github.io/c-gon
-  n-gon-enhanced.vercel.app
-
-bookmarlet
-  github.com/Whyisthisnotavalable/n-scythe
-  github.com/kgurchiek/n-gon-mobile
-  github.com/kgurchiek/n-gon-controller
-
-text
-  ngon.fandom.com/wiki/N-gon
-  github.com/3xionDev/n-docs

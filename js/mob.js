@@ -1234,6 +1234,30 @@ const mobs = {
                         m.energy -= 0.05;
                         if (m.energy < 0) m.energy = 0
                     }
+
+
+
+                    if (tech.isRemineralize) {
+                        //reduce mineral percent based on time since last check
+                        const seconds = (simulation.cycle - tech.mineralLastCheck) / 60
+                        tech.mineralLastCheck = simulation.cycle
+                        tech.mineralDamageReduction = 1 - (1 - tech.mineralDamageReduction) * Math.pow(0.9, seconds);
+                        tech.mineralDamage = 1 + (tech.mineralDamage - 1) * Math.pow(0.9, seconds);
+                        //apply mineral damage reduction
+                        tech.mineralDamageReduction *= 0.85
+                    }
+                    if (tech.isDemineralize) {
+                        //reduce mineral percent based on time since last check
+                        const seconds = (simulation.cycle - tech.mineralLastCheck) / 60
+                        tech.mineralLastCheck = simulation.cycle
+                        tech.mineralDamageReduction = 1 - (1 - tech.mineralDamageReduction) * Math.pow(0.9, seconds);
+                        tech.mineralDamage = 1 + (tech.mineralDamage - 1) * Math.pow(0.9, seconds);
+                        //apply mineral damage
+                        tech.mineralDamage *= 1.08
+                    }
+
+
+
                     powerUps.spawnRandomPowerUp(this.position.x, this.position.y);
                     m.lastKillCycle = m.cycle; //tracks the last time a kill was made, mostly used in simulation.checks()
                     mobs.mobDeaths++
@@ -1253,9 +1277,11 @@ const mobs = {
                         } else {
                             for (let i = 0; i < amount; i++) b.spore(this.position)
                         }
-                    } else if (tech.isExplodeMob) {
+                    }
+                    if (tech.isExplodeMob) {
                         b.explosion(this.position, Math.min(700, Math.sqrt(this.mass + 6) * (30 + 60 * Math.random())))
-                    } else if (tech.nailsDeathMob) {
+                    }
+                    if (tech.nailsDeathMob) {
                         b.targetedNail(this.position, tech.nailsDeathMob, 39 + 6 * Math.random())
                     }
                     if (tech.isBotSpawnerReset) {
@@ -1269,7 +1295,7 @@ const mobs = {
                         this.leaveBody = false; // no body since it turned into the bot
                     }
                     if (tech.isMobDeathImmunity) {
-                        const immuneTime = 360
+                        const immuneTime = 300
                         if (m.immuneCycle < m.cycle + immuneTime) m.immuneCycle = m.cycle + immuneTime; //player is immune to damage
                     }
                     if (tech.isAddRemoveMaxHealth) {

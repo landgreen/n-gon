@@ -497,7 +497,7 @@ const build = {
 <span style="float: right;"><strong class='color-d'>level</strong> ${((m.dmgScale)).toPrecision(4)}x</span>
 <br><strong class='color-defense'>damage taken</strong> ${(m.defense()).toPrecision(4)}x
 <span style="float: right;"><strong class='color-defense'>level</strong> ${(simulation.dmgScale).toPrecision(4)}x</span>
-<br><strong class='color-h'>health</strong> (${(m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
+<br><strong class='color-h'>health</strong> (${level.isHideHealth ? "null" : (m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
 <span style="float: right;">${powerUps.research.count} ${powerUps.orb.research()}</span>
 <br><strong class='color-f'>energy</strong> (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000 * level.isReducedRegen).toFixed(0)}/s)
 <span style="float: right;">${tech.totalCount} ${powerUps.orb.tech()}</span>

@@ -1,6 +1,6 @@
 //main object for spawning things in a level
 const spawn = {
-    nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "growBossCulture"],
+    nonCollideBossList: ["cellBossCulture", "bomberBoss", "powerUpBoss", "growBossCulture", "snakeBoss"],
     // other bosses: suckerBoss, laserBoss, tetherBoss, bounceBoss, sprayBoss, mineBoss, hopMotherBoss    //these need a particular level to work so they are not included in the random pool
     randomBossList: [
         "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
@@ -114,9 +114,9 @@ const spawn = {
             }
         }
     },
-    secondaryBossChance(x, y) {
+    secondaryBossChance(x, y, options = []) {
         if (simulation.difficultyMode > 2 && level.levelsCleared > 1) {
-            spawn.randomLevelBoss(x, y);
+            spawn.randomLevelBoss(x, y, options);
             powerUps.spawn(x - 30, y, "ammo");
             powerUps.spawn(x + 30, y, "ammo");
         } else {
@@ -3921,8 +3921,8 @@ const spawn = {
         }
         me.frictionStatic = 0;
         me.friction = 0;
-        me.memory = 240
-        me.seePlayerFreq = 55
+        me.memory = 900;
+        me.seePlayerFreq = 41
         me.delay = 5 + 2 * simulation.CDScale;//8 + 3 * simulation.CDScale;
         me.nextBlinkCycle = me.delay;
         me.JumpDistance = 0//set in redMode()
@@ -4082,21 +4082,18 @@ const spawn = {
                     move()
                 } else if (this.seePlayer.recall) { //chase player's history
                     this.lostPlayer();
-                    if (!m.isCloak) {
-                        for (let i = 0; i < 50; i++) { //if lost player lock onto a player location in history
+                    if (m.isCloak) {
+                        move(this.seePlayer.position) //go after where you last saw the player
+                    } else {
+                        for (let i = 0; i < 55; i++) { //if lost player lock onto a player location in history
                             let history = m.history[(m.cycle - 10 * i) % 600]
                             if (Matter.Query.ray(map, this.position, history.position).length === 0) {
-                                this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //cycles before mob falls a sleep
-                                this.seePlayer.position.x = history.position.x;
-                                this.seePlayer.position.y = history.position.y;
-                                this.seePlayer.yes = true;
-                                move()
+                                move(history.position) //go after where you last saw the player
                                 break
                             }
                         }
                     }
                 }
-
             }
             this.checkStatus();
             if (this.isInvulnerable) {
@@ -4170,7 +4167,7 @@ const spawn = {
         me.fire = function () {
             // this.armor();
             this.checkStatus();
-            if (!m.isCloak && !this.isStunned) {
+            if (!this.isStunned) {
                 if (this.isFiring) {
                     if (this.fireCycle > this.fireDelay) { //fire
                         this.isFiring = false
@@ -4221,7 +4218,9 @@ const spawn = {
                     }
                 } else { //aim at player
                     this.fireCycle++
-                    this.fireDir = Vector.normalise(Vector.sub(m.pos, this.position)); //set direction to turn to fire
+                    //if cloaked, aim at player's history from 3 seconds ago
+                    const whereIsPlayer = m.isCloak ? m.history[(m.cycle - 180) % 600].position : m.pos
+                    this.fireDir = Vector.normalise(Vector.sub(whereIsPlayer, this.position)); //set direction to turn to fire
                     //rotate towards fireAngle
                     const angle = this.angle + Math.PI / 2;
                     const c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
@@ -4233,7 +4232,7 @@ const spawn = {
                     } else if (this.fireCycle > 45) { //fire
                         unit = Vector.mult(Vector.normalise(Vector.sub(this.vertices[1], this.position)), this.distanceToPlayer() - 100)
                         this.fireTarget = Vector.add(this.vertices[1], unit)
-                        if (Vector.magnitude(Vector.sub(m.pos, this.fireTarget)) < 1000) { //if's possible for this to be facing 180 degrees away from the player, this makes sure that doesn't occur
+                        if (Vector.magnitude(Vector.sub(whereIsPlayer, this.fireTarget)) < 1000) { //if's possible for this to be facing 180 degrees away from the player, this makes sure that doesn't occur
                             Matter.Body.setAngularVelocity(this, 0)
                             this.fireLockCount = 0
                             this.isFiring = true
@@ -4277,7 +4276,7 @@ const spawn = {
             }, Vector.normalise(Vector.sub(this.fireTarget, this.position)));
             //distance between the target and the player's location
             if (
-                m.isCloak ||
+                // m.isCloak ||
                 dot > 0.03 || // not looking at target
                 Matter.Query.ray(map, this.fireTarget, this.position).length || Matter.Query.ray(body, this.fireTarget, this.position).length || //something blocking line of sight
                 Vector.magnitude(Vector.sub(m.pos, this.fireTarget)) > 1000 // distance from player to target is very far,  (this is because dot product can't tell if facing 180 degrees away)
@@ -5056,7 +5055,7 @@ const spawn = {
         me.laserSword = function (where, angle, length) {
             best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
             const look = { x: where.x + length * Math.cos(angle), y: where.y + length * Math.sin(angle) };
-            best = vertexCollision(where, look, m.isCloak ? [map] : [map, [playerBody, playerHead]]);
+            best = vertexCollision(where, look, [map, [playerBody, playerHead]]);
             if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                 m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for an extra second
                 m.damage(this.swordDamage);
@@ -5663,7 +5662,7 @@ const spawn = {
 
             best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
             const look = { x: where.x + this.swordRadius * Math.cos(angle), y: where.y + this.swordRadius * Math.sin(angle) };
-            best = vertexCollision(where, look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
+            best = vertexCollision(where, look, [map, body, [playerBody, playerHead]]);
 
             if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                 m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
@@ -5762,7 +5761,7 @@ const spawn = {
         me.laserSword = function (where, angle) {
             best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
             const look = { x: where.x + this.swordRadius * Math.cos(angle), y: where.y + this.swordRadius * Math.sin(angle) };
-            best = vertexCollision(where, look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
+            best = vertexCollision(where, look, [map, body, [playerBody, playerHead]]);
             if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                 m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
                 m.damage(this.swordDamage);
@@ -5854,7 +5853,7 @@ const spawn = {
         me.laserSword = function (where, angle) {
             best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
             const look = { x: where.x + this.swordRadius * Math.cos(angle), y: where.y + this.swordRadius * Math.sin(angle) };
-            best = vertexCollision(where, look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
+            best = vertexCollision(where, look, [map, body, [playerBody, playerHead]]);
             if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                 m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
                 m.damage(this.swordDamage);
@@ -5964,7 +5963,7 @@ const spawn = {
         me.laserSpear = function (where, angle) {
             best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
             const look = { x: where.x + this.swordRadius * Math.cos(angle), y: where.y + this.swordRadius * Math.sin(angle) };
-            best = vertexCollision(where, look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
+            best = vertexCollision(where, look, [map, body, [playerBody, playerHead]]);
 
             if (best.who && (best.who === playerBody || best.who === playerHead)) {
                 this.swordRadiusGrowRate = 1 / this.swordRadiusGrowRateInitial //!!!! this retracts the sword if it hits the player
@@ -6180,7 +6179,7 @@ const spawn = {
         mobs.spawn(x, y, 7, radius, "transparent");
         let me = mob[mob.length - 1];
         me.seeAtDistance2 = 500000;
-        me.accelMag = 0.00007 + 0.0001 * simulation.accelScale;
+        me.accelMag = 0.0002 + 0.0001 * simulation.accelScale;
         if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
         Matter.Body.setDensity(me, 0.0002); //normal is 0.001
         me.damageReduction = 0.1
@@ -6222,7 +6221,7 @@ const spawn = {
             if (this.health < 0.8) me.seeAtDistance2 = 2000000;
         }
         me.do = function () {
-            if (this.speed > 7) Matter.Body.setVelocity(this, { x: this.velocity.x * 0.8, y: this.velocity.y * 0.8 }); //cap max speed to avoid getting launched by deflection, explosion
+            if (this.speed > 6) Matter.Body.setVelocity(this, { x: this.velocity.x * 0.8, y: this.velocity.y * 0.8 }); //cap max speed to avoid getting launched by deflection, explosion
             this.seePlayerCheckByDistance();
             this.checkStatus();
             this.attraction();
@@ -7215,6 +7214,7 @@ const spawn = {
         me.do = function () {
             this.seePlayerByHistory(60);
             this.attraction();
+            if (this.distanceToPlayer2() > 9000000) this.attraction(); //extra attraction if far away
             this.checkStatus();
             this.eventHorizon = 950 + 250 * Math.sin(simulation.cycle * 0.005)
             if (!simulation.isTimeSkipping) {
