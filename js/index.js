@@ -12,9 +12,25 @@ Math.hash = s => {
 
 // document.getElementById("seed").placeholder = Math.initialSeed = Math.floor(Date.now() % 100000) //random every time:  just the time in milliseconds UTC
 
+function formatError(error, html = false) {
+    if (html) {
+        if (window.netscape) { // firefox
+            return `${error}<br>${error.stack.replace(/\n/g, '<br>')}`
+        } else {
+            return error.stack.replace(/\n/g, '<br>') || `${error} <u>${error.filename}:${error.lineno}</u>`
+        }
+    } else {
+        if (window.netscape) { // firefox
+            return `${error}\n${error.stack}`
+        } else {
+            return error.stack || `${error} ${error.filename}:${error.lineno}`
+        }
+    }
+}
+
 window.addEventListener('error', error => {
     // simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${error.message}  <u>${error.filename}:${error.lineno}</u>`)
-    simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${(error.stack && error.stack.replace(/\n/g, "<br>")) || (error.message + ` <u>${error.filename}:${error.lineno}</u>`)}`);
+    simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${formatError(error, true)}`);
 
 });
 
@@ -1891,6 +1907,30 @@ document.getElementById("control-testing").style.visibility = (localSettings.lor
 // document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
 input.controlTextUpdate()
 
+
+//**********************************************************************
+// import/export local settings
+//**********************************************************************
+function localSettingsImport() {
+    if (!localSettings.isAllowed) {
+        alert("localStorage is either disabled or your browser does not have the capability. Refer to your browser's support page for more information.")
+        return
+    }
+    let str = prompt("Paste your data string here:")
+    try {
+        localSettings = JSON.parse(atob(str))
+        console.log(localSettingsImported)
+    } catch (error) {
+        alert("error importing local settings:\n" + formatError(error))
+    }
+}
+function localSettingsExport() {
+    try {
+        prompt("Copy this and paste it somewhere to store it:", btoa(JSON.stringify(localSettings)))
+    } catch (error) {
+        alert("error exporting local settings:\n" + formatError(error))
+    }
+}
 
 //**********************************************************************
 // settings
