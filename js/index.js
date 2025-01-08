@@ -1814,98 +1814,100 @@ if (localStorageCheck()) {
     }
 }
 
-if (localSettings.isAllowed && !localSettings.isEmpty) {
-    console.log('restoring previous settings')
+function checkLocalSettings() {
+    if (localSettings.isAllowed && !localSettings.isEmpty) {
+        console.log('restoring previous settings')
 
-    if (localSettings.key) {
-        input.key = localSettings.key
+        if (localSettings.key) {
+            input.key = localSettings.key
+        } else {
+            input.setDefault()
+        }
+
+        if (localSettings.loreCount === undefined) {
+            localSettings.loreCount = 0
+            localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        }
+
+        simulation.isCommunityMaps = localSettings.isCommunityMaps
+        document.getElementById("community-maps").checked = localSettings.isCommunityMaps
+
+        if (localSettings.fpsCapDefault === undefined) localSettings.fpsCapDefault = 'max'
+        if (localSettings.personalSeeds === undefined) localSettings.personalSeeds = [];
+        if (localSettings.fpsCapDefault === 'max') {
+            simulation.fpsCapDefault = 999999999;
+        } else {
+            simulation.fpsCapDefault = Number(localSettings.fpsCapDefault)
+        }
+        document.getElementById("fps-select").value = localSettings.fpsCapDefault
+
+        if (!localSettings.banList) localSettings.banList = ""
+        if (localSettings.banList.length === 0 || localSettings.banList === "undefined") {
+            localSettings.banList = ""
+            localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        }
+        document.getElementById("banned").value = localSettings.banList
+
+        if (!localSettings.isLoreDoesNotNeedReset) {
+            localSettings.isLoreDoesNotNeedReset = true
+            localSettings.loreCount = 0; //this sets what conversation is heard
+            if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        }
+        if (localSettings.isHideImages === undefined) localSettings.isHideImages = true //default to hide images
+        document.getElementById("hide-images").checked = localSettings.isHideImages
+        // localSettings.isHideImages = true //no images
+
+        if (localSettings.isHideHUD === undefined) localSettings.isHideHUD = true
+        document.getElementById("hide-hud").checked = localSettings.isHideHUD
+
+        if (localSettings.difficultyCompleted === undefined) {
+            localSettings.difficultyCompleted = [null, false, false, false, false, false, false, false] //null because there isn't a difficulty zero
+            localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        }
+
+        if (localSettings.difficultyMode === undefined) localSettings.difficultyMode = "2"
+        simulation.difficultyMode = localSettings.difficultyMode
+        lore.setTechGoal()
+
+        if (localSettings.pauseMenuDetailsOpen === undefined) {
+            localSettings.pauseMenuDetailsOpen = [true, false, false, true]
+            localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        }
     } else {
+        console.log('setting default localSettings')
+        const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
+        localSettings = {
+            banList: "",
+            isAllowed: isAllowed,
+            personalSeeds: [],
+            isJunkExperiment: false,
+            isCommunityMaps: false,
+            difficultyMode: '2',
+            difficultyCompleted: [null, false, false, false, false, false, false, false],
+            fpsCapDefault: 'max',
+            runCount: 0,
+            isTrainingNotAttempted: true,
+            levelsClearedLastGame: 0,
+            loreCount: 0,
+            isLoreDoesNotNeedReset: false,
+            isHuman: false,
+            key: undefined,
+            isHideImages: true, //default to hide images
+            isHideHUD: false,
+            pauseMenuDetailsOpen: [true, false, false, true]
+        };
         input.setDefault()
-    }
-
-    if (localSettings.loreCount === undefined) {
-        localSettings.loreCount = 0
-        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-    }
-
-    simulation.isCommunityMaps = localSettings.isCommunityMaps
-    document.getElementById("community-maps").checked = localSettings.isCommunityMaps
-
-    if (localSettings.fpsCapDefault === undefined) localSettings.fpsCapDefault = 'max'
-    if (localSettings.personalSeeds === undefined) localSettings.personalSeeds = [];
-    if (localSettings.fpsCapDefault === 'max') {
-        simulation.fpsCapDefault = 999999999;
-    } else {
-        simulation.fpsCapDefault = Number(localSettings.fpsCapDefault)
-    }
-    document.getElementById("fps-select").value = localSettings.fpsCapDefault
-
-    if (!localSettings.banList) localSettings.banList = ""
-    if (localSettings.banList.length === 0 || localSettings.banList === "undefined") {
-        localSettings.banList = ""
-        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-    }
-    document.getElementById("banned").value = localSettings.banList
-
-    if (!localSettings.isLoreDoesNotNeedReset) {
-        localSettings.isLoreDoesNotNeedReset = true
-        localSettings.loreCount = 0; //this sets what conversation is heard
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        document.getElementById("community-maps").checked = localSettings.isCommunityMaps
+        simulation.isCommunityMaps = localSettings.isCommunityMaps
+        document.getElementById("hide-images").checked = localSettings.isHideImages
+        document.getElementById("fps-select").value = localSettings.fpsCapDefault
+        document.getElementById("banned").value = localSettings.banList
     }
-    if (localSettings.isHideImages === undefined) localSettings.isHideImages = true //default to hide images
-    document.getElementById("hide-images").checked = localSettings.isHideImages
-    // localSettings.isHideImages = true //no images
-
-    if (localSettings.isHideHUD === undefined) localSettings.isHideHUD = true
-    document.getElementById("hide-hud").checked = localSettings.isHideHUD
-
-    if (localSettings.difficultyCompleted === undefined) {
-        localSettings.difficultyCompleted = [null, false, false, false, false, false, false, false] //null because there isn't a difficulty zero
-        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-    }
-
-    if (localSettings.difficultyMode === undefined) localSettings.difficultyMode = "2"
-    simulation.difficultyMode = localSettings.difficultyMode
-    lore.setTechGoal()
-
-    if (localSettings.pauseMenuDetailsOpen === undefined) {
-        localSettings.pauseMenuDetailsOpen = [true, false, false, true]
-        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-    }
-} else {
-    console.log('setting default localSettings')
-    const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
-    localSettings = {
-        banList: "",
-        isAllowed: isAllowed,
-        personalSeeds: [],
-        isJunkExperiment: false,
-        isCommunityMaps: false,
-        difficultyMode: '2',
-        difficultyCompleted: [null, false, false, false, false, false, false, false],
-        fpsCapDefault: 'max',
-        runCount: 0,
-        isTrainingNotAttempted: true,
-        levelsClearedLastGame: 0,
-        loreCount: 0,
-        isLoreDoesNotNeedReset: false,
-        isHuman: false,
-        key: undefined,
-        isHideImages: true, //default to hide images
-        isHideHUD: false,
-        pauseMenuDetailsOpen: [true, false, false, true]
-    };
-    input.setDefault()
-    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-    document.getElementById("community-maps").checked = localSettings.isCommunityMaps
-    simulation.isCommunityMaps = localSettings.isCommunityMaps
-    document.getElementById("hide-images").checked = localSettings.isHideImages
-    document.getElementById("fps-select").value = localSettings.fpsCapDefault
-    document.getElementById("banned").value = localSettings.banList
+    document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
+    // document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
+    input.controlTextUpdate()
 }
-document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
-// document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
-input.controlTextUpdate()
 
 
 //**********************************************************************
@@ -1916,14 +1918,15 @@ function localSettingsImport() {
         alert("localStorage is either disabled or your browser does not have the capability. Refer to your browser's support page for more information.")
         return
     }
-    let str = prompt("Paste your data string here:")
     try {
-        localSettings = JSON.parse(atob(str))
-        console.log(localSettingsImported)
+        localSettings = JSON.parse(atob(prompt("Paste your data string here:")))
     } catch (error) {
         alert("error importing local settings:\n" + formatError(error))
+        return
     }
+    checkLocalSettings()
 }
+
 function localSettingsExport() {
     try {
         prompt("Copy this and paste it somewhere to store it:", btoa(JSON.stringify(localSettings)))
