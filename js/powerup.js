@@ -1653,6 +1653,7 @@ const powerUps = {
             if (b.inventory.length === 0) {
                 powerUps.spawn(x, y, "gun", false); //first gun
             } else if (tech.totalCount === 0) { //first tech
+                powerUps.spawn(x - 22, y - 50, "ammo", false); //some ammo
                 powerUps.spawn(x, y, "tech", false);
             } else if (b.inventory.length === 1) { //second gun or extra ammo
                 if (Math.random() < 0.4) {

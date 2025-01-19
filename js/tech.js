@@ -271,7 +271,6 @@ const tech = {
         if (tech.isImmunityDamage && m.immuneCycle > m.cycle) dmg *= 3
         if (tech.isPowerUpDamage) dmg *= 1 + 0.07 * powerUp.length
         if (tech.isDamageCooldown) dmg *= m.lastKillCycle + tech.isDamageCooldownTime > m.cycle ? 0.4 : 4
-        if (tech.isDamageAfterKillNoRegen && m.lastKillCycle + 300 > m.cycle) dmg *= 2
         if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.9
         if (tech.offGroundDamage && !m.onGround) dmg *= tech.offGroundDamage
         if (tech.isDilate) dmg *= 1.9 + 1.1 * Math.sin(m.cycle * 0.01)
@@ -1018,7 +1017,7 @@ const tech = {
     {
         name: "Pareto efficiency",
         descriptionFunction() {
-            return `all you ${powerUps.orb.gun()} randomly get<br><strong>5x</strong> or <strong>0.2x</strong> <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`
+            return `all your ${powerUps.orb.gun()} randomly get<br><strong>5x</strong> or <strong>0.2x</strong> <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`
         },
         maxCount: 1,
         count: 0,
@@ -1033,7 +1032,7 @@ const tech = {
 
             let options = []
             for (let i = 0; i < b.inventory.length; i++) options.push(b.inventory[i])
-            options = shuffle(options)
+            options.sort(() => Math.random() - 0.5);
             for (let i = 0; i < options.length; i++) {
                 const index = options[i]
                 const scale = (i < options.length / 2) ? 4 : 0.25
@@ -2758,7 +2757,7 @@ const tech = {
     },
     {
         name: "Pauli exclusion",
-        description: `for <strong>7</strong> seconds after mob <strong>collisions</strong><br>become <strong class="color-invulnerable">invulnerable</strong> and <em style="opacity: 0.3;">inhibit <strong class='color-f'>energy</strong> regen</em>`,
+        description: `for <strong>7</strong> seconds after mob <strong>collisions</strong><br>gain <strong class="color-invulnerable">invulnerbility</strong> and <em style="opacity: 0.3;">blocked <strong class='color-f'>energy</strong> regen</em>`,
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -2777,7 +2776,7 @@ const tech = {
     },
     {
         name: "spin-statistics theorem",
-        description: `for <strong>1.9</strong> seconds out of every <strong>7</strong> seconds<br>become <strong class="color-invulnerable">invulnerable</strong> and <em style="opacity: 0.3;">inhibit <strong class='color-f'>energy</strong> regen</em>`,
+        description: `for <strong>1.9</strong> seconds out of every <strong>7</strong> seconds<br>gain <strong class="color-invulnerable">invulnerbility</strong> and <em style="opacity: 0.3;">blocked <strong class='color-f'>energy</strong> regen</em>`,
         maxCount: 3,
         count: 0,
         frequency: 1,
@@ -2795,7 +2794,7 @@ const tech = {
     },
     {
         name: "fermion",
-        description: `for <strong>5</strong> seconds after mobs <strong>die</strong><br>become <strong class="color-invulnerable">invulnerable</strong> and <em style="opacity: 0.3;">inhibit <strong class='color-f'>energy</strong> regen</em>`,
+        description: `if a mob has <strong>died</strong> in the last <strong>5</strong> seconds<br>gain <strong class="color-invulnerable">invulnerbility</strong> and <em style="opacity: 0.3;">blocked <strong class='color-f'>energy</strong> regen</em>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3009,9 +3008,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return !tech.isDamageAfterKillNoRegen
+            return true
         },
-        requires: "not parasitism",
+        requires: "",
         effect() {
             tech.isCrouchRegen = true; //only used to check for requirements
             m.regenEnergy = function () {
@@ -3040,29 +3039,6 @@ const tech = {
         },
         remove() {
             tech.energySiphon = 0;
-        }
-    },
-    {
-        name: "parasitism",
-        description: "if a mob has <strong>died</strong> in the last <strong>5</strong> seconds<br><strong>2x</strong> <strong class='color-d'>damage</strong>, no passive <strong class='color-f'>energy</strong> generation",
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        allowed() {
-            return !tech.isCrouchRegen
-        },
-        requires: "not inductive charging",
-        effect() {
-            tech.isDamageAfterKillNoRegen = true;
-            m.regenEnergy = function () {
-                if (m.immuneCycle < m.cycle && (m.lastKillCycle + 300 < m.cycle) && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen * level.isReducedRegen;
-                if (m.energy < 0) m.energy = 0
-            }
-        },
-        remove() {
-            if (this.count) m.regenEnergy = m.regenEnergyDefault
-            tech.isDamageAfterKillNoRegen = false;
         }
     },
     {
@@ -4769,7 +4745,7 @@ const tech = {
             for (let i = 0, len = tech.tech.length; i < len; i++) { // spawn new tech power ups
                 if (tech.tech[i].count && !tech.tech[i].isInstant) pool.push(i)
             }
-            pool = shuffle(pool); //shuffles order of maps
+            pool.sort(() => Math.random() - 0.5);
             let removeCount = 0
             for (let i = 0, len = pool.length * 0.5; i < len; i++) removeCount += tech.removeTech(pool[i])
             this.damage = this.damagePerRemoved * removeCount
@@ -8965,22 +8941,31 @@ const tech = {
     },
     {
         name: "invariant",
-        description: "while placing your <strong class='color-worm'>wormhole</strong><br>use <strong class='color-f'>energy</strong> to <strong>pause</strong> time",
+        cost: 1,
+        descriptionFunction() {
+            return `use ${powerUps.orb.research(this.cost)}<br><strong>pause</strong> time while placing your <strong class='color-worm'>wormhole</strong>`
+        },
         isFieldTech: true,
         maxCount: 1,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 9 && !tech.isNoDraftPause
+            return m.fieldMode === 9 && !tech.isNoDraftPause && (build.isExperimentSelection || powerUps.research.count > this.cost - 1)
         },
         requires: "wormhole, not eternalism",
         effect() {
             tech.isWormHolePause = true
+            for (let i = 0; i < this.cost; i++) {
+                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+            }
         },
         remove() {
             if (tech.isWormHolePause && m.isTimeDilated) m.wakeCheck();
             tech.isWormHolePause = false
+            if (this.count) {
+                powerUps.research.changeRerolls(this.cost)
+            }
         }
     },
     {
@@ -9031,7 +9016,7 @@ const tech = {
         allowed() {
             return m.fieldMode === 9 && !tech.isFreeWormHole
         },
-        requires: "wormhole, not charmed baryons",
+        requires: "wormhole, not holographic principle",
         effect() {
             tech.isWormholeMapIgnore = true
         },
@@ -10044,8 +10029,8 @@ const tech = {
         },
         requires: "",
         effect() {
-            // const colors = shuffle(["#f7b", "#0eb", "#467", "#0cf", "hsl(246,100%,77%)", "#26a"])
-            const colors = shuffle([powerUps.research.color, powerUps.heal.color, powerUps.ammo.color, powerUps.ammo.color, powerUps.field.color, powerUps.gun.color])
+            const colors = [powerUps.research.color, powerUps.heal.color, powerUps.ammo.color, powerUps.ammo.color, powerUps.field.color, powerUps.gun.color]
+            colors.sort(() => Math.random() - 0.5);
             powerUps.research.color = colors[0]
             powerUps.heal.color = colors[1]
             powerUps.ammo.color = colors[2]
@@ -10075,37 +10060,7 @@ const tech = {
                 }
             }
         },
-        remove() {
-            // const colors = ["#f7b", "#0eb", "#467", "#0cf", "hsl(246,100%,77%)", "#26a"] //no shuffle
-            // powerUps.research.color = colors[0]
-            // powerUps.heal.color = colors[1]
-            // powerUps.ammo.color = colors[2]
-            // powerUps.field.color = colors[3]
-            // powerUps.tech.color = colors[4]
-            // powerUps.gun.color = colors[5]
-            // for (let i = 0; i < powerUp.length; i++) {
-            //     switch (powerUp[i].name) {
-            //         case "research":
-            //             powerUp[i].color = colors[0]
-            //             break;
-            //         case "heal":
-            //             powerUp[i].color = colors[1]
-            //             break;
-            //         case "ammo":
-            //             powerUp[i].color = colors[2]
-            //             break;
-            //         case "field":
-            //             powerUp[i].color = colors[3]
-            //             break;
-            //         case "tech":
-            //             powerUp[i].color = colors[4]
-            //             break;
-            //         case "gun":
-            //             powerUp[i].color = colors[5]
-            //             break;
-            //     }
-            // }
-        }
+        remove() { }
     },
     {
         name: "emergency broadcasting",
@@ -10519,7 +10474,7 @@ const tech = {
         },
         requires: "",
         effect() {
-            String.prototype.shuffle = function () {
+            String.prototype.shuf = function () {
                 var a = this.split(""),
                     n = a.length;
 
@@ -10532,7 +10487,7 @@ const tech = {
                 return a.join("");
             }
 
-            for (let i = 0, len = tech.tech.length; i < len; i++) tech.tech[i].name = tech.tech[i].name.shuffle()
+            for (let i = 0, len = tech.tech.length; i < len; i++) tech.tech[i].name = tech.tech[i].name.shuf()
         },
         remove() { }
     },
@@ -12190,7 +12145,6 @@ const tech = {
     isDuplicateMobs: null,
     isDynamoBotUpgrade: null,
     isBlockPowerUps: null,
-    isDamageAfterKillNoRegen: null,
     isHarmReduceNoKill: null,
     isSwitchReality: null,
     isResearchReality: null,

@@ -745,7 +745,7 @@ const spawn = {
             //     exit() { },
             // },
         ]
-        shuffle(me.mode); //THIS SHOULD NOT BE COMMENTED OUT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        me.mode.sort(() => Math.random() - 0.5);
         me.do = function () {
             this.fill = `hsl(${360 * Math.sin(this.cycle * 0.011)},${80 + 20 * Math.sin(this.cycle * 0.004)}%,${60 + 20 * Math.sin(this.cycle * 0.009)}%)`
             if (this.health < 1) {
@@ -1771,6 +1771,7 @@ const spawn = {
             powerUps.spawn(me.position.x, me.position.y, "heal");
             powerUps.spawn(me.position.x, me.position.y, "ammo");
             powerUps.spawn(me.position.x, me.position.y, "ammo");
+            powerUps.spawn(me.position.x, me.position.y, "ammo");
         } else if (!m.isCloak) {
             me.foundPlayer();
         }
@@ -2683,22 +2684,24 @@ const spawn = {
             this.seePlayerByHistory()
             this.invulnerabilityCountDown--
             if (this.isInvulnerable) {
-                ctx.beginPath();
-                let vertices = this.vertices;
-                ctx.moveTo(vertices[0].x, vertices[0].y);
-                for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
-                ctx.lineTo(vertices[0].x, vertices[0].y);
-                for (let i = 0; i < this.babyList.length; i++) {
-                    if (this.babyList[i].alive) {
-                        let vertices = this.babyList[i].vertices;
-                        ctx.moveTo(vertices[0].x, vertices[0].y);
-                        for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
-                        ctx.lineTo(vertices[0].x, vertices[0].y);
+                if (this.invulnerabilityCountDown > 90 || this.invulnerabilityCountDown % 20 > 10) {
+                    ctx.beginPath();
+                    let vertices = this.vertices;
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                    ctx.lineTo(vertices[0].x, vertices[0].y);
+                    for (let i = 0; i < this.babyList.length; i++) {
+                        if (this.babyList[i].alive) {
+                            let vertices = this.babyList[i].vertices;
+                            ctx.moveTo(vertices[0].x, vertices[0].y);
+                            for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                            ctx.lineTo(vertices[0].x, vertices[0].y);
+                        }
                     }
+                    ctx.lineWidth = 3 + 0.2 * Math.min(this.invulnerabilityCountDown, 90) + 5 * Math.random()
+                    ctx.strokeStyle = `rgba(255,255,255,${0.4 + 0.4 * Math.random()})`;
+                    ctx.stroke();
                 }
-                ctx.lineWidth = 13 + 5 * Math.random();
-                ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.2 * Math.random()})`;
-                ctx.stroke();
                 if (this.invulnerabilityCountDown < 0) {
                     this.invulnerabilityCountDown = 110
                     this.isInvulnerable = false
@@ -2711,7 +2714,7 @@ const spawn = {
                     }
                 }
             } else if (this.invulnerabilityCountDown < 0) {
-                this.invulnerabilityCountDown = 120 + 9 * simulation.difficulty
+                this.invulnerabilityCountDown = 240 + 5 * simulation.difficulty
                 this.isInvulnerable = true
                 if (this.damageReduction) this.startingDamageReduction = this.damageReduction
                 this.damageReduction = 0

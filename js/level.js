@@ -22,7 +22,7 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
-            // level.levelsCleared = 10
+            // level.levelsCleared = 9
             // level.updateDifficulty()
             // tech.giveTech("performance")
             // m.maxHealth = m.health = 100000000
@@ -33,7 +33,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField("negative mass") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField("wormhole") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
             // powerUps.research.count = 3
             // tech.isHookWire = true
@@ -58,7 +58,7 @@ const level = {
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("interest") });
             // for (let i = 0; i < 1; i++) tech.giveTech("interest")
             // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 7; i++) powerUps.directSpawn(450, -50, "tech");
+            // for (let i = 0; i < 7; i++) powerUps.directSpawn(450, -50, "field");
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.testing();
@@ -810,14 +810,14 @@ const level = {
 
         if (document.getElementById("seed").value) { //check for player entered seed in settings
             Math.initialSeed = String(document.getElementById("seed").value)
-            Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
         }
+        Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed
 
         if (simulation.isTraining) {
             simulation.isHorizontalFlipped = false
             level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
             if (simulation.isCommunityMaps) level.trainingLevels.push("diamagnetism")
-        } else { //add remove and shuffle levels for the normal game (not training levels)
+        } else {
             level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
             if (simulation.isCommunityMaps) {
                 level.levels = level.levels.concat(level.communityLevels)
@@ -825,7 +825,7 @@ const level = {
             } else {
                 simulation.isHorizontalFlipped = (Math.seededRandom() < 0.5) ? true : false //if true, some maps are flipped horizontally
             }
-            level.levels = shuffle(level.levels); //shuffles order of maps with seeded random
+            level.levels = seededShuffle(level.levels); //shuffles order of maps with seeded random
             level.levels.length = 9 //remove any extra levels past 9
             pick = ["interferometer", "factory", "reservoir"]
             level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, pick[Math.floor(Math.random() * pick.length)]); //add level to the back half of the randomized levels list
@@ -3533,7 +3533,7 @@ const level = {
 
         const stationList = [] //use to randomize station order
         for (let i = 1, totalNumberOfStations = 10; i < totalNumberOfStations; ++i) stationList.push(i) //!!!! update station number when you add a new station
-        shuffle(stationList);
+        stationList.sort(() => Math.random() - 0.5);
         stationList.splice(0, 3); //remove some stations to keep it to 4 stations
         stationList.unshift(0) //add index zero to the front of the array
 
@@ -6690,14 +6690,14 @@ const level = {
         //3x2:  4 short rooms (3000x1500),  1 double tall room (3000x3000)
         //rooms
         let rooms = ["exit", "loot", "enter", "empty"]
-        rooms = shuffle(rooms); //shuffles array order
+        rooms.sort(() => Math.random() - 0.5);
         //look... you and I both know there is a better way to do this, but it works so I'm gonna focus on other things
         while ( //makes sure that the exit and entrance aren't both on the same floor
             (rooms[0] === "enter" && rooms[2] === "exit") ||
             (rooms[2] === "enter" && rooms[0] === "exit") ||
             (rooms[1] === "enter" && rooms[3] === "exit") ||
             (rooms[3] === "enter" && rooms[1] === "exit")
-        ) rooms = shuffle(rooms); //shuffles array order
+        ) rooms.sort(() => Math.random() - 0.5);
         for (let i = 0; i < rooms.length; i++) {
             if (rooms[i] === "enter") rooms[i] = enter
             if (rooms[i] === "exit") rooms[i] = exit
@@ -6764,7 +6764,7 @@ const level = {
                 rooms[3]()
             },
         ]
-        columns = shuffle(columns) //********************************* RUN THIS LINE IN THE FINAL VERSION ***************************************
+        columns.sort(() => Math.random() - 0.5);
         for (let i = 0; i < 3; i++) {
             if (i === 0) {
                 isDoorLeft = false
@@ -7054,7 +7054,7 @@ const level = {
         };
         powerUps.spawnStartingPowerUps(1875, -3075);
 
-        const powerUpPos = shuffle([{ //no debris on this level but 2 random spawn instead
+        const powerUpPos = [{ //no debris on this level but 2 random spawn instead
             x: -150,
             y: -1775
         }, {
@@ -7066,7 +7066,8 @@ const level = {
         }, {
             x: 1325,
             y: -150
-        }]);
+        }];
+        powerUpPos.sort(() => Math.random() - 0.5);
         powerUps.chooseRandomPowerUp(powerUpPos[0].x, powerUpPos[0].y);
         powerUps.chooseRandomPowerUp(powerUpPos[1].x, powerUpPos[1].y);
         //outer wall
@@ -8858,7 +8859,8 @@ const level = {
         // spawn.bodyRect(312, -100, 25, 100);
         spawn.bodyRect(1450, -300, 150, 50);
 
-        const xPos = shuffle([600, 1250, 2000]);
+        const xPos = [600, 1250, 2000];
+        xPos.sort(() => Math.random() - 0.5);
         spawn.mapRect(xPos[0], -200, 300, 100);
         spawn.mapRect(xPos[1], -250, 300, 300);
         spawn.mapRect(xPos[2], -150, 300, 200);

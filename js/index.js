@@ -28,11 +28,11 @@ Math.seededRandom = function (min = 0, max = 1) { // in order to work 'Math.seed
 // console.log(Math.seed)
 
 
-function shuffle(array) {
+function seededShuffle(array) {
     var currentIndex = array.length,
         temporaryValue,
         randomIndex;
-    // While there remain elements to shuffle...
+    // While there remain elements
     while (0 !== currentIndex) {
         // Pick a remaining element...
         // randomIndex = Math.floor(Math.random() * currentIndex);
@@ -542,7 +542,7 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
 <details id = "console-log-details" style="padding: 0 8px;">
 <summary>console log</summary>
 <div class="pause-details">
-    <div class="pause-grid-module" style="background-color: rgba(255,255,255,0.3);font-size: 0.8em;">${document.getElementById("text-log").innerHTML}</div>
+    <div class="pause-grid-module" style="    background-color: #e2e9ec;font-size: 0.8em;">${document.getElementById("text-log").innerHTML}</div>
 </div>
 </details>
 </div>`
@@ -1205,6 +1205,7 @@ const input = {
     left: false,
     right: false,
     isPauseKeyReady: true,
+    // lastDown: null,
     key: {
         fire: "KeyF",
         field: "Space",
@@ -1379,6 +1380,7 @@ window.addEventListener("keyup", function (event) {
 });
 
 window.addEventListener("keydown", function (event) {
+    // input.lastDown = event.code
     // console.log(event.code)
     switch (event.code) {
         case input.key.right:

@@ -1069,7 +1069,11 @@ const mobs = {
                         if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 33% dmg at max range of 3000
                         dmg *= this.damageReduction
                         //energy and heal drain should be calculated after damage boosts
-                        if (tech.energySiphon && dmg !== Infinity && this.isDropPowerUp && m.immuneCycle < m.cycle) m.energy += Math.min(this.health, dmg) * tech.energySiphon * level.isReducedRegen
+                        if (tech.energySiphon && this.isDropPowerUp && m.immuneCycle < m.cycle) {
+                            //dmg !== Infinity &&
+                            const regen = Math.min(this.health, dmg) * tech.energySiphon * level.isReducedRegen
+                            if (!isNaN(regen) && regen !== Infinity) m.energy += regen
+                        }
                         dmg /= Math.sqrt(this.mass)
                     }
 
@@ -1129,7 +1133,7 @@ const mobs = {
                         for (let i = 0; i < mob.length; i++) {
                             if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 && mob[i].alive) { //700
                                 if (mob[i].health < 1) {
-                                    mob[i].health += 0.33 + this.isBoss
+                                    mob[i].health += 0.33
                                     if (mob[i].health > 1) mob[i].health = 1
                                     simulation.drawList.push({
                                         x: mob[i].position.x,

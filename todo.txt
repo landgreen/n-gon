@@ -1,98 +1,77 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: demineralization - after mobs die gain 0.85x damage taken, effect stacks, but fades 10% every second
-tech: remineralization - after mobs die gain 1.08x damage, effect stacks, but fades 10% every second
-tech: equivalence principle - negative mass field doesn't cost energy
-new JUNK tech: aerodynamics
-
-interferometer
-  slower elevator and lasers 
-  wider side ledges
-  large laser blocking blocks
-flocculation
-  fewer mobs
-  it's easier to get out of the slime
-pavilion
-  move vanish elements
-  easier traversal
-  secret tunnel
-  removed debris, but added power ups and blocks
-corridor
-  limited to bosses that don't interact with the movers poorly
-gravitron, substructure, corridor, interferometer
-  added more heal and ammo power ups to match other levels
-because some newer levels are zoomed out more
-  laser max range is 3000->5000
-  nails last 1/3 of a second longer
-bosses spawn an extra ammo power up
-  and 2 extra ammo on the hardest 2 difficulties
-slasher mob's laserSwords will now damage a cloaked player
-constraint announcement text looks more like computer code style to match game theme
-
-foam recoil is back: 1->0.7x horizontal force and 2->4.3x vertical up force
-  this makes it less annoying to horizontally and easier to kinda fly/float
-negative mass field damage reduction 0.4->0.5x
-holographic principle no longer slows player movement
-  added 2 research cost
-fermion gives 6->5 seconds of invulnerability after mobs die
-stability 0.2->0.1x damage taken at max health
-non-Newtonian armor 0.3->0.4x damage taken after collisions
-Zeno's paradox 0.15->0.2x damage taken
-annihilation energy cost 10->8 to destroy mobs after collisions
-radiative equilibrium damage is 3->4x for 8->4 seconds
-aerostat can be taken 1->3 times
-dynamic equilibrium damage increased by 6->8x damage per last damage taken
-aerostat no longer has 0.9x damage for being on the ground
-launch system 1.2->1.3x ammo for missiles
-research says that repeatedly entering alternate realities builds up some positive effects
-  Hilbert space 4x->3x damage
-  Ψ(t) collapse 6->4 research on boss death
-transdimensional worms: 50% chance for a second worm per block in wormhole
-wormhole 7->8 energy regen per second
-hidden-variable theory 1.15->1.2 damage after choosing a field tech
-ghoster mobs are less likely to get knocked far away from the player for long periods of time
+mantisBoss flashes for a second before it drops invulnerability
+removed parasitism - it's too similar to invulnerability tech
+invariant no longer drains energy while wormhole time is paused
+  added 1 research cost
+added secret combo to change molecular assembler mode
 
 bug fixes
-  dynamic equilibrium was set to 100 times higher frequency then normal
-  when constraints hide health bar's it's now hidden in the pause menu
-  mobs aiming at cloaked player
-    snakeBoss more intelligently chases player for a few seconds
-    pulsarBoss aims at player's history 3 seconds in past
-    pulsar will not stop firing
-      but it will still not fire at cloaked player
+  issue with constraint: "mob death heals mobs"
+    mob health was becoming NaN, this was infecting other values like player energy
+  entering a seed in settings wasn't giving the same results as a randomly generated seeds
+    also removed some random code that was using seeded shuffle, but didn't need to
+      converted it to non seeded random shuffle with .sort(() => Math.random() - 0.5);
 
 ******************************************************** BUGS ********************************************************
-
-figure out why seeded random isn't making runs the same:
-  shuffle is being used for a wide variety of things that don't need a seeded random
-    make two shuffle functions?
-  check which of these is working
-    level order
-    is flipped
-    constraint order
-    mob type order
-    boss order
-    gun, field, tech options
-  make field options offered precalculated so it doesn't depend on player choices?
-  generate all constraints at the start of the game
-    doesn't seem to be determined by the seed...
-    display future constraints in pause menu?
 
 player can become crouched while not touching the ground if they exit the ground while crouched
 
 *********************************************************** TODO *****************************************************
 
+
+use ←↑→↓↖↗↘↙ combos to allow fields to have special actions
+  !!should this be wasd, arrows, or both?
+  how to limit spam?
+     on cooldown
+      timer or once per level
+     energy cost
+     research cost
+     toggle modes
+  combos are listed in white text in field description, and console message when getting field
+    shows up on highlight, and mouse over in experiment mode
+  field ideas:
+    standing wave
+      push mobs away are any distance
+      pull mobs towards you
+    perfect diamagnetism
+    negative mass
+    molecular assembler - done
+    plasma torch
+    time dilation
+    metamaterial cloaking
+    pilot wave
+      spawn blocks
+    wormhole
+      shoot out all the blocks that were sucked in this level (maybe cap at like 10?, cap with energy spent to fire)
+        are block sizes stored properly?  because they shrink before they get eaten...
+          store vertices on the body object if one does already exists
+          after eating store the saved vertices
+        where to fire blocks from and in what direction?
+          target mobs?
+          fire from player (and draw a wormhole looking graphic)
+    grappling hook
+
+new level idea:  escort mission
+  player has to stay near something that moves slowly through the level
+    maybe only a zone around the escort is safe
+      safe from?
+        lasers
+        slime
+        radiation
+    use line of site vision?
+    is it going to feel too slow?
+    where to put in level order?
+      random option instead of reactor?
+      normal level?
+      4th hard level?
+        already too many hard options
+          you could put in 2 hard levels in the level list
+    make the style look like substructure, that level looks great
+      use the motion sense lasers
+
 tech synergy ideas
   a tech that spawns mobs that the player can use to trigger mob death tech
-
-wormhole field needs a buff
-  it's good on wide open maps, but it needs a defensive effect on more closed maps
-  fix?
-    increase energy regen?
-    new tech?
-      a way to make more blocks
-        the block can feed into worms/coupling energy 
-
   
 tech:  - remove the research costs of all tech
   there's about 15 tech with a research cost

@@ -987,7 +987,7 @@ const simulation = {
         } else {
             Composite.add(engine.world, [player])
         }
-        shuffle(level.constraint)
+        seededShuffle(level.constraint)
         level.populateLevels()
         input.endKeySensing();
         simulation.ephemera = []

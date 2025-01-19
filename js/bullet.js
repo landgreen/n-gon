@@ -3160,7 +3160,7 @@ const b = {
                                 if (
                                     Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 &&
                                     !(
-                                        (m.health > 0.93 * m.maxHealth && !tech.isDroneGrab && powerUp[i].name === "heal") ||
+                                        (m.health > 0.94 * m.maxHealth && !tech.isOverHeal && !tech.isDroneGrab && powerUp[i].name === "heal") ||
                                         (tech.isSuperDeterminism && powerUp[i].name === "field") ||
                                         ((tech.isEnergyNoAmmo || b.inventory.length === 0) && powerUp[i].name === "ammo")
                                     )
@@ -3192,7 +3192,7 @@ const b = {
                             let closeDist = Infinity;
                             for (let i = 0, len = powerUp.length; i < len; ++i) {
                                 if (!(
-                                    (m.health > 0.93 * m.maxHealth && !tech.isDroneGrab && powerUp[i].name === "heal") ||
+                                    (m.health > 0.94 * m.maxHealth && !tech.isOverHeal && !tech.isDroneGrab && powerUp[i].name === "heal") ||
                                     (tech.isSuperDeterminism && powerUp[i].name === "field") ||
                                     ((tech.isEnergyNoAmmo || b.inventory.length === 0) && powerUp[i].name === "ammo")
                                 )) {
