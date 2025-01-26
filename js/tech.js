@@ -406,12 +406,13 @@ const tech = {
             m.skin.strokeGap();
         },
         remove() {
-            tech.isFireMoveLock = false
             if (tech.isFireMoveLock) {
+                tech.isFireMoveLock = false
                 b.setFireCD();
                 b.setFireMethod();
-                if (this.count) m.resetSkin();
+                m.resetSkin();
             }
+            tech.isFireMoveLock = false
         }
     },
     {
@@ -480,7 +481,10 @@ const tech = {
         },
         remove() {
             tech.isDilate = false
-            if (this.count) m.resetSkin();
+            if (this.count) {
+                m.resetSkin();
+                if (tech.isDiaphragm) m.skin.dilate2()
+            }
         }
     },
     {
@@ -490,7 +494,7 @@ const tech = {
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
-        isSkin: true,
+        // isSkin: true,
         allowed() {
             return tech.isDilate
         },
@@ -502,7 +506,10 @@ const tech = {
         },
         remove() {
             tech.isDiaphragm = false
-            if (this.count) m.resetSkin();
+            if (this.count) {
+                m.resetSkin();
+                if (tech.isDilate) m.skin.dilate()
+            }
         }
     },
     {
@@ -1063,7 +1070,7 @@ const tech = {
     {
         name: "cache",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Cache_(computing)' class="link">cache</a>`,
-        description: `<strong>17x</strong> <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo()}, but<br>you can't <strong>store</strong> additional <strong class='color-ammo'>ammo</strong>`,
+        description: `<strong>15x</strong> <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo()}, but<br>you can't <strong>store</strong> additional <strong class='color-ammo'>ammo</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -1073,7 +1080,7 @@ const tech = {
         },
         requires: "not non-renewables",
         effect() {
-            tech.ammoCap = 17;
+            tech.ammoCap = 15;
             powerUps.ammo.effect()
         },
         remove() {
@@ -7372,7 +7379,7 @@ const tech = {
             requestAnimationFrame(() => {
                 let techGiven = 0
                 for (let j = 0; j < 3; j++) {
-                    const names = ["quasiparticles", "lens", "compound lens", "arc length", "infrared diode", "free-electron laser", "dye laser", "relativistic momentum", "specular reflection", "diffraction grating", "diffuse beam", "output coupler", "slow light", "laser-bot", "laser-bot upgrade"]
+                    const names = ["quasiparticles", "lens", "compound lens", "arc length", "infrared diode", "free-electron laser", "dye laser", "relativistic momentum", "specular reflection", "diffraction grating", "diffuse beam", "output coupler", "slow light", "laser-bot", "laser-bot upgrade", "collimator"]
                     //convert names into indexes
                     const options = []
                     for (let i = 0; i < names.length; i++) {
@@ -7514,7 +7521,7 @@ const tech = {
         allowed() {
             return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.isLaserBotUpgrade || tech.isLaserField) && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
         },
-        requires: "laser, not diffuse beam, pulse, or slow light",
+        requires: "laser, not diffuse beam, pulse, slow light",
         effect() {
             tech.laserReflections += 2;
         },
@@ -7533,7 +7540,7 @@ const tech = {
         allowed() {
             return tech.haveGunCheck("laser") && !tech.isWideLaser && !tech.historyLaser
         },
-        requires: "laser gun, diffuse beam, or slow light",
+        requires: "laser gun, not diffuse beam, slow light",
         effect() {
             tech.beamSplitter++
             b.guns[11].chooseFireMethod()
@@ -7543,6 +7550,29 @@ const tech = {
                 tech.beamSplitter = 0
                 b.guns[11].chooseFireMethod()
             }
+        }
+    },
+    {
+        name: "collimator",
+        description: `<strong>+1</strong> <strong class='color-laser'>laser</strong> beam<br>align your diverging <strong class='color-laser'>laser</strong> beams to be <strong>parallel</strong>`,
+        isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return tech.haveGunCheck("laser") && !tech.isWideLaser && !tech.historyLaser && tech.beamSplitter > 0 && !tech.isPulseLaser
+        },
+        requires: "laser gun, diffraction, not diffuse beam, slow light, pulse",
+        effect() {
+            tech.beamSplitter++
+            tech.beamCollimator = true
+            b.guns[11].chooseFireMethod()
+        },
+        remove() {
+            tech.beamCollimator = false
+            if (tech.beamSplitter > 0) tech.beamSplitter--
+            b.guns[11].chooseFireMethod()
         }
     },
     {
@@ -7607,7 +7637,7 @@ const tech = {
         allowed() {
             return tech.haveGunCheck("laser") && !tech.beamSplitter && !tech.isWideLaser
         },
-        requires: "laser gun, diffraction grating, diffuse beam",
+        requires: "laser gun, not diffraction grating, diffuse beam",
         effect() {
             tech.historyLaser++
             b.guns[11].chooseFireMethod()
@@ -7657,8 +7687,8 @@ const tech = {
         effect() {
             tech.laserDrain *= 0.75
             tech.laserDamage *= 1.25
-            tech.laserColor = "rgb(0, 11, 255)"
-            tech.laserColorAlpha = "rgba(0, 11, 255,0.5)"
+            tech.laserColor = "rgb(0, 40, 255)"
+            tech.laserColorAlpha = "rgba(0, 40, 255,0.5)"
         },
         remove() {
             tech.laserDrain = 0.003;
@@ -7701,9 +7731,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDrain === 0.003 && !tech.isStuckOn
+            return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDrain === 0.003 && !tech.isStuckOn && !tech.beamCollimator
         },
-        requires: "laser gun, not specular reflection, diffuse, free-electron laser, optical amplifier",
+        requires: "laser gun, not specular reflection, diffuse, free-electron laser, optical amplifier, collimator",
         effect() {
             tech.isPulseLaser = true;
             b.guns[11].chooseFireMethod()
@@ -12319,4 +12349,5 @@ const tech = {
     isDemineralize: null,
     mineralDamage: null,
     negativeMassCost: null,
+    beamCollimator: null,
 }

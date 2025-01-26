@@ -7370,6 +7370,8 @@ const b = {
                         };
                     }
 
+                } else if (tech.beamCollimator) {
+                    this.fire = this.fireSplitCollimator
                 } else if (tech.beamSplitter) {
                     this.fire = this.fireSplit
                 } else if (tech.historyLaser) {
@@ -7395,6 +7397,7 @@ const b = {
                     }, tech.laserDamage / b.fireCDscale * this.lensDamage);
                 }
             },
+
             firePulse() { },
             fireSplit() {
                 const drain = tech.laserDrain / b.fireCDscale
@@ -7415,6 +7418,29 @@ const b = {
                             x: where.x + 3000 * Math.cos(angle + i * divergence),
                             y: where.y + 3000 * Math.sin(angle + i * divergence)
                         }, dmg, tech.laserReflections, false)
+                    }
+                }
+            },
+            fireSplitCollimator() {
+                const drain = tech.laserDrain / b.fireCDscale
+                if (m.energy < drain) {
+                    m.fireCDcycle = m.cycle + 100; // cool down if out of energy
+                } else {
+                    m.fireCDcycle = m.cycle
+                    m.energy -= drain
+                    const freq = 0.037
+                    const len = tech.beamSplitter + 1
+                    const phase = 2 * Math.PI / len
+                    for (let i = 0; i < len; i++) {
+                        if (Math.sin(m.cycle * freq + phase * (i) + Math.PI / 2) > 0 || !(m.cycle % 3)) ctx.globalAlpha = 0.35
+
+                        const whereSweep = m.angle + (m.crouch ? 0.4 : 1) * (Math.sin(m.cycle * freq + phase * (i)))
+                        const where = { x: m.pos.x + 30 * Math.cos(whereSweep), y: m.pos.y + 30 * Math.sin(whereSweep) }
+                        b.laser(where, {
+                            x: where.x + 5000 * Math.cos(m.angle),
+                            y: where.y + 5000 * Math.sin(m.angle)
+                        }, tech.laserDamage / b.fireCDscale * this.lensDamage);
+                        ctx.globalAlpha = 1
                     }
                 }
             },

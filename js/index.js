@@ -1176,6 +1176,7 @@ function openExperimentMenu() {
     document.body.style.overflowX = "hidden";
     document.getElementById("info").style.display = 'none'
     build.reset();
+
 }
 
 //record settings so they can be reproduced in the experimental menu

@@ -9,6 +9,7 @@ body {
     margin: 0;
     overflow: hidden;
     cursor: auto;
+    background-color: #f00;
     /* filter: grayscale(1); */
     /* transition: background-color 0.2s ease-in-out; */
 }

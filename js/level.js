@@ -33,7 +33,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField("wormhole") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField("pilot wave") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
             // powerUps.research.count = 3
             // tech.isHookWire = true
@@ -50,8 +50,8 @@ const level = {
             // requestAnimationFrame(() => { tech.giveTech("non-renewables") });
             // tech.giveTech("dark matter")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("demineralization")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("remineralization")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("paradigm shift")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Higgs mechanism")
             // m.skin.egg();
             // for (let i = 0; i < 1; ++i) tech.giveTech("many-worlds")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("quasiparticles") });
@@ -67,7 +67,7 @@ const level = {
 
 
             // for (let i = 0; i < 10; ++i) spawn.starter(1900, -500)
-            // for (let i = 0; i < 1; i++) spawn.mantisBoss(1900, -500)
+            // for (let i = 0; i < 1; i++) spawn.softBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "gun");
             // for (let i = 0; i < 100; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "ammo");
@@ -175,7 +175,8 @@ const level = {
             let rate = tech.interestRate
             if (level.onLevel < level.levels.length - 1) {//make sure it's not on the lore level which has an undefined name
                 const levelName = level.levels[level.onLevel]
-                if (levelName === "final" || levelName === "subway") rate *= 1 / 3
+                if (levelName === "final") rate *= 1 / 3
+                if (levelName === "subway") rate *= 1 / 5
             }
 
             let ammoSum = 0
@@ -2754,6 +2755,11 @@ const level = {
             Composite.add(engine.world, cons[cons.length - 1]);
         }
     },
+    // softBody(x, y, angle = 0, isAttached = true, len = 15, radius = 20, stiffness = 1, damping = 1) {
+    // https://github.com/liabru/matter-js/blob/master/examples/softBody.js
+    // https://brm.io/matter-js/docs/classes/Composites.html
+    // https://codepen.io/Shokeen/pen/EmOLJO?editors=0010
+    // },
     //******************************************************************************************************************
     //******************************************************************************************************************
     //******************************************************************************************************************
@@ -3534,7 +3540,7 @@ const level = {
         const stationList = [] //use to randomize station order
         for (let i = 1, totalNumberOfStations = 10; i < totalNumberOfStations; ++i) stationList.push(i) //!!!! update station number when you add a new station
         stationList.sort(() => Math.random() - 0.5);
-        stationList.splice(0, 3); //remove some stations to keep it to 4 stations
+        stationList.splice(0, simulation.difficultyMode > 4 ? 4 : 5); //remove some stations to keep it to 4 stations
         stationList.unshift(0) //add index zero to the front of the array
 
         let isExitOpen = false

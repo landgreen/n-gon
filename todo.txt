@@ -1,17 +1,22 @@
 ******************************************************** NEXT PATCH **************************************************
 
-mantisBoss flashes for a second before it drops invulnerability
-removed parasitism - it's too similar to invulnerability tech
-invariant no longer drains energy while wormhole time is paused
-  added 1 research cost
-added secret combo to change molecular assembler mode
+tech: collimator - add 1 laser beam and align your diverging beams to be parallel
+  requires diffraction grating
+
+added secret pilot wave combo to make blocks
+rewrote combo test algorithm to be more forgiving with pattern matching
+  also extended combos test to arrow keys, not just WASD
+
+cache 17->15x ammo
+metamaterial cloaking 0.3->0.4x damage reduction while cloaked
+boson composite drains more energy when passing through mobs
+  scales with difficulty
+subway level has 6->4 (5 on hard difficulty) stations
+subway gives 1/3->1/5 interest per station 
 
 bug fixes
-  issue with constraint: "mob death heals mobs"
-    mob health was becoming NaN, this was infecting other values like player energy
-  entering a seed in settings wasn't giving the same results as a randomly generated seeds
-    also removed some random code that was using seeded shuffle, but didn't need to
-      converted it to non seeded random shuffle with .sort(() => Math.random() - 0.5);
+  Higgs skin removal fixed
+  diaphragm skin removal fixed
 
 ******************************************************** BUGS ********************************************************
 
@@ -19,9 +24,10 @@ player can become crouched while not touching the ground if they exit the ground
 
 *********************************************************** TODO *****************************************************
 
+soft body boss?
+  search    softBody(x, y, angle = 0, isAttached = true, len = 15, radius = 20, stiffness = 1, damping = 1) {
 
 use ←↑→↓↖↗↘↙ combos to allow fields to have special actions
-  !!should this be wasd, arrows, or both?
   how to limit spam?
      on cooldown
       timer or once per level
@@ -40,8 +46,7 @@ use ←↑→↓↖↗↘↙ combos to allow fields to have special actions
     plasma torch
     time dilation
     metamaterial cloaking
-    pilot wave
-      spawn blocks
+    pilot wave - done
     wormhole
       shoot out all the blocks that were sucked in this level (maybe cap at like 10?, cap with energy spent to fire)
         are block sizes stored properly?  because they shrink before they get eaten...
@@ -51,6 +56,12 @@ use ←↑→↓↖↗↘↙ combos to allow fields to have special actions
           target mobs?
           fire from player (and draw a wormhole looking graphic)
     grappling hook
+
+new level idea: large map sized blocks that can't be destroyed that the player walks on as a part of the level
+  eventually the blocks fall
+    after fall level progresses to a phase 2 to clean up the blocks or leave them
+    should bosses be killed by falling blocks??
+  how to avoid the large block vibrating/dancing on tiny block issue
 
 new level idea:  escort mission
   player has to stay near something that moves slowly through the level

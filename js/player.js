@@ -3647,6 +3647,7 @@ const m = {
         m.fieldUpgrades[index].effect();
         simulation.inGameConsole(`<div class="circle-grid field"></div> &nbsp; <span class='color-var'>m</span>.setField("<strong class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</strong>")<br>input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>MouseRight</span>"]`);
         if (m.fieldMode === 4) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${m.fieldUpgrades[4].modeText()} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↓↘→↓↙←↑↑↓</em>`);
+        if (m.fieldMode === 8) simulation.inGameConsole(`Composite<span class='color-symbol'>.</span>add<span class='color-symbol'>(</span>engine.world<span class='color-symbol'>,</span> block<span class='color-symbol'>)</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↓↓→↘↓↙←↓↓</em>`);
     },
     fieldEvent: null,
     fieldUpgrades: [
@@ -4209,43 +4210,23 @@ const m = {
             setDescription() {
                 return `use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>excess <strong class='color-f'>energy</strong> used to <strong class='color-print'>print</strong> ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br><strong>12</strong> <strong class='color-f'>energy</strong> per second <em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↘→↓↙←↑↑↓</em>`
             },
-            keyLog: [],
+            keyLog: [null, null, null, null, null, null, null],
             effect: () => {
                 //store event function so it can be found and removed in m.setField()
                 m.fieldEvent = function (event) {
-                    m.fieldUpgrades[4].keyLog.push(event.code)
-
-
-                    // Helper function to compare arrays
-                    function arraysEqual(arr1, arr2) {
-                        if (arr1.length !== arr2.length) return false;
-                        for (let i = 0; i < arr1.length; i++) {
-                            if (arr1[i] !== arr2[i]) return false;
-                        }
-                        return true;
-                    }
-
-                    const pattern = [input.key.down, input.key.right, input.key.down, input.key.left, input.key.up, input.key.up, input.key.down]
-                    //check if the newest key press is correct
-                    if (event.code !== pattern[m.fieldUpgrades[4].keyLog.length - 1]) {
-                        m.fieldUpgrades[4].keyLog = [] //pattern is wrong, reset log
-                    } else if (arraysEqual(m.fieldUpgrades[4].keyLog, pattern)) { //pattern is complete
+                    m.fieldUpgrades[4].keyLog.shift() //remove first element
+                    m.fieldUpgrades[4].keyLog.push(event.code) //add new key to end
+                    const patternA = ["ArrowDown", "ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "ArrowUp", "ArrowDown"]
+                    const patternB = [input.key.down, input.key.right, input.key.down, input.key.left, input.key.up, input.key.up, input.key.down]
+                    const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
+                    if (arraysEqual(m.fieldUpgrades[4].keyLog, patternA) || arraysEqual(m.fieldUpgrades[4].keyLog, patternB)) {
                         //cycle to next molecular mode
-                        m.fieldUpgrades[4].keyLog = []
-                        const energy = m.energy //save current energy
-                        if (simulation.molecularMode < 3) {
-                            simulation.molecularMode++
-                        } else {
-                            simulation.molecularMode = 0
-                        }
-                        // m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field, skip field emitter
+                        simulation.molecularMode = simulation.molecularMode < 3 ? simulation.molecularMode + 1 : 0
                         m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
-                        m.energy = energy //return to current energy
-
                         const name = `${simulation.molecularMode === 0 ? "<em class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<em>missiles" : simulation.molecularMode === 2 ? "<em class='color-s'>ice IX" : "<em>drones"}</em>`
                         simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${simulation.molecularMode} // ${name} &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↓↘→↓↙←↑↑↓</em>`);
                     }
-                    // console.log(m.fieldUpgrades[4].keyLog)
+                    // console.log(event.code, m.fieldUpgrades[4].keyLog)
                 }
                 window.addEventListener("keydown", m.fieldEvent);
 
@@ -5019,7 +5000,7 @@ const m = {
         },
         {
             name: "metamaterial cloaking",
-            description: `<strong>0.3x</strong> <strong class='color-defense'>damage taken</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>4.5x</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br><strong>6</strong> <strong class='color-f'>energy</strong> per second`,
+            description: `<strong>0.4x</strong> <strong class='color-defense'>damage taken</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>4.5x</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br><strong>6</strong> <strong class='color-f'>energy</strong> per second`,
             effect: () => {
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
@@ -5070,7 +5051,7 @@ const m = {
                         if (!m.isCloak) { //&& m.energy > drain + 0.03
                             // m.energy -= drain
                             m.isCloak = true //enter cloak
-                            m.fieldHarmReduction = 0.3;
+                            m.fieldHarmReduction = 0.4;
                             m.enterCloakCycle = m.cycle
                             if (tech.isCloakHealLastHit && m.lastHit > 0) {
                                 const heal = Math.min(0.75 * m.lastHit, m.energy)
@@ -5151,8 +5132,8 @@ const m = {
                             if (inPlayer.length > 0) {
                                 for (let i = 0; i < inPlayer.length; i++) {
                                     if (m.energy > 0) {
-                                        if (!inPlayer[i].isUnblockable) m.energy -= 0.003;
-                                        if (inPlayer[i].shield) m.energy -= 0.011;
+                                        if (!inPlayer[i].isUnblockable) m.energy -= 0.004 + 0.0005 * simulation.difficultyMode;
+                                        if (inPlayer[i].shield) m.energy -= 0.015 + 0.001 * simulation.difficultyMode;
                                     }
                                 }
                             }
@@ -5180,8 +5161,65 @@ const m = {
         },
         {
             name: "pilot wave",
-            description: `use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><div class="circle-grid tech"></div>, <div class="circle-grid gun"></div>, and <div class="circle-grid field"></div> have <strong>+3</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second`,
+            description: `use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↓→↘↓↙←↓↓</em><br><div class="circle-grid tech"></div>, <div class="circle-grid gun"></div>, and <div class="circle-grid field"></div> have <strong>+3</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second`,
+            keyLog: [null, null, null, null, null, null, null],
             effect: () => {
+                //store event function so it can be found and removed in m.setField()
+                m.fieldEvent = function (event) {
+                    m.fieldUpgrades[4].keyLog.shift() //remove first element
+                    m.fieldUpgrades[4].keyLog.push(event.code) //add new key to end
+                    const patternA = ["ArrowDown", "ArrowDown", "ArrowRight", "ArrowDown", "ArrowLeft", "ArrowDown", "ArrowDown"]
+                    const patternB = [input.key.down, input.key.down, input.key.right, input.key.down, input.key.left, input.key.down, input.key.down]
+                    const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
+                    const where = {
+                        x: m.pos.x,
+                        y: m.pos.y - 75
+                    }
+                    if (
+                        (arraysEqual(m.fieldUpgrades[4].keyLog, patternA) || arraysEqual(m.fieldUpgrades[4].keyLog, patternB))
+                        && !Matter.Query.point(map, where).length
+                    ) {
+                        //remove old blocks
+                        // for (let i = 0; i < body.length; i++) {
+                        //     if (body[i].isPilotWave) {
+                        //         Matter.Composite.remove(engine.world, body[i]);
+                        //         body.splice(i, 1);
+                        //         break
+                        //     }
+                        // }
+
+                        //spawn a block
+                        const radius = 25 + Math.floor(15 * Math.random())
+                        // body[body.length] = Matter.Bodies.polygon(simulation.mouseInGame.x, simulation.mouseInGame.y, 4, radius, {
+                        body[body.length] = Matter.Bodies.polygon(where.x, where.y, 4 + Math.floor(4 * Math.random()), radius, {
+                            friction: 0.05,
+                            frictionAir: 0.001,
+                            collisionFilter: {
+                                category: cat.body,
+                                mask: cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+                            },
+                            classType: "body",
+                            isPilotWave: true,
+                        });
+                        const block = body[body.length - 1]
+                        //mess with the block shape (this code is horrible)
+                        Composite.add(engine.world, block); //add to world
+                        const r1 = radius * (0.85 + 0.6 * Math.random())
+                        const r2 = radius * (0.85 + 0.6 * Math.random())
+                        let angle = Math.PI / 4
+                        const vertices = []
+                        for (let i = 0, len = block.vertices.length; i < len; i++) {
+                            angle += 2 * Math.PI / len + 0.06 * Math.random()
+                            vertices.push({ x: block.position.x + r1 * Math.cos(angle), y: block.position.y + r2 * Math.sin(angle) })
+                        }
+                        Matter.Body.setVertices(block, vertices)
+                        /* <em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↘→↓↙←↑↑↓</em> */
+                        simulation.inGameConsole(`Composite<span class='color-symbol'>.</span>add<span class='color-symbol'>(</span>engine.world<span class='color-symbol'>,</span> block<span class='color-symbol'>)</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">//↓↓→↘↓↙←↓↓</em>`);
+                    }
+                }
+                window.addEventListener("keydown", m.fieldEvent);
+
+
                 m.fieldMeterColor = "#333"
                 m.eyeFillColor = m.fieldMeterColor
 
