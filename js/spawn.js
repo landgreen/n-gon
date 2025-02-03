@@ -1498,7 +1498,7 @@ const spawn = {
         for (let i = 0; i < num; i++) spawn.spawnerBoss(x, y, radius, spawnID)
     },
     spawnerBoss(x, y, radius, spawnID) {
-        mobs.spawn(x + Math.random(), y + Math.random(), 4, radius, "rgba(255,60,0,0.3)") //);
+        mobs.spawn(x + Math.random(), y + Math.random(), 4, radius, "rgba(255,0,70,1)") //);
         let me = mob[mob.length - 1];
         me.isBoss = true;
 
@@ -1518,10 +1518,24 @@ const spawn = {
         // spawn.shield(me, x, y, 1);
 
         me.onHit = function () { //run this function on hitting player
-            this.explode();
+            this.explode(2 * this.mass);
         };
         me.damageReduction = 0.14
         me.doAwake = function () {
+            //draw aura 
+            ctx.beginPath();
+            const vertices = this.vertices;
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+            ctx.lineTo(vertices[0].x, vertices[0].y);
+            ctx.strokeStyle = `rgba(255,0,70,${0.2 + 0.4 * Math.random()})`
+            ctx.lineWidth = Math.floor(5 + 30 * this.health)
+            ctx.stroke();
+            // ctx.strokeStyle = "rgba(255,60,0,0.1)"
+            // ctx.lineWidth = 70
+            // ctx.stroke();
+            // this.fill = `rgba(255,0,70,${0.1 + 0.1 * Math.random()})`
+
             this.alwaysSeePlayer();
             this.checkStatus();
             this.attraction();
@@ -1546,6 +1560,7 @@ const spawn = {
             this.checkStatus();
             if (this.seePlayer.recall) {
                 this.do = this.doAwake
+                this.fill = `transparent`
                 //awaken other spawnBosses
                 for (let i = 0, len = mob.length; i < len; i++) {
                     if (mob[i].isSpawnBoss && mob[i].spawnID === this.spawnID) mob[i].seePlayer.recall = 1
@@ -1601,7 +1616,7 @@ const spawn = {
         me.seePlayerFreq = Math.floor(11 + 7 * Math.random())
         me.seeAtDistance2 = 200000 //1400000;
         me.stroke = "transparent"
-        me.collisionFilter.mask = cat.player | cat.bullet //| cat.body //| cat.map   //"rgba(255,60,0,0.3)"
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body //| cat.map   //"rgba(255,60,0,0.3)"
 
         me.buffCount = 0
         me.accelMag = 0.00005 //* simulation.accelScale;
@@ -2030,7 +2045,7 @@ const spawn = {
         // Matter.Body.setStatic(me, true); //make static  (disables taking damage)
         me.frictionAir = 1
         me.damageReduction = 2
-        me.collisionFilter.mask = cat.bullet //| cat.body
+        me.collisionFilter.mask = cat.bullet | cat.body
         // me.collisionFilter.category = cat.mobBullet;
         // me.collisionFilter.mask = cat.bullet | cat.body // | cat.player
         me.isMine = true
@@ -3930,7 +3945,7 @@ const spawn = {
         me.nextBlinkCycle = me.delay;
         me.JumpDistance = 0//set in redMode()
         // spawn.shield(me, x, y, 1);
-        me.collisionFilter.mask = cat.bullet | cat.map //| cat.body  //cat.player |
+        me.collisionFilter.mask = cat.bullet | cat.map | cat.body  //cat.player |
         me.powerUpNames = []
         me.redMode = function () {
             this.color = `rgba(255,0,200,`
@@ -4711,10 +4726,11 @@ const spawn = {
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
         me.accelMag = 0.0001 * simulation.accelScale;
         me.laserInterval = 100
+        Matter.Body.setDensity(me, 0.0015); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y);
         me.onHit = function () {
             //run this function on hitting player
-            this.explode();
+            // this.explode();
         };
         me.do = function () {
             this.torque = this.lookTorque * this.inertia * 0.5;
@@ -6184,7 +6200,7 @@ const spawn = {
         me.seeAtDistance2 = 500000;
         me.accelMag = 0.0002 + 0.0001 * simulation.accelScale;
         if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
-        Matter.Body.setDensity(me, 0.0002); //normal is 0.001
+        Matter.Body.setDensity(me, 0.00015); //normal is 0.001
         me.damageReduction = 0.1
         me.stroke = "transparent"; //used for drawGhost
         me.alpha = 1; //used in drawGhost
@@ -6324,7 +6340,7 @@ const spawn = {
         me.friction = 0;
         me.frictionAir = 0.01;
         me.memory = Infinity;
-        me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body
         spawn.shield(me, x, y, 1);
 
         const len = Math.floor(Math.min(15, 3 + Math.sqrt(simulation.difficulty)))
@@ -7429,13 +7445,27 @@ const spawn = {
     exploder(x, y, radius = 40 + Math.ceil(Math.random() * 50)) {
         mobs.spawn(x, y, 4, radius, "rgb(255,0,0)");
         let me = mob[mob.length - 1];
+        Matter.Body.setDensity(me, 0.0013); //normal is 0.001
         me.onHit = function () {
             //run this function on hitting player
-            this.explode();
+            this.explode(2.5 * this.mass);
         };
         me.g = 0.0004; //required if using this.gravity
-        spawn.shield(me, x, y);
+        // spawn.shield(me, x, y);
         me.do = function () {
+            //draw aura 
+            ctx.beginPath();
+            const vertices = this.vertices;
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+            ctx.lineTo(vertices[0].x, vertices[0].y);
+            ctx.strokeStyle = `rgba(255,0,50,${0.13 + 0.45 * Math.random()})`
+            ctx.lineWidth = 30
+            ctx.stroke();
+            ctx.strokeStyle = "rgba(255,0,50,0.1)"
+            ctx.lineWidth = 70
+            ctx.stroke();
+
             this.gravity();
             this.seePlayerCheck();
             this.checkStatus();

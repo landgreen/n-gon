@@ -1,28 +1,50 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: collimator - add 1 laser beam and align your diverging beams to be parallel
-  requires diffraction grating
+pilot wave effect rework
+  it's easier to surf on blocks controlled by pilot wave
+    pilot wave secret combo spawns blocks that are easier to surf on: long and thin
+  pilot wave location resets to player when off
+  pilot wave hitting map no longer shrinks, it just will not enter map
+  field speed slows down with total block mass in field
+  energy drain
+    1x energy regen disabled when field is active
+    2x passive regen drained when out of line of sight of player
+    energy drain that scales with size and acceleration of blocks in field
+  added graphical flicker when field is out of line of sight
+  a few more bosses now interact with blocks and can take damage
+  prevented field from disabling when mouse goes off screen
+    I don't expect any bugs from this, but maybe...
 
-added secret pilot wave combo to make blocks
-rewrote combo test algorithm to be more forgiving with pattern matching
-  also extended combos test to arrow keys, not just WASD
+ghoster mobs have 2x->1.5x extra density and health
+exploder mobs no longer have a chance for a shield
+  2.5x explode damage, 1.3x health
+  added a red aura to show they explode on contact
+spawnerBossCulture changed visual look to be a flashing transparent red outline
+  2x explode damage
+laser mobs no longer explode, 1.5x density/mass
 
-cache 17->15x ammo
-metamaterial cloaking 0.3->0.4x damage reduction while cloaked
-boson composite drains more energy when passing through mobs
-  scales with difficulty
-subway level has 6->4 (5 on hard difficulty) stations
-subway gives 1/3->1/5 interest per station 
-
-bug fixes
-  Higgs skin removal fixed
-  diaphragm skin removal fixed
 
 ******************************************************** BUGS ********************************************************
 
 player can become crouched while not touching the ground if they exit the ground while crouched
 
 *********************************************************** TODO *****************************************************
+
+tech - while player is in field increase field radius and no energy drain
+  check if player is inside field
+    m.fieldUpgrades[8].collider.isPLayerInField = false
+    fix   tech.isSurfing && m.fieldUpgrades[8].collider.isPLayerInField
+
+tech - get a benefit while surfing on a block inside the pilot wave field
+  defense?  damage?
+tech - benefit if you haven't killed any mobs on this level
+tech - benefit in the first 20 seconds of the level
+
+plasma globe - it should not explode on map contact, but instead shrink?
+  only explode on mouse release
+
+mob - moves around, but then stops and makes porcupine spikes for 2 seconds, then moves again.
+  maybe use hopper movement?
 
 soft body boss?
   search    softBody(x, y, angle = 0, isAttached = true, len = 15, radius = 20, stiffness = 1, damping = 1) {
@@ -44,10 +66,14 @@ use ←↑→↓↖↗↘↙ combos to allow fields to have special actions
     negative mass
     molecular assembler - done
     plasma torch
+      move around like you have recoil, move kinda fast so it's hard to control
+        like form recoil but fast
     time dilation
     metamaterial cloaking
     pilot wave - done
     wormhole
+      toggle bullets entering with wormholes
+        and player??
       shoot out all the blocks that were sucked in this level (maybe cap at like 10?, cap with energy spent to fire)
         are block sizes stored properly?  because they shrink before they get eaten...
           store vertices on the body object if one does already exists
@@ -81,8 +107,6 @@ new level idea:  escort mission
     make the style look like substructure, that level looks great
       use the motion sense lasers
 
-tech synergy ideas
-  a tech that spawns mobs that the player can use to trigger mob death tech
   
 tech:  - remove the research costs of all tech
   there's about 15 tech with a research cost
@@ -91,11 +115,9 @@ tech:  - remove the research costs of all tech
   when far away from your wormhole regenerate 1% of your max energy per second
   when far away from your wormhole reduce damage taken
   heal last hit damage after enter wormhole
-!!quasar - plasma torch from both ends
+!!quasar - plasma torch from both ends of wormhole
   only after wormhole eats a block fire?
     or just increase plasma length after eating block?
-
-make a text orb for JUNK text to make JUNK more clear
 
 procedural animation 
   https://www.youtube.com/watch?v=qlfh_rv6khY
@@ -1274,6 +1296,7 @@ possible names for tech
   active optics - something with lasers?  maybe something with diffuse beam getting smaller
   Quintessence - related to dark energy
   biofilm - something defensive?  related to spores?
+  Thermogalvanic - makes things cold, for no energy
 
 ******************************************************* DESIGN ******************************************************
 

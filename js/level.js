@@ -34,6 +34,16 @@ const level = {
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
             // m.setField("pilot wave") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+
+            // spawn.bodyRect(625, -100, 100, 75);
+            // spawn.bodyRect(750, -125, 250, 100);
+            // spawn.bodyRect(500, -150, 75, 100);
+            // spawn.bodyRect(1150, -125, 225, 75);
+            // spawn.bodyRect(1425, -250, 25, 150);
+            // spawn.bodyRect(1525, -100, 75, 25);
+            // spawn.bodyRect(1550, -200, 150, 100);
+
+
             // m.energy = 0
             // powerUps.research.count = 3
             // tech.isHookWire = true
@@ -54,7 +64,7 @@ const level = {
             // for (let i = 0; i < 1; ++i) tech.giveTech("Higgs mechanism")
             // m.skin.egg();
             // for (let i = 0; i < 1; ++i) tech.giveTech("many-worlds")
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("quasiparticles") });
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("surfing") });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("interest") });
             // for (let i = 0; i < 1; i++) tech.giveTech("interest")
             // m.lastKillCycle = m.cycle
@@ -63,11 +73,12 @@ const level = {
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.testing();
 
+
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
 
-            // for (let i = 0; i < 10; ++i) spawn.starter(1900, -500)
-            // for (let i = 0; i < 1; i++) spawn.softBoss(1900, -500)
+            // for (let i = 0; i < 10; ++i) spawn.exploder(1900, -500)
+            // for (let i = 0; i < 1; i++) spawn.snakeBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "gun");
             // for (let i = 0; i < 100; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "ammo");
@@ -2798,7 +2809,7 @@ const level = {
     testing() {
         // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
 
-        document.body.style.backgroundColor = "#fff";
+        document.body.style.backgroundColor = "#ddd";
         // color.map = "#444" //custom map color
         level.defaultZoom = 1500
         simulation.zoomTransition(level.defaultZoom)
@@ -2824,8 +2835,8 @@ const level = {
             ctx.fillStyle = "#d4d4d4"
             ctx.fillRect(2500, -475, 200, 300)
 
-            ctx.fillStyle = "#ddd"
-            ctx.fillRect(-150, -1000, 6875, 1000);
+            // ctx.fillStyle = "#ddd"
+            // ctx.fillRect(-150, -1000, 6875, 1000);
             ctx.fillStyle = "rgba(0,255,255,0.1)";
             ctx.fillRect(6400, -550, 300, 350);
             level.exit.drawAndCheck();
@@ -6901,7 +6912,7 @@ const level = {
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
             level.setPosToSpawn(900, 225); //normal spawn
             level.custom = () => {
-                ctx.fillStyle = "#d0d3d9"
+                ctx.fillStyle = "rgba(0, 10, 30, 0.04)"//"#d0d3d9"
                 ctx.fillRect(-2500, -1800, 3575, 2100);
                 ctx.fillStyle = "#c0c3c9"
                 ctx.fillRect(-2075, -1475, 25, 1800);
@@ -6929,7 +6940,7 @@ const level = {
 
         } else {
             level.custom = () => {
-                ctx.fillStyle = "#d0d3d9"
+                ctx.fillStyle = "rgba(0, 10, 30, 0.04)"//"#d0d3d9"
                 ctx.fillRect(-1075, -1800, 3575, 2100);
                 ctx.fillStyle = "#c0c3c9"
                 ctx.fillRect(2050, -1475, 25, 1800);

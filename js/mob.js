@@ -981,7 +981,7 @@ const mobs = {
             },
             explode(mass = this.mass) {
                 if (m.immuneCycle < m.cycle) {
-                    m.damage(Math.min(Math.max(0.02 * Math.sqrt(mass), 0.01), 0.35) * simulation.dmgScale);
+                    m.damage(Math.min(Math.max(0.03 * Math.sqrt(mass), 0.01), 0.4) * simulation.dmgScale);
                     this.isDropPowerUp = false;
                     this.death(); //death with no power up or body
                 }

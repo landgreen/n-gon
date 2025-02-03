@@ -1206,6 +1206,7 @@ const input = {
     left: false,
     right: false,
     isPauseKeyReady: true,
+    // isMouseInside: true,
     // lastDown: null,
     key: {
         fire: "KeyF",
@@ -1736,11 +1737,12 @@ document.body.addEventListener("mouseenter", (e) => { //prevents mouse getting s
         input.fire = false;
     }
 
-    if (e.button === 3) {
-        input.field = true;
-    } else {
-        input.field = false;
-    }
+    // if (e.button === 3) {
+    //     input.field = true;
+    // } else {
+    //     input.field = false;
+    // }
+    // input.isMouseInside = true
 });
 document.body.addEventListener("mouseleave", (e) => { //prevents mouse getting stuck when leaving the window
     if (e.button === 1) {
@@ -1749,11 +1751,12 @@ document.body.addEventListener("mouseleave", (e) => { //prevents mouse getting s
         input.fire = false;
     }
 
-    if (e.button === 3) {
-        input.field = true;
-    } else {
-        input.field = false;
-    }
+    // if (e.button === 3) {
+    //     input.field = true;
+    // } else {
+    //     input.field = false;
+    // }
+    // input.isMouseInside = false
 });
 
 document.body.addEventListener("wheel", (e) => {

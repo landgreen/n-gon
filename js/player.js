@@ -3629,6 +3629,10 @@ const m = {
     setField(index) {
         // console.log("field mode: ", index)
         window.removeEventListener("keydown", m.fieldEvent);
+        if (m.fieldUpgrades[8].collider) {
+            Matter.Composite.remove(engine.world, m.fieldUpgrades[8].collider);
+            m.fieldUpgrades[8].collider = null
+        }
 
         if (isNaN(index)) { //find index by name
             let found = false
@@ -4267,7 +4271,8 @@ const m = {
                                 for (let i = 0, len = 5; i < len; i++) {
                                     if (m.energy > 3 * drain) {
                                         m.energy -= drain
-                                        b.spore(m.pos)
+                                        const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
+                                        b.spore(Vector.add(m.pos, Vector.mult(unit, 25)), Vector.mult(unit, 10))
                                     } else {
                                         break
                                     }
@@ -5163,7 +5168,19 @@ const m = {
             name: "pilot wave",
             description: `use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↓→↘↓↙←↓↓</em><br><div class="circle-grid tech"></div>, <div class="circle-grid gun"></div>, and <div class="circle-grid field"></div> have <strong>+3</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second`,
             keyLog: [null, null, null, null, null, null, null],
+            collider: null,
+            fieldMass: 1,
             effect: () => {
+                m.fieldUpgrades[8].collider = Matter.Bodies.polygon(m.pos.x, m.pos.y, 8, 35, {
+                    friction: 0,
+                    frictionAir: 0.12,
+                    collisionFilter: { category: cat.player, mask: cat.map }, //no collision because player is holding
+                    classType: "field",
+                    lastSpeed: 0,
+                    isPLayerInField: false,
+                });
+                Composite.add(engine.world, m.fieldUpgrades[8].collider); //add to world
+
                 //store event function so it can be found and removed in m.setField()
                 m.fieldEvent = function (event) {
                     m.fieldUpgrades[4].keyLog.shift() //remove first element
@@ -5171,27 +5188,30 @@ const m = {
                     const patternA = ["ArrowDown", "ArrowDown", "ArrowRight", "ArrowDown", "ArrowLeft", "ArrowDown", "ArrowDown"]
                     const patternB = [input.key.down, input.key.down, input.key.right, input.key.down, input.key.left, input.key.down, input.key.down]
                     const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
-                    const where = {
-                        x: m.pos.x,
-                        y: m.pos.y - 75
+
+                    const width = 90 + Math.floor(30 * Math.random())
+                    const height = 11 + Math.floor(7 * Math.random())
+                    const yOff = 60
+                    const blockRegion = {
+                        min: {
+                            x: m.pos.x - width,
+                            y: m.pos.y + yOff - height
+                        },
+                        max: {
+                            x: m.pos.x + width,
+                            y: m.pos.y + yOff + height
+                        }
                     }
                     if (
                         (arraysEqual(m.fieldUpgrades[4].keyLog, patternA) || arraysEqual(m.fieldUpgrades[4].keyLog, patternB))
-                        && !Matter.Query.point(map, where).length
+                        && !Matter.Query.region(map, blockRegion).length
+                        && !m.crouch
                     ) {
-                        //remove old blocks
-                        // for (let i = 0; i < body.length; i++) {
-                        //     if (body[i].isPilotWave) {
-                        //         Matter.Composite.remove(engine.world, body[i]);
-                        //         body.splice(i, 1);
-                        //         break
-                        //     }
-                        // }
+                        //move player up away from block
+                        Matter.Body.setPosition(player, { x: player.position.x, y: player.position.y - height })
 
                         //spawn a block
-                        const radius = 25 + Math.floor(15 * Math.random())
-                        // body[body.length] = Matter.Bodies.polygon(simulation.mouseInGame.x, simulation.mouseInGame.y, 4, radius, {
-                        body[body.length] = Matter.Bodies.polygon(where.x, where.y, 4 + Math.floor(4 * Math.random()), radius, {
+                        body[body.length] = Matter.Bodies.rectangle(m.pos.x, blockRegion.max.y, width * 2, height * 2, {
                             friction: 0.05,
                             frictionAir: 0.001,
                             collisionFilter: {
@@ -5201,38 +5221,20 @@ const m = {
                             classType: "body",
                             isPilotWave: true,
                         });
-                        const block = body[body.length - 1]
-                        //mess with the block shape (this code is horrible)
-                        Composite.add(engine.world, block); //add to world
-                        const r1 = radius * (0.85 + 0.6 * Math.random())
-                        const r2 = radius * (0.85 + 0.6 * Math.random())
-                        let angle = Math.PI / 4
-                        const vertices = []
-                        for (let i = 0, len = block.vertices.length; i < len; i++) {
-                            angle += 2 * Math.PI / len + 0.06 * Math.random()
-                            vertices.push({ x: block.position.x + r1 * Math.cos(angle), y: block.position.y + r2 * Math.sin(angle) })
-                        }
-                        Matter.Body.setVertices(block, vertices)
-                        /* <em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↘→↓↙←↑↑↓</em> */
+                        Composite.add(engine.world, body[body.length - 1]); //add to world
                         simulation.inGameConsole(`Composite<span class='color-symbol'>.</span>add<span class='color-symbol'>(</span>engine.world<span class='color-symbol'>,</span> block<span class='color-symbol'>)</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">//↓↓→↘↓↙←↓↓</em>`);
                     }
                 }
                 window.addEventListener("keydown", m.fieldEvent);
 
-
                 m.fieldMeterColor = "#333"
                 m.eyeFillColor = m.fieldMeterColor
-
                 m.fieldPhase = 0;
-                m.fieldPosition = {
-                    x: simulation.mouseInGame.x,
-                    y: simulation.mouseInGame.y
-                }
-                m.lastFieldPosition = {
-                    x: simulation.mouseInGame.x,
-                    y: simulation.mouseInGame.y
-                }
+                m.fieldPosition = { x: simulation.mouseInGame.x, y: simulation.mouseInGame.y }
+                m.lastFieldPosition = { x: simulation.mouseInGame.x, y: simulation.mouseInGame.y }
                 m.fieldOn = false;
+                // m.fieldFire = true;
+
                 m.fieldRadius = 0;
                 m.drop();
                 m.hold = function () {
@@ -5268,45 +5270,36 @@ const m = {
                     }
                     if (input.field) {
                         if (m.fieldCDcycle < m.cycle) {
-                            const scale = 25
-                            const bounds = {
-                                min: {
-                                    x: m.fieldPosition.x - scale,
-                                    y: m.fieldPosition.y - scale
-                                },
-                                max: {
-                                    x: m.fieldPosition.x + scale,
-                                    y: m.fieldPosition.y + scale
-                                }
-                            }
-                            const isInMap = Matter.Query.region(map, bounds).length
-                            // const isInMap = Matter.Query.point(map, m.fieldPosition).length
-
-                            if (!m.fieldOn) { // if field was off, and it starting up, teleport to new mouse location
+                            if (!m.fieldOn) { // if field was off, teleport to player
                                 m.fieldOn = true;
-                                // m.fieldPosition = { //smooth the mouse position,  set to starting at player
-                                //     x: m.pos.x,
-                                //     y: m.pos.y
-                                // }
-                                m.fieldPosition = { //smooth the mouse position, set to mouse's current location
-                                    x: simulation.mouseInGame.x,
-                                    y: simulation.mouseInGame.y
-                                }
-                                m.lastFieldPosition = { //used to find velocity of field changes
-                                    x: m.fieldPosition.x,
-                                    y: m.fieldPosition.y
-                                }
-                            } else { //when field is on it smoothly moves towards the mouse
-                                m.lastFieldPosition = { //used to find velocity of field changes
-                                    x: m.fieldPosition.x,
-                                    y: m.fieldPosition.y
-                                }
-                                const smooth = isInMap ? 0.985 : 0.96;
-                                m.fieldPosition = { //smooth the mouse position
-                                    x: m.fieldPosition.x * smooth + simulation.mouseInGame.x * (1 - smooth),
-                                    y: m.fieldPosition.y * smooth + simulation.mouseInGame.y * (1 - smooth),
-                                }
+                                Matter.Body.setPosition(m.fieldUpgrades[8].collider, m.pos);
+                                m.fieldPosition.x = m.pos.x
+                                m.fieldPosition.y = m.pos.y
                             }
+                            //when field is on it smoothly moves towards the mouse
+                            const sub = Vector.sub(simulation.mouseInGame, m.fieldUpgrades[8].collider.position)
+                            const mag = Vector.magnitude(sub)
+
+                            //adjust speed of field here, and with friction and mass above where the collier is spawned
+                            const fieldMassScale = Math.max(1.5, Math.pow(m.fieldUpgrades[8].fieldMass, 0.35)) //how much mass inside the field slows the push and cap
+                            const scaledMag = 0.00000017 / fieldMassScale * Math.pow(mag, 2) //having the mag squared makes the effect weaker in close for fine movement
+                            let push = Vector.mult(Vector.normalise(sub), scaledMag)
+                            const cap = 0.17 / fieldMassScale //acts like a "speed limit"
+                            if (Vector.magnitude(push) > cap) push = Vector.mult(Vector.normalise(push), cap)
+                            m.fieldUpgrades[8].collider.force = push
+
+                            //check for map collisions
+                            if (Matter.Query.ray(map, m.fieldPosition, m.fieldUpgrades[8].collider.position).length) {
+                                Matter.Body.setVelocity(m.fieldUpgrades[8].collider, Vector.mult(m.fieldUpgrades[8].collider.velocity, 0.6))
+                                m.fieldRadius *= 0.6
+                            }
+                            m.fieldPosition.x = m.fieldUpgrades[8].collider.position.x
+                            m.fieldPosition.y = m.fieldUpgrades[8].collider.position.y
+
+                            //check if player is inside field
+                            // if (tech.isSurfing) {
+
+                            // }
 
                             //grab power ups into the field
                             for (let i = 0, len = powerUp.length; i < len; ++i) {
@@ -5340,66 +5333,63 @@ const m = {
                                     }
                                 }
                             }
-                            //grab power ups normally too
+                            //grab power ups normally at player too
                             m.grabPowerUp();
 
-                            if (m.energy > 0.01) {
-                                //find mouse velocity
-                                const diff = Vector.sub(m.fieldPosition, m.lastFieldPosition)
-                                const speed = Vector.magnitude(diff)
-                                const velocity = Vector.mult(Vector.normalise(diff), Math.min(speed, 60)) //limit velocity
-                                let radius, radiusSmooth
-                                if (Matter.Query.ray(map, m.fieldPosition, player.position).length) { //is there something block the player's view of the field
-                                    radius = 0
-                                    radiusSmooth = Math.max(0, isInMap ? 0.96 - 0.02 * speed : 0.995); //0.99
-                                } else {
-                                    radius = Math.max(50, 250 - 2 * speed)
-                                    radiusSmooth = 0.97
-                                }
-                                m.fieldRadius = m.fieldRadius * radiusSmooth + radius * (1 - radiusSmooth)
+                            let radiusGoal, radiusSmooth, drainPassive
+                            if (Matter.Query.ray(map, m.fieldPosition, player.position).length) { //is there something blocking the player's view of the field
+                                radiusGoal = 0
+                                radiusSmooth = 0.995
+                                drainPassive = 1.5 * m.fieldRegen //* (tech.isSurfing && m.fieldUpgrades[8].collider.isPLayerInField ? 0 : 1)
+                            } else {
+                                radiusGoal = Math.max(50, 250 - 2 * m.fieldUpgrades[8].collider.speed) //* (tech.isSurfing && m.fieldUpgrades[8].collider.isPLayerInField ? 1.5 : 1)
+                                radiusSmooth = 0.97
+                                drainPassive = m.fieldRegen //* (tech.isSurfing && m.fieldUpgrades[8].collider.isPLayerInField ? 0 : 1)
+                            }
+                            m.fieldRadius = m.fieldRadius * radiusSmooth + radiusGoal * (1 - radiusSmooth)
 
+                            //track velocity change for calculating block energy drain
+                            const speedChange = Math.max(0, m.fieldUpgrades[8].collider.speed - m.fieldUpgrades[8].collider.lastSpeed)
+                            m.fieldUpgrades[8].collider.lastSpeed = m.fieldUpgrades[8].collider.speed
+
+                            if (m.energy > drainPassive) {
+                                m.energy -= drainPassive;
+                                m.fieldUpgrades[8].fieldMass = 1
                                 for (let i = 0, len = body.length; i < len; ++i) {
                                     if (Vector.magnitude(Vector.sub(body[i].position, m.fieldPosition)) < m.fieldRadius && !body[i].isNotHoldable) {
-                                        const DRAIN = speed * body[i].mass * 0.0000035 // * (1 + m.energy * m.energy) //drain more energy when you have more energy
-                                        if (m.energy > DRAIN) {
-                                            m.energy -= DRAIN;
-                                            Matter.Body.setVelocity(body[i], velocity); //give block mouse velocity
+                                        // const drainBlock = m.fieldUpgrades[8].collider.speed * body[i].mass * 0.0000013
+                                        const drainBlock = speedChange * body[i].mass * 0.000095 //* (tech.isSurfing && m.fieldUpgrades[8].collider.isPLayerInField ? 0 : 1)
+                                        if (m.energy > drainBlock) {
+                                            m.energy -= drainBlock;
+                                            Matter.Body.setVelocity(body[i], m.fieldUpgrades[8].collider.velocity); //give block mouse velocity
                                             Matter.Body.setAngularVelocity(body[i], body[i].angularVelocity * 0.8)
-                                            // body[i].force.y -= body[i].mass * simulation.g; //remove gravity effects
+                                            m.fieldUpgrades[8].fieldMass += body[i].mass
                                             //blocks drift towards center of pilot wave
                                             const sub = Vector.sub(m.fieldPosition, body[i].position)
                                             const push = Vector.mult(Vector.normalise(sub), 0.0001 * body[i].mass * Vector.magnitude(sub))
                                             body[i].force.x += push.x
                                             body[i].force.y += push.y - body[i].mass * simulation.g //remove gravity effects
-                                            // if (body[i].collisionFilter.category !== cat.bullet) {
-                                            //     body[i].collisionFilter.category = cat.bullet;
-                                            // }
+
+                                            if (m.standingOn === body[i] && m.onGround) {
+                                                //try to stop the walk animation
+                                                m.walk_cycle -= m.flipLegs * m.Vx
+                                                m.stepSize *= 0
+                                                //extra stability
+                                                Matter.Body.setAngularVelocity(body[i], body[i].angularVelocity * 0)
+                                                //match velocity upto a change of 10 per cycle
+                                                const limit = 10
+                                                const deltaV = Math.max(-limit, Math.min((m.fieldUpgrades[8].collider.velocity.x - player.velocity.x), limit))
+                                                Matter.Body.setVelocity(player, { x: player.velocity.x + deltaV, y: player.velocity.y });
+                                            }
+
                                         } else {
-                                            m.fieldCDcycle = m.cycle + 120;
+                                            m.fieldCDcycle = m.cycle + 60;
                                             m.fieldOn = false
                                             m.fieldRadius = 0
                                             break
                                         }
                                     }
                                 }
-
-
-                                // m.holdingTarget.collisionFilter.category = cat.bullet;
-                                // m.holdingTarget.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet | cat.mobShield;
-                                // //check every second to see if player is away from thrown body, and make solid
-                                // const solid = function(that) {
-                                //     const dx = that.position.x - player.position.x;
-                                //     const dy = that.position.y - player.position.y;
-                                //     if (that.speed < 3 && dx * dx + dy * dy > 10000 && that !== m.holdingTarget) {
-                                //         that.collisionFilter.category = cat.body; //make solid
-                                //         that.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet; //can hit player now
-                                //     } else {
-                                //         setTimeout(solid, 40, that);
-                                //     }
-                                // };
-                                // setTimeout(solid, 200, m.holdingTarget);
-
-
 
                                 // if (tech.isFreezeMobs) {
                                 //     for (let i = 0, len = mob.length; i < len; ++i) {
@@ -5418,17 +5408,22 @@ const m = {
                                 const off2 = 1 - 0.06 * Math.sin(m.fieldPhase);
                                 ctx.beginPath();
                                 ctx.ellipse(m.fieldPosition.x, m.fieldPosition.y, 1.2 * m.fieldRadius * off1, 1.2 * m.fieldRadius * off2, rotate, 0, 2 * Math.PI);
-                                ctx.globalCompositeOperation = "exclusion"; //"exclusion" "difference";
-                                ctx.fillStyle = "#fff"; //"#eef";
+                                ctx.globalCompositeOperation = "exclusion";
+                                ctx.fillStyle = "#fff";
                                 ctx.fill();
                                 ctx.globalCompositeOperation = "source-over";
                                 ctx.beginPath();
                                 ctx.ellipse(m.fieldPosition.x, m.fieldPosition.y, 1.2 * m.fieldRadius * off1, 1.2 * m.fieldRadius * off2, rotate, 0, 2 * Math.PI * m.energy / m.maxEnergy);
-                                ctx.strokeStyle = "#000";
+                                if (radiusGoal || m.cycle % 5) {
+                                    ctx.strokeStyle = "#000";
+                                } else {
+                                    ctx.strokeStyle = "#fff";
+                                }
                                 ctx.lineWidth = 4;
                                 ctx.stroke();
+
                             } else {
-                                m.fieldCDcycle = m.cycle + 120;
+                                m.fieldCDcycle = m.cycle + 60;
                                 m.fieldOn = false
                                 m.fieldRadius = 0
                             }
@@ -5440,6 +5435,16 @@ const m = {
                         m.fieldRadius = 0
                     }
                     m.drawRegenEnergy("rgba(0,0,0,0.2)")
+
+                    // //draw physics collider
+                    // ctx.beginPath();
+                    // const vertices = m.fieldUpgrades[8].collider.vertices;
+                    // ctx.moveTo(vertices[0].x, vertices[0].y);
+                    // for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+                    // ctx.lineTo(vertices[0].x, vertices[0].y);
+                    // ctx.strokeStyle = "#000";
+                    // ctx.lineWidth = 2;
+                    // ctx.stroke();
                 }
             }
         },

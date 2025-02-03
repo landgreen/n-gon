@@ -2619,14 +2619,14 @@ const b = {
             }
         }
     },
-    spore(where, isFreeze = tech.isSporeFreeze) { //used with the tech upgrade in mob.death()
+    spore(where, velocity = null) { //used with the tech upgrade in mob.death()
         const bIndex = bullet.length;
         const size = 4
         if (bIndex < 500) { //can't make over 500 spores
             bullet[bIndex] = Bodies.polygon(where.x, where.y, size, size, {
                 // density: 0.0015,			//frictionAir: 0.01,
                 inertia: Infinity,
-                isFreeze: isFreeze,
+                isFreeze: tech.isSporeFreeze,
                 restitution: 0.5,
                 angle: Math.random() * 2 * Math.PI,
                 friction: 0,
@@ -2693,57 +2693,19 @@ const b = {
                         }
 
                     }
-
-                    // if (!this.lockedOn && !(simulation.cycle % this.lookFrequency)) { //find mob targets
-                    //   this.closestTarget = null;
-                    //   this.lockedOn = null;
-                    //   let closeDist = Infinity;
-                    //   for (let i = 0, len = mob.length; i < len; ++i) {
-                    //     if (mob[i].isDropPowerUp && Matter.Query.ray(map, this.position, mob[i].position).length === 0) {
-                    //       // Matter.Query.ray(body, this.position, mob[i].position).length === 0
-                    //       const targetVector = Vector.sub(this.position, mob[i].position)
-                    //       const dist = Vector.magnitude(targetVector);
-                    //       if (dist < closeDist) {
-                    //         this.closestTarget = mob[i].position;
-                    //         closeDist = dist;
-                    //         this.lockedOn = mob[i] //Vector.normalise(targetVector);
-                    //         if (0.3 > Math.random()) break //doesn't always target the closest mob
-                    //       }
-                    //     }
-                    //   }
-                    // }
-                    // if (this.lockedOn && this.lockedOn.alive) { //accelerate towards mobs
-                    //   this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
-                    // } else if (tech.isSporeFollow && this.lockedOn !== undefined) { //move towards player
-                    //   //checking for undefined means that the spores don't go after the player until it has looked and not found a target
-                    //   const dx = this.position.x - m.pos.x;
-                    //   const dy = this.position.y - m.pos.y;
-                    //   if (dx * dx + dy * dy > 10000) {
-                    //     this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, Vector.add(this.playerOffPosition, this.position))), this.mass * this.thrust)
-                    //   }
-                    //   // this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.position)), this.mass * this.thrust)
-                    // } else {
-                    //   this.force.y += this.mass * 0.0001; //gravity
-                    // }
-
-                    // if (this.nextPortCycle < simulation.cycle) { //teleport around if you have tech.isBulletTeleport
-                    //     this.nextPortCycle = simulation.cycle + this.portFrequency
-                    //     const range = 50 * Math.random()
-                    //     Matter.Body.setPosition(this, Vector.add(this.position, Vector.rotate({ x: range, y: 0 }, 2 * Math.PI * Math.random())))
-                    // }
                 },
             });
-            // if (tech.isBulletTeleport) {
-            //     bullet[bIndex].portFrequency = 10 + Math.floor(5 * Math.random())
-            //     bullet[bIndex].nextPortCycle = simulation.cycle + bullet[bIndex].portFrequency
-            // }
+            if (velocity) {
+                Matter.Body.setVelocity(bullet[bIndex], velocity);
+            } else {
+                const SPEED = 4 + 8 * Math.random();
+                const ANGLE = 2 * Math.PI * Math.random()
+                Matter.Body.setVelocity(bullet[bIndex], {
+                    x: SPEED * Math.cos(ANGLE),
+                    y: SPEED * Math.sin(ANGLE)
+                });
+            }
 
-            const SPEED = 4 + 8 * Math.random();
-            const ANGLE = 2 * Math.PI * Math.random()
-            Matter.Body.setVelocity(bullet[bIndex], {
-                x: SPEED * Math.cos(ANGLE),
-                y: SPEED * Math.sin(ANGLE)
-            });
             Composite.add(engine.world, bullet[bIndex]); //add bullet to world
 
             if (tech.isMutualism && m.health > 0.01) {

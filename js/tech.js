@@ -5551,7 +5551,7 @@ const tech = {
     },
     {
         name: "super ball",
-        description: "fire just <strong>1 large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>2</strong> second",
+        description: "fire just <strong>1 large</strong> super <strong>ball</strong><br>that <strong>stuns</strong> mobs for <strong>2</strong> seconds",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -8828,6 +8828,25 @@ const tech = {
             tech.isDamageFieldTech = false
         }
     },
+    // {
+    //     name: "surfing",
+    //     description: `while player is inside the pilot wave field<br><strong>1.5x</strong> field radius and no field energy drain`,
+    //     isFieldTech: true,
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 4,
+    //     frequencyDefault: 4,
+    //     allowed() {
+    //         return m.fieldMode === 8
+    //     },
+    //     requires: "pilot wave",
+    //     effect() {
+    //         tech.isSurfing = true
+    //     },
+    //     remove() {
+    //         tech.isSurfing = false
+    //     }
+    // },
     {
         name: "WIMPs",
         description: `at the exit to each <strong>level</strong> spawn ${powerUps.orb.research(4)}<br>and a dangerous particle that slowly <strong>chases</strong> you`,
@@ -12350,4 +12369,5 @@ const tech = {
     mineralDamage: null,
     negativeMassCost: null,
     beamCollimator: null,
+    isSurfing: null,
 }
