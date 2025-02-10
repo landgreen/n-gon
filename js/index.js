@@ -1,5 +1,14 @@
 "use strict";
 
+//list of the recent github hashes, shortened to the first 7 digits of the full hash.
+//the last element of the array is the most recent commit
+// const commitHashes = ['6472d6d', 'c8bf77d', 'eb8f4b0', 'f556371', '74f569b', 'c9f355b', '6814c10', '9402cf2', 'f8b4b6f', '82c0ea8', 'f9849d4', 'd00a94a', '3654198', '9bcf4d3', 'eecf763', 'be109bb', 'e2bf9aa', '3ea8bfd', 'c614451', '1752453', '34e05c7', '07af7a7', '2e76b5c', '1b23dec', '0b728fb', 'e6e5058', '4f87444', 'e418b93', 'b3fa1bf', '09c9e93', 'd8e978f', 'da559f4', '1d4b0c4', '4415942', '6cd2502', '8a211e8', '3d423a5', '4933ef5', '77cafe3', 'bffaeed', '99bd1c8', '8a3ac11', 'bf5f866', 'b14f2c1', 'ff613dc', '1129b9d', '3844d00', 'e9d2262', 'ce74f42', 'ad33cf6', '2d12f1d', 'c47d860', '4e6acdd', '778a2c9', '68f9269', '17f65cf', 'b5e4b0d', '38d9931', '64f2a9f', '64c81cd', '254ec00', '38ef45a', '1728b53', 'fde3a58', '6c3d97a', '951806d', '2b99e59', '3ce6bec', '773ee5c', '4c6b480', 'a1164ed', '507b060', '63bfaba', 'eabd146', '438c166', '1903b9e', '5e12cea', 'f43a5e3', '022e2fa', '20f9b79', 'fc70dfe', '5eae070', '8dacb02', '52046ca', '220a6b4', 'ebd2274', 'cea1c64', 'a47ef97', 'a8c6c0e', '9c2c9be', '8bb8222', '1fde74d', 'f1a6713', '97c5509', '1966173', '2daeae1', '1040d1f', 'c9a5ab9', '77e484c', 'b2426cd']
+// const lastShortHash = 'b2426cd'
+//Landgreen needs to update the commitHashes array with the most recent commit hash on each new upload, but the array will always be missing the current hash since it is generated with each new commit
+//write code to check the 2nd most recent hash and see if it match an element in the commitHashes array.  Use that to calculate how many commits have been made since the last update
+
+
+
 //convert text into numbers for seed
 Math.hash = s => {
     for (var i = 0, h = 9; i < s.length;) h = Math.imul(h ^ s.charCodeAt(i++), 9 ** 9);
@@ -1953,13 +1962,41 @@ document.getElementById("updates").addEventListener("toggle", function () {
         xhr.open("GET", path, true);
         xhr.send();
     }
+
+    // fetch(`https://api.github.com/repos/landgreen/n-gon/commits?per_page=100`)
+    //     .then(response => {
+    //         if (!response.ok) {
+    //             throw new Error(`GitHub API responded with status ${response.status}`);
+    //         }
+    //         return response.json();
+    //     })
+    //     .then(commits => {
+    //         // console.log(commits.sha)
+    //         const array = []
+    //         commits.forEach(commitData => {
+    //             const shortHash = commitData.sha.substr(0, 7);
+    //             array.push(shortHash)
+    //         });
+    //         console.log(array)
+    //     })
+    //     .catch(error => {
+    //         console.error('Error fetching commits:', error);
+    //     });
+
+
+
     let text = `<pre><strong>n-gon</strong>: <a href="https://github.com/landgreen/n-gon/blob/master/todo.txt">todo list</a> and complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a><hr>`
     document.getElementById("updates-div").innerHTML = text
 
     ///  https://api.github.com/repos/landgreen/n-gon/stats/commit_activity
     loadJSON('https://api.github.com/repos/landgreen/n-gon/commits',
         function (data) {
-            // console.log(data[0].sha) //unique code for most recent commit
+            // console.log(data[0].sha, lastShortHash)
+            // if (data[0].sha.substr(0, 7) === lastShortHash) {
+            //     text += "<br><em>https://github.com/landgreen/n-gon/</em>: hash matches latest version<hr>"
+            // } else {
+            //     text += "<br><em>https://github.com/landgreen/n-gon/</em>: hash does <strong>not</strong> match latest version<br><hr>"
+            // }
             for (let i = 0, len = 20; i < len; i++) {
                 text += "<strong>" + data[i].commit.author.date.substr(0, 10) + "</strong> - "; //+ "<br>"
                 text += data[i].commit.message

@@ -809,6 +809,7 @@ const m = {
             tech.mineralDamageReduction = 1 - (1 - tech.mineralDamageReduction) * Math.pow(0.9, seconds);
             dmg *= tech.mineralDamageReduction
         }
+        if (tech.isInPilot && Vector.magnitude(Vector.sub(m.fieldPosition, m.pos)) < m.fieldRadius + 100) dmg *= 0.1
         // return tech.isEnergyHealth ? Math.pow(dmg, 0.7) : dmg //defense has less effect
         // dmg *= m.fieldHarmReduction
         return dmg * m.fieldHarmReduction
@@ -5170,6 +5171,7 @@ const m = {
             keyLog: [null, null, null, null, null, null, null],
             collider: null,
             fieldMass: 1,
+            drain: 1,
             effect: () => {
                 m.fieldUpgrades[8].collider = Matter.Bodies.polygon(m.pos.x, m.pos.y, 8, 35, {
                     friction: 0,
@@ -5177,7 +5179,6 @@ const m = {
                     collisionFilter: { category: cat.player, mask: cat.map }, //no collision because player is holding
                     classType: "field",
                     lastSpeed: 0,
-                    isPLayerInField: false,
                 });
                 Composite.add(engine.world, m.fieldUpgrades[8].collider); //add to world
 
@@ -5233,11 +5234,13 @@ const m = {
                 m.fieldPosition = { x: simulation.mouseInGame.x, y: simulation.mouseInGame.y }
                 m.lastFieldPosition = { x: simulation.mouseInGame.x, y: simulation.mouseInGame.y }
                 m.fieldOn = false;
-                // m.fieldFire = true;
+                if (tech.isNoPilotCost) m.fieldFire = true;
+
 
                 m.fieldRadius = 0;
                 m.drop();
                 m.hold = function () {
+                    let isOn = (tech.isNoPilotCost ? !input.field : input.field)
                     if (tech.isPrinter) {
                         //spawn blocks if field and crouch
                         if (input.field && m.fieldCDcycle < m.cycle && input.down && !m.isHolding) {
@@ -5268,7 +5271,7 @@ const m = {
                         //if releasing field throw it
 
                     }
-                    if (input.field) {
+                    if (isOn) {
                         if (m.fieldCDcycle < m.cycle) {
                             if (!m.fieldOn) { // if field was off, teleport to player
                                 m.fieldOn = true;
@@ -5281,7 +5284,7 @@ const m = {
                             const mag = Vector.magnitude(sub)
 
                             //adjust speed of field here, and with friction and mass above where the collier is spawned
-                            const fieldMassScale = Math.max(1.5, Math.pow(m.fieldUpgrades[8].fieldMass, 0.35)) //how much mass inside the field slows the push and cap
+                            const fieldMassScale = Math.max(1.5, Math.pow(m.fieldUpgrades[8].fieldMass, 0.3)) //how much mass inside the field slows the push and cap
                             const scaledMag = 0.00000017 / fieldMassScale * Math.pow(mag, 2) //having the mag squared makes the effect weaker in close for fine movement
                             let push = Vector.mult(Vector.normalise(sub), scaledMag)
                             const cap = 0.17 / fieldMassScale //acts like a "speed limit"
@@ -5295,11 +5298,6 @@ const m = {
                             }
                             m.fieldPosition.x = m.fieldUpgrades[8].collider.position.x
                             m.fieldPosition.y = m.fieldUpgrades[8].collider.position.y
-
-                            //check if player is inside field
-                            // if (tech.isSurfing) {
-
-                            // }
 
                             //grab power ups into the field
                             for (let i = 0, len = powerUp.length; i < len; ++i) {
@@ -5333,18 +5331,16 @@ const m = {
                                     }
                                 }
                             }
-                            //grab power ups normally at player too
-                            m.grabPowerUp();
 
                             let radiusGoal, radiusSmooth, drainPassive
                             if (Matter.Query.ray(map, m.fieldPosition, player.position).length) { //is there something blocking the player's view of the field
                                 radiusGoal = 0
                                 radiusSmooth = 0.995
-                                drainPassive = 1.5 * m.fieldRegen //* (tech.isSurfing && m.fieldUpgrades[8].collider.isPLayerInField ? 0 : 1)
+                                drainPassive = 1.5 * m.fieldRegen * m.fieldUpgrades[8].drain
                             } else {
-                                radiusGoal = Math.max(50, 250 - 2 * m.fieldUpgrades[8].collider.speed) //* (tech.isSurfing && m.fieldUpgrades[8].collider.isPLayerInField ? 1.5 : 1)
+                                radiusGoal = Math.max(50, 250 - 2 * m.fieldUpgrades[8].collider.speed)
                                 radiusSmooth = 0.97
-                                drainPassive = m.fieldRegen //* (tech.isSurfing && m.fieldUpgrades[8].collider.isPLayerInField ? 0 : 1)
+                                drainPassive = m.fieldRegen * m.fieldUpgrades[8].drain
                             }
                             m.fieldRadius = m.fieldRadius * radiusSmooth + radiusGoal * (1 - radiusSmooth)
 
@@ -5358,7 +5354,7 @@ const m = {
                                 for (let i = 0, len = body.length; i < len; ++i) {
                                     if (Vector.magnitude(Vector.sub(body[i].position, m.fieldPosition)) < m.fieldRadius && !body[i].isNotHoldable) {
                                         // const drainBlock = m.fieldUpgrades[8].collider.speed * body[i].mass * 0.0000013
-                                        const drainBlock = speedChange * body[i].mass * 0.000095 //* (tech.isSurfing && m.fieldUpgrades[8].collider.isPLayerInField ? 0 : 1)
+                                        const drainBlock = m.fieldUpgrades[8].drain * speedChange * body[i].mass * 0.000095
                                         if (m.energy > drainBlock) {
                                             m.energy -= drainBlock;
                                             Matter.Body.setVelocity(body[i], m.fieldUpgrades[8].collider.velocity); //give block mouse velocity
@@ -5434,6 +5430,9 @@ const m = {
                         m.fieldOn = false
                         m.fieldRadius = 0
                     }
+                    //grab power ups normally at player too
+                    if (input.field) m.grabPowerUp();
+
                     m.drawRegenEnergy("rgba(0,0,0,0.2)")
 
                     // //draw physics collider

@@ -141,7 +141,7 @@ const tech = {
             if (tech.tech[index].isLost) tech.tech[index].isLost = false; //give specific tech
             if (tech.isBanish && tech.tech[index].isBanished) tech.tech[index].isBanished = false //stops the bug where you can't gets stacks of tech you take with decoherence, I think
             if (tech.isDamageFieldTech && tech.tech[index].isFieldTech) {
-                tech.damage *= 1.2
+                tech.damage *= 1.3
                 // simulation.inGameConsole(`<strong class='color-d'>damage</strong> <span class='color-symbol'>*=</span> ${1.05}`)
                 simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.1} //hidden-variable theory`);
             }
@@ -2550,9 +2550,9 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter) && !tech.nailsDeathMob && !tech.sporesOnDeath && !tech.isExplodeMob && !tech.botSpawner && !tech.iceIXOnDeath
+            return (tech.blockDamage > 0.075 || tech.isPrinter)
         },
-        requires: "mass driver, printer, no other mob death tech",
+        requires: "mass driver, printer",
         effect() {
             tech.isMobBlockFling = true
         },
@@ -2570,7 +2570,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter) && !tech.isTokamak
         },
         requires: "mass driver, printer, not pilot wave, tokamak",
         effect() {
@@ -3089,8 +3089,28 @@ const tech = {
         }
     },
     {
-        name: "torpor",
-        description: "if a mob has <strong>not died</strong> in the last <strong>5</strong> seconds<br><strong>0.3x</strong> <strong class='color-defense'>damage taken</strong>",
+        name: "fluoroantimonic acid",
+        description: "if your <strong class='color-h'>health</strong> is above <strong>100</strong><br><strong>1.35x</strong> <strong class='color-d'>damage</strong>",
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.maxHealth > 1;
+        },
+        requires: "maximum health above 100",
+        effect() {
+            tech.isAcidDmg = true;
+        },
+        remove() {
+            tech.isAcidDmg = false;
+        }
+    },
+    {
+        name: "control theory",
+        descriptionFunction() {
+            return `<strong>2x</strong> <strong class='color-d'>damage</strong><br>while your <strong class='color-h'>health</strong> is at maximum`
+        },
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3100,10 +3120,10 @@ const tech = {
         },
         requires: "",
         effect() {
-            tech.isHarmReduceNoKill = true;
+            tech.isMaxHealthDamage = true;
         },
         remove() {
-            tech.isHarmReduceNoKill = false;
+            tech.isMaxHealthDamage = false;
         }
     },
     {
@@ -3147,10 +3167,8 @@ const tech = {
         }
     },
     {
-        name: "control theory",
-        descriptionFunction() {
-            return `<strong>2x</strong> <strong class='color-d'>damage</strong><br>while your <strong class='color-h'>health</strong> is at maximum`
-        },
+        name: "torpor",
+        description: "if a mob has <strong>not died</strong> in the last <strong>5</strong> seconds<br><strong>0.3x</strong> <strong class='color-defense'>damage taken</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3160,10 +3178,10 @@ const tech = {
         },
         requires: "",
         effect() {
-            tech.isMaxHealthDamage = true;
+            tech.isHarmReduceNoKill = true;
         },
         remove() {
-            tech.isMaxHealthDamage = false;
+            tech.isHarmReduceNoKill = false;
         }
     },
     {
@@ -3255,7 +3273,7 @@ const tech = {
     {
         name: "ergodicity",
         descriptionFunction() {
-            return `<strong>0.50x</strong> <strong class='color-h'>healing</strong> from ${powerUps.orb.heal()}<br><strong>1.7x</strong> <strong class='color-d'>damage</strong>`
+            return `<strong>0.5x</strong> <strong class='color-h'>healing</strong> from ${powerUps.orb.heal()}<br><strong>1.7x</strong> <strong class='color-d'>damage</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -3289,24 +3307,6 @@ const tech = {
                 }
             }
             tech.isHalfHeals = false;
-        }
-    },
-    {
-        name: "fluoroantimonic acid",
-        description: "if your <strong class='color-h'>health</strong> is above <strong>100</strong><br><strong>1.35x</strong> <strong class='color-d'>damage</strong>",
-        maxCount: 1,
-        count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
-        allowed() {
-            return m.maxHealth > 1;
-        },
-        requires: "maximum health above 100",
-        effect() {
-            tech.isAcidDmg = true;
-        },
-        remove() {
-            tech.isAcidDmg = false;
         }
     },
     {
@@ -8328,12 +8328,12 @@ const tech = {
         damage: 1.4,
         effect() {
             tech.damage *= this.damage
-            tech.aimDamage = 1.42
+            tech.slowFireDamage = 1.42
             b.setFireCD();
         },
         remove() {
             if (this.count && m.alive) tech.damage /= this.damage
-            tech.aimDamage = 1
+            tech.slowFireDamage = 1
             b.setFireCD();
         }
     },
@@ -8406,9 +8406,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldMode === 10 || m.fieldMode === 5 || m.fieldMode === 8)
+            return (m.fieldMode === 10 || m.fieldMode === 5 || m.fieldMode === 8) && !tech.isNoPilotCost
         },
-        requires: "plasma torch, grappling hook, pilot wave",
+        requires: "plasma torch, grappling hook, pilot wave, not Bells theorem",
         effect() {
             tech.isHarmReduce = true
         },
@@ -8811,7 +8811,7 @@ const tech = {
     },
     {
         name: "hidden-variable theory",
-        description: `<strong>1.2x</strong> <strong class='color-d'>damage</strong> after you <strong class='color-choice'><span>ch</span><span>oo</span><span>se</span></strong> ${powerUps.orb.fieldTech()}`,
+        description: `<strong>1.3x</strong> <strong class='color-d'>damage</strong> after you <strong class='color-choice'><span>ch</span><span>oo</span><span>se</span></strong> ${powerUps.orb.fieldTech()}`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -8828,28 +8828,52 @@ const tech = {
             tech.isDamageFieldTech = false
         }
     },
-    // {
-    //     name: "surfing",
-    //     description: `while player is inside the pilot wave field<br><strong>1.5x</strong> field radius and no field energy drain`,
-    //     isFieldTech: true,
-    //     maxCount: 1,
-    //     count: 0,
-    //     frequency: 4,
-    //     frequencyDefault: 4,
-    //     allowed() {
-    //         return m.fieldMode === 8
-    //     },
-    //     requires: "pilot wave",
-    //     effect() {
-    //         tech.isSurfing = true
-    //     },
-    //     remove() {
-    //         tech.isSurfing = false
-    //     }
-    // },
+    {
+        name: "Bells theorem",
+        description: `<strong>pilot wave</strong> is always <strong>on</strong><br>and has no <strong class='color-f'>energy</strong> cost`,
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 4,
+        frequencyDefault: 4,
+        allowed() {
+            return m.fieldMode === 8 && !tech.isHarmReduce
+        },
+        requires: "pilot wave, not degenerate matter",
+        effect() {
+            tech.isNoPilotCost = true
+            m.fieldUpgrades[8].drain = 0
+            if (m.fieldMode === 8) m.fieldFire = true;
+
+        },
+        remove() {
+            tech.isNoPilotCost = false
+            m.fieldUpgrades[8].drain = 1
+            if (m.fieldMode === 8) m.fieldFire = false
+        }
+    },
+    {
+        name: "principle of locality",
+        description: `<strong>0.9x</strong> <strong class='color-defense'>damage taken</strong> while inside <strong>pilot wave</strong><br><div class="circle-grid tech"></div>, <div class="circle-grid gun"></div>, and <div class="circle-grid field"></div> have <strong>-2</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>`,
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 4,
+        frequencyDefault: 4,
+        allowed() {
+            return m.fieldMode === 8
+        },
+        requires: "pilot wave",
+        effect() {
+            tech.isInPilot = true
+        },
+        remove() {
+            tech.isInPilot = false
+        }
+    },
     {
         name: "WIMPs",
-        description: `at the exit to each <strong>level</strong> spawn ${powerUps.orb.research(4)}<br>and a dangerous particle that slowly <strong>chases</strong> you`,
+        description: `at the exit to each <strong>level</strong> spawn ${powerUps.orb.research(5)}<br>and a dangerous particle that slowly <strong>chases</strong> you`,
         isFieldTech: true,
         maxCount: 9,
         count: 0,
@@ -8862,7 +8886,7 @@ const tech = {
         effect() {
             tech.wimpCount++
             spawn.WIMP()
-            for (let j = 0, len = 4; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
+            for (let j = 0, len = 5; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         },
         remove() {
             tech.wimpCount = 0
@@ -12127,7 +12151,7 @@ const tech = {
     bonusEnergy: null,
     // healGiveMaxEnergy: null,
     healMaxEnergyBonus: 0, //not null
-    aimDamage: null,
+    slowFireDamage: null,
     isNoFireDefense: null,
     isNoFireDamage: null,
     duplicateChance: null,
@@ -12369,5 +12393,6 @@ const tech = {
     mineralDamage: null,
     negativeMassCost: null,
     beamCollimator: null,
-    isSurfing: null,
+    isInPilot: null,
+    isNoPilotCost: null,
 }

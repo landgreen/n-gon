@@ -1,47 +1,33 @@
 ******************************************************** NEXT PATCH **************************************************
 
-pilot wave effect rework
-  it's easier to surf on blocks controlled by pilot wave
-    pilot wave secret combo spawns blocks that are easier to surf on: long and thin
-  pilot wave location resets to player when off
-  pilot wave hitting map no longer shrinks, it just will not enter map
-  field speed slows down with total block mass in field
-  energy drain
-    1x energy regen disabled when field is active
-    2x passive regen drained when out of line of sight of player
-    energy drain that scales with size and acceleration of blocks in field
-  added graphical flicker when field is out of line of sight
-  a few more bosses now interact with blocks and can take damage
-  prevented field from disabling when mouse goes off screen
-    I don't expect any bugs from this, but maybe...
+pilot wave tech: Bells theorem - field is always on for no energy cost
+pilot wave tech: principle of locality - 0.9x damage taken while inside pilot wave field, -2 choices
 
-ghoster mobs have 2x->1.5x extra density and health
-exploder mobs no longer have a chance for a shield
-  2.5x explode damage, 1.3x health
-  added a red aura to show they explode on contact
-spawnerBossCulture changed visual look to be a flashing transparent red outline
-  2x explode damage
-laser mobs no longer explode, 1.5x density/mass
+hidden-variable theory 1.2->1.3 damage per field tech
+WIMPS spawn 4->5 research per level
+
+bug fixes
+  fixed exploit with final tech power up on subway level
 
 
 ******************************************************** BUGS ********************************************************
 
-player can become crouched while not touching the ground if they exit the ground while crouched
+graphical bug - player can become crouched while not touching the ground if they exit the ground while crouched
 
 *********************************************************** TODO *****************************************************
 
-tech - while player is in field increase field radius and no energy drain
-  check if player is inside field
-    m.fieldUpgrades[8].collider.isPLayerInField = false
-    fix   tech.isSurfing && m.fieldUpgrades[8].collider.isPLayerInField
-
-tech - get a benefit while surfing on a block inside the pilot wave field
-  defense?  damage?
 tech - benefit if you haven't killed any mobs on this level
+  have to clean up mobs that die on level spawn from falling blocks 
 tech - benefit in the first 20 seconds of the level
 
 plasma globe - it should not explode on map contact, but instead shrink?
   only explode on mouse release
+  use pilot wave code?
+
+rework JUNK
+  example:  +5 JUNK adds a frequency of (1?  6?) to a random JUNK tech
+    if you see that JUNK tech again it's frequency drops down to 0 again
+  have to rework constraints and a few other tech...
 
 mob - moves around, but then stops and makes porcupine spikes for 2 seconds, then moves again.
   maybe use hopper movement?
