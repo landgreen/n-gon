@@ -809,7 +809,7 @@ const m = {
             tech.mineralDamageReduction = 1 - (1 - tech.mineralDamageReduction) * Math.pow(0.9, seconds);
             dmg *= tech.mineralDamageReduction
         }
-        if (tech.isInPilot && Vector.magnitude(Vector.sub(m.fieldPosition, m.pos)) < m.fieldRadius + 100) dmg *= 0.1
+        if (tech.isInPilot && m.fieldOn && Vector.magnitude(Vector.sub(m.fieldPosition, m.pos)) < m.fieldRadius + 100) dmg *= 0.1
         // return tech.isEnergyHealth ? Math.pow(dmg, 0.7) : dmg //defense has less effect
         // dmg *= m.fieldHarmReduction
         return dmg * m.fieldHarmReduction
@@ -4348,6 +4348,334 @@ const m = {
                 }
             }
         },
+        // {
+        //     name: "plasma torch",
+        //     description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong>1.5x</strong> <strong class='color-d'>damage</strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second",
+        //     set() {
+        //         b.isExtruderOn = false
+        //         m.fieldDamage = 1.5
+        //         // m.fieldCDcycleAlternate = 0
+
+        //         if (m.plasmaBall) {
+        //             m.plasmaBall.reset()
+        //             Matter.Composite.remove(engine.world, m.plasmaBall);
+        //         }
+        //         if (tech.isPlasmaBall) {
+        //             const circleRadiusScale = 2
+        //             m.plasmaBall = Bodies.circle(m.pos.x + 10 * Math.cos(m.angle), m.pos.y + 10 * Math.sin(m.angle), 1, {
+        //                 // collisionFilter: {
+        //                 //     group: 0,
+        //                 //     category: 0,
+        //                 //     mask: 0 //cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
+        //                 // },
+        //                 isSensor: true,
+        //                 frictionAir: 0,
+        //                 alpha: 0.7,
+        //                 isPopping: false,
+        //                 isAttached: false,
+        //                 isOn: false,
+        //                 drain: 0.0018,
+        //                 radiusLimit: 10,
+        //                 damage: 0.8,
+        //                 setPositionToNose() {
+        //                     const r = 27
+        //                     const nose = { x: m.pos.x + r * Math.cos(m.angle), y: m.pos.y + r * Math.sin(m.angle) }
+        //                     Matter.Body.setPosition(this, Vector.add(nose, Vector.mult(Vector.normalise(Vector.sub(nose, m.pos)), circleRadiusScale * this.circleRadius)));
+        //                 },
+        //                 fire() {
+        //                     const drain = 0.05
+        //                     if (m.energy > drain) m.energy -= drain
+        //                     this.isAttached = false;
+        //                     const speed = 5 + Math.min(15, 80 / this.mass) //scale speed with mass
+        //                     Matter.Body.setVelocity(this, {
+        //                         x: player.velocity.x * 0.4 + speed * Math.cos(m.angle),
+        //                         y: speed * Math.sin(m.angle)
+        //                     });
+        //                     m.plasmaBall.setPositionToNose()
+        //                     if (this.circleRadius < 10) this.isPopping = true
+        //                 },
+        //                 scale(scale) {
+        //                     if (this.circleRadius > this.radiusLimit) Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
+        //                 },
+        //                 reset() {
+        //                     const scale = 1 / m.plasmaBall.circleRadius
+        //                     Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+        //                     this.alpha = 0.7
+        //                     this.isOn = false
+        //                     this.isPopping = false
+        //                     // this.isAttached = true;
+        //                 },
+        //                 do() {
+        //                     if (this.isOn) {
+        //                         if (this.isPopping) {
+        //                             this.alpha -= 0.05
+        //                             if (this.alpha < 0.05 || this.circleRadius < 10) {
+        //                                 this.reset()
+        //                                 // } else if (m.plasmaBall.circleRadius < 10) {
+        //                                 //     const scale = 1.04 + 2 / Math.max(1, m.plasmaBall.circleRadius)
+        //                                 //     Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+        //                             } else {
+        //                                 const scale = 1.04 + 4 / Math.max(1, m.plasmaBall.circleRadius)
+        //                                 Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+        //                             }
+        //                             // if (this.speed > 2.5) {
+        //                             //     const slow = 0.9
+        //                             //     Matter.Body.setVelocity(this, {
+        //                             //         x: slow * this.velocity.x,
+        //                             //         y: slow * this.velocity.y
+        //                             //     });
+        //                             // }
+        //                         } else if (Matter.Query.collides(this, map).length > 0) {
+        //                             if (this.isAttached) {
+        //                                 this.scale(Math.max(0.9, 0.99 - 0.1 / m.plasmaBall.circleRadius))
+        //                             } else {
+        //                                 this.isPopping = true
+        //                                 Matter.Body.setVelocity(this, { x: 0, y: 0 });
+        //                             }
+        //                         }
+
+        //                         //mouse control
+        //                         if (tech.isControlPlasma) {
+        //                             const mouseUnit = Vector.normalise(Vector.sub(simulation.mouseInGame, this.position))
+        //                             const speed = Vector.magnitude(this.velocity) //save current speed
+        //                             const push = Vector.mult(mouseUnit, 0.008 * Math.pow(speed, 1.7)) //roughly optimized to produce similar turing radius for different sizes
+        //                             Matter.Body.setVelocity(this, Vector.add(push, this.velocity));
+        //                             Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), speed)); //keep speed constant
+        //                         }
+        //                         //damage nearby mobs
+        //                         const dmg = this.damage * m.dmgScale
+        //                         const arcList = []
+        //                         const damageRadius = circleRadiusScale * this.circleRadius
+        //                         const dischargeRange = 150 + 1600 * tech.plasmaDischarge + 1.3 * damageRadius
+        //                         for (let i = 0, len = mob.length; i < len; i++) {
+        //                             if (mob[i].alive && (!mob[i].isBadTarget || mob[i].isMobBullet) && !mob[i].isInvulnerable) {
+        //                                 const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
+        //                                 if (sub < damageRadius + mob[i].radius) {
+        //                                     // if (!this.isAttached && !mob[i].isMobBullet) this.isPopping = true
+        //                                     mob[i].damage(dmg);
+        //                                     if (mob[i].speed > 5) {
+        //                                         Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.6, y: mob[i].velocity.y * 0.6 });
+        //                                     } else {
+        //                                         Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.93, y: mob[i].velocity.y * 0.93 });
+        //                                     }
+        //                                 } else if (sub < dischargeRange + mob[i].radius && Matter.Query.ray(map, mob[i].position, this.position).length === 0) {
+        //                                     arcList.push(mob[i]) //populate electrical arc list
+        //                                 }
+        //                             }
+        //                         }
+        //                         for (let i = 0; i < arcList.length; i++) {
+        //                             if (tech.plasmaDischarge > Math.random()) {
+        //                                 const who = arcList[Math.floor(Math.random() * arcList.length)]
+        //                                 who.damage(dmg * 4);
+        //                                 //draw arcs
+        //                                 const sub = Vector.sub(who.position, this.position)
+        //                                 const unit = Vector.normalise(sub)
+        //                                 let len = 12
+        //                                 const step = Vector.magnitude(sub) / (len + 2)
+        //                                 let x = this.position.x
+        //                                 let y = this.position.y
+        //                                 ctx.beginPath();
+        //                                 ctx.moveTo(x, y);
+        //                                 for (let i = 0; i < len; i++) {
+        //                                     x += step * (unit.x + (Math.random() - 0.5))
+        //                                     y += step * (unit.y + (Math.random() - 0.5))
+        //                                     ctx.lineTo(x, y);
+        //                                 }
+        //                                 ctx.lineTo(who.position.x, who.position.y);
+        //                                 ctx.strokeStyle = "#88f";
+        //                                 ctx.lineWidth = 6 + 3 * Math.random();
+        //                                 ctx.stroke();
+        //                                 if (who.damageReduction) {
+        //                                     simulation.drawList.push({
+        //                                         x: who.position.x,
+        //                                         y: who.position.y,
+        //                                         radius: 15,
+        //                                         color: "rgba(150,150,255,0.4)",
+        //                                         time: 15
+        //                                     });
+        //                                 }
+        //                             }
+        //                         }
+
+        //                         //graphics
+        //                         const radius = circleRadiusScale * this.circleRadius * (0.99 + 0.02 * Math.random()) + 3 * Math.random()
+        //                         const gradient = ctx.createRadialGradient(this.position.x, this.position.y, 0, this.position.x, this.position.y, radius);
+        //                         const alpha = this.alpha + 0.15 * Math.random()
+        //                         const stop = 0.75 + 0.1 * Math.random()
+        //                         gradient.addColorStop(0, `rgba(255,255,255,${alpha})`);
+        //                         gradient.addColorStop(stop, `rgba(255,245,255,${alpha})`);
+        //                         gradient.addColorStop(stop + 0.1, `rgba(255,200,255,${alpha})`);
+        //                         gradient.addColorStop(1, `rgba(255,75,255,${alpha})`);
+        //                         // gradient.addColorStop(1, `rgba(255,150,255,${alpha})`);
+        //                         ctx.fillStyle = gradient
+        //                         ctx.beginPath();
+        //                         ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
+        //                         ctx.fill();
+
+        //                         //draw arc from radius inward in a random walk
+        //                         ctx.beginPath();
+        //                         const unit = Vector.rotate({ x: 1, y: 0 }, Math.random() * 6.28)
+        //                         let where = Vector.add(this.position, Vector.mult(unit, 0.98 * radius))
+        //                         ctx.moveTo(where.x, where.y)
+        //                         const sub = Vector.normalise(Vector.sub(this.position, where))
+        //                         for (let i = 0, len = 7; i < len; i++) {
+        //                             const step = Vector.rotate(Vector.mult(sub, 17 * Math.random()), 2 * (Math.random() - 0.5))
+        //                             where = Vector.add(where, step)
+        //                             ctx.lineTo(where.x, where.y)
+        //                         }
+        //                         ctx.strokeStyle = "#88f";
+        //                         ctx.lineWidth = 0.5 + 2 * Math.random();
+        //                         ctx.stroke();
+        //                     }
+        //                 },
+        //             });
+
+        //             Composite.add(engine.world, m.plasmaBall);
+        //             m.hold = function () {
+        //                 if (m.isHolding) {
+        //                     m.drawHold(m.holdingTarget);
+        //                     m.holding();
+        //                     m.throwBlock();
+        //                 } else if (input.field) { //not hold but field button is pressed
+        //                     if (tech.isPlasmaBoost && powerUps.boost.endCycle < simulation.cycle + 60) powerUps.boost.endCycle = simulation.cycle + 60
+
+        //                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
+        //                     m.grabPowerUp();
+        //                     m.lookForPickUp();
+        //                     if (m.fieldCDcycle < m.cycle) {
+        //                         //field is active
+        //                         if (!m.plasmaBall.isAttached) { //return ball to player
+        //                             if (m.plasmaBall.isOn) {
+        //                                 m.plasmaBall.isPopping = true
+        //                             } else {
+        //                                 m.plasmaBall.isAttached = true
+        //                                 m.plasmaBall.isOn = true
+        //                                 m.plasmaBall.isPopping = false
+        //                                 m.plasmaBall.alpha = 0.7
+        //                                 m.plasmaBall.setPositionToNose()
+        //                                 // m.plasmaBall.reset()
+        //                             }
+        //                         } else if (m.energy > m.plasmaBall.drain) { //charge up when attached
+        //                             if (tech.isCapacitor) {
+        //                                 m.energy -= m.plasmaBall.drain * 2;
+        //                                 const scale = 1 + 48 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+        //                                 Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+        //                             } else {
+        //                                 m.energy -= m.plasmaBall.drain;
+        //                                 const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+        //                                 Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
+        //                             }
+        //                             if (m.energy > m.maxEnergy) {
+        //                                 m.energy -= m.plasmaBall.drain * 2;
+        //                                 const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+        //                                 Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
+        //                             }
+        //                             m.plasmaBall.setPositionToNose()
+
+        //                             //float
+        //                             const slowY = (player.velocity.y > 0) ? Math.max(0.5, 1 - 0.006 * player.velocity.y * player.velocity.y) : Math.max(0.997, 1 - 0.001 * Math.abs(player.velocity.y)) //down : up
+        //                             Matter.Body.setVelocity(player, {
+        //                                 x: Math.max(0.95, 1 - 0.002 * Math.abs(player.velocity.x)) * player.velocity.x,
+        //                                 y: slowY * player.velocity.y
+        //                             });
+        //                             if (player.velocity.y > 5) {
+        //                                 player.force.y -= 0.9 * player.mass * simulation.g //less gravity when falling fast
+        //                             } else {
+        //                                 player.force.y -= 0.5 * player.mass * simulation.g;
+        //                             }
+        //                         } else {
+        //                             // m.fieldCDcycle = m.cycle + 60;
+        //                             m.plasmaBall.fire()
+        //                         }
+        //                     }
+        //                 } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+        //                     m.pickUp();
+        //                     if (m.plasmaBall.isAttached) {
+        //                         // m.fieldCDcycle = m.cycle;
+        //                         m.plasmaBall.fire()
+        //                     }
+        //                 } else {
+        //                     m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+        //                     if (m.plasmaBall.isAttached) {
+        //                         // m.fieldCDcycle = m.cycle;
+        //                         m.plasmaBall.fire()
+        //                     }
+        //                 }
+        //                 m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
+        //                 m.plasmaBall.do()
+        //             }
+        //         } else if (tech.isExtruder) {
+        //             m.hold = function () {
+        //                 b.isExtruderOn = false
+        //                 if (m.isHolding) {
+        //                     m.drawHold(m.holdingTarget);
+        //                     m.holding();
+        //                     m.throwBlock();
+        //                 } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+        //                     if (tech.isPlasmaBoost && powerUps.boost.endCycle < simulation.cycle + 60) powerUps.boost.endCycle = simulation.cycle + 60
+
+        //                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
+        //                     m.grabPowerUp();
+        //                     m.lookForPickUp();
+        //                     b.extruder();
+        //                 } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+        //                     m.pickUp();
+        //                 } else {
+        //                     m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+        //                 }
+        //                 m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
+        //                 if (input.field) {
+        //                     b.wasExtruderOn = true
+        //                 } else {
+        //                     b.wasExtruderOn = false
+        //                     b.canExtruderFire = true
+        //                 }
+        //                 ctx.beginPath(); //draw all the wave bullets
+        //                 for (let i = 1, len = bullet.length; i < len; i++) { //skip the first bullet (which is is oldest bullet)
+        //                     if (bullet[i].isWave) {
+        //                         if (bullet[i].isBranch || bullet[i - 1].isBranch) {
+        //                             ctx.moveTo(bullet[i].position.x, bullet[i].position.y)
+        //                         } else {
+        //                             ctx.lineTo(bullet[i].position.x, bullet[i].position.y)
+        //                         }
+        //                     }
+        //                 }
+        //                 if (b.wasExtruderOn && b.isExtruderOn) ctx.lineTo(m.pos.x + 15 * Math.cos(m.angle), m.pos.y + 15 * Math.sin(m.angle))
+        //                 ctx.lineWidth = 4;
+        //                 ctx.strokeStyle = "#f07"
+        //                 ctx.stroke();
+        //                 ctx.lineWidth = tech.extruderRange;
+        //                 ctx.strokeStyle = "rgba(255,0,110,0.06)"
+        //                 ctx.stroke();
+        //             }
+        //         } else {
+        //             m.hold = function () {
+        //                 if (m.isHolding) {
+        //                     m.drawHold(m.holdingTarget);
+        //                     m.holding();
+        //                     m.throwBlock();
+        //                 } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+        //                     if (tech.isPlasmaBoost && powerUps.boost.endCycle < simulation.cycle + 60) powerUps.boost.endCycle = simulation.cycle + 60
+
+        //                     if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
+        //                     m.grabPowerUp();
+        //                     m.lookForPickUp();
+        //                     b.plasma();
+        //                 } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
+        //                     m.pickUp();
+        //                 } else {
+        //                     m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
+        //                 }
+        //                 m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
+        //             }
+        //         }
+        //     },
+        //     effect() {
+        //         m.fieldMeterColor = "#f0f"
+        //         m.eyeFillColor = m.fieldMeterColor
+        //         this.set();
+        //     }
+        // },
         {
             name: "plasma torch",
             description: "use <strong class='color-f'>energy</strong> to emit short range <strong class='color-plasma'>plasma</strong><br><strong>1.5x</strong> <strong class='color-d'>damage</strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second",
@@ -4361,29 +4689,28 @@ const m = {
                     Matter.Composite.remove(engine.world, m.plasmaBall);
                 }
                 if (tech.isPlasmaBall) {
-                    const circleRadiusScale = 2
                     m.plasmaBall = Bodies.circle(m.pos.x + 10 * Math.cos(m.angle), m.pos.y + 10 * Math.sin(m.angle), 1, {
-                        // collisionFilter: {
-                        //     group: 0,
-                        //     category: 0,
-                        //     mask: 0 //cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
-                        // },
                         isSensor: true,
                         frictionAir: 0,
                         alpha: 0.7,
                         isPopping: false,
                         isAttached: false,
                         isOn: false,
-                        drain: 0.0017,
+                        drain: 0.0018,
                         radiusLimit: 10,
                         damage: 0.8,
+                        effectRadius: 10,
                         setPositionToNose() {
-                            const nose = { x: m.pos.x + 10 * Math.cos(m.angle), y: m.pos.y + 10 * Math.sin(m.angle) }
-                            Matter.Body.setPosition(this, Vector.add(nose, Vector.mult(Vector.normalise(Vector.sub(nose, m.pos)), circleRadiusScale * this.circleRadius)));
+                            const r = 27
+                            const nose = { x: m.pos.x + r * Math.cos(m.angle), y: m.pos.y + r * Math.sin(m.angle) }
+                            m.plasmaBall.effectRadius = 2 * m.plasmaBall.circleRadius
+                            Matter.Body.setPosition(this, Vector.add(nose, Vector.mult(Vector.normalise(Vector.sub(nose, m.pos)), this.effectRadius)));
                         },
                         fire() {
+                            const drain = 0.05
+                            if (m.energy > drain) m.energy -= drain
                             this.isAttached = false;
-                            const speed = 10 //scale with mass?
+                            const speed = 5 + Math.min(15, 80 / this.mass) //scale speed with mass
                             Matter.Body.setVelocity(this, {
                                 x: player.velocity.x * 0.4 + speed * Math.cos(m.angle),
                                 y: speed * Math.sin(m.angle)
@@ -4392,15 +4719,11 @@ const m = {
                             if (this.circleRadius < 10) this.isPopping = true
                         },
                         scale(scale) {
-                            Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
-                            if (this.circleRadius < this.radiusLimit) this.reset()
+                            if (this.circleRadius > this.radiusLimit) Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
                         },
                         reset() {
-                            // console.log(this.circleRadius)
-                            const scale = 1 / m.plasmaBall.circleRadius
-                            Matter.Body.scale(m.plasmaBall, scale, scale); //grow
-                            // console.log(this.circleRadius)
-                            // this.circleRadius = 0
+                            const scale = 1 / this.circleRadius
+                            Matter.Body.scale(this, scale, scale); //grow
                             this.alpha = 0.7
                             this.isOn = false
                             this.isPopping = false
@@ -4408,65 +4731,36 @@ const m = {
                         },
                         do() {
                             if (this.isOn) {
-                                //collisions with map
-                                if (Matter.Query.collides(this, map).length > 0) {
+                                this.effectRadius = 2 * m.plasmaBall.circleRadius
+
+                                if (this.isPopping) {
+                                    this.alpha -= 0.05
+                                    if (this.alpha < 0.06 || this.circleRadius < 10) {
+                                        this.reset()
+                                        // } else if (m.plasmaBall.circleRadius < 10) {
+                                        //     const scale = 1.04 + 2 / Math.max(1, m.plasmaBall.circleRadius)
+                                        //     Matter.Body.scale(m.plasmaBall, scale, scale); //grow
+                                    } else {
+                                        const scale = 1.04 + 4 / Math.max(1, this.circleRadius)
+                                        Matter.Body.scale(this, scale, scale); //grow
+                                    }
+                                } else if (Matter.Query.collides(this, map).length > 0) {
                                     if (this.isAttached) {
-                                        this.scale(Math.max(0.9, 0.998 - 0.1 / m.plasmaBall.circleRadius))
+                                        this.scale(Math.max(0.9, 0.99 - 0.1 / this.circleRadius))
                                     } else {
                                         this.isPopping = true
+                                        Matter.Body.setVelocity(this, { x: 0, y: 0 });
                                     }
                                 }
-                                if (this.isPopping) {
-                                    this.alpha -= 0.03
-                                    if (this.alpha < 0.1) {
-                                        this.reset()
-                                    } else {
-                                        const scale = 1.04 + 4 / Math.max(1, m.plasmaBall.circleRadius)
-                                        Matter.Body.scale(m.plasmaBall, scale, scale); //grow
-                                    }
-                                    // if (this.speed > 2.5) {
-                                    //     const slow = 0.9
-                                    //     Matter.Body.setVelocity(this, {
-                                    //         x: slow * this.velocity.x,
-                                    //         y: slow * this.velocity.y
-                                    //     });
-                                    // }
-                                }
-                                //collisions with mobs
-                                // const whom = Matter.Query.collides(this, mob)
-                                // const dmg = this.damage * m.dmgScale
-                                // for (let i = 0, len = whom.length; i < len; i++) {
-                                //     const mobHit = (who) => {
-                                //         if (who.alive) {
-                                //             if (!this.isAttached && !who.isMobBullet) this.isPopping = true
-                                //             who.damage(dmg);
-                                //             // if (who.shield) this.scale(Math.max(0.9, 0.99 - 0.5 / m.plasmaBall.circleRadius))
-                                //             if (who.speed > 5) {
-                                //                 Matter.Body.setVelocity(who, { //friction
-                                //                     x: who.velocity.x * 0.6,
-                                //                     y: who.velocity.y * 0.6
-                                //                 });
-                                //             } else {
-                                //                 Matter.Body.setVelocity(who, { //friction
-                                //                     x: who.velocity.x * 0.93,
-                                //                     y: who.velocity.y * 0.93
-                                //                 });
-                                //             }
-                                //         }
-                                //     }
-                                //     mobHit(whom[i].bodyA)
-                                //     mobHit(whom[i].bodyB)
-                                // }
 
                                 //damage nearby mobs
-                                const dmg = this.damage * m.dmgScale
+                                const dmg = this.damage * m.dmgScale * ((tech.isControlPlasma && !this.isAttached) ? 2 : 1)
                                 const arcList = []
-                                const damageRadius = circleRadiusScale * this.circleRadius
-                                const dischargeRange = 150 + 1600 * tech.plasmaDischarge + 1.3 * damageRadius
+                                const dischargeRange = 150 + 1600 * tech.plasmaDischarge + 1.3 * this.effectRadius
                                 for (let i = 0, len = mob.length; i < len; i++) {
                                     if (mob[i].alive && (!mob[i].isBadTarget || mob[i].isMobBullet) && !mob[i].isInvulnerable) {
                                         const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
-                                        if (sub < damageRadius + mob[i].radius) {
+                                        if (sub < this.effectRadius + mob[i].radius) {
                                             // if (!this.isAttached && !mob[i].isMobBullet) this.isPopping = true
                                             mob[i].damage(dmg);
                                             if (mob[i].speed > 5) {
@@ -4499,7 +4793,7 @@ const m = {
                                         }
                                         ctx.lineTo(who.position.x, who.position.y);
                                         ctx.strokeStyle = "#88f";
-                                        ctx.lineWidth = 4 + 3 * Math.random();
+                                        ctx.lineWidth = 6 + 3 * Math.random();
                                         ctx.stroke();
                                         if (who.damageReduction) {
                                             simulation.drawList.push({
@@ -4513,64 +4807,62 @@ const m = {
                                     }
                                 }
 
-
-                                //slowly slow down if too fast
-                                if (this.speed > 10) {
-                                    const scale = 0.998
-                                    Matter.Body.setVelocity(this, { x: scale * this.velocity.x, y: scale * this.velocity.y });
-                                }
-
                                 //graphics
-                                const radius = circleRadiusScale * this.circleRadius * (0.99 + 0.02 * Math.random()) + 3 * Math.random()
+                                const radius = this.effectRadius * (0.99 + 0.02 * Math.random()) + 3 * Math.random()
                                 const gradient = ctx.createRadialGradient(this.position.x, this.position.y, 0, this.position.x, this.position.y, radius);
-                                const alpha = this.alpha + 0.1 * Math.random()
+                                const alpha = this.alpha + 0.15 * Math.random()
+                                const stop = 0.75 + 0.1 * Math.random()
                                 gradient.addColorStop(0, `rgba(255,255,255,${alpha})`);
-                                gradient.addColorStop(0.35 + 0.1 * Math.random(), `rgba(255,150,255,${alpha})`);
-                                gradient.addColorStop(1, `rgba(255,0,255,${alpha})`);
+                                gradient.addColorStop(stop, `rgba(255,245,255,${alpha})`);
+                                gradient.addColorStop(stop + 0.1, `rgba(255,200,255,${alpha})`);
+                                gradient.addColorStop(1, `rgba(255,75,255,${alpha})`);
                                 // gradient.addColorStop(1, `rgba(255,150,255,${alpha})`);
                                 ctx.fillStyle = gradient
                                 ctx.beginPath();
                                 ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
                                 ctx.fill();
-                                //draw arcs
-                                const unit = Vector.rotate({ x: 1, y: 0 }, Math.random() * 6.28)
-                                let len = 8
-                                const step = this.circleRadius / len
-                                let x = this.position.x
-                                let y = this.position.y
-                                ctx.beginPath();
-                                if (Math.random() < 0.5) {
-                                    x += step * (unit.x + 6 * (Math.random() - 0.5))
-                                    y += step * (unit.y + 6 * (Math.random() - 0.5))
-                                    len -= 2
+                                if (tech.isControlPlasma) {
+                                    if (!this.isAttached) {
+                                        //extra stroke to show 2x damage
+                                        ctx.strokeStyle = "rgba(255,0,255,1)";
+                                        ctx.lineWidth = Math.max(1, 0.03 * this.effectRadius);
+                                        ctx.stroke();
+                                    }
+                                    //mouse control
+                                    const mouseUnit = Vector.normalise(Vector.sub(simulation.mouseInGame, this.position))
+                                    const speed = Vector.magnitude(this.velocity) //save current speed
+                                    const push = Vector.mult(mouseUnit, 0.008 * Math.pow(speed, 1.8)) //roughly optimized to produce similar turing radius for different sizes
+                                    Matter.Body.setVelocity(this, Vector.add(push, this.velocity));
+                                    Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), speed)); //keep speed constant
                                 }
-                                if (Math.random() < 0.5) {
-                                    x += step * (unit.x + 6 * (Math.random() - 0.5))
-                                    y += step * (unit.y + 6 * (Math.random() - 0.5))
-                                    len -= 2
-                                }
-                                ctx.moveTo(x, y);
 
-                                for (let i = 0; i < len; i++) {
-                                    x += step * (unit.x + 1.9 * (Math.random() - 0.5))
-                                    y += step * (unit.y + 1.9 * (Math.random() - 0.5))
-                                    ctx.lineTo(x, y);
+                                //draw arc from radius inward in a random walk
+                                ctx.beginPath();
+                                const unit = Vector.rotate({ x: 1, y: 0 }, Math.random() * 6.28)
+                                let where = Vector.add(this.position, Vector.mult(unit, 0.98 * radius))
+                                ctx.moveTo(where.x, where.y)
+                                const sub = Vector.normalise(Vector.sub(this.position, where))
+                                for (let i = 0, len = 7; i < len; i++) {
+                                    const step = Vector.rotate(Vector.mult(sub, 17 * Math.random()), 2 * (Math.random() - 0.5))
+                                    where = Vector.add(where, step)
+                                    ctx.lineTo(where.x, where.y)
                                 }
                                 ctx.strokeStyle = "#88f";
-                                ctx.lineWidth = 2 * Math.random();
+                                ctx.lineWidth = 0.5 + 2 * Math.random();
                                 ctx.stroke();
                             }
                         },
                     });
 
                     Composite.add(engine.world, m.plasmaBall);
-                    // m.plasmaBall.startingVertices = m.plasmaBall.vertices.slice();
                     m.hold = function () {
                         if (m.isHolding) {
                             m.drawHold(m.holdingTarget);
                             m.holding();
                             m.throwBlock();
                         } else if (input.field) { //not hold but field button is pressed
+                            if (tech.isPlasmaBoost && powerUps.boost.endCycle < simulation.cycle + 60) powerUps.boost.endCycle = simulation.cycle + 60
+
                             if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                             m.grabPowerUp();
                             m.lookForPickUp();
@@ -4586,7 +4878,6 @@ const m = {
                                         m.plasmaBall.alpha = 0.7
                                         m.plasmaBall.setPositionToNose()
                                         // m.plasmaBall.reset()
-
                                     }
                                 } else if (m.energy > m.plasmaBall.drain) { //charge up when attached
                                     if (tech.isCapacitor) {
@@ -4605,22 +4896,10 @@ const m = {
                                     }
                                     m.plasmaBall.setPositionToNose()
 
-                                    //add friction for player when holding ball, more friction in vertical
-                                    // const floatScale = Math.sqrt(m.plasmaBall.circleRadius)
-                                    // const friction = 0.0002 * floatScale
-                                    // const slowY = (player.velocity.y > 0) ? Math.max(0.8, 1 - friction * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - friction * Math.abs(player.velocity.y)) //down : up
-                                    // Matter.Body.setVelocity(player, {
-                                    //     x: Math.max(0.95, 1 - friction * Math.abs(player.velocity.x)) * player.velocity.x,
-                                    //     y: slowY * player.velocity.y
-                                    // });
-
-                                    // if (player.velocity.y > 7) player.force.y -= 0.95 * player.mass * simulation.g //less gravity when falling fast
-                                    // player.force.y -= Math.min(0.95, 0.05 * floatScale) * player.mass * simulation.g; //undo some gravity on up or down
-
                                     //float
-                                    const slowY = (player.velocity.y > 0) ? Math.max(0.8, 1 - 0.002 * player.velocity.y * player.velocity.y) : Math.max(0.98, 1 - 0.001 * Math.abs(player.velocity.y)) //down : up
+                                    const slowY = (player.velocity.y > 0) ? Math.max(0.5, 1 - 0.006 * player.velocity.y * player.velocity.y) : Math.max(0.997, 1 - 0.001 * Math.abs(player.velocity.y)) //down : up
                                     Matter.Body.setVelocity(player, {
-                                        x: Math.max(0.95, 1 - 0.003 * Math.abs(player.velocity.x)) * player.velocity.x,
+                                        x: Math.max(0.95, 1 - 0.002 * Math.abs(player.velocity.x)) * player.velocity.x,
                                         y: slowY * player.velocity.y
                                     });
                                     if (player.velocity.y > 5) {
@@ -4629,20 +4908,20 @@ const m = {
                                         player.force.y -= 0.5 * player.mass * simulation.g;
                                     }
                                 } else {
-                                    m.fieldCDcycle = m.cycle + 90;
+                                    // m.fieldCDcycle = m.cycle + 60;
                                     m.plasmaBall.fire()
                                 }
                             }
                         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                             m.pickUp();
                             if (m.plasmaBall.isAttached) {
-                                m.fieldCDcycle = m.cycle + 30;
+                                // m.fieldCDcycle = m.cycle;
                                 m.plasmaBall.fire()
                             }
                         } else {
                             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                             if (m.plasmaBall.isAttached) {
-                                m.fieldCDcycle = m.cycle + 30;
+                                // m.fieldCDcycle = m.cycle;
                                 m.plasmaBall.fire()
                             }
                         }
@@ -4657,6 +4936,8 @@ const m = {
                             m.holding();
                             m.throwBlock();
                         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+                            if (tech.isPlasmaBoost && powerUps.boost.endCycle < simulation.cycle + 60) powerUps.boost.endCycle = simulation.cycle + 60
+
                             if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                             m.grabPowerUp();
                             m.lookForPickUp();
@@ -4691,94 +4972,6 @@ const m = {
                         ctx.strokeStyle = "rgba(255,0,110,0.06)"
                         ctx.stroke();
                     }
-                    // } else if (true) { //plasma sword slash
-                    //     const plasmaSweepCycles = 30
-                    //     m.plasmaSweep = 0
-                    //     m.plasmaSlashDirection = m.flipLegs//Math.random() > 0.5 ? 1 : -1;
-                    //     m.hold = function () {
-                    //         if (m.isHolding) {
-                    //             m.drawHold(m.holdingTarget);
-                    //             m.holding();
-                    //             m.throwBlock();
-                    //             m.plasmaSweep = 0
-                    //             // } else if (true) { //not hold but field button is pressed
-                    //         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
-                    //             if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
-                    //             m.grabPowerUp();
-                    //             m.lookForPickUp();
-
-                    //             //graphics
-                    //             if (m.plasmaSweep === 0) m.plasmaSlashDirection = m.flipLegs //Math.random() > 0.5 ? 1 : -1;
-                    //             const angle = m.angle //+ 1 * (m.plasmaSweep - plasmaSweepCycles / 2) / plasmaSweepCycles * m.plasmaSlashDirection
-                    //             const plasmaSweepCapped = Math.min(m.plasmaSweep, plasmaSweepCycles - 8) / plasmaSweepCycles
-                    //             const range = 100 * plasmaSweepCapped
-                    //             const arc = 1.3
-                    //             const A = { x: m.pos.x + range * Math.cos(angle - arc), y: m.pos.y + range * Math.sin(angle - arc) }
-                    //             const B = { x: m.pos.x + range * Math.cos(angle + arc), y: m.pos.y + range * Math.sin(angle + arc) }
-                    //             const controlRange = 500 * plasmaSweepCapped
-                    //             const AC = { x: m.pos.x + controlRange * Math.cos(angle - arc / 2), y: m.pos.y + controlRange * Math.sin(angle - arc / 2) }
-                    //             const BC = { x: m.pos.x + controlRange * Math.cos(angle + arc / 2), y: m.pos.y + controlRange * Math.sin(angle + arc / 2) }
-                    //             const innerControlRange = 300 * plasmaSweepCapped
-                    //             const ACinner = { x: m.pos.x + innerControlRange * Math.cos(angle - arc / 2), y: m.pos.y + innerControlRange * Math.sin(angle - arc / 2) }
-                    //             const BCinner = { x: m.pos.x + innerControlRange * Math.cos(angle + arc / 2), y: m.pos.y + innerControlRange * Math.sin(angle + arc / 2) }
-                    //             ctx.beginPath();
-                    //             ctx.moveTo(A.x, A.y)
-                    //             ctx.bezierCurveTo(AC.x, AC.y, BC.x, BC.y, B.x, B.y); //outer curve
-                    //             ctx.bezierCurveTo(BCinner.x, BCinner.y, ACinner.x, ACinner.y, A.x, A.y); //inner curve
-                    //             // ctx.strokeStyle = "#000"
-                    //             // ctx.stroke();
-                    //             ctx.fillStyle = "rgba(255,0,255,0.5)"
-                    //             ctx.fill();
-
-                    //             //draw control points for graphics reference
-                    //             ctx.lineWidth = '0.5'
-                    //             ctx.beginPath();
-                    //             ctx.arc(A.x, A.y, 5, 0, 2 * Math.PI);
-                    //             ctx.stroke();
-                    //             ctx.beginPath();
-                    //             ctx.arc(B.x, B.y, 5, 0, 2 * Math.PI);
-                    //             ctx.stroke();
-                    //             ctx.beginPath();
-                    //             ctx.arc(AC.x, AC.y, 5, 0, 2 * Math.PI);
-                    //             ctx.stroke();
-                    //             ctx.beginPath();
-                    //             ctx.arc(BC.x, BC.y, 5, 0, 2 * Math.PI);
-                    //             ctx.stroke();
-                    //             ctx.beginPath();
-                    //             ctx.arc(ACinner.x, ACinner.y, 5, 0, 2 * Math.PI);
-                    //             ctx.stroke();
-                    //             ctx.beginPath();
-                    //             ctx.arc(BCinner.x, BCinner.y, 5, 0, 2 * Math.PI);
-                    //             ctx.stroke();
-
-                    //             //mob collision detection
-                    //             collideRange = 160
-                    //             const collideCenter = {
-                    //                 x: m.pos.x + collideRange * Math.cos(angle),
-                    //                 y: m.pos.y + collideRange * Math.sin(angle)
-                    //             }
-                    //             ctx.beginPath();
-                    //             ctx.arc(collideCenter.x, collideCenter.y, 140, 0, 2 * Math.PI);
-                    //             ctx.stroke();
-
-                    //             //push mob away and slow them?
-
-
-                    //             //sweeping motion and cooldown
-                    //             m.plasmaSweep++
-                    //             if (m.plasmaSweep > plasmaSweepCycles) {
-                    //                 m.plasmaSweep = 0
-                    //                 if (m.fireCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 30
-                    //             }
-                    //         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
-                    //             m.pickUp();
-                    //             m.plasmaSweep = 0
-                    //         } else {
-                    //             m.plasmaSweep = 0
-                    //             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-                    //         }
-                    //         m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
-                    //     }
                 } else {
                     m.hold = function () {
                         if (m.isHolding) {
@@ -4786,6 +4979,8 @@ const m = {
                             m.holding();
                             m.throwBlock();
                         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
+                            if (tech.isPlasmaBoost && powerUps.boost.endCycle < simulation.cycle + 60) powerUps.boost.endCycle = simulation.cycle + 60
+
                             if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                             m.grabPowerUp();
                             m.lookForPickUp();
@@ -5544,9 +5739,7 @@ const m = {
                                                 m.fieldRange *= 0.8
                                                 if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                                 if (tech.isWormholeWorms) { //pandimensional spermia
-                                                    b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
-                                                    Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
-                                                    if (Math.random() < 0.5) { //chance for a second worm
+                                                    for (let i = 0, len = 1 + Math.floor(3 * Math.random()); i < len; i++) {
                                                         b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                                         Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
                                                     }
@@ -5569,11 +5762,9 @@ const m = {
                                             if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                             if (m.fieldMode === 0 || m.fieldMode === 9) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                             if (tech.isWormholeWorms) { //pandimensional spermia
-                                                b.worm(Vector.add(m.hole.pos1, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
-                                                Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), 5));
-                                                if (Math.random() < 0.5) { //chance for a second worm
-                                                    b.worm(Vector.add(m.hole.pos1, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
-                                                    Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), 5));
+                                                for (let i = 0, len = 1 + Math.floor(3 * Math.random()); i < len; i++) {
+                                                    b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
+                                                    Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
                                                 }
                                             }
                                             break
@@ -5753,6 +5944,9 @@ const m = {
                                             mobs.statusStun(who[i].body, 360)
                                         }
                                     }
+                                }
+                                if (true) {
+
                                 }
                             }
                         }

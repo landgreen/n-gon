@@ -33,7 +33,8 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField("pilot wave") //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(5) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.energy = 0
 
             // m.energy = 0
             // powerUps.research.count = 3
@@ -49,12 +50,12 @@ const level = {
 
             // b.guns[8].ammo = 100000000
             // requestAnimationFrame(() => { tech.giveTech("non-renewables") });
-            // tech.giveTech("dark matter")
+            // tech.giveTech("cyclotron")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("principle of locality")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Bells theorem")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("plasma ball")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("corona discharge")
             // m.skin.egg();
-            // for (let i = 0; i < 1; ++i) tech.giveTech("many-worlds")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("dielectric")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("surfing") });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("interest") });
             // for (let i = 0; i < 1; i++) tech.giveTech("interest")
@@ -62,7 +63,7 @@ const level = {
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(450, -50, "field");
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
-            // level.subway();
+            // level.testing();
 
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************

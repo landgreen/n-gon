@@ -1,13 +1,20 @@
 ******************************************************** NEXT PATCH **************************************************
 
-pilot wave tech: Bells theorem - field is always on for no energy cost
-pilot wave tech: principle of locality - 0.9x damage taken while inside pilot wave field, -2 choices
+updated plasma ball
+  new graphics
+  player can jump much higher with plasma ball active
+  ball explodes quicker and for less damage
+    ball stops moving after hitting walls
+  small balls move faster
+  releasing the ball costs 4 energy, but the drain while charging is a bit lower
+  can still pick up blocks at zero energy
 
-hidden-variable theory 1.2->1.3 damage per field tech
-WIMPS spawn 4->5 research per level
+plasma fieldtech: dielectric - 3 research cost, while your plasma field is active you are exciton boosted for 1 second
+plasma fieldtech: cyclotron - curve plasma ball towards mouse, 2x plasma damage after releasing it
+    
+transdimensional worms spawns (1-2)->(1-3) worms
 
-bug fixes
-  fixed exploit with final tech power up on subway level
+added sound effect to rule 30, rule 90 so people notice when you get rewards
 
 
 ******************************************************** BUGS ********************************************************
@@ -16,18 +23,27 @@ graphical bug - player can become crouched while not touching the ground if they
 
 *********************************************************** TODO *****************************************************
 
+apply plasma jet to plasma ball?
+  increase range of electrical arc?
+    this is the same as corona discharge
+
+wormhole fieldtech:   - gain 1% duplication for this level each time the wormhole eats a block
+  add a limit to the number of blocks that can be duplicated?
+  can this be exploited to not be fun?
+  how many blocks are on an average level?
+
+tech - rip in spacetime - using wormhole leaves behind a zone of radiation, like neutron bomb  ( grenadeNeutron )
+  make a new bullet type for rip() in spacetime so you can use it for several things
+  rips()
+    lasts 2-10 seconds?
+    damages mobs and player
+    slows things caught inside?
+    black circle with randomly changing radius and sparkles inside the black circle
+      white stroke (maybe with dotted lines like laser)
+
 tech - benefit if you haven't killed any mobs on this level
   have to clean up mobs that die on level spawn from falling blocks 
 tech - benefit in the first 20 seconds of the level
-
-plasma globe - it should not explode on map contact, but instead shrink?
-  only explode on mouse release
-  use pilot wave code?
-
-rework JUNK
-  example:  +5 JUNK adds a frequency of (1?  6?) to a random JUNK tech
-    if you see that JUNK tech again it's frequency drops down to 0 again
-  have to rework constraints and a few other tech...
 
 mob - moves around, but then stops and makes porcupine spikes for 2 seconds, then moves again.
   maybe use hopper movement?
@@ -1226,14 +1242,13 @@ possible names for tech
   SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
   Josephson junction - superconducting junction used in SQUIDS and quantum computers
   nuclear pasta - hard matter in neutron star
-  nonlocal, nonlocality:  maybe use for pilot wave 
+  spaghettification
   fine-tuned universe
   nonperturbative
   D-branes
   instanton or pseudoparticle
   soliton  (wave packet)
   hall effect thrusters
-  spaghettification
   particle accelerator
   superluminal signalling
   NP-complete
@@ -1283,6 +1298,7 @@ possible names for tech
   Quintessence - related to dark energy
   biofilm - something defensive?  related to spores?
   Thermogalvanic - makes things cold, for no energy
+  Intron - noncoding DNA that separates regions of coding DNA,  use for JUNK tech
 
 ******************************************************* DESIGN ******************************************************
 

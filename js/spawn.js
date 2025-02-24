@@ -3945,7 +3945,7 @@ const spawn = {
         me.nextBlinkCycle = me.delay;
         me.JumpDistance = 0//set in redMode()
         // spawn.shield(me, x, y, 1);
-        me.collisionFilter.mask = cat.bullet | cat.map | cat.body  //cat.player |
+        me.collisionFilter.mask = cat.bullet | cat.map //| cat.body  //cat.player |
         me.powerUpNames = []
         me.redMode = function () {
             this.color = `rgba(255,0,200,`

@@ -1761,7 +1761,6 @@ const powerUps = {
             }
         }
 
-
         if (smallIndexes.length > 2 && Math.random() < 0.66) {             // console.log("no big, at least 3 small can combine")
             for (let j = 0; j < 3; j++) {
                 for (let i = 0; i < powerUp.length; i++) {
@@ -1773,7 +1772,7 @@ const powerUps = {
                 }
             }
 
-            options = ["tech", "gun", "field"]
+            options = ["tech", "tech", "tech", "gun", "gun", "field"]
             powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
         } else if (bigIndexes.length > 0 && Math.random() < 0.5) { // console.log("at least 1 big can spilt")
             const index = bigIndexes[Math.floor(Math.random() * bigIndexes.length)]
