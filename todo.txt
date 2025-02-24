@@ -1,20 +1,8 @@
 ******************************************************** NEXT PATCH **************************************************
 
-updated plasma ball
-  new graphics
-  player can jump much higher with plasma ball active
-  ball explodes quicker and for less damage
-    ball stops moving after hitting walls
-  small balls move faster
-  releasing the ball costs 4 energy, but the drain while charging is a bit lower
-  can still pick up blocks at zero energy
-
-plasma fieldtech: dielectric - 3 research cost, while your plasma field is active you are exciton boosted for 1 second
-plasma fieldtech: cyclotron - curve plasma ball towards mouse, 2x plasma damage after releasing it
-    
-transdimensional worms spawns (1-2)->(1-3) worms
-
-added sound effect to rule 30, rule 90 so people notice when you get rewards
+plasma ball resets instantly after exploding
+  reduced damage by 8%
+  increase cost to fire 4->5 energy
 
 
 ******************************************************** BUGS ********************************************************
