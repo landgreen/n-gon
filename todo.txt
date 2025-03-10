@@ -1,9 +1,26 @@
 ******************************************************** NEXT PATCH **************************************************
 
-plasma ball resets instantly after exploding
-  reduced damage by 8%
-  increase cost to fire 4->5 energy
+standing wave field tech: superposition -  if you have above 200 energy, 0.1x damage taken
 
+updated some harpoon gun images
+
+1st ionization energy 14->15 energy per heal
+increase block pick up range by 30
+plasma jet applies to plasma ball, and makes it bigger
+spore gun shows path prediction when crouched
+futures exchange 6->7 duplication per cancel
+residual dipolar coupling 8->10 coupling per cancel
+commodities exchange (8-12)->(10-14) power ups per cancel
+
+
+grappling hook
+  accelerates faster
+  initial launch gains player velocity
+    makes aiming easier while moving
+  grapple has a slightly shorter cooldown after hitting mobs
+
+bugs
+  fixed soft lock on training level - grenades
 
 ******************************************************** BUGS ********************************************************
 
@@ -11,9 +28,43 @@ graphical bug - player can become crouched while not touching the ground if they
 
 *********************************************************** TODO *****************************************************
 
-apply plasma jet to plasma ball?
-  increase range of electrical arc?
-    this is the same as corona discharge
+!!!mob: spiker - moves around, but then stops and makes porcupine spikes for 2 seconds, then moves again.
+  maybe use hopper movement?
+  maybe use slasher laser code
+
+make guns do different things if  tap or hold fire
+  effects have some overlap with crouch
+  guns
+    wave: amplitude difference, single wave/double wave
+    nail gun:  one large bullet, faster
+    laser: wide beam
+    super balls: ball velocity
+    foam: speed, size
+    harpoon: retract early?
+  like incendiary, but only active on tap and release
+    bigger explosions to balance?
+
+tech - if you haven't fired a bullet in 4 seconds your next bullet is bigger?
+  effect?
+    size: nail gun,shotgun,super balls,drones,foam,harpoon
+    spores,mine: number of projectiles
+    wave?
+    explosion size: missiles,grenades
+    laser?
+  code?
+    ephemera?  This doesn't sync to the bullet fired, it would have to be a additional projectiles
+    custom to each gun?
+
+option for numerical HUD
+  dmg, energy, health, defense
+
+hold jump to jump higher
+  field tech?  or skin tech?
+    maybe require nitinol first?
+
+increase interest percent, but make it focused on one type:
+  this lets the player make more strategic choices
+  research, coupling, ammo?
 
 wormhole fieldtech:   - gain 1% duplication for this level each time the wormhole eats a block
   add a limit to the number of blocks that can be duplicated?
@@ -32,9 +83,6 @@ tech - rip in spacetime - using wormhole leaves behind a zone of radiation, like
 tech - benefit if you haven't killed any mobs on this level
   have to clean up mobs that die on level spawn from falling blocks 
 tech - benefit in the first 20 seconds of the level
-
-mob - moves around, but then stops and makes porcupine spikes for 2 seconds, then moves again.
-  maybe use hopper movement?
 
 soft body boss?
   search    softBody(x, y, angle = 0, isAttached = true, len = 15, radius = 20, stiffness = 1, damping = 1) {
@@ -1167,7 +1215,6 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   time dilation - graphic of a hyperbolic equation Luminogram
   negative mass - Blacklight painting by Moebius
   plasma torch - by Dan Mumford
-
   metamaterial cloaking - Scientific photography by Miki Asai,   by Bruce Munro
   molecular assembler - by Laurie Greasley 16-bit Isometric 
   wormhole - by Tim White
@@ -1180,7 +1227,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   drones - insect quadcopter tilt-shift photography
   super balls - By Akari Toriyama
   wave - sound wave oscilloscope by Paul Catherall,   concentric circles by Paul Catherall 
-    Barbara Takenaga's painting depicting a clean sound wave on aoscilloscope device --ar 3:2 --v 5
+    Barbara Takenaga's painting depicting a clean sound wave on oscilloscope device --ar 3:2 --v 5
   foam - black blobs Ink doodle
   harpoon - iron harpoon on a rope weapon art white background by Eiichiro Oda --no fish --ar 3:2 --v 5 --s 750
   mine - by Dan McPharlin
@@ -1268,7 +1315,6 @@ possible names for tech
   Casimir effect - attractive force between two close conductive plates
   difference engine - early calculator/computer
   cyanoacrylate - superglue use for a slowing effect?
-  superposition - something with waves overlapping
   math terms - integral, derivative, Laplace transform, inflection point
   quasicrystals - something with low friction, maybe defense?
   Coalescence - things merging together like clouds.  maybe mergin power ups?

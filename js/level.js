@@ -18,6 +18,7 @@ const level = {
         if (level.levelsCleared === 0) { //this code only runs on the first level
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
             // simulation.difficultyMode = 1
+            // build.isExperimentRun = true
 
             // simulation.isHorizontalFlipped = true
             // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
@@ -43,7 +44,7 @@ const level = {
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("spores") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // tech.laserColor = "#fff"
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
@@ -52,8 +53,8 @@ const level = {
             // requestAnimationFrame(() => { tech.giveTech("non-renewables") });
             // tech.giveTech("cyclotron")
             // tech.addJunkTechToPool(0.5)
+            // for (let i = 0; i < 3; ++i) tech.giveTech("plasma jet")
             // for (let i = 0; i < 1; ++i) tech.giveTech("plasma ball")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("corona discharge")
             // m.skin.egg();
             // for (let i = 0; i < 1; ++i) tech.giveTech("dielectric")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("surfing") });
@@ -69,7 +70,7 @@ const level = {
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
 
-            // for (let i = 0; i < 10; ++i) spawn.exploder(1900, -500)
+            // for (let i = 0; i < 1; ++i) spawn.spiker(1900, -500)
             // for (let i = 0; i < 1; i++) spawn.snakeBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "gun");
@@ -38510,7 +38511,17 @@ const level = {
         spawn.mapRect(1725, -3150, 50, 175);
         spawn.mapRect(1725, -3150, 425, 50);
 
-        spawn.nodeGroup(1200, -1500, "grenadier", 7);
+        spawn.nodeGroup(1200, -1500, "grenadier", 7, 35, 200);
+        //     nodeGroup(
+        //     x,
+        //     y,
+        //     spawn = "striker",
+        //     nodes = Math.min(2 + Math.ceil(Math.random() * (simulation.difficulty + 2)), 8),
+        //     //Math.ceil(Math.random() * 3) + Math.min(4,Math.ceil(simulation.difficulty/2)),
+        //     radius = Math.ceil(Math.random() * 10) + 18, // radius of each node mob
+        //     sideLength = Math.ceil(Math.random() * 100) + 70, // distance between each node mob
+        //     stiffness = Math.random() * 0.03 + 0.005
+        // )
     },
     harpoon() { //jump at the top of the elevator's path to go extra high
         level.setPosToSpawn(0, -50); //normal spawn

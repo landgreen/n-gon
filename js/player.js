@@ -781,6 +781,7 @@ const m = {
     lastCalculatedDefense: 0, //used to decided if defense bar needs to be redrawn  (in simulation.checks)
     defense() {
         let dmg = 1
+        if (tech.energyDefense && m.energy > 1.99) dmg *= 0.1
         if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
         if (tech.isMaxHealthDefense && m.health === m.maxHealth) dmg *= 0.1
         if (tech.isDiaphragm) dmg *= 0.55 + 0.35 * Math.sin(m.cycle * 0.0075);
@@ -3486,7 +3487,7 @@ const m = {
             }
         }
     },
-    lookForPickUp() { //find body to pickup
+    lookForBlock() { //find body to pickup
         const grabbing = {
             targetIndex: null,
             targetRange: 150,
@@ -3498,7 +3499,7 @@ const m = {
                 const dist = Vector.magnitude(Vector.sub(body[i].position, m.pos));
                 const looking = m.lookingAt(body[i]);
                 // if (dist < grabbing.targetRange && (looking || !grabbing.lookingAt) && !body[i].isNotHoldable) {
-                if (dist < grabbing.targetRange && looking && !body[i].isNotHoldable) {
+                if (dist < grabbing.targetRange + 30 && looking && !body[i].isNotHoldable) {
                     grabbing.targetRange = dist;
                     grabbing.targetIndex = i;
                     // grabbing.lookingAt = looking;
@@ -3670,7 +3671,7 @@ const m = {
                     } else if ((input.field && m.fieldCDcycle < m.cycle)) { //not hold but field button is pressed
                         if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                         m.grabPowerUp();
-                        m.lookForPickUp();
+                        m.lookForBlock();
                         if (m.energy > m.minEnergyToDeflect) {
                             m.drawField();
                             m.pushMobsFacing();
@@ -3767,7 +3768,7 @@ const m = {
                     } else if ((input.field) && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
                         if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                         m.grabPowerUp();
-                        m.lookForPickUp();
+                        m.lookForBlock();
                     } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                         m.pickUp();
                     } else {
@@ -3956,7 +3957,7 @@ const m = {
 
                         if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                         m.grabPowerUp();
-                        m.lookForPickUp();
+                        m.lookForBlock();
                         m.fieldPosition = { x: m.pos.x, y: m.pos.y }
                         m.fieldAngle = m.angle
                         //draw field attached to player
@@ -4047,7 +4048,7 @@ const m = {
                     } else if (input.field) { //push away
                         if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                         m.grabPowerUp();
-                        m.lookForPickUp();
+                        m.lookForBlock();
                         if (m.energy > tech.negativeMassCost && m.fieldCDcycle < m.cycle) {
                             if (tech.isFlyFaster) {
                                 //look for nearby objects to make zero-g
@@ -4332,7 +4333,7 @@ const m = {
                     } else if ((input.field && m.fieldCDcycle < m.cycle)) { //not hold but field button is pressed
                         if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                         m.grabPowerUp();
-                        m.lookForPickUp();
+                        m.lookForBlock();
                         if (tech.isPrinter && input.down) {
                             m.printBlock();
                         } else if (m.energy > m.minEnergyToDeflect) {
@@ -4398,7 +4399,7 @@ const m = {
                         },
                         do() {
                             if (this.isOn) {
-                                this.effectRadius = 2 * m.plasmaBall.circleRadius
+                                this.effectRadius = 2 * m.plasmaBall.circleRadius * (0.6 + 0.4 * tech.isPlasmaRange)
 
                                 if (Matter.Query.collides(this, map).length > 0) {
                                     if (this.isAttached) {
@@ -4566,7 +4567,7 @@ const m = {
 
                             if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                             m.grabPowerUp();
-                            m.lookForPickUp();
+                            m.lookForBlock();
                             if (m.fieldCDcycle < m.cycle) {
                                 //field is active
                                 if (!m.plasmaBall.isAttached) { //return ball to player
@@ -4641,7 +4642,7 @@ const m = {
 
                             if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                             m.grabPowerUp();
-                            m.lookForPickUp();
+                            m.lookForBlock();
                             b.extruder();
                         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                             m.pickUp();
@@ -4684,7 +4685,7 @@ const m = {
 
                             if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                             m.grabPowerUp();
-                            m.lookForPickUp();
+                            m.lookForBlock();
                             b.plasma();
                         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                             m.pickUp();
@@ -4768,7 +4769,7 @@ const m = {
                             if (m.energy > drain) m.energy -= drain
                             m.grabPowerUp();
                             if (this.rewindCount === 0) {
-                                m.lookForPickUp();
+                                m.lookForBlock();
                             }
 
                             if (!m.holdingTarget) {
@@ -4856,7 +4857,7 @@ const m = {
                             const drain = 0.0026 / (1 + 0.03 * m.coupling)
                             if (m.energy > drain) m.energy -= drain
                             m.grabPowerUp();
-                            m.lookForPickUp(); //this drains energy 0.001
+                            m.lookForBlock(); //this drains energy 0.001
                             if (m.energy > drain) {
                                 timeStop();
                             } else { //holding, but field button is released
@@ -4940,7 +4941,7 @@ const m = {
                     } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold and field button is pressed
                         if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                         m.grabPowerUp();
-                        m.lookForPickUp();
+                        m.lookForBlock();
                     } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding target exists, and field button is not pressed
                         m.pickUp();
                     } else {
@@ -5902,7 +5903,7 @@ const m = {
                                     Matter.Query.ray(map, m.pos, mob[i].position).length === 0
                                 ) {
                                     m.energy -= 0.1
-                                    if (m.fieldCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 30
+                                    if (m.fieldCDcycle < m.cycle + 20) m.fieldCDcycle = m.cycle + 20
                                     const angle = Math.atan2(mob[i].position.y - player.position.y, mob[i].position.x - player.position.x);
                                     b.harpoon(m.pos, mob[i], angle, 0.75, true, 20) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
                                     bullet[bullet.length - 1].drain = 0

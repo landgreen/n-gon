@@ -559,7 +559,7 @@ const tech = {
         name: "1st ionization energy",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Ionization_energy' class="link">1st ionization energy</a>`,
         descriptionFunction() {
-            return `convert current and future <div class="heal-circle"></div> into <div class="heal-circle" style="background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style="background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${14 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)}</strong> maximum <strong class='color-f'>energy</strong>`
+            return `convert current and future <div class="heal-circle"></div> into <div class="heal-circle" style="background-color: #ff0; border: 0.5px #000 solid;"></div><br><div class="heal-circle" style="background-color: #ff0; border: 0.5px #000 solid;"></div> give <strong>+${15 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)}</strong> maximum <strong class='color-f'>energy</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -4284,7 +4284,7 @@ const tech = {
     {
         name: "residual dipolar coupling",
         descriptionFunction() {
-            return `clicking <strong class='color-cancel'>cancel</strong> spawns ${powerUps.orb.coupling(8)}<br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
+            return `clicking <strong class='color-cancel'>cancel</strong> spawns ${powerUps.orb.coupling(10)}<br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
         },
         maxCount: 1,
         count: 0,
@@ -4304,7 +4304,7 @@ const tech = {
     {
         name: "commodities exchange",
         descriptionFunction() {
-            return `clicking <strong class='color-cancel'>cancel</strong> for ${powerUps.orb.field()}, ${powerUps.orb.tech()}, or ${powerUps.orb.gun()}<br>spawns <strong>8-12</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
+            return `clicking <strong class='color-cancel'>cancel</strong> for ${powerUps.orb.field()}, ${powerUps.orb.tech()}, or ${powerUps.orb.gun()}<br>spawns <strong>10-14</strong> ${powerUps.orb.heal()}, ${powerUps.orb.ammo()}, or ${powerUps.orb.research(1)}`
         },
         maxCount: 1,
         count: 0,
@@ -4344,7 +4344,7 @@ const tech = {
     },
     {
         name: "futures exchange",
-        description: `clicking <strong class='color-cancel'>cancel</strong> for ${powerUps.orb.field()}, ${powerUps.orb.tech()}, or ${powerUps.orb.gun()}<br>gives <strong>+6%</strong> power up <strong class='color-dup'>duplication</strong> chance`,
+        description: `clicking <strong class='color-cancel'>cancel</strong> for ${powerUps.orb.field()}, ${powerUps.orb.tech()}, or ${powerUps.orb.gun()}<br>gives <strong>+7%</strong> power up <strong class='color-dup'>duplication</strong> chance`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -7773,6 +7773,27 @@ const tech = {
         }
     },
     {
+        name: "superposition",
+        descriptionFunction() {
+            return `<strong>0.1x</strong> <strong class='color-defense'>damage taken</strong><br>while you have above <strong>200</strong> <strong class='color-f'>energy</strong>`
+        },
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 1
+        },
+        requires: "standing wave",
+        effect() {
+            tech.energyDefense = true
+        },
+        remove() {
+            tech.energyDefense = false
+        }
+    },
+    {
         name: "surface plasmons",
         description: "if <strong>deflecting</strong> drains all your <strong class='color-f'>energy</strong><br>emit <strong class='color-laser'>laser</strong> beams that scale with max <strong class='color-f'>energy</strong>",
         isFieldTech: true,
@@ -7841,10 +7862,6 @@ const tech = {
         }
     },
     {
-
-        // descriptionFunction() {
-        //     return `use ${powerUps.orb.research(2)}<br><span style = 'font-size:94%;'><strong>1.01x</strong> <strong class='color-d'>damage</strong> per <strong class='color-f'>energy</strong> below <strong>maximum</strong> <em style ="float: right;">(${(1 + Math.max(0, m.maxEnergy - m.energy)).toFixed(2)}x)</em></span>`
-        // },
         name: "electronegativity",
         descriptionFunction() {
             return `<strong>1.0023x</strong> <strong class='color-d'>damage</strong> per <strong class='color-f'>energy</strong><br><em style ="float: right;">(${(1 + 0.23 * m.energy).toFixed(2)}x, ${(1 + 0.23 * m.maxEnergy).toFixed(2)}x at max energy)</em>`
@@ -8488,16 +8505,22 @@ const tech = {
     {
         name: "plasma jet",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Plasma_(physics)' class="link">plasma jet</a>`,
-        description: `use ${powerUps.orb.research(1)}<br><strong>1.5x</strong> <strong class='color-plasma'>plasma</strong> <strong>torch</strong> range`,
+        descriptionFunction() {
+            if (tech.isPlasmaBall) {
+                return `use ${powerUps.orb.research(1)}<br><strong>1.5x</strong> <strong class='color-plasma'>plasma</strong> <strong>ball</strong> radius`
+            } else {
+                return `use ${powerUps.orb.research(1)}<br><strong>1.5x</strong> <strong class='color-plasma'>plasma</strong> <strong>torch</strong> range`
+            }
+        },
         isFieldTech: true,
         maxCount: 3,
         count: 0,
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.plasmaBotCount || m.fieldMode === 5) && (build.isExperimentSelection || powerUps.research.count > 0) && !tech.isPlasmaBall
+            return (tech.plasmaBotCount || m.fieldMode === 5) && (build.isExperimentSelection || powerUps.research.count > 0)
         },
-        requires: "plasma torch, not plasma ball",
+        requires: "plasma torch",
         effect() {
             tech.isPlasmaRange += 0.5;
             for (let i = 0; i < 1; i++) {
@@ -8558,9 +8581,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 5 && !tech.isExtruder && tech.isPlasmaRange === 1
+            return m.fieldMode === 5 && !tech.isExtruder
         },
-        requires: "plasma torch, not extruder, plasma jet",
+        requires: "plasma torch, not extruder",
         effect() {
             tech.isPlasmaBall = true;
             m.fieldUpgrades[m.fieldMode].set()
@@ -12443,4 +12466,5 @@ const tech = {
     isNoPilotCost: null,
     isPlasmaBoost: null,
     isControlPlasma: null,
+    energyDefense: null,
 }

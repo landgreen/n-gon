@@ -1173,8 +1173,8 @@ const b = {
                 angle: angle,
                 friction: 1,
                 frictionAir: 0.4,
-                thrustMag: 0.13,
-                dmg: 8, //damage done in addition to the damage from momentum
+                thrustMag: 0.17,
+                dmg: 7, //damage done in addition to the damage from momentum
                 classType: "bullet",
                 endCycle: simulation.cycle + 70,
                 isSlowPull: false,
@@ -1252,7 +1252,7 @@ const b = {
                         who.isShielded = false
                         requestAnimationFrame(() => { who.isShielded = true });
                     }
-                    if (m.fieldCDcycle < m.cycle + 40) m.fieldCDcycle = m.cycle + 40  //extra long cooldown on hitting mobs
+                    if (m.fieldCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 30  //extra long cooldown on hitting mobs
                     if (tech.hookNails) {
                         // if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + 5; //player is immune to damage for 5 cycles
                         // b.explosion(this.position, 300 + 150 * Math.random()); //makes bullet do explosive damage at end
@@ -1344,6 +1344,7 @@ const b = {
                     if (m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
                     if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius) { //near player
                         this.endCycle = 0;
+
                         //recoil on catching grapple
                         // const momentum = Vector.mult(Vector.sub(this.velocity, player.velocity), (m.crouch ? 0.0001 : 0.0002))
                         const unit = Vector.normalise(Vector.sub(this.velocity, player.velocity))
@@ -1551,6 +1552,7 @@ const b = {
                 },
             });
         Composite.add(engine.world, bullet[me]); //add bullet to world
+        Matter.Body.setVelocity(bullet[me], player.velocity); //set velocity in direction of player
     },
     harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
         const me = bullet.length;
@@ -6471,12 +6473,30 @@ const b = {
                     return `<strong class='color-p' style='letter-spacing: 2px;'>spore${suffix}</strong>`
                 }
             },
-            do() { },
+            do() {
+                if (!input.field && m.crouch) {
+                    const cycles = 110
+                    const speed = 24
+                    const g = 0.0955 //get this from just testing
+                    const v = {
+                        x: speed * Math.cos(m.angle),
+                        y: speed * Math.sin(m.angle)
+                    }
+                    ctx.strokeStyle = "rgba(68, 68, 68, 0.2)" //color.map
+                    ctx.lineWidth = 2
+                    ctx.beginPath()
+                    for (let i = 0.5, len = 15; i < len + 1; i++) {
+                        const time = cycles * i / len
+                        ctx.lineTo(m.pos.x + time * v.x, m.pos.y + time * v.y + g * time * time)
+                    }
+                    ctx.stroke()
+                }
+            },
             fire() {
                 const me = bullet.length;
                 const dir = m.angle;
                 bullet[me] = Bodies.polygon(m.pos.x + 30 * Math.cos(m.angle), m.pos.y + 30 * Math.sin(m.angle), 20, 4.5, b.fireAttributes(dir, false));
-                b.fireProps(m.crouch ? 40 : 20, m.crouch ? 30 : 16, dir, me); //cd , speed
+                b.fireProps(m.crouch ? 40 : 20, m.crouch ? 24 : 18, dir, me); //cd , speed
                 Matter.Body.setDensity(bullet[me], 0.000001);
                 bullet[me].endCycle = simulation.cycle + 480 + Math.max(0, 120 - 2 * bullet.length);
                 bullet[me].frictionAir = 0;
@@ -6534,14 +6554,14 @@ const b = {
                                     Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.stuckTo.velocity), this.stuckTo.position))
                                     // Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
                                 } else {
-                                    this.force.y += this.mass * 0.0006;
+                                    this.force.y += this.mass * 0.0007;
                                 }
                             }
                         } else {
                             if (Matter.Query.collides(this, map).length) {
                                 onCollide(this)
                             } else { //if colliding with nothing just fall
-                                this.force.y += this.mass * 0.0006;
+                                this.force.y += this.mass * 0.0007;
                                 simulation.mouseInGame.x
                             }
                         }
@@ -7157,7 +7177,7 @@ const b = {
             },
             do() {
                 if (!input.field && m.crouch && !tech.isLaserMine) {
-                    const cycles = 60 //30
+                    const cycles = 80 //30
                     const speed = 40
                     const v = {
                         x: speed * Math.cos(m.angle),
