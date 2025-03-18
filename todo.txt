@@ -1,32 +1,47 @@
 ******************************************************** NEXT PATCH **************************************************
 
-standing wave field tech: superposition -  if you have above 200 energy, 0.1x damage taken
+wormhole adjustments
+  energy cost of new holes doesn't scale with distance anymore
+    portals are cheaper at most ranges (16 energy now)
+  removed minimum length of wormhole
+  wormholes can be placed a bit closer to walls
+  20% less velocity exiting a wormhole
+  updated most wormhole images
 
-updated some harpoon gun images
+wormhole tech balance
+  affine connection - removed the 2x energy cost, added 2 research cost
+    camera tracking on teleport becomes instant (and a bit disorienting)
+    affine connection and holographic principle tech are compatible
+  WIMPs spawn 5->6 research
+  transdimensional worms (1-2)->(1-5) worms
+  anyon renamed Penrose process: free->2 energy wormholes
 
-1st ionization energy 14->15 energy per heal
-increase block pick up range by 30
-plasma jet applies to plasma ball, and makes it bigger
-spore gun shows path prediction when crouched
-futures exchange 6->7 duplication per cancel
-residual dipolar coupling 8->10 coupling per cancel
-commodities exchange (8-12)->(10-14) power ups per cancel
+new wormhole field tech:
+  anyon - gain 2% duplication for each block your wormhole eats for the duration of the level (caps at 40%)
+  manifold - after making a wormhole gain 1.5x damage for 5 seconds (this effect stacks)
 
-
-grappling hook
-  accelerates faster
-  initial launch gains player velocity
-    makes aiming easier while moving
-  grapple has a slightly shorter cooldown after hitting mobs
-
-bugs
-  fixed soft lock on training level - grenades
+defense and damage HUD now includes difficulty and level based effects
 
 ******************************************************** BUGS ********************************************************
 
 graphical bug - player can become crouched while not touching the ground if they exit the ground while crouched
 
 *********************************************************** TODO *****************************************************
+
+add more  indications of tech field, mob, effects
+  canvas graphics, but also text, pause, sound?, camera, title text?, in game console
+
+n-gon needs to be stranger
+  more wild synergies
+  more subtle lore hints and world building
+  more secrets
+
+  !conformal infinity - after making a wormhole, subsequent wormholes generate energy 10 energy for the next 5 seconds
+    replace holographic principle?
+    !image
+  !quasar  - gain 1 random small power up for each block your wormhole eats
+    cap at 10?
+    !image
 
 !!!mob: spiker - moves around, but then stops and makes porcupine spikes for 2 seconds, then moves again.
   maybe use hopper movement?
@@ -1217,7 +1232,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   plasma torch - by Dan Mumford
   metamaterial cloaking - Scientific photography by Miki Asai,   by Bruce Munro
   molecular assembler - by Laurie Greasley 16-bit Isometric 
-  wormhole - by Tim White
+  wormhole - wormhole funnel entrance and exit classic sci-fi painting
   pilot wave - none
 
   nail gun - Screenprint
@@ -1333,6 +1348,7 @@ possible names for tech
   biofilm - something defensive?  related to spores?
   Thermogalvanic - makes things cold, for no energy
   Intron - noncoding DNA that separates regions of coding DNA,  use for JUNK tech
+  
 
 ******************************************************* DESIGN ******************************************************
 

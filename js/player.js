@@ -5346,8 +5346,10 @@ const m = {
         },
         {
             name: "wormhole",
-            //<strong class='color-worm'>wormholes</strong> attract <strong class='color-block'>blocks</strong> and power ups<br>
-            description: "use <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>8</strong> <strong class='color-f'>energy</strong> per second", //<br>bullets may also traverse <strong class='color-worm'>wormholes</strong>
+            // setDescription() {
+            //     return `use <strong>${tech.isFreeWormHole ? 2 : 16}</strong> <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>8</strong> <strong class='color-f'>energy</strong> per second`
+            // },
+            description: `use <strong>16</strong> <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+8%</strong> chance to <strong class='color-dup'>duplicate</strong> <strong>power ups</strong><br><strong>8</strong> <strong class='color-f'>energy</strong> per second`,
             drain: 0,
             effect: function () {
                 m.fieldMeterColor = "#bbf" //"#0c5"
@@ -5441,9 +5443,17 @@ const m = {
                                                 m.fieldRange *= 0.8
                                                 if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                                 if (tech.isWormholeWorms) { //pandimensional spermia
-                                                    for (let i = 0, len = 1 + Math.floor(3 * Math.random()); i < len; i++) {
+                                                    for (let i = 0, len = 1 + Math.floor(5 * Math.random()); i < len; i++) {
                                                         b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                                         Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
+                                                    }
+                                                }
+                                                if (tech.isBlockDup) {
+                                                    if (tech.blockDupCount < 0.4) {
+                                                        tech.blockDupCount += 0.02
+                                                        simulation.inGameConsole(`<span class='color-var'>duplicationChance</span><span class='color-symbol'>++</span> <em>//${(tech.blockDupCount * 100).toFixed(0)}% for anyon</em>`);
+                                                    } else {
+                                                        simulation.inGameConsole(`//<em><span class='color-var'>duplicationChance</span> limit reached for this level</em>`);
                                                     }
                                                 }
                                                 break
@@ -5464,9 +5474,17 @@ const m = {
                                             if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                             if (m.fieldMode === 0 || m.fieldMode === 9) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                             if (tech.isWormholeWorms) { //pandimensional spermia
-                                                for (let i = 0, len = 1 + Math.floor(3 * Math.random()); i < len; i++) {
+                                                for (let i = 0, len = 1 + Math.floor(5 * Math.random()); i < len; i++) {
                                                     b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                                     Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
+                                                }
+                                            }
+                                            if (tech.isBlockDup) {
+                                                if (tech.blockDupCount < 0.4) {
+                                                    tech.blockDupCount += 0.02
+                                                    simulation.inGameConsole(`<span class='color-var'>duplicationChance</span><span class='color-symbol'>++</span> <em>//${(tech.blockDupCount * 100).toFixed(0)}% for anyon</em>`);
+                                                } else {
+                                                    simulation.inGameConsole(`//<em><span class='color-var'>duplicationChance</span> limit reached for this level</em>`);
                                                 }
                                             }
                                             break
@@ -5505,10 +5523,10 @@ const m = {
                     }
 
                     if (m.fieldCDcycle < m.cycle) {
-                        const scale = 60
-                        const justPastMouse = Vector.add(Vector.mult(Vector.normalise(Vector.sub(simulation.mouseInGame, m.pos)), 50), simulation.mouseInGame)
+                        const scale = 40
+                        const justPastMouse = Vector.add(Vector.mult(Vector.normalise(Vector.sub(simulation.mouseInGame, m.pos)), 25), simulation.mouseInGame) //used to see if the wormhole will collide with wall
                         const sub = Vector.sub(simulation.mouseInGame, m.pos)
-                        const mag = Vector.magnitude(sub)
+                        // const mag = Vector.magnitude(sub)
 
                         if (input.field) {
                             if (tech.isWormHolePause) {
@@ -5544,34 +5562,35 @@ const m = {
                             }
 
                             m.grabPowerUp();
-                            //draw possible wormhole
-                            if (tech.isWormholeMapIgnore && Matter.Query.ray(map, m.pos, justPastMouse).length !== 0) {
-                                this.drain = (0.05 + 0.005 * Math.sqrt(mag)) * 2
-                            } else {
-                                this.drain = tech.isFreeWormHole ? 0 : 0.05 + 0.005 * Math.sqrt(mag)
-                            }
+                            //scale drain with distance
+                            // if (tech.isWormholeMapIgnore && Matter.Query.ray(map, m.pos, justPastMouse).length !== 0) {
+                            //     this.drain = (0.05 + 0.005 * Math.sqrt(mag)) * 2
+                            // } else {
+                            //     this.drain = tech.isFreeWormHole ? 0 : 0.05 + 0.005 * Math.sqrt(mag)
+                            // }
+                            // if (tech.isWormholeMapIgnore && Matter.Query.ray(map, m.pos, justPastMouse).length !== 0) {
+                            //     this.drain = tech.isFreeWormHole ? 0 : 0.25
+                            // } else {
+                            //     this.drain = tech.isFreeWormHole ? 0 : 0.15
+                            // }
+                            this.drain = tech.isFreeWormHole ? 0.02 : 0.16
                             const unit = Vector.perp(Vector.normalise(sub))
                             const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                             m.fieldRange = 0.97 * m.fieldRange + 0.03 * (50 + 10 * Math.sin(simulation.cycle * 0.025))
                             const edge2a = Vector.add(Vector.mult(unit, 1.5 * m.fieldRange), simulation.mouseInGame)
                             const edge2b = Vector.add(Vector.mult(unit, -1.5 * m.fieldRange), simulation.mouseInGame)
+                            //draw possible wormhole
                             ctx.beginPath();
                             ctx.moveTo(where.x, where.y)
                             ctx.bezierCurveTo(where.x, where.y, simulation.mouseInGame.x, simulation.mouseInGame.y, edge2a.x, edge2a.y);
                             ctx.moveTo(where.x, where.y)
                             ctx.bezierCurveTo(where.x, where.y, simulation.mouseInGame.x, simulation.mouseInGame.y, edge2b.x, edge2b.y);
                             if (
-                                mag > 250 && m.energy > this.drain &&
+                                m.energy > this.drain &&
                                 (tech.isWormholeMapIgnore || Matter.Query.ray(map, m.pos, justPastMouse).length === 0) &&
                                 Matter.Query.region(map, {
-                                    min: {
-                                        x: simulation.mouseInGame.x - scale,
-                                        y: simulation.mouseInGame.y - scale
-                                    },
-                                    max: {
-                                        x: simulation.mouseInGame.x + scale,
-                                        y: simulation.mouseInGame.y + scale
-                                    }
+                                    min: { x: simulation.mouseInGame.x - scale, y: simulation.mouseInGame.y - scale },
+                                    max: { x: simulation.mouseInGame.x + scale, y: simulation.mouseInGame.y + scale }
                                 }).length === 0
                             ) {
                                 m.hole.isReady = true;
@@ -5591,29 +5610,28 @@ const m = {
                             }
                         } else {
                             if (tech.isWormHolePause && m.isTimeDilated) m.wakeCheck();
-
                             //make new wormhole
                             if (
-                                m.hole.isReady && mag > 250 && m.energy > this.drain &&
+                                m.hole.isReady && m.energy > this.drain &&
                                 (tech.isWormholeMapIgnore || Matter.Query.ray(map, m.pos, justPastMouse).length === 0) &&
                                 Matter.Query.region(map, {
                                     min: { x: simulation.mouseInGame.x - scale, y: simulation.mouseInGame.y - scale },
                                     max: { x: simulation.mouseInGame.x + scale, y: simulation.mouseInGame.y + scale }
                                 }).length === 0
                             ) {
-                                //tech.isWormHolePause
-                                // console.log(this.drain)
                                 m.energy -= this.drain
                                 m.hole.isReady = false;
                                 m.fieldRange = 0
-                                Matter.Body.setPosition(player, simulation.mouseInGame);
-                                // simulation.translatePlayerAndCamera(simulation.mouseInGame) //too jerky
+                                if (tech.isWormholeMapIgnore) {
+                                    simulation.translatePlayerAndCamera(simulation.mouseInGame) //too jerky
+                                } else {
+                                    Matter.Body.setPosition(player, simulation.mouseInGame);
+                                }
                                 m.buttonCD_jump = 0 //this might fix a bug with jumping
-                                const velocity = Vector.mult(Vector.normalise(sub), 20)
-                                Matter.Body.setVelocity(player, {
-                                    x: velocity.x,
-                                    y: velocity.y - 4 //an extra vertical kick so the player hangs in place longer
-                                });
+
+                                const velocity = Vector.mult(Vector.normalise(sub), 15)
+                                Matter.Body.setVelocity(player, { x: velocity.x, y: velocity.y - 5 }); //an extra vertical kick so the player hangs in place longer
+
                                 if (m.immuneCycle < m.cycle + 5) m.immuneCycle = m.cycle + 5; //player is immune to damage for 1/4 seconds 
                                 // move bots to player
                                 for (let i = 0; i < bullet.length; i++) {
@@ -5647,8 +5665,20 @@ const m = {
                                         }
                                     }
                                 }
-                                if (true) {
-
+                                if (tech.isNewWormHoleDamage) {
+                                    const dmg = 1.5
+                                    tech.damage *= dmg
+                                    simulation.ephemera.push({
+                                        name: `wormholeDamage${m.cycle}`,
+                                        count: 300, //cycles before it self removes
+                                        do() {
+                                            this.count--
+                                            if (this.count < 0) {
+                                                simulation.removeEphemera(this.name)
+                                                tech.damage /= dmg
+                                            }
+                                        },
+                                    })
                                 }
                             }
                         }

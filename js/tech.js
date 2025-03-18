@@ -310,7 +310,7 @@ const tech = {
     },
     duplicationChance() {
         if (level.isNoDuplicate) return 0
-        return Math.min(1, Math.max(0, (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.2 : 0) + tech.duplication + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + 0.08 * tech.isDuplicateMobs + 0.03 * tech.isMassProduction + 0.04 * tech.isHealAttract + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.6 : 0) + 0.06 * tech.isDupEnergy))
+        return Math.min(1, Math.max(0, (tech.isPowerUpsVanish ? 0.13 : 0) + (tech.isStimulatedEmission ? 0.2 : 0) + tech.duplication + tech.duplicateChance + 0.05 * tech.isExtraGunField + m.duplicateChance + tech.fieldDuplicate + 0.08 * tech.isDuplicateMobs + 0.03 * tech.isMassProduction + 0.04 * tech.isHealAttract + tech.cloakDuplication + (tech.isAnthropicTech && tech.isDeathAvoidedThisLevel ? 0.6 : 0) + 0.06 * tech.isDupEnergy + tech.blockDupCount))
     },
     setTechFrequency(name, frequency) {
         for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -8940,7 +8940,7 @@ const tech = {
     },
     {
         name: "WIMPs",
-        description: `at the exit to each <strong>level</strong> spawn ${powerUps.orb.research(5)}<br>and a dangerous particle that slowly <strong>chases</strong> you`,
+        description: `at the exit to each <strong>level</strong> spawn ${powerUps.orb.research(6)}<br>and a dangerous particle that slowly <strong>chases</strong> you`,
         isFieldTech: true,
         maxCount: 9,
         count: 0,
@@ -8953,7 +8953,7 @@ const tech = {
         effect() {
             tech.wimpCount++
             spawn.WIMP()
-            for (let j = 0, len = 5; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
+            for (let j = 0, len = 6; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         },
         remove() {
             tech.wimpCount = 0
@@ -8988,9 +8988,32 @@ const tech = {
         }
     },
     {
+        name: "anyon",
+        descriptionFunction() {
+            return `<strong>+2%</strong> <strong class='color-dup'>duplication</strong> chance until you exit the <strong>level</strong><br>after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong> <em style ="float: right;">(up to 40%)</em>`
+        },
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 9
+        },
+        requires: "wormhole",
+        effect() {
+            tech.isBlockDup = true
+            tech.blockDupCount = 0
+        },
+        remove() {
+            tech.isBlockDup = false
+            tech.blockDupCount = 0
+        }
+    },
+    {
         name: "transdimensional worms",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Dimension' class="link">transdimensional worms</a>`,
-        description: "after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>spawn <strong>1-3</strong> <strong class='color-p' style='letter-spacing: 2px;'>worms</strong>",
+        description: "after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>spawn <strong>1-5</strong> <strong class='color-p' style='letter-spacing: 2px;'>worms</strong>",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -9008,7 +9031,7 @@ const tech = {
         }
     },
     {
-        name: "anyon",
+        name: "Penrose process",
         descriptionFunction() {
             return `<strong>2x</strong> stored <strong class='color-f'>energy</strong> after <strong class='color-dup'>duplicating</strong> power ups<br><strong>+6%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong>`
         },
@@ -9029,6 +9052,53 @@ const tech = {
         remove() {
             tech.isDupEnergy = false;
             if (this.count) powerUps.setPowerUpMode(); //needed after adjusting duplication chance        }
+        }
+    },
+    {
+        name: "holographic principle",
+        cost: 2,
+        descriptionFunction() {
+            return `making <strong class='color-worm'>wormholes</strong> costs <strong>2</strong> <strong class='color-f'>energy</strong><br><em style ="float: right;">(originally 16 energy)</em>`
+        },
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 9 && (build.isExperimentSelection || powerUps.research.count > this.cost - 1)
+        },
+        requires: "wormhole",
+        effect() {
+            for (let i = 0; i < this.cost; i++) {
+                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+            }
+            tech.isFreeWormHole = true
+        },
+        remove() {
+            tech.isFreeWormHole = false
+            if (this.count) powerUps.research.changeRerolls(this.cost)
+        }
+    },
+    {
+        name: "manifold",
+        descriptionFunction() {
+            return `after each new <strong class='color-worm'>wormhole</strong><br><strong>1.5x</strong> <strong class='color-d'>damage</strong> for <strong>5</strong> seconds`
+        },
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 9
+        },
+        requires: "wormhole",
+        effect() {
+            tech.isNewWormHoleDamage = true
+        },
+        remove() {
+            tech.isNewWormHoleDamage = false
         }
     },
     {
@@ -9109,10 +9179,10 @@ const tech = {
         }
     },
     {
-        name: "holographic principle",
+        name: "affine connection",
         cost: 2,
         descriptionFunction() {
-            return `use ${powerUps.orb.research(this.cost)}<br>making <strong class='color-worm'>wormholes</strong> doesn't cost <strong class='color-f'>energy</strong>`
+            return `use ${powerUps.orb.research(this.cost)}<br><strong class='color-worm'>wormholes</strong> can tunnel through <strong>anything</strong>`
         },
         isFieldTech: true,
         maxCount: 1,
@@ -9120,48 +9190,18 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 9 && !tech.isWormholeMapIgnore && (build.isExperimentSelection || powerUps.research.count > this.cost - 1)
+            return m.fieldMode === 9 && (build.isExperimentSelection || powerUps.research.count > this.cost - 1)
         },
-        requires: "wormhole, not affine connection",
+        requires: "wormhole",
         effect() {
             for (let i = 0; i < this.cost; i++) {
                 if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
             }
-            tech.isFreeWormHole = true
-            // tech.baseFx *= 0.8
-            // tech.baseJumpForce *= 0.8
-            // m.setMovement()
-        },
-        //also removed in m.setHoldDefaults() if player switches into a bad field
-        remove() {
-            tech.isFreeWormHole = false
-            if (this.count) {
-                powerUps.research.changeRerolls(this.cost)
-            }
-            // if (!tech.isNeutronium) {
-            //     tech.baseFx = 0.08
-            //     tech.baseJumpForce = 10.5
-            //     m.setMovement()
-            // }
-        }
-    },
-    {
-        name: "affine connection",
-        description: "<strong class='color-worm'>wormholes</strong> can tunnel through <strong>anything</strong><br><strong>2x</strong> <strong class='color-f'>energy</strong> cost going through <strong>solids</strong>",
-        isFieldTech: true,
-        maxCount: 1,
-        count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
-        allowed() {
-            return m.fieldMode === 9 && !tech.isFreeWormHole
-        },
-        requires: "wormhole, not holographic principle",
-        effect() {
             tech.isWormholeMapIgnore = true
         },
         remove() {
             tech.isWormholeMapIgnore = false
+            if (this.count) powerUps.research.changeRerolls(this.cost)
         }
     },
     {
@@ -12467,4 +12507,5 @@ const tech = {
     isPlasmaBoost: null,
     isControlPlasma: null,
     energyDefense: null,
+    isNewWormHoleDamage: null,
 }

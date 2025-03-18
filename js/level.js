@@ -34,7 +34,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(5) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(9) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
             // m.energy = 0
@@ -50,11 +50,11 @@ const level = {
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
             // b.guns[8].ammo = 100000000
-            // requestAnimationFrame(() => { tech.giveTech("non-renewables") });
+            // requestAnimationFrame(() => { tech.giveTech("anyon") });
             // tech.giveTech("cyclotron")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 3; ++i) tech.giveTech("plasma jet")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("plasma ball")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("manifold")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("holographic principle")
             // m.skin.egg();
             // for (let i = 0; i < 1; ++i) tech.giveTech("dielectric")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("surfing") });
@@ -132,7 +132,7 @@ const level = {
         for (let i = 0; i < tech.wimpCount; i++) {
             spawn.WIMP()
             mob[mob.length - 1].isDecoupling = true //so you can find it to remove
-            for (let j = 0, len = 5; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
+            for (let j = 0, len = 6; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         }
 
         if (m.plasmaBall) m.plasmaBall.fire()
@@ -145,6 +145,11 @@ const level = {
             m.fieldPosition = { x: m.pos.x, y: m.pos.y }
             m.lastFieldPosition = { x: m.pos.x, y: m.pos.y }
         }
+        if (tech.isBlockDup) {
+            tech.blockDupCount = 0
+            simulation.inGameConsole(`<span class='color-var'>duplicationChance</span> <span class='color-symbol'>=</span> 0 //for anyon`);
+        }
+
         level.newLevelOrPhase()
         if (simulation.isTraining) {
             simulation.difficultyMode = 1
@@ -15672,7 +15677,7 @@ const level = {
                         }
                     }
                     templePlayer.drawExit = true;
-                    for (let i = 0; i < 5 * tech.wimpCount; i++) {
+                    for (let i = 0; i < 6 * tech.wimpCount; i++) {
                         powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false);
                     }
                     canvas.style.filter = "";
