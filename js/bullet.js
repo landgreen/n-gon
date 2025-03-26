@@ -3056,6 +3056,43 @@ const b = {
                 Matter.Body.scale(this, scale, scale);
             },
             hasExploded: false,
+            eatPowerUp(i) {
+                simulation.ephemera.push({
+                    name: "drone grab",
+                    count: 5, //cycles before it self removes
+                    pos: this.position,
+                    PposX: powerUp[i].position.x,
+                    PposY: powerUp[i].position.y,
+                    size: powerUp[i].size,
+                    color: powerUp[i].color,
+                    do() {
+                        this.count--
+                        if (this.count < 0) simulation.removeEphemera(this.name)
+                        ctx.strokeStyle = "#000"
+                        ctx.lineWidth = 3
+                        ctx.beginPath();
+                        ctx.moveTo(this.pos.x, this.pos.y);
+                        ctx.lineTo(this.PposX, this.PposY);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.arc(this.PposX, this.PposY, this.size * (this.count + 2) / 7, 0, 2 * Math.PI);
+                        ctx.fillStyle = this.color
+                        ctx.fill();
+                    },
+                })
+                //pick up nearby power ups
+                powerUps.onPickUp(powerUp[i]);
+                powerUp[i].effect();
+                Matter.Composite.remove(engine.world, powerUp[i]);
+                powerUp.splice(i, 1);
+                if (tech.isDroneGrab) {
+                    this.isImproved = true;
+                    const SCALE = 2.25
+                    Matter.Body.scale(this, SCALE, SCALE);
+                    this.lookFrequency = 30 + Math.floor(11 * Math.random());
+                    this.endCycle += 3000 * tech.droneCycleReduction * tech.bulletsLastLonger
+                }
+            },
             do() {
                 if (simulation.cycle + this.deathCycles > this.endCycle) {
                     if (tech.isIncendiary && !this.hasExploded) {
@@ -3122,32 +3159,15 @@ const b = {
                         if (this.lockedOn) {
                             for (let i = 0, len = powerUp.length; i < len; ++i) { //grab, but don't lock onto nearby power up
                                 if (
-                                    Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 &&
-                                    !(
+                                    Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000
+                                    && !simulation.isChoosing
+                                    && !(
                                         (m.health > 0.94 * m.maxHealth && !tech.isOverHeal && !tech.isDroneGrab && powerUp[i].name === "heal") ||
                                         (tech.isSuperDeterminism && powerUp[i].name === "field") ||
                                         ((tech.isEnergyNoAmmo || b.inventory.length === 0) && powerUp[i].name === "ammo")
                                     )
                                 ) {
-                                    //draw pickup for a single cycle
-                                    ctx.beginPath();
-                                    ctx.moveTo(this.position.x, this.position.y);
-                                    ctx.lineTo(powerUp[i].position.x, powerUp[i].position.y);
-                                    ctx.strokeStyle = "#000"
-                                    ctx.lineWidth = 4
-                                    ctx.stroke();
-                                    //pick up nearby power ups
-                                    powerUps.onPickUp(powerUp[i]);
-                                    powerUp[i].effect();
-                                    Matter.Composite.remove(engine.world, powerUp[i]);
-                                    powerUp.splice(i, 1);
-                                    if (tech.isDroneGrab) {
-                                        this.isImproved = true;
-                                        const SCALE = 2.25
-                                        Matter.Body.scale(this, SCALE, SCALE);
-                                        this.lookFrequency = 30 + Math.floor(11 * Math.random());
-                                        this.endCycle += 3000 * tech.droneCycleReduction * tech.bulletsLastLonger
-                                    }
+                                    this.eatPowerUp(i)
                                     break;
                                 }
                             }
@@ -3161,26 +3181,7 @@ const b = {
                                     ((tech.isEnergyNoAmmo || b.inventory.length === 0) && powerUp[i].name === "ammo")
                                 )) {
                                     if (Vector.magnitudeSquared(Vector.sub(this.position, powerUp[i].position)) < 20000 && !simulation.isChoosing) {
-                                        //draw pickup for a single cycle
-                                        ctx.beginPath();
-                                        ctx.moveTo(this.position.x, this.position.y);
-                                        ctx.lineTo(powerUp[i].position.x, powerUp[i].position.y);
-                                        ctx.strokeStyle = "#000"
-                                        ctx.lineWidth = 4
-                                        ctx.stroke();
-                                        //pick up nearby power ups
-                                        powerUps.onPickUp(powerUp[i]);
-                                        powerUp[i].effect();
-                                        Matter.Composite.remove(engine.world, powerUp[i]);
-                                        powerUp.splice(i, 1);
-                                        if (tech.isDroneGrab) {
-                                            this.isImproved = true;
-                                            const SCALE = 2.25
-                                            Matter.Body.scale(this, SCALE, SCALE);
-                                            this.lookFrequency = 30 + Math.floor(11 * Math.random());
-                                            this.endCycle += 3000 * tech.droneCycleReduction * tech.bulletsLastLonger
-                                            // this.frictionAir = 0
-                                        }
+                                        this.eatPowerUp(i)
                                         break;
                                     }
                                     //look for power ups to lock onto

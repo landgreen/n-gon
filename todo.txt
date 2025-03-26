@@ -1,32 +1,35 @@
 ******************************************************** NEXT PATCH **************************************************
 
-wormhole adjustments
-  energy cost of new holes doesn't scale with distance anymore
-    portals are cheaper at most ranges (16 energy now)
-  removed minimum length of wormhole
-  wormholes can be placed a bit closer to walls
-  20% less velocity exiting a wormhole
-  updated most wormhole images
+tech: quantum Zeno effect - you can't die, but you need to heal to above zero before you exit each level.
+  also 2x damage while health < 0
 
-wormhole tech balance
-  affine connection - removed the 2x energy cost, added 2 research cost
-    camera tracking on teleport becomes instant (and a bit disorienting)
-    affine connection and holographic principle tech are compatible
-  WIMPs spawn 5->6 research
-  transdimensional worms (1-2)->(1-5) worms
-  anyon renamed Penrose process: free->2 energy wormholes
+Gibbs free energy
+  1.006->1.007x damage
+  6% JUNK chance
+interest 5->15%, but only applies to research and coupling power ups, not health and ammo
+mass-energy equivalence
+  added 1.3x damage
+  fluoroantimonic acid, control theory, and stability are all compatible with mass-energy
 
-new wormhole field tech:
-  anyon - gain 2% duplication for each block your wormhole eats for the duration of the level (caps at 40%)
-  manifold - after making a wormhole gain 1.5x damage for 5 seconds (this effect stacks)
+improved drone, wormhole, and pilot wave power up pick up animations
+draw a pink dot every time player loses health from Zeno's paradox
+new mine gun image
+snakeBoss is 30% slower in red mode
+snakeBoss is about 10% shorter
 
-defense and damage HUD now includes difficulty and level based effects
+bug fix
+  going very low on energy with pilot wave prevented energy regen with the always on tech
+  
 
 ******************************************************** BUGS ********************************************************
 
 graphical bug - player can become crouched while not touching the ground if they exit the ground while crouched
 
 *********************************************************** TODO *****************************************************
+
+
+defense and damage HUD now includes difficulty and level based effects
+  make them both work like health bars where they are aren't linear, but they add up to 1 in the end,  so the progress easily at the low end, but get to 1 eventually
 
 add more  indications of tech field, mob, effects
   canvas graphics, but also text, pause, sound?, camera, title text?, in game console
@@ -1281,7 +1284,6 @@ possible names for tech
   stochastic optimization
   electrostatic discharge
   Gödel's incompleteness
-  quantum zeno effect  (perturbation of a system prevents some systems from evolving because it scrambles coherence)  (apply to lasers, fields)
   counterfactual - something false
   regression to the mean
   phlogiston theory is a superseded scientific theory that postulated the existence of a fire-like element called phlogiston
@@ -1348,6 +1350,7 @@ possible names for tech
   biofilm - something defensive?  related to spores?
   Thermogalvanic - makes things cold, for no energy
   Intron - noncoding DNA that separates regions of coding DNA,  use for JUNK tech
+  virtual particles - can have these properties: imaginary mass, violation of the conservation of energy, violation of causality, traveling faster than light or backwards in time, popping in and out of the vacuum via vacuum fluctuations
   
 
 ******************************************************* DESIGN ******************************************************

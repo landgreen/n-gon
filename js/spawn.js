@@ -924,6 +924,10 @@ const spawn = {
             ctx.lineTo(best.x, best.y);
         }
         me.onDeath = function () {
+            if (m.health < 0) {
+                m.death() //needed for quantum Zeno effect
+                return
+            }
             if (!this.hasRunDeathScript) {
                 this.hasRunDeathScript = true
                 //record win on this difficulty level to show up in the difficulty settings as a
@@ -989,7 +993,6 @@ const spawn = {
                                 simulation.inGameConsole(`Engine.clear(engine) <em>//simulation successful</em>`);
                             } else if (count === 1260) {
                                 // tech.isImmortal = false;
-                                // m.death()
                                 // m.alive = false;
                                 // simulation.paused = true;
                                 // m.health = 0;
@@ -3951,7 +3954,7 @@ const spawn = {
         me.redMode = function () {
             this.color = `rgba(255,0,200,`
             this.fill = this.color + '1)'
-            this.JumpDistance = 20
+            this.JumpDistance = 15
             let cycle = () => {
                 if (this.radius < 25) {
                     if (m.alive && this.JumpDistance === 20) requestAnimationFrame(cycle);
@@ -3968,7 +3971,7 @@ const spawn = {
         me.blueMode = function () {
             this.color = `rgba(0,0,255,`//`rgba(255,0,200,`
             this.fill = this.color + '1)'
-            this.JumpDistance = 37 //adjust this number in the IF below
+            this.JumpDistance = 36 //adjust this number in the IF below
             let cycle = () => {
                 if (this.radius > 14) {
                     if (m.alive && this.JumpDistance === 37) requestAnimationFrame(cycle);
@@ -3988,7 +3991,7 @@ const spawn = {
                 this.invulnerableCount = 240
                 this.isInvulnerable = true
                 this.damageReduction = 0
-                if (this.history.length < 200) for (let i = 0; i < 11; i++) this.history.unshift(this.history[0])
+                if (this.history.length < 200) for (let i = 0; i < 9; i++) this.history.unshift(this.history[0])
                 this.blueMode()
             }
         };

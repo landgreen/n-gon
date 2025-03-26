@@ -792,7 +792,7 @@ const powerUps = {
                         simulation.drawList.push({ //add dmg to draw queue
                             x: m.pos.x,
                             y: m.pos.y,
-                            radius: overHeal * 100 * simulation.healScale,
+                            radius: Math.max(3, overHeal * 100 * simulation.healScale),
                             color: "#0eb",
                             time: simulation.drawTime
                         });

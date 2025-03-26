@@ -34,9 +34,6 @@ const m = {
                 category: cat.player,
                 mask: cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
             },
-            // death() {
-            //     m.death();
-            // }
         });
         Matter.Body.setMass(player, m.mass);
         Composite.add(engine.world, [player]);
@@ -746,7 +743,7 @@ const m = {
     displayHealth() {
         id = document.getElementById("health");
         // health display is a x^1.5 rule to make it seem like the player has lower health, this makes the player feel more excitement
-        id.style.width = Math.floor(300 * m.maxHealth * Math.pow(m.health / m.maxHealth, 1.4)) + "px";
+        id.style.width = Math.floor(300 * m.maxHealth * Math.pow(Math.max(0, m.health) / m.maxHealth, 1.4)) + "px";
         //css animation blink if health is low
         // if (m.health < 0.3) {
         //     id.classList.add("low-health");
@@ -783,7 +780,7 @@ const m = {
         let dmg = 1
         if (tech.energyDefense && m.energy > 1.99) dmg *= 0.1
         if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
-        if (tech.isMaxHealthDefense && m.health === m.maxHealth) dmg *= 0.1
+        if (tech.isMaxHealthDefense && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 0.1
         if (tech.isDiaphragm) dmg *= 0.55 + 0.35 * Math.sin(m.cycle * 0.0075);
         if (tech.isZeno) dmg *= 0.2
         if (tech.isFieldHarmReduction) dmg *= 0.6
@@ -984,7 +981,7 @@ const m = {
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
                     }, 3000);
-                } else {
+                } else if (!tech.isNoDeath) {
                     m.health = 0;
                     m.displayHealth();
                     m.death();
@@ -5176,6 +5173,7 @@ const m = {
                                 m.fieldPosition.x = m.pos.x
                                 m.fieldPosition.y = m.pos.y
                             }
+                            const graphicScale = 1.2 //the draw range is a bit bigger then the interaction range
                             //when field is on it smoothly moves towards the mouse
                             const sub = Vector.sub(simulation.mouseInGame, m.fieldUpgrades[8].collider.position)
                             const mag = Vector.magnitude(sub)
@@ -5203,30 +5201,48 @@ const m = {
                                 const dxP = m.fieldPosition.x - powerUp[i].position.x;
                                 const dyP = m.fieldPosition.y - powerUp[i].position.y;
                                 const dist2 = dxP * dxP + dyP * dyP + 200;
+                                const graphicRange = graphicScale * m.fieldRadius
                                 // float towards field  if looking at and in range  or  if very close to player
+                                // if (
+                                //     dist2 < graphicRange * graphicRange &&
+                                //     (m.lookingAt(powerUp[i]) || dist2 < 16000)
+                                // ) {
+                                //     powerUp[i].force.x += 0.05 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
+                                //     powerUp[i].force.y += 0.05 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
+                                //     Matter.Body.setVelocity(powerUp[i], { x: powerUp[i].velocity.x * 0.11, y: powerUp[i].velocity.y * 0.11 }); //extra friction
                                 if (
-                                    dist2 < m.fieldRadius * m.fieldRadius &&
-                                    (m.lookingAt(powerUp[i]) || dist2 < 16000)
-                                ) {
-                                    powerUp[i].force.x += 0.05 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
-                                    powerUp[i].force.y += 0.05 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
-                                    //extra friction
-                                    Matter.Body.setVelocity(powerUp[i], { x: powerUp[i].velocity.x * 0.11, y: powerUp[i].velocity.y * 0.11 });
-                                    if (
-                                        dist2 < 5000 &&
-                                        !simulation.isChoosing &&
-                                        (tech.isOverHeal || powerUp[i].name !== "heal" || m.maxHealth - m.health > 0.01)
-                                        // (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth)
-                                        // (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity)
-                                    ) { //use power up if it is close enough
-                                        powerUps.onPickUp(powerUp[i]);
-                                        powerUp[i].effect();
-                                        Matter.Composite.remove(engine.world, powerUp[i]);
-                                        powerUp.splice(i, 1);
-                                        // m.fieldRadius += 50
-                                        break; //because the array order is messed up after splice
-                                    }
+                                    dist2 < graphicRange * graphicRange &&
+                                    !simulation.isChoosing &&
+                                    (tech.isOverHeal || powerUp[i].name !== "heal" || m.maxHealth - m.health > 0.01)
+                                    // (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth)
+                                    // (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity)
+                                ) { //use power up if it is close enough
+
+                                    simulation.ephemera.push({
+                                        name: "pilot grab",
+                                        count: 5, //cycles before it self removes
+                                        PposX: powerUp[i].position.x,
+                                        PposY: powerUp[i].position.y,
+                                        size: powerUp[i].size,
+                                        color: powerUp[i].color,
+                                        do() {
+                                            this.count--
+                                            if (this.count < 0) simulation.removeEphemera(this.name)
+                                            ctx.beginPath();
+                                            ctx.arc(this.PposX, this.PposY, this.size * (this.count + 2) / 7, 0, 2 * Math.PI);
+                                            ctx.fillStyle = this.color
+                                            ctx.fill();
+                                        },
+                                    })
+
+                                    powerUps.onPickUp(powerUp[i]);
+                                    powerUp[i].effect();
+                                    Matter.Composite.remove(engine.world, powerUp[i]);
+                                    powerUp.splice(i, 1);
+                                    // m.fieldRadius += 50
+                                    break; //because the array order is messed up after splice
                                 }
+                                // }
                             }
 
                             let radiusGoal, radiusSmooth, drainPassive
@@ -5239,13 +5255,14 @@ const m = {
                                 radiusSmooth = 0.97
                                 drainPassive = m.fieldRegen * m.fieldUpgrades[8].drain
                             }
+                            if (tech.isNoPilotCost) drainPassive = 0
                             m.fieldRadius = m.fieldRadius * radiusSmooth + radiusGoal * (1 - radiusSmooth)
 
                             //track velocity change for calculating block energy drain
                             const speedChange = Math.max(0, m.fieldUpgrades[8].collider.speed - m.fieldUpgrades[8].collider.lastSpeed)
                             m.fieldUpgrades[8].collider.lastSpeed = m.fieldUpgrades[8].collider.speed
 
-                            if (m.energy > drainPassive) {
+                            if (m.energy >= drainPassive) {
                                 m.energy -= drainPassive;
                                 m.fieldUpgrades[8].fieldMass = 1
                                 for (let i = 0, len = body.length; i < len; ++i) {
@@ -5300,13 +5317,13 @@ const m = {
                                 const off1 = 1 + 0.06 * Math.sin(m.fieldPhase);
                                 const off2 = 1 - 0.06 * Math.sin(m.fieldPhase);
                                 ctx.beginPath();
-                                ctx.ellipse(m.fieldPosition.x, m.fieldPosition.y, 1.2 * m.fieldRadius * off1, 1.2 * m.fieldRadius * off2, rotate, 0, 2 * Math.PI);
+                                ctx.ellipse(m.fieldPosition.x, m.fieldPosition.y, graphicScale * m.fieldRadius * off1, graphicScale * m.fieldRadius * off2, rotate, 0, 2 * Math.PI);
                                 ctx.globalCompositeOperation = "exclusion";
                                 ctx.fillStyle = "#fff";
                                 ctx.fill();
                                 ctx.globalCompositeOperation = "source-over";
                                 ctx.beginPath();
-                                ctx.ellipse(m.fieldPosition.x, m.fieldPosition.y, 1.2 * m.fieldRadius * off1, 1.2 * m.fieldRadius * off2, rotate, 0, 2 * Math.PI * m.energy / m.maxEnergy);
+                                ctx.ellipse(m.fieldPosition.x, m.fieldPosition.y, graphicScale * m.fieldRadius * off1, graphicScale * m.fieldRadius * off2, rotate, 0, 2 * Math.PI * m.energy / m.maxEnergy);
                                 if (radiusGoal || m.cycle % 5) {
                                     ctx.strokeStyle = "#000";
                                 } else {
@@ -5411,6 +5428,24 @@ const m = {
                                 powerUp[i].force.y += 4 * (dyP / dist2) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
                                 Matter.Body.setVelocity(powerUp[i], { x: powerUp[i].velocity.x * 0.05, y: powerUp[i].velocity.y * 0.05 });
                                 if (dist2 < 1000 && !simulation.isChoosing) { //use power up if it is close enough
+
+                                    simulation.ephemera.push({
+                                        name: "womrhole grab",
+                                        count: 5, //cycles before it self removes
+                                        PposX: powerUp[i].position.x,
+                                        PposY: powerUp[i].position.y,
+                                        size: powerUp[i].size,
+                                        color: powerUp[i].color,
+                                        do() {
+                                            this.count--
+                                            if (this.count < 0) simulation.removeEphemera(this.name)
+                                            ctx.beginPath();
+                                            ctx.arc(this.PposX, this.PposY, this.size * (this.count + 1) / 7, 0, 2 * Math.PI);
+                                            ctx.fillStyle = this.color
+                                            ctx.fill();
+                                        },
+                                    })
+
                                     m.fieldRange *= 0.8
                                     powerUps.onPickUp(powerUp[i]);
                                     powerUp[i].effect();
@@ -5443,7 +5478,7 @@ const m = {
                                                 m.fieldRange *= 0.8
                                                 if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                                 if (tech.isWormholeWorms) { //pandimensional spermia
-                                                    for (let i = 0, len = 1 + Math.floor(5 * Math.random()); i < len; i++) {
+                                                    for (let i = 0, len = 1 + Math.floor(4 * Math.random()); i < len; i++) {
                                                         b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                                         Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
                                                     }
@@ -5474,7 +5509,7 @@ const m = {
                                             if ((m.fieldMode === 0 || m.fieldMode === 9) && m.immuneCycle < m.cycle) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                             if (m.fieldMode === 0 || m.fieldMode === 9) m.energy += 0.02 * m.coupling * level.isReducedRegen
                                             if (tech.isWormholeWorms) { //pandimensional spermia
-                                                for (let i = 0, len = 1 + Math.floor(5 * Math.random()); i < len; i++) {
+                                                for (let i = 0, len = 1 + Math.floor(4 * Math.random()); i < len; i++) {
                                                     b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
                                                     Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(Vector.rotate(m.hole.unit, Math.PI / 2), -10));
                                                 }

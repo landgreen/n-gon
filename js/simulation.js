@@ -1242,7 +1242,13 @@ const simulation = {
                                 m.health *= 0.95 //remove 5%
                                 m.displayHealth();
                             }
-
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: m.pos.x,
+                                y: m.pos.y,
+                                radius: 5,
+                                color: "rgb(255, 0, 195)",
+                                time: 4
+                            });
                         }
                         if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
 

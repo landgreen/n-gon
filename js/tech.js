@@ -266,7 +266,8 @@ const tech = {
     damageFromTech() {
         let dmg = tech.damage * m.fieldDamage
         if (level.isNoDamage && (m.cycle - 180 < level.noDamageCycle)) dmg *= 0.3
-        if (tech.isMaxHealthDamage && m.health === m.maxHealth) dmg *= 2
+        if (tech.isMaxHealthDamage && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 2
+        if (tech.isNoDeath && m.health < 0) dmg *= 2
         if (tech.noDefenseSettingDamage && m.defense() === 1) dmg *= 2.5
         if (tech.isImmunityDamage && m.immuneCycle > m.cycle) dmg *= 3
         if (tech.isPowerUpDamage) dmg *= 1 + 0.07 * powerUp.length
@@ -283,11 +284,11 @@ const tech = {
         if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
         if (tech.isDamageForGuns) dmg *= 1 + 0.22 * Math.max(0, b.inventory.length - 1)
         if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.3
-        if (tech.isAcidDmg && m.health > 1) dmg *= 1.35;
+        if ((tech.isAcidDmg && m.health > 1) || (tech.isEnergyHealth && m.energy > 1)) dmg *= 1.35;
         if (tech.isRerollDamage) dmg *= 1 + Math.max(0, 0.05 * powerUps.research.count)
         if (tech.isBotDamage) dmg *= 1 + 0.04 * b.totalBots()
         if (tech.restDamage > 1 && player.speed < 1) dmg *= tech.restDamage
-        if (tech.isLowEnergyDamage) dmg *= 1 + 0.6 * Math.max(0, m.maxEnergy - m.energy)
+        if (tech.isLowEnergyDamage) dmg *= 1 + 0.7 * Math.max(0, m.maxEnergy - m.energy)
         if (tech.energyDamage) dmg *= 1 + m.energy * 0.23 * tech.energyDamage;
         if (tech.isDamageFromBulletCount) dmg *= 1 + bullet.length * 0.01
         if (tech.isNoFireDamage && m.cycle > m.fireCDcycle + 120) dmg *= 2
@@ -514,17 +515,20 @@ const tech = {
     },
     {
         name: "mass-energy equivalence",
-        description: `<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong>`,
+        description: `<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong>1.3x</strong> <strong class='color-d'>damage</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
         isSkin: true,
         allowed() {
-            return !m.isAltSkin && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isAnnihilation //&& !tech.isAmmoFromHealth && !tech.isRewindGun
+            return !m.isAltSkin && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isAnnihilation && !tech.isNoDeath//&& !tech.isAmmoFromHealth && !tech.isRewindGun
         },
-        requires: "not piezoelectricity, CPT, annihilation",
+        requires: "not piezoelectricity, CPT, annihilation, quantum Zeno effect",
+        damage: 1.3,
         effect() {
+            tech.damage *= this.damage
+
             m.health = 0
             document.getElementById("health").style.display = "none"
             document.getElementById("health-bg").style.display = "none"
@@ -537,6 +541,7 @@ const tech = {
         },
         remove() {
             if (this.count > 0) {
+                tech.damage /= this.damage
                 tech.isEnergyHealth = false;
                 if (tech.isEnergyHealth) {
                     document.getElementById("health").style.display = "none"
@@ -2940,7 +2945,7 @@ const tech = {
     {
         name: "Gibbs free energy",
         descriptionFunction() {
-            return `<strong>1.006x</strong> <strong class='color-d'>damage</strong> for each missing <strong class='color-f'>energy</strong><br><em style ="float: right;">(${(1 + 0.5 * Math.max(0, m.maxEnergy - m.energy)).toFixed(2)}x)</em>`
+            return `<strong>1.007x</strong> <strong class='color-d'>damage</strong> for each missing <strong class='color-f'>energy</strong><br><strong>+6%</strong> chance for <strong class='color-junk'>JUNK</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><em style ="float: right;">(${(1 + 0.5 * Math.max(0, m.maxEnergy - m.energy)).toFixed(2)}x)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -2952,9 +2957,15 @@ const tech = {
         requires: "",
         effect() {
             tech.isLowEnergyDamage = true;
+            this.refundAmount += tech.addJunkTechToPool(0.06)
+
         },
         remove() {
             tech.isLowEnergyDamage = false;
+            if (this.count > 0 && this.refundAmount > 0) {
+                tech.removeJunkTechFromPool(this.refundAmount)
+                this.refundAmount = 0
+            }
         }
     },
     {
@@ -3090,13 +3101,15 @@ const tech = {
     },
     {
         name: "fluoroantimonic acid",
-        description: "if your <strong class='color-h'>health</strong> is above <strong>100</strong><br><strong>1.35x</strong> <strong class='color-d'>damage</strong>",
+        descriptionFunction() {
+            return `if your ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} is above <strong>100</strong><br><strong>1.35x</strong> <strong class='color-d'>damage</strong>`
+        },
         maxCount: 1,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.maxHealth > 1;
+            return m.maxHealth > 1 || tech.isEnergyHealth;
         },
         requires: "maximum health above 100",
         effect() {
@@ -3109,7 +3122,7 @@ const tech = {
     {
         name: "control theory",
         descriptionFunction() {
-            return `<strong>2x</strong> <strong class='color-d'>damage</strong><br>while your <strong class='color-h'>health</strong> is at maximum`
+            return `<strong>2x</strong> <strong class='color-d'>damage</strong><br>while your ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} is at maximum`
         },
         maxCount: 1,
         count: 0,
@@ -3129,7 +3142,7 @@ const tech = {
     {
         name: "stability",
         descriptionFunction() {
-            return `<strong>0.1x</strong> <strong class='color-defense'>damage taken</strong><br>while your <strong class='color-h'>health</strong> is at maximum`
+            return `<strong>0.1x</strong> <strong class='color-defense'>damage taken</strong><br>while your ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} is at maximum`
         },
         maxCount: 1,
         count: 0,
@@ -3189,7 +3202,7 @@ const tech = {
         descriptionFunction() {
             // return `<strong>0.9x</strong> <strong class='color-defense'>damage taken</strong> for each ${name} missing<br><em>(${(Math.pow(0.1 * max, Math.max(0, max - h))).toFixed(2)}x)</em>`
             const scale = 0.2 //adjust this to control the strength of this effect
-            return `missing ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} reduces <strong class='color-defense'>damage taken</strong><br>down to a limit of <strong>${scale}x</strong> at <strong>0</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"}<em style ="float: right;">(${(Math.pow(scale, Math.max(0, 1 - (tech.isEnergyHealth ? m.energy / m.maxEnergy : m.health / m.maxHealth)))).toFixed(2)}x)</em>`
+            return `missing ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} reduces <strong class='color-defense'>damage taken</strong><br>down to <strong>${scale}x</strong> at <strong>0</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"}<em style ="float: right;">(${(Math.pow(scale, Math.max(0, 1 - (tech.isEnergyHealth ? m.energy / m.maxEnergy : m.health / m.maxHealth)))).toFixed(2)}x)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -3244,6 +3257,28 @@ const tech = {
         },
         remove() {
             tech.isZeno = false;
+        }
+    },
+    {
+        name: "quantum Zeno effect",
+        descriptionFunction() {
+            return `you can only <strong>die</strong> if you <strong>end</strong> a level with <strong class='color-h'>health</strong> < <strong>0</strong><br><strong>2x</strong> <strong class='color-d'>damage</strong> while <strong class='color-h'>health</strong> < <strong>0</strong>`
+            // return `you don't <strong>die</strong> when you go below <strong>0</strong> <strong class='color-h'>health</strong>, but<br>you need <strong class='color-h'>health</strong> above <strong>0</strong> to <strong>exit</strong> the level`
+            // return `you can't <strong>die</strong> if <strong class='color-h'>health</strong> < <strong>0</strong>, but<br>you need <strong class='color-h'>health</strong> > <strong>0</strong> to <strong>exit</strong> the level`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return !tech.isEnergyHealth
+        },
+        requires: "not mass-energy",
+        effect() {
+            tech.isNoDeath = true;
+        },
+        remove() {
+            tech.isNoDeath = false;
         }
     },
     {
@@ -3491,7 +3526,9 @@ const tech = {
     {
         name: "interest",
         descriptionFunction() {
-            return `at the start of each <strong>level</strong> spawn<br><strong>${(100 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.research(1)}, ${powerUps.orb.ammo(1)}, ${powerUps.orb.coupling(1)}, and ${powerUps.orb.heal(1)} <em>(rounded up)</em>`
+            const r = Math.ceil(this.rate * powerUps.research.count)
+            const c = Math.ceil(this.rate * m.coupling)
+            return `at the start of each <strong>level</strong><br>spawn <strong>${(100 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.research(1)} and ${powerUps.orb.coupling(1)} <em style ="float: right;">(${r} ${powerUps.orb.research(1)}, ${c} ${powerUps.orb.coupling(1)})</em>`
         },
         maxCount: 9,
         count: 0,
@@ -3501,7 +3538,7 @@ const tech = {
             return true
         },
         requires: "",
-        rate: 0.05,
+        rate: 0.15,
         effect() {
             tech.interestRate += this.rate;
         },
@@ -3518,7 +3555,9 @@ const tech = {
         //     }, 1000);
         // },
         descriptionFunction() {
-            return `once per level, instead of <strong>dying</strong> use ${powerUps.orb.research(1)} and<br>spawn ${powerUps.orb.heal(22)}`
+            // return `once per level, instead of <strong>dying</strong> use ${powerUps.orb.research(1)} and<br>spawn ${powerUps.orb.heal(22)}`
+            return `once per level, if <strong class='color-h'>health</strong> < <strong>0</strong> use ${powerUps.orb.research(1)} to survive<br>and spawn ${powerUps.orb.heal(22)}<em style ="float: right;">(${(!tech.isDeathAvoidedThisLevel && powerUps.research.count > 0) ? "on" : "off"})</em>`
+
         },
         maxCount: 1,
         count: 0,
@@ -4697,25 +4736,6 @@ const tech = {
         },
         requires: "more than 6 tech",
         effect() {
-            // //remove active bullets  //to get rid of bots
-            // for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
-            // bullet = [];
-            // let count = 1 //count tech
-            // for (let i = 0, len = tech.tech.length; i < len; i++) { // spawn new tech power ups
-            //     if (!tech.tech[i].isInstant) count += tech.tech[i].count
-            // }
-            // if (tech.isDeterminism) count -= 4 //remove the bonus tech
-            // if (tech.isSuperDeterminism) count -= 4 //remove the bonus tech
-            // const removeCount = tech.removeCount
-            // tech.resetAllTech(); // remove all tech
-            // tech.removeCount = removeCount
-            // if (simulation.isCheating) tech.setCheating();
-            // lore.techCount = 0;
-            // // tech.addLoreTechToPool();
-            // for (let i = 0; i < count; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "tech"); // spawn new tech power ups
-            // //have state is checked in m.death()
-
-
             let count = 0 //count tech
             for (let i = 0, len = tech.tech.length; i < len; i++) { // spawn new tech power ups
                 if (!tech.tech[i].isInstant && tech.tech[i].count) {
@@ -9013,7 +9033,7 @@ const tech = {
     {
         name: "transdimensional worms",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Dimension' class="link">transdimensional worms</a>`,
-        description: "after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>spawn <strong>1-5</strong> <strong class='color-p' style='letter-spacing: 2px;'>worms</strong>",
+        description: "after a <strong class='color-block'>block</strong> falls into a <strong class='color-worm'>wormhole</strong><br>spawn <strong>1-4</strong> <strong class='color-p' style='letter-spacing: 2px;'>worms</strong>",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -9926,7 +9946,6 @@ const tech = {
                 // (1-X)^cycles = chance to be removed //Math.random() < 0.000019  10 min
                 if (!simulation.paused && m.alive) {
                     if (Math.random() < 0.000038) {
-                        // m.death();
                         simulation.clearMap();
                         simulation.draw.setPaths();
                         return
@@ -12508,4 +12527,5 @@ const tech = {
     isControlPlasma: null,
     energyDefense: null,
     isNewWormHoleDamage: null,
+    isNoDeath: null,
 }

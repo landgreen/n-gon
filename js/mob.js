@@ -71,7 +71,6 @@ const mobs = {
             if (!whom.shield && !whom.isShielded && whom.alive) {
                 if (tech.isIceMaxHealthLoss && whom.health > 0.66 && whom.damageReduction > 0) whom.health = 0.66
                 if (tech.isIceKill && whom.health < 0.34 && whom.damageReduction > 0 && whom.alive) {
-                    // whom.death();
                     whom.damage(Infinity);
                     simulation.drawList.push({
                         x: whom.position.x,

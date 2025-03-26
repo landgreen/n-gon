@@ -34,7 +34,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(9) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(8) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
             // m.energy = 0
@@ -44,19 +44,19 @@ const level = {
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("spores") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("drones") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // tech.laserColor = "#fff"
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
             // b.guns[8].ammo = 100000000
-            // requestAnimationFrame(() => { tech.giveTech("anyon") });
+            // requestAnimationFrame(() => { tech.giveTech("Zenos paradox") });
             // tech.giveTech("cyclotron")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("manifold")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("quantum Zeno effect")
             // for (let i = 0; i < 1; ++i) tech.giveTech("holographic principle")
             // m.skin.egg();
-            // for (let i = 0; i < 1; ++i) tech.giveTech("dielectric")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("anthropic principle")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("surfing") });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("interest") });
             // for (let i = 0; i < 1; i++) tech.giveTech("interest")
@@ -74,7 +74,7 @@ const level = {
             // for (let i = 0; i < 1; i++) spawn.snakeBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "gun");
-            // for (let i = 0; i < 100; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "ammo");
+            // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 500 * Math.random(), m.pos.y + 500 * Math.random(), "coupling");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             //lore testing
             // localSettings.isTrainingNotAttempted = true
@@ -114,6 +114,31 @@ const level = {
         simulation.draw.setPaths();
         b.respawnBots();
         m.resetHistory();
+
+        if (m.health < 0 && tech.isNoDeath) { //needed for quantum Zeno effect
+            if (tech.isDeathAvoid && powerUps.research.count > 0 && !tech.isDeathAvoidedThisLevel) {
+                tech.isDeathAvoidedThisLevel = true
+                m.health = 0.05
+                powerUps.research.changeRerolls(-1)
+                simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
+                for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
+                if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
+                simulation.wipe = function () { //set wipe to have trails
+                    ctx.fillStyle = "rgba(255,255,255,0.03)";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                setTimeout(function () {
+                    simulation.wipe = function () { //set wipe to normal
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                }, 3000);
+            } else {
+                m.health = 0;
+                m.displayHealth();
+                m.death();
+            }
+        }
+        tech.isDeathAvoidedThisLevel = false;
 
         if (tech.isForeverDrones) {
             if (tech.isDroneRadioactive) {
@@ -157,7 +182,6 @@ const level = {
             simulation.inGameConsole(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
             document.title = "n-gon: " + level.levelAnnounce();
         }
-
         level.setConstraints()
     },
     newLevelOrPhase() { //runs on each new level but also on final boss phases
@@ -193,15 +217,15 @@ const level = {
                 if (levelName === "subway") rate *= 1 / 5
             }
 
-            let ammoSum = 0
-            for (let i = 0; i < b.inventory.length; i++) {
-                if (b.guns[b.inventory[i]].ammo !== Infinity) ammoSum += b.guns[b.inventory[i]].ammo / b.guns[b.inventory[i]].ammoPack
-            }
-            if (ammoSum > 0 && b.inventory.length > 0) {
-                const amount = Math.ceil(rate * ammoSum / b.inventory.length)
-                powerUps.spawnDelay("ammo", amount, 4);
-                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${amount > 20 ? amount + powerUps.orb.ammo(1) : powerUps.orb.ammo(amount)}`)
-            }
+            // let ammoSum = 0
+            // for (let i = 0; i < b.inventory.length; i++) {
+            //     if (b.guns[b.inventory[i]].ammo !== Infinity) ammoSum += b.guns[b.inventory[i]].ammo / b.guns[b.inventory[i]].ammoPack
+            // }
+            // if (ammoSum > 0 && b.inventory.length > 0) {
+            //     const amount = Math.ceil(rate * ammoSum / b.inventory.length)
+            //     powerUps.spawnDelay("ammo", amount, 4);
+            //     simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${amount > 20 ? amount + powerUps.orb.ammo(1) : powerUps.orb.ammo(amount)}`)
+            // }
 
             // if (b.activeGun !== null && b.activeGun !== undefined && b.guns[b.activeGun].ammo !== Infinity) {
             //     const ammoPerOrb = b.guns[b.activeGun].ammoPack
@@ -219,10 +243,10 @@ const level = {
                 powerUps.spawnDelay("coupling", c, 4);
                 simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
             }
-            const healPerOrb = (powerUps.heal.size() / 40 / (simulation.healScale ** 0.25)) ** 2
-            const h = Math.ceil(rate * m.health / healPerOrb)
-            powerUps.spawnDelay("heal", h, 4);
-            simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
+            // const healPerOrb = (powerUps.heal.size() / 40 / (simulation.healScale ** 0.25)) ** 2
+            // const h = Math.ceil(rate * m.health / healPerOrb)
+            // powerUps.spawnDelay("heal", h, 4);
+            // simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
 
             // trying to spawn smaller heals
             // const healPerOrb = (powerUps.heal.size() / 40 / (simulation.healScale ** 0.25)) ** 2
@@ -710,7 +734,6 @@ const level = {
             for (let i = 0; i < tech.tech.length; i++) {
                 if (tech.tech[i].isLost) tech.tech[i].isLost = false;
             }
-            tech.isDeathAvoidedThisLevel = false;
             simulation.updateTechHUD();
             simulation.clearNow = true; //triggers in simulation.clearMap to remove all physics bodies and setup for new map
 
@@ -950,7 +973,7 @@ const level = {
                 player.velocity.y < 0.15
             ) {
                 // level.exitCount += input.down ? 8 : 2
-                level.exitCount += 3
+                level.exitCount += m.health < 0 ? 0.5 : 3
             } else if (level.exitCount > 0) {
                 level.exitCount -= 3
             }
@@ -974,8 +997,13 @@ const level = {
                 ctx.bezierCurveTo(level.exit.x + 100, level.exit.y - 148, level.exit.x + 50, level.exit.y - 148, level.exit.x + 50, level.exit.y - 148);
                 ctx.setLineDash([200, 200]);
                 ctx.lineDashOffset = Math.max(-15, 185 - 2.1 * level.exitCount)
-                ctx.strokeStyle = "#444"
-                ctx.lineWidth = 2
+                if (m.health < 0) {
+                    ctx.strokeStyle = "#f00"
+                    ctx.lineWidth = 6 + 0.1 * (level.exitCount)
+                } else {
+                    ctx.strokeStyle = "#444"
+                    ctx.lineWidth = 2
+                }
                 ctx.stroke();
                 ctx.setLineDash([0, 0]);
 
@@ -25820,7 +25848,6 @@ const level = {
             elevator1.move();
             elevator2.move();
             if (player.position.x > 0 && player.position.y < -9000 && player.position.y > -10000) {
-                //m.death()
                 m.damage(0.05 * simulation.difficultyMode)
                 Matter.Body.setPosition(player, {
                     x: 275,
@@ -35197,7 +35224,7 @@ const level = {
                                 }
                             }
                             if (tech.infinityEdge) {
-                                const newSize = Math.sqrt(0.5 * m.health) + 1;
+                                const newSize = Math.max(0, Math.sqrt(0.5 * m.health) + 1);
                                 Matter.Body.scale(this.sword, newSize * (1 / (this.sword.scale == undefined ? 1 : this.sword.scale)), newSize * (1 / (this.sword.scale == undefined ? 1 : this.sword.scale)), handle.position);
                                 this.sword.scale = newSize;
                             }
