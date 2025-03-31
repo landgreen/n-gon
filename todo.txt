@@ -1,25 +1,12 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: quantum Zeno effect - you can't die, but you need to heal to above zero before you exit each level.
-  also 2x damage while health < 0
-
-Gibbs free energy
-  1.006->1.007x damage
-  6% JUNK chance
-interest 5->15%, but only applies to research and coupling power ups, not health and ammo
-mass-energy equivalence
-  added 1.3x damage
-  fluoroantimonic acid, control theory, and stability are all compatible with mass-energy
-
-improved drone, wormhole, and pilot wave power up pick up animations
-draw a pink dot every time player loses health from Zeno's paradox
-new mine gun image
-snakeBoss is 30% slower in red mode
-snakeBoss is about 10% shorter
+tech: quantum Darwinism - once per level if health < 0 spawn a tech and get 2% JUNK
+harpoon tech: rebar - make the harpoon into rebar.  ~2x damage for 10 ammo
+harpoon tech: maul -  make the rebar into a maul.  ~2x damage  for 10 ammo
+missile tech: missile guidance - missiles follow mouse if you are crouching, and 1.5 extra missile ammo
 
 bug fix
-  going very low on energy with pilot wave prevented energy regen with the always on tech
-  
+  snakeBoss has better behavior when stunned
 
 ******************************************************** BUGS ********************************************************
 
@@ -27,24 +14,55 @@ graphical bug - player can become crouched while not touching the ground if they
 
 *********************************************************** TODO *****************************************************
 
+difficulty rework:
+  make it clear that the player is getting stronger
+  just changing damage taken and damage done is kinda invisible
+  difficulty that players can see:
+    maybe just make the change in damage done/taken animated at start of new level?
+    more mobs
+    more bosses
+    more constraints
+    put mob types into tiers, higher tiers have more health and do more damage
+      remove the random linked up groups of mobs
+      some level specific bosses will need to have different versions for each tier
+      What do do with old difficulty system
+        need to replace 1 or both of these:
+            0.85x damage per level
+            1.25x damage taken per level
+          replace with:
+            difficulty 0: at higher levels spawn high tier mobs (so basically just the new rule)
+            each level has a chance to spawn mobs from the next higher tier
 
-defense and damage HUD now includes difficulty and level based effects
-  make them both work like health bars where they are aren't linear, but they add up to 1 in the end,  so the progress easily at the low end, but get to 1 eventually
-
-add more  indications of tech field, mob, effects
-  canvas graphics, but also text, pause, sound?, camera, title text?, in game console
+mob tiers
+  tier 0: starter
+  tier 1: slasher, hopper, flutter, shooter, grower, grenadier, laser, beamer, launcher, exploder
+  tier 2: slasher2, stabber, springer, striker, spinner, sucker, pulsar, focuser, spawner
+  tier 3: slasher3, hopMother, stinger, sniper, sneaker, ghoster, laserLayer, launcherOne
+boss tiers
+  tier 0:
+  tier 1: snakeBoss, dragonFlyBoss, slashBoss, revolutionBoss, streamBoss, launcherBoss, grenadierBoss, shooterBoss, orbitalBoss, spiderBoss
+  tier 2: powerUpBossBaby, sneakBoss, blockBoss, laserTargetingBoss, blinkBoss, shieldingBoss, pulsarBoss, spawnerBossCulture, growBossCulture
+  tier 3: powerUpBoss, laserLayerBoss, historyBoss, beetleBoss, snakeSpitBoss, mantisBoss, laserBombingBoss, cellBossCulture, bomberBoss, timeSkipBoss
+levels:
+  0 = tier 0: initial
+  1,2,3,4 = tier 1: 3 random levels -> reactor(end of tier 1)
+  5,6,7,8 = tier 2: 3 random levels -> interferometer, factory, reservoir(end of tier 2)
+  9,10,11,12,13 = tier 3: 3 random levels -> final, subway (end of tier 3)
+  
+  
+Gravity could flip on the final level.
 
 n-gon needs to be stranger
   more wild synergies
   more subtle lore hints and world building
   more secrets
 
-  !conformal infinity - after making a wormhole, subsequent wormholes generate energy 10 energy for the next 5 seconds
-    replace holographic principle?
-    !image
-  !quasar  - gain 1 random small power up for each block your wormhole eats
-    cap at 10?
-    !image
+!conformal infinity - after making a wormhole, subsequent wormholes generate energy 10 energy for the next 5 seconds
+  replace holographic principle?
+  !image
+!quasar  - gain 1 random small power up for each block your wormhole eats
+  cap at 10?
+  !image
 
 !!!mob: spiker - moves around, but then stops and makes porcupine spikes for 2 seconds, then moves again.
   maybe use hopper movement?
@@ -1351,7 +1369,8 @@ possible names for tech
   Thermogalvanic - makes things cold, for no energy
   Intron - noncoding DNA that separates regions of coding DNA,  use for JUNK tech
   virtual particles - can have these properties: imaginary mass, violation of the conservation of energy, violation of causality, traveling faster than light or backwards in time, popping in and out of the vacuum via vacuum fluctuations
-  
+  Sintering - the process of compacting and forming a solid mass of material by pressure[1] or heat[2] without melting it to the point of liquefaction. Sintering happens as part of a manufacturing process used with metals, ceramics, plastics, 
+
 
 ******************************************************* DESIGN ******************************************************
 

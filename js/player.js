@@ -742,8 +742,13 @@ const m = {
     },
     displayHealth() {
         id = document.getElementById("health");
-        // health display is a x^1.5 rule to make it seem like the player has lower health, this makes the player feel more excitement
+        // health display is a x^1.5 rule to make it seem like the player has lower health 
         id.style.width = Math.floor(300 * m.maxHealth * Math.pow(Math.max(0, m.health) / m.maxHealth, 1.4)) + "px";
+        if (m.health < 0) {
+            id.style.borderRightColor = "#f00"
+        } else {
+            id.style.borderRightColor = "rgb(51, 162, 125)"
+        }
         //css animation blink if health is low
         // if (m.health < 0.3) {
         //     id.classList.add("low-health");
@@ -981,7 +986,14 @@ const m = {
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
                     }, 3000);
-                } else if (!tech.isNoDeath) {
+                } else if (tech.isNoDeath) {
+                    if (tech.isDeathTech && !tech.isDeathTechTriggered) {
+                        tech.isDeathTechTriggered = true
+                        powerUps.spawn(player.position.x, player.position.y, "tech");
+                        // simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.05} //Zeno`);
+                        tech.addJunkTechToPool(0.02)
+                    }
+                } else {
                     m.health = 0;
                     m.displayHealth();
                     m.death();

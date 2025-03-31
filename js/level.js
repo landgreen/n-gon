@@ -44,17 +44,17 @@ const level = {
             // simulation.molecularMode = 2
             // m.damage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("drones") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("missiles") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.guns[9].ammo = 100000000
             // tech.laserColor = "#fff"
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
-            // b.guns[8].ammo = 100000000
-            // requestAnimationFrame(() => { tech.giveTech("Zenos paradox") });
-            // tech.giveTech("cyclotron")
+            // requestAnimationFrame(() => { tech.giveTech("rebar") });
+            // tech.giveTech("missile guidance")
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("quantum Zeno effect")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("holographic principle")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("maul")
             // m.skin.egg();
             // for (let i = 0; i < 1; ++i) tech.giveTech("anthropic principle")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("surfing") });
@@ -70,8 +70,8 @@ const level = {
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
 
-            // for (let i = 0; i < 1; ++i) spawn.spiker(1900, -500)
-            // for (let i = 0; i < 1; i++) spawn.snakeBoss(1900, -500)
+            // for (let i = 0; i < 1; i++) spawn.beamer(1900, -500)
+            // for (let i = 0; i < 1; ++i) spawn.spiderBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "gun");
             // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 500 * Math.random(), m.pos.y + 500 * Math.random(), "coupling");
@@ -114,6 +114,8 @@ const level = {
         simulation.draw.setPaths();
         b.respawnBots();
         m.resetHistory();
+
+        tech.isDeathTechTriggered = false
 
         if (m.health < 0 && tech.isNoDeath) { //needed for quantum Zeno effect
             if (tech.isDeathAvoid && powerUps.research.count > 0 && !tech.isDeathAvoidedThisLevel) {
@@ -174,7 +176,6 @@ const level = {
             tech.blockDupCount = 0
             simulation.inGameConsole(`<span class='color-var'>duplicationChance</span> <span class='color-symbol'>=</span> 0 //for anyon`);
         }
-
         level.newLevelOrPhase()
         if (simulation.isTraining) {
             simulation.difficultyMode = 1
@@ -2848,7 +2849,7 @@ const level = {
         const mover = level.mover(2800, -300, 1000, 25); //x,y,width.height,VxGoal,force
 
         const train = level.transport(2900, -500, 500, 25, 8); //x,y,width.height,VxGoal,force
-        // spawn.bodyRect(1900, -550, 50, 50);
+        spawn.bodyRect(500, -500, 50, 50);
         const button = level.button(2535, -200)
         // spawn.bodyRect(250, -450, 50, 50); //block on button
 

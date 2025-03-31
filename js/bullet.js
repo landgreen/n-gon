@@ -1557,27 +1557,67 @@ const b = {
     harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
         const me = bullet.length;
         const returnRadius = 100 * Math.sqrt(harpoonSize)
-        bullet[me] = Bodies.fromVertices(where.x, where.y, [{
-            x: -40 * harpoonSize,
-            y: 2 * harpoonSize,
-            index: 0,
-            isInternal: false
-        }, {
-            x: -40 * harpoonSize,
-            y: -2 * harpoonSize,
-            index: 1,
-            isInternal: false
-        }, {
-            x: 50 * harpoonSize,
-            y: -3 * harpoonSize,
-            index: 3,
-            isInternal: false
-        }, {
-            x: 30 * harpoonSize,
-            y: 2 * harpoonSize,
-            index: 4,
-            isInternal: false
-        }], {
+        let shape
+        if (tech.isRebar) {
+            const long = tech.isMaul ? 32 : 65
+            const tall = tech.isMaul ? 25 : 5
+            shape = [{
+                x: -long * harpoonSize,
+                y: tall * harpoonSize,
+                index: 0,
+                isInternal: false
+            }, {
+                x: -long * harpoonSize * 1.05,
+                y: 0,
+                index: 1,
+                isInternal: false
+            }, {
+                x: -long * harpoonSize,
+                y: -tall * harpoonSize,
+                index: 2,
+                isInternal: false
+            }, {
+                x: long * harpoonSize,
+                y: -tall * harpoonSize,
+                index: 3,
+                isInternal: false
+            }, {
+                x: long * harpoonSize * 1.05,
+                y: 0,
+                index: 4,
+                isInternal: false
+            }, {
+                x: long * harpoonSize,
+                y: tall * harpoonSize,
+                index: 5,
+                isInternal: false
+            }]
+        } else {
+            shape = [{
+                x: -40 * harpoonSize,
+                y: 2 * harpoonSize,
+                index: 0,
+                isInternal: false
+            }, {
+                x: -40 * harpoonSize,
+                y: -2 * harpoonSize,
+                index: 1,
+                isInternal: false
+            }, {
+                x: 50 * harpoonSize,
+                y: -3 * harpoonSize,
+                index: 3,
+                isInternal: false
+            }, {
+                x: 30 * harpoonSize,
+                y: 2 * harpoonSize,
+                index: 4,
+                isInternal: false
+            }]
+        }
+
+
+        bullet[me] = Bodies.fromVertices(where.x, where.y, shape, {
             cycle: 0,
             angle: angle,
             friction: 1,
@@ -1596,7 +1636,7 @@ const b = {
             },
             minDmgSpeed: 4,
             lookFrequency: Math.floor(7 + Math.random() * 3),
-            density: tech.harpoonDensity, //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
+            density: tech.harpoonDensity * (tech.isRebar ? 0.6 : 1), //0.001 is normal for blocks,  0.004 is normal for harpoon,  0.004*6 when buffed
             foamSpawned: 0,
             beforeDmg(who) {
                 if (tech.isShieldPierce && who.isShielded) { //disable shields
@@ -1706,15 +1746,16 @@ const b = {
                 ctx.fill();
             },
             drawString() {
+                ropeIndex = this.vertices.length - 1
                 const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
-                const sub = Vector.sub(where, this.vertices[0])
+                const sub = Vector.sub(where, this.vertices[ropeIndex])
                 const perpendicular = Vector.mult(Vector.normalise(Vector.perp(sub)), this.drawStringFlip * Math.min(80, 10 + this.drawStringControlMagnitude / (10 + Vector.magnitude(sub))))
                 const controlPoint = Vector.add(Vector.add(where, Vector.mult(sub, -0.5)), perpendicular)
                 ctx.strokeStyle = "#000" // "#0ce"
                 ctx.lineWidth = 0.5
                 ctx.beginPath();
                 ctx.moveTo(where.x, where.y);
-                ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
+                ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[ropeIndex].x, this.vertices[ropeIndex].y)
                 // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
                 ctx.stroke();
             },
@@ -1759,19 +1800,20 @@ const b = {
                 this.draw();
             },
             grabPowerUp() { //grab power ups near the tip of the harpoon
+                const grabPowerUpIndex = 2
                 if (this.caughtPowerUp) {
-                    Matter.Body.setPosition(this.caughtPowerUp, Vector.add(this.vertices[2], this.velocity))
+                    Matter.Body.setPosition(this.caughtPowerUp, Vector.add(this.vertices[grabPowerUpIndex], this.velocity))  //this.vertices[2]
                     Matter.Body.setVelocity(this.caughtPowerUp, { x: 0, y: 0 })
                 } else { //&& simulation.cycle % 2 
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
                         if (tech.isEnergyNoAmmo && powerUp[i].name === "ammo") continue
                         const radius = powerUp[i].circleRadius + 50
-                        if (Vector.magnitudeSquared(Vector.sub(this.vertices[2], powerUp[i].position)) < radius * radius && !powerUp[i].isGrabbed) {
+                        if (Vector.magnitudeSquared(Vector.sub(this.vertices[grabPowerUpIndex], powerUp[i].position)) < radius * radius && !powerUp[i].isGrabbed) {  //this.vertices[2]
                             if (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) {
                                 powerUp[i].isGrabbed = true
                                 this.caughtPowerUp = powerUp[i]
                                 Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 })
-                                Matter.Body.setPosition(powerUp[i], this.vertices[2])
+                                Matter.Body.setPosition(powerUp[i], this.vertices[grabPowerUpIndex])
                                 powerUp[i].collisionFilter.category = 0
                                 powerUp[i].collisionFilter.mask = 0
                                 thrust *= 0.6
@@ -1852,10 +1894,7 @@ const b = {
     missile(where, angle, speed, size = 1) {
         if (tech.isMissileBig) {
             size *= 1.55
-            if (tech.isMissileBiggest) {
-                size *= 1.55
-
-            }
+            if (tech.isMissileBiggest) size *= 1.55
         }
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(where.x, where.y, 30 * size, 4 * size, {
@@ -1914,7 +1953,26 @@ const b = {
             },
             do() {
                 if (!(m.cycle % this.lookFrequency)) this.tryToLockOn();
-                if (this.lockedOn) { //rotate missile towards the target
+                if (tech.isTargeting && input.down) {
+                    const face = {
+                        x: Math.cos(this.angle),
+                        y: Math.sin(this.angle)
+                    };
+                    const target = Vector.normalise(Vector.sub(this.position, simulation.mouseInGame));
+                    const dot = Vector.dot(target, face)
+                    const aim = Math.min(0.08, (1 + dot) * 1)
+                    if (Vector.cross(target, face) > 0) {
+                        Matter.Body.rotate(this, aim);
+                    } else {
+                        Matter.Body.rotate(this, -aim);
+                    }
+                    this.frictionAir = Math.min(0.1, Math.max(0.04, 1 + dot)) //0.08; //extra friction if turning
+
+                    //draw targeting square
+                    ctx.strokeStyle = "#000"
+                    ctx.lineWidth = 1
+                    ctx.strokeRect(simulation.mouseInGame.x - 40, simulation.mouseInGame.y - 40, 80, 80)
+                } else if (this.lockedOn) { //rotate missile towards the target
                     const face = {
                         x: Math.cos(this.angle),
                         y: Math.sin(this.angle)
@@ -6826,6 +6884,9 @@ const b = {
             descriptionFunction() {
                 return `throw a <strong>harpoon</strong> that uses <strong class='color-f'>energy</strong> to <strong>retract</strong><br><strong>harpoons</strong> refund <strong class='color-ammo'>ammo</strong><br><strong>${this.ammoPack.toFixed(1)}</strong> harpoons per ${powerUps.orb.ammo()}`
             },
+            harpoonName() {
+                return "<strong>" + (tech.isMaul ? "maul" : (tech.isRebar ? "rebar" : "harpoon")) + "</strong>"
+            },
             ammo: 0,
             ammoPack: 0.77, //update this in railgun tech
             defaultAmmoPack: 0.77,
@@ -7043,36 +7104,6 @@ const b = {
                 m.fireCDcycle = m.cycle + 10 //can't fire until mouse is released
                 this.charge += 0.00001
             },
-            // grappleFire() {
-            //     const harpoonSize = (tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(this.ammo) : 1) //* (m.crouch ? 0.7 : 1)
-            //     const where = {
-            //         x: m.pos.x + harpoonSize * 40 * Math.cos(m.angle),
-            //         y: m.pos.y + harpoonSize * 40 * Math.sin(m.angle)
-            //     }
-            //     const num = Math.min(this.ammo, tech.extraHarpoons + 1)
-            //     if (!m.crouch && num > 1) { //multiple harpoons
-            //         const SPREAD = 0.06
-            //         let angle = m.angle - SPREAD * num / 2;
-            //         for (let i = 0; i < num; i++) {
-            //             if (this.ammo > 0) {
-            //                 this.ammo--
-            //                 b.grapple(where, angle, true, harpoonSize)
-            //                 angle += SPREAD
-            //             }
-            //         }
-            //         this.ammo++ //make up for the ammo used up in fire()
-            //         simulation.updateGunHUD();
-            //         m.fireCDcycle = m.cycle + Math.floor(75 * b.fireCDscale) // cool down
-            //         // } else if (m.crouch) {
-            //         //     b.harpoon(where, null, m.angle, harpoonSize, false, 70)
-            //     } else {
-            //         if (tech.crouchAmmoCount) tech.crouchAmmoCount = 1
-            //         b.grapple(where, m.angle, harpoonSize)
-            //     }
-            //     // m.fireCDcycle = m.cycle + Math.floor(75 * b.fireCDscale) // cool down
-            //     m.fireCDcycle = m.cycle + 5 + 40 * b.fireCDscale + 60 * (m.energy < 0.05)
-
-            // },
             harpoonFire() {
                 const where = {
                     x: m.pos.x + 30 * Math.cos(m.angle),

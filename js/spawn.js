@@ -33,8 +33,8 @@ const spawn = {
         "pulsar", "pulsar",
         "laser", "laser",
         "laserLayer", "laserLayer",
-        // "spiker", "spiker",
         "sneaker", "launcher", "launcherOne", "exploder", "sucker", "sniper", "spinner", "grower", "beamer", "spawner", "ghoster", "focuser"
+        // "spiker", "spiker",
     ],
     mobTypeSpawnOrder: [], //preset list of mob names calculated at the start of a run by the randomSeed
     mobTypeSpawnIndex: 0, //increases as the mob type cycles
@@ -3926,11 +3926,13 @@ const spawn = {
         };
     },
     snakeBoss(x, y) {
-        mobs.spawn(x, y, 0, 25, `rgba(255,0,200)`); //"rgb(221,102,119)"
+        mobs.spawn(x, y, 0, 15, `rgba(255,0,200)`); //"rgb(221,102,119)"
+
         let me = mob[mob.length - 1];
+        // Matter.Body.setStatic(me, true)//this causes crashes
         me.stroke = "transparent"; //used for drawGhost
         me.isUnblockable = true;
-        Matter.Body.setDensity(me, 0.033); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.06); //extra dense //normal is 0.001 //makes effective life much larger
         me.isBoss = true;
         me.damageReduction = 0.5
         me.startingDamageReduction = me.damageReduction
@@ -3945,7 +3947,7 @@ const spawn = {
         me.friction = 0;
         me.memory = 900;
         me.seePlayerFreq = 41
-        me.delay = 5 + 2 * simulation.CDScale;//8 + 3 * simulation.CDScale;
+        me.delay = 3 + 2 * simulation.CDScale;//8 + 3 * simulation.CDScale;
         me.nextBlinkCycle = me.delay;
         me.JumpDistance = 0//set in redMode()
         // spawn.shield(me, x, y, 1);
@@ -4041,13 +4043,17 @@ const spawn = {
 
             if (this.nextBlinkCycle < simulation.cycle) { //teleport towards the player
                 this.nextBlinkCycle = simulation.cycle + this.delay;
-                if (this.isSlowed) this.nextBlinkCycle += this.delay
-                if (this.isStunned) this.nextBlinkCycle += this.delay * 3
+                if (this.isSlowed || this.isStunned) this.nextBlinkCycle += this.delay
+                // if () this.nextBlinkCycle += this.delay * 3
 
                 //custom see player by history code
                 let move = (target = this.seePlayer.position) => {
                     const dist = Vector.sub(target, this.position);
-
+                    this.force = { x: 0, y: 0 }
+                    // if (this.isStunned) {
+                    //     Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), this.JumpDistance * 0.1));
+                    // } else {
+                    // }
                     Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), this.JumpDistance));
                     Matter.Body.setVelocity(this, { x: 0, y: 0 });
                     // Matter.Body.setAngle(this, 0);
@@ -4115,6 +4121,10 @@ const spawn = {
                             }
                         }
                     }
+                } else {
+
+                    Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                    Matter.Body.setAngularVelocity(this, 0)
                 }
             }
             this.checkStatus();
