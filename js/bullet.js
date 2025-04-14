@@ -1699,6 +1699,25 @@ const b = {
                         },
                     })
                 }
+                if (tech.isBreakHarpoon && Math.random() < 0.1) {
+                    if (tech.isBreakHarpoonGain) {
+                        powerUps.spawn(m.pos.x, m.pos.y - 50, "research");
+                        powerUps.spawn(m.pos.x - 20, m.pos.y + 15, "research");
+                        powerUps.spawn(m.pos.x + 20, m.pos.y + 15, "boost");
+                        b.targetedNail(this.position, Math.floor(1 + 1.5 * Math.random()))
+                    }
+                    this.endCycle += 60 //so it lasts a bit longer
+                    this.frictionAir = 0.01
+                    //add spin
+                    Matter.Body.setAngularVelocity(this, 0.7 * (Math.random() - 0.5))
+                    //cap speed
+                    const unit = Vector.normalise(this.velocity)
+                    Matter.Body.setVelocity(this, Vector.mult(unit, Math.min(this.speed, 20)));
+                    //stop behavior
+                    this.do = () => {
+                        this.force.y += this.mass * 0.005; //gravity
+                    }
+                }
             },
             caughtPowerUp: null,
             dropCaughtPowerUp() {
@@ -2517,7 +2536,7 @@ const b = {
                                     ) {
                                         if (tech.isStun) b.AoEStunEffect(this.position, this.range + mob[i].radius + random); //AoEStunEffect(where, range, cycles = 90 + 60 * Math.random()) {
                                         if (tech.isMineSentry) {
-                                            this.lookFrequency = Math.floor(7 + 7 * b.fireCDscale + 10 * (tech.oneSuperBall && tech.isSuperMine) + Math.floor(3 * Math.random()))
+                                            this.lookFrequency = Math.floor(5 + 7 * b.fireCDscale + 10 * (tech.oneSuperBall && tech.isSuperMine) + Math.floor(2 * Math.random()))
                                             // this.endCycle = Infinity
                                             this.shots = tech.sentryAmmo
                                             this.do = function () { //overwrite the do method for this bullet
@@ -7183,7 +7202,7 @@ const b = {
                         b.harpoon(where, closest.target, m.angle, harpoonSize, true, totalCycles)
                     }
                 }
-                m.fireCDcycle = m.cycle + 5 + 35 * b.fireCDscale + 60 * (m.energy < 0.05) + tech.extraHarpoons // cool down is set when harpoon bullet returns to player
+                m.fireCDcycle = m.cycle + 5 + 35 * b.fireCDscale * (tech.isBreakHarpoon ? 0.5 : 1) + 60 * (m.energy < 0.05) + tech.extraHarpoons // cool down is set when harpoon bullet returns to player
                 const recoil = Vector.mult(Vector.normalise(Vector.sub(where, m.pos)), m.crouch ? 0.015 : 0.035)
                 player.force.x -= recoil.x
                 player.force.y -= recoil.y

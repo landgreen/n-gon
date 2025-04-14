@@ -35,13 +35,13 @@ function playerOnGroundCheck(event) {
                 //sets a hard land where player stays in a crouch for a bit and can't jump
                 //crouch is forced in groundControl below
                 const momentum = player.velocity.y * player.mass //player mass is 5 so this triggers at 26 down velocity, unless the player is holding something
-                if (momentum > m.hardLanding) {
+                if (momentum > m.hardLanding && !input.up) {
                     m.doCrouch();
                     m.yOff = m.yOffWhen.jump;
                     m.hardLandCD = m.cycle + m.hardLandCDScale * Math.min(momentum / 6.5 - 6, 40)
                     //falling damage
                     if (tech.isFallingDamage && m.immuneCycle < m.cycle && momentum > 150) {
-                        m.damage(Math.min(Math.sqrt(momentum - 133) * 0.01, 0.25));
+                        m.damage(Math.min(Math.sqrt(momentum - 100) * 0.01, 0.2));
                         if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
                     }
                 } else {

@@ -3088,7 +3088,7 @@ const m = {
                     if (tech.isTokamakHeal && tech.tokamakHealCount < 5) {
                         tech.tokamakHealCount++
                         let massScale = Math.min(65 * Math.sqrt(m.maxHealth), 14 * Math.pow(m.holdingTarget.mass, 0.4))
-                        if (powerUps.healGiveMaxEnergy) massScale = powerUps["heal"].size()
+                        if (powerUps.isEnergyHealth) massScale = powerUps["heal"].size()
                         powerUps.spawn(m.pos.x, m.pos.y, "heal", true, massScale * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)))  //    spawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
                     }
                 } else { //normal throw
@@ -3951,10 +3951,25 @@ const m = {
                         // console.log(angleReduction)
                         if (player.velocity.y > 1) {
                             player.force.y -= angleReduction * (tech.isBigField ? 0.95 : 0.5) * player.mass * simulation.g;
+
+                            const pushX = 0.0007 * angleReduction * player.mass
+                            if (player.velocity.x > 0.5) {
+                                player.force.x += pushX
+                            } else if (player.velocity.x < -0.5) {
+                                player.force.x -= pushX
+                            }
+
                             Matter.Body.setVelocity(player, {
                                 x: player.velocity.x,
                                 y: 0.98 * player.velocity.y
-                            }); //set velocity to cap, but keep the direction
+                            });
+
+                            //set velocity to cap, but keep the direction
+                            // capX = 28
+                            // Matter.Body.setVelocity(player, {
+                            //     x: Math.abs(player.velocity.x) < capX ? Math.max(-capX, Math.min(1.0155 * player.velocity.x, capX)) : player.velocity.x,
+                            //     y: 0.98 * player.velocity.y
+                            // }); 
                         }
 
                         // go invulnerable while field is active, but also drain energy
@@ -5452,7 +5467,7 @@ const m = {
                                             this.count--
                                             if (this.count < 0) simulation.removeEphemera(this.name)
                                             ctx.beginPath();
-                                            ctx.arc(this.PposX, this.PposY, this.size * (this.count + 1) / 7, 0, 2 * Math.PI);
+                                            ctx.arc(this.PposX, this.PposY, Math.max(1, this.size * (this.count + 1) / 7), 0, 2 * Math.PI);
                                             ctx.fillStyle = this.color
                                             ctx.fill();
                                         },

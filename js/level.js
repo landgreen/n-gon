@@ -34,7 +34,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(8) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
             // m.energy = 0
@@ -58,8 +58,8 @@ const level = {
             // m.skin.egg();
             // for (let i = 0; i < 1; ++i) tech.giveTech("anthropic principle")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("surfing") });
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("interest") });
-            // for (let i = 0; i < 1; i++) tech.giveTech("interest")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("spalling") });
+            // for (let i = 0; i < 1; i++) tech.giveTech("wear")
             // m.lastKillCycle = m.cycle
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(450, -50, "field");
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
@@ -70,7 +70,7 @@ const level = {
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
 
-            // for (let i = 0; i < 1; i++) spawn.beamer(1900, -500)
+            // for (let i = 0; i < 10; i++) spawn.starter(1100 + 100 * i, -500)
             // for (let i = 0; i < 1; ++i) spawn.spiderBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "gun");
@@ -159,7 +159,7 @@ const level = {
         for (let i = 0; i < tech.wimpCount; i++) {
             spawn.WIMP()
             mob[mob.length - 1].isDecoupling = true //so you can find it to remove
-            for (let j = 0, len = 6; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
+            for (let j = 0, len = 7; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         }
 
         if (m.plasmaBall) m.plasmaBall.fire()
@@ -478,16 +478,15 @@ const level = {
                 if (level.isReducedHealth) {
                     level.isReducedHealth = false
                     m.setMaxHealth()
-                    m.addHealth(level.reducedHealthLost);
+                    m.addHealth(level.reducedHealthLost / simulation.healScale);
                     level.reducedHealthLost = 0
                 } else {
                     level.isReducedHealth = false
                 }
-
             }
         },
         {
-            description: "after 40 seconds spawn WIMPs",
+            description: "after 50 seconds spawn WIMPs",
             effect() {
                 simulation.ephemera.push({
                     name: "WIMPS",
@@ -496,7 +495,7 @@ const level = {
                     do() {
                         this.time++
                         if (level.levels[level.onLevel] === this.levelName) {
-                            if (this.time > 2400 && !(this.time % 420)) spawn.WIMP(level.enter.x, level.enter.y)
+                            if (this.time > 3000 && !(this.time % 540)) spawn.WIMP(level.enter.x, level.enter.y)
                         } else {
                             simulation.removeEphemera(this.name);
                         }
@@ -15706,7 +15705,7 @@ const level = {
                         }
                     }
                     templePlayer.drawExit = true;
-                    for (let i = 0; i < 6 * tech.wimpCount; i++) {
+                    for (let i = 0; i < 7 * tech.wimpCount; i++) {
                         powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false);
                     }
                     canvas.style.filter = "";

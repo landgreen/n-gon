@@ -346,7 +346,7 @@ const tech = {
     },
     tech: [{
         name: "tungsten carbide",
-        description: "<strong>+500</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
+        description: "<strong>+500</strong> maximum <strong class='color-h'>health</strong><br><strong>lose</strong> ~8 <strong class='color-h'>health</strong> after hard <strong>landings</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -370,7 +370,7 @@ const tech = {
     },
     {
         name: "nitinol",
-        description: "<strong>1.3x</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>0.17</strong> seconds of <strong>coyote time</strong>",
+        description: "<strong>1.3x</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>0.17</strong> seconds of <strong>coyote time</strong> <em style ='float: right;'>(jumping after falling)</em>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -515,7 +515,7 @@ const tech = {
     },
     {
         name: "mass-energy equivalence",
-        description: `<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong>1.3x</strong> <strong class='color-d'>damage</strong>`,
+        description: `<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong>1.5x</strong> <strong class='color-d'>damage</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -525,7 +525,7 @@ const tech = {
             return !m.isAltSkin && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isAnnihilation && !tech.isNoDeath//&& !tech.isAmmoFromHealth && !tech.isRewindGun
         },
         requires: "not piezoelectricity, CPT, annihilation, quantum Zeno effect",
-        damage: 1.3,
+        damage: 1.5,
         effect() {
             tech.damage *= this.damage
 
@@ -568,8 +568,8 @@ const tech = {
         },
         maxCount: 1,
         count: 0,
-        frequency: 4,
-        frequencyDefault: 4,
+        frequency: 5,
+        frequencyDefault: 5,
         allowed() {
             return tech.isEnergyHealth && !tech.isOverHeal
         },
@@ -1696,7 +1696,7 @@ const tech = {
     {
         name: "scrap bots",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Scrap' class="link">scrap bots</a>`,
-        description: "after mobs <strong>die</strong> you have a <strong>33%</strong> chance<br>to construct scrap <strong class='color-bot'>bots</strong> that operate for <strong>15</strong> seconds",
+        description: "after mobs <strong>die</strong> you have a <strong>33%</strong> chance to<br>construct scrap <strong class='color-bot'>bots</strong> that operate for <strong>15</strong> seconds",
         maxCount: 3,
         count: 0,
         frequency: 1,
@@ -5939,7 +5939,7 @@ const tech = {
     },
     {
         name: "missile guidance",
-        description: `while pressing <strong>crouch</strong> <strong>missile</strong> target your mouse<br><strong>1.5x</strong> missile <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
+        description: `while <strong>crouching</strong> your <strong>missiles</strong> target your mouse<br><strong>1.5x</strong> missile <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -7230,9 +7230,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.isHarpoonPowerUp && !tech.isBoostReplaceAmmo
+            return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.isHarpoonPowerUp && !tech.isBoostReplaceAmmo && !tech.isBreakHarpoon
         },
-        requires: "harpoon, not UHMWPE, induction furnace, quasiparticles",
+        requires: "harpoon, not UHMWPE, induction furnace, quasiparticles, wear",
         ammoBonus: 9,
         effect() {
             tech.isRailGun = true;
@@ -7303,8 +7303,8 @@ const tech = {
         isGunTech: true,
         maxCount: 1,
         count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
+        frequency: 3,
+        frequencyDefault: 3,
         removeAmmo: 10,
         allowed() {
             return tech.haveGunCheck("harpoon") && (build.isExperimentSelection || b.guns[9].ammo >= this.removeAmmo)
@@ -7342,8 +7342,8 @@ const tech = {
         isGunTech: true,
         maxCount: 1,
         count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
+        frequency: 4,
+        frequencyDefault: 4,
         removeAmmo: 10,
         allowed() {
             return tech.haveGunCheck("harpoon") && (build.isExperimentSelection || b.guns[9].ammo >= this.removeAmmo) && tech.isRebar
@@ -7371,6 +7371,49 @@ const tech = {
                     }
                 }
             }
+        }
+    },
+    {
+        name: "wear",
+        descriptionFunction() {
+            //<strong>2x</strong> ${b.guns[9].harpoonName()} <strong class='color-d'>damage</strong>
+            return `<strong>2x</strong> ${b.guns[9].harpoonName()} <em>fire rate</em><br><strong>10%</strong> chance to <strong>break</strong> on hitting mobs, <strong>-1</strong> <strong class='color-ammo'>ammo</strong>`
+        },
+        isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return tech.haveGunCheck("harpoon") && !tech.isRailGun
+        },
+        requires: "harpoon, not railgun",
+        effect() {
+            tech.isBreakHarpoon = true;
+        },
+        remove() {
+            tech.isBreakHarpoon = false;
+        }
+    },
+    {
+        name: "spalling",
+        descriptionFunction() {
+            return `if your ${b.guns[9].harpoonName()} <strong>breaks</strong> after hitting mobs<br>spawn metal <strong>fragments</strong> and ${powerUps.orb.research(2)}${powerUps.orb.boost(1)}`
+        },
+        isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 4,
+        frequencyDefault: 4,
+        allowed() {
+            return tech.haveGunCheck("harpoon") && tech.isBreakHarpoon
+        },
+        requires: "harpoon, wear",
+        effect() {
+            tech.isBreakHarpoonGain = true;
+        },
+        remove() {
+            tech.isBreakHarpoonGain = false;
         }
     },
     {
@@ -8650,7 +8693,7 @@ const tech = {
     {
         name: "dielectric",
         descriptionFunction() {
-            return `use ${powerUps.orb.research(3)}<em style ="float: right;">(${(1 + powerUps.boost.damage).toFixed(2)}x</strong> <strong class='color-d'>damage</strong>)</em><br>activate ${powerUps.orb.boost(1)} while <strong class='color-plasma'>plasma</strong> ${powerUps.orb.field()} is active`
+            return `use ${powerUps.orb.research(2)}<em style ="float: right;">(${(1 + powerUps.boost.damage).toFixed(2)}x</strong> <strong class='color-d'>damage</strong>)</em><br>activate ${powerUps.orb.boost(1)} while <strong class='color-plasma'>plasma</strong> ${powerUps.orb.field()} is active`
         },
         isFieldTech: true,
         maxCount: 1,
@@ -8658,18 +8701,18 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (m.fieldMode === 5) && (build.isExperimentSelection || powerUps.research.count > 2)
+            return (m.fieldMode === 5) && (build.isExperimentSelection || powerUps.research.count > 1)
         },
         requires: "plasma torch",
         effect() {
             tech.isPlasmaBoost = true;
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 2; i++) {
                 if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
             }
         },
         remove() {
             tech.isPlasmaBoost = false;
-            if (this.count > 0) powerUps.research.changeRerolls(3)
+            if (this.count > 0) powerUps.research.changeRerolls(2)
         }
     },
     {
@@ -9110,7 +9153,7 @@ const tech = {
     },
     {
         name: "WIMPs",
-        description: `at the exit to each <strong>level</strong> spawn ${powerUps.orb.research(6)}<br>and a dangerous particle that slowly <strong>chases</strong> you`,
+        description: `at the exit to each <strong>level</strong> spawn ${powerUps.orb.research(7)}<br>and a dangerous particle that slowly <strong>chases</strong> you`,
         isFieldTech: true,
         maxCount: 9,
         count: 0,
@@ -9123,7 +9166,7 @@ const tech = {
         effect() {
             tech.wimpCount++
             spawn.WIMP()
-            for (let j = 0, len = 6; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
+            for (let j = 0, len = 7; j < len; j++) powerUps.spawn(level.exit.x + 100 * (Math.random() - 0.5), level.exit.y - 100 + 100 * (Math.random() - 0.5), "research", false)
         },
         remove() {
             tech.wimpCount = 0
@@ -12685,4 +12728,6 @@ const tech = {
     isRebar: null,
     isMaul: null,
     isTargeting: null,
+    isBreakHarpoon: null,
+    isBreakHarpoonGain: null,
 }

@@ -61,7 +61,7 @@ const powerUps = {
             return text
         },
         heal(num = 1) {
-            if (powerUps.healGiveMaxEnergy) {
+            if (powerUps.isEnergyHealth) {
                 if (num === 1) return `<div class="heal-circle-energy"></div>`
 
                 let text = '<span style="position:relative;">'
@@ -861,7 +861,7 @@ const powerUps = {
                     }
                 }
             }
-            if (powerUps.healGiveMaxEnergy) {
+            if (powerUps.isEnergyHealth) {
                 tech.healMaxEnergyBonus += 0.15 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)
                 m.setMaxEnergy();
             }

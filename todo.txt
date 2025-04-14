@@ -1,12 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: quantum Darwinism - once per level if health < 0 spawn a tech and get 2% JUNK
-harpoon tech: rebar - make the harpoon into rebar.  ~2x damage for 10 ammo
-harpoon tech: maul -  make the rebar into a maul.  ~2x damage  for 10 ammo
-missile tech: missile guidance - missiles follow mouse if you are crouching, and 1.5 extra missile ammo
+tech: wear - 2x harpoon fire rate, 10% chance for rope to snap after hitting a mob (losing ammo)
+tech: spalling - after harpoon breaks get 2 research and 1 boost
 
-bug fix
-  snakeBoss has better behavior when stunned
+perfect diamagnetism field float also accelerates horizontally
+constraint balance: after 40->50 seconds spawn WIMPs  (then spawn one every 7->9 seconds)
+constraint balance: 0.5x max health now no longer considers difficulty based heal reduction when returning lost health
+plasma dielectric 3->2 cost
+WIMPs 6->7 research per level
+mine tech sentry fires ~1.2x faster
+mass-energy equivalence 1.3 ->1.5 damage
+
+added button in settings to load gamepad code: https://github.com/kgurchiek/n-gon-controller
+
+fixed bug with wormhole crashing after eating very small power ups
 
 ******************************************************** BUGS ********************************************************
 
@@ -14,48 +21,101 @@ graphical bug - player can become crouched while not touching the ground if they
 
 *********************************************************** TODO *****************************************************
 
-difficulty rework:
-  make it clear that the player is getting stronger
-  just changing damage taken and damage done is kinda invisible
-  difficulty that players can see:
-    maybe just make the change in damage done/taken animated at start of new level?
-    more mobs
-    more bosses
-    more constraints
-    put mob types into tiers, higher tiers have more health and do more damage
-      remove the random linked up groups of mobs
-      some level specific bosses will need to have different versions for each tier
-      What do do with old difficulty system
-        need to replace 1 or both of these:
-            0.85x damage per level
-            1.25x damage taken per level
-          replace with:
-            difficulty 0: at higher levels spawn high tier mobs (so basically just the new rule)
-            each level has a chance to spawn mobs from the next higher tier
-
+mob tiers
+  replaces damage taken and damage done effects
+    higher tier mobs have more health and do more damage
+    assign mob tier in spawn random mob method
+  should the number of mobs increase as you get deeper into each tier?
+  edge cases
+    what about slime, lasers, .... environmental effects do they scale up in difficulty to match tiers or do they follow the old system
+      need to keep the old system of player damage taken and heal reduction, but separate it from the mob tier system
+    remove the random linked up groups of mobs
+    some level specific bosses will need to have different versions for each tier
+    testing mode button to spawn a mob needs a tier (maybe T4, which just scales with the current levels cleared)
+  special levels have a locked in order now
+  in pause menu add in mode tier into next to mob type names
+  update difficulty system text
+    need to replace:
+        0.85x damage per level
+        1.25x damage taken per level
+      replace with:
+        difficulty 0: at higher levels spawn high tier mobs (so basically just the new system for mob tiers)
+        difficulty 4: each level has a chance to spawn a mob from the 2 tier higher and all mobs are one progress to higher tiers 2 levels earlier
 mob tiers
   tier 0: starter
   tier 1: slasher, hopper, flutter, shooter, grower, grenadier, laser, beamer, launcher, exploder
   tier 2: slasher2, stabber, springer, striker, spinner, sucker, pulsar, focuser, spawner
   tier 3: slasher3, hopMother, stinger, sniper, sneaker, ghoster, laserLayer, launcherOne
+  tier 4+ spawns any mob type
 boss tiers
   tier 0:
-  tier 1: snakeBoss, dragonFlyBoss, slashBoss, revolutionBoss, streamBoss, launcherBoss, grenadierBoss, shooterBoss, orbitalBoss, spiderBoss
-  tier 2: powerUpBossBaby, sneakBoss, blockBoss, laserTargetingBoss, blinkBoss, shieldingBoss, pulsarBoss, spawnerBossCulture, growBossCulture
+  tier 1: snakeBoss, dragonFlyBoss, slashBoss, revolutionBoss, streamBoss, launcherBoss, grenadierBoss, shooterBoss, orbitalBoss, spiderBoss, shieldingBoss
+  tier 2: powerUpBossBaby, sneakBoss, blockBoss, laserTargetingBoss, blinkBoss, pulsarBoss, spawnerBossCulture, growBossCulture
   tier 3: powerUpBoss, laserLayerBoss, historyBoss, beetleBoss, snakeSpitBoss, mantisBoss, laserBombingBoss, cellBossCulture, bomberBoss, timeSkipBoss
-levels:
-  0 = tier 0: initial
-  1,2,3,4 = tier 1: 3 random levels -> reactor(end of tier 1)
-  5,6,7,8 = tier 2: 3 random levels -> interferometer, factory, reservoir(end of tier 2)
-  9,10,11,12,13 = tier 3: 3 random levels -> final, subway (end of tier 3)
-  
-  
+  tier 4+ spawns any boss type
+
+base mob tier progression
+  level 0: (T0)    initial
+  level 1: (T0,T1)
+  level 2: (T1,T1)
+  level 3: (T1,T1)
+  level 4: (     ) reactor
+  level 5: (T1,T2)
+  level 6: (T2,T2)
+  level 7: (T2,T2)
+  level 8: (T2,T3) interferometer, factory, reservoir
+  level 9: (T3,T3)
+  level 10 (T3,T3)
+  level 11 (T3,T4)
+  level 12 (T4,T4) subway
+  level 13 (T4,T4) final Boss
+
+Higher difficulty progression  (also spawn 1 mob at +2 tier each level)
+  level 0: (T1)    initial
+  level 1: (T1,T1)
+  level 2: (T1,T1)
+  level 3: (T1,T2) 
+  level 4: (     ) reactor
+  level 5: (T2,T2)
+  level 6: (T2,T2) 
+  level 7: (T2,T3)
+  level 8: (T3,T3) interferometer, factory, reservoir
+  level 9: (T3,T3)
+  level 10 (T3,T4) 
+  level 11 (T4,T4)
+  level 12 (T4,T4) subway
+  level 13 (T4,T4) final Boss
+
+mob balance:
+  T1 mobs balance with old difficulty 4 on level 2
+    player dmg 0.5220, player dmg taken 1.000x
+  T2 mobs balance with old difficulty 4 on level 6
+    player dmg 0.1422x, player dmg taken 3.000x
+  T3 mobs balance with old difficulty 4 on level 10
+    player dmg 0.03876x, player dmg taken 5.000x
+  T4 mobs scale with levels cleared and can be any mob type 
+
+
+
+
 Gravity could flip on the final level.
 
 n-gon needs to be stranger
   more wild synergies
   more subtle lore hints and world building
   more secrets
+
+
+mob: weeping angle - spawns long lasting bullets, like seekers, but called weepers
+  tier 3
+mob: weepers - bullet
+  when you aren't facing it or blocked line of site
+    moves extra fast
+    can harm player on collision
+  player can see
+    invincible
+    frozen/not moving/slow moving?
+
 
 !conformal infinity - after making a wormhole, subsequent wormholes generate energy 10 energy for the next 5 seconds
   replace holographic principle?
@@ -67,6 +127,10 @@ n-gon needs to be stranger
 !!!mob: spiker - moves around, but then stops and makes porcupine spikes for 2 seconds, then moves again.
   maybe use hopper movement?
   maybe use slasher laser code
+
+guntech:  - 0.5x damage taken while ____  gun is equipped
+  wave or shotgun?
+  thematic issues? (how is a gun going to protect you)
 
 make guns do different things if  tap or hold fire
   effects have some overlap with crouch
@@ -97,10 +161,6 @@ option for numerical HUD
 hold jump to jump higher
   field tech?  or skin tech?
     maybe require nitinol first?
-
-increase interest percent, but make it focused on one type:
-  this lets the player make more strategic choices
-  research, coupling, ammo?
 
 wormhole fieldtech:   - gain 1% duplication for this level each time the wormhole eats a block
   add a limit to the number of blocks that can be duplicated?
