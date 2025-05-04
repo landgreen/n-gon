@@ -148,7 +148,7 @@ function vertexCollision(v1, v1End, domains) {  //= [map, body, [playerBody, pla
 function beforeUnloadEventListener(event) {
     event.preventDefault();
     if (tech.isExitPrompt) {
-        tech.damage *= 1.25
+        m.damageDone *= 1.25
         // simulation.inGameConsole(`<strong class='color-d'>damage</strong> <span class='color-symbol'>*=</span> ${1.25}`)
         simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.25} //beforeunload`);
         if (Math.random() < 0.25) {
@@ -266,12 +266,6 @@ window.addEventListener('load', () => {
                     }
                 }
             }
-
-            // if (property === "difficulty") {
-            //     simulation.difficultyMode = Number(set[property])
-            //     lore.setTechGoal()
-            //     document.getElementById("difficulty-select-experiment").value = Number(set[property])
-            // }
             if (property === "molMode") {
                 simulation.molecularMode = Number(set[property])
                 const i = 4 //update experiment text
@@ -280,11 +274,6 @@ window.addEventListener('load', () => {
                 <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
                 ${m.fieldUpgrades[i].description}</div>`
             }
-            // if (property === "seed") {
-            //     document.getElementById("seed").placeholder = Math.initialSeed = String(set[property])
-            //     Math.seed = Math.abs(Math.hash(Math.initialSeed))
-            //     level.populateLevels()
-            // }
             requestAnimationFrame(() => { build.sortTech('have', true) });
 
         }
@@ -446,7 +435,7 @@ const build = {
                             document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
                             m.lastCalculatedDefense = defense
                         }
-                        const damage = tech.damageFromTech()             //update damage bar
+                        const damage = tech.damageAdjustments()             //update damage bar
                         if (m.lastCalculatedDamage !== damage) {
                             document.getElementById("damage-bar").style.height = Math.floor((Math.atan(0.25 * damage - 0.25) + 0.25) * 0.53 * canvas.height) + "px";
                             m.lastCalculatedDamage = damage
@@ -488,6 +477,12 @@ const build = {
         // <br>
         // <input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages ? "checked" : ""}>
         // <label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.15em;" >hide images</label>
+        let mobText
+        if (level.levelsCleared > 0 && level.levelsCleared < 13) {
+            mobText = `<br>${spawn.pickList[0]} (<strong class="color-tier">T${spawn.mobTierSpawnOrder[level.levelsCleared - 1]}</strong>), ${spawn.pickList[1]} (<strong class="color-tier">T${spawn.mobTierSpawnOrder[level.levelsCleared]}</strong>)<span style="float: right;">mobs ${mob.length}</span>`
+        } else {
+            mobText = ""
+        }
 
         let text = `<div class="pause-grid-module" style="padding: 8px;">
 <span style="font-size:1.4em;font-weight: 600; float: left;">PAUSED</span> 
@@ -502,10 +497,10 @@ const build = {
 <details id = "simulation-variables-details" style="padding: 0 8px;line-height: 140%;">
 <summary>simulation variables</summary>
 <div class="pause-details">
-<strong class='color-d'>damage</strong> ${((tech.damageFromTech())).toPrecision(4)}x
-<span style="float: right;"><strong class='color-d'>level</strong> ${((m.dmgScale)).toPrecision(4)}x</span>
+<strong class='color-d'>damage</strong> ${((tech.damageAdjustments())).toPrecision(4)}x
+<span style="float: right;">empty</span>
 <br><strong class='color-defense'>damage taken</strong> ${(m.defense()).toPrecision(4)}x
-<span style="float: right;"><strong class='color-defense'>level</strong> ${(simulation.dmgScale).toPrecision(4)}x</span>
+<span style="float: right;">empty</span>
 <br><strong class='color-h'>health</strong> (${level.isHideHealth ? "null" : (m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
 <span style="float: right;">${powerUps.research.count} ${powerUps.orb.research()}</span>
 <br><strong class='color-f'>energy</strong> (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000 * level.isReducedRegen).toFixed(0)}/s)
@@ -523,26 +518,26 @@ ${botText}
 <span style="float: right;">mouse (${simulation.mouseInGame.x.toFixed(0)}, ${simulation.mouseInGame.y.toFixed(0)})</span>
 <br>cycles ${m.cycle}
 <span style="float: right;">velocity (${player.velocity.x.toFixed(2)}, ${player.velocity.y.toFixed(2)})</span>
-<br>mobs ${mob.length} (${spawn.pickList[0]},  ${spawn.pickList[1]})
-<span style="float: right;">blocks ${body.length}</span>
 <br>bullets ${bullet.length}
 <span style="float: right;">power ups ${powerUp.length}</span>
+${mobText}
 
 ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 </div>
 </details>
 </div>`
+
         text += `<div class="pause-grid-module card-background" style="height:auto;">
 <details id="difficulty-parameters-details" style="padding: 0 8px;">
 <summary>difficulty parameters</summary>
 <div class="pause-details">
-        ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row"><strong>0.85x</strong> <strong class='color-d'>damage</strong> per level<br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
-        ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row">spawn <strong>more</strong> mobs<br>mobs move <strong>faster</strong></div>` : " "}
-        ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row">spawn a <strong>2nd boss</strong> each level<br>bosses spawn <strong>0.5x</strong> power ups</div>` : " "}
-        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row"><strong>0.85x</strong> <strong class='color-d'>damage</strong> per level<br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>` : " "}
-        ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>+1</strong> random <strong class="constraint">constraint</strong> each level<br>fewer initial power ups</div>` : " "}
-        ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> initial <strong class='color-d'>damage</strong><br><strong>2x</strong> initial <strong class='color-defense'>damage taken</strong></div>` : " "}        
-        ${simulation.difficultyMode > 6 ? `<div class="pause-difficulty-row"><strong>+1</strong> random <strong class="constraint">constraint</strong> each level<br>fewer ${powerUps.orb.tech()} spawn</div>` : " "}        
+        ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row">spawn higher <strong class="color-tier">TIER</strong> mobs<br>after every <strong>4</strong> levels</div>` : " "}
+        ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> <strong class='color-d'>damage</strong><br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>` : " "}
+        ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row">spawn a <strong>2nd boss</strong><br>bosses spawn <strong>fewer</strong> ${powerUps.orb.tech()}</div>` : " "}
+        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row">one mob per level will<br>be from <strong>2</strong> <strong class="color-tier">TIER</strong> higher</div>` : " "}
+        ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer initial <strong>power ups</strong></div>` : " "}
+        ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> <strong class='color-d'>damage</strong><br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>` : " "}
+        ${simulation.difficultyMode > 6 ? `<div class="pause-difficulty-row"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer ${powerUps.orb.tech()} spawn</div>` : " "}
 </div>
 </details>
 ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padding: 0 8px;"><summary>active constraints</summary><div class="pause-details"><span class="constraint">${level.constraintDescription1}<br>${level.constraintDescription2}</span></div></details>` : ""}
@@ -1139,7 +1134,6 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
     hasExperimentalMode: false,
     startExperiment() { //start playing the game after exiting the experiment menu
         build.isExperimentSelection = false;
-        spawn.setSpawnList(); //gives random mobs,  not starter mobs
         if (b.inventory.length > 0) {
             b.activeGun = b.inventory[0] //set first gun to active gun
             b.inventoryGun = 0;
@@ -1637,8 +1631,7 @@ window.addEventListener("keydown", function (event) {
                 spawn.bodyRect(simulation.mouseInGame.x, simulation.mouseInGame.y, 50, 50);
                 break
             case "7":
-                const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)];
-                spawn[pick](simulation.mouseInGame.x, simulation.mouseInGame.y);
+                spawn.randomMobByLevelsCleared(simulation.mouseInGame.x, simulation.mouseInGame.y)
                 break
             case "8":
                 spawn.randomLevelBoss(simulation.mouseInGame.x, simulation.mouseInGame.y);
@@ -1910,18 +1903,6 @@ input.controlTextUpdate()
 //**********************************************************************
 // settings
 //**********************************************************************
-
-
-// difficulty-select-experiment event listener is set in build.makeGrid
-// document.getElementById("difficulty-select").addEventListener("input", () => {
-//     simulation.difficultyMode = Number(document.getElementById("difficulty-select").value)
-//     lore.setTechGoal()
-//     localSettings.difficultyMode = simulation.difficultyMode
-//     localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
-//     localSettings.entanglement = undefined //after changing difficulty, reset stored tech
-//     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-// });
-
 
 document.getElementById("fps-select").addEventListener("input", () => {
     let value = document.getElementById("fps-select").value

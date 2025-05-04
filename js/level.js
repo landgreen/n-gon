@@ -21,12 +21,12 @@ const level = {
             // build.isExperimentRun = true
 
             // simulation.isHorizontalFlipped = true
-            // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
-            // spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // level.levelsCleared = 9
             // level.updateDifficulty()
             // tech.giveTech("performance")
-            // m.maxHealth = m.health = 100000000
+            // m.maxHealth = m.health = 10000000
+            // m.displayHealth();
+
             // m.maxEnergy = m.energy = 10000000
             // tech.isRerollDamage = true
             // powerUps.research.changeRerolls(99999)
@@ -42,7 +42,7 @@ const level = {
             // tech.isHookWire = true
             // m.energy = 0
             // simulation.molecularMode = 2
-            // m.damage(0.1);
+            // m.takeDamage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("missiles") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
@@ -64,13 +64,12 @@ const level = {
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(450, -50, "field");
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
-            // level.testing();
-
+            // level.interferometer()
+            // level.subway()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
-
-            // for (let i = 0; i < 10; i++) spawn.starter(1100 + 100 * i, -500)
+            // for (let i = 0; i < 3; i++) spawn.flutter(1100 + 100 * i, -200)
             // for (let i = 0; i < 1; ++i) spawn.spiderBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "gun");
@@ -269,7 +268,7 @@ const level = {
             if (index) { //eject it
                 const effect = Math.pow(1.1, tech.tech[index].count)
                 simulation.inGameConsole(`<strong>${(effect).toFixed(2)}x</strong> <strong class='color-d'>damage</strong> <em>//from obsolescence</em>`, 360)
-                tech.damage *= effect
+                m.damageDone *= effect
                 powerUps.ejectTech(index)
             }
         }
@@ -288,16 +287,8 @@ const level = {
         if (simulation.isTraining) {
             simulation.difficulty = 1
             simulation.difficultyMode = 1
-            m.dmgScale = 1
-            simulation.dmgScale = 1//Math.max(0.1, 0.25 * level.levelsCleared * scale) //damage done by mobs scales with total levels //a bigger number means the player takes more damage
         } else {
             const scale = simulation.difficultyMode > 3 ? 2 : 1
-            m.dmgScale = Math.pow(0.85, level.levelsCleared * scale)
-            simulation.dmgScale = Math.max(0.1, 0.25 * level.levelsCleared * scale) //damage done by mobs scales with total levels //a bigger number means the player takes more damage
-            if (simulation.difficultyMode > 5) {
-                m.dmgScale *= 0.5
-                simulation.dmgScale *= 2
-            }
         }
         simulation.healScale = 1 / (1 + simulation.difficulty * 0.043) //a higher denominator makes for lower heals // m.health += heal * simulation.healScale;
         if (simulation.difficultyMode === 1) {
@@ -697,8 +688,8 @@ const level = {
         }
     },
     announceMobTypes() {
-        simulation.inGameConsole(`spawn<span class='color-symbol'>.</span>${spawn.pickList[0]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span>`)
-        simulation.inGameConsole(`spawn<span class='color-symbol'>.</span>${spawn.pickList[1]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span>`)
+        simulation.inGameConsole(`spawn<span class='color-symbol'>.</span>${spawn.pickList[0]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span> //Tier ${spawn.mobTierSpawnOrder[level.levelsCleared - 1]}`)
+        simulation.inGameConsole(`spawn<span class='color-symbol'>.</span>${spawn.pickList[1]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span> //Tier ${spawn.mobTierSpawnOrder[level.levelsCleared]}`)
     },
     disableExit: false,
     nextLevel() {
@@ -745,23 +736,20 @@ const level = {
                     simulation.paused = true;
                     simulation.isChoosing = true; //stops p from un pausing on key down
                 }
+
                 //build level info
                 document.getElementById("choose-grid").style.gridTemplateColumns = "250px"
-                //onclick="level.unPause()"
-                // if (level.levels[level.onLevel] === "final") { //|| level.levels[level.onLevel] === "reactor"
                 let text = `<div class="card-background" style="height:auto; border: none; background-color: transparent; line-height: 160%; background-color: var(--card-color); font-size: 1.15em;"> <div class="card-text">`
                 for (let i = 0; i < level.levels.length; i++) {
                     if (i < level.levelsCleared) {
                         text += `<div style="user-select: none;">${level.levels[i]}</div>`
                     } else if (i === level.levelsCleared) {
-                        // text += `<div><strong class="fade-in-faster">${level.levels[i]}</strong></div>`
                         text += `<div class="unblur" style="user-select: none;"><strong>${level.levels[i]}</strong></div>`
+                        // ${spawn.mobTypeSpawnOrder[level.levelsCleared]} Tier ${spawn.mobTierSpawnOrder[level.levelsCleared]}
+                        // <br>${spawn.mobTypeSpawnOrder[level.levelsCleared - 1]} Tier ${spawn.mobTierSpawnOrder[level.levelsCleared - 1]}`
                     } else {
                         text += `<div class= "blurry-text" style="user-select: none;">${level.levels[i]}</div>` //blurry text
-                        // ???????? text
-                        // text += `<div style="user-select: none; color: #bbb;">`
-                        // for (let j = 0; j < level.levels[i].length; j++)     text += `?`
-                        // text += `</div>`
+                        // `spawn<span class='color-symbol'>.</span><span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span>`
                     }
                 }
                 text += `</div></div>`
@@ -771,7 +759,6 @@ const level = {
                 document.getElementById("choose-grid").style.opacity = "1"
                 document.getElementById("choose-grid").style.transitionDuration = "0.25s"; //how long is the fade in on
                 document.getElementById("choose-grid").style.visibility = "visible"
-                // }
                 simulation.draw.cons();
                 simulation.draw.body();
                 level.customTopLayer();
@@ -781,7 +768,6 @@ const level = {
                     if (count > 0) {
                         requestAnimationFrame(newLevelDraw);
                     } else { //unpause
-                        // document.body.style.cursor = "none";
                         if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 30; //player is immune to damage for 30 cycles
                         if (simulation.paused) requestAnimationFrame(cycle);
                         if (m.alive) simulation.paused = false;
@@ -866,20 +852,15 @@ const level = {
             level.levels = seededShuffle(level.levels); //shuffles order of maps with seeded random
             level.levels.length = 9 //remove any extra levels past 9
             pick = ["interferometer", "factory", "reservoir"]
-            level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, pick[Math.floor(Math.random() * pick.length)]); //add level to the back half of the randomized levels list
-
-            level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, "reactor"); //add level to the back half of the randomized levels list
+            // level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, pick[Math.floor(Math.random() * pick.length)]); //add level to the back half of the randomized levels list
+            level.levels.splice(6, 0, "reactor"); //add level to the 7th location of the randomized levels list
+            level.levels.push(pick[Math.floor(Math.random() * pick.length)]); //add level to the end of the randomized levels list
             if (!build.isExperimentSelection || (build.hasExperimentalMode && !simulation.isCheating)) { //experimental mode is endless, unless you only have an experiment Tech
                 level.levels.unshift("initial"); //add level to the start of the randomized levels list
                 level.levels.push("subway"); //add level to the end of the randomized levels list
                 level.levels.push("final"); //add level to the end of the randomized levels list
             }
         }
-        //set seeded random lists of mobs and bosses
-        spawn.mobTypeSpawnOrder = []
-        for (let i = 0; i < level.levels.length; i++) spawn.mobTypeSpawnOrder.push(spawn.fullPickList[Math.floor(Math.seededRandom(0, spawn.fullPickList.length))])
-        spawn.bossTypeSpawnOrder = []
-        for (let i = 0; i < level.levels.length * 2; i++) spawn.bossTypeSpawnOrder.push(spawn.randomBossList[Math.floor(Math.seededRandom(0, spawn.randomBossList.length))])
     },
     flipHorizontal() {
         const flipX = (who) => {
@@ -2315,8 +2296,8 @@ const level = {
                     // hitting player
                     if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                        const dmg = damage * simulation.dmgScale;
-                        m.damage(dmg);
+                        const dmg = damage * spawn.dmgToPlayerByLevelsCleared();
+                        m.takeDamage(dmg);
                         simulation.drawList.push({ //add dmg to draw queue
                             x: best.x,
                             y: best.y,
@@ -2357,8 +2338,8 @@ const level = {
                         this.countDown--
                         if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) { // hitting player
                             m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                            const dmg = damage * simulation.dmgScale;
-                            m.damage(dmg);
+                            const dmg = damage * spawn.dmgToPlayerByLevelsCleared()
+                            m.takeDamage(dmg);
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: best.x,
                                 y: best.y,
@@ -2449,7 +2430,8 @@ const level = {
                     if (this.height > 0 && Matter.Query.region([player], this).length && !(m.isCloak)) {
                         if (m.immuneCycle < m.cycle) {
                             m.immuneCycle = m.cycle + m.collisionImmuneCycles;
-                            m.damage(damage)
+                            damage *= spawn.dmgToPlayerByLevelsCleared()
+                            m.takeDamage(damage)
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: player.position.x,
                                 y: player.position.y,
@@ -2474,8 +2456,7 @@ const level = {
                                 m.energy -= DRAIN
                                 if (tech.isEnergyHealth && m.energy < 0) m.death()
                             } else {
-                                m.damage(damage * (tech.isRadioactiveResistance ? 0.2 : 1))
-
+                                m.takeDamage(damage * (tech.isRadioactiveResistance ? 0.2 : 1) * spawn.dmgToPlayerByLevelsCleared())
                             }
                         }
                         //float
@@ -2833,7 +2814,7 @@ const level = {
         // spawn.randomSmallMob(1300, -70);
         // spawn.randomMob(2650, -975, 0.8);
         // spawn.randomGroup(1700, -900, 0.4);
-        // if (simulation.difficulty > 1) spawn.randomLevelBoss(2200, -1300);
+        // spawn.randomLevelBoss(2200, -1300);
         // spawn.secondaryBossChance(100, -1500)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
@@ -3122,7 +3103,6 @@ const level = {
     },
     initial() {
         if (level.levelsCleared === 0) { //if this is the 1st level of the game
-            if (simulation.difficultyMode > 2) spawn.setSpawnList() // don't begin with starter mobs
             level.initialPowerUps()
             if (level.levelsCleared === 0) powerUps.directSpawn(-60, -950, "difficulty", false);
 
@@ -3525,18 +3505,16 @@ const level = {
             }
         } else {
             spawn[spawn.pickList[0]](1500, -200, 150 + Math.random() * 30);
-            spawn.nodeGroup(3500, -200, spawn.allowedGroupList[Math.floor(Math.random() * spawn.allowedGroupList.length)]);
-            spawn.lineGroup(5000, -200, spawn.allowedGroupList[Math.floor(Math.random() * spawn.allowedGroupList.length)]);
             for (let i = 0; i < 3; ++i) {
                 if (simulation.difficulty * Math.random() > 15 * i) spawn.randomGroup(2000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
                 if (simulation.difficulty * Math.random() > 10 * i) spawn.randomGroup(3500 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
                 if (simulation.difficulty * Math.random() > 7 * i) spawn.randomGroup(5000 + 500 * (Math.random() - 0.5), -800 + 200 * (Math.random() - 0.5), Infinity);
             }
         }
-        if (simulation.difficulty > 1) {
-            spawn.randomLevelBoss(5750, -600);
-            spawn.secondaryBossChance(4125, -350)
-        }
+
+        spawn.randomLevelBoss(5750, -600);
+        spawn.secondaryBossChance(4125, -350)
+
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
@@ -3591,7 +3569,14 @@ const level = {
         let gatesOpenLeft = -1
         const infrastructure = (x, isInProgress = true) => {
             if (isInProgress) {
-                spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
+
+                //randomize the mobs for each station
+                spawn.pickList.splice(0, 2);
+                let array = simulation.difficultyMode > 3 ? spawn.tier[4] : spawn.tier[3]
+                spawn.pickList.push(array[Math.floor(Math.random() * array.length)]);
+                array = spawn.tier[4]
+                spawn.pickList.push(array[Math.floor(Math.random() * array.length)]);
+
                 function removeAll(array) {
                     for (let i = 0; i < array.length; ++i) Matter.Composite.remove(engine.world, array[i]);
                 }
@@ -3764,6 +3749,7 @@ const level = {
                             spawn.randomMob(x + -1925, -2175, 0);
                             spawn.randomMob(x + -825, -2050, 0);
                         }
+                        //spawn.randomHigherTierMob(x + 1732, -2267)
                     }
 
                     const portal1 = level.portal({ x: x - 250, y: -310 }, Math.PI,
@@ -3857,6 +3843,7 @@ const level = {
                             spawn.randomMob(x + -1550, -2325, 0);
                             spawn.randomMob(x + -1725, -2425, 0);
                         }
+                        //spawn.randomHigherTierMob(x + 393, -1280)
                     }
 
                     spawn.mapRect(x + -1500, -210, 3000, 400);//station floor
@@ -3977,6 +3964,7 @@ const level = {
                             spawn.randomMob(x + -150, -175, 0);
                             spawn.randomMob(x + -800, -150, 0);
                         }
+                        //spawn.randomHigherTierMob(x + -452, -453)
                     }
 
                     const boost1 = level.boost(x - 1185, -225, 1400)
@@ -4057,6 +4045,7 @@ const level = {
                         spawn.randomMob(x + 19050, -2925, 0);
                         spawn.randomMob(x + 17150, -3150, 0);
                         spawn.randomMob(x + 17700, -3300, 0);
+                        //spawn.randomHigherTierMob(x - 711, -895)
                     }
                     const portal1 = level.portal({
                         x: x + 0,
@@ -4197,7 +4186,10 @@ const level = {
 
                         },
                     ]
-                    if (!isExitOpen) mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
+                    if (!isExitOpen) {
+                        mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
+                        //spawn.randomHigherTierMob(x + 51, -419)
+                    }
                     stationCustom = () => { }
                     stationCustomTopLayer = () => {
                         checkGate(gate, gateButton)
@@ -4288,7 +4280,10 @@ const level = {
                             spawn.randomMob(x + -600, -375, 0);
                         },
                     ]
-                    if (!isExitOpen) mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
+                    if (!isExitOpen) {
+                        mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
+                        //spawn.randomHigherTierMob(x + 378, -1905)
+                    }
                     const boost1 = level.boost(x - 50, -225, 790)
                     const boost2 = level.boost(x + 550, -985, 900)
                     const boost3 = level.boost(x + -850, -835, 1900)
@@ -4349,6 +4344,7 @@ const level = {
                         spawn.randomMob(x + -925, -350, 0);
                         spawn.randomMob(x + 75, -1750, 0);
                         spawn.randomMob(x + 1000, -375, 0);
+                        //spawn.randomHigherTierMob(x + 89, -632)
                     }
                     stationCustom = () => { }
                     stationCustomTopLayer = () => {
@@ -4420,6 +4416,7 @@ const level = {
                         spawn.randomMob(x + 1075, -3025, 0);
                         spawn.randomMob(x + 750, -3125, 0);
                         spawn.randomMob(x + -725, -3125, 0);
+                        //spawn.randomHigherTierMob(x + 64, -1514)
                     }
                     stationCustom = () => {
                         for (let i = 0; i < boosts.length; i++) {
@@ -4439,7 +4436,7 @@ const level = {
                     const buttonsCoords = [{ x: x - 65, y: -2045 }] //only one button location?
                     const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array
                     const moverDirection = stationNumber > 0 ? 1 : -1
-                    console.log(stationNumber)
+                    // console.log(stationNumber)
                     if (isExitOpen) {
                         level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
                         level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
@@ -4531,6 +4528,7 @@ const level = {
                         spawn.randomMob(x + -1675, -3650, 0);
                         spawn.randomMob(x + -3025, -3450, 0);
                         spawn.randomMob(x + -3850, -3750, 0);
+                        //spawn.randomHigherTierMob(x + 1201, -4110)
                     }
 
                     //floor 3 fast with bumps
@@ -4587,7 +4585,8 @@ const level = {
             ]
             //update totalNumberOfStations to a higher number when adding new maps
             simulation.zoomTransition(level.defaultZoom)
-            // stations[9]() //for testing a specific station
+            // spawn.randomHigherTierMob(1732, -2267)
+            // stations[10]() //for testing a specific station
             stations[stationList[Math.abs(stationNumber % stationList.length)]]() //*************** run this one when uploading
             //add in standard station map infrastructure
             spawn.mapRect(x + -8000, 0, 16000, 800);//tunnel floor
@@ -4752,10 +4751,10 @@ const level = {
         spawn.randomMob(1775, 1000, -0.4);
         spawn.randomSmallMob(-575, -2925);
         spawn.randomGroup(-400, -4400, 0);
-        if (simulation.difficulty > 1) {
-            spawn.randomLevelBoss(825, -3500);
-            spawn.secondaryBossChance(75, -1350)
-        }
+        spawn.randomLevelBoss(825, -3500);
+        spawn.secondaryBossChance(75, -1350)
+        //spawn.randomHigherTierMob(955, -208)
+
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
         const slime = level.hazard(-2000, -5000, 4000, 6060); //    hazard(x, y, width, height, damage = 0.003)
         slime.height -= slime.maxHeight - 60 //start slime at zero
@@ -5178,8 +5177,6 @@ const level = {
                 ctx.fillRect(-775, -1100, 1000, 350);
             };
         }
-
-        // if (simulation.difficulty > 1) spawn.randomLevelBoss(2200, -1300);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     towers() {
@@ -5428,17 +5425,11 @@ const level = {
         spawn.randomMob(6300, 1025, 0.7);
         spawn.randomMob(6525, 1425, 0.8);
         spawn.randomMob(7125, 1450, 0.9);
-        // spawn.randomMob(8600, -2325, 0.7);
-        // spawn.randomMob(8650, -2825, 0.8);
-        // spawn.randomMob(9225, -2850, 0.9);
-        // spawn.randomMob(8525, -2375, 0.9);
         spawn.randomGroup(4925, -2850, 1);
-        if (simulation.difficulty > 1) {
-            spawn.randomLevelBoss(7275, -2475);
-            spawn.secondaryBossChance(8400, -1025)
-        }
+        spawn.randomLevelBoss(7275, -2475);
+        spawn.secondaryBossChance(8400, -1025)
+        //spawn.randomHigherTierMob(6644, -682)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
-
     },
     factory() {
         level.announceMobTypes()
@@ -5626,7 +5617,7 @@ const level = {
                     spawn.randomMob(5325, -1975, 0.4);
 
                     spawn.randomGroup(3900, -725, 0.4);
-                    if (simulation.difficulty > 1) spawn.randomLevelBoss(6501, -1771);
+                    spawn.randomLevelBoss(6501, -1771);
                     spawn.secondaryBossChance(6063, -661)
                     powerUps.addResearchToLevel() //needs to run after mobs are spawned
                 }
@@ -5738,6 +5729,7 @@ const level = {
         spawn.randomSmallMob(1250, -175);
         spawn.randomSmallMob(1500, -229);
         spawn.randomSmallMob(1850, -300);
+        //spawn.randomHigherTierMob(1491, -150)
         powerUps.spawn(5200, -1300, "ammo");
     },
     labs() {
@@ -5843,6 +5835,7 @@ const level = {
                             spawn.randomMob(x + 425, y - 100, mobSpawnChance);
                             spawn.randomMob(x + 1700, y - 300, mobSpawnChance);
                             spawn.randomMob(x + 1300, y - 375, mobSpawnChance);
+                            //spawn.randomHigherTierMob(x + 800, y - 1000);
                         }
                         ctx.fillStyle = "#d4f4f4"
                         ctx.fillRect(x + 1550, y - 1300, 450, 350)
@@ -5895,6 +5888,7 @@ const level = {
                                 spawn.randomMob(x + 425, y - 100, mobSpawnChance);
                                 spawn.randomMob(x + 1200, y - 125, mobSpawnChance);
                                 spawn.randomMob(x + 1300, y - 375, mobSpawnChance);
+                                //spawn.randomHigherTierMob(x + 800, y - 1000);
                             }
                             ctx.fillStyle = "#d4f4f4"
                             ctx.fillRect(x + 1600, y - 1300, 400, 350)
@@ -5922,6 +5916,7 @@ const level = {
                                 spawn.randomMob(x + 425, y - 100, mobSpawnChance);
                                 spawn.randomMob(x + 1200, y - 125, mobSpawnChance);
                                 spawn.randomMob(x + 1300, y - 375, mobSpawnChance);
+                                //spawn.randomHigherTierMob(x + 800, y - 1000);
                             }
                             ctx.fillStyle = "#d4f4f4"
                             ctx.fillRect(x + 1600, y - 1300, 400, 350)
@@ -6520,7 +6515,11 @@ const level = {
                                 powerUps.spawn(x + 50, y - 1525, "ammo");
                                 powerUps.spawn(x + 1950, y - 1525, "ammo");
                                 powerUps.spawn(x + 1900, y - 1525, "ammo");
-                                spawn.hopMotherBoss(x + 800, y + -2200)
+                                if (simulation.difficultyMode > 1 || level.levelsCleared > 1) {
+                                    spawn.hopMotherBoss(x + 800, y + -2200)
+                                } else {
+                                    powerUps.spawnBossPowerUp(2800, -1400)
+                                }
                                 for (let i = 0; i < 4; ++i) spawn.hopBullet(x + 150 + 750 * Math.random(), y + -1600)
                                 for (let i = 0; i < 4; ++i) spawn.hopBullet(x + 1100 + 750 * Math.random(), y + -1600)
                                 spawn.hopper(x + 1550, y + -775);
@@ -6623,10 +6622,6 @@ const level = {
                                 spawn.secondaryBossChance(x + 1250, y + -2300)
                             }
                         }
-                        // toggle.query();
-                        // if (toggle.isOn && !toggle.isAddedElements) { //this code runs once after the toggle is triggered
-
-                        // }
                     }
                 )
             },
@@ -6704,33 +6699,6 @@ const level = {
                     }
                 )
             },
-            // (x = offset.x, y = offset.y) => {
-            //     const elevator1 = level.elevator(x + 1100, y - 200, 250, 30, -2100, 0.0015) // x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }, isTeleport = false) {
-            //     // const elevator1 = level.elevator(x + 175, y - 200, 250, 30, -1400, 0.001) 
-            //     // const elevator2 = level.elevator(x + 2175, y - 200, 250, 30, -1400, 0.001)
-
-            //     spawn.mapRect(-200, -1400, 350, 50); //up left door ledge
-            //     spawn.mapRect(2450, -1400, 350, 50); //up right door ledge
-
-            //     spawn.mapRect(225, -450, 350, 350); //left crawl zone
-            //     // spawn.mapRect(725, -175, 275, 75);
-            //     spawn.mapRect(725, -225, 350, 100);
-            //     spawn.mapRect(275, -750, 200, 200);
-            //     spawn.mapRect(1375, -700, 500, 750); //right side big elevator wall
-            //     spawn.mapRect(2375, -325, 350, 50);
-            //     spawn.mapRect(1800, -500, 250, 50);
-
-            //     //up high elevator
-            //     spawn.mapRect(1375, -2100, 500, 175);
-            //     spawn.mapRect(600, -2100, 475, 175);
-
-            //     if (simulation.difficulty > 3) spawn.randomLevelBoss(x + 1250, y - 1400);
-            //     doCustomTopLayer.push(
-            //         () => {
-            //             elevator1.move()
-            //         }
-            //     )
-            // }
         ]
         //pick which type of room spawns
         enter = enterOptions[Math.floor(Math.random() * enterOptions.length)];
@@ -6935,12 +6903,10 @@ const level = {
         spawn.randomMob(-150, -1975, 0.4);
         spawn.randomSmallMob(900, -825);
         spawn.randomSmallMob(1050, -50);
-
-        if (simulation.difficulty > 1) {
-            spawn.randomGroup(750, -2150, -0.8)
-            spawn.randomLevelBoss(2050, -2025)
-            spawn.secondaryBossChance(100, -1500)
-        }
+        spawn.randomGroup(750, -2150, -0.8)
+        spawn.randomLevelBoss(2050, -2025)
+        spawn.secondaryBossChance(100, -1500)
+        //spawn.randomHigherTierMob(1232, -803)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
@@ -7183,23 +7149,21 @@ const level = {
         spawn.randomMob(1225, -3375, -0.2);
         spawn.randomMob(1200, -1125, -0.1);
         spawn.randomMob(2050, -950, 0.5);
-        if (simulation.difficulty > 40) {
-            spawn.randomMob(2300, -2775, -0.5);
-            spawn.randomMob(600, -925, -0.5);
-            spawn.randomMob(1550, -2750, -0.5);
-            spawn.randomMob(1350, -1150, -0.5);
-            spawn.randomMob(-75, -1475, 0);
-            spawn.randomGroup(600, -2600, 0);
+        spawn.randomMob(2300, -2775, -0.5);
+        spawn.randomMob(600, -925, -0.5);
+        spawn.randomMob(1550, -2750, -0.5);
+        spawn.randomMob(1350, -1150, -0.5);
+        spawn.randomMob(-75, -1475, 0);
+
+        if (Math.random() < 0.5) {
+            spawn.randomLevelBoss(700, -1550);
+        } else {
+            spawn.randomLevelBoss(675, -2775);
         }
-        if (simulation.difficulty > 1) {
-            if (Math.random() < 0.5) {
-                spawn.randomLevelBoss(700, -1550);
-            } else {
-                spawn.randomLevelBoss(675, -2775); //["shooterBoss", "launcherBoss", "laserTargetingBoss", "streamBoss", "shieldingBoss", "pulsarBoss", "grenadierBoss"]
-            }
-        }
-        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+
         spawn.secondaryBossChance(1925, -1250)
+        //spawn.randomHigherTierMob(87, -1421)
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -7284,7 +7248,6 @@ const level = {
         powerUps.chooseRandomPowerUp(-975, -1475);
         powerUps.chooseRandomPowerUp(2150, -750);
         powerUps.chooseRandomPowerUp(1850, 1925);
-
 
         let buttons = []
         let lasers = []
@@ -7802,7 +7765,9 @@ const level = {
         spawn.randomMob(1475, 500, 0.8);
 
         powerUps.spawnStartingPowerUps(-875, -1925);
+
         spawn.randomLevelBoss(-875, -200);
+        //spawn.randomHigherTierMob(821, 705)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     gravitron() {
@@ -8149,7 +8114,7 @@ const level = {
         spawn.randomMob(3825, -750, 0.9);
         spawn.randomMob(2825, 150, 1);
         spawn.randomMob(-1900, 875, 1);
-
+        //spawn.randomHigherTierMob(-1296, 407)
         powerUps.spawnStartingPowerUps(-825, -600);
         spawn.randomLevelBoss(1550, 200);
         spawn.secondaryBossChance(2675, -125)
@@ -8338,6 +8303,7 @@ const level = {
         spawn.randomMob(2825, 75, 0.9);
         spawn.randomLevelBoss(2400, 600);
         spawn.secondaryBossChance(800, -300)
+        //spawn.randomHigherTierMob(-1499, 122)
         powerUps.chooseRandomPowerUp(600, 375);
         powerUps.chooseRandomPowerUp(600, 925);
         powerUps.spawnStartingPowerUps(1750, -325);
@@ -8596,9 +8562,23 @@ const level = {
         spawn.randomMob(5425, -950, 0.6);
         spawn.randomMob(3575, 375, 0.6);
         spawn.randomGroup(5300, -1400, 1.3);
-
-        spawn.randomLevelBoss(2025, -1825, ["pulsarBoss", "shieldingBoss", "laserLayerBoss", "shooterBoss"]);
-        spawn.secondaryBossChance(-1900, -1800, ["historyBoss", "spawnerBossCulture", "blockBoss"]);
+        if (simulation.difficultyMode > 1 || level.levelsCleared > 1) {
+            if (level.levelsCleared > 7) { //T3
+                spawn.randomLevelBoss(2025, -1825, ["laserLayerBoss"]);
+                spawn.secondaryBossChance(-1900, -1800, ["historyBoss"]);
+            } else if (level.levelsCleared > 3) { //T2
+                spawn.randomLevelBoss(2025, -1825, ["pulsarBoss", "spawnerBossCulture"]);
+                spawn.secondaryBossChance(-1900, -1800, ["blockBoss"]);
+            } else {  //T1
+                spawn.randomLevelBoss(2025, -1825, ["shieldingBoss"]);
+                spawn.secondaryBossChance(-1900, -1800, ["shooterBoss"]);
+            }
+        } else {
+            powerUps.spawnBossPowerUp(2800, -1400)
+        }
+        //spawn.randomHigherTierMob(4245, -1245)
+        // spawn.randomLevelBoss(2025, -1825, ["pulsarBoss", "shieldingBoss", "laserLayerBoss", "shooterBoss"]);
+        // spawn.secondaryBossChance(-1900, -1800, ["historyBoss", "spawnerBossCulture", "blockBoss"]);
         powerUps.spawnStartingPowerUps(11750, -1000);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
@@ -8627,13 +8607,6 @@ const level = {
         buttonRight.isUp = true
         const hazardSlimeLeft = level.hazard(900, -300, 1638, 2450) //hazard(x, y, width, height, damage = 0.002) {
         const hazardSlimeRight = level.hazard(2812, -300, 1650, 2450) //hazard(x, y, width, height, damage = 0.002) {
-        //set slime to empty
-        // hazardSlimeLeft.height -= hazardSlimeLeft.maxHeight //start slime at zero
-        // hazardSlimeLeft.min.y += hazardSlimeLeft.maxHeight
-        // hazardSlimeLeft.max.y = hazardSlimeLeft.min.y + hazardSlimeLeft.height
-        // hazardSlimeRight.height -= hazardSlimeRight.maxHeight //start slime at zero
-        // hazardSlimeRight.min.y += hazardSlimeRight.maxHeight
-        // hazardSlimeRight.max.y = hazardSlimeRight.min.y + hazardSlimeRight.height
         const balance = []
         level.custom = () => {
             ctx.fillStyle = "hsl(175, 35%, 76%)" //exit
@@ -8713,22 +8686,11 @@ const level = {
         spawn.mapRect(750, -350, 250, 575);
         spawn.mapRect(625, 2100, 4300, 575); //floor
         spawn.mapRect(-1400, -4425, 7250, 1000); //ceiling
-        // const vanish = []
-        // vanish.push(level.vanish(400, -1512, 150, 50))
-        // vanish.push(level.vanish(825, -625, 100, 325))
-
         //left button room  (on the far right in the
         spawn.mapRect(4450, -3525, 1400, 4500);
         spawn.mapRect(4450, 1235, 1400, 1440);
         spawn.mapRect(4775, 750, 1075, 825);
         spawn.mapRect(4450, 950, 50, 75);
-
-
-        //other ideas for left and right alternate setups
-        //just a floor covered with boosts
-        //something focused on funnel shapes
-        //several rooms with tunnels connecting them
-        //spinners
 
         //right side
         if (Math.random() < 1) {
@@ -8749,18 +8711,6 @@ const level = {
             spawn.mapRect(2750, 125, 100, 25);
             spawn.mapRect(4425, 800, 75, 25);
             spawn.mapRect(4425, 325, 75, 25);
-            // spawn.mapRect(4425, -100, 75, 25);
-            // spawn.mapRect(4425, -550, 75, 25);
-            // spawn.mapRect(4425, -1000, 75, 25);
-
-
-            // if (Math.random() < 0.5) {
-            //     spawn.mapRect(2775, 525, 100, 25);
-            //     spawn.mapRect(3200, 75, 125, 25);
-            // } else {
-            //     spawn.mapRect(4400, 800, 100, 25);
-            //     spawn.mapRect(3925, 400, 100, 25);
-            // }
         }
         //left side
         if (Math.random() < 1) {
@@ -8826,7 +8776,7 @@ const level = {
             spawn.randomMob(4000, 1650, 0.1);
             spawn.randomMob(4100, 1425, 0);
             spawn.randomGroup(3025, 325, 1);
-            if (simulation.difficulty > 1) spawn.secondaryBossChance(3520, 1169)
+            spawn.secondaryBossChance(3520, 1169)
         }
 
         const spawnLeftMobs = () => {
@@ -8840,7 +8790,7 @@ const level = {
             spawn.randomMob(1075, -100, 0.3);
             spawn.randomMob(2450, -100, 0.2);
             spawn.randomGroup(1350, -775, 1);
-            if (simulation.difficulty > 1) spawn.randomLevelBoss(1491, 495);
+            spawn.randomLevelBoss(1491, 495);
         }
         spawn.randomMob(2650, -750, 0.4);
         spawn.randomMob(300, -1725, 0.4);
@@ -8849,7 +8799,7 @@ const level = {
         spawn.randomMob(2700, -475, 0.4);
         spawn.randomMob(2375, -200, 0.2);
         spawn.randomMob(3350, -225, 0.3);
-
+        //spawn.randomHigherTierMob(2676, -424)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     sewers() {
@@ -8992,9 +8942,11 @@ const level = {
         spawn.randomMob(3600, 1725, 0.9);
         spawn.randomMob(4100, 1225, 0.9);
         spawn.randomMob(2825, 400, 0.9);
-        if (simulation.difficulty > 1) spawn.randomLevelBoss(6000, 2300, ["dragonFlyBoss", "beetleBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss", "blinkBoss", "streamBoss", "historyBoss", "orbitalBoss", "grenadierBoss", "blockBoss", "revolutionBoss", "slashBoss"]);
-        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+        spawn.randomLevelBoss(6000, 2300);
         spawn.secondaryBossChance(7725, 2275)
+        //spawn.randomHigherTierMob(2431, 2086)
+
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -9085,7 +9037,7 @@ const level = {
                     spawn.randomMob(5675, 2225, 0.5);
                     spawn.randomMob(7450, 2775, 0.5);
                     spawn.randomGroup(6600, 2400, 0.1);
-                    if (simulation.difficulty > 1) spawn.randomLevelBoss(6076, 2341);
+                    spawn.randomLevelBoss(6076, 2341);
                 }
             }
             button0.draw();
@@ -9218,8 +9170,9 @@ const level = {
         spawn.randomMob(2400, 1775, 0.3);
         spawn.randomMob(1250, 1725, 0.3);
         spawn.randomMob(775, 1775, 0.4);
-        powerUps.addResearchToLevel() //needs to run after mobs are spawned
         spawn.secondaryBossChance(1822, 1336)
+        //spawn.randomHigherTierMob(6577, 2511)
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -9267,7 +9220,7 @@ const level = {
                         spawn.randomMob(-3350, 2250, 0.5);
                         spawn.randomMob(-1275, 2725, 0.5);
                         spawn.randomGroup(-6225, 2400, 0.1);
-                        if (simulation.difficulty > 1) spawn.randomLevelBoss(-6250, 2350);
+                        spawn.randomLevelBoss(-6250, 2350);
                     }
                 }
                 button0.draw();
@@ -9434,7 +9387,9 @@ const level = {
         spawn.randomGroup(2700, -1600, 0.1);
         spawn.randomGroup(1600, -100, 0);
         spawn.randomGroup(5000, -3900, -0.3);
-        if (simulation.difficulty > 1) {
+
+
+        if (simulation.difficultyMode > 1 || level.levelsCleared > 1) {
             if (Math.random() < 0.25) {
                 spawn.randomLevelBoss(2800, -1400);
             } else if (Math.random() < 0.25) {
@@ -9446,9 +9401,13 @@ const level = {
             } else {
                 spawn.laserBoss(600 + 200 * Math.random(), -2150 + 250 * Math.random());
             }
+        } else {
+            powerUps.spawnBossPowerUp(2800, -1400)
         }
-        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+
         spawn.secondaryBossChance(3950, -850)
+        //spawn.randomHigherTierMob(5038, 100)
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -9621,9 +9580,11 @@ const level = {
         spawn.randomGroup(600, -1575, 0);
         spawn.randomGroup(2225, -1325, 0.4);
         spawn.randomGroup(4900, -1200, 0);
-        if (simulation.difficulty > 1) spawn.randomLevelBoss(3200, -1900);
-        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+        spawn.randomLevelBoss(3200, -1900);
         spawn.secondaryBossChance(2175, -2425)
+        //spawn.randomHigherTierMob(4425, -1400);
+
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -9822,7 +9783,9 @@ const level = {
         spawn.randomMob(3575, -2425, 0.5);
         spawn.randomMob(3975, -3900, 0.5);
         spawn.randomMob(1725, 125, 0.5);
-        if (simulation.difficulty > 1) {
+
+
+        if (simulation.difficultyMode > 1 || level.levelsCleared > 1) {
             if (Math.random() < 0.5) {
                 spawn.randomLevelBoss(4250, -250);
                 spawn.debris(-250, 50, 1650, 2); //16 debris per level
@@ -9845,9 +9808,13 @@ const level = {
                 spawn.bodyRect(4900, -100, 300, 300, 0.7);
                 spawn.suckerBoss(4500, -400);
             }
+        } else {
+            powerUps.spawnBossPowerUp(2800, -1400)
         }
-        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+
         spawn.secondaryBossChance(5350, -325)
+        //spawn.randomHigherTierMob(4437, -2466)
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -10007,9 +9974,10 @@ const level = {
         spawn.randomMob(-100, -1700, -0.2);
         spawn.randomGroup(3700, -1500, 0.4);
         spawn.randomGroup(1700, -900, 0.4);
-        if (simulation.difficulty > 1) spawn.randomLevelBoss(2800 + 200 * Math.random(), -2200 + 200 * Math.random());
-        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+        spawn.randomLevelBoss(2800 + 200 * Math.random(), -2200 + 200 * Math.random());
         spawn.secondaryBossChance(4000, -1825)
+        //spawn.randomHigherTierMob(1675, -728)
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -10247,10 +10215,10 @@ const level = {
         spawn.randomMob(-550, -100, -0.1);
         spawn.randomGroup(-3250, -2700, 0.2);
         spawn.randomGroup(-2450, -1100, 0);
-
-        if (simulation.difficulty > 1) spawn.randomLevelBoss(-2400, -2650);
-        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+        spawn.randomLevelBoss(-2400, -2650);
         spawn.secondaryBossChance(-1825, -1975)
+        //spawn.randomHigherTierMob(-2938, -830)
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -10527,38 +10495,32 @@ const level = {
         //mobs
         spawn.randomSmallMob(-1125, 550);
         spawn.randomSmallMob(-2950, -50);
-        spawn.randomMob(-2025, 175, 0.3);
-        spawn.randomMob(-2325, 450, 0.3);
-        spawn.randomMob(-2925, 675, 0.2);
-        spawn.randomMob(-2700, 300, 0.1);
-        spawn.randomMob(-2500, 300, 0.1);
-        spawn.randomMob(-2075, -425, 0.1);
-        spawn.randomMob(-1550, -725, 0.1);
-        spawn.randomMob(375, 1100, 0);
-        spawn.randomMob(-1575, 1100, 0);
+        spawn.randomMob(-2025, 175, 0.5);
+        spawn.randomMob(-2325, 450, 0.5);
+        spawn.randomMob(-2925, 675, 0.4);
+        spawn.randomMob(-2700, 300, 0.3);
+        spawn.randomMob(-2500, 300, 0.3);
+        spawn.randomMob(-2075, -425, 0.3);
+        spawn.randomMob(-1550, -725, 0.3);
+        spawn.randomMob(375, 1100, 0.2);
+        spawn.randomMob(-1575, 1100, 0.3);
         spawn.randomSmallMob(825, 300);
-        spawn.randomMob(-800, -1750, 0);
-        spawn.randomMob(400, -750, -0.1);
-        spawn.randomMob(650, 1300, -0.1);
-        spawn.randomMob(-2450, 1050, -0.1);
-        spawn.randomMob(500, 400, -0.1);
-        spawn.randomMob(-75, -1700, -0.1);
-        spawn.randomMob(900, -800, -0.2);
-        spawn.randomGroup(-75, 1050, -0.1);
+        spawn.randomMob(-800, -1750, 0.3);
+        spawn.randomMob(400, -750, 0.5);
+        spawn.randomMob(650, 1300, 0.5);
+        spawn.randomMob(-2450, 1050, 0.5);
+        spawn.randomMob(500, 400, 0.5);
+        spawn.randomMob(-75, -1700, 0.5);
+        spawn.randomMob(900, -800, 0.6);
+        spawn.randomGroup(-75, 1050, 0);
         spawn.randomGroup(-900, 1000, 0.2);
-        spawn.randomGroup(-1300, -1100, -0.3);
+        spawn.randomGroup(-1300, -1100, 0);
         spawn.randomSmallMob(-2325, 800);
         spawn.randomSmallMob(-900, 825);
-
-        if (simulation.difficulty > 1) {
-            if (Math.random() < 0.80) {
-                spawn.randomLevelBoss(-800, -1300)
-            } else {
-                spawn.dragonFlyBoss(-1000 + Math.random() * 2500, -1300); //boss snake with head
-            }
-        }
-        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+        spawn.randomLevelBoss(-800, -1300)
         spawn.secondaryBossChance(300, -800)
+        //spawn.randomHigherTierMob(- 98, 1044)
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -10782,15 +10744,21 @@ const level = {
         spawn.randomMob(950, -1150, -0.1);
         spawn.randomGroup(1800, -800, -0.2);
         spawn.randomGroup(4150, -1000, 0.6);
-        if (simulation.difficulty > 1) {
+
+        if (simulation.difficultyMode > 1 || level.levelsCleared > 1) {
             if (Math.random() < 0.5) {
                 spawn.tetherBoss(2850, -80, { x: 2500, y: -500 })
             } else {
                 spawn.randomLevelBoss(2200, -450)
             }
+        } else {
+            powerUps.spawnBossPowerUp(2800, -1400)
         }
-        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+
         spawn.secondaryBossChance(1875, -675)
+        //spawn.randomHigherTierMob(-139, -610)
+
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
@@ -11001,8 +10969,7 @@ const level = {
         spawn.randomGroup(1500, -1900, 0.5);
         spawn.randomGroup(2350, -850, 1);
         spawn.randomGroup(100, -450, 0.9);
-
-        if (simulation.difficulty > 1) spawn.randomLevelBoss(1850, -1400);
+        spawn.randomLevelBoss(1850, -1400);
         spawn.secondaryBossChance(1850, -1400)
 
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
@@ -12869,7 +12836,7 @@ const level = {
                         });
                     }
                 }
-                m.damage(0.1 * simulation.difficultyMode)
+                m.takeDamage(0.1 * simulation.difficultyMode)
                 m.energy -= 0.1 * simulation.difficultyMode
             }
 
@@ -13559,7 +13526,7 @@ const level = {
                 ctx.fillStyle = "#f00c";
                 ctx.fillRect(m.pos.x - 50, m.pos.y - 100, fireDmgLevel, 15);
 
-                m.damage(0.001 * (1.5 * isInRange + 1));
+                m.takeDamage(0.001 * (1.5 * isInRange + 1));
 
                 drawFlame(m.pos.x, m.pos.y + 90, "#d40", Math.PI / 2 + 1);
                 drawFlame(m.pos.x, m.pos.y + 90, "#d40", Math.PI / 2 + 1);
@@ -14297,19 +14264,6 @@ const level = {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 30);
         level.defaultZoom = 2000;
         simulation.zoomTransition(level.defaultZoom);
-        // spawn.setSpawnList = [
-        //     "hopper",
-        //     "slasher",
-        //     "striker",
-        //     "stabber",
-        //     "springer",
-        //     "pulsar",
-        //     "sneaker",
-        //     "spinner",
-        //     "grower",
-        //     "focuser",
-        //     "spawner",
-        // ];
         spawn.mapRect(57800, -18550, 50, 100);
         spawn.mapRect(57500, -18550, 50, 275);
         spawn.mapRect(66900, -18675, 300, 200);
@@ -14760,7 +14714,7 @@ const level = {
                             // Standard black hole stuff
                             if (m.immuneCycle < m.cycle) {
                                 if (m.energy > 0) m.energy -= 0.003;
-                                if (m.energy < 0.1) m.damage(0.00015 * simulation.dmgScale);
+                                if (m.energy < 0.1) m.takeDamage(0.00015 * spawn.dmgToPlayerByLevelsCleared());
                             }
                             const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                             player.force.x -= 0.0005 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
@@ -14783,7 +14737,7 @@ const level = {
                                 }));
                                 if (m.immuneCycle < m.cycle) {
                                     if (m.energy > 0) m.energy -= 0.03;
-                                    m.damage(0.005 * simulation.dmgScale);
+                                    m.takeDamage(0.005 * spawn.dmgToPlayerByLevelsCleared());
                                 }
                             }
                             DrawTools.lightning(this.position, m.pos, this.lastAttackCycle, this.randomPRNGMult);
@@ -14900,7 +14854,7 @@ const level = {
                     ctx.shadowBlur = 0;
                     if (this.attackCycle >= 10) {
                         DrawTools.lightning(this.position, m.pos, simulation.cycle);
-                        m.damage(0.003 * simulation.dmgScale);
+                        m.takeDamage(0.003 * spawn.dmgToPlayerByLevelsCleared());
                     }
                 }
                 this.timeLimit();
@@ -14917,7 +14871,7 @@ const level = {
                 //damage player if in range
                 if (distance(player.position, this.position) < pulseRadius && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
-                    m.damage(0.02 * simulation.dmgScale);
+                    m.takeDamage(0.02 * spawn.dmgToPlayerByLevelsCleared());
                 }
                 simulation.drawList.push({ //add dmg to draw queue
                     x: this.position.x,
@@ -15009,7 +14963,7 @@ const level = {
                 for (const ring of this.rings) {
                     const radius = ring.radius * (1 + 0.3 * Math.sin(simulation.cycle / 60 * (ring.id + 2)));
                     if (Math.abs(distance(player.position, this.position) - radius) < 60 && m.immuneCycle < simulation.cycle) {
-                        m.damage(0.4 / radius);
+                        m.takeDamage(0.4 / radius);
                     }
                     ctx.strokeStyle = ring.colour;
                     DrawTools.arcOut(this.position.x, this.position.y, radius, 0, Math.PI * 2);
@@ -15039,7 +14993,7 @@ const level = {
                     // Standard black hole stuff
                     if (m.immuneCycle < m.cycle) {
                         if (m.energy > 0) m.energy -= 0.004;
-                        if (m.energy < 0.1) m.damage(0.0002 * simulation.dmgScale);
+                        if (m.energy < 0.1) m.takeDamage(0.0002 * spawn.dmgToPlayerByLevelsCleared());
                     }
                     const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                     player.force.x -= 0.001 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
@@ -15060,7 +15014,7 @@ const level = {
                             y: -20
                         }));
                         if (m.immuneCycle < m.cycle) {
-                            m.damage(0.012 * simulation.dmgScale);
+                            m.takeDamage(0.012 * spawn.dmgToPlayerByLevelsCleared());
                         }
                     }
                     const lightningCycle = simulation.cycle * 2 / 3 + this.lastAttackCycle / 3;
@@ -15308,14 +15262,14 @@ const level = {
                     if (m.energy > DRAIN && !tech.isEnergyHealth) {
                         m.energy -= DRAIN;
                     }
-                    m.damage(0.00015 * (tech.isRadioactiveResistance ? 0.2 : 1));
+                    m.takeDamage(0.00015 * (tech.isRadioactiveResistance ? 0.2 : 1));
                     if (tech.isEnergyHealth) {
                         const previousEnergy = m.energy;
                         m.regenEnergy();
                         const energyRegenerated = m.energy - previousEnergy;
                         if (energyRegenerated > 0) {
                             m.energy = previousEnergy;
-                            m.damage(energyRegenerated);
+                            m.takeDamage(energyRegenerated);
                         }
                     }
                     tech.isRewindAvoidDeath = hasCPT;
@@ -15396,7 +15350,7 @@ const level = {
                         m.energy += 0.005;
                     } else {
                         m.energy = Math.max(m.energy - 0.006, 0);
-                        if (m.energy <= 0.01 && m.immuneCycle < m.cycle) m.damage(0.002);
+                        if (m.energy <= 0.01 && m.immuneCycle < m.cycle) m.takeDamage(0.002);
                     }
                 },
                 drawTop() {
@@ -15751,7 +15705,7 @@ const level = {
                     }
                 }
                 if (!isInBounds) {
-                    m.damage(0.1 * simulation.difficultyMode);
+                    m.takeDamage(0.1 * simulation.difficultyMode);
                     trapPlayer(level.enter.x, level.enter.y);
                     simulation.inGameConsole("<span style='color: #f00'>" + name + "</span>: &nbsp; You thought I could let you get away with that?");
                 }
@@ -17562,7 +17516,7 @@ const level = {
             };
             me.onHit = function () {
                 for (let i = 0; i < 10; i++) {
-                    spawn.spawns(this.position.x + Math.random() * 1000 - Math.random() * 1000, this.position.y - Math.random() * 1000)
+                    spawn.spawns(this.position.x + Math.random() * 1000 - Math.random() * 1000, this.position.y - Math.random() * 1000, 1)
                 }
             }
         }
@@ -17602,7 +17556,7 @@ const level = {
                     const force = Vector.mult(Vector.normalise(sub), 0.000000003)
                     if (mag < this.radius) { //heal player when inside radius
                         if (m.health < 0.7) {
-                            m.damage(-0.001);
+                            m.takeDamage(-0.001);
                         } else if (m.health == 0.7 || m.health > 0.7) {
                             this.death()
                         }
@@ -17652,7 +17606,7 @@ const level = {
                 Matter.Body.setAngle(me, angle);
             };
             me.onHit = function () {
-                m.damage(0.01) //extra damage
+                m.takeDamage(0.01) //extra damage
                 me.collisionFilter.mask = 0;
                 setTimeout(() => {
                     me.collisionFilter.mask = cat.player | cat.mob | cat.bullet;
@@ -17743,7 +17697,7 @@ const level = {
             if (m.pos.y > 1055) {
                 Matter.Body.setPosition(player, { x: 0, y: -150 });
                 simulation.inGameConsole(`<div><em>There is nowhere to run...</em></div>`);
-                m.damage(0.1 * simulation.difficultyMode);
+                m.takeDamage(0.1 * simulation.difficultyMode);
             }
             if (m.alive == false && barThere == true) {
                 document.body.removeChild(bar);
@@ -18189,7 +18143,7 @@ const level = {
                         });
                     }
                 }
-                m.damage(0.1 * simulation.difficultyMode)
+                m.takeDamage(0.1 * simulation.difficultyMode)
                 m.energy -= 0.1 * simulation.difficultyMode
             }
             if (m.pos.y > -150 && m.pos.x > 47770 && m.pos.x < 50130) {
@@ -18214,7 +18168,7 @@ const level = {
                         });
                     }
                 }
-                m.damage(0.1 * simulation.difficultyMode)
+                m.takeDamage(0.1 * simulation.difficultyMode)
                 m.energy -= 0.1 * simulation.difficultyMode
             }
             if (m.pos.y > -150 && 50975 < m.pos.x && m.pos.x < 54925) {
@@ -18239,7 +18193,7 @@ const level = {
                         });
                     }
                 }
-                m.damage(0.1 * simulation.difficultyMode)
+                m.takeDamage(0.1 * simulation.difficultyMode)
                 m.energy -= 0.1 * simulation.difficultyMode
             }
             if (m.pos.y > -150 && 55025 < m.pos.x && m.pos.x < 57675) {
@@ -18264,7 +18218,7 @@ const level = {
                         });
                     }
                 }
-                m.damage(0.1 * simulation.difficultyMode)
+                m.takeDamage(0.1 * simulation.difficultyMode)
                 m.energy -= 0.1 * simulation.difficultyMode
             }
             if (m.pos.y > -150 && 57875 < m.pos.x && m.pos.x < 58700) {
@@ -18290,7 +18244,7 @@ const level = {
                         });
                     }
                 }
-                m.damage(0.1 * simulation.difficultyMode)
+                m.takeDamage(0.1 * simulation.difficultyMode)
                 m.energy -= 0.1 * simulation.difficultyMode
             }
             if (m.pos.y > -150 && 58875 < m.pos.x && m.pos.x < 61650) {
@@ -18316,7 +18270,7 @@ const level = {
                         });
                     }
                 }
-                m.damage(0.1 * simulation.difficultyMode)
+                m.takeDamage(0.1 * simulation.difficultyMode)
                 m.energy -= 0.1 * simulation.difficultyMode
             }
             if (m.pos.y > -1677 && 104650 < m.pos.x && m.pos.x < 105000 && barThere == true) {
@@ -19175,7 +19129,7 @@ const level = {
                 if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
                     if (m.immuneCycle < m.cycle) {
                         if (m.energy > 0) m.energy -= 0.005
-                        if (m.energy < 0.1) m.damage(0.0001 * simulation.dmgScale);
+                        if (m.energy < 0.1) m.takeDamage(0.0001 * spawn.dmgToPlayerByLevelsCleared());
                     }
                     const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                     player.force.x += 0.00125 * player.mass * Math.cos(angle) * (m.onGround ? 1.8 : 1);
@@ -21744,7 +21698,7 @@ const level = {
             lastPistonDirection = Math.sin((simulation.cycle + 15) / 25) < 0;
 
             if (Matter.Query.ray([player], Matter.Vector.create(piston1.position.x - 50, piston1.position.y + 175), Matter.Vector.create(piston1.position.x + 50, piston1.position.y + 175), 5).length > 0 && !dealtPiston1Damage && Math.sin(-finalGearRot) - Math.sin(-lastFinalGearRot) > 0.01) {
-                m.damage(0.1);
+                m.takeDamage(0.1);
                 dealtPiston1Damage = true;
             }
 
@@ -21757,7 +21711,7 @@ const level = {
             }
 
             if (Matter.Query.ray([player], Matter.Vector.create(piston2.position.x - 50, piston2.position.y + 175), Matter.Vector.create(piston2.position.x + 50, piston2.position.y + 175), 5).length > 0 && !dealtPiston2Damage && Math.sin(-finalGearRot) - Math.sin(-lastFinalGearRot) < -0.01) {
-                m.damage(0.1);
+                m.takeDamage(0.1);
                 dealtPiston2Damage = true;
             }
 
@@ -23509,8 +23463,8 @@ const level = {
             slimePit.query()
             if (Matter.Query.collides(dong, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
                 m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
-                const dmg = 0.05 * Math.min(simulation.dmgScale, simulation.difficulty);
-                m.damage(dmg);
+                const dmg = 0.05 * Math.min(spawn.dmgToPlayerByLevelsCleared(), simulation.difficulty);
+                m.takeDamage(dmg);
                 simulation.drawList.push({ //add dmg to draw queue
                     x: dong.position.x,
                     y: dong.position.y,
@@ -23993,8 +23947,8 @@ const level = {
                 }
                 if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles // I wasnt gonna add this but since ya'll would have killed me if I didn't I added this
-                    const dmg = 0.013 * simulation.dmgScale;
-                    m.damage(dmg);
+                    const dmg = 0.013 * spawn.dmgToPlayerByLevelsCleared();
+                    m.takeDamage(dmg);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,
                         y: this.position.y,
@@ -24075,7 +24029,7 @@ const level = {
                     Matter.Body.setPosition(this, player.position)
                     if (player.speed > 2.5) Matter.Body.setVelocity(player, Vector.mult(player.velocity, 0.94))
                     Matter.Body.setAngularVelocity(player, player.angularVelocity * 0.9);
-                    m.damage(0.00003); //balanced? not sure
+                    m.takeDamage(0.00003); //balanced? not sure
                 }
             }
         };
@@ -24109,8 +24063,8 @@ const level = {
                 //damage player
                 if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
-                    const dmg = 0.013 * simulation.dmgScale
-                    m.damage(dmg);
+                    const dmg = 0.013 * spawn.dmgToPlayerByLevelsCleared()
+                    m.takeDamage(dmg);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,
                         y: this.position.y,
@@ -24231,7 +24185,7 @@ const level = {
             Matter.Body.setDensity(me, 0.01)
             me.seePlayerFreq = 0
             me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position;
-            me.swordDamage = 0.025 * simulation.dmgScale
+            me.swordDamage = 0.025 * spawn.dmgToPlayerByLevelsCleared()
             me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob | cat.mobBullet
             me.repulsionRange = 50000;
             me.do = function () {
@@ -24343,7 +24297,7 @@ const level = {
                 if (!m.isCloak) vertexCollision(where, look, [player]);
                 if (best.who && (best.who === player) && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for an extra second
-                    m.damage(this.swordDamage);
+                    m.takeDamage(this.swordDamage);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: best.x,
                         y: best.y,
@@ -24395,7 +24349,6 @@ const level = {
                 size() { return 40 },
                 effect() {
                     if (m.alive) {
-                        // tech.damage *= 2;
                         let text = "";
                         if (!tech.isSuperDeterminism) { text += `<div class='cancel' onclick='powerUps.endDraft("buff",true)'>${(tech.isCancelTech && tech.cancelTechCount === 0) ? "?" : "✕"}</div>`; };
                         text += `<h3 style = 'color:#fff; text-align:left; margin: 0px;'>Blessing Of Sal</h3>`;
@@ -24416,10 +24369,8 @@ const level = {
                         m.setMovement();
                         powerUps.endDraft("buff");
                     } else if (index == 2) {
-                        simulation.dmgScale *= 0.95;
                         powerUps.endDraft("buff");
                     } else if (index == 3) {
-                        m.dmgScale *= 1.1;
                         powerUps.endDraft("buff");
                     } else if (index == 4) { //sword!
                         powerUps.pass = false;
@@ -24458,7 +24409,7 @@ const level = {
             me.showHealthBar = false
             Matter.Body.setDensity(me, m.maxHealth / (simulation.difficulty < 5 ? 0.5 : simulation.difficulty / simulation.difficultyMode))
             me.seePlayerFreq = 0
-            me.swordDamage = 0.025 * simulation.dmgScale
+            me.swordDamage = 0.025 * spawn.dmgToPlayerByLevelsCleared()
             me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob | cat.mobBullet
             me.repulsionRange = 500000;
             me.isDropPowerUp = false;
@@ -24729,7 +24680,7 @@ const level = {
                 if (!m.isCloak) vertexCollision(where, look, [player]);
                 if (best.who && (best.who === player) && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for an extra second
-                    m.damage(this.swordDamage);
+                    m.takeDamage(this.swordDamage);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: best.x,
                         y: best.y,
@@ -24841,7 +24792,7 @@ const level = {
                     }
                     if (m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles
-                        m.damage(0.025 * simulation.dmgScale)
+                        m.takeDamage(0.025 * spawn.dmgToPlayerByLevelsCleared())
                     }
                     ctx.lineWidth = 3;
                     ctx.strokeStyle = "#000";
@@ -25016,7 +24967,7 @@ const level = {
                     ctx.beginPath();
                     // const end = 1100 * tech.bulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
                     const end = 1100 * tech.bulletsLastLonger * Math.pow(0.93, tech.waveReflections) //should equal about  1767
-                    const damage = 0.0005 * simulation.dmgScale//normal damage for m basically shreds m, so had to nerf this
+                    const damage = 0.0005 * spawn.dmgToPlayerByLevelsCleared()//normal damage for m basically shreds m, so had to nerf this
                     for (let i = this.waves.length - 1; i > -1; i--) {
                         const v1 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit1, this.waves[i].radius))
                         const v2 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit2, this.waves[i].radius))
@@ -25032,7 +24983,7 @@ const level = {
                                 x: player.velocity.x * 0.95,
                                 y: player.velocity.y * 0.95
                             });
-                            m.damage(damage)
+                            m.takeDamage(damage)
                         }
                         hits = Matter.Query.ray(body, v1, v2, 50)
                         for (let j = 0, len = Math.min(30, hits.length); j < len; j++) {
@@ -25124,8 +25075,8 @@ const level = {
                 vertexCollision(where, look, body);
                 if (!m.isCloak) vertexCollision(where, look, [player]);
                 if (best.who && (best.who === player) && m.immuneCycle < m.cycle) {
-                    const dmg = 0.0011 * simulation.dmgScale;
-                    m.damage(dmg);
+                    const dmg = 0.0011 * spawn.dmgToPlayerByLevelsCleared();
+                    m.takeDamage(dmg);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: best.x,
                         y: best.y,
@@ -25462,8 +25413,8 @@ const level = {
                     }
                     if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles // I wasnt gonna add this but since ya'll would have killed me if I didn't I added this
-                        const dmg = 0.013 * simulation.dmgScale;
-                        m.damage(dmg);
+                        const dmg = 0.013 * spawn.dmgToPlayerByLevelsCleared();
+                        m.takeDamage(dmg);
                         // simulation.drawList.push({ //add dmg to draw queue
                         // x: this.position.x,
                         // y: this.position.y,
@@ -25653,11 +25604,11 @@ const level = {
             }
         };
         // simulation.enableConstructMode() //landgreen if you see this can you remove im probably gonna forget
-        for (let i = 0; i < spawn.bossTypeSpawnOrder.length * Math.random(); i++) {
-            spawn.bossTypeSpawnOrder.splice(i * Math.floor(Math.random() * spawn.bossTypeSpawnOrder.length), 1, "restoreBoss") //meh good enough
-        }
-        const obj = { restoreBoss };
-        Object.assign(spawn, obj); //ez
+        // for (let i = 0; i < spawn.bossTypeSpawnOrder.length * Math.random(); i++) {
+        //     spawn.bossTypeSpawnOrder.splice(i * Math.floor(Math.random() * spawn.bossTypeSpawnOrder.length), 1, "restoreBoss") //meh good enough
+        // }
+        // const obj = { restoreBoss };
+        // Object.assign(spawn, obj); //ez
     },
     superNgonBros() {
         simulation.inGameConsole(`<strong>Super N-gon Bros</strong> by <span class='color-var'>DesBoot</span>`);
@@ -25675,6 +25626,7 @@ const level = {
         const bowser = function (x, y, radius = 150) { //define the mob the same as spawn mob code
             mobs.spawn(x, y, 5, radius, "rgb(0,200,180)");
             let me = mob[mob.length - 1];
+            me.tier = 1
             me.accelMag = 0.05;
             me.g = 0.002; //required if using this.gravity
             me.frictionAir = 0.01;
@@ -25704,7 +25656,7 @@ const level = {
                         this.force.x += forceMag * Math.cos(angle) * 0.5;
                         this.force.y += (forceMag * Math.sin(angle) - (Math.random() * 0.07 + 0.1) * this.mass) * 0.7; //antigravity
                         if (Math.random() < 0.5) {
-                            spawn.grenade(me.position.x, me.position.y - 250 * Math.random(), 500);
+                            spawn.grenade(me.position.x, me.position.y - 250 * Math.random(), this.tier, 500);
                             Matter.Body.setVelocity(mob[mob.length - 1], {
                                 x: -5,
                                 y: 0
@@ -25727,7 +25679,7 @@ const level = {
                         const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
                         this.force.x += forceMag * Math.cos(angle);
                         this.force.y += forceMag * Math.sin(angle) - 0.07 * this.mass; //antigravity
-                        spawn.grenade(me.position.x, me.position.y - 250 * Math.random(), 500);
+                        spawn.grenade(me.position.x, me.position.y - 250 * Math.random(), this.tier, 500);
                         Matter.Body.setVelocity(mob[mob.length - 1], {
                             x: -5,
                             y: 0
@@ -25848,7 +25800,7 @@ const level = {
             elevator1.move();
             elevator2.move();
             if (player.position.x > 0 && player.position.y < -9000 && player.position.y > -10000) {
-                m.damage(0.05 * simulation.difficultyMode)
+                m.takeDamage(0.05 * simulation.difficultyMode)
                 Matter.Body.setPosition(player, {
                     x: 275,
                     y: -12175
@@ -26308,8 +26260,8 @@ const level = {
             slimePit.query()
             if (Matter.Query.collides(dong, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
                 m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
-                const dmg = 0.05 * Math.min(simulation.dmgScale, simulation.difficulty);
-                m.damage(dmg);
+                const dmg = 0.05 * spawn.dmgToPlayerByLevelsCleared()
+                m.takeDamage(dmg);
                 simulation.drawList.push({ //add dmg to draw queue
                     x: dong.position.x,
                     y: dong.position.y,
@@ -26882,8 +26834,8 @@ const level = {
                 }
                 if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles // I wasnt gonna add this but since ya'll would have killed me if I didn't I added this
-                    const dmg = 0.013 * simulation.dmgScale;
-                    m.damage(dmg);
+                    const dmg = 0.013 * spawn.dmgToPlayerByLevelsCleared();
+                    m.takeDamage(dmg);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,
                         y: this.position.y,
@@ -26964,7 +26916,7 @@ const level = {
                     Matter.Body.setPosition(this, player.position)
                     if (player.speed > 2.5) Matter.Body.setVelocity(player, Vector.mult(player.velocity, 0.94))
                     Matter.Body.setAngularVelocity(player, player.angularVelocity * 0.9);
-                    m.damage(0.00003); //balanced? not sure
+                    m.takeDamage(0.00003); //balanced? not sure
                 }
             }
         };
@@ -26998,8 +26950,8 @@ const level = {
                 //damage player
                 if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
-                    const dmg = 0.013 * simulation.dmgScale
-                    m.damage(dmg);
+                    const dmg = 0.013 * spawn.dmgToPlayerByLevelsCleared()
+                    m.takeDamage(dmg);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: this.position.x,
                         y: this.position.y,
@@ -27122,8 +27074,8 @@ const level = {
                 }
                 if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles // I wasnt gonna add this but since ya'll would have killed me if I didn't I added this
-                    const dmg = 0.013 * simulation.dmgScale;
-                    m.damage(dmg);
+                    const dmg = 0.013 * spawn.dmgToPlayerByLevelsCleared();
+                    m.takeDamage(dmg);
                     // simulation.drawList.push({ //add dmg to draw queue
                     // x: this.position.x,
                     // y: this.position.y,
@@ -27156,7 +27108,7 @@ const level = {
                 //damage player if in range
                 if (Vector.magnitude(Vector.sub(player.position, this.position)) < pulseRadius && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
-                    m.damage(0.015 * simulation.dmgScale);
+                    m.takeDamage(0.015 * spawn.dmgToPlayerByLevelsCleared());
                 }
                 simulation.drawList.push({ //add dmg to draw queue
                     x: this.position.x,
@@ -27289,7 +27241,7 @@ const level = {
             Matter.Body.setDensity(me, 0.01)
             me.seePlayerFreq = 0
             me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position;
-            me.swordDamage = 0.025 * simulation.dmgScale
+            me.swordDamage = 0.025 * spawn.dmgToPlayerByLevelsCleared()
             me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob | cat.mobBullet
             me.repulsionRange = 50000;
             me.do = function () {
@@ -27401,7 +27353,7 @@ const level = {
                 if (!m.isCloak) vertexCollision(where, look, [player]);
                 if (best.who && (best.who === player) && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for an extra second
-                    m.damage(this.swordDamage);
+                    m.takeDamage(this.swordDamage);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: best.x,
                         y: best.y,
@@ -27458,7 +27410,7 @@ const level = {
             me.showHealthBar = false
             Matter.Body.setDensity(me, m.maxHealth / (simulation.difficulty < 5 ? 0.5 : simulation.difficulty / simulation.difficultyMode))
             me.seePlayerFreq = 0
-            me.swordDamage = 0.025 * simulation.dmgScale
+            me.swordDamage = 0.025 * spawn.dmgToPlayerByLevelsCleared()
             me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob | cat.mobBullet
             me.repulsionRange = 500000;
             me.isDropPowerUp = false;
@@ -27798,7 +27750,7 @@ const level = {
                 if (!m.isCloak) vertexCollision(where, look, [player]);
                 if (best.who && (best.who === player) && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for an extra second
-                    m.damage(this.swordDamage);
+                    m.takeDamage(this.swordDamage);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: best.x,
                         y: best.y,
@@ -27915,7 +27867,7 @@ const level = {
                     }
                     if (m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles
-                        m.damage(0.025 * simulation.dmgScale)
+                        m.takeDamage(0.025 * spawn.dmgToPlayerByLevelsCleared())
                     }
                     ctx.lineWidth = 3;
                     ctx.strokeStyle = "#000";
@@ -28140,7 +28092,7 @@ const level = {
                     ctx.beginPath();
                     // const end = 1100 * tech.bulletsLastLonger / Math.sqrt(tech.waveReflections * 0.5) //should equal about  1767
                     const end = 1100 * tech.bulletsLastLonger * Math.pow(0.93, tech.waveReflections) //should equal about  1767
-                    const damage = 0.0005 * simulation.dmgScale//normal damage for m basically shreds m, so had to nerf this
+                    const damage = 0.0005 * spawn.dmgToPlayerByLevelsCleared()//normal damage for m basically shreds m, so had to nerf this
                     for (let i = this.waves.length - 1; i > -1; i--) {
                         const v1 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit1, this.waves[i].radius))
                         const v2 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit2, this.waves[i].radius))
@@ -28156,7 +28108,7 @@ const level = {
                                 x: player.velocity.x * 0.95,
                                 y: player.velocity.y * 0.95
                             });
-                            m.damage(damage)
+                            m.takeDamage(damage)
                         }
                         hits = Matter.Query.ray(body, v1, v2, 50)
                         for (let j = 0, len = Math.min(30, hits.length); j < len; j++) {
@@ -28248,8 +28200,8 @@ const level = {
                 vertexCollision(where, look, body);
                 if (!m.isCloak) vertexCollision(where, look, [player]);
                 if (best.who && (best.who === player) && m.immuneCycle < m.cycle) {
-                    const dmg = 0.0011 * simulation.dmgScale;
-                    m.damage(dmg);
+                    const dmg = 0.0011 * spawn.dmgToPlayerByLevelsCleared();
+                    m.takeDamage(dmg);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: best.x,
                         y: best.y,
@@ -30468,8 +30420,8 @@ const level = {
                     //damage player
                     if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
-                        const dmg = 0.03 * simulation.dmgScale
-                        m.damage(dmg);
+                        const dmg = 0.03 * spawn.dmgToPlayerByLevelsCleared()
+                        m.takeDamage(dmg);
                         simulation.drawList.push({ //add dmg to draw queue
                             x: this.position.x,
                             y: this.position.y,
@@ -30594,7 +30546,7 @@ const level = {
                 me.swordRadiusMax = 275 + 3.5 * simulation.difficulty;
                 me.swordRadiusGrowRate = me.swordRadiusMax * (0.011 + 0.0002 * simulation.difficulty)
                 me.isSlashing = false;
-                me.swordDamage = 0.03 * simulation.dmgScale
+                me.swordDamage = 0.03 * spawn.dmgToPlayerByLevelsCleared()
                 me.laserAngle = 3 * Math.PI / 5
                 const seeDistance2 = 200000
                 ace.shield(me, x, y);
@@ -30679,7 +30631,7 @@ const level = {
                     if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
                     if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                        m.damage(this.swordDamage);
+                        m.takeDamage(this.swordDamage);
                         simulation.drawList.push({ //add dmg to draw queue
                             x: best.x,
                             y: best.y,
@@ -30721,7 +30673,7 @@ const level = {
                 me.swordRadiusGrowRateInitial = 1.08
                 me.swordRadiusGrowRate = me.swordRadiusGrowRateInitial//me.swordRadiusMax * (0.009 + 0.0002 * simulation.difficulty)
                 me.isSlashing = false;
-                me.swordDamage = 0.04 * simulation.dmgScale
+                me.swordDamage = 0.04 * spawn.dmgToPlayerByLevelsCleared()
                 me.laserAngle = 3 * Math.PI / 5
                 const seeDistance2 = me.swordRadiusMax * me.swordRadiusMax
                 ace.shield(me, x, y);
@@ -30833,7 +30785,7 @@ const level = {
 
                         if (m.immuneCycle < m.cycle) {
                             m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                            m.damage(this.swordDamage);
+                            m.takeDamage(this.swordDamage);
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: best.x,
                                 y: best.y,
@@ -30988,7 +30940,7 @@ const level = {
                 me.swordRadiusMax = 1100 + 20 * simulation.difficulty;
                 me.swordRadiusGrowRate = me.swordRadiusMax * (0.005 + 0.0003 * simulation.difficulty)
                 me.isSlashing = false;
-                me.swordDamage = 0.07 * simulation.dmgScale
+                me.swordDamage = 0.07 * spawn.dmgToPlayerByLevelsCleared()
                 me.laserAngle = 3 * Math.PI / 5
                 me.eventHorizon = 550;
                 const seeDistance2 = 200000
@@ -31187,7 +31139,7 @@ const level = {
                     if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
                     if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                        m.damage(this.swordDamage);
+                        m.takeDamage(this.swordDamage);
                         simulation.drawList.push({ //add dmg to draw queue
                             x: best.x,
                             y: best.y,
@@ -31214,7 +31166,7 @@ const level = {
                     // ctx.lineDashOffset = 6*(simulation.cycle % 215);
                     if (this.distanceToPlayer3(x, y) < this.laserRange) {
                         if (m.immuneCycle < m.cycle) {
-                            m.damage(0.0003 * simulation.dmgScale);
+                            m.takeDamage(0.0003 * spawn.dmgToPlayerByLevelsCleared());
                             if (m.energy > 0.1) m.energy -= 0.003
                         }
                         ctx.beginPath();
@@ -31740,8 +31692,8 @@ const level = {
                     //damage player
                     if (Matter.Query.collides(this, [player]).length > 0 && !(m.isCloak && tech.isIntangible) && m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
-                        const dmg = 0.03 * simulation.dmgScale
-                        m.damage(dmg);
+                        const dmg = 0.03 * spawn.dmgToPlayerByLevelsCleared()
+                        m.takeDamage(dmg);
                         simulation.drawList.push({ //add dmg to draw queue
                             x: this.position.x,
                             y: this.position.y,
@@ -31866,7 +31818,7 @@ const level = {
                 me.swordRadiusMax = 275 + 3.5 * simulation.difficulty;
                 me.swordRadiusGrowRate = me.swordRadiusMax * (0.011 + 0.0002 * simulation.difficulty)
                 me.isSlashing = false;
-                me.swordDamage = 0.03 * simulation.dmgScale
+                me.swordDamage = 0.03 * spawn.dmgToPlayerByLevelsCleared()
                 me.laserAngle = 3 * Math.PI / 5
                 const seeDistance2 = 200000
                 ace.shield(me, x, y);
@@ -31951,7 +31903,7 @@ const level = {
                     if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
                     if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                        m.damage(this.swordDamage);
+                        m.takeDamage(this.swordDamage);
                         simulation.drawList.push({ //add dmg to draw queue
                             x: best.x,
                             y: best.y,
@@ -31993,7 +31945,7 @@ const level = {
                 me.swordRadiusGrowRateInitial = 1.08
                 me.swordRadiusGrowRate = me.swordRadiusGrowRateInitial//me.swordRadiusMax * (0.009 + 0.0002 * simulation.difficulty)
                 me.isSlashing = false;
-                me.swordDamage = 0.04 * simulation.dmgScale
+                me.swordDamage = 0.04 * spawn.dmgToPlayerByLevelsCleared()
                 me.laserAngle = 3 * Math.PI / 5
                 const seeDistance2 = me.swordRadiusMax * me.swordRadiusMax
                 ace.shield(me, x, y);
@@ -32105,7 +32057,7 @@ const level = {
 
                         if (m.immuneCycle < m.cycle) {
                             m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                            m.damage(this.swordDamage);
+                            m.takeDamage(this.swordDamage);
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: best.x,
                                 y: best.y,
@@ -32260,7 +32212,7 @@ const level = {
                 me.swordRadiusMax = 1100 + 20 * simulation.difficulty;
                 me.swordRadiusGrowRate = me.swordRadiusMax * (0.005 + 0.0003 * simulation.difficulty)
                 me.isSlashing = false;
-                me.swordDamage = 0.07 * simulation.dmgScale
+                me.swordDamage = 0.07 * spawn.dmgToPlayerByLevelsCleared()
                 me.laserAngle = 3 * Math.PI / 5
                 me.eventHorizon = 550;
                 const seeDistance2 = 200000
@@ -32459,7 +32411,7 @@ const level = {
                     if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
                     if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                        m.damage(this.swordDamage);
+                        m.takeDamage(this.swordDamage);
                         simulation.drawList.push({ //add dmg to draw queue
                             x: best.x,
                             y: best.y,
@@ -32486,7 +32438,7 @@ const level = {
                     // ctx.lineDashOffset = 6*(simulation.cycle % 215);
                     if (this.distanceToPlayer3(x, y) < this.laserRange) {
                         if (m.immuneCycle < m.cycle) {
-                            m.damage(0.0003 * simulation.dmgScale);
+                            m.takeDamage(0.0003 * spawn.dmgToPlayerByLevelsCleared());
                             if (m.energy > 0.1) m.energy -= 0.003
                         }
                         ctx.beginPath();
@@ -34758,7 +34710,6 @@ const level = {
                 }
             },
             alive: true,
-            dmgScale: 1, //scales all damage, but not raw .dmg //set in levels.setDifficulty
             defaultFPSCycle: 0, //tracks when to return to normal fps
             immuneCycle: 0, //used in engine
             collisionImmuneCycles: 30,
@@ -35437,7 +35388,7 @@ const level = {
                     if (this.sword) {
                         for (let i = 0; i < mob.length; i++) {
                             if (Matter.Query.collides(this.sword, [mob[i]]).length > 0) {
-                                const dmg = m.dmgScale * Math.sqrt(this.sword.speed) * (tech.sizeIllusion ? 1.1 : 1) * (tech.isStabSword ? 1.5 : 1) * (tech.infinityEdge ? 1.1 : 1);
+                                const dmg = Math.sqrt(this.sword.speed) * (tech.sizeIllusion ? 1.1 : 1) * (tech.isStabSword ? 1.5 : 1) * (tech.infinityEdge ? 1.1 : 1);
                                 if (!tech.soundSword) {
                                     if (m.health < m.maxHealth) {
                                         if (tech.isEnergyHealth) {
@@ -35467,7 +35418,7 @@ const level = {
                             }
                         }
                         if (Matter.Query.collides(this.sword, [genisis]).length > 0) {
-                            m.damage(-0.0142) //balanced!
+                            m.takeDamage(-0.0142) //balanced!
                         }
                     }
                 }
@@ -36032,7 +35983,7 @@ const level = {
                     if (this.scythe) {
                         for (let i = 0; i < mob.length; i++) {
                             if (Matter.Query.collides(this.scythe, [mob[i]]).length > 0) {
-                                const dmg = m.dmgScale * 0.12 * 2.73 * (evo.isLongBlade ? 1.3 : 1) * (evo.scytheRange ? evo.scytheRange * 1.15 : 1) * (evo.isDoubleScythe ? 0.9 : 1) * (evo.scytheRad ? evo.scytheRad * 1.5 : 1);
+                                const dmg = 0.12 * 2.73 * (evo.isLongBlade ? 1.3 : 1) * (evo.scytheRange ? evo.scytheRange * 1.15 : 1) * (evo.isDoubleScythe ? 0.9 : 1) * (evo.scytheRad ? evo.scytheRad * 1.5 : 1);
                                 mob[i].damage(dmg, true);
                                 simulation.drawList.push({
                                     x: mob[i].position.x,
@@ -36054,7 +36005,7 @@ const level = {
                         }
                         if (Matter.Query.collides(this.scythe, [player]).length > 0 && m.immuneCycle < m.cycle) {
                             const dmg = 0.02 * (evo.isLongBlade ? 1.3 : 1) * (evo.scytheRange ? evo.scytheRange * 1.15 : 1) * (evo.isDoubleScythe ? 0.9 : 1) * (evo.scytheRad ? evo.scytheRad * 1.5 : 1); // actual scythe scallings one tap the player so this is nerfed for genisis
-                            m.damage(dmg);
+                            m.takeDamage(dmg);
                             m.immuneCycle = m.cycle + 10;
                             simulation.drawList.push({
                                 x: player.position.x,
@@ -36498,8 +36449,8 @@ const level = {
                 if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
                 if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                    const dmg = 0.5 / simulation.dmgScale;
-                    m.damage(dmg);
+                    const dmg = 0.5 / spawn.dmgToPlayerByLevelsCleared();
+                    m.takeDamage(dmg);
                     simulation.drawList.push({ //add dmg to draw queue
                         x: best.x,
                         y: best.y,
@@ -36633,8 +36584,8 @@ const level = {
                     if (!m.isCloak) vertexCollision(where, look, [playerBody, playerHead]);
                     if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                        const dmg = 0.5 / simulation.dmgScale;
-                        m.damage(dmg);
+                        const dmg = 0.5 / spawn.dmgToPlayerByLevelsCleared();
+                        m.takeDamage(dmg);
                         simulation.drawList.push({ //add dmg to draw queue
                             x: best.x,
                             y: best.y,

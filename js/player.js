@@ -635,7 +635,6 @@ const m = {
     //         if (simulation.paused) build.pauseGrid() //update the build when paused
     //     }
     // },
-    dmgScale: null, //scales all damage, but not raw .dmg 
     death() {
         if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
             //remove immortality tech
@@ -651,7 +650,6 @@ const m = {
                 ctx.fillStyle = "rgba(255,255,255,0)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
-            spawn.setSpawnList(); //new mob types
             level.isFlipped = false
             simulation.clearNow = true; //triggers a map reset
 
@@ -663,7 +661,6 @@ const m = {
                         ctx.fillStyle = "rgba(255,255,255,0)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
-                    spawn.setSpawnList(); //new mob types
                     // simulation.clearNow = true; //triggers a map reset
                     // m.switchWorlds()
                     simulation.isTextLogOpen = true;
@@ -781,14 +778,14 @@ const m = {
     immuneCycle: 0, //used in engine
     lastCalculatedDamage: 0, //used to decided if damage bar needs to be redrawn  (in simulation.checks)
     lastCalculatedDefense: 0, //used to decided if defense bar needs to be redrawn  (in simulation.checks)
+    damageDone: 1,
+    damageReduction: 1,
     defense() {
-        let dmg = 1
+        let dmg = m.damageReduction * powerUps.difficulty.damageReduction
         if (tech.energyDefense && m.energy > 1.99) dmg *= 0.1
         if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
         if (tech.isMaxHealthDefense && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 0.1
         if (tech.isDiaphragm) dmg *= 0.55 + 0.35 * Math.sin(m.cycle * 0.0075);
-        if (tech.isZeno) dmg *= 0.2
-        if (tech.isFieldHarmReduction) dmg *= 0.6
         if (tech.isHarmDarkMatter) dmg *= (tech.isMoveDarkMatter || tech.isNotDarkMatter) ? 0.25 : 0.4
         if (tech.isImmortal) dmg *= 0.7
         if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.973 ** m.coupling
@@ -922,7 +919,7 @@ const m = {
         }
     },
     collisionImmuneCycles: 30,
-    damage(dmg, isDefense = true) {
+    takeDamage(dmg, isDefense = true) {
         if (tech.isRewindAvoidDeath && (m.energy + 0.05) > Math.min(0.95, m.maxEnergy) && dmg > 0.01) {
             const steps = Math.floor(Math.min(299, 150 * m.energy))
             simulation.inGameConsole(`<span class='color-var'>m</span>.rewind(${steps})`)
@@ -940,8 +937,8 @@ const m = {
             }
         }
         if (tech.isEnergyHealth) {
-            if (isDefense) dmg *= Math.pow(m.defense(), 0.5)
-            m.energy -= 0.9 * dmg / Math.sqrt(simulation.healScale) //scale damage with heal reduction difficulty
+            if (isDefense) dmg *= Math.pow(m.defense(), 0.6)
+            m.energy -= dmg //scale damage with heal reduction difficulty
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
                     tech.isDeathAvoidedThisLevel = true
@@ -3088,7 +3085,7 @@ const m = {
                     if (tech.isTokamakHeal && tech.tokamakHealCount < 5) {
                         tech.tokamakHealCount++
                         let massScale = Math.min(65 * Math.sqrt(m.maxHealth), 14 * Math.pow(m.holdingTarget.mass, 0.4))
-                        if (powerUps.isEnergyHealth) massScale = powerUps["heal"].size()
+                        if (powerUps.healGiveMaxEnergy) massScale = powerUps["heal"].size()
                         powerUps.spawn(m.pos.x, m.pos.y, "heal", true, massScale * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)))  //    spawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
                     }
                 } else { //normal throw
@@ -3435,16 +3432,16 @@ const m = {
                 Matter.Body.setVelocity(who, { x: 0.5 * who.velocity.x, y: 0.5 * who.velocity.y });
                 if (who.isShielded) {
                     for (let i = 0, len = mob.length; i < len; i++) {
-                        if (mob[i].id === who.shieldID) mob[i].damage(tech.blockDmg * m.dmgScale * (tech.isBlockRadiation ? 6 : 2), true)
+                        if (mob[i].id === who.shieldID) mob[i].damage(tech.blockDmg * (tech.isBlockRadiation ? 6 : 2), true)
                     }
                 } else if (tech.isBlockRadiation) {
                     if (who.isMobBullet) {
-                        who.damage(tech.blockDmg * m.dmgScale * 3, true)
+                        who.damage(tech.blockDmg * 3, true)
                     } else {
                         mobs.statusDoT(who, tech.blockDmg * 0.42, 180) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
                     }
                 } else {
-                    who.damage(tech.blockDmg * m.dmgScale, true)
+                    who.damage(tech.blockDmg, true)
                 }
                 const step = 40
                 ctx.beginPath(); //draw electricity
@@ -3838,28 +3835,17 @@ const m = {
                                     Matter.Body.setVelocity(mob[i], { x: 0.5 * mob[i].velocity.x, y: 0.5 * mob[i].velocity.y });
                                     if (mob[i].isShielded) {
                                         for (let j = 0, len = mob.length; j < len; j++) {
-                                            if (mob[j].id === mob[i].shieldID) mob[j].damage(tech.blockDmg * m.dmgScale * (tech.isBlockRadiation ? 6 : 2), true)
+                                            if (mob[j].id === mob[i].shieldID) mob[j].damage(tech.blockDmg * (tech.isBlockRadiation ? 6 : 2), true)
                                         }
                                     } else if (tech.isBlockRadiation) {
                                         if (mob[i].isMobBullet) {
-                                            mob[i].damage(tech.blockDmg * m.dmgScale * 3, true)
+                                            mob[i].damage(tech.blockDmg * 3, true)
                                         } else {
-                                            mobs.statusDoT(mob[i], tech.blockDmg * m.dmgScale * 0.42, 180) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
+                                            mobs.statusDoT(mob[i], tech.blockDmg * 0.42, 180) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
                                         }
                                     } else {
-                                        mob[i].damage(tech.blockDmg * m.dmgScale, true)
+                                        mob[i].damage(tech.blockDmg, true)
                                     }
-                                    // if (mob[i].isShielded) {
-                                    //     for (let j = 0, len = mob.length; j < len; j++) {
-                                    //         if (mob[j].id === mob[i].shieldID) mob[j].damage(tech.blockDmg * m.dmgScale * (tech.isBlockRadiation ? 3 : 1), true)
-                                    //     }
-                                    // } else {
-                                    //     if (tech.isBlockRadiation && !mob[i].isMobBullet) {
-                                    //         mobs.statusDoT(mob[i], tech.blockDmg * m.dmgScale * 4 / 12, 360) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
-                                    //     } else {
-                                    //         mob[i].damage(tech.blockDmg * m.dmgScale)
-                                    //     }
-                                    // }
                                     const step = 40
                                     ctx.beginPath();
                                     for (let i = 0, len = 0.5 * tech.blockDmg; i < len; i++) {
@@ -4070,10 +4056,10 @@ const m = {
                         m.holding();
                         m.throwBlock();
                     } else if (input.field) { //push away
-                        if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
+                        if (m.energy > m.fieldRegen && tech.negativeMassCost > 0) m.energy -= m.fieldRegen
                         m.grabPowerUp();
                         m.lookForBlock();
-                        if (m.energy > tech.negativeMassCost && m.fieldCDcycle < m.cycle) {
+                        if (m.energy >= tech.negativeMassCost && m.fieldCDcycle < m.cycle) {
                             if (tech.isFlyFaster) {
                                 //look for nearby objects to make zero-g
                                 function moveThis(who, range, mag = 1.06) {
@@ -4163,7 +4149,7 @@ const m = {
                                 }
                             }
 
-                            if (m.energy < 0.001) {
+                            if (m.energy < 0) {
                                 m.fieldCDcycle = m.cycle + 120;
                                 m.energy = 0;
                             }
@@ -4436,7 +4422,7 @@ const m = {
                                 }
 
                                 //damage nearby mobs
-                                const dmg = this.damage * m.dmgScale * ((tech.isControlPlasma && !this.isAttached) ? 2 : 1)
+                                const dmg = this.damage * ((tech.isControlPlasma && !this.isAttached) ? 2 : 1)
                                 const arcList = []
                                 const dischargeRange = 150 + 1600 * tech.plasmaDischarge + 1.3 * this.effectRadius
                                 for (let i = 0, len = mob.length; i < len; i++) {
@@ -4565,7 +4551,7 @@ const m = {
                                     ctx.fill();
 
                                     //damage nearby mobs
-                                    const dmg = m.plasmaBall.damage * m.dmgScale
+                                    const dmg = m.plasmaBall.damage
                                     for (let i = 0, len = mob.length; i < len; i++) {
                                         if (mob[i].alive && (!mob[i].isBadTarget || mob[i].isMobBullet) && !mob[i].isInvulnerable) {
                                             const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
@@ -5729,7 +5715,7 @@ const m = {
                                 }
                                 if (tech.isNewWormHoleDamage) {
                                     const dmg = 1.5
-                                    tech.damage *= dmg
+                                    m.damageDone *= dmg
                                     simulation.ephemera.push({
                                         name: `wormholeDamage${m.cycle}`,
                                         count: 300, //cycles before it self removes
@@ -5737,7 +5723,7 @@ const m = {
                                             this.count--
                                             if (this.count < 0) {
                                                 simulation.removeEphemera(this.name)
-                                                tech.damage /= dmg
+                                                m.damageDone /= dmg
                                             }
                                         },
                                     })
@@ -6295,12 +6281,12 @@ const m = {
                                     !mob[k].isSlowed && !mob[k].isStunned
                                 ) {
                                     mob[k].foundPlayer();
-                                    let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * simulation.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
+                                    let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * mob[k].damageScale();
                                     if (tech.isRewindAvoidDeath && (m.energy + 0.05) > Math.min(0.95, m.maxEnergy) && dmg > 0.01) { //CPT reversal runs in m.damage, but it stops the rest of the collision code here too
-                                        m.damage(dmg);
+                                        m.takeDamage(dmg);
                                         return
                                     }
-                                    m.damage(dmg);
+                                    m.takeDamage(dmg);
                                     if (tech.isPiezo) m.energy += 20.48 * level.isReducedRegen;
                                     if (tech.isStimulatedEmission) powerUps.ejectTech()
                                     if (mob[k].onHit) mob[k].onHit();
@@ -6323,7 +6309,7 @@ const m = {
                                         simulation.drawList.push({ //add dmg to draw queue
                                             x: pairs[i].activeContacts[0].vertex.x,
                                             y: pairs[i].activeContacts[0].vertex.y,
-                                            radius: dmg * 2000,
+                                            radius: dmg * 1000,
                                             color: "rgba(255,0,255,0.2)",
                                             time: simulation.drawTime
                                         });
@@ -6342,7 +6328,7 @@ const m = {
                                 //mob + bullet collisions
                                 if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
                                     obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
-                                    let dmg = m.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
+                                    let dmg = (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
                                     if (tech.isCrit && mob[k].isStunned) dmg *= 4
                                     mob[k].damage(dmg);
                                     if (mob[k].alive) mob[k].foundPlayer();
@@ -6361,7 +6347,7 @@ const m = {
                                 if (obj.classType === "body" && obj.speed > 6) {
                                     const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
                                     if (v > 9) {
-                                        let dmg = tech.blockDamage * m.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2 : 1);
+                                        let dmg = tech.blockDamage * v * obj.mass * (tech.isMobBlockFling ? 2 : 1);
                                         if (mob[k].isShielded) dmg *= 0.7
                                         mob[k].damage(dmg, true);
                                         if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && Math.random() < 0.5) {

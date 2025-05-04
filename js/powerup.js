@@ -61,7 +61,7 @@ const powerUps = {
             return text
         },
         heal(num = 1) {
-            if (powerUps.isEnergyHealth) {
+            if (powerUps.healGiveMaxEnergy) {
                 if (num === 1) return `<div class="heal-circle-energy"></div>`
 
                 let text = '<span style="position:relative;">'
@@ -380,7 +380,7 @@ const powerUps = {
  tech.giveTech("name")              //replace "name" with tech name
  m.setField("name")                 //standing wave  perfect diamagnetism  negative mass  molecular assembler  plasma torch  time dilation  metamaterial cloaking  pilot wave  wormhole  grappling hook
  b.giveGuns("name")                 //nail gun  shotgun  super balls  wave  missiles  grenades  spores  drones  foam  harpoon  mine  laser
- tech.damage *= 2                   //2x damage
+ m.damageDone *= 2                   //2x damage
  m.immuneCycle = Infinity           //immune to damage            
  m.coyoteCycles = Infinity          //air jumps
  m.energy = 0                       //set energy
@@ -497,6 +497,21 @@ const powerUps = {
         size() {
             return 80 / Math.pow(localSettings.difficultyMode, 1.5);
         },
+        damageDone: 1,
+        damageReduction: 1,
+        setDamageAndDefense() {
+            if (simulation.difficultyMode > 5) {
+                this.damageReduction = 2
+                this.damageDone = 0.5
+            } else if (simulation.difficultyMode === 1) {
+                this.damageReduction = 0.5
+                this.damageDone = 2
+            } else {
+                this.damageReduction = 1
+                this.damageDone = 1
+            }
+            spawn.setMobTypeSpawnOrder();
+        },
         effect() {
             const initialDifficultyMode = simulation.difficultyMode
             requestAnimationFrame(() => { //add a background behind the power up menu
@@ -515,7 +530,7 @@ const powerUps = {
             //build level info
             document.getElementById("choose-grid").classList.add('choose-grid-no-images');
             document.getElementById("choose-grid").classList.remove('choose-grid');
-            document.getElementById("choose-grid").style.gridTemplateColumns = "390px" //adjust this to increase the width of the whole menu, but mostly the center column
+            document.getElementById("choose-grid").style.gridTemplateColumns = "340px" //adjust this to increase the width of the whole menu, but mostly the center column
 
             //<div class="row" id="constraint-1"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> boss on each level</div>
             //<div class="row" id="constraint-2"><strong>more</strong> mobs per level<br><strong>faster</strong> mobs per level</div>
@@ -524,7 +539,12 @@ const powerUps = {
             //<div class="row" id="constraint-5"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> random <strong class="constraint">constraint</strong> on each level</div>
             //<div class="row" id="constraint-6"><strong>0.5x</strong> initial <strong class='color-d'>damage</strong><br><strong>2x</strong> initial <strong class='color-defense'>damage taken</strong></div>
 
-            let text = `<div>
+            /* <div class="row" id="constraint-1"><strong>0.85x</strong> <strong class='color-d'>damage</strong> per level<br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div> */
+            //                    <div class="row" id="constraint-2">spawn <strong>more</strong> mobs<br>mobs move <strong>faster</strong></div>
+            // <div class="row" id="constraint-1">spawn higher <strong class="color-tier">TIER</strong> mobs<br>after every <strong>4</strong> levels</div>
+            //<div class="row" id="constraint-4">one mob per level will<br>be from <strong>2</strong> <strong class="color-tier">TIER</strong> higher</div>
+            let text = `
+        <div>
             <div class="grid-container">
                 <div class="left-column">
                     <input type="range" id="difficulty-slider" name="temp" type="range" step="1" value="1" min="1" max="7" list="values" dir="ltr"/>
@@ -539,13 +559,13 @@ const powerUps = {
                     </datalist>
                 </div>
                 <div class="right-column">
-                    <div class="row" id="constraint-1"><strong>0.85x</strong> <strong class='color-d'>damage</strong> per level<br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
-                    <div class="row" id="constraint-2">spawn <strong>more</strong> mobs<br>mobs move <strong>faster</strong></div>
-                    <div class="row" id="constraint-3">spawn a <strong>2nd boss</strong> each level<br>bosses spawn <strong>0.5x</strong> power ups</div>
-                    <div class="row" id="constraint-4"><strong>0.85x</strong> <strong class='color-d'>damage</strong> per level<br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div>
-                    <div class="row" id="constraint-5"><strong>+1</strong> random <strong class="constraint">constraint</strong> each level<br>fewer initial power ups</div>
-                    <div class="row" id="constraint-6"><strong>0.5x</strong> initial <strong class='color-d'>damage</strong><br><strong>2x</strong> initial <strong class='color-defense'>damage taken</strong></div>
-                    <div class="row" id="constraint-7"><strong>+1</strong> random <strong class="constraint">constraint</strong> each level<br>fewer ${powerUps.orb.tech()} spawn</div>
+                    <div class="row" id="constraint-1">increase mob <strong class="color-tier">TIER</strong><br>after every <strong>4</strong> levels</div>
+                    <div class="row" id="constraint-2"><strong>0.5x</strong> <strong class='color-d'>damage</strong><br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>
+                    <div class="row" id="constraint-3">spawn a <strong>2nd boss</strong><br>bosses spawn <strong>fewer</strong> ${powerUps.orb.tech()}</div>
+                    <div class="row" id="constraint-4">increase mob <strong class="color-tier">TIER</strong><br>after every <strong>3</strong> levels</div>
+                    <div class="row" id="constraint-5"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer initial <strong>power ups</strong></div>
+                    <div class="row" id="constraint-6"><strong>0.5x</strong> <strong class='color-d'>damage</strong><br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>
+                    <div class="row" id="constraint-7"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer ${powerUps.orb.tech()} spawn</div>
                 </div>
                 <div class="far-right-column">
                     <div id = "constraint-1-record">${localSettings.difficultyCompleted[1] ? "⚆" : " "}</div>
@@ -557,14 +577,12 @@ const powerUps = {
                     <div id = "constraint-6-record">${localSettings.difficultyCompleted[7] ? "⚇" : " "}</div>
                 </div>
             </div>
-            <div class="choose-grid-module" id="choose-difficulty">
-                confirm difficulty parameters 
-            </div>
-            </div>`
+            <div class="choose-grid-module" id="choose-difficulty">confirm difficulty parameters</div>
+        </div>`
             document.getElementById("choose-grid").innerHTML = text
             //show level info
             document.getElementById("choose-grid").style.opacity = "1"
-            document.getElementById("choose-grid").style.transitionDuration = "0.3s"; //how long is the fade in on
+            document.getElementById("choose-grid").style.transitionDuration = "0.5s"; //how long is the fade in on
             document.getElementById("choose-grid").style.visibility = "visible"
             document.getElementById("choose-difficulty").addEventListener("click", () => {
                 level.unPause()
@@ -578,6 +596,7 @@ const powerUps = {
                     document.getElementById("choose-grid").classList.remove('choose-grid-no-images');
                 }
                 if (level.levelsCleared === 0 && initialDifficultyMode !== simulation.difficultyMode) {
+                    powerUps.difficulty.setDamageAndDefense()
                     //remove and respawn all power ups if difficulty mode was changed
                     for (let i = 0; i < powerUp.length; ++i) Matter.Composite.remove(engine.world, powerUp[i]);
                     powerUp = [];
@@ -598,6 +617,7 @@ const powerUps = {
                 if (isReset) {
                     lore.setTechGoal()
                     localSettings.difficultyMode = simulation.difficultyMode
+                    powerUps.difficulty.setDamageAndDefense()
                     localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
                     localSettings.entanglement = undefined //after changing difficulty, reset stored tech
                     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -757,7 +777,7 @@ const powerUps = {
                 powerUps.research.changeRerolls(-1)
             }
             if (tech.isResearchDamage) {
-                tech.damage *= 1.05
+                m.damageDone *= 1.05
                 simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.05} //peer review`);
                 tech.addJunkTechToPool(0.01)
             }
@@ -796,23 +816,6 @@ const powerUps = {
                             color: "#0eb",
                             time: simulation.drawTime
                         });
-
-                        // overHeal *= 2 //double the over heal converted to max health
-                        // //make sure overHeal doesn't kill player
-                        // if (m.health - overHeal * m.defense() < 0) overHeal = m.health - 0.01
-                        // if (overHeal > m.maxHealth) overHeal = m.maxHealth  //just in case overHeal gets too big
-                        // tech.extraMaxHealth += overHeal //increase max health
-                        // m.setMaxHealth();
-                        // m.damage(overHeal);
-                        // overHeal *= m.defense() // account for defense after m.damage() so the text log is accurate
-                        // simulation.inGameConsole(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.health <span class='color-symbol'>-=</span> ${(overHeal).toFixed(3)}`) // <br>${m.health.toFixed(3)}
-                        // simulation.drawList.push({ //add dmg to draw queue
-                        //     x: m.pos.x,
-                        //     y: m.pos.y,
-                        //     radius: overHeal * 500 * simulation.healScale,
-                        //     color: simulation.mobDmgColor,
-                        //     time: simulation.drawTime
-                        // });
                     } else if (overHeal > 0.2) { //if leftover heals spawn a new spammer heal power up
                         requestAnimationFrame(() => {
                             powerUps.directSpawn(this.position.x, this.position.y, "heal", true, Math.min(1, overHeal) * 40 * (simulation.healScale ** 0.25))//    directSpawn(x, y, name, moving = true, mode = null, size = powerUps[name].size()) {
@@ -861,7 +864,7 @@ const powerUps = {
                     }
                 }
             }
-            if (powerUps.isEnergyHealth) {
+            if (powerUps.healGiveMaxEnergy) {
                 tech.healMaxEnergyBonus += 0.15 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)
                 m.setMaxEnergy();
             }
@@ -1547,7 +1550,7 @@ const powerUps = {
     },
     onPickUp(who) {
         powerUps.research.currentRerollCount = 0
-        if (tech.isTechDamage && who.name === "tech") m.damage(0.1)
+        if (tech.isTechDamage && who.name === "tech") m.takeDamage(0.1)
         if (tech.isMassEnergy) m.energy += 2 * level.isReducedRegen;
         if (tech.isMineDrop && bullet.length < 150 && Math.random() < 0.5) {
             if (tech.isLaserMine && input.down) {
@@ -1594,8 +1597,9 @@ const powerUps = {
             } else {
                 powerUpChance()
             }
-            if (simulation.difficultyMode < 3) {//don't spawn second power up on difficulties with a second boss
+            if (simulation.difficultyMode < 3) {//don't spawn 2nd or 3rd power up on difficulties with a second boss
                 powerUpChance()
+                // powerUps.spawn(x, y, "tech")
             }
             function powerUpChance() {
                 powerUps.randomPowerUpCounter++
@@ -1648,7 +1652,7 @@ const powerUps = {
         }
     },
     spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
-        if (level.levelsCleared < 4) { //runs on first 4 levels on all difficulties
+        if (level.levelsCleared < 4 || simulation.difficultyMode < 2) { //runs on first 4 levels on all difficulties
             if (level.levelsCleared > 1 && simulation.difficultyMode < 7) powerUps.spawn(x, y, "tech")
             if (b.inventory.length === 0) {
                 powerUps.spawn(x, y, "gun", false); //first gun
@@ -1730,7 +1734,7 @@ const powerUps = {
             // }
             tech.tech[index].frequency = 0 //banish tech
             powerUps.ejectTech(index)
-            if (m.immuneCycle < m.cycle) m.damage(tech.pauseEjectTech * 0.01, false)
+            if (m.immuneCycle < m.cycle) m.takeDamage(tech.pauseEjectTech * 0.01, false)
             tech.pauseEjectTech *= 1.3
             document.getElementById(`${index}-pause-tech`).style.textDecoration = "line-through"
             document.getElementById(`${index}-pause-tech`).style.animation = ""

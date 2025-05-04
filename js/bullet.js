@@ -1,7 +1,6 @@
 let bullet = [];
 
 const b = {
-    // dmgScale: null, //scales all damage, but not raw .dmg
     gravity: 0.0006, //most other bodies have   gravity = 0.001
     activeGun: null, //current gun in use by player
     inventoryGun: 0,
@@ -407,12 +406,12 @@ const b = {
                 if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                 if (m.energy < 0) {
                     m.energy = 0
-                    if (simulation.dmgScale) m.damage(tech.radioactiveDamage * 0.03 * (tech.isRadioactiveResistance ? 0.2 : 1));
+                    m.takeDamage(tech.radioactiveDamage * 0.03 * (tech.isRadioactiveResistance ? 0.2 : 1) * spawn.dmgToPlayerByLevelsCleared());
                 }
             }
 
             //mob damage and knock back with alert
-            let damageScale = 1.5; // reduce dmg for each new target to limit total AOE damage
+            let damageScaler = 1.5; // reduce dmg for each new target to limit total AOE damage
             for (let i = 0, len = mob.length; i < len; ++i) {
                 if (mob[i].alive && !mob[i].isShielded) {
                     sub = Vector.sub(where, mob[i].position);
@@ -420,10 +419,10 @@ const b = {
                     if (dist < radius) {
                         if (mob[i].shield) dmg *= 2.5 //balancing explosion dmg to shields
                         if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
-                        mobs.statusDoT(mob[i], dmg * damageScale * 0.25, 240) //apply radiation damage status effect on direct hits
+                        mobs.statusDoT(mob[i], dmg * damageScaler * 0.25, 240) //apply radiation damage status effect on direct hits
                         if (tech.isStun) mobs.statusStun(mob[i], 30)
                         mob[i].locatePlayer();
-                        damageScale *= 0.87 //reduced damage for each additional explosion target
+                        damageScaler *= 0.87 //reduced damage for each additional explosion target
                     }
                 }
             }
@@ -448,21 +447,18 @@ const b = {
             //player damage and knock back
             if (m.immuneCycle < m.cycle) {
                 if (dist < radius) {
-                    if (simulation.dmgScale) {
-                        const harm = tech.isExplosionHarm ? 0.067 : 0.05
-                        if (tech.isImmuneExplosion && m.energy > 0.25) {
-                            // const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
-                            m.energy -= 0.25
-                            // m.damage(0.01 * harm); //remove 99% of the damage  1-0.99
-                            knock = Vector.mult(Vector.normalise(sub), -0.6 * player.mass * Math.max(0, Math.min(0.15 - 0.002 * player.speed, 0.15)));
-                            player.force.x = knock.x; // not +=  so crazy forces can't build up with MIRV
-                            player.force.y = knock.y - 0.3; //some extra vertical kick 
-                        } else {
-                            if (simulation.dmgScale) m.damage(harm);
-                            knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
-                            player.force.x += knock.x;
-                            player.force.y += knock.y;
-                        }
+                    const harm = tech.isExplosionHarm ? 0.067 : 0.05
+                    if (tech.isImmuneExplosion && m.energy > 0.2) {
+                        // const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
+                        m.energy -= 0.2
+                        knock = Vector.mult(Vector.normalise(sub), -0.6 * player.mass * Math.max(0, Math.min(0.15 - 0.002 * player.speed, 0.15)));
+                        player.force.x = knock.x; // not +=  so crazy forces can't build up with MIRV
+                        player.force.y = knock.y - 0.3; //some extra vertical kick 
+                    } else {
+                        m.takeDamage(harm * spawn.dmgToPlayerByLevelsCleared());
+                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
+                        player.force.x += knock.x;
+                        player.force.y += knock.y;
                     }
                 } else if (dist < alertRange) {
                     knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.005);
@@ -515,17 +511,17 @@ const b = {
             }
 
             //mob damage and knock back with alert
-            let damageScale = 1.5; // reduce dmg for each new target to limit total AOE damage
+            let damageScaler = 1.5; // reduce dmg for each new target to limit total AOE damage
             for (let i = 0, len = mob.length; i < len; ++i) {
                 if (mob[i].alive && !mob[i].isShielded) {
                     sub = Vector.sub(where, mob[i].position);
                     dist = Vector.magnitude(sub) - mob[i].radius;
                     if (dist < radius) {
-                        if (mob[i].shield) dmg *= 2.5 //balancing explosion dmg to shields
+                        if (mob[i].shield) dmg *= 1.8 //balancing explosion dmg to shields
                         if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
-                        mob[i].damage(dmg * damageScale * m.dmgScale);
+                        mob[i].damage(dmg * damageScaler);
                         mob[i].locatePlayer();
-                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg * damageScale) * mob[i].mass * (mob[i].isBoss ? 0.003 : 0.01) * reducedKnock);
+                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg * damageScaler) * mob[i].mass * (mob[i].isBoss ? 0.003 : 0.01) * reducedKnock);
                         if (tech.isStun) {
                             mobs.statusStun(mob[i], 30)
                         } else if (!mob[i].isInvulnerable) {
@@ -533,10 +529,10 @@ const b = {
                             mob[i].force.y += knock.y;
                         }
                         radius *= 0.95 //reduced range for each additional explosion target
-                        damageScale *= 0.87 //reduced damage for each additional explosion target
+                        damageScaler *= 0.87 //reduced damage for each additional explosion target
                     } else if (!mob[i].seePlayer.recall && dist < alertRange) {
                         mob[i].locatePlayer();
-                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg * damageScale) * mob[i].mass * (mob[i].isBoss ? 0 : 0.006 * reducedKnock));
+                        knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg * damageScaler) * mob[i].mass * (mob[i].isBoss ? 0 : 0.006 * reducedKnock));
                         if (tech.isStun) {
                             mobs.statusStun(mob[i], 30)
                         } else if (!mob[i].isInvulnerable) {
@@ -1034,11 +1030,11 @@ const b = {
                             if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                         } else {
                             m.energy = 0;
-                            if (simulation.dmgScale) m.damage((tech.isRadioactiveResistance ? 0.00016 * 0.2 : 0.00016) * tech.radioactiveDamage) //0.00015
+                            m.takeDamage((tech.isRadioactiveResistance ? 0.00016 * 0.2 : 0.00016) * tech.radioactiveDamage * spawn.dmgToPlayerByLevelsCleared()) //0.00015
                         }
                     }
                     //aoe damage to mobs
-                    let dmg = m.dmgScale * 0.15 * tech.radioactiveDamage
+                    let dmg = 0.15 * tech.radioactiveDamage
                     for (let i = 0, len = mob.length; i < len; i++) {
                         if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius + mob[i].radius) {
                             if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.2 //reduce damage if a wall is in the way
@@ -1960,14 +1956,14 @@ const b = {
                         }
                         if (Vector.magnitude(Vector.sub(this.position, mob[i].position) < this.explodeRad)) {
                             this.endCycle = 0; //bullet ends cycle after doing damage  //also triggers explosion
-                            mob[i].lockedOn.damage(m.dmgScale * 2 * size); //does extra damage to target
+                            mob[i].lockedOn.damage(2 * size); //does extra damage to target
                         }
                     }
                 }
                 //explode when bullet is close enough to target
                 if (this.lockedOn && Vector.magnitude(Vector.sub(this.position, this.lockedOn.position)) < this.explodeRad) {
                     this.endCycle = 0; //bullet ends cycle after doing damage  //also triggers explosion
-                    this.lockedOn.damage(m.dmgScale * 4 * size); //does extra damage to target
+                    this.lockedOn.damage(4 * size); //does extra damage to target
                 }
             },
             do() {
@@ -2051,7 +2047,7 @@ const b = {
                 frictionAir: 0,
                 isInHole: true, //this keeps the bullet from entering wormholes
                 minDmgSpeed: 0,
-                dmg: m.dmgScale * 2.7, //damage also changes when you divide by mob.mass on in .do()
+                dmg: 2.7, //damage also changes when you divide by mob.mass on in .do()
                 classType: "bullet",
                 isBranch: false,
                 restitution: 0,
@@ -2142,7 +2138,7 @@ const b = {
             if (best.dist2 != Infinity) { //if hitting something
                 path[path.length - 1] = { x: best.x, y: best.y };
                 if (best.who.alive) {
-                    const dmg = 0.9 * m.dmgScale; //********** SCALE DAMAGE HERE *********************
+                    const dmg = 0.9; //********** SCALE DAMAGE HERE *********************
                     best.who.damage(dmg);
                     best.who.locatePlayer();
 
@@ -2205,9 +2201,8 @@ const b = {
     }, whereEnd = {
         x: where.x + 3000 * Math.cos(m.angle),
         y: where.y + 3000 * Math.sin(m.angle)
-    }, dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1) {
+    }, damage = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1) {
         const reflectivity = 1 - 1 / (reflections * 3)
-        let damage = m.dmgScale * dmg
         let best = { x: 1, y: 1, dist2: Infinity, who: null, v1: 1, v2: 1 };
         const path = [{ x: where.x, y: where.y }, { x: whereEnd.x, y: whereEnd.y }];
 
@@ -3380,11 +3375,11 @@ const b = {
                         if (m.immuneCycle < m.cycle) m.energy -= DRAIN
                     } else {
                         m.energy = 0;
-                        if (simulation.dmgScale) m.damage((tech.isRadioactiveResistance ? 0.00004 : 0.0002) * tech.radioactiveDamage) //0.00015
+                        m.takeDamage((tech.isRadioactiveResistance ? 0.00004 : 0.0002) * tech.radioactiveDamage * spawn.dmgToPlayerByLevelsCleared()) //0.00015
                     }
                 }
                 //aoe damage to mobs
-                let dmg = (0.12 + 0.04 * tech.isFastDrones) * m.dmgScale * tech.droneRadioDamage * tech.radioactiveDamage
+                let dmg = (0.12 + 0.04 * tech.isFastDrones) * tech.droneRadioDamage * tech.radioactiveDamage
                 for (let i = 0, len = mob.length; i < len; i++) {
                     if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radioRadius + mob[i].radius) {
                         if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
@@ -3793,12 +3788,12 @@ const b = {
                     Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9);
                     // Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
                     if (this.target.isShielded) {
-                        this.target.damage(m.dmgScale * this.damage, true); //shield damage bypass
+                        this.target.damage(this.damage, true); //shield damage bypass
                         const SCALE = 1 - 0.004 / tech.bulletsLastLonger //shrink if mob is shielded
                         Matter.Body.scale(this, SCALE, SCALE);
                         this.radius *= SCALE;
                     } else {
-                        this.target.damage(m.dmgScale * this.damage);
+                        this.target.damage(this.damage);
                     }
                 } else if (this.target !== null) { //look for a new target
                     this.collisionFilter.category = cat.bullet;
@@ -4042,7 +4037,7 @@ const b = {
                                 } else if (tech.isCritKill) b.crit(who, this)
 
                                 this.immuneList.push(who.id) //remember that this needle has hit this mob once already
-                                let dmg = this.dmg * tech.bulletSize * m.dmgScale
+                                let dmg = this.dmg * tech.bulletSize
                                 if (tech.isNailRadiation) {
                                     mobs.statusDoT(who, (tech.isFastRadiation ? 6 : 2) * tech.bulletSize, tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
                                     dmg *= 0.25
@@ -4100,7 +4095,7 @@ const b = {
                                 } else if (tech.isCritKill) b.crit(who, this)
 
                                 this.immuneList.push(who.id) //remember that this needle has hit this mob once already
-                                let dmg = this.dmg * tech.bulletSize * m.dmgScale
+                                let dmg = this.dmg * tech.bulletSize
                                 if (tech.isNailRadiation) {
                                     mobs.statusDoT(who, (tech.isFastRadiation ? 6 : 2) * tech.bulletSize, tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
                                     dmg *= 0.25
@@ -4447,9 +4442,7 @@ const b = {
                     for (let i = 0; i < q.length; i++) {
                         if (!q[i].isShielded) {
                             Matter.Body.setAngularVelocity(this, this.spin)
-                            // mobs.statusStun(q[i], 180)
-                            // const dmg = 0.5 * m.dmgScale * (this.isUpgraded ? 2.5 : 1)
-                            const dmg = 0.5 * m.dmgScale
+                            const dmg = 0.5
                             q[i].damage(dmg);
                             if (q[i].alive) q[i].foundPlayer();
                             if (q[i].damageReduction) {
@@ -4721,7 +4714,7 @@ const b = {
                     arc: halfArc * 2,
                     radius: 25,
                     resonanceCount: 0,
-                    dmg: (tech.isUpgraded ? 9 : 1.5) * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.5 : 1),
+                    dmg: (tech.isUpgraded ? 9 : 1.5) * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.5 : 1),
                 })
             },
             fire() {
@@ -4919,13 +4912,12 @@ const b = {
                 if (this.lockedOn && this.lockedOn.alive && m.energy > this.drainThreshold) {
                     m.energy -= this.drain
                     this.laser();
-                    // b.laser(this.vertices[0], this.lockedOn.position, m.dmgScale * this.laserDamage * tech.laserDamage, tech.laserReflections, false, 0.4) //tech.laserDamage = 0.16
                 }
             },
             laser() {
                 const push = 0.4
                 const reflectivity = 1 - 1 / (tech.laserReflections * 3)
-                let damage = m.dmgScale * this.laserDamage * tech.laserDamage
+                let damage = this.laserDamage * tech.laserDamage
                 //make the laser wiggle as it aims at the target
                 let best = { x: 1, y: 1, dist2: Infinity, who: null, v1: 1, v2: 1 };
                 const perp2 = Vector.mult(Vector.rotate({ x: 1, y: 0 }, m.angle + Math.PI / 2), 0.6 * this.lockedOn.radius * Math.sin(simulation.cycle / this.lookFrequency))
@@ -5182,7 +5174,7 @@ const b = {
                         if (best.dist2 != Infinity) { //if hitting something
                             path[path.length - 1] = { x: best.x, y: best.y };
                             if (best.who.alive) {
-                                const dmg = 1.4 * m.dmgScale; //********** SCALE DAMAGE HERE *********************
+                                const dmg = 1.4; //********** SCALE DAMAGE HERE *********************
                                 best.who.damage(dmg);
                                 best.who.locatePlayer();
                                 //push mobs away
@@ -5301,7 +5293,7 @@ const b = {
                     for (let i = 0; i < q.length; i++) {
                         if (!q[i].isShielded) {
                             mobs.statusStun(q[i], 210 + 90 * this.isUpgraded)
-                            const dmg = 0.4 * m.dmgScale * (this.isUpgraded ? 4.5 : 1) * (tech.isCrit ? 4 : 1)
+                            const dmg = 0.4 * (this.isUpgraded ? 4.5 : 1) * (tech.isCrit ? 4 : 1)
                             q[i].damage(dmg);
                             if (q[i].alive) q[i].foundPlayer();
                             if (q[i].damageReduction) {
@@ -6086,7 +6078,7 @@ const b = {
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();
                     const end = 700 * Math.sqrt(tech.bulletsLastLonger)
-                    const damage = 2.3 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                    const damage = 2.3 * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
 
                     for (let i = this.waves.length - 1; i > -1; i--) {
                         //draw wave
@@ -6183,7 +6175,7 @@ const b = {
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();
                     const end = 1100 * tech.bulletsLastLonger
-                    const damage = 2.3 * m.dmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.4 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                    const damage = 2.3 * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.4 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
                     for (let i = this.waves.length - 1; i > -1; i--) {
                         const v1 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit1, this.waves[i].radius))
                         const v2 = Vector.add(this.waves[i].position, Vector.mult(this.waves[i].unit2, this.waves[i].radius))
@@ -6301,7 +6293,7 @@ const b = {
                     // amplitude: (m.crouch ? 5 : 10) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin((this.wavePacketCycle + 1) * 0.088), //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
                     amplitude: (m.crouch ? 6 : 12) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin(this.wavePacketCycle * 0.088) * Math.sin(this.wavePacketCycle * 0.04), //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
                     minDmgSpeed: 0,
-                    dmg: m.dmgScale * tech.waveBeamDamage * tech.wavePacketDamage * (tech.isBulletTeleport ? 1.43 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1), //also control damage when you divide by mob.mass 
+                    dmg: tech.waveBeamDamage * tech.wavePacketDamage * (tech.isBulletTeleport ? 1.43 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1), //also control damage when you divide by mob.mass 
                     dmgCoolDown: 0,
                     classType: "bullet",
                     collisionFilter: {
@@ -6750,13 +6742,12 @@ const b = {
             }
         }, {
             name: "drones", //7
-            // description: `deploy <strong>autonomous</strong> drones that <strong>smash</strong> into mobs<br>and <strong>collect</strong> nearby power ups<br><strong>16</strong> drones per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
                 return `deploy <strong>autonomous</strong> <strong>drones</strong> that smash into mobs<br>drones <strong>collect</strong> nearby power ups<br><strong>${this.ammoPack.toFixed(0)}</strong> drones per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
-            ammoPack: 7.3,
-            defaultAmmoPack: 7.3,
+            ammoPack: 7.8,
+            defaultAmmoPack: 7.8,
             have: false,
             do() { },
             fire() {
@@ -6780,13 +6771,13 @@ const b = {
                             x: m.pos.x + 30 * Math.cos(m.angle) + 5 * (Math.random() - 0.5),
                             y: m.pos.y + 30 * Math.sin(m.angle) + 5 * (Math.random() - 0.5)
                         }, 50)
-                        m.fireCDcycle = m.cycle + Math.floor(7 * b.fireCDscale); // cool down
+                        m.fireCDcycle = m.cycle + Math.floor(4 * b.fireCDscale); // cool down
                     } else {
                         b.drone({
                             x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5),
                             y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5)
                         }, 15)
-                        m.fireCDcycle = m.cycle + Math.floor(4 * b.fireCDscale); // cool down
+                        m.fireCDcycle = m.cycle + Math.floor(3 * b.fireCDscale); // cool down
                     }
                 }
             }
@@ -6958,7 +6949,7 @@ const b = {
                                     mob[i].force.x += FORCE.x;
                                     mob[i].force.y += FORCE.y;
 
-                                    let dmg = m.dmgScale * (mob[i].isDropPowerUp ? 350 : 1100) * tech.harpoonDensity * this.charge
+                                    let dmg = (mob[i].isDropPowerUp ? 350 : 1100) * tech.harpoonDensity * this.charge
                                     simulation.drawList.push({ //add dmg to draw queue
                                         x: mob[i].position.x,
                                         y: mob[i].position.y,

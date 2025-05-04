@@ -41,7 +41,7 @@ function playerOnGroundCheck(event) {
                     m.hardLandCD = m.cycle + m.hardLandCDScale * Math.min(momentum / 6.5 - 6, 40)
                     //falling damage
                     if (tech.isFallingDamage && m.immuneCycle < m.cycle && momentum > 150) {
-                        m.damage(Math.min(Math.sqrt(momentum - 100) * 0.01, 0.2));
+                        m.takeDamage(Math.min(Math.sqrt(momentum - 100) * 0.01, 0.2) * spawn.dmgToPlayerByLevelsCleared());
                         if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
                     }
                 } else {
@@ -106,14 +106,13 @@ function collisionChecks(event) {
                         (obj === playerBody || obj === playerHead) &&
                         !mob[k].isSlowed && !mob[k].isStunned
                     ) {
-                        let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * simulation.dmgScale; //player damage is capped at 0.3*dmgScale of 1.0
-                        // if (m.isCloak) dmg *= 0.5
+                        let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * mob[k].damageScale();
                         mob[k].foundPlayer();
                         if (tech.isRewindAvoidDeath && m.energy > 0.85 * Math.min(1, m.maxEnergy) && dmg > 0.01) { //CPT reversal runs in m.damage, but it stops the rest of the collision code here too
-                            m.damage(dmg);
+                            m.takeDamage(dmg);
                             return
                         }
-                        m.damage(dmg); //normal damage
+                        m.takeDamage(dmg); //normal damage
 
                         if (tech.isCollisionRealitySwitch && m.alive) {
                             m.switchWorlds("Hilbert space")
@@ -203,9 +202,8 @@ function collisionChecks(event) {
                         //mob + bullet collisions
                         if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
                             obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
-                            let dmg = m.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
+                            let dmg = (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
                             if (tech.isCrit && mob[k].isStunned) dmg *= 4
-                            // console.log(dmg) //remove this
                             mob[k].damage(dmg);
                             if (mob[k].alive) mob[k].foundPlayer();
                             if (mob[k].damageReduction) {
@@ -229,7 +227,7 @@ function collisionChecks(event) {
                                     if (tech.isBlockRadiation && !mob[k].isShielded && !mob[k].isMobBullet) {
                                         mobs.statusDoT(mob[k], tech.blockDmg * 0.42, 180) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
                                     } else {
-                                        mob[k].damage(tech.blockDmg * m.dmgScale)
+                                        mob[k].damage(tech.blockDmg)
                                         simulation.drawList.push({
                                             x: pairs[i].activeContacts[0].vertex.x,
                                             y: pairs[i].activeContacts[0].vertex.y,
@@ -240,7 +238,7 @@ function collisionChecks(event) {
                                     }
                                 }
 
-                                let dmg = tech.blockDamage * m.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1) * ((m.fieldMode === 0 || m.fieldMode === 8) ? 1 + 0.05 * m.coupling : 1);
+                                let dmg = tech.blockDamage * v * obj.mass * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1) * ((m.fieldMode === 0 || m.fieldMode === 8) ? 1 + 0.05 * m.coupling : 1);
                                 if (mob[k].isShielded) dmg *= 0.7
 
                                 mob[k].damage(dmg, true);

@@ -71,7 +71,7 @@ const mobs = {
             if (!whom.shield && !whom.isShielded && whom.alive) {
                 if (tech.isIceMaxHealthLoss && whom.health > 0.66 && whom.damageReduction > 0) whom.health = 0.66
                 if (tech.isIceKill && whom.health < 0.34 && whom.damageReduction > 0 && whom.alive) {
-                    whom.damage(Infinity);
+                    whom.damage(Infinity)
                     simulation.drawList.push({
                         x: whom.position.x,
                         y: whom.position.y,
@@ -196,7 +196,7 @@ const mobs = {
             who.status.push({
                 effect() {
                     if ((simulation.cycle - this.startCycle) % 30 === 0) {
-                        let dmg = m.dmgScale * tech.radioactiveDamage * this.dmg
+                        let dmg = tech.radioactiveDamage * this.dmg
                         who.damage(dmg);
                         if (who.damageReduction) {
                             simulation.drawList.push({ //add dmg to draw queue
@@ -217,33 +217,6 @@ const mobs = {
             })
         }
     },
-    // statusBurn(who, tickDamage, cycles = 90 + Math.floor(90 * Math.random())) {
-    //   if (!who.isShielded) {
-    //     //remove other "burn" effects on this mob
-    //     let i = who.status.length
-    //     while (i--) {
-    //       if (who.status[i].type === "burn") who.status.splice(i, 1);
-    //     }
-    //     who.status.push({
-    //       effect() {
-    //         if ((simulation.cycle - this.startCycle) % 15 === 0) {
-    //           let dmg = m.dmgScale * tickDamage * 0.5 * (1 + Math.random())
-    //           who.damage(dmg);
-    //           simulation.drawList.push({ //add dmg to draw queue
-    //             x: who.position.x,
-    //             y: who.position.y,
-    //             radius: Math.log(2 * dmg + 1.1) * 40,
-    //             color: `rgba(255,${Math.floor(200*Math.random())},0,0.9)`,
-    //             time: simulation.drawTime
-    //           });
-    //         }
-    //       },
-    //       type: "burn",
-    //       endCycle: simulation.cycle + cycles,
-    //       startCycle: simulation.cycle
-    //     })
-    //   }
-    // },
     deathCount: 0,
     mobSpawnWithHealth: 1,
     setMobSpawnHealth() {
@@ -484,7 +457,7 @@ const mobs = {
                     // ctx.lineDashOffset = 6*(simulation.cycle % 215);
                     if (this.distanceToPlayer() < this.laserRange) {
                         if (m.immuneCycle < m.cycle) {
-                            m.damage(0.0003 * simulation.dmgScale);
+                            m.takeDamage(0.0003 * this.damageScale());
                             if (m.energy > 0.1) m.energy -= 0.003
                         }
                         ctx.beginPath();
@@ -510,48 +483,6 @@ const mobs = {
                     ctx.fill();
                 }
             },
-            // laser() {
-            //     if (this.seePlayer.recall && !this.isSlowed) {
-            //         const seeRange = 2500;
-            //         best = {
-            //             x: null,
-            //             y: null,
-            //             dist2: Infinity,
-            //             who: null,
-            //             v1: null,
-            //             v2: null
-            //         };
-            //         const look = {
-            //             x: this.position.x + seeRange * Math.cos(this.angle),
-            //             y: this.position.y + seeRange * Math.sin(this.angle)
-            //         };
-            //         best = vertexCollision(this.position, look, m.isCloak ? [map, body] : [map, body, [player]]);
-
-            //         // hitting player
-            //         if (best.who === player) {
-            //             if (m.immuneCycle < m.cycle) {
-            //                 const dmg = 0.0014 * simulation.dmgScale;
-            //                 m.damage(dmg);
-            //                 ctx.fillStyle = "#f00"; //draw damage
-            //                 ctx.beginPath();
-            //                 ctx.arc(best.x, best.y, dmg * 10000, 0, 2 * Math.PI);
-            //                 ctx.fill();
-            //             }
-            //         }
-            //         //draw beam
-            //         if (best.dist2 === Infinity) {
-            //             best = look;
-            //         }
-            //         ctx.beginPath();
-            //         ctx.moveTo(this.position.x, this.position.y);
-            //         ctx.lineTo(best.x, best.y);
-            //         ctx.strokeStyle = "#f00"; // Purple path
-            //         ctx.lineWidth = 1;
-            //         ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
-            //         ctx.stroke(); // Draw it
-            //         ctx.setLineDash([]);
-            //     }
-            // },
             wing(a, radius = 250, ellipticity = 0.4, dmg = 0.0006) {
                 const minorRadius = radius * ellipticity
                 const perp = { x: Math.cos(a), y: Math.sin(a) } //
@@ -564,7 +495,7 @@ const mobs = {
                 //check for wing -> player damage
                 const hitPlayer = Matter.Query.ray([player], this.position, Vector.add(this.position, Vector.mult(perp, radius * 2.05)), minorRadius)
                 if (hitPlayer.length && m.immuneCycle < m.cycle) {
-                    m.damage(dmg * simulation.dmgScale);
+                    m.takeDamage(dmg * this.damageScale());
                 }
             },
             searchSpring() {
@@ -876,6 +807,16 @@ const mobs = {
                     ctx.stroke();
                 }
             },
+            // pushAway(range = 700, force = 0.2) {
+            //     if (m.immuneCycle < m.cycle) {
+            //         let sub = Vector.sub(player.position, this.position);
+            //         if (Vector.magnitude(sub) < range) {
+            //             knock = Vector.mult(Vector.normalise(sub), player.mass * force);
+            //             player.force.x += knock.x;
+            //             player.force.y += knock.y - (m.onGround && !m.crouch) ? 0.1 * player.mass : 0;
+            //         }
+            //     }
+            // },
             bomb() {
                 //throw a mob/bullet at player
                 if (
@@ -911,7 +852,6 @@ const mobs = {
                         x: Math.cos(angle),
                         y: Math.sin(angle)
                     }, this.fireDir)
-                    // c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
                     const threshold = 0.1;
                     if (dot > threshold) {
                         this.torque += 0.000004 * this.inertia;
@@ -919,7 +859,8 @@ const mobs = {
                         this.torque -= 0.000004 * this.inertia;
                     } else if (this.noseLength > 1.5 && dot > -0.2 && dot < 0.2) {
                         //fire
-                        spawn.bullet(this.vertices[1].x, this.vertices[1].y, 9 + Math.ceil(this.radius / 15));
+                        spawn.bullet(this.vertices[1].x, this.vertices[1].y, this.tier, 9 + Math.ceil(this.radius / 15));
+
                         const v = 15;
                         Matter.Body.setVelocity(mob[mob.length - 1], {
                             x: this.velocity.x + this.fireDir.x * v + 3 * Math.random(),
@@ -936,25 +877,7 @@ const mobs = {
                     this.noseLength -= this.fireFreq / 2;
                     setNoseShape();
                 }
-                // else if (this.noseLength < -0.1) {
-                //   this.noseLength += this.fireFreq / 4;
-                //   setNoseShape();
-                // }
             },
-            // launch() {
-            //     if (this.seePlayer.recall) {
-            //       //fire
-            //       spawn.seeker(this.vertices[1].x, this.vertices[1].y, 5 + Math.ceil(this.radius / 15), 5);
-            //       const v = 15;
-            //       Matter.Body.setVelocity(mob[mob.length - 1], {
-            //         x: this.velocity.x + this.fireDir.x * v + Math.random(),
-            //         y: this.velocity.y + this.fireDir.y * v + Math.random()
-            //       });
-            //       // recoil
-            //       this.force.x -= 0.005 * this.fireDir.x * this.mass;
-            //       this.force.y -= 0.005 * this.fireDir.y * this.mass;
-            //     }
-            // },
             turnToFacePlayer() {
                 //turn to face player
                 const dx = player.position.x - this.position.x;
@@ -962,11 +885,6 @@ const mobs = {
                 const dist = this.distanceToPlayer();
                 const angle = this.angle + Math.PI / 2;
                 c = Math.cos(angle) * dx - Math.sin(angle) * dy;
-                // if (c > 0.04) {
-                //   Matter.Body.rotate(this, 0.01);
-                // } else if (c < 0.04) {
-                //   Matter.Body.rotate(this, -0.01);
-                // }
                 if (c > 0.04 * dist) {
                     this.torque += 0.002 * this.mass;
                 } else if (c < 0.04) {
@@ -980,7 +898,7 @@ const mobs = {
             },
             explode(mass = this.mass) {
                 if (m.immuneCycle < m.cycle) {
-                    m.damage(Math.min(Math.max(0.03 * Math.sqrt(mass), 0.01), 0.4) * simulation.dmgScale);
+                    m.takeDamage(Math.min(Math.max(0.03 * Math.sqrt(mass), 0.01), 0.4) * this.damageScale());
                     this.isDropPowerUp = false;
                     this.death(); //death with no power up or body
                 }
@@ -1005,10 +923,13 @@ const mobs = {
                     ctx.fillRect(x, y, w * this.health, h);
                 }
             },
-            damage(dmg, isBypassShield = false) {
+            damageScale() {
+                return ((spawn.mobDmgDoneByTier[this.tier] && level.levelsCleared < 14) ? spawn.mobDmgDoneByTier[this.tier] : spawn.dmgToPlayerByLevelsCleared())
+            },
+            damage(dmg, isBypassShield = false) { //damage taken by this mob 
                 if ((!this.isShielded || isBypassShield) && this.alive) {
                     if (dmg !== Infinity) {
-                        dmg *= tech.damageFromTech()
+                        dmg *= tech.damageAdjustments()
                         if (this.isDropPowerUp) {
                             if (this.health === 1) {
                                 if (tech.isMobFullHealthCloak) {
@@ -1038,7 +959,6 @@ const mobs = {
                                 }
                             } else if (tech.isMobLowHealth && this.health < 0.25) {
                                 dmg *= 3
-
                                 simulation.ephemera.push({
                                     name: "damage outline",
                                     count: 2, //cycles before it self removes
@@ -1065,9 +985,15 @@ const mobs = {
                         }
 
                         //mobs specific damage changes
+                        if (this.tier && level.levelsCleared < 14) {
+                            dmg *= spawn.mobDmgTakenByTier[this.tier] //scale by tier
+                        } else {
+                            dmg *= spawn.mobDmgTakenByLevelsCleared() //scale by level.levelsCleared if no tier
+                        }
+                        dmg *= this.damageReduction //damage reduction specific to this mob (not based on tier)
+
                         if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 33% dmg at max range of 3000
-                        dmg *= this.damageReduction
-                        //energy and heal drain should be calculated after damage boosts
+                        //energy and heal drain should be calculated after damage boosts and before mass reduction
                         if (tech.energySiphon && this.isDropPowerUp && m.immuneCycle < m.cycle) {
                             //dmg !== Infinity &&
                             const regen = Math.min(this.health, dmg) * tech.energySiphon * level.isReducedRegen
@@ -1167,7 +1093,7 @@ const mobs = {
                         const spawns = tech.deathSpawns + tech.deathSpawnsFromBoss
                         const len = Math.min(12, spawns * Math.ceil(Math.random() * simulation.difficulty * spawns))
                         for (let i = 0; i < len; i++) {
-                            spawn.spawns(this.position.x + (Math.random() - 0.5) * radius * 2.5, this.position.y + (Math.random() - 0.5) * radius * 2.5);
+                            spawn.spawns(this.position.x + (Math.random() - 0.5) * radius * 2.5, this.position.y + (Math.random() - 0.5) * radius * 2.5, 2);
                             Matter.Body.setVelocity(mob[mob.length - 1], {
                                 x: this.velocity.x + (Math.random() - 0.5) * 10,
                                 y: this.velocity.x + (Math.random() - 0.5) * 10

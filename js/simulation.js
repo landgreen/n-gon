@@ -271,7 +271,6 @@ const simulation = {
     difficultyMode: 2, //normal difficulty is 2
     difficulty: 0,
     constraint: 0,
-    dmgScale: null,
     healScale: 1,
     accelScale: null,
     CDScale: null,
@@ -1079,12 +1078,12 @@ const simulation = {
             simulation.ephemera.push({
                 name: "dmgDefBars", count: 0, do() {
                     if (!(m.cycle % 15)) { //4 times a second
-                        const defense = m.defense() * simulation.dmgScale           //update defense bar
+                        const defense = m.defense() //update defense bar
                         if (m.lastCalculatedDefense !== defense) {
                             document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
                             m.lastCalculatedDefense = defense
                         }
-                        const damage = tech.damageFromTech() * m.dmgScale           //update damage bar
+                        const damage = tech.damageAdjustments() //update damage bar
                         if (m.lastCalculatedDamage !== damage) {
                             document.getElementById("damage-bar").style.height = Math.floor((Math.atan(0.25 * damage - 0.25) + 0.25) * 0.63 * canvas.height) + "px";
                             m.lastCalculatedDamage = damage
@@ -1482,7 +1481,7 @@ const simulation = {
             for (let i = 0, len = mob.length; i < len; i++) {
                 if (mob[i].isDropPowerUp && mob[i].alive) count++
             }
-            count *= 0.3 //to fake the 25% chance, this makes it not random, and more predictable
+            count *= 0.4 //to fake the 25% chance, this makes it not random, and more predictable
             let cycle = () => { //run after waiting a cycle for the map to be cleared
                 const types = ["heal", "ammo", "heal", "ammo", "research", "coupling", "boost", "tech", "gun", "field"]
                 for (let i = 0; i < count; i++) powerUps.spawnDelay(types[Math.floor(Math.random() * types.length)], 1)
