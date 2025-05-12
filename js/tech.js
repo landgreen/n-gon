@@ -637,8 +637,9 @@ const tech = {
     {
         name: "CPT symmetry",
         descriptionFunction() {
-            return `after losing <strong class='color-h'>health</strong>, if you have above <strong>${(85 * Math.min(100, m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>20</strong> <strong class='color-f'>energy</strong> per second`
+            return `after losing <strong class='color-h'>health</strong>, if you have above <strong>${(85 * Math.min(1, m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>20</strong> <strong class='color-f'>energy</strong> per second`
         },
+        // (85 * Math.min(100, m.maxEnergy)
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3559,7 +3560,7 @@ const tech = {
         descriptionFunction() {
             const r = Math.ceil(this.rate * powerUps.research.count)
             const c = Math.ceil(this.rate * m.coupling)
-            return `at the start of each <strong>level</strong><br>spawn <strong>${(100 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.research(1)} and ${powerUps.orb.coupling(1)} <em style ="float: right;">(get ${r} ${powerUps.orb.research(1)}, ${c} ${powerUps.orb.coupling(1)})</em>`
+            return `at the start of each <strong>level</strong> <em style ="float: right;">(get ${r} ${powerUps.orb.research(1)}, ${c} ${powerUps.orb.coupling(1)})</em><br>spawn <strong>${(100 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.research(1)} and <strong>${(50 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.coupling(1)}`
         },
         maxCount: 9,
         count: 0,
@@ -3569,7 +3570,7 @@ const tech = {
             return true
         },
         requires: "",
-        rate: 0.15,
+        rate: 0.18,
         effect() {
             tech.interestRate += this.rate;
         },

@@ -17,7 +17,6 @@ const mobs = {
         ctx.lineWidth = 2;
         let i = mob.length;
         while (i--) {
-            // if (Matter.Query.ray(map, mob[i].position, m.pos).length === 0) { //check if there is a ray between the mob and the player
             ctx.beginPath();
             const vertices = mob[i].vertices;
             ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -27,29 +26,8 @@ const mobs = {
             ctx.strokeStyle = mob[i].stroke;
             ctx.fill();
             ctx.stroke();
-            // }
         }
     },
-    defaultHealthBar() {
-        for (let i = 0, len = mob.length; i < len; i++) {
-            if (mob[i].seePlayer.recall && mob[i].showHealthBar) {
-                const h = mob[i].radius * 0.3;
-                const w = mob[i].radius * 2;
-                const x = mob[i].position.x - w / 2;
-                const y = mob[i].position.y - w * 0.7;
-                ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
-                ctx.fillRect(x, y, w, h);
-                ctx.fillStyle = "rgba(255,0,0,0.7)";
-                ctx.fillRect(x, y, w * mob[i].health, h);
-                // if (mob[i].isInvulnerable) {
-                //     ctx.strokeStyle = "rgba(255,255,255,1)";
-                //     ctx.lineWidth = 5
-                //     ctx.strokeRect(x, y, w, h);
-                // }
-            }
-        }
-    },
-    healthBar() { },
     statusSlow(who, cycles = 60) {
         applySlow(who)
         //look for mobs near the target
@@ -243,7 +221,6 @@ const mobs = {
             alive: true,
             index: i,
             health: mobs.mobSpawnWithHealth,
-            showHealthBar: true,
             accelMag: 0.001 * simulation.accelScale,
             cd: 0, //game cycle when cooldown will be over
             delay: 60, //static: time between cooldowns
@@ -261,6 +238,57 @@ const mobs = {
             spawnPos: {
                 x: xPos,
                 y: yPos
+            },
+            healthBar1() {
+                const h = this.radius * 0.3;
+                const w = this.radius * 2;
+                const x = this.position.x - w / 2;
+                const y = this.position.y - w * 0.7;
+                ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                ctx.fillRect(x, y, w, h);
+                ctx.fillStyle = "rgba(255,0,0,0.7)";
+                ctx.fillRect(x, y, w * this.health, h);
+            },
+            healthBar2() {
+                const x1 = this.position.x - this.radius
+                const x2 = this.position.x + this.radius
+                const y = this.position.y - this.radius
+                ctx.lineWidth = this.radius * 0.27;
+
+                ctx.beginPath()
+                ctx.moveTo(x1, y);
+                ctx.lineTo(x2, y)
+                ctx.strokeStyle = "rgba(100, 100, 100, 0.3)";
+                ctx.stroke()
+
+                ctx.beginPath()
+                ctx.moveTo(x1, y);
+                ctx.lineTo(x1 + 2 * this.radius * this.health, y)
+                ctx.strokeStyle = "rgba(255, 0, 100, 0.8)";
+                ctx.stroke()
+            },
+            healthBar3() {
+                const arc = 3 / 2 * Math.PI
+                ctx.lineWidth = this.radius * 0.25;
+                ctx.strokeStyle = `rgb(${Math.floor(100 + 150 * Math.random())},0,${Math.floor(100 + 150 * Math.random())})`;
+
+                ctx.beginPath()
+                ctx.arc(this.position.x, this.position.y, this.radius * 1.5, arc - this.health, arc + this.health,);
+                ctx.stroke()
+            },
+            healthBar4() {
+                const h = this.radius * 0.36;
+                const w = this.radius * 2;
+                const x = this.position.x - w / 2;
+                const y = this.position.y - w * 0.7;
+                ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                ctx.fillRect(x, y, w, h);
+                ctx.fillStyle = "#000";
+                for (let j = 0; j < 5; j++) {
+                    if (this.health > j * 0.2) {
+                        ctx.fillRect(x + (j * 0.41) * this.radius, y, h, h);
+                    }
+                }
             },
             status: [], // [ { effect(), endCycle } ]
             checkStatus() {
@@ -908,19 +936,6 @@ const mobs = {
                 if (this.timeLeft < 0) {
                     this.isDropPowerUp = false;
                     this.death(); //death with no power up
-                }
-            },
-            //draw health by mob //most health bars are drawn in mobs.healthBar(); , not this
-            healthBar() {
-                if (this.seePlayer.recall && !level.isHideHealth) {
-                    const h = this.radius * 0.3;
-                    const w = this.radius * 2;
-                    const x = this.position.x - w / 2;
-                    const y = this.position.y - w * 0.7;
-                    ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
-                    ctx.fillRect(x, y, w, h);
-                    ctx.fillStyle = "rgba(255,0,0,0.7)";
-                    ctx.fillRect(x, y, w * this.health, h);
                 }
             },
             damageScale() {

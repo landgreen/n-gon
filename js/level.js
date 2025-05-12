@@ -24,7 +24,7 @@ const level = {
             // level.levelsCleared = 9
             // level.updateDifficulty()
             // tech.giveTech("performance")
-            // m.maxHealth = m.health = 10000000
+            // m.maxHealth = m.health = 1//10000000
             // m.displayHealth();
 
             // m.maxEnergy = m.energy = 10000000
@@ -34,7 +34,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(7) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
             // m.energy = 0
@@ -45,7 +45,7 @@ const level = {
             // m.takeDamage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("missiles") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[9].ammo = 100000000
             // tech.laserColor = "#fff"
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
@@ -54,7 +54,7 @@ const level = {
             // tech.giveTech("missile guidance")
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("quantum Zeno effect")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("maul")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("irradiated drones")
             // m.skin.egg();
             // for (let i = 0; i < 1; ++i) tech.giveTech("anthropic principle")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("surfing") });
@@ -65,11 +65,17 @@ const level = {
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.interferometer()
-            // level.subway()
+            // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
-            // for (let i = 0; i < 3; i++) spawn.flutter(1100 + 100 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.finalBoss(1100 + 100 * i, -100)
+            // for (let i = 0; i < 1; i++) spawn.slasher2(1100 + 100 * i, -200, 50)
+            // for (let i = 0; i < 3; i++) spawn.freezer(1100 + 100 * i, -300)
+            // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
+            // for (let i = 0; i < 1; i++) spawn.laserLayer(1100 + 100 * i, -400, 50)
+            // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 25)
+            // for (let i = 0; i < 1; i++) spawn.hopsploder(1100 + 100 * i, -500)
             // for (let i = 0; i < 1; ++i) spawn.spiderBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "gun");
@@ -239,7 +245,7 @@ const level = {
                 powerUps.spawnDelay("research", r, 4);
             }
             if (m.coupling > 0) {
-                const c = Math.ceil(rate * m.coupling)
+                const c = Math.ceil(0.5 * rate * m.coupling)
                 powerUps.spawnDelay("coupling", c, 4);
                 simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
             }
@@ -431,15 +437,13 @@ const level = {
             }
         },
         {
-            description: "no health bars",
+            description: "no health bar",
             effect() {
-                mobs.healthBar = () => { }
                 level.isHideHealth = true
                 document.getElementById("health").style.display = "none"
                 document.getElementById("health-bg").style.display = "none"
             },
             remove() {
-                mobs.healthBar = mobs.defaultHealthBar
                 level.isHideHealth = false
                 if (tech.isEnergyHealth) {
                     document.getElementById("health").style.display = "none"
@@ -2139,6 +2143,13 @@ const level = {
                     for (let i = 0; i < powerUp.length; i++) {
                         if (powerUp[i].name === "heal" && Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 1000000) {
                             Matter.Body.setPosition(powerUp[i], Vector.add(this.portalPair.portal.position, { x: 500 * (Math.random() - 0.5), y: 500 * (Math.random() - 0.5) }));
+                        }
+                    }
+                }
+                if (tech.isForeverDrones) { //send drones to next portal
+                    for (let i = 0; i < bullet.length; i++) {
+                        if (bullet[i].endCycle === Infinity) {
+                            Matter.Body.setPosition(bullet[i], Vector.add(this.portalPair.portal.position, { x: 500 * (Math.random() - 0.5), y: 500 * (Math.random() - 0.5) }));
                         }
                     }
                 }
@@ -5032,27 +5043,41 @@ const level = {
                             for (let i = 0; i < 12; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1800, "ammo")
                             for (let i = 0; i < 5; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1700, "heal");
                             for (let i = 0; i < 1; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1750, "research");
-                            const scale = Math.pow(simulation.difficulty, 0.7)
                             if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
                                 for (let i = 0; i < 250; i++) spawn.starter(-2700 + 2400 * Math.random(), -1300 - 500 * Math.random())
                             } else {
-                                if (Math.random() < 0.07 && simulation.difficulty > 35) {
-                                    for (let i = 0, len = scale * 0.22 / 6; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
-                                    for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false);
-                                    for (let i = 0, len = scale * 0.13 / 6; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false)
-                                    for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false);
+                                const bossNumber = level.levelsCleared / 7 + simulation.difficultyMode / 2
+                                if (Math.random() < 0.25) {
+                                    for (let i = 0, len = bossNumber; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                                } else if (Math.random() < 0.33) {
+                                    for (let i = 0, len = bossNumber * 0.5; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                                } else if (Math.random() < 0.5) {
+                                    for (let i = 0, len = bossNumber * 0.5; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
                                 } else {
-                                    if (Math.random() < 0.25) {
-                                        for (let i = 0, len = scale * 0.22; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
-                                    } else if (Math.random() < 0.33) {
-                                        for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
-                                    } else if (Math.random() < 0.5) {
-                                        for (let i = 0, len = scale * 0.13; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
-                                    } else {
-                                        for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
-                                    }
+                                    for (let i = 0, len = bossNumber; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
                                 }
                             }
+                            // const scale = Math.pow(simulation.difficulty, 0.7)
+                            // if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
+                            //     for (let i = 0; i < 250; i++) spawn.starter(-2700 + 2400 * Math.random(), -1300 - 500 * Math.random())
+                            // } else {
+                            //     if (Math.random() < 0.07 && simulation.difficulty > 35) {
+                            //         for (let i = 0, len = scale * 0.22 / 6; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
+                            //         for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false);
+                            //         for (let i = 0, len = scale * 0.13 / 6; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false)
+                            //         for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false);
+                            //     } else {
+                            //         if (Math.random() < 0.25) {
+                            //             for (let i = 0, len = scale * 0.22; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                            //         } else if (Math.random() < 0.33) {
+                            //             for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                            //         } else if (Math.random() < 0.5) {
+                            //             for (let i = 0, len = scale * 0.13; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+                            //         } else {
+                            //             for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+                            //         }
+                            //     }
+                            // }
                         }
                     } else {
                         doorIn.isClosing = false
@@ -19240,7 +19265,7 @@ const level = {
                 //draw
                 if (this.alpha > 0) {
                     if (this.alpha > 0.95) {
-                        this.healthBar();
+                        if (this.seePlayer.recall) this.healthBar1()
                         if (!this.canTouchPlayer) {
                             this.canTouchPlayer = true;
                             this.isBadTarget = false;
@@ -29115,9 +29140,9 @@ const level = {
             if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
             // Matter.Body.setDensity(me, 0.0015); //normal is 0.001
             me.damageReduction = 0.5
-            me.stroke = "transparent"; //used for drawGhost
-            me.alpha = 1; //used in drawGhost
-            me.isNotCloaked = false; //used in drawGhost
+            me.stroke = "transparent";
+            me.alpha = 1;
+            me.isNotCloaked = false;
             me.isBadTarget = true;
             // me.leaveBody = false;
             me.collisionFilter.mask = cat.bullet //| cat.body
@@ -29143,7 +29168,7 @@ const level = {
                 }
                 if (this.alpha > 0) {
                     if (this.alpha > 0.7 && this.seePlayer.recall) {
-                        this.healthBar();
+                        if (this.seePlayer.recall) this.healthBar1()
                         if (!this.isNotCloaked) {
                             this.isNotCloaked = true;
                             this.isBadTarget = false;

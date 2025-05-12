@@ -448,9 +448,9 @@ const b = {
             if (m.immuneCycle < m.cycle) {
                 if (dist < radius) {
                     const harm = tech.isExplosionHarm ? 0.067 : 0.05
-                    if (tech.isImmuneExplosion && m.energy > 0.2) {
+                    if (tech.isImmuneExplosion && m.energy > 0.05) {
                         // const mitigate = Math.min(1, Math.max(1 - m.energy * 0.5, 0))
-                        m.energy -= 0.2
+                        m.energy -= 0.05
                         knock = Vector.mult(Vector.normalise(sub), -0.6 * player.mass * Math.max(0, Math.min(0.15 - 0.002 * player.speed, 0.15)));
                         player.force.x = knock.x; // not +=  so crazy forces can't build up with MIRV
                         player.force.y = knock.y - 0.3; //some extra vertical kick 
@@ -5064,10 +5064,6 @@ const b = {
                 const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, player.position))
                 if (distanceToPlayer > 100) { //if far away move towards player
                     if (this.explode) {
-                        // if (tech.isImmuneExplosion && m.energy > 1.43) {
-                        //     b.explosion(this.position, this.explode);
-                        // } else {
-                        // }
                         b.explosion(this.position, Math.max(0, Math.min(this.explode, (distanceToPlayer - 70) / b.explosionRange())));
                         this.explode = 0;
                     }

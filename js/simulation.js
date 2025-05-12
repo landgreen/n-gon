@@ -22,7 +22,6 @@ const simulation = {
     //         simulation.draw.cons();
     //         simulation.draw.body();
     //         if (!m.isTimeDilated) mobs.loop();
-    //         mobs.healthBar();
     //         m.draw();
     //         m.hold();
     //         level.customTopLayer();
@@ -99,7 +98,6 @@ const simulation = {
         simulation.draw.cons();
         simulation.draw.body();
         if (!m.isTimeDilated) mobs.loop();
-        mobs.healthBar();
         m.draw();
         m.hold();
         level.customTopLayer();
@@ -226,7 +224,6 @@ const simulation = {
     //     if (!m.isTimeDilated) {
     //         // mobs.loop();
     //     }
-    //     mobs.healthBar();
     //     m.draw();
     //     m.hold();
     //     // v.draw(); //working on visibility work in progress
