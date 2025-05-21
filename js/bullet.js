@@ -84,13 +84,13 @@ const b = {
         if (tech.crouchAmmoCount && m.crouch) {
             if (tech.crouchAmmoCount % 2) {
                 b.guns[b.activeGun].ammo--;
-                if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0) b.guns[b.activeGun].ammo--;
+                if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0 && b.guns[b.activeGun].name !== "harpoon") b.guns[b.activeGun].ammo--;
                 simulation.updateGunHUD();
             }
             tech.crouchAmmoCount++ //makes the no ammo toggle off and on
         } else {
             b.guns[b.activeGun].ammo--;
-            if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0) b.guns[b.activeGun].ammo--;
+            if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0 && b.guns[b.activeGun].name !== "harpoon") b.guns[b.activeGun].ammo--;
             simulation.updateGunHUD();
         }
     },
@@ -1790,7 +1790,6 @@ const b = {
                     // refund ammo
                     if (isReturnAmmo) {
                         b.guns[9].ammo++;
-                        if (level.is2xAmmo) b.guns[9].ammo++;
                         simulation.updateGunHUD();
                         // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                         //     if (b.guns[i].name === "harpoon") {

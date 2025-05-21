@@ -1,20 +1,30 @@
 ******************************************************** NEXT PATCH **************************************************
 
-each mob tier has a unique health bar style
-  some bosses don't have a health bar
-    reactor bosses and other level specific bosses
+trainBoss
+  custom primary boss for level:corridor
+  follows a looping track around the level
+  fires bouncing bullets and mines
 
-new tier 3 mob: freezer - it's like grenadier, but it shoots a 2 second freeze zone
-when player is immune to damage the player's transparency flickers
-interest spawns 15->18% of research, and 15->9% of coupling
-rocket-propelled grenade uses 20->5 energy to protect you from explosions 
+overall mob damage is reduced by 0.86x
+tier 4 mobs and bosses have ~1.25x more health/density,
+  but shorter invulnerability, fewer bullets/grenades, smaller ranges
+all reactor bosses have about 0.8x less health
+shields have ~0.8x health
+shieldingBoss makes shields ~0.8x slower
+the moving laser in level:interferometer flashes off and on every second
+seeker mob bullets fade out in color to indicate they are about to expire
+interest coupling 9->6%
+finalBoss rounds trigger 1/3->1/5 normal interest per phase
+determinism and superdeterminism spawn 5->4 tech
 
-bugs
-  finalBoss spawns the correct boss mob tiers
-  fixed text on CPT symmetry to show correct energy cost with extra high max energy
-  drones from fault tolerance respawn when going through portals
+bug
+  fault tolerance + path integration no longer spawns extra drones
+  33% of mobs respawn constraint, now spawns current tier mobs
+  needle gun ammo issue fixed
 
 ******************************************************** BUGS ********************************************************
+
+dps side bar is too long sometimes
 
 graphical bug - player can become crouched while not touching the ground if they exit the ground while crouched
 
@@ -24,7 +34,7 @@ n-gon long term goals
   more wild synergies, less balanced for rare combos
   more subtle lore hints and world building
   more secrets
-  indication of when things occur
+  more indication of when things occur
     animate start/end of level effects
       new random mob types in the 2 mob random pool
         tiers also
@@ -32,17 +42,6 @@ n-gon long term goals
     draw map animation on all levels
       draw slower on reactor, interferometer, factory, reservoir, subway, finalBoss
       show progression in mob types and tiers
-
-tier patch issues
-  is pacifist lore run broken?
-  balance
-    it's maybe too cluttered
-      maybe spawn less mobs
-  dps side bar is too long...
-    at 26x dmg
-  I think infinite scaling is still messed up
-    try experiment mode 
-    try testing and U after final Boss
 
 after a mob dies make a missile that aims away from player, but then loops around to hit player
 
@@ -57,6 +56,9 @@ new class of effects:  for the next 3 runs of n-gon
     from JUNK?
     maybe from something in the late game?
       reactor reward?
+
+look into locking mouse into the browser again
+  full screen
 
 allow multiple stacks of nitinol
   until the player is just jumping crazy

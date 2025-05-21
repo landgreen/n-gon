@@ -1165,11 +1165,6 @@ const simulation = {
                                 }
                             }
                         }
-
-
-
-
-
                     }
                     if (isNaN(player.position.x)) m.death();
                     if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
@@ -1396,7 +1391,7 @@ const simulation = {
             let fleaCount = 0
             let deliveryCount = 0
             for (let i = 0; i < bullet.length; ++i) {
-                if (bullet[i].isDrone) {
+                if (bullet[i].isDrone && bullet[i].endCycle !== Infinity) {
                     droneCount++
                     if (bullet[i].isImproved) deliveryCount++
                 } else if (bullet[i].isSpore) {
@@ -2100,7 +2095,7 @@ const simulation = {
                         simulation.outputMapString(`spawn.randomMob(${x}, ${y}, 0);\n`);
                     }
                 } else if (e.button === 4) {
-                    simulation.outputMapString(`${Math.floor(simulation.constructMouseDownPosition.x)}, ${Math.floor(simulation.constructMouseDownPosition.y)}`);
+                    simulation.outputMapString(`${Math.floor(simulation.constructMouseDownPosition.x)}, ${Math.floor(simulation.constructMouseDownPosition.y)} `);
                 } else if (simulation.mouseInGame.x > simulation.constructMouseDownPosition.x && simulation.mouseInGame.y > simulation.constructMouseDownPosition.y) { //make sure that the width and height are positive
                     if (e.button === 0) { //add map
                         // if (level.isProcedural) {

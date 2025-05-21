@@ -3560,7 +3560,7 @@ const tech = {
         descriptionFunction() {
             const r = Math.ceil(this.rate * powerUps.research.count)
             const c = Math.ceil(this.rate * m.coupling)
-            return `at the start of each <strong>level</strong> <em style ="float: right;">(get ${r} ${powerUps.orb.research(1)}, ${c} ${powerUps.orb.coupling(1)})</em><br>spawn <strong>${(100 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.research(1)} and <strong>${(50 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.coupling(1)}`
+            return `at the start of each <strong>level</strong> <em style ="float: right;">(get ${r} ${powerUps.orb.research(1)}, ${c} ${powerUps.orb.coupling(1)})</em><br>spawn <strong>${(100 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.research(1)} and <strong>${(100 * this.rate / 3).toFixed(0)}%</strong> of your ${powerUps.orb.coupling(1)}`
         },
         maxCount: 9,
         count: 0,
@@ -4017,7 +4017,7 @@ const tech = {
     },
     {
         name: "determinism",
-        description: `spawn ${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}<br>${powerUps.orb.field()}, ${powerUps.orb.tech()}, and ${powerUps.orb.gun()} have only <strong>1</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ce</span></strong>`,
+        description: `spawn ${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}<br>${powerUps.orb.field()}, ${powerUps.orb.tech()}, and ${powerUps.orb.gun()} have only <strong>1</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ce</span></strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -4031,7 +4031,7 @@ const tech = {
         effect() {
             tech.isDeterminism = true;
             //if you change the number spawned also change it in Born rule
-            for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
+            for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
         },
         remove() {
             tech.isDeterminism = false;
@@ -4039,7 +4039,7 @@ const tech = {
     },
     {
         name: "superdeterminism",
-        description: `spawn ${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}<br>you can't <strong class='color-cancel'>cancel</strong> and ${powerUps.orb.research(1)} no longer <strong>spawn</strong>`,
+        description: `spawn ${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}${powerUps.orb.tech()}<br>you can't <strong class='color-cancel'>cancel</strong> and ${powerUps.orb.research(1)} no longer <strong>spawn</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 3,
@@ -4053,7 +4053,7 @@ const tech = {
         effect() {
             tech.isSuperDeterminism = true;
             //if you change the number spawned also change it in Born rule
-            for (let i = 0; i < 5; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
+            for (let i = 0; i < 4; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "tech");
         },
         remove() {
             tech.isSuperDeterminism = false;
@@ -4952,18 +4952,19 @@ const tech = {
         },
         ammoScale: 3,
         remove() {
-            if (tech.isNeedles) {
+            if (this.count > 0) {
                 tech.isNeedles = false
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "nail gun") {
-                        b.guns[i].chooseFireMethod()
                         b.guns[i].ammo = Math.ceil(b.guns[i].ammo * this.ammoScale);
-                        b.guns[i].ammoPack = b.guns[i].ammo * this.ammoScale;
+                        b.guns[i].ammoPack = b.guns[i].ammoPack * this.ammoScale;
+                        b.guns[i].chooseFireMethod()
                         simulation.updateGunHUD();
                         break
                     }
                 }
             }
+            tech.isNeedles = false
         }
     },
     {

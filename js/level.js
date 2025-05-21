@@ -16,7 +16,8 @@ const level = {
     levels: [],
     start() {
         if (level.levelsCleared === 0) { //this code only runs on the first level
-            // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
+            // simulation.enableConstructMode()  //used to build maps in testing mode
+            // tech.giveTech('motion sickness') //used to build maps in testing mode for precise mouse control
             // simulation.difficultyMode = 1
             // build.isExperimentRun = true
 
@@ -24,7 +25,7 @@ const level = {
             // level.levelsCleared = 9
             // level.updateDifficulty()
             // tech.giveTech("performance")
-            // m.maxHealth = m.health = 1//10000000
+            // m.maxHealth = m.health = 10000000
             // m.displayHealth();
 
             // m.maxEnergy = m.energy = 10000000
@@ -51,9 +52,9 @@ const level = {
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
             // requestAnimationFrame(() => { tech.giveTech("rebar") });
-            // tech.giveTech("missile guidance")
+            // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("quantum Zeno effect")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("needle gun")
             // for (let i = 0; i < 1; ++i) tech.giveTech("irradiated drones")
             // m.skin.egg();
             // for (let i = 0; i < 1; ++i) tech.giveTech("anthropic principle")
@@ -65,11 +66,11 @@ const level = {
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.interferometer()
-            // level.testing()
+            // level.corridor()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
-            // for (let i = 0; i < 1; i++) spawn.finalBoss(1100 + 100 * i, -100)
+            // for (let i = 0; i < 2; i++) spawn.launchPusher(1100 + 100 * i, -100)
             // for (let i = 0; i < 1; i++) spawn.slasher2(1100 + 100 * i, -200, 50)
             // for (let i = 0; i < 3; i++) spawn.freezer(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
@@ -219,8 +220,18 @@ const level = {
             let rate = tech.interestRate
             if (level.onLevel < level.levels.length - 1) {//make sure it's not on the lore level which has an undefined name
                 const levelName = level.levels[level.onLevel]
-                if (levelName === "final") rate *= 1 / 3
+                if (levelName === "final") rate *= 1 / 5
                 if (levelName === "subway") rate *= 1 / 5
+            }
+            if (powerUps.research.count > 0 && rate > 0) {
+                const r = Math.ceil(rate * powerUps.research.count)
+                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-r'>research</span> <span class='color-symbol'>=</span> ${r > 20 ? r + powerUps.orb.research(1) : powerUps.orb.research(r)}`)
+                powerUps.spawnDelay("research", r, 4);
+            }
+            if (m.coupling > 0 && rate > 0) {
+                const c = Math.ceil(rate * m.coupling / 3)
+                powerUps.spawnDelay("coupling", c, 4);
+                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
             }
 
             // let ammoSum = 0
@@ -239,16 +250,6 @@ const level = {
             //     powerUps.spawnDelay("ammo", a, 4);
             //     simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${a > 20 ? a + powerUps.orb.ammo(1) : powerUps.orb.ammo(a)}`)
             // }
-            if (powerUps.research.count > 0) {
-                const r = Math.ceil(rate * powerUps.research.count)
-                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-r'>research</span> <span class='color-symbol'>=</span> ${r > 20 ? r + powerUps.orb.research(1) : powerUps.orb.research(r)}`)
-                powerUps.spawnDelay("research", r, 4);
-            }
-            if (m.coupling > 0) {
-                const c = Math.ceil(0.5 * rate * m.coupling)
-                powerUps.spawnDelay("coupling", c, 4);
-                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
-            }
             // const healPerOrb = (powerUps.heal.size() / 40 / (simulation.healScale ** 0.25)) ** 2
             // const h = Math.ceil(rate * m.health / healPerOrb)
             // powerUps.spawnDelay("heal", h, 4);
@@ -1013,7 +1014,7 @@ const level = {
                         let text = `
                             <div class="choose-grid-module" id = "choose-training" style = "font-size: 1em; padding:10px;color:#333;">
                                 <h2 style="text-align: center;letter-spacing: 5px;">training</h2>
-                                Begin the <strong>guided tutorial</strong> that shows you how to use your ${powerUps.orb.field()} and ${powerUps.orb.gun()}.
+                                Begin the <strong>guided tutorial</strong> that shows how to use ${powerUps.orb.field()} and ${powerUps.orb.gun()}.
                             </div>
                             <div class="choose-grid-module" id = "choose-unPause" style = "font-size: 1em; padding:10px;color:#333;">
                                 <h2 style="text-align: center; letter-spacing: 7px;">play</h2>
@@ -2576,7 +2577,9 @@ const level = {
                     }
                     const mobTargets = Matter.Query.collides(this, mob)
                     for (let i = 0; i < mobTargets.length; i++) {
+                        // if (!mobTargets[i].bodyA.isBoss)
                         pushBlock(mobTargets[i].bodyA)
+                        // if (!mobTargets[i].bodyB.isBoss)
                         pushBlock(mobTargets[i].bodyB)
                     }
                     let pushPowerUp = (who) => {
@@ -7692,7 +7695,8 @@ const level = {
             }
         };
         level.customTopLayer = () => {
-            for (let i = 0; i < lasers.length; i++) lasers[i].query()
+            for (let i = 0; i < lasers.length - 1; i++) lasers[i].query()
+            if (simulation.cycle % 120 > 60) lasers[lasers.length - 1].query()
             ctx.fillStyle = "#233" //balances center dot
             ctx.beginPath();
             for (let i = 0; i < balance.length; i++) {
@@ -8544,7 +8548,6 @@ const level = {
         spawn.mapRect(14275, -2375, 1050, 2050);
         spawn.mapRect(13400, -2375, 900, 1125);
 
-
         //blocks on movers
         spawn.bodyRect(-200, 950, 50, 50);
         spawn.bodyRect(-1100, 925, 65, 75);
@@ -8587,23 +8590,38 @@ const level = {
         spawn.randomMob(5425, -950, 0.6);
         spawn.randomMob(3575, 375, 0.6);
         spawn.randomGroup(5300, -1400, 1.3);
+        // if (simulation.difficultyMode > 1 || level.levelsCleared > 1) {
+        //     if (level.levelsCleared > 7) { //T3
+        //         spawn.randomLevelBoss(2025, -1825, ["laserLayerBoss"]);
+        //         spawn.secondaryBossChance(-1900, -1800, ["historyBoss"]);
+        //     } else if (level.levelsCleared > 3) { //T2
+        //         spawn.randomLevelBoss(2025, -1825, ["pulsarBoss", "spawnerBossCulture"]);
+        //         spawn.secondaryBossChance(-1900, -1800, ["blockBoss"]);
+        //     } else {  //T1
+        //         spawn.randomLevelBoss(2025, -1825, ["shieldingBoss"]);
+        //         spawn.secondaryBossChance(-1900, -1800, ["shooterBoss"]);
+        //     }
+        // } else {
+        //     powerUps.spawnBossPowerUp(2800, -1400)
+        // }
         if (simulation.difficultyMode > 1 || level.levelsCleared > 1) {
+            const bossSpawn = [{ x: -1900, y: -1825 }, { x: 2025, y: -1825 }, { x: 950, y: -1825 }, { x: -850, y: -1825 }]
+            const where = bossSpawn[Math.floor(Math.random() * bossSpawn.length)]
             if (level.levelsCleared > 7) { //T3
-                spawn.randomLevelBoss(2025, -1825, ["laserLayerBoss"]);
-                spawn.secondaryBossChance(-1900, -1800, ["historyBoss"]);
+                spawn.randomLevelBoss(where.x, where.y, ["historyBoss", "laserLayerBoss"]);
             } else if (level.levelsCleared > 3) { //T2
-                spawn.randomLevelBoss(2025, -1825, ["pulsarBoss", "spawnerBossCulture"]);
-                spawn.secondaryBossChance(-1900, -1800, ["blockBoss"]);
+                spawn.randomLevelBoss(where.x, where.y, ["blockBoss", "pulsarBoss", "spawnerBossCulture"]);
             } else {  //T1
-                spawn.randomLevelBoss(2025, -1825, ["shieldingBoss"]);
-                spawn.secondaryBossChance(-1900, -1800, ["shooterBoss"]);
+                spawn.randomLevelBoss(where.x, where.y, ["shooterBoss", "shieldingBoss"]);
             }
+            spawn.secondaryBossChance(3486, -557, ["trainBoss"]);
         } else {
             powerUps.spawnBossPowerUp(2800, -1400)
         }
-        //spawn.randomHigherTierMob(4245, -1245)
-        // spawn.randomLevelBoss(2025, -1825, ["pulsarBoss", "shieldingBoss", "laserLayerBoss", "shooterBoss"]);
-        // spawn.secondaryBossChance(-1900, -1800, ["historyBoss", "spawnerBossCulture", "blockBoss"]);
+
+
+
+
         powerUps.spawnStartingPowerUps(11750, -1000);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },

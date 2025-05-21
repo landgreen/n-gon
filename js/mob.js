@@ -143,14 +143,15 @@ const mobs = {
                     if (who.velocity.y < 2) who.force.y += who.mass * 0.0004 //extra gravity
 
                     //draw health bar
-                    const h = who.radius * 0.3;
-                    const w = who.radius * 2;
-                    const x = who.position.x - w / 2;
-                    const y = who.position.y - w * 0.7;
-                    ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
-                    ctx.fillRect(x, y, w, h);
+                    // const h = who.radius * 0.3;
+                    // const w = who.radius * 2;
+                    // const x = who.position.x - w / 2;
+                    // const y = who.position.y - w * 0.7;
+                    // ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                    // ctx.fillRect(x, y, w, h);
+                    // ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
+                    // ctx.fillRect(x, y, w * who.health, h);
                     ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
-                    ctx.fillRect(x, y, w * who.health, h);
 
                     //draw fill inside mob
                     ctx.beginPath();
@@ -270,7 +271,8 @@ const mobs = {
             healthBar3() {
                 const arc = 3 / 2 * Math.PI
                 ctx.lineWidth = this.radius * 0.25;
-                ctx.strokeStyle = `rgb(${Math.floor(100 + 150 * Math.random())},0,${Math.floor(100 + 150 * Math.random())})`;
+                // ctx.strokeStyle = `rgb(${Math.floor(100 + 150 * Math.random())},0,${Math.floor(100 + 150 * Math.random())})`;
+                ctx.strokeStyle = `rgb(${Math.floor(150 + 50 * Math.random())},0,${Math.floor(150 + 50 * Math.random())})`;
 
                 ctx.beginPath()
                 ctx.arc(this.position.x, this.position.y, this.radius * 1.5, arc - this.health, arc + this.health,);
@@ -1138,9 +1140,10 @@ const mobs = {
                             time: 60
                         });
                         setTimeout(() => {
-                            const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
-                            const size = 16 + Math.ceil(Math.random() * 15)
-                            spawn[pick](this.position.x, this.position.y, size);
+                            // const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
+                            // const size = 16 + Math.ceil(Math.random() * 15)
+                            // spawn[pick](this.position.x, this.position.y, size);
+                            spawn.randomMobByLevelsCleared(2650, -975);
                         }, 1000);
                     }
                     if (tech.healSpawn && Math.random() < tech.healSpawn) {
