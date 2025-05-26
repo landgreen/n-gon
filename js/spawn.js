@@ -6379,11 +6379,11 @@ const spawn = {
                     if (mob[i].isMine) mob[i].isExploding = true
                 }
 
-                this.ammo = 30 + simulation.difficultyMode * 10 + level.levelsCleared * 2
+                this.ammo = 20 + simulation.difficultyMode * 8 + level.levelsCleared * 2
             }
         };
 
-        me.ammo = 30 + simulation.difficultyMode * 10 + level.levelsCleared * 2
+        me.ammo = 20 + simulation.difficultyMode * 8 + level.levelsCleared * 2
         me.onDeath = function () {
             if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             for (let i = 0, len = mob.length; i < len; ++i) { //trigger nearby mines
@@ -8468,7 +8468,7 @@ const spawn = {
         me.fireDir = { x: 0, y: 0 };
         me.onDeath = function () { //helps collisions functions work better after vertex have been changed
             setTimeout(() => { //fix mob in place, but allow rotation
-                spawn.grenade(this.position.x, this.position.y, this.tier, 170 * simulation.CDScale);
+                spawn.grenade(this.position.x, this.position.y, this.tier, 150);
             }, 200);
         }
         spawn.shield(me, x, y);
@@ -8770,7 +8770,7 @@ const spawn = {
             ctx.stroke();
         };
     },
-    freezeGrenade(x, y, tier = null, lifeSpan = 90, pulseRadius = 200, size = 3) {
+    freezeGrenade(x, y, tier = null, lifeSpan = 90, pulseRadius = 230 + 10 * tier, size = 3) {
         mobs.spawn(x, y, 4, size, "rgb(0,0,255)");
         let me = mob[mob.length - 1];
         me.tier = tier
@@ -8791,17 +8791,19 @@ const spawn = {
         me.onDeath = function () {
             simulation.ephemera.push({
                 name: "freeze",
-                count: 240,
+                count: 210 + 10 * tier,
                 position: {
                     x: me.position.x,
                     y: me.position.y,
                 },
                 level: level.levelsCleared,
+                radius: pulseRadius,
                 do() {
                     this.count--
                     if (this.count < 0 || this.level !== level.levelsCleared) simulation.removeEphemera(this.name);
+                    this.radius *= 0.994
 
-                    if (Vector.magnitude(Vector.sub(player.position, this.position)) < pulseRadius + 40) {
+                    if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.radius + 40) {
                         Matter.Body.setVelocity(player, { x: 0.7 * player.velocity.x, y: 0.94 * player.velocity.y });
                         ctx.beginPath();
                         ctx.arc(m.pos.x, m.pos.y, 34, 0, 2 * Math.PI);
@@ -8811,12 +8813,12 @@ const spawn = {
                         if (m.immuneCycle < m.cycle) m.takeDamage(0.00023 * spawn.dmgToPlayerByLevelsCleared());
                     }
                     for (let i = 0; i < bullet.length; i++) {
-                        if (Vector.magnitude(Vector.sub(bullet[i].position, this.position)) < pulseRadius + 40) {
+                        if (Vector.magnitude(Vector.sub(bullet[i].position, this.position)) < this.radius + 40) {
                             Matter.Body.setVelocity(bullet[i], { x: 0.95 * bullet[i].velocity.x, y: 0.97 * bullet[i].velocity.y });
                         }
                     }
                     ctx.beginPath();
-                    ctx.arc(this.position.x, this.position.y, pulseRadius, 0, 2 * Math.PI);
+                    ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
                     ctx.fillStyle = `rgba(0,0,255,${0.2 + 0.1 * Math.random()})`;
                     ctx.fill();
                 },

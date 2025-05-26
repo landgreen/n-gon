@@ -1015,21 +1015,21 @@ const powerUps = {
     },
     hideStyle: `style="height:auto; border: none; background-color: transparent;"`,
     constraintText(choose, click) {
-        return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
         <div class="card-text">
         <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div>
         ${m.fieldUpgrades[choose].description}</div></div>`
     },
     gunText(choose, click) {
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/gun/${b.guns[choose].name}.webp');"`
-        return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}" ${style}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}" ${style}>
             <div class="card-text">
             <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choose].name}</div>
             ${b.guns[choose].descriptionFunction()}</div></div>`
     },
     fieldText(choose, click) {
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/field/${m.fieldUpgrades[choose].name}${choose === 0 ? Math.floor(Math.random() * 10) : ""}.webp');"`
-        return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${style}>
         <div class="card-text">
         <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div>
         ${m.fieldUpgrades[choose].description}</div></div>`
@@ -1037,7 +1037,7 @@ const powerUps = {
     techText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
         const style = localSettings.isHideImages || tech.tech[choose].isLore ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-        return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
                 <div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1046,7 +1046,7 @@ const powerUps = {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
         const style = localSettings.isHideImages || tech.tech[choose].isLore ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
         // <div class="circle-grid tech"></div>
-        return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
                 <div class="grid-title"> <div class="circle-grid-instant"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1054,7 +1054,7 @@ const powerUps = {
     skinTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-        return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
                 <div class="grid-title">         
                 <span style="position:relative;">
@@ -1067,7 +1067,7 @@ const powerUps = {
     fieldTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-        return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
                 <div class="grid-title">
                 <span style="position:relative;">
@@ -1080,7 +1080,7 @@ const powerUps = {
     gunTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-        return `<div class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
                 <div class="grid-title">         
                 <span style="position:relative;">
@@ -1093,28 +1093,28 @@ const powerUps = {
     junkTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-size: contain;background-repeat: no-repeat;background-image: url('img/junk.webp');"`
-        if (!localSettings.isHideImages) {
-            // setTimeout(() => { //delay so that the html element exists
-            //     if (tech.tech[choose].url === undefined) { //if on url has been set yet
-            //         const url = `https://api.openverse.engineering/v1/images/?q=${tech.tech[choose].name}`;
-            //         fetch(url, { signal: AbortSignal.timeout(1000) }) //give up if it takes over 1 second
-            //             .then((response) => response.json())
-            //             .then((responseJson) => {
-            //                 if (responseJson.results.length > 0) {
-            //                     const index = Math.floor(Math.random() * responseJson.results.length) //randomly choose from the images
-            //                     tech.tech[choose].url = responseJson.results[index].url //store the url
-            //                     document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')` //make the url the background image
-            //                 }
-            //             });
-            //     } else {
-            //         document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
-            //     }
-            // }, 1);
-            // setTimeout(() => { //delay so that the html element exists
-            //     document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
-            // }, 1);
-        }
-        return `<div id = "junk-${choose}" class="choose-grid-module card-background" onclick="${click}" onauxclick="${click}"${style}>
+        // if (!localSettings.isHideImages) {
+        // setTimeout(() => { //delay so that the html element exists
+        //     if (tech.tech[choose].url === undefined) { //if on url has been set yet
+        //         const url = `https://api.openverse.engineering/v1/images/?q=${tech.tech[choose].name}`;
+        //         fetch(url, { signal: AbortSignal.timeout(1000) }) //give up if it takes over 1 second
+        //             .then((response) => response.json())
+        //             .then((responseJson) => {
+        //                 if (responseJson.results.length > 0) {
+        //                     const index = Math.floor(Math.random() * responseJson.results.length) //randomly choose from the images
+        //                     tech.tech[choose].url = responseJson.results[index].url //store the url
+        //                     document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')` //make the url the background image
+        //                 }
+        //             });
+        //     } else {
+        //         document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
+        //     }
+        // }, 1);
+        // setTimeout(() => { //delay so that the html element exists
+        //     document.getElementById(`junk-${choose}`).style.backgroundImage = `url('${tech.tech[choose].url}')`
+        // }, 1);
+        // }
+        return `<div id = "junk-${choose}" class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
                 <div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1182,7 +1182,7 @@ const powerUps = {
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
                             const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-                            text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
+                            text += `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${choose})" ${style}>
                                     <div class="card-text">
                                     <div class="grid-title"><span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                                     ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1249,7 +1249,7 @@ const powerUps = {
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
                             const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-                            text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
+                            text += `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${choose})" ${style}>
                                     <div class="card-text">
                                     <div class="grid-title"><span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                                     ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1269,6 +1269,12 @@ const powerUps = {
         },
         effect() {
             if (m.alive) {
+                // if (level.blurryChoices || true) {
+                //     document.documentElement.style.filter = `blur(6px)`
+                //     document.documentElement.style.filter = ``
+                // }
+
+
                 // powerUps.animatePowerUpGrab('hsla(246, 100%, 77%,0.5)')
                 let options = []; //generate all options
                 optionLengthNoDuplicates = 0
@@ -1385,29 +1391,17 @@ const powerUps = {
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
                             const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-                            text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
+                            text += `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${choose})" ${style}>
                                     <div class="card-text">
                                     <div class="grid-title"><span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                                     ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
                         }
                     }
                     if (tech.isMassProduction) {
-                        // const techOptions = [] //make an array of bot options
-                        // for (let i = 0, len = tech.tech.length; i < len; i++) {
-                        //     if (tech.tech[i].isMassProduction) techOptions.push(i)
-                        // }
-                        // if (techOptions.length > 0) { //pick random bot tech
-                        //     const choose = techOptions[Math.floor(Math.random() * techOptions.length)];
-                        //     const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-                        //     text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${choose})" ${style}>
-                        //             <div class="card-text">
-                        //             <div class="grid-title">${tech.tech[choose].name}</div>
-                        //             ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
-                        // }
                         for (let i = 0, len = tech.tech.length; i < len; i++) {
                             if (tech.tech[i].isMassProduction) {
                                 const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[i].name}.webp');"`
-                                text += `<div class="choose-grid-module card-background" onclick="powerUps.choose('tech',${i})" ${style}>
+                                text += `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${i})" ${style}>
                                         <div class="card-text">
                                         <div class="grid-title">${tech.tech[i].name}</div>
                                         ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`

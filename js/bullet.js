@@ -3632,6 +3632,39 @@ const b = {
                     requestAnimationFrame(cycle);
                 }
             }
+            if (tech.isRicochet) {
+                const range = 1000
+                const targets = [] //target nearby mobs
+                for (let i = 0, len = mob.length; i < len; i++) {
+                    if (mob[i] !== who && !mob[i].isInvulnerable && !mob[i].isBadTarget) {
+                        const dist = Vector.magnitude(Vector.sub(this.position, mob[i].position));
+                        if (
+                            dist < (range + mob[i].radius) &&
+                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                            Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                            Vector.magnitude(Vector.sub(who.position, mob[i].position)) < dist
+                        ) {
+                            targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
+                        }
+                    }
+                }
+                if (targets.length) {
+                    const index = Math.floor(Math.random() * targets.length)
+                    const unit = Vector.normalise(Vector.sub(targets[index], this.position))
+                    requestAnimationFrame(() => {
+                        Matter.Body.setVelocity(this, Vector.mult(unit, 40 + 20 * tech.isSuperBounce));
+                        this.dmg += 1
+                        simulation.drawList.push({ //add dmg to draw queue
+                            x: targets[index].x,
+                            y: targets[index].y,
+                            radius: 40,
+                            color: 'rgba(255, 255, 0, 0.5)',
+                            time: 8
+                        });
+                    });
+
+                }
+            }
         };
     },
     targetedBall(position, num = 1, speed = 42 + 12 * Math.random(), range = 1200, isRandomAim = true) {

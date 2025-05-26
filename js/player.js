@@ -3710,7 +3710,7 @@ const m = {
                     const fieldRange2 = (0.68 + 0.37 * Math.sin(m.cycle / 37)) * m.fieldRange * m.harmonicRadius
                     const fieldRange3 = (0.7 + 0.35 * Math.sin(m.cycle / 47)) * m.fieldRange * m.harmonicRadius
                     const netFieldRange = Math.max(fieldRange1, fieldRange2, fieldRange3)
-                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.6, (0.04 + 0.7 * m.energy * (0.1 + 0.11 * Math.random()))) + ")";
+                    ctx.fillStyle = "rgba(110,170,200," + Math.min(0.55, (0.04 + 0.7 * m.energy * (0.1 + 0.11 * Math.random()))) + ")";
                     ctx.beginPath();
                     ctx.arc(m.pos.x, m.pos.y, fieldRange1, 0, 2 * Math.PI);
                     ctx.fill();

@@ -1506,6 +1506,11 @@ summary {
     }
 } */
 .blurry-text {
+    user-select: none;
+    filter: blur(2.8px) contrast(1.4);
+}
+
+.blur-text {
     color: transparent;
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
 }

@@ -1,26 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-trainBoss
-  custom primary boss for level:corridor
-  follows a looping track around the level
-  fires bouncing bullets and mines
+interferometer level balance:
+  top platform is higher
+  lasers cycle on/off faster
+  added a button to disable lasers
+level based laser hazards do 1.14->1.12x default damage
+freezeGrenade gets smaller over time
 
-overall mob damage is reduced by 0.86x
-tier 4 mobs and bosses have ~1.25x more health/density,
-  but shorter invulnerability, fewer bullets/grenades, smaller ranges
-all reactor bosses have about 0.8x less health
-shields have ~0.8x health
-shieldingBoss makes shields ~0.8x slower
-the moving laser in level:interferometer flashes off and on every second
-seeker mob bullets fade out in color to indicate they are about to expire
-interest coupling 9->6%
-finalBoss rounds trigger 1/3->1/5 normal interest per phase
-determinism and superdeterminism spawn 5->4 tech
+ricochet tech extended to include super balls
 
-bug
-  fault tolerance + path integration no longer spawns extra drones
-  33% of mobs respawn constraint, now spawns current tier mobs
-  needle gun ammo issue fixed
+new constraint: blurry choices
+4 new JUNK tech: pulsating lights, grayscale, blur, hue-rotate
+
+bugs
+  planned obsolescence wouldn't eject if it was your first tech
 
 ******************************************************** BUGS ********************************************************
 
@@ -35,35 +28,32 @@ n-gon long term goals
   more subtle lore hints and world building
   more secrets
   more indication of when things occur
-    animate start/end of level effects
-      new random mob types in the 2 mob random pool
-        tiers also
-      tech effects
-    draw map animation on all levels
-      draw slower on reactor, interferometer, factory, reservoir, subway, finalBoss
-      show progression in mob types and tiers
 
-after a mob dies make a missile that aims away from player, but then loops around to hit player
+mob that does very fast tiny little hops, like a little bunny
+  it has extra gravity so it can jump faster
+
+field tech: - use _____ to refresh current choices  (or give +6 choices for the next 3 tech)
+  which field? (pick one based on the name)
+    pilot wave (choices)
+    wormhole? (alt reality)
+    time dilation (rewind time)
+  or skin tech
+  use 
+    10 health
+    all your energy 
+      produce a new choice for each 30 energy
 
 new class of effects:  for the next 3 runs of n-gon
   offer a research donation and get a random effect
+  new power up type
+    reward for completing reactor
+    large yellow?
   effects
     start with ____ power ups
     the first research is free
     start with ____ duplication
-  how to get?
-    from tech?
-    from JUNK?
-    maybe from something in the late game?
-      reactor reward?
-
-look into locking mouse into the browser again
-  full screen
-
-allow multiple stacks of nitinol
-  until the player is just jumping crazy
-
-try disabling camera on reactor level
+    start with ____ damage
+    start with ____ damage reduction
 
 tech:   player behavior challenges
   if you ______ for a level
@@ -79,9 +69,13 @@ how to code?
   ephemera that watches key input states?
   rewrite event listener?
 
-JUNK: Tracepath (literally traces M's path for a bit, sort of like snakeBoss)
+look into locking mouse into the browser again
+  full screen
 
-Gravity could flip on the final level.
+allow multiple stacks of nitinol
+  until the player is just jumping crazy
+
+JUNK: Tracepath (literally traces M's path for a bit, sort of like snakeBoss)
 
 constraint: remove 10% of your tech until the end of the level
   does remove then add give any benefits?
