@@ -1,21 +1,32 @@
 ******************************************************** NEXT PATCH **************************************************
 
-interferometer level balance:
-  top platform is higher
-  lasers cycle on/off faster
-  added a button to disable lasers
-level based laser hazards do 1.14->1.12x default damage
-freezeGrenade gets smaller over time
+player damage taken from a single hit is capped at 0.44x max health
+  calculated after damage reduction effects
+damage immunity animation has a more noticeable low frame rate look
+  after choosing a power up you get 15->5 cycles of immunity (about 0.1 seconds)
+increased the size of the tech, field, gun orb icons in titles
 
-ricochet tech extended to include super balls
+tech: exponential growth - drones  gain 1.03x damage and size every second
+  drones spawned from path integration now inherit size and lifespan
+bot fabrication (+1 cost per 3 bots)->(+2 cost per 5 bots)
 
-new constraint: blurry choices
-4 new JUNK tech: pulsating lights, grayscale, blur, hue-rotate
+refire another grappling hook while the original is retracting
+grappling hook
+  secret code
+wormhole secret code
+pilot wave effect extended to bullets
 
-bugs
-  planned obsolescence wouldn't eject if it was your first tech
+bug fixes
+  pressing left and right no longer makes you go left
+  potential soft lock on highrise level
+  seeker fade out color works better for unusually color backgrounds
+  constraints now update before a new level loads
+    to make sure the 0 duplication effect applies to level based power ups
+  keyword "print" font heights weren't aligned by a few pixels
+    
 
 ******************************************************** BUGS ********************************************************
+
 
 dps side bar is too long sometimes
 
@@ -28,6 +39,56 @@ n-gon long term goals
   more subtle lore hints and world building
   more secrets
   more indication of when things occur
+
+secret codes
+  time dilation - rewind player position
+    code: buttons in a circle
+    replace retrocausality tech?
+  perfect diamagnetism - move the field forward until it hits something
+    code: L R L R down
+  negative mass -  pull in blocks and then push them away
+    tech?
+  plasma - switch between different plasma modes:  normal, ball, extruder
+    have to remove tech for ball and extruder?
+    unlock this after you get plasma ball or extruder to switch between them?
+  metamaterial cloaking  - ?
+  standing wave - ?
+
+!conductorBoss
+  draw thin outline on all or just nearby map elements
+  on ground below player and on the boss draw timer as growing line width
+
+power up: entanglement - make it spawn from killing a mob that kinda looks like the player?
+
+gun tech:   - individual drones and spore damage/size grows by 1.2x every second
+  size growth needs to stack with delivery drone synergistically
+
+tech:  - limit the total number of tech 
+  skin tech or field tech
+  limit:
+    match level.levelsCleared (times 2?)
+    match set number, like 10
+    match number of guns (times 3?)
+    only show choices for: gun tech, field tech, nonrefundable tech
+  benefit:
+    improve ability to choose and eject
+    improve damage, damage taken
+  UI
+    pop up a menu that asks player to choose one of their tech to remove
+      before or after normal tech UI
+      can copy the standard tech UI with a few differences
+
+tech:  - nonrefundable tech that gives you 2 tech that each have minor negative effects
+  synergy with removing tech builds
+  minor negative tech
+    lower damage
+    higher damage taken
+    research costs 2x
+    you can't heal
+  positive effects
+    benefit after removing the negative tech
+
+constraint: you can't heal
 
 mob that does very fast tiny little hops, like a little bunny
   it has extra gravity so it can jump faster
@@ -71,6 +132,8 @@ how to code?
 
 look into locking mouse into the browser again
   full screen
+
+mob status: confused - I could rotate the velocity that mobs have gently over 1-2 seconds. that might work.
 
 allow multiple stacks of nitinol
   until the player is just jumping crazy

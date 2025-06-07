@@ -1385,15 +1385,18 @@ const simulation = {
         }
         if (tech.isDronesTravel && m.alive) {
             //count drones
-            let droneCount = 0
+            // let droneCount = 0
+            let droneArray = []
             let sporeCount = 0
             let wormCount = 0
             let fleaCount = 0
-            let deliveryCount = 0
             for (let i = 0; i < bullet.length; ++i) {
                 if (bullet[i].isDrone && bullet[i].endCycle !== Infinity) {
-                    droneCount++
-                    if (bullet[i].isImproved) deliveryCount++
+                    droneArray.push({
+                        isImproved: bullet[i].isImproved,
+                        scale: bullet[i].scale,
+                        endCycle: bullet[i].endCycle,
+                    })
                 } else if (bullet[i].isSpore) {
                     sporeCount++
                 } else if (bullet[i].wormSize) {
@@ -1404,7 +1407,34 @@ const simulation = {
             }
 
             //respawn drones in animation frame
-            requestAnimationFrame(() => { b.delayDrones({ x: level.enter.x + 50, y: level.enter.y - 60 }, droneCount, deliveryCount) });
+            requestAnimationFrame(() => {
+                let respawnDrones = () => {
+                    const where = {
+                        x: level.enter.x + 50,
+                        y: level.enter.y - 60
+                    }
+                    if (droneArray.length) {
+                        requestAnimationFrame(respawnDrones);
+                        if (!simulation.paused && !simulation.isChoosing && m.alive) {
+                            if (tech.isDroneRadioactive) {
+                                b.droneRadioactive({ x: where.x + 50 * (Math.random() - 0.5), y: where.y + 50 * (Math.random() - 0.5) }, 0)
+                                if (droneArray[0].scale) bullet[bullet.length - 1].size = droneArray[0].scale
+                            } else {
+                                b.drone({ x: where.x + 50 * (Math.random() - 0.5), y: where.y + 50 * (Math.random() - 0.5) }, 0)
+                                const who = bullet[bullet.length - 1]
+                                if (droneArray[0].isImproved) who.isImproved = true;
+                                if (droneArray[0].scale) {
+                                    who.scale = droneArray[0].scale
+                                    Matter.Body.scale(who, who.scale, who.scale);
+                                }
+                                who.endCycle = droneArray[0].endCycle + 300
+                            }
+                            droneArray.shift() //remove first element
+                        }
+                    }
+                }
+                requestAnimationFrame(respawnDrones);
+            });
 
             //respawn spores in animation frame
             let respawnSpores = () => {

@@ -271,7 +271,7 @@ window.addEventListener('load', () => {
                 const i = 4 //update experiment text
                 m.fieldUpgrades[i].description = m.fieldUpgrades[i].setDescription()
                 document.getElementById(`field-${i}`).innerHTML = `<div class="card-text">
-                <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
+                <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
                 ${m.fieldUpgrades[i].description}</div>`
             }
             requestAnimationFrame(() => { build.sortTech('have', true) });
@@ -560,7 +560,7 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
             const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
             text += `<div class="pause-grid-module card-background" id="pause-field" ${style} >
                                                     <div class="card-text">
-                                                        <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
+                                                        <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
                                                         ${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
             //button below for next
             text += `<div class="pause-grid-module" id="pause-field-next" style="animation: fieldColorCycle 3s linear infinite alternate;border-bottom: 1px solid #000;">
@@ -571,17 +571,14 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
             const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/field/${m.fieldUpgrades[m.fieldMode].name}${m.fieldMode === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
             text += `<div class="pause-grid-module card-background" id="pause-field" ${style} >
                                                     <div class="card-text">
-                                                        <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
+                                                        <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
                                                         ${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
         }
-        // for (let i = 0, len = b.inventory.length; i < len; i++) {
-        //     text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div> ${b.guns[b.inventory[i]].description}</div>`
-        // }
         for (let i = 0, len = b.inventory.length; i < len; i++) {
             const style = localSettings.isHideImages ? `style="height:auto;"` : `style="background-image: url('img/gun/${b.guns[b.inventory[i]].name}.webp');"`
             text += `<div class="pause-grid-module card-background" ${style} >
                                                     <div class="card-text">
-                                                        <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div>
+                                                        <div class="grid-title"><div class="circle-grid-title gun"></div> &nbsp; ${build.nameLink(b.guns[b.inventory[i]].name)} - <span style="font-size:100%;font-weight: 100;">${b.guns[b.inventory[i]].ammo}</span></div>
                                                         ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         }
         let el = document.getElementById("pause-grid-left")
@@ -789,7 +786,7 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
     isExperimentRun: false,
     techText(i) {
         return `<div class="card-text" >
-                                <div class="grid-title" ><div class="circle-grid tech"></div> &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
+                                <div class="grid-title" ><div class="circle-grid-title tech"></div> &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
                                 ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     instantTechText(i) {
@@ -809,22 +806,22 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
     gunTechText(i) {
         return `<div class="card-text"> <div class="grid-title">
                                 <span style="position:relative;">
-                                    <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                                    <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
+                                    <div class="circle-grid-title tech" style="position:absolute; top:0.12em; left:0;opacity:0.8;"></div>
+                                    <div class="circle-grid-title gun" style="position:absolute; top:0.12em; left:10px; opacity:0.65;"></div>
                                 </span> &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
                                 ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     fieldTechText(i) {
         return `<div class="card-text"><div class="grid-title">
                                 <span style="position:relative;">
-                                    <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                                    <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
+                                    <div class="circle-grid-title tech" style="position:absolute; top:0.12em; left:0;opacity:0.8;"></div>
+                                    <div class="circle-grid-title field" style="position:absolute; top:0.12em; left:10px;opacity:0.65;"></div>
                                 </span> &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
                                 ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     junkTechText(i) {
         return `<div class="card-text">
-                                <div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
+                                <div class="grid-title"><div class="circle-grid-title junk"></div> &nbsp; ${build.nameLink(tech.tech[i].name)} ${tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : ""}</div>
                                 ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
     },
     choosePowerUp(index, type, isAllowed = false) {
@@ -862,10 +859,8 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
                 simulation.molecularMode++
                 if (simulation.molecularMode > i - 1) simulation.molecularMode = 0
                 m.fieldUpgrades[i].description = m.fieldUpgrades[i].setDescription()
-                // document.getElementById(`field-${i}`).innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div> ${m.fieldUpgrades[i].description}`
-
                 document.getElementById(`field-${i}`).innerHTML = `<div class="card-text">
-                                <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
+                                <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
                                 ${m.fieldUpgrades[i].description}</div>`
             }
         } else if (type === "tech") {
@@ -898,7 +893,6 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
                         techID.innerHTML = build.gunTechText(i)
                     } else if (tech.tech[i].isJunk) {
                         techID.innerHTML = build.junkTechText(i)
-                        // `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
                     } else if (tech.tech[i].isSkin) {
                         techID.classList.remove('experiment-grid-hide');
                         techID.innerHTML = build.skinTechText(i)
@@ -996,14 +990,14 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
             const style = localSettings.isHideImages ? hideStyle : `style="background-image: url('img/field/${m.fieldUpgrades[i].name}${i === 0 ? m.fieldUpgrades[0].imageNumber : ""}.webp');"`
             text += `<div id="field-${i}" class="experiment-grid-module card-background ${m.fieldMode === i ? " build-field-selected" : ""}" onclick="build.choosePowerUp(${i},'field')" ${style} >
                             <div class="card-text">
-                                <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
+                                <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
                                 ${m.fieldUpgrades[i].description}</div> </div>`
         }
         for (let i = 0, len = b.guns.length; i < len; i++) {
             const style = localSettings.isHideImages ? hideStyle : `style="background-image: url('img/gun/${b.guns[i].name}.webp');"`
             text += `<div id="gun-${i}" class="experiment-grid-module card-background ${b.guns[i].have ? " build-gun-selected" : ""}" onclick="build.choosePowerUp(${i},'gun')" ${style} >
                         <div class="card-text">
-                            <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div>
+                            <div class="grid-title"><div class="circle-grid-title gun"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div>
                             ${b.guns[i].descriptionFunction()}</div> </div>`
         }
         for (let i = 0, len = tech.tech.length; i < len; i++) {

@@ -1019,7 +1019,9 @@ summary {
 
 .color-print {
     color: #567;
-    font-family: 'Courier New', Courier, monospace;
+    /* font-family: monospace; */
+    font-variant-caps: small-caps;
+    /* font-size: 1.3em; */
 }
 
 .color-defense {
@@ -1088,6 +1090,15 @@ summary {
     font-size: 90%;
 }
 
+.circle-grid-title {
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 50%;
+    display: inline-block;
+    margin-bottom: -0.45em;
+    margin-top: -0.3em;
+}
+
 .circle-grid {
     width: 1.32em;
     height: 1.32em;
@@ -1097,17 +1108,19 @@ summary {
 }
 
 .circle-grid-instant {
-    width: 1.1em;
-    height: 1.1em;
+    width: 1.3em;
+    height: 1.3em;
     border-radius: 50%;
     border: 0.15em solid hsl(255, 100%, 71%);
     display: inline-block;
-    margin-bottom: -0.35em;
+    margin-bottom: -0.5em;
+    margin-top: -0.3em;
+    /* margin-bottom: -0.35em; */
 }
 
 .circle-grid-skin {
-    width: 1.25em;
-    height: 1.25em;
+    width: 1.3em;
+    height: 1.3em;
     border-radius: 50%;
     display: inline-block;
     background-color: #fff;

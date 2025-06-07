@@ -1337,7 +1337,7 @@ const b = {
                     player.force.y += momentum.y
                 },
                 returnToPlayer() {
-                    if (m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
+                    // if (m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
                     if (Vector.magnitude(Vector.sub(this.position, m.pos)) < returnRadius) { //near player
                         this.endCycle = 0;
 
@@ -1483,8 +1483,8 @@ const b = {
                     m.grabPowerUp();
                 },
                 do() {
-                    if (m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
                     if (input.field) {
+                        if (m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
                         this.grabBlocks()
                         this.grabPowerUp()
                     } else {
@@ -1505,7 +1505,7 @@ const b = {
                             Matter.Sleeping.set(this, true)
                             this.endCycle = simulation.cycle + 5
                             this.do = () => {
-                                if (m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
+                                if (input.field && m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
                                 this.grabPowerUp()
 
                                 //between player nose and the grapple
@@ -2642,7 +2642,6 @@ const b = {
                     ctx.strokeStyle = "#000";
                     ctx.stroke();
 
-
                     if (this.lockedOn && this.lockedOn.alive) {
                         this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
                     } else {
@@ -2731,7 +2730,6 @@ const b = {
                         if (m.health > m.maxHealth) m.health = m.maxHealth;
                         m.displayHealth();
                     }
-                    // console.log(this.dmg)
                 },
                 do() {
                     if (this.lockedOn && this.lockedOn.alive) {
@@ -3001,8 +2999,8 @@ const b = {
                             const who = bullet[bullet.length - 1]
                             who.isImproved = true;
                             const SCALE = 2.25
+                            who.scale = SCALE
                             Matter.Body.scale(who, SCALE, SCALE);
-                            who.lookFrequency = 30 + Math.floor(11 * Math.random());
                             who.endCycle += 3000 * tech.droneCycleReduction * tech.bulletsLastLonger
                             deliveryCount--
                         }
@@ -3025,8 +3023,8 @@ const b = {
             restitution: 1,
             density: 0.0005, //  0.001 is normal density
             dmg: 0.34 + 0.12 * tech.isDroneTeleport + 0.15 * tech.isDroneFastLook, //damage done in addition to the damage from momentum
-            lookFrequency: (tech.isDroneFastLook ? 20 : 70) + Math.floor(17 * Math.random()),
-            endCycle: simulation.cycle + Math.floor((950 + 400 * Math.random()) * tech.bulletsLastLonger * tech.droneCycleReduction) + 5 * RADIUS + Math.max(0, 150 - bullet.length),
+            lookFrequency: 55 + Math.floor(10 * Math.random()),
+            endCycle: simulation.cycle + Math.floor((900 + 400 * Math.random()) * tech.bulletsLastLonger * tech.droneCycleReduction) + 5 * RADIUS + Math.max(0, 200 - bullet.length),
             classType: "bullet",
             isDrone: true,
             collisionFilter: {
@@ -3037,6 +3035,7 @@ const b = {
             lockedOn: null,
             deathCycles: 110 + RADIUS * 5,
             isImproved: false,
+            scale: 1,
             beforeDmg(who) {
                 if (who.isInvulnerable) {
                     //move away from target after hitting
@@ -3044,26 +3043,14 @@ const b = {
                     Matter.Body.setVelocity(this, { x: unit.x, y: unit.y });
                     this.lockedOn = null
                 } else {
-                    // if (tech.isIncendiary && simulation.cycle + this.deathCycles < this.endCycle && !tech.isForeverDrones) {
-                    //     const max = Math.max(Math.min(this.endCycle - simulation.cycle - this.deathCycles, 1500), 0)
-                    //     b.explosion(this.position, max * 0.14 + this.isImproved * 110 + 60 * Math.random()); //makes bullet do explosive damage at end
-                    //     if (tech.isForeverDrones) {
-                    //         this.endCycle = 0
-                    //         b.drone({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
-                    //         bullet[bullet.length - 1].endCycle = Infinity
-                    //     } else {
-                    //         this.endCycle -= max
-                    //     }
-                    // } else {
                     //move away from target after hitting
                     const unit = Vector.mult(Vector.normalise(Vector.sub(this.position, who.position)), -20)
                     Matter.Body.setVelocity(this, { x: unit.x, y: unit.y });
                     this.lockedOn = null
                     if (this.endCycle > simulation.cycle + this.deathCycles) {
-                        this.endCycle -= 60
+                        this.endCycle -= 50 + this.scale * 30
                         if (simulation.cycle + this.deathCycles > this.endCycle) this.endCycle = simulation.cycle + this.deathCycles
                     }
-                    // }
                 }
             },
             onEnd() {
@@ -3121,7 +3108,7 @@ const b = {
                     this.force.y += this.mass * 0.0012;
                 }
             },
-            doDieing() { //fall shrink and die
+            doDying() { //fall shrink and die
                 this.force.y += this.mass * 0.0012;
                 const scale = 0.995;
                 Matter.Body.scale(this, scale, scale);
@@ -3158,9 +3145,10 @@ const b = {
                 powerUp.splice(i, 1);
                 if (tech.isDroneGrab) {
                     this.isImproved = true;
+                    if (this.scale > 1) Matter.Body.scale(this, 1 / this.scale, 1 / this.scale);
                     const SCALE = 2.25
+                    this.scale = SCALE
                     Matter.Body.scale(this, SCALE, SCALE);
-                    this.lookFrequency = 30 + Math.floor(11 * Math.random());
                     this.endCycle += 3000 * tech.droneCycleReduction * tech.bulletsLastLonger
                 }
             },
@@ -3187,12 +3175,23 @@ const b = {
                             if (found) this.bodyTarget = found
                         }
                     } else {
-                        this.do = this.doDieing
+                        this.do = this.doDying
                     }
                 }
 
                 this.force.y += this.mass * 0.0002;
                 if (!(simulation.cycle % this.lookFrequency)) {
+                    if (tech.isExponential) { //base drones last about 22 seconds
+                        if (Matter.Query.collides(this, map).length > 1) {
+                            const SCALE = 0.9
+                            Matter.Body.scale(this, SCALE, SCALE);
+                            this.scale *= SCALE
+                        } else {
+                            const SCALE = 1.03
+                            Matter.Body.scale(this, SCALE, SCALE);
+                            this.scale *= SCALE
+                        }
+                    }
                     //find mob targets
                     this.lockedOn = null;
                     let closeDist = Infinity;
@@ -3301,7 +3300,7 @@ const b = {
             restitution: 0.4 + 0.199 * Math.random(),
             dmg: 0, //0.24   damage done in addition to the damage from momentum   and radiation
             lookFrequency: 120 + Math.floor(23 * Math.random()),
-            endCycle: simulation.cycle + Math.floor((900 + 110 * Math.random()) * tech.bulletsLastLonger / tech.droneRadioDamage) + 5 * RADIUS + Math.max(0, 150 - 2 * bullet.length),
+            endCycle: simulation.cycle + Math.floor((850 + 110 * Math.random()) * tech.bulletsLastLonger / tech.droneRadioDamage) + 5 * RADIUS + Math.max(0, 200 - 2 * bullet.length),
             classType: "bullet",
             isDrone: true,
             collisionFilter: {
@@ -3408,6 +3407,12 @@ const b = {
                     this.force.y += this.mass * 0.0002; //gravity
 
                     if (!(simulation.cycle % this.lookFrequency)) {
+                        if (tech.isExponential) { //base drones last about 22 seconds
+                            const SCALE = 1.03
+                            Matter.Body.scale(this, SCALE, SCALE);
+                            this.scale *= SCALE
+                            this.radioRadius = this.radioRadius * SCALE
+                        }
                         //find mob targets
                         this.lockedOn = null;
                         let closeDist = Infinity;
@@ -3454,8 +3459,9 @@ const b = {
                                         if (tech.isDroneGrab) {
                                             this.isImproved = true;
                                             const SCALE = 2.25
+                                            if (this.scale > 1) Matter.Body.scale(this, 1 / this.scale, 1 / this.scale);
+                                            this.scale = SCALE
                                             Matter.Body.scale(this, SCALE, SCALE);
-                                            this.lookFrequency = 30 + Math.floor(11 * Math.random());
                                             this.endCycle += 1000 * tech.bulletsLastLonger
                                             this.maxRadioRadius *= 1.25
                                         }
@@ -3487,8 +3493,9 @@ const b = {
                                             if (tech.isDroneGrab) {
                                                 this.isImproved = true;
                                                 const SCALE = 2.25
+                                                if (this.scale > 1) Matter.Body.scale(this, 1 / this.scale, 1 / this.scale);
+                                                this.scale = SCALE
                                                 Matter.Body.scale(this, SCALE, SCALE);
-                                                this.lookFrequency = 30 + Math.floor(11 * Math.random());
                                                 this.endCycle += 1000 * tech.bulletsLastLonger
                                                 this.maxRadioRadius *= 1.25
                                             }

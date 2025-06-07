@@ -205,6 +205,7 @@ function collisionChecks(event) {
                             let dmg = (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
                             if (tech.isCrit && mob[k].isStunned) dmg *= 4
                             // console.log(dmg)
+
                             mob[k].damage(dmg);
                             if (mob[k].alive) mob[k].foundPlayer();
                             if (mob[k].damageReduction) {

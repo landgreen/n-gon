@@ -327,7 +327,7 @@ const powerUps = {
         if (m.alive) simulation.paused = false;
         simulation.isChoosing = false; //stops p from un pausing on key down
         build.unPauseGrid()
-        if (m.immuneCycle < m.cycle + 15) m.immuneCycle = m.cycle + 15; //player is immune to damage for 30 cycles
+        if (m.immuneCycle < m.cycle + 5) m.immuneCycle = m.cycle + 5; //player is immune to damage
         if (m.holdingTarget) m.drop();
     },
     animatePowerUpGrab(color) {
@@ -532,17 +532,6 @@ const powerUps = {
             document.getElementById("choose-grid").classList.remove('choose-grid');
             document.getElementById("choose-grid").style.gridTemplateColumns = "340px" //adjust this to increase the width of the whole menu, but mostly the center column
 
-            //<div class="row" id="constraint-1"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> boss on each level</div>
-            //<div class="row" id="constraint-2"><strong>more</strong> mobs per level<br><strong>faster</strong> mobs per level</div>
-            //<div class="row" id="constraint-3"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> random <strong class="constraint">constraint</strong> on each level</div>
-            //<div class="row" id="constraint-4"><strong>+1</strong> boss on each level<br>bosses spawn <strong>1</strong> fewer ${powerUps.orb.tech()}</div>
-            //<div class="row" id="constraint-5"><strong>0.87x</strong> <strong class='color-d'>damage</strong>, <strong>1.22x</strong> <strong class='color-defense'>damage taken</strong> per level<br><strong>+1</strong> random <strong class="constraint">constraint</strong> on each level</div>
-            //<div class="row" id="constraint-6"><strong>0.5x</strong> initial <strong class='color-d'>damage</strong><br><strong>2x</strong> initial <strong class='color-defense'>damage taken</strong></div>
-
-            /* <div class="row" id="constraint-1"><strong>0.85x</strong> <strong class='color-d'>damage</strong> per level<br><strong>1.25x</strong> <strong class='color-defense'>damage taken</strong> per level</div> */
-            //                    <div class="row" id="constraint-2">spawn <strong>more</strong> mobs<br>mobs move <strong>faster</strong></div>
-            // <div class="row" id="constraint-1">spawn higher <strong class="color-tier">TIER</strong> mobs<br>after every <strong>4</strong> levels</div>
-            //<div class="row" id="constraint-4">one mob per level will<br>be from <strong>2</strong> <strong class="color-tier">TIER</strong> higher</div>
             let text = `
         <div>
             <div class="grid-container">
@@ -729,7 +718,7 @@ const powerUps = {
             if (amount !== 0) powerUps.research.count += amount
             if (tech.isRerollBots && !this.isMakingBots) {
                 let cycle = () => {
-                    const cost = 2 + Math.floor(b.totalBots() / 3)
+                    const cost = 2 + Math.floor(b.totalBots() * 2 / 5)
                     if (m.alive && powerUps.research.count >= cost) {
                         requestAnimationFrame(cycle);
                         this.isMakingBots = true
@@ -1024,14 +1013,14 @@ const powerUps = {
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/gun/${b.guns[choose].name}.webp');"`
         return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}" ${style}>
             <div class="card-text">
-            <div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choose].name}</div>
+            <div class="grid-title"><div class="circle-grid-title gun"></div> &nbsp; ${b.guns[choose].name}</div>
             ${b.guns[choose].descriptionFunction()}</div></div>`
     },
     fieldText(choose, click) {
         const style = localSettings.isHideImages ? powerUps.hideStyle : `style="background-image: url('img/field/${m.fieldUpgrades[choose].name}${choose === 0 ? Math.floor(Math.random() * 10) : ""}.webp');"`
         return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${style}>
         <div class="card-text">
-        <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div>
+        <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div>
         ${m.fieldUpgrades[choose].description}</div></div>`
     },
     techText(choose, click) {
@@ -1039,13 +1028,12 @@ const powerUps = {
         const style = localSettings.isHideImages || tech.tech[choose].isLore ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
         return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
-                <div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
+                <div class="grid-title"><div class="circle-grid-title tech"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
     },
     instantTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
         const style = localSettings.isHideImages || tech.tech[choose].isLore ? powerUps.hideStyle : `style="background-image: url('img/${tech.tech[choose].name}.webp');"`
-        // <div class="circle-grid tech"></div>
         return `<div class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
                 <div class="grid-title"> <div class="circle-grid-instant"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
@@ -1071,8 +1059,8 @@ const powerUps = {
                 <div class="card-text">
                 <div class="grid-title">
                 <span style="position:relative;">
-                    <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                    <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
+                    <div class="circle-grid-title tech" style="position:absolute; top:0.12em; left:0;opacity:0.8;"></div>
+                    <div class="circle-grid-title field" style="position:absolute; top:0.12em; left:10px;opacity:0.65;"></div>
                 </span>
                 &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1084,8 +1072,8 @@ const powerUps = {
                 <div class="card-text">
                 <div class="grid-title">         
                 <span style="position:relative;">
-                    <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
-                    <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
+                    <div class="circle-grid-title tech" style="position:absolute; top:0.12em; left:0;opacity:0.8;"></div>
+                    <div class="circle-grid-title gun" style="position:absolute; top:0.12em; left:10px; opacity:0.65;"></div>
                 </span>
                 &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1116,7 +1104,7 @@ const powerUps = {
         // }
         return `<div id = "junk-${choose}" class="choose-grid-module card-background ${level.blurryChoices ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${style}>
                 <div class="card-text">
-                <div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
+                <div class="grid-title"><div class="circle-grid-title junk"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
     },
     incoherentTechText(choose, click) {
@@ -1166,7 +1154,7 @@ const powerUps = {
                     let text = powerUps.buildColumns(totalChoices, "gun")
                     for (let i = 0; i < totalChoices; i++) {
                         const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options                        
-                        // text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choose})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[choose].name}</div> ${b.guns[choose].description}</div>`
+                        // text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${choose})"><div class="grid-title"><div class="circle-grid-title gun"></div> &nbsp; ${b.guns[choose].name}</div> ${b.guns[choose].description}</div>`
                         text += powerUps.gunText(choose, `powerUps.choose('gun',${choose})`)
 
                         b.guns[choose].isRecentlyShown = true
@@ -1234,7 +1222,7 @@ const powerUps = {
                     let text = powerUps.buildColumns(totalChoices, "field")
                     for (let i = 0; i < totalChoices; i++) {
                         const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options
-                        //text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choose})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div> ${m.fieldUpgrades[choose].description}</div>`                         //default
+                        //text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choose})"><div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div> ${m.fieldUpgrades[choose].description}</div>`                         //default
                         text += powerUps.fieldText(choose, `powerUps.choose('field',${choose})`)
                         m.fieldUpgrades[choose].isRecentlyShown = true
                         removeOption(choose)
@@ -1415,7 +1403,7 @@ const powerUps = {
                                 if (!b.guns[i].have) gunOptions.push(i);
                             }
                             const pick = gunOptions[Math.floor(Math.seededRandom(0, gunOptions.length))] //pick an element from the array of options
-                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${pick})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[pick].name}</div> ${b.guns[pick].description}</div>`
+                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${pick})"><div class="grid-title"><div class="circle-grid-title gun"></div> &nbsp; ${b.guns[pick].name}</div> ${b.guns[pick].description}</div>`
                             text += powerUps.gunText(pick, `powerUps.choose('gun',${pick})`)
                         } else {
                             let fieldOptions = [];
@@ -1423,7 +1411,7 @@ const powerUps = {
                                 if (i !== m.fieldMode) fieldOptions.push(i);
                             }
                             const pick = fieldOptions[Math.floor(Math.seededRandom(0, fieldOptions.length))] //pick an element from the array of options
-                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${pick})"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[pick].name}</div> ${m.fieldUpgrades[pick].description}</div>`
+                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${pick})"><div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${m.fieldUpgrades[pick].name}</div> ${m.fieldUpgrades[pick].description}</div>`
                             text += powerUps.fieldText(pick, `powerUps.choose('field',${pick})`)
                         }
                     }
@@ -1483,7 +1471,7 @@ const powerUps = {
                     for (let j = 0; j < b.inventory.length; j++) {
                         if (b.inventory[j] === choose) alreadyHasGun = true
                     }
-                    // text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${gun})"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${b.guns[gun].name}</div> ${b.guns[gun].description}</div>`
+                    // text += `<div class="choose-grid-module" onclick="powerUps.choose('gun',${gun})"><div class="grid-title"><div class="circle-grid-title gun"></div> &nbsp; ${b.guns[gun].name}</div> ${b.guns[gun].description}</div>`
                     if (!alreadyHasGun) text += powerUps.gunText(choose, `powerUps.choose('gun',${choose})`)
                 }
                 for (let i = 0; i < localSettings.entanglement.techIndexes.length; i++) { //add tech
@@ -1506,7 +1494,7 @@ const powerUps = {
                             } else if (tech.tech[choose].isGunTech) {
                                 text += powerUps.gunTechText(choose, `powerUps.choose('tech',${choose})`)
                             } else if (tech.tech[choose].isLore) {
-                                text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
+                                text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title lore-text"><div class="circle-grid-title lore"></div> &nbsp; ${tech.tech[choose].name} ${isCount}</div>${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
                             } else if (tech.tech[choose].isJunk) {
                                 text += powerUps.junkTechText(choose, `powerUps.choose('tech',${choose})`)
                             } else if (tech.tech[choose].isSkin) {

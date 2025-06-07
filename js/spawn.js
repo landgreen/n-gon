@@ -8913,6 +8913,95 @@ const spawn = {
             }
         };
     },
+    conductorBoss(x, y, radius = 100) {
+        mobs.spawn(x, y, 4, radius, "rgb(255, 255, 255)");
+        let me = mob[mob.length - 1];
+        me.tier = 3
+        // setTimeout(() => { //fix mob in place, but allow rotation
+        //     me.constraint = Constraint.create({
+        //         pointA: {
+        //             x: me.position.x,
+        //             y: me.position.y
+        //         },
+        //         bodyB: me,
+        //         stiffness: 0.0001,
+        //         damping: 1
+        //     });
+        //     Composite.add(engine.world, me.constraint);
+        // }, 2000); //add in a delay in case the level gets flipped left right
+
+        me.isBoss = true;
+        Matter.Body.setDensity(me, 0.0045); //extra dense //normal is 0.001 //makes effective life much larger
+        me.damageReduction = 0.39
+        me.cycle = 0
+        me.maxCycles = 140;
+        me.frictionStatic = 0;
+        me.friction = 0;
+        me.frictionAir = 1;
+        // me.homePosition = { x: x, y: y };
+        // spawn.shield(me, x, y, 1);
+        // spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
+
+        me.onDeath = function () {
+            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+        };
+        // me.onDamage = function () {
+        //     this.cycle = 0
+        // };
+        me.lastMapPLayerOn = null
+        me.do = function () {
+            this.cycle++
+            if (this.seePlayer.recall) this.healthBar1()
+            // Matter.Body.rotate(this, 0.003) //gently spin around
+            this.checkStatus();
+            if (this.isStunned) this.cycle = 0
+
+            // draw cycle timer
+            const size = 50
+            // ctx.lineJoin = "miter";
+            ctx.beginPath();
+            let vertices
+
+            //find what player is touching
+            const touching = Matter.Query.collides(player, map)
+            if (touching.length) {
+                this.lastMapPLayerOn = touching[0].bodyB
+                for (let i = 0; i < touching.length; i++) {
+                    vertices = touching[i].bodyB.vertices
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+                    ctx.lineTo(vertices[0].x, vertices[0].y);
+                }
+            } else if (this.lastMapPLayerOn) {
+                vertices = this.lastMapPLayerOn.vertices
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+                ctx.lineTo(vertices[0].x, vertices[0].y);
+            }
+
+
+            // ctx.beginPath();
+            vertices = this.vertices;
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+            ctx.lineTo(vertices[0].x, vertices[0].y);
+            // ctx.closePath()
+            ctx.strokeStyle = `rgba(100,0,255,${0.13 + 0.45 * Math.random()})`
+            ctx.lineWidth = size * (this.cycle / this.maxCycles)
+            ctx.stroke();
+            ctx.strokeStyle = "rgba(100, 0, 255, 0.1)"
+            ctx.lineWidth = size
+            ctx.stroke();
+            // ctx.lineJoin = "round";
+            if (this.cycle > this.maxCycles) {
+                this.cycle = 0
+                if (touching.length) {
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
+                    m.takeDamage(0.045 * this.damageScale());
+                }
+            }
+        };
+    },
     timeSkipBoss(x, y, radius = 50) {
         mobs.spawn(x, y, 15, radius, "transparent");
         let me = mob[mob.length - 1];
@@ -9072,7 +9161,7 @@ const spawn = {
     },
     seeker(x, y, tier = 1, radius = 8, sides = 6) {
         //bullets
-        mobs.spawn(x, y, sides, radius, "rgb(255,0,255)");
+        mobs.spawn(x, y, sides, radius, "rgba(255,0,255,1)");
         let me = mob[mob.length - 1];
         me.tier = tier
         me.stroke = "transparent";
@@ -9091,7 +9180,7 @@ const spawn = {
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
         me.do = function () {
-            if (this.timeLeft < 200) this.fill = `rgb(255,${200 - this.timeLeft},255)`
+            if (this.timeLeft < 90) this.fill = `rgba(255,0,255,${0.3 + 0.7 * Math.min(90, this.timeLeft) / 90})`
             this.alwaysSeePlayer()
             this.attraction();
             this.timeLimit();

@@ -15,19 +15,19 @@ const level = {
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "mine", "grenades", "harpoon"],
     levels: [],
     start() {
+        level.setConstraints()
         if (level.levelsCleared === 0) { //this code only runs on the first level
 
             // simulation.enableConstructMode()  //used to build maps in testing mode
             // tech.giveTech('motion sickness') //used to build maps in testing mode for precise mouse control
             // simulation.difficultyMode = 1
             // build.isExperimentRun = true
-
+            // tech.duplicateChance += 1
+            // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             // simulation.isHorizontalFlipped = true
             // level.levelsCleared = 11
             // level.updateDifficulty()
             // tech.giveTech("performance")
-            // m.maxHealth = m.health = 10000000
-            // m.displayHealth();
 
             // m.maxEnergy = m.energy = 10000000
             // tech.isRerollDamage = true
@@ -36,18 +36,19 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(7) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(8) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
-            // m.energy = 0
+            // m.maxHealth = m.health = 10000000
+            // m.displayHealth();
             // powerUps.research.count = 3
             // tech.isHookWire = true
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.takeDamage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("super balls") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("mine") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("drones") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[9].ammo = 100000000
             // tech.laserColor = "#fff"
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
@@ -55,24 +56,22 @@ const level = {
             // requestAnimationFrame(() => { tech.giveTech("rebar") });
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("planned obsolescence")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("ricochet")
-            // m.skin.egg();
-            // for (let i = 0; i < 1; ++i) tech.giveTech("anthropic principle")
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("surfing") });
+            // for (let i = 0; i < 1; ++i) tech.giveTech("exponential growth")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("nitinol")
+            // for (let i = 0; i < 1; i++) tech.giveTech("demineralization")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("irradiated drones") });
             // requestAnimationFrame(() => { level.blurryChoices = true });
-            // for (let i = 0; i < 1; i++) tech.giveTech("wear")
             // m.lastKillCycle = m.cycle
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(450, -50, "field");
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
-            // level.interferometer()
+            // level.rooftops()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
-            // for (let i = 0; i < 6; i++) spawn.freezer(1100 + 100 * i, -100 - i * 100)
-            // for (let i = 0; i < 1; i++) spawn.slasher2(1100 + 100 * i, -200, 50)
+            // for (let i = 0; i < 1; i++) spawn.starter(1100 + 100 * i, -200, 500)
+            // for (let i = 0; i < 1; i++) spawn.conductorBoss(1100 + 100 * i, -100 - i * 100)
             // for (let i = 0; i < 3; i++) spawn.freezer(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
             // for (let i = 0; i < 1; i++) spawn.laserLayer(1100 + 100 * i, -400, 50)
@@ -81,7 +80,7 @@ const level = {
             // for (let i = 0; i < 1; ++i) spawn.spiderBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
-            // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 500 * Math.random(), m.pos.y + 500 * Math.random(), "coupling");
+            // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 500 * Math.random(), m.pos.y + 500 * Math.random(), "coupling");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             //lore testing
             // localSettings.isTrainingNotAttempted = true
@@ -190,7 +189,6 @@ const level = {
             simulation.inGameConsole(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
             document.title = "n-gon: " + level.levelAnnounce();
         }
-        level.setConstraints()
     },
     newLevelOrPhase() { //runs on each new level but also on final boss phases
         //used for generalist and pigeonhole principle
@@ -532,16 +530,6 @@ const level = {
                 level.isMobDeathHeal = false
             }
         },
-        // {
-        //     description: "full damage taken after boss dies",
-        //     // description: "after boss dies damage taken = 1",
-        //     effect() {
-        //         level.noDefenseSetting = 1 //defense goes to zero once equal to 2
-        //     },
-        //     remove() {
-        //         level.noDefenseSetting = 0
-        //     }
-        // },
         {
             description: "4x shielded mobs",
             effect() {
@@ -649,9 +637,11 @@ const level = {
         {
             description: "slow bots",
             effect() {
-                level.isSlowBots = true
-                b.clearPermanentBots();
-                b.respawnBots();
+                requestAnimationFrame(() => {
+                    level.isSlowBots = true
+                    b.clearPermanentBots();
+                    b.respawnBots();
+                });
             },
             remove() {
                 if (level.isSlowBots) {
@@ -684,7 +674,6 @@ const level = {
     is2xAmmo: false,
     isReducedEnergy: false,
     isSlowBots: false,
-    // noDefenseSetting: 0,
     isMobDeathHeal: false,
     isMobHealPlayerDamage: false,
     isNoDamage: false,
@@ -10160,7 +10149,7 @@ const level = {
             ctx.fillRect(-1830, -1150, 2030, 1150)
             ctx.fillRect(-3410, -2150, 495, 1550)
             ctx.fillRect(-2585, -1675, 420, 1125)
-            ctx.fillRect(-1650, -1575, 750, 450)
+            ctx.fillRect(-1650, -1575, 775, 450)
         };
 
         level.setPosToSpawn(-300, -700); //normal spawn
@@ -10205,7 +10194,9 @@ const level = {
         spawn.bodyRect(-500, -300, 100, 100, 0.6); //a nice block near the elevator
 
         spawn.bodyRect(-425, -1375, 400, 225);
-        spawn.mapRect(-925, -1575, 50, 475);
+        // spawn.mapRect(-925, -1575, 50, 475);
+        spawn.mapRect(-925, -1575, 50, 325);
+
         spawn.bodyRect(-1475, -1275, 250, 125);
 
         // spawn.mapRect(-1650, -1575, 600, 50);

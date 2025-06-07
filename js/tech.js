@@ -2195,7 +2195,8 @@ const tech = {
         name: "bot fabrication",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">bot fabrication</a>`,
         descriptionFunction() {
-            return `after you collect ${powerUps.orb.research(2 + Math.floor(0.25 * b.totalBots()))}use them<br>to construct a random <strong class='color-bot'>bot</strong> <em style ="float: right;">(+1 cost every 3 bots)</em>`
+            const cost = 2 + Math.floor(b.totalBots() * 2 / 5)
+            return `after you collect ${powerUps.orb.research(cost)}use them<br>to construct a random <strong class='color-bot'>bot</strong> <em style ="float: right;">(+2 cost every 5 bots)</em>`
         },
         // description: `if you collect ${powerUps.orb.research(2)}use them to build a<br>random <strong class='color-bot'>bot</strong> <em>(+1 cost every 5 bots)</em>`,
         maxCount: 1,
@@ -2776,7 +2777,7 @@ const tech = {
     },
     {
         name: "Pauli exclusion",
-        description: `for <strong>7</strong> seconds after mob <strong>collisions</strong><br>gain <strong class="color-invulnerable">invulnerbility</strong> and <em style="opacity: 0.3;">blocked <strong class='color-f'>energy</strong> regen</em>`,
+        description: `for <strong>7</strong> seconds after mob <strong>collisions</strong><br>gain <strong class="color-invulnerable">invulnerability</strong> and <em style="opacity: 0.3;">blocked <strong class='color-f'>energy</strong> regen</em>`,
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -2795,7 +2796,7 @@ const tech = {
     },
     {
         name: "spin-statistics theorem",
-        description: `for <strong>1.9</strong> seconds out of every <strong>7</strong> seconds<br>gain <strong class="color-invulnerable">invulnerbility</strong> and <em style="opacity: 0.3;">blocked <strong class='color-f'>energy</strong> regen</em>`,
+        description: `for <strong>1.9</strong> seconds out of every <strong>7</strong> seconds<br>gain <strong class="color-invulnerable">invulnerability</strong> and <em style="opacity: 0.3;">blocked <strong class='color-f'>energy</strong> regen</em>`,
         maxCount: 3,
         count: 0,
         frequency: 1,
@@ -2813,7 +2814,7 @@ const tech = {
     },
     {
         name: "fermion",
-        description: `if a mob has <strong>died</strong> in the last <strong>5</strong> seconds<br>gain <strong class="color-invulnerable">invulnerbility</strong> and <em style="opacity: 0.3;">blocked <strong class='color-f'>energy</strong> regen</em>`,
+        description: `if a mob has <strong>died</strong> in the last <strong>5</strong> seconds<br>gain <strong class="color-invulnerable">invulnerability</strong> and <em style="opacity: 0.3;">blocked <strong class='color-f'>energy</strong> regen</em>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -2837,7 +2838,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isMobDeathImmunity || tech.cyclicImmunity || m.collisionImmuneCycles > 30
+            return tech.isMobDeathImmunity || tech.cyclicImmunity || m.collisionImmuneCycles > 30 || tech.isShotgunImmune
         },
         requires: "invincibility tech",
         effect() {
@@ -2930,7 +2931,7 @@ const tech = {
     },
     {
         name: "exothermic process",
-        description: "<strong>1.6x</strong> <strong class='color-d'>damage</strong><br>after mobs <strong>die</strong> <strong>–5</strong> <strong class='color-f'>energy</strong>",
+        description: "<strong>1.6x</strong> <strong class='color-d'>damage</strong><br><strong>–5</strong> <strong class='color-f'>energy</strong> after mobs <strong>die</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -5208,7 +5209,7 @@ const tech = {
     {
         name: "spin-statistics",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Spin%E2%80%93statistics_theorem' class="link">spin-statistics</a>`,
-        description: `after firing the <strong>shotgun</strong> you are <strong class="color-invulnerable">invulnerable</strong><br>shotgun has <strong>0.7x</strong> bullets per ${powerUps.orb.ammo(1)}`,
+        description: `after firing the <strong>shotgun</strong> you are <strong class="color-invulnerable">invulnerable</strong><br>shotgun has <strong>0.6x</strong> bullets per ${powerUps.orb.ammo(1)}`,
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -5224,8 +5225,8 @@ const tech = {
             //cut current ammo by 1/2
             for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                 if (b.guns[i].name === "shotgun") {
-                    b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.7);
-                    b.guns[i].ammoPack *= 0.7
+                    b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.6);
+                    b.guns[i].ammoPack *= 0.6
                     break;
                 }
             }
@@ -5236,8 +5237,8 @@ const tech = {
             if (this.count > 0) {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "shotgun") {
-                        b.guns[i].ammoPack /= 0.7
-                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 0.7);
+                        b.guns[i].ammoPack /= 0.6
+                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 0.6);
                         simulation.updateGunHUD();
                         break;
                     }
@@ -6738,6 +6739,32 @@ const tech = {
         }
     },
     {
+        name: "exponential growth",
+        descriptionFunction() {
+            return `use ${powerUps.orb.research(this.cost)}<br><strong>drones</strong> gain <strong>1.03x</strong> <strong>size</strong> and <strong class='color-d'>damage</strong> per second`
+        },
+        cost: 2,
+        isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return !tech.isForeverDrones && (tech.haveGunCheck("drones") || (m.fieldMode === 4 && simulation.molecularMode === 3))
+        },
+        requires: "drones, not fault tolerance",
+        effect() {
+            tech.isExponential = true
+            for (let i = 0; i < this.cost; i++) {
+                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
+            }
+        },
+        remove() {
+            if (this.count > 0) powerUps.research.changeRerolls(this.cost)
+            tech.isExponential = false
+        }
+    },
+    {
         name: "fault tolerance",
         description: `use ${powerUps.orb.research(2)}to trade your <strong>drone</strong> ${powerUps.orb.gun()}<br>for <strong>5</strong> <strong>drones</strong> that last <strong>forever</strong>`,
         // isGunTech: true,
@@ -6748,9 +6775,9 @@ const tech = {
         frequencyDefault: 1,
         isInstant: true,
         allowed() {
-            return tech.haveGunCheck("drones", false) && !tech.isDroneRespawn && tech.bulletsLastLonger === 1 && !tech.isDronesTravel && (build.isExperimentSelection || powerUps.research.count > 1)
+            return tech.haveGunCheck("drones", false) && !tech.isDroneRespawn && !tech.isExponential && tech.bulletsLastLonger === 1 && !tech.isDronesTravel && (build.isExperimentSelection || powerUps.research.count > 1)
         },
-        requires: "drones, not drone repair, anti-shear topology, autonomous navigation, ",
+        requires: "drones, not exponential growth, drone repair, anti-shear topology, autonomous navigation, ",
         effect() {
             const num = 5
             tech.isForeverDrones += num
@@ -6836,7 +6863,7 @@ const tech = {
     },
     {
         name: "delivery drone",
-        description: "if a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it becomes <strong>larger</strong>, <strong>faster</strong>, and more <strong>durable</strong>",
+        description: "after a <strong>drone</strong> picks up a <strong>power up</strong>,<br>it gains <strong>2.25x</strong> <strong>size</strong> and <strong>50</strong> seconds of <strong>durability</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -8048,9 +8075,9 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (m.fieldMode === 1 || m.fieldMode === 8 || m.fieldMode === 6) && (build.isExperimentSelection || powerUps.research.count > 1)
+            return (m.fieldMode === 1 || m.fieldMode === 8) && (build.isExperimentSelection || powerUps.research.count > 1)
         },
-        requires: "standing wave, pilot wave, time dilation",
+        requires: "standing wave, pilot wave",
         effect() {
             tech.harmonicEnergy = 1.66
             m.setMaxEnergy()
@@ -12640,4 +12667,5 @@ const tech = {
     isTargeting: null,
     isBreakHarpoon: null,
     isBreakHarpoonGain: null,
+    isExponential: null,
 }

@@ -256,14 +256,14 @@ const m = {
             m.jump()
         }
         const moveX = player.velocity.x - m.moverX //account for mover platforms
-        if (input.left) {
+        if (input.left && !input.right) {
             if (moveX > -2) {
                 player.force.x -= m.Fx * 1.5
             } else {
                 player.force.x -= m.Fx
             }
             // }
-        } else if (input.right) {
+        } else if (input.right && !input.left) {
             if (moveX < 2) {
                 player.force.x += m.Fx * 1.5
             } else {
@@ -291,7 +291,8 @@ const m = {
 
         if (input.left) {
             if (player.velocity.x > -m.airSpeedLimit / player.mass / player.mass) player.force.x -= m.FxAir; // move player   left / a
-        } else if (input.right) {
+        }
+        if (input.right) {
             if (player.velocity.x < m.airSpeedLimit / player.mass / player.mass) player.force.x += m.FxAir; //move player  right / d
         }
     },
@@ -938,6 +939,7 @@ const m = {
         }
         if (tech.isEnergyHealth) {
             if (isDefense) dmg *= Math.pow(m.defense(), 0.6)
+            dmg = Math.min(dmg, 0.49 * m.maxHealth)
             m.energy -= dmg //scale damage with heal reduction difficulty
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
@@ -965,6 +967,7 @@ const m = {
             }
         } else {
             if (isDefense) dmg *= m.defense()
+            dmg = Math.min(dmg, 0.4 * m.maxHealth)
             m.health -= dmg;
             if (m.health < 0 || isNaN(m.health)) {
                 if (tech.isDeathAvoid && powerUps.research.count > 0 && !tech.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
@@ -1122,7 +1125,7 @@ const m = {
             ctx.fillStyle = m.fillColor;
             m.walk_cycle += m.flipLegs * m.Vx;
             ctx.save();
-            ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+            ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
             ctx.translate(m.pos.x, m.pos.y);
             m.calcLeg(Math.PI, -3);
             m.drawLeg("#4a4a4a");
@@ -1210,7 +1213,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 // m.calcLeg(Math.PI, -3);
                 // m.drawLeg("#4a4a4a");
@@ -1264,7 +1267,7 @@ const m = {
 
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -1.25);
                 m.drawLeg("#606060");
@@ -1379,7 +1382,7 @@ const m = {
 
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -1.25);
                 m.drawLeg("#606060");
@@ -1468,7 +1471,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
 
@@ -1588,7 +1591,7 @@ const m = {
 
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -1.25);
                 m.drawLeg("#606080");
@@ -1710,7 +1713,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
                 m.drawLeg("#456");
@@ -1813,7 +1816,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(4.2, -3);
                 m.drawLeg("#666");
@@ -1953,7 +1956,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
                 m.drawLeg("#4a4a5a");
@@ -2027,7 +2030,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
                 m.drawLeg("#456");
@@ -2085,7 +2088,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
                 m.drawLeg("#456");
@@ -2197,7 +2200,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
                 m.drawLeg("#eee");
@@ -2272,7 +2275,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -2);
                 m.drawLeg("#4a4a4a");
@@ -2356,7 +2359,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
                 m.drawLeg("#555");
@@ -2400,7 +2403,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 for (let i = 0; i < 16; i++) {
                     m.calcLeg(Math.PI * i / 8, -3 * i / 16)
@@ -2427,7 +2430,7 @@ const m = {
                 m.walk_cycle += m.flipLegs * m.Vx;
 
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
                 m.drawLeg("#4a4a4a");
@@ -2455,7 +2458,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
                 m.drawLeg("#4a4a4a");
@@ -2522,7 +2525,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
                 m.drawLeg("#4a4a4a");
@@ -2580,7 +2583,7 @@ const m = {
 
                 //draw body
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
 
                 m.calcLeg(Math.PI, -3);
@@ -2623,7 +2626,7 @@ const m = {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
                 m.drawLeg("#4a4a4a");
@@ -3660,6 +3663,9 @@ const m = {
         simulation.inGameConsole(`<div class="circle-grid field"></div> &nbsp; <span class='color-var'>m</span>.setField("<strong class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</strong>")<br>input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>MouseRight</span>"]`);
         if (m.fieldMode === 4) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${m.fieldUpgrades[4].modeText()} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↓↘→↓↙←↑↑↓</em>`);
         if (m.fieldMode === 8) simulation.inGameConsole(`Composite<span class='color-symbol'>.</span>add<span class='color-symbol'>(</span>engine.world<span class='color-symbol'>,</span> block<span class='color-symbol'>)</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↓↓→↘↓↙←↓↓</em>`);
+        if (m.fieldMode === 9) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>({</span> x<span class='color-symbol'>:</span> 0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span> 0 <span class='color-symbol'>})</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↓↓↓↑↓</em>`);
+        if (m.fieldMode === 10) simulation.inGameConsole(`Matter<span class='color-symbol'>.</span>Body<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>(</span>player<span class='color-symbol'>, {</span> x<span class='color-symbol'>:</span> 0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span> 0 <span class='color-symbol'>})</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↑↑↓↓</em>`);
+
     },
     fieldEvent: null,
     fieldUpgrades: [
@@ -4240,7 +4246,7 @@ const m = {
                         simulation.molecularMode = simulation.molecularMode < 3 ? simulation.molecularMode + 1 : 0
                         m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
                         const name = `${simulation.molecularMode === 0 ? "<em class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<em>missiles" : simulation.molecularMode === 2 ? "<em class='color-s'>ice IX" : "<em>drones"}</em>`
-                        simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${simulation.molecularMode} // ${name} &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↓↘→↓↙←↑↑↓</em>`);
+                        simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${simulation.molecularMode} // ${name} &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">↓↘→↓↙←↑↑↓</em>`);
                     }
                     // console.log(event.code, m.fieldUpgrades[4].keyLog)
                 }
@@ -5074,7 +5080,7 @@ const m = {
         },
         {
             name: "pilot wave",
-            description: `use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↓→↘↓↙←↓↓</em><br><div class="circle-grid tech"></div>, <div class="circle-grid gun"></div>, and <div class="circle-grid field"></div> have <strong>+3</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second`,
+            description: `use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><div class="circle-grid tech"></div>, <div class="circle-grid gun"></div>, and <div class="circle-grid field"></div> have <strong>+3</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↓→↘↓↙←↓↓</em>`,
             keyLog: [null, null, null, null, null, null, null],
             collider: null,
             fieldMass: 1,
@@ -5091,8 +5097,8 @@ const m = {
 
                 //store event function so it can be found and removed in m.setField()
                 m.fieldEvent = function (event) {
-                    m.fieldUpgrades[4].keyLog.shift() //remove first element
-                    m.fieldUpgrades[4].keyLog.push(event.code) //add new key to end
+                    m.fieldUpgrades[8].keyLog.shift() //remove first element
+                    m.fieldUpgrades[8].keyLog.push(event.code) //add new key to end
                     const patternA = ["ArrowDown", "ArrowDown", "ArrowRight", "ArrowDown", "ArrowLeft", "ArrowDown", "ArrowDown"]
                     const patternB = [input.key.down, input.key.down, input.key.right, input.key.down, input.key.left, input.key.down, input.key.down]
                     const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
@@ -5111,7 +5117,7 @@ const m = {
                         }
                     }
                     if (
-                        (arraysEqual(m.fieldUpgrades[4].keyLog, patternA) || arraysEqual(m.fieldUpgrades[4].keyLog, patternB))
+                        (arraysEqual(m.fieldUpgrades[8].keyLog, patternA) || arraysEqual(m.fieldUpgrades[8].keyLog, patternB))
                         && !Matter.Query.region(map, blockRegion).length
                         && !m.crouch
                     ) {
@@ -5313,6 +5319,22 @@ const m = {
                                         }
                                     }
                                 }
+                                for (let i = 0, len = bullet.length; i < len; ++i) {
+                                    // console.log(bullet[i].speed)
+                                    if (bullet[i].speed < 35 && Vector.magnitude(Vector.sub(bullet[i].position, m.fieldPosition)) < m.fieldRadius && !bullet[i].isNotHoldable) {
+                                        const drainBlock = m.fieldUpgrades[8].drain * speedChange * bullet[i].mass * 0.000095
+                                        if (m.energy > drainBlock) {
+                                            Matter.Body.setVelocity(bullet[i], m.fieldUpgrades[8].collider.velocity); //give block mouse velocity
+                                            Matter.Body.setAngularVelocity(bullet[i], bullet[i].angularVelocity * 0.99)
+                                            // m.fieldUpgrades[8].fieldMass += bullet[i].mass
+                                            //blocks drift towards center of pilot wave
+                                            const sub = Vector.sub(m.fieldPosition, bullet[i].position)
+                                            const push = Vector.mult(Vector.normalise(sub), 0.0001 * bullet[i].mass * Vector.magnitude(sub))
+                                            bullet[i].force.x += push.x
+                                            bullet[i].force.y += push.y - bullet[i].mass * simulation.g //remove gravity effects
+                                        }
+                                    }
+                                }
 
                                 // if (tech.isFreezeMobs) {
                                 //     for (let i = 0, len = mob.length; i < len; ++i) {
@@ -5376,12 +5398,76 @@ const m = {
         },
         {
             name: "wormhole",
-            // setDescription() {
-            //     return `use <strong>${tech.isFreeWormHole ? 2 : 16}</strong> <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+8%</strong> chance to <strong class='color-dup'>duplicate</strong> spawned <strong>power ups</strong><br><strong>8</strong> <strong class='color-f'>energy</strong> per second`
-            // },
-            description: `use <strong>16</strong> <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+8%</strong> chance to <strong class='color-dup'>duplicate</strong> <strong>power ups</strong><br><strong>8</strong> <strong class='color-f'>energy</strong> per second`,
+            description: `use <strong>16</strong> <strong class='color-f'>energy</strong> to <strong>tunnel</strong> through a <strong class='color-worm'>wormhole</strong><br><strong>+8%</strong> chance to <strong class='color-dup'>duplicate</strong> <strong>power ups</strong><br><strong>8</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↓↓↑↓</em>`,
+            keyLog: [null, null, null, null, null],
             drain: 0,
             effect: function () {
+                //store event function so it can be found and removed in m.setField()
+                m.fieldEvent = function (event) {
+                    m.fieldUpgrades[9].keyLog.shift() //remove first element
+                    m.fieldUpgrades[9].keyLog.push(event.code) //add new key to end
+                    const patternA = ["ArrowDown", "ArrowDown", "ArrowDown", "ArrowUp", "ArrowDown"]
+                    const patternB = [input.key.down, input.key.down, input.key.down, input.key.up, input.key.down,]
+                    const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
+                    const drain = tech.isFreeWormHole ? 0.02 : 0.16
+                    if (m.energy > drain && arraysEqual(m.fieldUpgrades[9].keyLog, patternA) || arraysEqual(m.fieldUpgrades[9].keyLog, patternB)) {
+                        m.energy -= drain
+                        const rayResults = Matter.Query.ray(map, m.pos, { x: m.pos.x, y: m.pos.y - 10000 }, 50)
+                        let hasTeleported = false
+                        if (rayResults.length) {
+                            rayResults.sort((a, b) => {
+                                const yA = a.body.position.y;
+                                const yB = b.body.position.y;
+                                return yB - yA;
+                            });
+
+                            for (let i = 0, len = Math.min(10, rayResults.length); i < len; i++) {
+                                const h = rayResults[i].body.bounds.min.y
+                                if (Matter.Query.ray(map, { x: m.pos.x, y: h }, { x: m.pos.x, y: h - 150 }, 50).length === 0) {
+                                    simulation.translatePlayerAndCamera({ x: m.pos.x, y: h - 90 }) //too jerky 
+                                    // Matter.Body.setPosition(player, { x: m.pos.x, y: h - 90 });
+                                    requestAnimationFrame(() => {
+                                        Matter.Body.setVelocity(player, { x: 0, y: 0 });
+                                        // requestAnimationFrame(() => { Matter.Body.setVelocity(player, { x: 0, y: 0 }); });
+                                    });
+
+                                    // simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>({</span> x<span class='color-symbol'>:</span> 0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span> 0 <span class='color-symbol'>})</span> &nbsp; <em style="font-family:monospace;font-size:1rem;color:#055;">//↓↓↓↑↓</em>`);
+                                    hasTeleported = true
+                                    break
+                                }
+                            }
+                        } else {
+                            const rayResultsDown = Matter.Query.ray(map, m.pos, { x: m.pos.x, y: m.pos.y + 10000 }, 50)
+                            if (rayResultsDown.length) {
+                                rayResultsDown.sort((a, b) => {
+                                    const yA = a.body.position.y;
+                                    const yB = b.body.position.y;
+                                    return yB - yA;
+                                });
+                                for (let i = 0, len = Math.min(10, rayResultsDown.length); i < len; i++) {
+                                    const h = rayResultsDown[i].body.bounds.min.y
+                                    if (Matter.Query.ray(map, { x: m.pos.x, y: h }, { x: m.pos.x, y: h - 150 }, 50).length === 0) {
+                                        simulation.translatePlayerAndCamera({ x: m.pos.x, y: h - 90 }) //too jerky 
+                                        Matter.Body.setVelocity(player, { x: 0, y: 0 });
+                                        // simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>({</span> x<span class='color-symbol'>:</span> 0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span> 0 <span class='color-symbol'>})</span> &nbsp; <em style ="font-family: monospace;font-size:1rem;color:#055;">//↓↓↓↑↓</em>`);
+                                        hasTeleported = true
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        if (!hasTeleported) { //show failure as a short teleport
+                            simulation.translatePlayerAndCamera({ x: m.pos.x, y: player.position.y - 20 }) //too jerky 
+                            // Matter.Body.setPosition(player, { x: m.pos.x, y: m.pos.y - 20 });
+                            // Matter.Body.setVelocity(player, { x: 0, y: 0 });
+                        }
+                    }
+                }
+                window.addEventListener("keydown", m.fieldEvent);
+
+
+
+
                 m.fieldMeterColor = "#bbf" //"#0c5"
                 m.eyeFillColor = m.fieldMeterColor
 
@@ -5948,8 +6034,100 @@ const m = {
         },
         {
             name: "grappling hook",
-            description: `use <strong class='color-f'>energy</strong> to fire a hook that <strong>pulls</strong> you<br><strong>0.5x</strong> <strong class='color-defense'>damage taken</strong><br><strong>9</strong> <strong class='color-f'>energy</strong> per second`,
+            description: `use <strong class='color-f'>energy</strong> to fire a hook that <strong>pulls</strong> you<br><strong>0.5x</strong> <strong class='color-defense'>damage taken</strong><br><strong>9</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↑↑↓↓</em>`,
+            keyLog: [null, null, null, null],
             effect: () => {
+                //store event function so it can be found and removed in m.setField()
+                m.fieldEvent = function (event) {
+                    m.fieldUpgrades[10].keyLog.shift() //remove first element
+                    m.fieldUpgrades[10].keyLog.push(event.code) //add new key to end
+                    const patternA = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown"]
+                    const patternB = [input.key.up, input.key.up, input.key.down, input.key.down]
+                    const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
+                    const drain = 0.13
+                    if (m.energy > drain && arraysEqual(m.fieldUpgrades[10].keyLog, patternA) || arraysEqual(m.fieldUpgrades[10].keyLog, patternB)) {
+                        m.energy -= drain
+                        //check if at least 500 above the ground
+                        // const rayResults = Matter.Query.ray(map, m.pos, { x: m.pos.x, y: m.pos.y + 5000 }, 50)
+
+                        const combinedElements = [...map, ...body];
+                        const rayResults = Matter.Query.ray(combinedElements, m.pos, { x: m.pos.x, y: m.pos.y + 5000 }, 40);
+
+                        if (rayResults.length) {
+                            rayResults.sort((a, b) => {
+                                const yA = a.body.position.y;
+                                const yB = b.body.position.y;
+                                return yA - yB;
+                            });
+                            const h = rayResults[0].body.bounds.min.y
+                            if (h - m.pos.y > 400) {
+                                const hLast = player.position.y
+                                const range = 0.05 * Math.min(h - hLast, 1500)
+                                const range2 = Math.min(h - hLast, 1500) * Math.min(h - hLast, 1500)
+                                simulation.ephemera.push({
+                                    name: "ground slam",
+                                    count: 0, //cycles before it self removes
+                                    do() {
+                                        this.count++
+                                        if (this.count > 6) simulation.removeEphemera(this.name)
+
+                                        ctx.fillStyle = 'rgba(255,255,255,0.5)'
+                                        ctx.beginPath();
+
+                                        ctx.arc(m.pos.x, m.pos.y, range * this.count, 0, 2 * Math.PI);
+                                        ctx.lineWidth = 10;
+                                        ctx.fill();
+
+                                        ctx.beginPath();
+                                        ctx.moveTo(m.pos.x, hLast);
+                                        ctx.lineTo(m.pos.x, h - 90);
+                                        ctx.strokeStyle = 'rgba(255,255,255,0.15)'
+                                        ctx.lineWidth = 40;
+                                        ctx.stroke();
+                                    },
+                                })
+                                Matter.Body.setPosition(player, { x: m.pos.x, y: h - 90 });
+                                Matter.Body.setVelocity(player, { x: player.velocity.x, y: 0 });
+                                input.field = false //force release grapple
+                                const immunity = Math.min(Math.floor(0.06 * (h - hLast)), 180)
+                                if (m.immuneCycle < m.cycle + immunity) m.immuneCycle = m.cycle + immunity; //player is immune to damage for 30 cycles
+
+                                m.doCrouch()
+                                m.yOff = m.yOffWhen.jump;
+                                m.hardLandCD = m.cycle + m.hardLandCDScale * Math.min(2 * m.hardLanding / 6.5 - 6, 40)
+
+                                //push away blocks, mobs
+                                const magX = 0.0015 * range
+                                const magY = 0.001 * range
+                                for (let i = 0, len = body.length; i < len; ++i) {
+                                    if (Vector.magnitudeSquared(Vector.sub(body[i].position, player.position)) < range2) {
+                                        body[i].force.x += magX * body[i].mass * (body[i].position.x > player.position.x ? 1 : -1)
+                                        body[i].force.y -= magY * body[i].mass
+                                    }
+                                }
+                                for (let i = 0, len = mob.length; i < len; ++i) {
+                                    if (Vector.magnitudeSquared(Vector.sub(mob[i].position, player.position)) < range2) {
+                                        mob[i].force.x += magX * mob[i].mass * (mob[i].position.x > player.position.x ? 1 : -1)
+                                        mob[i].force.y -= magY * mob[i].mass
+                                    }
+                                }
+                                //pull power ups in
+                                for (let i = 0, len = powerUp.length; i < len; ++i) {
+                                    if (Vector.magnitudeSquared(Vector.sub(powerUp[i].position, player.position)) < range2) {
+                                        powerUp[i].force.x -= magX * powerUp[i].mass * (powerUp[i].position.x > player.position.x ? 1 : -1)
+                                        powerUp[i].force.y += magY * powerUp[i].mass
+                                    }
+                                }
+                                // simulation.inGameConsole(`Matter<span class='color-symbol'>.</span>Body<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>(</span>player<span class='color-symbol'>, {</span> x<span class='color-symbol'>:</span> 0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span> 0 <span class='color-symbol'>})</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↑↑↓↓</em>`);
+                            }
+                        }
+                        //  AoE stun mobs?
+                        //  damage mobs?
+                    }
+                }
+                window.addEventListener("keydown", m.fieldEvent);
+
+
                 m.fieldFire = true;
                 // m.holdingMassScale = 0.01; //can hold heavier blocks with lower cost to jumping
                 // m.fieldMeterColor = "#789"//"#456"
@@ -5965,6 +6143,7 @@ const m = {
                     } else if (input.field) {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                         if (m.fieldCDcycle < m.cycle) {
+                            if (m.fieldCDcycle < m.cycle + 15) m.fieldCDcycle = m.cycle + 15
                             if (m.energy > 0.02) m.energy -= 0.02
                             b.grapple({ x: m.pos.x + 40 * Math.cos(m.angle), y: m.pos.y + 40 * Math.sin(m.angle) }, m.angle)
                             if (m.fieldCDcycle < m.cycle + 20) m.fieldCDcycle = m.cycle + 20
@@ -6213,7 +6392,7 @@ const m = {
 
             m.draw = () => { //just draw the circle
                 ctx.save();
-                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : 0.3 + 0.4 * Math.random()
+                ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(player.position.x, player.position.y);
                 ctx.rotate(player.angle);
 
