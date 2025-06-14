@@ -7018,10 +7018,7 @@ const b = {
                         }
                         //draw little dots near the edge of range
                         for (let i = 0, len = 10 + 25 * this.charge; i < len; i++) {
-                            const unit = Vector.rotate({
-                                x: 1,
-                                y: 0
-                            }, 6.28 * Math.random())
+                            const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
                             const where = Vector.add(m.pos, Vector.mult(unit, range * (0.6 + 0.3 * Math.random())))
                             simulation.drawList.push({
                                 x: where.x,

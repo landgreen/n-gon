@@ -28,19 +28,19 @@ const level = {
             // level.levelsCleared = 11
             // level.updateDifficulty()
             // tech.giveTech("performance")
-
-            // m.maxEnergy = m.energy = 10000000
+            // m.coyoteCycles = 120
             // tech.isRerollDamage = true
             // powerUps.research.changeRerolls(99999)
-            // m.immuneCycle = Infinity //you can't take damage
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(8) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(5) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
-            // m.maxHealth = m.health = 10000000
+            // m.maxHealth = m.health = 1//10000000
             // m.displayHealth();
+            // m.immuneCycle = Infinity //you can't take damage
+            // m.maxEnergy = m.energy = 10000000
             // powerUps.research.count = 3
             // tech.isHookWire = true
             // m.energy = 0
@@ -56,10 +56,12 @@ const level = {
             // requestAnimationFrame(() => { tech.giveTech("rebar") });
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("exponential growth")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("nitinol")
-            // for (let i = 0; i < 1; i++) tech.giveTech("demineralization")
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("irradiated drones") });
+            // for (let i = 0; i < 1; ++i) tech.giveTech("sound-bot")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("bremsstrahlung")
+            // for (let i = 0; i < 1; i++) tech.giveTech("nail-bot")
+            // for (let i = 0; i < 1; i++) tech.giveTech("boom-bot")
+            // for (let i = 0; i < 1; i++) tech.giveTech("laser-bot")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("aerostat") });
             // requestAnimationFrame(() => { level.blurryChoices = true });
             // m.lastKillCycle = m.cycle
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(450, -50, "field");
@@ -70,7 +72,7 @@ const level = {
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
-            // for (let i = 0; i < 1; i++) spawn.starter(1100 + 100 * i, -200, 500)
+            // for (let i = 0; i < 1; i++) spawn.striker(1300 + 100 * i, -200)
             // for (let i = 0; i < 1; i++) spawn.conductorBoss(1100 + 100 * i, -100 - i * 100)
             // for (let i = 0; i < 3; i++) spawn.freezer(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
@@ -8623,7 +8625,7 @@ const level = {
             const bossSpawn = [{ x: -1900, y: -1825 }, { x: 2025, y: -1825 }, { x: 950, y: -1825 }, { x: -850, y: -1825 }]
             const where = bossSpawn[Math.floor(Math.random() * bossSpawn.length)]
             if (level.levelsCleared > 7) { //T3
-                spawn.randomLevelBoss(where.x, where.y, ["historyBoss", "laserLayerBoss"]);
+                spawn.randomLevelBoss(where.x, where.y, ["historyBoss", "laserLayerBoss", "conductorBoss"]);
             } else if (level.levelsCleared > 3) { //T2
                 spawn.randomLevelBoss(where.x, where.y, ["blockBoss", "pulsarBoss", "spawnerBossCulture"]);
             } else {  //T1

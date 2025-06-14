@@ -380,7 +380,7 @@ const powerUps = {
  tech.giveTech("name")              //replace "name" with tech name
  m.setField("name")                 //standing wave  perfect diamagnetism  negative mass  molecular assembler  plasma torch  time dilation  metamaterial cloaking  pilot wave  wormhole  grappling hook
  b.giveGuns("name")                 //nail gun  shotgun  super balls  wave  missiles  grenades  spores  drones  foam  harpoon  mine  laser
- m.damageDone *= 2                   //2x damage
+ m.damageDone *= 2                  //2x damage
  m.immuneCycle = Infinity           //immune to damage            
  m.coyoteCycles = Infinity          //air jumps
  m.energy = 0                       //set energy

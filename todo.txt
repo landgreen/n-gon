@@ -1,34 +1,34 @@
 ******************************************************** NEXT PATCH **************************************************
 
-player damage taken from a single hit is capped at 0.44x max health
-  calculated after damage reduction effects
-damage immunity animation has a more noticeable low frame rate look
-  after choosing a power up you get 15->5 cycles of immunity (about 0.1 seconds)
-increased the size of the tech, field, gun orb icons in titles
+conductorBoss - every few seconds damages player if they are standing on the map 
+~1.2x density (health and collision damage) for all tier 3 mobs
+~1.3x density (health and collision damage) for all tier 4 mobs
 
-tech: exponential growth - drones  gain 1.03x damage and size every second
-  drones spawned from path integration now inherit size and lifespan
-bot fabrication (+1 cost per 3 bots)->(+2 cost per 5 bots)
+secret combos for
+  standing wave
+  perfect diamagnetism 
+  plasma torch
+  time dilation
+tech retrocausality removed
 
-refire another grappling hook while the original is retracting
-grappling hook
-  secret code
-wormhole secret code
-pilot wave effect extended to bullets
+pilot wave can fire bullets while active
+pilot wave no longer drags bots
+
+nitinol tech: acoustic levitation - jump on the air for 2 seconds after leaving the ground
+  0.7x damage taken
+aerostat 2->2.5x damage, but only activates after being in the air for at least 1 second
+  no longer a field tech
+bot fabrication now shows up even when you have no research
+
 
 bug fixes
-  pressing left and right no longer makes you go left
-  potential soft lock on highrise level
-  seeker fade out color works better for unusually color backgrounds
-  constraints now update before a new level loads
-    to make sure the 0 duplication effect applies to level based power ups
-  keyword "print" font heights weren't aligned by a few pixels
-    
+
 
 ******************************************************** BUGS ********************************************************
 
 
-dps side bar is too long sometimes
+dmg side bar is too long sometimes
+  maybe rework damage indications
 
 graphical bug - player can become crouched while not touching the ground if they exit the ground while crouched
 
@@ -40,28 +40,49 @@ n-gon long term goals
   more secrets
   more indication of when things occur
 
-secret codes
-  time dilation - rewind player position
-    code: buttons in a circle
-    replace retrocausality tech?
-  perfect diamagnetism - move the field forward until it hits something
-    code: L R L R down
-  negative mass -  pull in blocks and then push them away
-    tech?
-  plasma - switch between different plasma modes:  normal, ball, extruder
-    have to remove tech for ball and extruder?
-    unlock this after you get plasma ball or extruder to switch between them?
-  metamaterial cloaking  - ?
-  standing wave - ?
+constraint - periodic darkness
+  random delay and duration of darkness?
+  trigger after getting a power up?
 
-!conductorBoss
-  draw thin outline on all or just nearby map elements
-  on ground below player and on the boss draw timer as growing line width
+tech:  - repeat all _____ effects a second time
+  on remove/eject tech
+  on mob death
+  on getting hit
+
+wormhole tech:  - random bullets fire from both wormholes
+
+secret codes
+  negative mass
+    pull in blocks and then push them away
+  metamaterial cloaking
+    teleport behind the mob you are looking at?
+    convert __ health into a boost power up?
+
+
+add sounds this summer?  see ***sound*** section below
+  Web Audio API
+  AI sound generation survey (June 2025)
+    https://elevenlabs.io/sound-effects
+      sound effects, not too expensive?  $11/month?
+      seems able ot generate violent sounds, like shotgun
+      seems to work well, but can't do music
+    https://stableaudio.com/generate
+      makes 3 minute songs, no singing
+      best songs?
+    https://suno.com/
+      3min+ songs with lyrics
+      average songs
+    https://www.udio.com/create
+      advanced features
+      average songs
+    
+
+
+
+
+tech:   -  scale max energy with current health
 
 power up: entanglement - make it spawn from killing a mob that kinda looks like the player?
-
-gun tech:   - individual drones and spore damage/size grows by 1.2x every second
-  size growth needs to stack with delivery drone synergistically
 
 tech:  - limit the total number of tech 
   skin tech or field tech
@@ -87,8 +108,6 @@ tech:  - nonrefundable tech that gives you 2 tech that each have minor negative 
     you can't heal
   positive effects
     benefit after removing the negative tech
-
-constraint: you can't heal
 
 mob that does very fast tiny little hops, like a little bunny
   it has extra gravity so it can jump faster
@@ -134,9 +153,6 @@ look into locking mouse into the browser again
   full screen
 
 mob status: confused - I could rotate the velocity that mobs have gently over 1-2 seconds. that might work.
-
-allow multiple stacks of nitinol
-  until the player is just jumping crazy
 
 JUNK: Tracepath (literally traces M's path for a bit, sort of like snakeBoss)
 
@@ -1321,6 +1337,12 @@ add sounds
     // tone(396)
     // tone(445.50)
     // tone(495)
+
+Freesound Freesound - A collaborative database of Creative Commons licensed sounds. Has a huge collection with specific game-sound tags game-sound for easy filtering.
+OpenGameArt.org Library of Game Sounds | OpenGameArt.org - Specifically focused on game assets with music and sound effects for creating video games Library of Game Sounds | OpenGameArt.org. They can even generate credits files for attribution.
+Pixabay Download Free Game Sound Effects - Royalty-Free Video Game Sounds | Sound Library - Pixabay - Offers royalty-free video game sound effects Download Free Game Sound Effects - Royalty-Free Video Game Sounds | Sound Library - Pixabay that are easy to use.
+Mixkit Download Free Game Sound Effects | Mixkit - Has 36 free game sound effects Download Free Game Sound Effects | Mixkit including arcade games sounds to sporting game samples Download Free Game Sound Effects | Mixkit.
+Zapsplat Game Developer Sounds | Download FREE Game Developer sound effects | Zapsplat - Thousands of free sounds for game developers, including action tones, win, bonus, level up, coins Game Developer Sounds | Download FREE Game Developer sound effects | Zapsplat.
 
 ******************************************************** IMAGES ********************************************************
 

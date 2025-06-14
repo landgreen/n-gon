@@ -27,7 +27,7 @@ const spawn = {
         [],
         ["snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss"],
         ["powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture"],
-        ["powerUpBoss", "laserLayerBoss", "historyBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss"],
+        ["powerUpBoss", "laserLayerBoss", "historyBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss", "conductorBoss"],
         ["stagBeetleBoss", "kingSnakeBoss", "fabricatorBoss", "pentaLaserBoss"]
         //finalBoss is T5
     ],
@@ -38,7 +38,7 @@ const spawn = {
         "powerUpBoss", "powerUpBossBaby", "streamBoss", "pulsarBoss", "spawnerBossCulture", "grenadierBoss", "growBossCulture", "blinkBoss",
         "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss", "shieldingBoss",
         "timeSkipBoss", "dragonFlyBoss", "beetleBoss", "sneakBoss", "mantisBoss", "laserLayerBoss",
-        "snakeBoss"
+        "snakeBoss", "conductorBoss"
     ],
     mobDmgDoneByTier: [0.35, 0.7, 2.1, 3.5, 4.9, 6.3],
     dmgToPlayerByLevelsCleared() {
@@ -2093,7 +2093,7 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "rgb(33, 174, 160)");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.002); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0025); //normal is 0.001
         me.accelMag = 0.05;
         me.g = 0.0032; //required if using this.gravity
         me.frictionAir = 0.01;
@@ -2187,7 +2187,7 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "rgb(50,170,200)");
         let me = mob[mob.length - 1];
         me.tier = 3
-        Matter.Body.setDensity(me, 0.0008); //normal is 0.001
+        Matter.Body.setDensity(me, 0.00096); //normal is 0.001
         me.accelMag = 0.05;
         me.g = 0.0032; //required if using this.gravity
         me.frictionAir = 0.01;
@@ -2416,7 +2416,7 @@ const spawn = {
     bigSucker(x, y, radius = 10) {
         mobs.spawn(x, y, 9, radius, "#fff");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.002); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0025); //normal is 0.001
         me.tier = 4
         me.isVerticesChange = true
         me.big = false; //required for grow
@@ -3318,7 +3318,7 @@ const spawn = {
         mobs.spawn(x, y, 7, radius, color);
         let me = mob[mob.length - 1];
         me.tier = 3
-        Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0036); //extra dense //normal is 0.001 //makes effective life much larger
         // me.damageReduction = 0.04 
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
@@ -3417,7 +3417,7 @@ const spawn = {
         mobs.spawn(x, y, 14, radius, color);
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0028); //extra dense //normal is 0.001 //makes effective life much larger
         // me.damageReduction = 0.04 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         // Matter.Body.rotate(me, Math.random() * Math.PI * 2);
@@ -4904,6 +4904,7 @@ const spawn = {
             me.vertices[i].y = me.position.y + spike.y
         }
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
+        Matter.Body.setDensity(me, 0.0014); //normal is 0.001
         me.accelMag = 0.0002 * simulation.accelScale;
         spawn.shield(me, x, y);
 
@@ -5303,7 +5304,7 @@ const spawn = {
         me.accelMag = 0.00025 * simulation.accelScale;
         me.memory = 360;
         me.laserInterval = 240
-        Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0038); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y);
         me.do = function () {
             if (this.seePlayer.recall) this.healthBar4()
@@ -6930,6 +6931,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.tier = 3
         Matter.Body.rotate(me, 2 * Math.PI * Math.random());
+        Matter.Body.setDensity(me, 0.0012); //normal is 0.001
         me.accelMag = 0.0007 * simulation.accelScale;
         me.frictionStatic = 0;
         me.friction = 0;
@@ -7046,7 +7048,7 @@ const spawn = {
         mobs.spawn(x, y, sides, radius, "rgb(100, 100, 100)");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.002); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0025); //normal is 0.001
         me.accelMag = 0.00075 * simulation.accelScale;
         me.frictionStatic = 0;
         me.friction = 0;
@@ -7171,7 +7173,7 @@ const spawn = {
         mobs.spawn(x, y, sides, radius, "rgb(255, 255, 255)");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.0035); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0045); //normal is 0.001
         me.accelMag = 0.00135
         me.frictionStatic = 0;
         me.friction = 0;
@@ -7482,7 +7484,7 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "transparent");
         let me = mob[mob.length - 1];
         me.tier = 3
-        // Matter.Body.setDensity(me, 0.001); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0012); //normal is 0.001 //makes effective life much larger
         me.accelMag = 0.001 * Math.sqrt(simulation.accelScale);
         me.frictionAir = 0.01;
         me.g = 0.0002; //required if using this.gravity
@@ -7561,7 +7563,7 @@ const spawn = {
         mobs.spawn(x, y, 7, radius, "transparent");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.001); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0013); //normal is 0.001
         me.accelMag = 0.001
         me.frictionAir = 0.01;
         me.g = 0.0002; //required if using this.gravity
@@ -7684,7 +7686,7 @@ const spawn = {
         me.seeAtDistance2 = 500000;
         me.accelMag = 0.0002 + 0.0001 * simulation.accelScale;
         if (map.length) me.searchTarget = map[Math.floor(Math.random() * (map.length - 1))].position; //required for search
-        Matter.Body.setDensity(me, 0.00015); //normal is 0.001
+        Matter.Body.setDensity(me, 0.00018); //normal is 0.001
         me.damageReduction = 0.1
         me.stroke = "transparent";
         me.alpha = 1;
@@ -7993,6 +7995,7 @@ const spawn = {
         me.tier = 3
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         me.isVerticesChange = true
+        Matter.Body.setDensity(me, 0.0012); //normal is 0.001
         // Matter.Body.rotate(me, Math.PI)
         me.stroke = "transparent"; //used for drawSneaker
         me.alpha = 1; //used in drawSneaker
@@ -8142,6 +8145,7 @@ const spawn = {
         mobs.spawn(x, y, 3, radius, "rgb(150,150,255)");
         let me = mob[mob.length - 1];
         me.tier = 3
+        Matter.Body.setDensity(me, 0.0012); //normal is 0.001
         me.accelMag = 0.0001
         me.fireFreq = 330
         me.frictionStatic = 0;
@@ -8202,7 +8206,7 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "rgb(150,150,255)");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.003); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0038); //normal is 0.001
         me.accelMag = 0.001
         me.fireFreq = 240 + Math.floor(30 * Math.random())
         me.frictionStatic = 0;
@@ -8532,6 +8536,7 @@ const spawn = {
         me.isVerticesChange = true
         // Matter.Body.rotate(me, Math.PI)
         // me.stroke = "transparent"; //used for drawSneaker
+        Matter.Body.setDensity(me, 0.0012); //normal is 0.001
         me.frictionStatic = 0;
         me.friction = 0;
         me.memory = 60 //140;
@@ -8604,7 +8609,7 @@ const spawn = {
         mobs.spawn(x, y, 3, radius, "transparent"); //rgb(255,100,200)
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.0035); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0045); //normal is 0.001
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         me.isVerticesChange = true
         me.stroke = "transparent"; //used for drawSneaker
@@ -8914,33 +8919,20 @@ const spawn = {
         };
     },
     conductorBoss(x, y, radius = 100) {
-        mobs.spawn(x, y, 4, radius, "rgb(255, 255, 255)");
+        mobs.spawn(x, y, 4, radius, "rgb(68, 68, 68)");
         let me = mob[mob.length - 1];
         me.tier = 3
-        // setTimeout(() => { //fix mob in place, but allow rotation
-        //     me.constraint = Constraint.create({
-        //         pointA: {
-        //             x: me.position.x,
-        //             y: me.position.y
-        //         },
-        //         bodyB: me,
-        //         stiffness: 0.0001,
-        //         damping: 1
-        //     });
-        //     Composite.add(engine.world, me.constraint);
-        // }, 2000); //add in a delay in case the level gets flipped left right
-
         me.isBoss = true;
-        Matter.Body.setDensity(me, 0.0045); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0045); //normal is 0.001 //makes effective life much larger
         me.damageReduction = 0.39
+        me.stroke = color.map;
+        me.fill = color.map;
         me.cycle = 0
-        me.maxCycles = 140;
-        me.frictionStatic = 0;
-        me.friction = 0;
+        me.maxCycles = 300 - 15 * simulation.difficultyMode;
+        me.frictionStatic = 1;
+        me.friction = 1;
         me.frictionAir = 1;
-        // me.homePosition = { x: x, y: y };
-        // spawn.shield(me, x, y, 1);
-        // spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
+        me.g = 0.0032; //required if using this.gravity              
 
         me.onDeath = function () {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -8951,53 +8943,39 @@ const spawn = {
         me.lastMapPLayerOn = null
         me.do = function () {
             this.cycle++
-            if (this.seePlayer.recall) this.healthBar1()
+            this.gravity();
+            if (this.seePlayer.recall) this.healthBar3()
             // Matter.Body.rotate(this, 0.003) //gently spin around
             this.checkStatus();
-            if (this.isStunned) this.cycle = 0
-
-            // draw cycle timer
-            const size = 50
-            // ctx.lineJoin = "miter";
-            ctx.beginPath();
-            let vertices
-
-            //find what player is touching
-            const touching = Matter.Query.collides(player, map)
-            if (touching.length) {
-                this.lastMapPLayerOn = touching[0].bodyB
-                for (let i = 0; i < touching.length; i++) {
-                    vertices = touching[i].bodyB.vertices
-                    ctx.moveTo(vertices[0].x, vertices[0].y);
-                    for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
-                    ctx.lineTo(vertices[0].x, vertices[0].y);
-                }
-            } else if (this.lastMapPLayerOn) {
-                vertices = this.lastMapPLayerOn.vertices
-                ctx.moveTo(vertices[0].x, vertices[0].y);
-                for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
-                ctx.lineTo(vertices[0].x, vertices[0].y);
+            if (this.isStunned) {
+                this.cycle = 0
+            } else {
+                simulation.ephemera.push({ //using ephemera to overwrite the map background color
+                    name: "drawMap",
+                    opacity: Math.pow(this.cycle / this.maxCycles, 3),
+                    do() {
+                        simulation.removeEphemera(this.name)
+                        ctx.fillStyle = `rgba(255,50,100,${this.opacity})`;
+                        ctx.fill(simulation.draw.mapPath);
+                    },
+                })
             }
-
-
-            // ctx.beginPath();
-            vertices = this.vertices;
-            ctx.moveTo(vertices[0].x, vertices[0].y);
-            for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
-            ctx.lineTo(vertices[0].x, vertices[0].y);
-            // ctx.closePath()
-            ctx.strokeStyle = `rgba(100,0,255,${0.13 + 0.45 * Math.random()})`
-            ctx.lineWidth = size * (this.cycle / this.maxCycles)
-            ctx.stroke();
-            ctx.strokeStyle = "rgba(100, 0, 255, 0.1)"
-            ctx.lineWidth = size
-            ctx.stroke();
-            // ctx.lineJoin = "round";
             if (this.cycle > this.maxCycles) {
                 this.cycle = 0
-                if (touching.length) {
+                const touching = Matter.Query.collides(player, map)
+                if (Matter.Query.collides(player, map).length && m.immuneCycle < m.cycle) {
                     m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage
-                    m.takeDamage(0.045 * this.damageScale());
+                    const dmg = 0.03 * this.damageScale()
+                    m.takeDamage(dmg);
+
+                    const where = touching[0].supports[0]
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: where.x,
+                        y: where.y,
+                        radius: Math.sqrt(dmg) * 200,
+                        color: simulation.mobDmgColor,
+                        time: simulation.drawTime
+                    });
                 }
             }
         };

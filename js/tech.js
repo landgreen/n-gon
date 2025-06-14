@@ -275,7 +275,7 @@ const tech = {
         if (tech.isPowerUpDamage) dmg *= 1 + 0.07 * powerUp.length
         if (tech.isDamageCooldown) dmg *= m.lastKillCycle + tech.isDamageCooldownTime > m.cycle ? 0.4 : 4
         if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.9
-        if (tech.offGroundDamage && !m.onGround) dmg *= tech.offGroundDamage
+        if (tech.isOffGroundDamage && !m.onGround && m.cycle - m.lastOnGroundCycle > 65) dmg *= 2.5
         if (tech.isDilate) dmg *= 1.9 + 1.1 * Math.sin(m.cycle * 0.01)
         if (tech.isGunChoice) dmg *= 1 + 0.4 * b.inventory.length
         if (powerUps.boost.endCycle > simulation.cycle) dmg *= 1 + powerUps.boost.damage
@@ -383,11 +383,37 @@ const tech = {
         },
         requires: "not skinned",
         effect() {
+            tech.isNitinol = true
             m.skin.mech();
             m.setMovement()
         },
         remove() {
+            tech.isNitinol = false
             if (this.count) m.resetSkin();
+        }
+    },
+    {
+        name: "acoustic levitation",
+        description: "<strong>0.7x</strong> <strong class='color-defense'>damage taken</strong><br><strong>+2</strong> seconds of <strong>coyote time</strong> <em style ='float: right;'>(jumping after falling)</em>",
+        maxCount: 3,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return tech.isNitinol
+        },
+        requires: "nitinol",
+        effect() {
+            tech.isCoyote = true
+            m.coyoteCycles += 120 //adjust this 120 value in mech() skin
+            m.damageReduction *= 0.7
+        },
+        remove() {
+            tech.isCoyote = false
+            if (this.count > 0) {
+                m.damageReduction /= 0.7
+                if (tech.isNitinol) m.skin.mech(); //resets m.coyoteCycles
+            }
         }
     },
     {
@@ -647,7 +673,7 @@ const tech = {
         frequencyDefault: 1,
         isSkin: true,
         allowed() {
-            return !m.isAltSkin && m.fieldUpgrades[m.fieldMode].name !== "standing wave" && !tech.isRewindField && !tech.isEnergyHealth
+            return !m.isAltSkin && m.fieldUpgrades[m.fieldMode].name !== "standing wave" && !tech.isEnergyHealth
         },
         requires: "not skinned, standing wave, max energy reduction, retrocausality, mass-energy",
         effect() {
@@ -662,16 +688,16 @@ const tech = {
     {
         name: "causality bots",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Causality' class="link">causality bots</a>`,
-        description: "when you <strong class='color-rewind'>rewind</strong> build scrap <strong class='color-bot'>bots</strong><br>that protect you for about <strong>9</strong> seconds",
+        description: "when CPT <strong>rewinds</strong> build scrap <strong class='color-bot'>bots</strong><br>that protect you for about <strong>9</strong> seconds",
         maxCount: 3,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         isBotTech: true,
         allowed() {
-            return tech.isRewindAvoidDeath || tech.isRewindField
+            return tech.isRewindAvoidDeath
         },
-        requires: "CPT, retrocausality",
+        requires: "CPT",
         effect() {
             tech.isRewindBot++;
         },
@@ -682,15 +708,15 @@ const tech = {
     {
         name: "causality bombs",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Causality' class="link">causality bombs</a>`,
-        description: "when you <strong class='color-rewind'>rewind</strong> drop several <strong>grenades</strong>", //<br>become <strong>invulnerable</strong> until they <strong class='color-e'>explode</strong>
+        description: "when CPT <strong>rewinds</strong> drop several <strong>grenades</strong>", //<br>become <strong>invulnerable</strong> until they <strong class='color-e'>explode</strong>
         maxCount: 1,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isRewindAvoidDeath || tech.isRewindField
+            return tech.isRewindAvoidDeath
         },
-        requires: "CPT, retrocausality",
+        requires: "CPT",
         effect() {
             tech.isRewindGrenade = true;
         },
@@ -1196,6 +1222,28 @@ const tech = {
         },
         remove() {
             tech.restDamage = 1;
+        }
+    },
+    {
+        name: "aerostat",
+        descriptionFunction() {
+            const damage = (tech.isOffGroundDamage && !m.onGround && m.cycle - m.lastOnGroundCycle > 65) ? 2.5 : 1
+            const infoText = this.count ? `<em style ="float: right;">(${damage.toFixed(0)}x)</em>` : ""
+            return `<strong>2.5x</strong> <strong class='color-d'>damage</strong> while <strong>off</strong> the <strong>ground</strong><br>for more than <strong>1</strong> second${infoText}`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return true
+        },
+        requires: "",
+        effect() {
+            tech.isOffGroundDamage = true
+        },
+        remove() {
+            tech.isOffGroundDamage = false
         }
     },
     {
@@ -2201,13 +2249,11 @@ const tech = {
         // description: `if you collect ${powerUps.orb.research(2)}use them to build a<br>random <strong class='color-bot'>bot</strong> <em>(+1 cost every 5 bots)</em>`,
         maxCount: 1,
         count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
+        frequency: 1,
+        frequencyDefault: 1,
         isBotTech: true,
-        allowed() {
-            return powerUps.research.count > 1 || build.isExperimentSelection
-        },
-        requires: "at least 2 research",
+        allowed() { return true },
+        requires: "",
         effect() {
             tech.isRerollBots = true;
             powerUps.research.changeRerolls(0)
@@ -2450,9 +2496,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return !tech.isRewindField
+            return true
         },
-        requires: "not retrocausality",
+        requires: "",
         effect() {
             tech.isNoFireDefense = true
         },
@@ -2468,9 +2514,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return !tech.isRewindField
+            return true
         },
-        requires: "not retrocausality",
+        requires: "",
         effect() {
             tech.isNoFireDamage = true
         },
@@ -6750,7 +6796,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return !tech.isForeverDrones && (tech.haveGunCheck("drones") || (m.fieldMode === 4 && simulation.molecularMode === 3))
+            return !tech.isForeverDrones && (tech.haveGunCheck("drones") || (m.fieldMode === 4 && simulation.molecularMode === 3)) && (build.isExperimentSelection || powerUps.research.count > this.cost - 1)
         },
         requires: "drones, not fault tolerance",
         effect() {
@@ -8323,29 +8369,6 @@ const tech = {
         }
     },
     {
-        name: "aerostat",
-        descriptionFunction() {
-            const damage = m.onGround ? 1 : (tech.offGroundDamage)
-            const infoText = this.count ? `<br><em style ="float: right;">(${damage.toFixed(0)}x)</em>` : ""
-            return `<strong>2x</strong> <strong class='color-d'>damage</strong> while <strong>off</strong> the <strong>ground</strong>${infoText}`
-        },
-        isFieldTech: true,
-        maxCount: 3,
-        count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
-        allowed() {
-            return m.fieldMode === 3 || m.fieldMode === 10
-        },
-        requires: "negative mass, grappling hook",
-        effect() {
-            tech.offGroundDamage++
-        },
-        remove() {
-            tech.offGroundDamage = 1
-        }
-    },
-    {
         name: "annihilation",
         description: "<strong>mobs</strong> you <strong>collide</strong> with are <strong>annihilated</strong><br><strong>–8</strong> <strong class='color-f'>energy</strong> each time",
         isFieldTech: true,
@@ -8534,6 +8557,7 @@ const tech = {
                             expand(block, Math.min(20, block.mass * 3))
                         }
                         //jump
+                        m.lastOnGroundCycle = m.cycle;
                         m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
                         Matter.Body.setVelocity(player, { x: player.velocity.x + horizontalVelocity, y: -7.5 + 0.25 * player.velocity.y });
                         player.force.y = -m.jumpForce; //player jump force
@@ -8800,11 +8824,15 @@ const tech = {
         requires: "plasma torch, not plasma ball",
         effect() {
             tech.isExtruder = true;
+            window.removeEventListener("keydown", m.fieldEvent);
             m.fieldUpgrades[m.fieldMode].set()
         },
         remove() {
             tech.isExtruder = false;
-            if (this.count && m.fieldMode === 5) m.fieldUpgrades[m.fieldMode].set()
+            if (this.count && m.fieldMode === 5) {
+                window.removeEventListener("keydown", m.fieldEvent);
+                m.fieldUpgrades[m.fieldMode].set()
+            }
         }
     },
     {
@@ -8840,11 +8868,15 @@ const tech = {
         requires: "plasma torch, not extruder",
         effect() {
             tech.isPlasmaBall = true;
+            window.removeEventListener("keydown", m.fieldEvent);
             m.fieldUpgrades[m.fieldMode].set()
         },
         remove() {
             tech.isPlasmaBall = false;
-            if (this.count && m.fieldMode === 5) m.fieldUpgrades[m.fieldMode].set()
+            if (this.count && m.fieldMode === 5) {
+                window.removeEventListener("keydown", m.fieldEvent);
+                m.fieldUpgrades[m.fieldMode].set()
+            }
         }
     },
     {
@@ -8883,28 +8915,6 @@ const tech = {
         },
         remove() {
             tech.isControlPlasma = false;
-        }
-    },
-    {
-        name: "retrocausality",
-        description: "<strong>time dilation</strong> uses <strong class='color-f'>energy</strong> to <strong>rewind</strong> your<br><strong class='color-h'>health</strong>, <strong>velocity</strong>, and <strong>position</strong> up to <strong>10</strong> seconds",
-        isFieldTech: true,
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        allowed() {
-            return m.fieldMode === 6 && !m.isShipMode && !tech.isRewindAvoidDeath && !tech.isTimeSkip
-        },
-        requires: "time dilation, not CPT symmetry",
-        effect() {
-            tech.isRewindField = true;
-            m.fieldUpgrades[6].set()
-            m.wakeCheck();
-        },
-        remove() {
-            tech.isRewindField = false;
-            if (this.count) m.fieldUpgrades[6].set()
         }
     },
     {
@@ -11162,7 +11172,7 @@ const tech = {
     },
     {
         name: "rewind",
-        description: "every 10 seconds <strong class='color-rewind'>rewind</strong> <strong>2</strong> seconds",
+        description: "every 10 seconds <strong>rewind</strong> <strong>2</strong> seconds",
         maxCount: 9,
         count: 0,
         frequency: 0,
@@ -11185,7 +11195,7 @@ const tech = {
     },
     {
         name: "undo",
-        description: "every 4 seconds <strong class='color-rewind'>rewind</strong> <strong>1/2</strong> a second",
+        description: "every 4 seconds <strong>rewind</strong> <strong>1/2</strong> a second",
         maxCount: 9,
         count: 0,
         frequency: 0,
@@ -12556,7 +12566,6 @@ const tech = {
     baseFx: null,
     isNeutronium: null,
     isFreeWormHole: null,
-    isRewindField: null,
     isCrouchRegen: null,
     isAxion: null,
     isDarkEnergy: null,
@@ -12615,7 +12624,7 @@ const tech = {
     collidePowerUps: null,
     isDilate: null,
     isDiaphragm: null,
-    offGroundDamage: null,
+    isOffGroundDamage: null,
     isSuperBounce: null,
     isDivisor: null,
     isFoamCavitation: null,
@@ -12668,4 +12677,6 @@ const tech = {
     isBreakHarpoon: null,
     isBreakHarpoonGain: null,
     isExponential: null,
+    isCoyote: null,
+    isNitinol: null
 }
