@@ -6534,17 +6534,17 @@ const spawn = {
 
 
             //maintain speed //faster in the vertical to help avoid repeating patterns
-            if (this.speed < 0.01) {
-                const unit = Vector.sub(player.position, this.position)
-                Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(unit), 0.1));
-            } else {
-                if (Math.abs(this.velocity.y) < 10) {
-                    Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.03 });
-                }
-                if (Math.abs(this.velocity.x) < 7) {
-                    Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y });
-                }
-            }
+            // if (this.speed < 0.01) {
+            //     const unit = Vector.sub(player.position, this.position)
+            //     Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(unit), 0.1));
+            // } else {
+            //     if (Math.abs(this.velocity.y) < 10) {
+            //         Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.03 });
+            //     }
+            //     if (Math.abs(this.velocity.x) < 7) {
+            //         Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y });
+            //     }
+            // }
             if (this.isInvulnerable) {
                 this.invulnerableCount--
                 if (this.invulnerableCount < 0) {
@@ -8102,7 +8102,7 @@ const spawn = {
             }
         };
     },
-    sniperBullet(x, y, radius = 9, sides = 5) { //bullets
+    sniperBullet(x, y, radius = 9, sides = 5, isExplode = true) { //bullets
         mobs.spawn(x, y, sides, radius, "rgb(255,0,155)");
         let me = mob[mob.length - 1];
         me.tier = 3
@@ -8122,15 +8122,17 @@ const spawn = {
         me.collisionFilter.category = cat.mobBullet;
         me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
         me.onDeath = function () {
-            const radius = 100 + 50 * Math.random()
-            if (m.immuneCycle < m.cycle && Vector.magnitude(Vector.sub(this.position, player.position)) < radius) m.takeDamage(0.0003 * radius * this.damageScale());
-            simulation.drawList.push({ //add dmg to draw queue
-                x: this.position.x,
-                y: this.position.y,
-                radius: radius,
-                color: "rgba(255,0,155,0.5)",
-                time: simulation.drawTime
-            });
+            if (isExplode) {
+                const radius = 100 + 50 * Math.random()
+                if (m.immuneCycle < m.cycle && Vector.magnitude(Vector.sub(this.position, player.position)) < radius) m.takeDamage(0.0003 * radius * this.damageScale());
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: this.position.x,
+                    y: this.position.y,
+                    radius: radius,
+                    color: "rgba(255,0,155,0.5)",
+                    time: simulation.drawTime
+                });
+            }
         };
         me.do = function () {
             // this.gravity();

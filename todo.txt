@@ -1,27 +1,15 @@
 ******************************************************** NEXT PATCH **************************************************
 
-conductorBoss - every few seconds damages player if they are standing on the map 
-~1.2x density (health and collision damage) for all tier 3 mobs
-~1.3x density (health and collision damage) for all tier 4 mobs
+secret combos
+  metamaterial cloaking
+  negative mass
 
-secret combos for
-  standing wave
-  perfect diamagnetism 
-  plasma torch
-  time dilation
-tech retrocausality removed
+level gravitron - shrunk central tower a bit
 
-pilot wave can fire bullets while active
-pilot wave no longer drags bots
-
-nitinol tech: acoustic levitation - jump on the air for 2 seconds after leaving the ground
-  0.7x damage taken
-aerostat 2->2.5x damage, but only activates after being in the air for at least 1 second
-  no longer a field tech
-bot fabrication now shows up even when you have no research
-
-
-bug fixes
+bugs
+  tutorial levels
+    starter mobs didn't die in one shot throwing blocks
+    died on the falling bullets level from sniperBullets
 
 
 ******************************************************** BUGS ********************************************************
@@ -32,6 +20,14 @@ dmg side bar is too long sometimes
 
 graphical bug - player can become crouched while not touching the ground if they exit the ground while crouched
 
+safari browser looks weird with several stroke animations
+  might be related to dashed stroke 
+    ctx.setLineDash([200, 200]);
+  examples
+    going to next level, doorway animation
+    plasma field secret combo lightning
+
+
 *********************************************************** TODO *****************************************************
 
 n-gon long term goals
@@ -39,6 +35,51 @@ n-gon long term goals
   more subtle lore hints and world building
   more secrets
   more indication of when things occur
+
+
+tech:   -  scale max energy with current health
+  nonrefundable
+tech:   -  set max health equal to max energy
+tech:   -  set max energy equal to max health
+  names
+    Free energy
+    stress-energy tensor
+    binding energy
+    condensed matter
+    mass hyperboloid
+    off shell
+    stress–energy tensor
+    nuclear pasta
+    Lagrangian
+
+missile tech - missiles explode when they hit walls
+  missiles explode a second time, 30 cycles later
+    second explosion isn't in the same spot.
+      it follows the missile?  if possible
+      it targets mobs that got hit by the first explosions?
+
+tech:   - make a few random types of special bullets for super balls
+  super ball type ideas:
+    shoot lasers
+      vertical laser directed down
+      random directions
+      2 horizontal lasers
+    damaging aura
+    duplicate ball after hitting map or mob
+      but don't extend life span
+    freeze mobs  (with aura)
+    stun mobs (bigger ball)
+    aim at nearby mobs after hitting: mob or map
+    explode every couple seconds
+    extra long life
+      prevent it from getting slow, like reactor bosses
+    randomly change direction
+    fire nails at nearby mobs
+    attract mobs, like black hole
+    attract other super balls and grow as they merge
+
+tech:   - give ____ (nails) a tail that damages mobs.
+  use plasma code that runs in bullet history
 
 constraint - periodic darkness
   random delay and duration of darkness?
@@ -50,14 +91,8 @@ tech:  - repeat all _____ effects a second time
   on getting hit
 
 wormhole tech:  - random bullets fire from both wormholes
-
-secret codes
-  negative mass
-    pull in blocks and then push them away
-  metamaterial cloaking
-    teleport behind the mob you are looking at?
-    convert __ health into a boost power up?
-
+  fire b.needle() for 3 seconds after making a new wormhole
+    need to adjust b.needle() for positions that aren't the player's
 
 add sounds this summer?  see ***sound*** section below
   Web Audio API
@@ -80,7 +115,6 @@ add sounds this summer?  see ***sound*** section below
 
 
 
-tech:   -  scale max energy with current health
 
 power up: entanglement - make it spawn from killing a mob that kinda looks like the player?
 
@@ -1474,7 +1508,7 @@ possible names for tech
   cyanoacrylate - superglue use for a slowing effect?
   math terms - integral, derivative, Laplace transform, inflection point
   quasicrystals - something with low friction, maybe defense?
-  Coalescence - things merging together like clouds.  maybe mergin power ups?
+  coalescence - things merging together like clouds.  maybe mergin power ups?
   trihydrogen cation - common molecule in space, dark matter tech?
   superradiance - laser tech
   cryocoolers - freezing effects
@@ -1486,10 +1520,10 @@ possible names for tech
     every few seconds pick a random skin tech?
   De Sitter space - simple model of universe related to general relativity (mass-energy?)
   active optics - something with lasers?  maybe something with diffuse beam getting smaller
-  Quintessence - related to dark energy
+  quintessence - related to dark energy
   biofilm - something defensive?  related to spores?
-  Thermogalvanic - makes things cold, for no energy
-  Intron - noncoding DNA that separates regions of coding DNA,  use for JUNK tech
+  thermogalvanic - makes things cold, for no energy
+  intron - noncoding DNA that separates regions of coding DNA,  use for JUNK tech
   virtual particles - can have these properties: imaginary mass, violation of the conservation of energy, violation of causality, traveling faster than light or backwards in time, popping in and out of the vacuum via vacuum fluctuations
   Sintering - the process of compacting and forming a solid mass of material by pressure[1] or heat[2] without melting it to the point of liquefaction. Sintering happens as part of a manufacturing process used with metals, ceramics, plastics, 
   Kolmogorov complexity - how long a computer program for an algorithm is

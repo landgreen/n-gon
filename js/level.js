@@ -34,10 +34,10 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(5) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(3) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
-            // m.maxHealth = m.health = 1//10000000
+            // m.maxHealth = m.health = 10000000
             // m.displayHealth();
             // m.immuneCycle = Infinity //you can't take damage
             // m.maxEnergy = m.energy = 10000000
@@ -56,7 +56,7 @@ const level = {
             // requestAnimationFrame(() => { tech.giveTech("rebar") });
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("sound-bot")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("equivalence principle")
             // for (let i = 0; i < 1; ++i) tech.giveTech("bremsstrahlung")
             // for (let i = 0; i < 1; i++) tech.giveTech("nail-bot")
             // for (let i = 0; i < 1; i++) tech.giveTech("boom-bot")
@@ -64,15 +64,17 @@ const level = {
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("aerostat") });
             // requestAnimationFrame(() => { level.blurryChoices = true });
             // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 7; i++) powerUps.directSpawn(450, -50, "field");
+            // for (let i = 0; i < 7; i++) powerUps.directSpawn(450, -50, "coupling");
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
-            // level.rooftops()
+            // level.levelsCleared = 7
+            // level.corridor()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
-            // for (let i = 0; i < 1; i++) spawn.striker(1300 + 100 * i, -200)
+            // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
+            // for (let i = 0; i < 14; i++) spawn.starter(1300 + 100 * i, -200)
             // for (let i = 0; i < 1; i++) spawn.conductorBoss(1100 + 100 * i, -100 - i * 100)
             // for (let i = 0; i < 3; i++) spawn.freezer(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
@@ -7896,7 +7898,7 @@ const level = {
 
             //open center right area with both bosses
             // spawn.mapRect(0, -450, 425, 1100);
-            spawn.mapVertex(213, 0, "-213 -700  0 -650  213 -600  213 700  0 650  -213 600");
+            spawn.mapVertex(213, 0, "-213 -650  0 -600  213 -550  213 650  0 600  -213 550");
             spawn.mapRect(0, -1050, 425, 63);
             spawn.mapRect(0, 987, 425, 50);
             spawn.mapVertex(1700, -1000, "-600 0  -400 400  400 400  600 0");
@@ -7958,7 +7960,7 @@ const level = {
             Matter.Body.setAngle(map[map.length - 1], Math.PI / 4)
 
             //open center right area with both bosses
-            spawn.mapVertex(213, 0, "-213 -600  0 -650  213 -700  213 600  0 650  -213 700");
+            spawn.mapVertex(213, 0, "-213 -550  0 -600  213 -650  213 550  0 600  -213 650");
             spawn.mapRect(0, 1050 - 63, 425, 63);
             spawn.mapRect(0, -987 - 50, 425, 50);
             spawn.mapVertex(1700, 1000, "-400 0  -600 400  600 400  400 0");
@@ -37598,7 +37600,7 @@ const level = {
             }
             //if no blocks left make a new one
             if (body.length < 2) { //< 2 because the door is a body
-                spawn.bodyRect(1025, -550, 50, 50);
+                spawn.bodyRect(1025, -550, 60, 60);
             }
         };
 
@@ -37621,7 +37623,7 @@ const level = {
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
         spawn.mapRect(1600, -600, 425, 250);
 
-        spawn.bodyRect(1025, -75, 50, 50); //block to go on button
+        spawn.bodyRect(1025, -75, 60, 60); //block to go on button
         spawn.starter(425, -350, 35)
         spawn.starter(800, -350, 44)
     },
@@ -37746,19 +37748,14 @@ const level = {
             //teleport to start if hit
             if (m.immuneCycle > m.cycle) {
                 m.energy = m.maxEnergy
-                Matter.Body.setPosition(player, {
-                    x: 60,
-                    y: -50
-                })
+                Matter.Body.setPosition(player, { x: 60, y: -50 })
+                m.addHealth(Infinity)
             }
             //spawn bullets
             if (!(simulation.cycle % 5)) {
-                spawn.sniperBullet(660 + 580 * Math.random(), -2000, 10, 4);
+                spawn.sniperBullet(660 + 580 * Math.random(), -2000, 10, 4, false);
                 const who = mob[mob.length - 1]
-                Matter.Body.setVelocity(who, {
-                    x: 0,
-                    y: 8
-                });
+                Matter.Body.setVelocity(who, { x: 0, y: 8 });
                 who.timeLeft = 300
             }
             //exit room
@@ -37792,7 +37789,7 @@ const level = {
 
         //spawn bullets on load to avoid rush
         for (let i = 0; i < 32; i++) {
-            spawn.sniperBullet(660 + 580 * Math.random(), -2000 + 40 * i, 10, 4);
+            spawn.sniperBullet(660 + 580 * Math.random(), -2000 + 40 * i, 10, 4, false);
             const who = mob[mob.length - 1]
             Matter.Body.setVelocity(who, {
                 x: 0,

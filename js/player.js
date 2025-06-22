@@ -3691,9 +3691,11 @@ const m = {
         simulation.inGameConsole(`<div class="circle-grid field"></div> &nbsp; <span class='color-var'>m</span>.setField("<strong class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</strong>")<br>input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>MouseRight</span>"]`);
         if (m.fieldMode === 1) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[1]</span>energyHealthRatio <span class='color-symbol'>=</span> ${m.fieldUpgrades[1].energyHealthRatio} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←←↓→→↓</em>`);
         if (m.fieldMode === 2) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldPosition<span class='color-symbol'>+=</span>10 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">← → ← → ↧</em>`);
+        if (m.fieldMode === 3) simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↖↑→↗↑↑</em>`);
         if (m.fieldMode === 4) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${m.fieldUpgrades[4].modeText()} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↓↘→↓↙←↑↑↓</em>`);
         if (m.fieldMode === 5) simulation.inGameConsole(`m<span class='color-symbol'>.</span>energy <span class='color-symbol'>+=</span> 0.05 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↙↓↘→→↧</em>`);
-        if (m.fieldMode === 6) simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle <span class='color-symbol'>-</span> 200 <span class='color-symbol'>)</span> <span class='color-symbol'>%</span> 600 <span class='color-symbol'>]</span>  &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`);
+        if (m.fieldMode === 6) simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle <span class='color-symbol'>-</span> 200 <span class='color-symbol'>)</span> <span class='color-symbol'>%</span> 600 <span class='color-symbol'>]</span>  &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 0.9rem;color: #055;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`);
+        if (m.fieldMode === 7) simulation.inGameConsole(`<strong>4.5</strong><span class='color-symbol'>→</span><strong>6x</strong> <strong class='color-cloaked'>decloaking</strong> <strong class='color-d'>damage</strong> &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↑↓↙←↓↘→</em>`);
         if (m.fieldMode === 8) simulation.inGameConsole(`Composite<span class='color-symbol'>.</span>add<span class='color-symbol'>(</span>engine.world<span class='color-symbol'>,</span> block<span class='color-symbol'>)</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↓↓→↘↓↙←↓↓</em>`);
         if (m.fieldMode === 9) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>({</span> x<span class='color-symbol'>:</span> 0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span> 0 <span class='color-symbol'>})</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↓↓↓↑↓</em>`);
         if (m.fieldMode === 10) simulation.inGameConsole(`Matter<span class='color-symbol'>.</span>Body<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>(</span>player<span class='color-symbol'>, {</span> x<span class='color-symbol'>:</span> 0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span> 0 <span class='color-symbol'>})</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↑↑↓↓</em>`);
@@ -4148,10 +4150,67 @@ const m = {
         },
         {
             name: "negative mass",
-            //<br>hold <strong class='color-block'>blocks</strong> as if they have a lower <strong>mass</strong>
-            description: `use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br><strong>0.5x</strong> <strong class='color-defense'>damage taken</strong><br><strong>6</strong> <strong class='color-f'>energy</strong> per second`,
+            description: `use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br><strong>0.5x</strong> <strong class='color-defense'>damage taken</strong><br><strong>6</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">←↖↑→↗↑↑</em>`,
+            keyLog: [null, null, null, null, null],
             fieldDrawRadius: 0,
             effect: () => {
+                //store event function so it can be found and removed in m.setField()
+                m.fieldEvent = function (event) {
+                    m.fieldUpgrades[3].keyLog.shift() //remove first element
+                    m.fieldUpgrades[3].keyLog.push(event.code) //add new key to end
+                    const patternA = ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowUp", "ArrowUp"]
+                    const patternB = [input.key.left, input.key.up, input.key.right, input.key.up, input.key.up]
+                    const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
+                    const drain = tech.negativeMassCost ? 0.13 : 0
+                    if (input.field && m.energy > drain && (arraysEqual(m.fieldUpgrades[3].keyLog, patternA) || arraysEqual(m.fieldUpgrades[3].keyLog, patternB))) {
+                        m.energy -= drain
+                        simulation.ephemera.push({
+                            name: "mass push",
+                            count: 60,
+                            range: 1700,
+                            do() {
+                                this.count--
+                                if (this.count < 0) simulation.removeEphemera(this.name)
+                                // if (this.count < 0) {
+                                //     this.count = 20
+                                //     this.do = this.pushDo
+                                // }
+                                for (let i = 0, len = body.length; i < len; ++i) {
+                                    sub = Vector.sub(body[i].position, m.pos);
+                                    dist = Vector.magnitude(sub);
+                                    if (dist < this.range) {
+                                        const push = Vector.mult(Vector.normalise(sub), 0.012 * dist / 1000 * body[i].mass)
+                                        body[i].force.x -= push.x
+                                        body[i].force.y -= push.y + 1.1 * body[i].mass * simulation.g
+
+                                        Matter.Body.setVelocity(body[i], { x: body[i].velocity.x * 0.9, y: body[i].velocity.y * 0.9 });
+
+                                    }
+                                }
+
+                            },
+                            // pushDo() {
+                            //     this.count--
+                            //     if (this.count < 0) simulation.removeEphemera(this.name)
+                            //     for (let i = 0, len = body.length; i < len; ++i) {
+                            //         sub = Vector.sub(body[i].position, m.pos);
+                            //         dist = Vector.magnitude(sub);
+                            //         if (dist < this.range) {
+                            //             const push = Vector.mult(Vector.normalise(sub), 0.01 * body[i].mass)
+                            //             body[i].force.x += push.x
+                            //             body[i].force.y += push.y - 1.1 * body[i].mass * simulation.g
+
+                            //             Matter.Body.setVelocity(body[i], { x: body[i].velocity.x * 0.99, y: body[i].velocity.y * 0.99 });
+
+                            //         }
+                            //     }
+                            // },
+                        })
+                        simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↖↑→↗↑↑</em>`);
+                    }
+                }
+                window.addEventListener("keydown", m.fieldEvent);
+
                 m.fieldFire = true;
                 m.holdingMassScale = 0.01; //can hold heavier blocks with lower cost to jumping
                 m.fieldMeterColor = "#333"
@@ -4493,12 +4552,12 @@ const m = {
                                     const closest = { distance: 1500, target: null }
                                     const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) };
                                     for (let i = 0, len = mob.length; i < len; ++i) {
-                                        if (mob[i].alive && !mob[i].isBadTarget && !mob[i].isInvulnerable && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) {
+                                        if (!mob[i].isInvulnerable && mob[i].alive && Matter.Query.ray(map, m.pos, mob[i].position).length === 0) { //&& !mob[i].isDarkMatter
                                             const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                                             const dist = Vector.magnitude(Vector.sub(m.pos, mob[i].position))
-                                            if (dist < closest.distance && dot > 0.8) { //target closest mob that player is looking at and isn't too close to target
+                                            if (dist < closest.distance && dot > 0.65) { //target closest mob that player is looking at and isn't too close to target
                                                 closest.distance = dist
-                                                closest.target = mob[i]
+                                                if (closest.target === null || Math.random() < 0.5) closest.target = mob[i]
                                             }
                                         }
                                     }
@@ -4528,35 +4587,34 @@ const m = {
                                                         this.where = Vector.add(this.where, Vector.rotate(v, 1 * (Math.random() - 0.5)))
                                                     } else if (this.who) {
                                                         this.isReady = false
-                                                        // simulation.removeEphemera(this.name)
-                                                        requestAnimationFrame(() => {
-                                                            m.energy += 0.08
-                                                            const dmg = 0.08
-                                                            this.who.damage(dmg);
+                                                        // requestAnimationFrame(() => {
+                                                        m.energy += 0.08
+                                                        const dmg = 0.08
+                                                        this.who.damage(dmg);
 
-                                                            //mob vertex
-                                                            simulation.drawList.push({
-                                                                x: this.path[0].x,
-                                                                y: this.path[0].y,
-                                                                radius: 8,
-                                                                color: "rgba(136,136,255,0.9)",
-                                                                time: simulation.drawTime
-                                                            });
-                                                            //near player
-                                                            simulation.drawList.push({
-                                                                x: this.path[this.path.length - 1].x,
-                                                                y: this.path[this.path.length - 1].y,
-                                                                radius: 6 + Math.floor(5 * Math.random()),
-                                                                color: "rgba(136,136,255,0.9)",
-                                                                time: simulation.drawTime
-                                                            });
-
-                                                            if (this.who.speed > 1) {
-                                                                Matter.Body.setVelocity(this.who, { x: this.who.velocity.x * 0.1, y: this.who.velocity.y * 0.1 });
-                                                            } else {
-                                                                Matter.Body.setVelocity(this.who, { x: this.who.velocity.x * 0.3, y: this.who.velocity.y * 0.3 });
-                                                            }
+                                                        //mob vertex
+                                                        simulation.drawList.push({
+                                                            x: this.path[0].x,
+                                                            y: this.path[0].y,
+                                                            radius: 8,
+                                                            color: "rgba(136,136,255,0.9)",
+                                                            time: simulation.drawTime
                                                         });
+                                                        //near player
+                                                        simulation.drawList.push({
+                                                            x: this.path[this.path.length - 1].x,
+                                                            y: this.path[this.path.length - 1].y,
+                                                            radius: 6 + Math.floor(5 * Math.random()),
+                                                            color: "rgba(136,136,255,0.9)",
+                                                            time: simulation.drawTime
+                                                        });
+
+                                                        if (this.who.speed > 1) {
+                                                            Matter.Body.setVelocity(this.who, { x: this.who.velocity.x * 0.1, y: this.who.velocity.y * 0.1 });
+                                                        } else {
+                                                            Matter.Body.setVelocity(this.who, { x: this.who.velocity.x * 0.3, y: this.who.velocity.y * 0.3 });
+                                                        }
+                                                        // });
                                                         break
                                                     }
                                                 }
@@ -4932,7 +4990,7 @@ const m = {
         },
         {
             name: "time dilation",
-            description: `use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>1.2x</strong> movement and <strong><em>fire rate</em></strong><br><strong>12</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`,
+            description: `use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>1.2x</strong> movement and <strong><em>fire rate</em></strong><br><strong>12</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:0.8rem;color:#fff;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`,
             keyLog: [null, null, null, null, null, null, null, null],
             isRewindMode: false, //m.fieldUpgrades[6].isRewindMode
             set() {
@@ -4960,7 +5018,7 @@ const m = {
                                 m.wakeCheck();
                             }
                         }
-                        simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle <span class='color-symbol'>-</span> 200 <span class='color-symbol'>)</span> <span class='color-symbol'>%</span> 600 <span class='color-symbol'>]</span>  &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`);
+                        simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle <span class='color-symbol'>-</span> 200 <span class='color-symbol'>)</span> <span class='color-symbol'>%</span> 600 <span class='color-symbol'>]</span>  &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 0.9rem;color: #fff;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`);
                         // const DRAIN = 0.2
                         // if (m.history.length) {
                         //     let history = m.history[(m.cycle - 200) % 600]
@@ -5189,8 +5247,30 @@ const m = {
         },
         {
             name: "metamaterial cloaking",
-            description: `<strong>0.4x</strong> <strong class='color-defense'>damage taken</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>4.5x</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br><strong>6</strong> <strong class='color-f'>energy</strong> per second`,
+            description: `<strong>0.4x</strong> <strong class='color-defense'>damage taken</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>4.5x</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br><strong>6</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↑↓↙←↓↘→</em>`,
+            keyLog: [null, null, null, null, null],
+            smallFieldRadius: 130,
             effect: () => {
+                //store event function so it can be found and removed in m.setField()
+                m.fieldEvent = function (event) {
+                    m.fieldUpgrades[7].keyLog.shift() //remove first element
+                    m.fieldUpgrades[7].keyLog.push(event.code) //add new key to end
+                    const patternA = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowDown", "ArrowRight"]
+                    const patternB = [input.key.up, input.key.down, input.key.left, input.key.down, input.key.right]
+                    const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
+                    if (arraysEqual(m.fieldUpgrades[7].keyLog, patternA) || arraysEqual(m.fieldUpgrades[7].keyLog, patternB)) {
+                        if (m.fieldUpgrades[7].smallFieldRadius === 130) {
+                            m.fieldUpgrades[7].smallFieldRadius = 70
+                        } else {
+                            m.fieldUpgrades[7].smallFieldRadius = 130
+                        }
+
+                        simulation.inGameConsole(`<strong>4.5</strong><span class='color-symbol'>→</span><strong>6x</strong> <strong class='color-cloaked'>decloaking</strong> <strong class='color-d'>damage</strong> &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">↑↓↙←↓↘→</em>`);
+                    }
+                }
+                window.addEventListener("keydown", m.fieldEvent);
+
+
                 m.fieldFire = true;
                 m.fieldMeterColor = "#333";
                 m.eyeFillColor = m.fieldMeterColor
@@ -5296,7 +5376,7 @@ const m = {
                     }
 
                     if (m.isCloak) {
-                        m.fieldRange = m.fieldRange * 0.85 + 130
+                        m.fieldRange = m.fieldRange * 0.85 + m.fieldUpgrades[7].smallFieldRadius
                         m.fieldDrawRadius = m.fieldRange * 1.1 //* 0.88 //* Math.min(1, 0.3 + 0.5 * Math.min(1, energy * energy));
                         m.drawCloak()
                         // ctx.globalCompositeOperation = "lighter";
@@ -5332,7 +5412,7 @@ const m = {
                     }
                     this.drawRegenEnergyCloaking()
                     if (m.isSneakAttack && m.sneakAttackCycle + Math.min(100, 0.66 * (m.cycle - m.enterCloakCycle)) > m.cycle) { //show sneak attack status
-                        m.fieldDamage = 4.5 * (1 + 0.05 * m.coupling)
+                        m.fieldDamage = (4.5 + (m.fieldUpgrades[7].smallFieldRadius === 130 ? 0 : 1.5)) * (1 + 0.05 * m.coupling)
                         const timeLeft = (m.sneakAttackCycle + Math.min(100, 0.66 * (m.cycle - m.enterCloakCycle)) - m.cycle) * 0.5
                         ctx.beginPath();
                         ctx.arc(m.pos.x, m.pos.y, 32, 0, 2 * Math.PI);

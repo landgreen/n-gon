@@ -8369,6 +8369,25 @@ const tech = {
         }
     },
     {
+        name: "inertial mass",
+        description: "<strong>negative mass</strong> is larger and <strong>faster</strong>",  //<br><strong class='color-block'>blocks</strong> also move <strong>horizontally</strong> with the field
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 3
+        },
+        requires: "negative mass",
+        effect() {
+            tech.isFlyFaster = true
+        },
+        remove() {
+            tech.isFlyFaster = false;
+        }
+    },
+    {
         name: "annihilation",
         description: "<strong>mobs</strong> you <strong>collide</strong> with are <strong>annihilated</strong><br><strong>–8</strong> <strong class='color-f'>energy</strong> each time",
         isFieldTech: true,
@@ -8388,24 +8407,6 @@ const tech = {
         }
     },
     {
-        name: "inertial mass",
-        description: "<strong>negative mass</strong> is larger and <strong>faster</strong>",  //<br><strong class='color-block'>blocks</strong> also move <strong>horizontally</strong> with the field
-        isFieldTech: true,
-        maxCount: 1,
-        count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
-        allowed() {
-            return m.fieldMode === 3
-        },
-        requires: "negative mass",
-        effect() {
-            tech.isFlyFaster = true
-        },
-        remove() {
-            tech.isFlyFaster = false;
-        }
-    }, {
         name: "Newtons 1st law",
         descriptionFunction() {
             return `<strong class='color-defense'>damage taken</strong> reduces as your <strong class="color-speed">speed</strong> increases<br>up to <strong>0.05x</strong> <strong class='color-defense'>damage taken</strong> at <strong>60</strong> <strong class="color-speed">speed</strong> <em style ="float: right;">(${(1 - Math.min((tech.speedAdded + player.speed) * 0.01583, 0.95)).toFixed(2)}x)</em>`
