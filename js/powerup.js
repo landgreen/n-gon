@@ -261,6 +261,7 @@ const powerUps = {
         //disable clicking for 1/2 a second to prevent mistake clicks
         document.getElementById("choose-grid").style.pointerEvents = "none";
         document.body.style.cursor = "none";
+
         setTimeout(() => {
             document.body.style.cursor = "auto";
             document.getElementById("choose-grid").style.pointerEvents = "auto";
@@ -281,6 +282,14 @@ const powerUps = {
                 ctx.fillStyle = `rgba(150,150,150,0.9)`; //`rgba(221,221,221,0.6)`;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             });
+        }
+        if (document.fullscreenElement) {
+            mouseMove.isLockPointer = true
+            document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+
+            document.exitPointerLock();
+            mouseMove.isPointerLocked = false
+            mouseMove.reset()
         }
     },
     endDraft(type, isCanceled = false) { //type should be a gun, tech, or field
@@ -329,6 +338,8 @@ const powerUps = {
         build.unPauseGrid()
         if (m.immuneCycle < m.cycle + 5) m.immuneCycle = m.cycle + 5; //player is immune to damage
         if (m.holdingTarget) m.drop();
+
+        if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
     },
     animatePowerUpGrab(color) {
         simulation.ephemera.push({
@@ -417,7 +428,16 @@ const powerUps = {
                     document.getElementById("choose-grid").classList.add('choose-grid');
                     document.getElementById("choose-grid").classList.remove('choose-grid-no-images');
                 }
+                if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
             });
+            if (document.fullscreenElement) {
+                mouseMove.isLockPointer = true
+                document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+
+                document.exitPointerLock();
+                mouseMove.isPointerLocked = false
+                mouseMove.reset()
+            }
         },
     },
     warp: {
@@ -430,6 +450,7 @@ const powerUps = {
             level.levels[level.onLevel + 1] = name
             powerUps.warp.exit()
             level.nextLevel();
+            if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
             // simulation.clearNow = true
         },
         exit() {
@@ -488,7 +509,16 @@ const powerUps = {
 
             document.getElementById("exit").addEventListener("click", () => {
                 powerUps.warp.exit()
+                if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
             });
+            if (document.fullscreenElement) {
+                mouseMove.isLockPointer = true
+                document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+
+                document.exitPointerLock();
+                mouseMove.isPointerLocked = false
+                mouseMove.reset()
+            }
         },
     },
     difficulty: {
@@ -592,7 +622,17 @@ const powerUps = {
                     level.initialPowerUps()
                     simulation.trails(30)
                 }
+                if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
             });
+
+            if (document.fullscreenElement) {
+                mouseMove.isLockPointer = true
+                document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+
+                document.exitPointerLock()
+                mouseMove.isPointerLocked = false
+                mouseMove.reset()
+            }
 
             let setDifficultyText = function (isReset = true) {
                 for (let i = 1; i < 8; i++) {

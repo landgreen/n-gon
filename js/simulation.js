@@ -254,7 +254,7 @@ const simulation = {
     paused: false,
     isChoosing: false,
     testing: false, //testing mode: shows wire frame and some variables
-    cycle: 0, //total cycles, 60 per second
+    cycle: 600, //total cycles, 60 per second
     fpsCap: null, //limits frames per second to 144/2=72,  on most monitors the fps is capped at 60fps by the hardware
     fpsCapDefault: 72, //use to change fpsCap back to normal after a hit from a mob
     isCommunityMaps: false,
@@ -659,23 +659,18 @@ const simulation = {
                                 // Flip the canvas vertically
                                 ctx.translate(0, canvas.height); // Move the origin down to the bottom
                                 ctx.scale(1, -1); // Flip vertically
-                                simulation.isInvertedVertical = true
                                 //flip mouse Y again to make sure it caught
-                                mouseMove = function (e) {
-                                    simulation.mouse.x = e.clientX;
-                                    simulation.mouse.y = window.innerHeight - e.clientY;
-                                }
+                                // mouseMove.reset()
                             } else {
                                 requestAnimationFrame(loop);
                                 ctx.translate(0, canvas.height * count / frames);
                                 ctx.scale(1, 1 - 2 * count / frames);
                             }
-                            if (count === Math.floor(frames / 2)) {
+                            if (count > Math.floor(frames / 2) && !simulation.isInvertedVertical) {
                                 //flip mouse Y at the 1/2 way point
-                                mouseMove = function (e) {
-                                    simulation.mouse.x = e.clientX;
-                                    simulation.mouse.y = window.innerHeight - e.clientY;
-                                }
+                                simulation.isInvertedVertical = true
+                                mouseMove.reset()
+                                simulation.mouse.y = canvas.height - simulation.mouse.y
                                 //passFunction probably flips the map elements 
                                 passFunction()
                             }
@@ -689,10 +684,9 @@ const simulation = {
                 ctx.scale(1, -1); // Flip vertically
                 //flip mouse Y
                 simulation.isInvertedVertical = true
-                mouseMove = function (e) {
-                    simulation.mouse.x = e.clientX;
-                    simulation.mouse.y = window.innerHeight - e.clientY;
-                }
+                mouseMove.reset()
+                simulation.mouse.y = canvas.height - simulation.mouse.y
+
             }
         }
     },
@@ -710,17 +704,21 @@ const simulation = {
                             // requestAnimationFrame(() => { ctx.reset(); });
                             // ctx.translate(0, 0);
                             // ctx.scale(1, 1);
-                            simulation.isInvertedVertical = false
+
                             //flip mouse Y again to make sure it caught
-                            mouseMove = mouseMoveDefault
+                            // mouseMove.reset()
 
                         } else {
                             requestAnimationFrame(loop);
                             ctx.translate(0, canvas.height - canvas.height * count / frames);
                             ctx.scale(1, -1 + 2 * count / frames);
                         }
-                        if (count === Math.floor(frames / 2)) {
-                            mouseMove = mouseMoveDefault//flip mouse Y at the 1/2 way point
+                        if (count > Math.floor(frames / 2) && simulation.isInvertedVertical) {
+                            simulation.isInvertedVertical = false
+                            //flip mouse Y at the 1/2 way point
+                            mouseMove.reset()
+                            simulation.mouse.y = canvas.height - simulation.mouse.y
+
                             passFunction()//passFunction probably draws new map elements 
                         }
                     }
@@ -731,7 +729,9 @@ const simulation = {
             ctx.reset();
             ctx.font = "25px Arial";
             simulation.isInvertedVertical = false
-            mouseMove = mouseMoveDefault
+            mouseMove.reset()
+            simulation.mouse.y = canvas.height - simulation.mouse.y
+
         }
     },
     translatePlayerAndCamera(where, isTranslateBots = true) {
@@ -881,6 +881,14 @@ const simulation = {
     },
     firstRun: true,
     splashReturn() {
+        if (document.fullscreenElement) {
+            mouseMove.isLockPointer = true
+            document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+
+            document.exitPointerLock();
+            mouseMove.isPointerLocked = false
+            mouseMove.reset()
+        }
         document.getElementById("previous-seed").innerHTML = `previous seed: <span style="font-size:80%;">${Math.initialSeed}</span><br>`
         document.getElementById("seed").value = Math.initialSeed = Math.seed //randomize initial seed
 
@@ -970,7 +978,7 @@ const simulation = {
         ctx.globalCompositeOperation = "source-over"
         ctx.shadowBlur = 0;
 
-        mouseMove = mouseMoveDefault
+        mouseMove.reset()
         requestAnimationFrame(() => {
             ctx.setTransform(1, 0, 0, 1, 0, 0); //reset warp effect
             ctx.setLineDash([]) //reset stroke dash effect
@@ -1289,6 +1297,7 @@ const simulation = {
         simulation.fpsInterval = 1000 / simulation.fpsCap;
         simulation.then = Date.now();
         requestAnimationFrame(cycle); //starts game loop
+        if (document.fullscreenElement) mouseMove.isLockPointer = true //this interacts with the mousedown event listener to exit pointer lock
     },
     clearTimeouts() {
         let id = window.setTimeout(function () { }, 0);

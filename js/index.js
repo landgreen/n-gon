@@ -413,7 +413,7 @@ const build = {
             document.getElementById("choose-grid").classList.add('choose-grid');
             document.getElementById("choose-grid").classList.remove('choose-grid-no-images');
         }
-        document.getElementById("hide-images").checked = localSettings.isHideImages
+        document.getElementById("show-images").checked = !localSettings.isHideImages
         // console.log(localSettings.isHideImages, from)
     },
     hideHUD() {
@@ -474,9 +474,6 @@ const build = {
 
         // <strong class='color-g'>${b.activeGun === null || b.activeGun === undefined ? "undefined" : b.guns[b.activeGun].name}</strong> (${b.activeGun === null || b.activeGun === undefined ? "0" : b.guns[b.activeGun].ammo})
 
-        // <br>
-        // <input onclick="build.showImages('pause')" type="checkbox" id="hide-images-pause" name="hide-images-pause" ${localSettings.isHideImages ? "checked" : ""}>
-        // <label for="hide-images-pause" title="hide images for fields, guns, and tech" style="font-size:1.15em;" >hide images</label>
         let mobText
         if (level.levelsCleared > 0 && level.levelsCleared < 13) {
             mobText = `<br>${spawn.pickList[0]} (<strong class="color-tier">T${spawn.mobTierSpawnOrder[level.levelsCleared - 1]}</strong>), ${spawn.pickList[1]} (<strong class="color-tier">T${spawn.mobTierSpawnOrder[level.levelsCleared]}</strong>)<span style="float: right;">mobs ${mob.length}</span>`
@@ -484,10 +481,17 @@ const build = {
             mobText = ""
         }
 
+        function cleanText(text) {
+            return text.replace('Key', '').replace('Digit', '')
+        }
+
+        let fullscreenWarning = document.fullscreenElement ? `<div><span style="font-size:1.25em;font-weight: 600; float: left;">FULLSCREEN</span> <em style="float: right;color:#ccc;">press ${cleanText(input.key.fullscreen)} or hold ESC to exit</em></div><br>` : ""
         let text = `<div class="pause-grid-module" style="padding: 8px;">
+        
 <span style="font-size:1.4em;font-weight: 600; float: left;">PAUSED</span> 
 <em style="float: right;color:#ccc;">press ${input.key.pause} to resume</em>
 <br>
+${fullscreenWarning}
 <button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build URL</button>
 <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
 <label for="hide-hud" title="hide: tech, damage taken, damage, in game console" style="font-size:1.15em;">minimal HUD</label>
@@ -516,7 +520,7 @@ ${botText}
 <span style="float: right;">position (${player.position.x.toFixed(0)}, ${player.position.y.toFixed(0)})</span>
 <br>seed ${Math.initialSeed}
 <span style="float: right;">mouse (${simulation.mouseInGame.x.toFixed(0)}, ${simulation.mouseInGame.y.toFixed(0)})</span>
-<br>cycles ${m.cycle}
+<br>cycles ${m.cycle - 600}
 <span style="float: right;">velocity (${player.velocity.x.toFixed(2)}, ${player.velocity.y.toFixed(2)})</span>
 <br>bullets ${bullet.length}
 <span style="float: right;">power ups ${powerUp.length}</span>
@@ -932,20 +936,7 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
             }
         }
     },
-    //     <div>
-    // <select name="difficulty-select" id="difficulty-select-experiment">
-    // <option value="1">easy</option>
-    // <option value="2" selected>normal ⚆</option>
-    // <option value="4">hard ⚆</option>
-    // <option value="5">why ⚇</option>
-    // </select>
-    // &nbsp; &nbsp;
-    //     <label for="hide-images-experiment" title="reload experiment with no images for fields, guns, and tech" style="font-size: 0.85em;">hide images</label>
-    //     <input onclick="build.showImages('experiment')" type="checkbox" id="hide-images-experiment" name="hide-images-experiment" style="width:13px; height:13px;" ${localSettings.isHideImages ? "checked" : ""}>
-    // </div>
 
-    // <button onclick="build.sortTech('allowed', true)" class='sort-button' style="letter-spacing: 1px;font-weight: 400;">allowed</button>
-    // <button onclick="build.sortTech('have', true)" class='sort-button color-m' style="letter-spacing: 1px;font-weight: 800;">have</button>
     populateGrid() { //background-color:var(--build-bg-color);
         let text = `
 <div class="experiment-start-box">
@@ -1205,6 +1196,15 @@ const input = {
     isPauseKeyReady: true,
     // isMouseInside: true,
     // lastDown: null,
+    reset() {
+        input.fire = false
+        input.field = false
+        input.up = false
+        input.down = false
+        input.left = false
+        input.fire = false
+        input.right = false
+    },
     key: {
         fire: "KeyF",
         field: "Space",
@@ -1213,6 +1213,7 @@ const input = {
         left: "KeyA",
         right: "KeyD",
         pause: "KeyP",
+        fullscreen: "KeyO",
         nextGun: "KeyE",
         previousGun: "KeyQ",
         testing: "KeyT"
@@ -1226,6 +1227,7 @@ const input = {
             left: "KeyA",
             right: "KeyD",
             pause: "KeyP",
+            fullscreen: "KeyO",
             nextGun: "KeyE",
             previousGun: "KeyQ",
             testing: "KeyT"
@@ -1244,6 +1246,7 @@ const input = {
         document.getElementById("key-left").innerHTML = cleanText(input.key.left)
         document.getElementById("key-right").innerHTML = cleanText(input.key.right)
         document.getElementById("key-pause").innerHTML = cleanText(input.key.pause)
+        document.getElementById("key-fullscreen").innerHTML = cleanText(input.key.fullscreen)
         document.getElementById("key-next-gun").innerHTML = cleanText(input.key.nextGun)
         document.getElementById("key-previous-gun").innerHTML = cleanText(input.key.previousGun)
         document.getElementById("key-testing").innerHTML = cleanText(input.key.testing) //if (localSettings.loreCount > 0)
@@ -1252,6 +1255,8 @@ const input = {
         document.getElementById("splash-down").innerHTML = cleanText(input.key.down)[0]
         document.getElementById("splash-left").innerHTML = cleanText(input.key.left)[0]
         document.getElementById("splash-right").innerHTML = cleanText(input.key.right)[0]
+        document.getElementById("splash-pause").innerHTML = cleanText(input.key.pause)[0]
+        document.getElementById("splash-fullscreen").innerHTML = cleanText(input.key.fullscreen)[0]
         document.getElementById("splash-next-gun").innerHTML = cleanText(input.key.nextGun)[0]
         document.getElementById("splash-previous-gun").innerHTML = cleanText(input.key.previousGun)[0]
 
@@ -1268,6 +1273,7 @@ const input = {
         document.getElementById("key-left").style.background = backgroundColor
         document.getElementById("key-right").style.background = backgroundColor
         document.getElementById("key-pause").style.background = backgroundColor
+        document.getElementById("key-fullscreen").style.background = backgroundColor
         document.getElementById("key-next-gun").style.background = backgroundColor
         document.getElementById("key-previous-gun").style.background = backgroundColor
         document.getElementById("key-testing").style.background = backgroundColor
@@ -1315,6 +1321,9 @@ const input = {
                     break;
                 case "key-pause":
                     input.key.pause = event.code
+                    break;
+                case "key-fullscreen":
+                    input.key.fullscreen = event.code
                     break;
                 case "key-next-gun":
                     input.key.nextGun = event.code
@@ -1415,9 +1424,7 @@ window.addEventListener("keydown", function (event) {
                 input.isPauseKeyReady = false
                 setTimeout(function () { input.isPauseKeyReady = true }, 300);
                 if (simulation.isChoosing) {
-
                     build.pauseGrid()
-
                 } else if (simulation.paused) {
                     if (document.activeElement !== document.getElementById('sort-input')) {
                         build.unPauseGrid()
@@ -1425,11 +1432,21 @@ window.addEventListener("keydown", function (event) {
                         // level.levelAnnounce();
                         document.body.style.cursor = "none";
                         requestAnimationFrame(cycle);
+                        if (document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
+                            canvas.requestPointerLock();
+                            mouseMove.isPointerLocked = true
+                            mouseMove.reset()
+                        }
                     }
                 } else {  //if (!tech.isNoDraftPause)
                     simulation.paused = true;
                     build.pauseGrid()
                     document.body.style.cursor = "auto";
+                    if (document.fullscreenElement) {
+                        document.exitPointerLock();
+                        mouseMove.isPointerLocked = false
+                        mouseMove.reset()
+                    }
 
                     if (tech.isPauseSwitchField || simulation.testing) {
                         document.getElementById("pause-field-previous").addEventListener("click", () => {
@@ -1468,6 +1485,35 @@ window.addEventListener("keydown", function (event) {
                         });
                     }
                 }
+            }
+            break
+        case input.key.fullscreen:
+            // Escape key will also automatically exit pointer lock and fullscreen
+            // console.log(document.activeElement !== document.getElementById('sort-input'), document.activeElement)
+            if (document.fullscreenElement && document.activeElement !== document.getElementById('sort-input')) {
+                document.exitPointerLock();
+                mouseMove.isPointerLocked = false
+                mouseMove.reset()
+                document.exitFullscreen();
+                input.reset(); //to prevent key ghosting reset all input keys
+            } else if (document.activeElement !== document.getElementById('sort-input') && mouseMove.isMouseInWindow) {
+                document.documentElement.requestFullscreen().then(() => {
+                    input.reset(); //to prevent key ghosting reset all input keys
+
+                    // Small delay to ensure fullscreen is established, then lock pointer to canvas
+                    if (!simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
+                        setTimeout(() => {
+                            canvas.requestPointerLock();
+                            mouseMove.isPointerLocked = true
+                            mouseMove.reset()
+                        }, 100);
+                    } else {
+                        mouseMove.isLockPointer = true
+                        document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+                    }
+                }).catch(err => {
+                    console.error('Error attempting to enable fullscreen:', err);
+                });
             }
             break
         case input.key.testing:
@@ -1699,13 +1745,74 @@ window.addEventListener("keydown", function (event) {
     }
 });
 //mouse move input
-function mouseMoveDefault(e) {
-    simulation.mouse.x = e.clientX;
-    simulation.mouse.y = e.clientY;
+const mouseMove = {
+    active(e) { },//this controls how the mouse is updated in the mousemove event based on 1 of the 4 methods below
+    default(e) {
+        simulation.mouse.x = e.clientX;
+        simulation.mouse.y = e.clientY;
+    },
+    pointerLocked(e) {
+        simulation.mouse.x += e.movementX;
+        simulation.mouse.y += e.movementY;
+        //keep mouse inside canvas
+        if (simulation.mouse.x < 0) simulation.mouse.x = 0
+        if (simulation.mouse.x > canvas.width) simulation.mouse.x = canvas.width
+        if (simulation.mouse.y < 0) simulation.mouse.y = 0
+        if (simulation.mouse.y > canvas.height) simulation.mouse.y = canvas.height
+    },
+    inverted(e) {
+        simulation.mouse.x = e.clientX;
+        simulation.mouse.y = window.innerHeight - e.clientY;
+    },
+    invertedPointerLocked(e) {
+        simulation.mouse.x += e.movementX;
+        simulation.mouse.y -= e.movementY;
+        //keep mouse inside canvas
+        if (simulation.mouse.x < 0) simulation.mouse.x = 0
+        if (simulation.mouse.x > canvas.width) simulation.mouse.x = canvas.width
+        if (simulation.mouse.y < 0) simulation.mouse.y = 0
+        if (simulation.mouse.y > canvas.height) simulation.mouse.y = canvas.height
+    },
+    isLockPointer: false,//use to lock pointer in the mousedown eventlistener
+    isPointerLocked: false, //tracks the pointer locked state
+    isMouseInWindow: true,
+    pointerUnlock(event) {
+        setTimeout(() => {
+            if (mouseMove.isLockPointer && document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
+                mouseMove.isLockPointer = false
+                canvas.requestPointerLock();
+                mouseMove.isPointerLocked = true
+                mouseMove.reset()
+
+                document.body.removeEventListener('mousedown', mouseMove.pointerUnlock);
+            } else if (!mouseMove.isLockPointer || !document.fullscreenElement) {
+                mouseMove.isLockPointer = false
+
+                document.body.removeEventListener('mousedown', mouseMove.pointerUnlock);
+            }
+        }, 100);
+    },
+    reset() {//sets mouseMove.active based on inverted and pointer lock
+        if (simulation.isInvertedVertical) {
+            // simulation.mouse.y = canvas.height - simulation.mouse.y
+            if (mouseMove.isPointerLocked) {
+                mouseMove.active = mouseMove.invertedPointerLocked
+            } else {
+                mouseMove.active = mouseMove.inverted
+            }
+
+        } else {
+            if (mouseMove.isPointerLocked) {
+                mouseMove.active = mouseMove.pointerLocked
+            } else {
+                mouseMove.active = mouseMove.default
+            }
+        }
+    },
 }
-let mouseMove = mouseMoveDefault
+mouseMove.reset()
 document.body.addEventListener("mousemove", (e) => {
-    mouseMove(e)
+    mouseMove.active(e)
 });
 
 document.body.addEventListener("mouseup", (e) => {
@@ -1724,6 +1831,16 @@ document.body.addEventListener("mousedown", (e) => {
     } else if (e.button === 2) {
         input.field = true;
     }
+    //reenable pointer lock after choosing
+    // mouseMove.isLockPointer = true
+    // setTimeout(() => {
+    //     if (mouseMove.isLockPointer && document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
+    //         mouseMove.isLockPointer = false
+    //         canvas.requestPointerLock();
+    //         mouseMove.isPointerLocked = true
+    //         mouseMove.reset()
+    //     }
+    // }, 100);
 });
 
 document.body.addEventListener("mouseenter", (e) => { //prevents mouse getting stuck when leaving the window
@@ -1732,6 +1849,7 @@ document.body.addEventListener("mouseenter", (e) => { //prevents mouse getting s
     } else {
         input.fire = false;
     }
+    mouseMove.isMouseInWindow = true
 
     // if (e.button === 3) {
     //     input.field = true;
@@ -1746,6 +1864,7 @@ document.body.addEventListener("mouseleave", (e) => { //prevents mouse getting s
     } else {
         input.fire = false;
     }
+    mouseMove.isMouseInWindow = false
 
     // if (e.button === 3) {
     //     input.field = true;
@@ -1766,6 +1885,7 @@ document.body.addEventListener("wheel", (e) => {
 }, {
     passive: true
 });
+
 
 //**********************************************************************
 //  local storage
@@ -1803,7 +1923,7 @@ if (localStorageCheck()) {
 if (localSettings.isAllowed && !localSettings.isEmpty) {
     console.log('restoring previous settings')
 
-    if (localSettings.key) {
+    if (localSettings.key && localSettings.key.fullscreen) {
         input.key = localSettings.key
     } else {
         input.setDefault()
@@ -1839,7 +1959,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     }
     if (localSettings.isHideImages === undefined) localSettings.isHideImages = true //default to hide images
-    document.getElementById("hide-images").checked = localSettings.isHideImages
+    document.getElementById("show-images").checked = !localSettings.isHideImages
     // localSettings.isHideImages = true //no images
 
     if (localSettings.isHideHUD === undefined) localSettings.isHideHUD = true
@@ -1885,7 +2005,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     document.getElementById("community-maps").checked = localSettings.isCommunityMaps
     simulation.isCommunityMaps = localSettings.isCommunityMaps
-    document.getElementById("hide-images").checked = localSettings.isHideImages
+    document.getElementById("show-images").checked = !localSettings.isHideImages
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
     document.getElementById("banned").value = localSettings.banList
 }

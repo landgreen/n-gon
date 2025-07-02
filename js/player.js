@@ -172,7 +172,7 @@ const m = {
         m.Vy = player.velocity.y;
 
         //tracks the last 10s of player information
-        m.history.splice(m.cycle % 600, 1, {
+        m.history.splice(simulation.cycle % 600, 1, {
             position: {
                 x: player.position.x,
                 y: player.position.y,
@@ -843,7 +843,7 @@ const m = {
             }
         }
 
-        let history = m.history[(m.cycle - steps) % 600]
+        let history = m.history[(simulation.cycle - steps) % 600]
         Matter.Body.setPosition(player, history.position);
         Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
         m.yOff = history.yOff
@@ -887,7 +887,7 @@ const m = {
                     ctx.scale(simulation.zoom / simulation.edgeZoomOutSmooth, simulation.zoom / simulation.edgeZoomOutSmooth); //zoom in once centered
                     ctx.translate(-canvas.width2 + m.transX, -canvas.height2 + m.transY); //translate
                     for (let i = 1; i < steps; i++) {
-                        history = m.history[(m.cycle - i) % 600]
+                        history = m.history[(simulation.cycle - i) % 600]
                         m.pos.x = history.position.x
                         m.pos.y = history.position.y + m.yPosDifference - history.yOff
                         m.yOff = history.yOff
@@ -3583,10 +3583,7 @@ const m = {
                 for (let i = 0, len = who.length; i < len; ++i) {
                     Matter.Sleeping.set(who[i], false)
                     if (who[i].storeVelocity) {
-                        Matter.Body.setVelocity(who[i], {
-                            x: who[i].storeVelocity.x,
-                            y: who[i].storeVelocity.y
-                        })
+                        Matter.Body.setVelocity(who[i], { x: who[i].storeVelocity.x, y: who[i].storeVelocity.y })
                         Matter.Body.setAngularVelocity(who[i], who[i].storeAngularVelocity)
                     }
                 }
@@ -4229,7 +4226,7 @@ const m = {
                         if (m.energy > m.fieldRegen && tech.negativeMassCost > 0) m.energy -= m.fieldRegen
                         m.grabPowerUp();
                         m.lookForBlock();
-                        if (m.energy >= tech.negativeMassCost && m.fieldCDcycle < m.cycle) {
+                        if (m.energy > 0 && m.fieldCDcycle < m.cycle) {
                             if (tech.isFlyFaster) {
                                 //look for nearby objects to make zero-g
                                 function moveThis(who, range, mag = 1.06) {
@@ -4993,6 +4990,7 @@ const m = {
             description: `use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>1.2x</strong> movement and <strong><em>fire rate</em></strong><br><strong>12</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:0.8rem;color:#fff;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`,
             keyLog: [null, null, null, null, null, null, null, null],
             isRewindMode: false, //m.fieldUpgrades[6].isRewindMode
+            isRewinding: false,
             set() {
                 //store event function so it can be found and removed in m.setField()
                 m.fieldEvent = function (event) {
@@ -5019,25 +5017,6 @@ const m = {
                             }
                         }
                         simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle <span class='color-symbol'>-</span> 200 <span class='color-symbol'>)</span> <span class='color-symbol'>%</span> 600 <span class='color-symbol'>]</span>  &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 0.9rem;color: #fff;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`);
-                        // const DRAIN = 0.2
-                        // if (m.history.length) {
-                        //     let history = m.history[(m.cycle - 200) % 600]
-                        //     Matter.Body.setPosition(player, history.position);
-                        //     Matter.Body.setVelocity(player, {
-                        //         x: history.velocity.x,
-                        //         y: history.velocity.y
-                        //     });
-                        //     m.yOff = history.yOff
-                        //     if (m.yOff < 48) {
-                        //         m.doCrouch()
-                        //     } else {
-                        //         m.undoCrouch()
-                        //     }
-
-                        //     m.resetHistory();
-                        //     
-                        // }
-
                     }
                 }
                 window.addEventListener("keydown", m.fieldEvent);
@@ -5050,6 +5029,7 @@ const m = {
                 // m.fieldJump = 1.09
                 m.setMovement();
                 b.setFireCD()
+
                 const timeStop = () => {
                     m.immuneCycle = m.cycle + 10; //invulnerable to harm while time is stopped,  this also disables regen
                     //draw field everywhere
@@ -5071,12 +5051,15 @@ const m = {
                     }
                     sleep(mob);
                     sleep(body);
+                    // console.log(bullet[0].velocity, bullet[0].storeVelocity, bullet[0].isSleeping, 'before')
                     sleep(bullet);
+                    // console.log(bullet[0].velocity, bullet[0].storeVelocity, bullet[0].isSleeping, "after")
                     simulation.cycle--; //pause all functions that depend on game cycle increasing
                 }
                 if (m.fieldUpgrades[6].isRewindMode) {
                     this.rewindCount = 0
                     m.grabPowerUpRange2 = 600000
+                    m.fieldUpgrades[6].rewindDrain = 1
 
                     m.hold = function () {
                         if (input.field) m.grabPowerUp();
@@ -5088,7 +5071,8 @@ const m = {
                         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
                             // const drain = 0.0015 / (1 + 0.05 * m.coupling)
                             // const DRAIN = 0.003
-                            const drain = 0.0026 / (1 + 0.03 * m.coupling)
+                            const drain = m.fieldUpgrades[6].rewindDrain * 0.002 / (1 + 0.04 * m.coupling)
+                            m.fieldUpgrades[6].rewindDrain *= 1.0015
                             // const drainFlat = 0.2
                             // if (m.energy > drain) m.energy -= drain
                             if (this.rewindCount === 0) m.lookForBlock();
@@ -5113,9 +5097,10 @@ const m = {
                                 //         m.immuneCycle = m.cycle //if you reach the end of the history disable harm immunity
                                 //     }
                                 // }
-                                this.rewindCount += 3;
+                                this.isRewinding = true
+                                this.rewindCount += 2;
 
-                                let history = m.history[(m.cycle - this.rewindCount) % 600]
+                                let history = m.history[(simulation.cycle - this.rewindCount) % 600]
                                 if (this.rewindCount > 599 || m.energy < drain) {
                                     this.rewindCount = 0;
                                     m.resetHistory();
@@ -5132,11 +5117,11 @@ const m = {
                                     Matter.Body.setPosition(player, history.position);
                                     Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
 
-                                    // if (m.health < history.health) {
-                                    m.health = history.health
-                                    if (m.health > m.maxHealth) m.health = m.maxHealth
-                                    m.displayHealth();
-                                    // }
+                                    if (m.health < history.health) {
+                                        m.health = history.health
+                                        if (m.health > m.maxHealth) m.health = m.maxHealth
+                                        m.displayHealth();
+                                    }
 
                                     m.yOff = history.yOff
                                     if (m.yOff < 48) {
@@ -5150,25 +5135,8 @@ const m = {
                                     const percentLeft = this.rewindCount / 600
                                     ctx.arc(m.pos.x, m.pos.y, 30, 3 * Math.PI / 2, 2 * Math.PI * (1 - percentLeft) + 3 * Math.PI / 2);
                                     ctx.lineTo(m.pos.x, m.pos.y)
-                                    // ctx.strokeStyle = "rgba(100,255,255,0.9)";
-                                    // ctx.lineWidth = 5
-                                    // ctx.stroke();
-                                    // ctx.fillStyle = `rgba(190,255,255,${0.2 + 0.8 * percentLeft})`;
                                     ctx.fillStyle = `rgba(0,150,150,${percentLeft})`;
                                     ctx.fill()
-
-
-                                    // if (tech.isRewindBot && !(this.rewindCount % 60)) {
-                                    //     for (let i = 0; i < tech.isRewindBot; i++) {
-                                    //         b.randomBot(m.pos, false, false)
-                                    //         bullet[bullet.length - 1].endCycle = simulation.cycle + 300 + Math.floor(180 * Math.random()) //8-9 seconds
-                                    //     }
-                                    // }
-                                    // if (tech.isRewindGrenade && !(this.rewindCount % 30)) {
-                                    //     b.grenade(m.pos, this.rewindCount) //Math.PI / 2
-                                    //     const who = bullet[bullet.length - 1]
-                                    //     who.endCycle = simulation.cycle + 120
-                                    // }
                                     m.grabPowerUpEasy();
                                 }
                             }
@@ -5186,6 +5154,23 @@ const m = {
                             m.wakeCheck();
                         }
                         m.drawRegenEnergy() // this calls  m.regenEnergy(); also
+                        if (!(input.field && m.fieldCDcycle < m.cycle)) {
+                            if (m.fieldUpgrades[6].rewindDrain > 1) m.fieldUpgrades[6].rewindDrain /= 1.0005
+                            if (this.isRewinding) {
+                                this.isRewinding = false
+                                m.resetHistory()
+                            }
+                            // for (let i = 0; i < bullet.length; i++) {
+                            //     if (bullet[i].botType) {
+                            //         if (Vector.magnitudeSquared(Vector.sub(bullet[i].position, player.position)) > 1000000) { //far away bots teleport to player
+                            //             Matter.Body.setPosition(bullet[i], Vector.add(player.position, { x: 250 * (Math.random() - 0.5), y: 250 * (Math.random() - 0.5) }));
+                            //             Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
+                            //         } else { //close bots maintain relative distance to player on teleport
+                            //             Matter.Body.setPosition(bullet[i], Vector.sub(bullet[i].position, change));
+                            //         }
+                            //     }
+                            // }
+                        }
                     }
                 } else {
                     m.grabPowerUpRange2 = 200000

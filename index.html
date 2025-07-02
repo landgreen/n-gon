@@ -7,12 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Browser-based side scrolling video game with the matter.js physics engine.">
     <meta name="author" content="Ross Landgreen">
-    <meta property="og:description"
-        content="Browser-based side scrolling video game with the matter.js physics engine.">
+    <meta property="og:description" content="Browser-based side scrolling video game with the matter.js physics engine.">
     <meta property="og:title" content="n-gon">
     <meta name="twitter:title" content="n-gon">
-    <meta name="twitter:description"
-        content="Browser-based side scrolling video game with the matter.js physics engine.">
+    <meta name="twitter:description" content="Browser-based side scrolling video game with the matter.js physics engine.">
     <!-- <meta http-equiv="refresh" content="0; url=https://landgreen.github.io/n-gon/"> -->
     <title>n-gon</title>
     <link rel="stylesheet" href="style.css">
@@ -41,17 +39,14 @@
     <div style="position: absolute; top:0;right:0;">
         <div id="pause-grid-right" class="pause-grid"></div>
     </div>
-    <svg class="SVG-button SVG-button-splash" id="start-button" width="82" height="45" stroke='none' fill='#333'
-        font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame()">
+    <svg class="SVG-button SVG-button-splash" id="start-button" width="82" height="45" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame()">
         <text x="10" y="32">start</text>
     </svg>
-    <svg class="SVG-button SVG-button-splash" id="training-button" width="120" height="45" stroke='none' fill='#333'
-        font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame(false, true)">
+    <svg class="SVG-button SVG-button-splash" id="training-button" width="120" height="45" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame(false, true)">
         <text x="10" y="32">training</text>
     </svg>
     <svg class="SVG-button SVG-button-splash" id="experiment-button" width="170" height="45">
-        <text stroke='none' fill='#333' stroke-width="2" font-size="30px" font-family="Arial, sans-serif" x="10"
-            y="32">experiment</text>
+        <text stroke='none' fill='#333' stroke-width="2" font-size="30px" font-family="Arial, sans-serif" x="10" y="32">experiment</text>
     </svg>
 
 
@@ -60,14 +55,11 @@
             <details id='settings-details'>
                 <summary>settings</summary>
                 <div class="details-div" style="max-width: 24rem; line-height: 150%;">
-                    <input onclick="build.showImages('settings')" type="checkbox" id="hide-images" name="hide-images"
-                        style="width:17px; height:17px;">
-                    <label for="hide-images" title="hide images for fields, guns, and tech">hide images</label>
+                    <input onclick="build.showImages('settings')" type="checkbox" id="show-images" name="show-images" style="width:17px; height:17px;">
+                    <label for="show-images" title="hide images for fields, guns, and tech">show AI images</label>
                     <br>
-                    <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud"
-                        style="width:17px; height:17px;">
-                    <label for="hide-hud"
-                        title="hide: tech, damage taken, damage, in game console, new level animation">minimal
+                    <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" style="width:17px; height:17px;">
+                    <label for="hide-hud" title="hide: tech, damage taken, damage, in game console, new level animation">minimal
                         HUD</label>
                     <br>
                     <label for="fps-select" title="use this to slow the game down">limit frames per second:</label>
@@ -81,29 +73,21 @@
                     <br>
                     <br>
                     <input type="checkbox" id="community-maps" name="community-maps" style="width:17px; height:17px;">
-                    <label for="community-maps"
-                        title="add about 18 player made levels to the random n-gon level pool">community maps</label>
+                    <label for="community-maps" title="add about 18 player made levels to the random n-gon level pool">community maps</label>
                     <br>
-                    <label for="banned"
-                        title="type banned levels with a space between them.  Example:  run temple biohazard">banned
+                    <label for="banned" title="type banned levels with a space between them.  Example:  run temple biohazard">banned
                         levels:</label>
-                    <input id="banned" name="banned" placeholder="list levels by name" autocomplete="off"
-                        spellcheck="false" style="width: 182px;" />
+                    <input id="banned" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="false" style="width: 182px;" />
                     <br>
-                    <label for="seed"
-                        title="the randoms seed determines level order, tech choices, and mob types">randomization
+                    <label for="seed" title="the randoms seed determines level order, tech choices, and mob types">randomization
                         seed:</label>
-                    <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1"
-                        style="width: 120px;">
+                    <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" style="width: 120px;">
                     <br><span id="previous-seed" style="color:#bbb"></span>
                     <br>
-                    <svg class="SVG-button SVG-button-splash" id="enable-gamepad" width="300" height="60" stroke='none'
-                        fill='#333' font-family="Arial, sans-serif"
-                        onclick="javascript: (async () => { const scriptText = await (await fetch('https://raw.githubusercontent.com/kgurchiek/n-gon-controller/main/main.js')).text(); var script = document.createElement('script'); script.type = 'text/javascript'; script.textContent = scriptText; document.head.appendChild(script); document.getElementById('enable-gamepad').style.stroke = '#0b5';})();">
+                    <svg class="SVG-button SVG-button-splash" id="enable-gamepad" width="300" height="60" stroke='none' fill='#333' font-family="Arial, sans-serif" onclick="javascript: (async () => { const scriptText = await (await fetch('https://raw.githubusercontent.com/kgurchiek/n-gon-controller/main/main.js')).text(); var script = document.createElement('script'); script.type = 'text/javascript'; script.textContent = scriptText; document.head.appendChild(script); document.getElementById('enable-gamepad').style.stroke = '#0b5';})();">
                         <text x="39" y="19" font-size="22px">load gamepad support</text>
                         <text x="40" y="38" fill='#aaa' font-size="15px">community code, external script</text>
-                        <text x="12" y="55" fill='#aaa'
-                            font-size="14px">https://github.com/kgurchiek/n-gon-controller</text>
+                        <text x="12" y="55" fill='#aaa' font-size="14px">https://github.com/kgurchiek/n-gon-controller</text>
                     </svg>
 
                 </div>
@@ -172,6 +156,11 @@
                             <td id='key-pause' class='key-input'>P</td>
                             <td></td>
                         </tr>
+                        <tr>
+                            <th>FULLSCREEN</th>
+                            <td id='key-fullscreen' class='key-input'>O</td>
+                            <td></td>
+                        </tr>
                         <tr id="control-testing">
                             <th>TESTING</th>
                             <td id='key-testing' class='key-input'>T</td>
@@ -186,8 +175,7 @@
         <div>
             <details id="updates">
                 <summary>updates</summary>
-                <div id="updates-div" class="details-div"
-                    style="font-size: 70%;height: 400px;overflow: scroll;max-width: 50rem;"></div>
+                <div id="updates-div" class="details-div" style="font-size: 70%;height: 400px;overflow: scroll;max-width: 50rem;"></div>
             </details>
         </div>
         <div>
@@ -203,8 +191,7 @@
                         </svg> -->
                         <svg viewBox="-19 -8 40 16" xmlns="http://www.w3.org/2000/svg" stroke="#333" stroke-width="0.4">
                             <defs>
-                                <linearGradient id="horizontalGradient" x1="-8" y1="0" x2="8" y2="0"
-                                    gradientUnits="userSpaceOnUse">
+                                <linearGradient id="horizontalGradient" x1="-8" y1="0" x2="8" y2="0" gradientUnits="userSpaceOnUse">
                                     <stop offset="0%" stop-color="#e0e3e6" />
                                     <stop offset="100%" stop-color="#fff" />
                                 </linearGradient>
@@ -216,10 +203,8 @@
                     </a>
                     <p>
                         I wrote n-gon in JavaScript, CSS, and HTML using the matter.js 2-D physics library.
-                        The code is free and open source on <a id="github" href="https://github.com/landgreen/n-gon"
-                            aria-label="github">Github</a>.
-                        This is just my hobby project, but I try to fix bugs when <a id="github"
-                            href="https://github.com/landgreen/n-gon/issues" aria-label="github">reported</a>.
+                        The code is free and open source on <a id="github" href="https://github.com/landgreen/n-gon" aria-label="github">Github</a>.
+                        This is just my hobby project, but I try to fix bugs when <a id="github" href="https://github.com/landgreen/n-gon/issues" aria-label="github">reported</a>.
                     </p>
 
                     <span style="max-width: 25rem; line-height: 180%;">
@@ -272,80 +257,80 @@
         <g class="fade-in" transform="translate(100,210) scale(34)" fill='#afafaf' stroke='none'>
             <path d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" />
             <rect x="4" y="1.25" width="1" height="0.5" rx='0.03' />
-            <path transform="translate(6.9,0) scale(1.25)"
-                d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
-            <path transform="translate(10.9,0) scale(1.25)"
-                d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
+            <path transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
+            <path transform="translate(10.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
             <path transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" />
         </g>
-        <g transform="translate(100,210) scale(34)" fill='none' stroke='#333' stroke-linejoin="round"
-            stroke-linecap="round">
-            <path class="draw-lines" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z"
-                stroke-width='0.0875' />
+        <g transform="translate(100,210) scale(34)" fill='none' stroke='#333' stroke-linejoin="round" stroke-linecap="round">
+            <path class="draw-lines" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
             <rect class="draw-lines-dash" x="4" y="1.25" width="1" height="0.5" stroke-width='0.0875' rx='0.03' />
-            <path class="draw-lines-g" transform="translate(6.9,0) scale(1.25)"
-                d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z"
-                stroke-width='0.07' />
-            <path class="draw-lines-o" transform="translate(10.9,0) scale(1.25)"
-                d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
-            <path class="draw-lines" transform="translate(14,0)"
-                d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
+            <path class="draw-lines-g" transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
+            <path class="draw-lines-o" transform="translate(10.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
+            <path class="draw-lines" transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
         </g>
         <!-- mouse -->
-        <g class="draw-lines3" transform="translate(290,430) scale(0.28)" stroke-linecap="round" stroke-linejoin="round"
-            stroke-width="10px" stroke="#333" fill="none">
-            <path class="fade-in" stroke="none" fill="#fff"
-                d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
-            <path class="fade-in" d="M832.41,106.64 V322 H651.57 V255 c0-82,67.5-148,150-148 Z" fill="rgb(0, 200, 255)"
-                stroke="none" />
-            <path
-                d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
+        <g class="draw-lines3" transform="translate(290,430) scale(0.28)" stroke-linecap="round" stroke-linejoin="round" stroke-width="10px" stroke="#333" fill="none">
+            <path class="fade-in" stroke="none" fill="#fff" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
+            <path class="fade-in" d="M832.41,106.64 V322 H651.57 V255 c0-82,67.5-148,150-148 Z" fill="rgb(0, 200, 255)" stroke="none" />
+            <path d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
             <path d="M657 317 h340 h-170 v-25 m0 -140 v-42 s 21 -59, -5 -59 S 807 7, 807 7" />
             <ellipse fill="none" cx="827.57" cy="218.64" rx="29" ry="68" />
             <ellipse fill="#fff" class="fade-in-fast" cx="827.57" cy="218.64" rx="29" ry="68" />
         </g>
 
         <!-- keys -->
-        <g transform="translate(195,480) scale(0.8)">
+        <g transform="translate(95,480) scale(0.8)">
             <!-- fade in background -->
             <g fill='#fff' stroke='none' class="fade-in">
-                <path d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
+                <path d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" opacity="0.1" />
                 <path d="M70 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
-                <path d="M140 60 h60 v-60 h-60 v60" class="draw-lines-box-3" />
+                <path d="M140 60 h60 v-60 h-60 v60" class="draw-lines-box-3" opacity="0.1" />
+
+                <path d="M240 60 h60 v-60 h-60 v60" class="draw-lines-box-2" opacity="0.1" />
+                <path d="M310 60 h60 v-60 h-60 v60" class="draw-lines-box-1" opacity="0.1" />
+
                 <path d="M0 70 h60 v60 h-60 v-60" class="draw-lines-box-1" />
                 <path d="M70 70 h60 v60 h-60 v-60" class="draw-lines-box-2" />
                 <path d="M140 70 h60 v60 h-60 v-60" class="draw-lines-box-3" />
             </g>
             <g fill='none' stroke='#333' stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
-                <path d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
-                <!-- <rect x="0" y="0" width="60" height="60" rx="10" ry="10" class="draw-lines-box-1" /> -->
+                <path d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" opacity="0.1" />
                 <path d="M70 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
-                <path d="M140 60 h60 v-60 h-60 v60" class="draw-lines-box-3" />
+                <path d="M140 60 h60 v-60 h-60 v60" class="draw-lines-box-3" opacity="0.1" />
+
+                <path d="M240 60 h60 v-60 h-60 v60" class="draw-lines-box-2" opacity="0.1" />
+                <path d="M310 60 h60 v-60 h-60 v60" class="draw-lines-box-1" opacity="0.1" />
+
                 <path d="M0 70 h60 v60 h-60 v-60" class="draw-lines-box-1" />
                 <path d="M70 70 h60 v60 h-60 v-60" class="draw-lines-box-2" />
                 <path d="M140 70 h60 v60 h-60 v-60" class="draw-lines-box-3" />
             </g>
-            <g class="draw-lines4" text-anchor="middle" stroke='#000' fill='none' stroke-width="2" font-size="38px"
-                font-family="Arial Black, sans-serif">
-                <text x="30" y="45" id="splash-previous-gun" stroke-width="2">Q</text>
+            <g class="draw-lines4" text-anchor="middle" stroke='#000' fill='none' stroke-width="2" font-size="38px" font-family="Arial Black, sans-serif">
+                <text x="30" y="45" id="splash-previous-gun" stroke-width="2" opacity="0.1">Q</text>
                 <text x="100" y="45" id="splash-up">W</text>
-                <text x="170" y="45" id="splash-next-gun" stroke-width="2">E</text>
+                <text x="170" y="45" id="splash-next-gun" stroke-width="2" opacity="0.1">E</text>
                 <text x="30" y="113" id="splash-left">A</text>
                 <text x="100" y="113" id="splash-down">S</text>
                 <text x="170" y="113" id="splash-right">D</text>
+                <text x="270" y="45" id="splash-fullscreen" opacity="0.1">O</text>
+                <text x="340" y="45" id="splash-pause" opacity="0.1">P</text>
             </g>
         </g>
         <g class="fade-in" fill="none" stroke="#aaa" stroke-width="1">
-            <path d="M 254 433.5 h-35.5 v40" />
-            <path d="M 295 433.5 h36.5 v40" />
-            <path d="M 274 625 v-35" />
+            <path d="M 154 433.5 h-35.5 v40" opacity="0.3" />
+            <path d="M 195 433.5 h36.5 v40" opacity="0.3" />
+            <path d="M 311 533 v+50" opacity="0.3" />
+            <path d="M 364 533 v+20" opacity="0.3" />
+            <path d="M 174 625 v-35" />
             <path d="M 430.5 442 v50 h38" />
             <path d="M 612.5 442 v50 h-38" />
         </g>
         <g class="fade-in" stroke="none" fill="#aaa" font-size="16px">
-            <text x="253" y="422">switch</text>
-            <text x="257" y="438">guns</text>
-            <text x="255" y="638">move</text>
+            <text x="153" y="422" opacity="0.3">switch</text>
+            <text x="157" y="438" opacity="0.3">guns</text>
+            <text x="278" y="596" opacity="0.3">fullscreen</text>
+            <text x="344" y="566" opacity="0.3">pause</text>
+            <text x="155" y="638">move</text>
             <text x="420" y="438">fire</text>
             <text x="599" y="438">field</text>
         </g>

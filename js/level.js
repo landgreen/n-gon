@@ -37,6 +37,11 @@ const level = {
             // m.setField(3) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
+            // m.fieldUpgrades[6].isRewindMode = true
+            // window.removeEventListener("keydown", m.fieldEvent);
+            // m.fieldUpgrades[6].set()
+            // m.wakeCheck();
+
             // m.maxHealth = m.health = 10000000
             // m.displayHealth();
             // m.immuneCycle = Infinity //you can't take damage
@@ -57,8 +62,8 @@ const level = {
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("equivalence principle")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("bremsstrahlung")
-            // for (let i = 0; i < 1; i++) tech.giveTech("nail-bot")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("time crystals")
+            // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
             // for (let i = 0; i < 1; i++) tech.giveTech("boom-bot")
             // for (let i = 0; i < 1; i++) tech.giveTech("laser-bot")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("aerostat") });
@@ -68,14 +73,14 @@ const level = {
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
-            // level.corridor()
+            // level.gravitron()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
             // for (let i = 0; i < 14; i++) spawn.starter(1300 + 100 * i, -200)
-            // for (let i = 0; i < 1; i++) spawn.conductorBoss(1100 + 100 * i, -100 - i * 100)
+            // for (let i = 0; i < 1; i++) spawn.historyBoss(1100 + 100 * i, -100 - i * 100)
             // for (let i = 0; i < 3; i++) spawn.freezer(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
             // for (let i = 0; i < 1; i++) spawn.laserLayer(1100 + 100 * i, -400, 50)
@@ -84,7 +89,7 @@ const level = {
             // for (let i = 0; i < 1; ++i) spawn.spiderBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
-            // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 500 * Math.random(), m.pos.y + 500 * Math.random(), "coupling");
+            // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 500 * Math.random(), m.pos.y + 500 * Math.random(), "heal");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             //lore testing
             // localSettings.isTrainingNotAttempted = true
@@ -104,7 +109,7 @@ const level = {
             // lore.unlockTesting();
             // tech.giveTech("tinker"); //show junk tech in experiment mode
             // m.storeTech()
-            // powerUps.spawn(m.pos.x, m.pos.y, "entanglement", false);
+            // powerUps.spawn(m.pos.x, m.pos.y, "instructions", false);
             // for (let i = 0; i < 4; i++) localSettings.difficultyCompleted[i] = true
             // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         } else {
@@ -27752,22 +27757,6 @@ const level = {
                     ctx.fillStyle = "#ccc";
                     ctx.fillRect(-50000, -50000, 100000, 100000)
                     ctx.globalCompositeOperation = "source-over"
-                    // stop time
-                    // m.isTimeDilated = true;
-                    // function sleep(who) {
-                    // for (let i = 0, len = who.length; i < len; ++i) {
-                    // if (!who[i].isSleeping) {
-                    // who[i].storeVelocity = who[i].velocity
-                    // who[i].storeAngularVelocity = who[i].angularVelocity
-                    // }
-                    // Matter.Sleeping.set(who[i], true)
-                    // }
-                    // }
-                    // sleep(mob);
-                    // sleep(body);
-                    // sleep(bullet);
-                    // sleep([player]);
-                    // simulation.cycle--;
                 }
                 if (this.seePlayer.recall) { //fields
                     this.gun()

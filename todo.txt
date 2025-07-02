@@ -1,41 +1,91 @@
 ******************************************************** NEXT PATCH **************************************************
 
-secret combos
-  metamaterial cloaking
-  negative mass
+press "o" to toggle fullscreen + pointer lock mode
+  doesn't work well in safari browser
+startle response removed
+  because it's too strong now that I got fullscreen mode working
 
-level gravitron - shrunk central tower a bit
+switched the setting "hide images" to "show AI images"
+  setting may switch off/on once as they update to the new patch, sorry
+
+ice crystal nucleation
+  freeze lasts 1->2s
+  0.5x energy cost
+
+time rewind code switched to the simulation clock instead of the player clock
+  as a side effect simulation.cycle needs to start at 600, not zero
+time dilation combo
+    health can only increase during rewind
+    rewind rate is 3->2 cycles (slower)
+    rewind history clears after each period of rewinding
+    rewind energy cost slowly increases while rewinding to prevent unlimited use
+      cost returns to baseline at 0.3x the rate of cost growth
+
+grenadier no longer drops grenades on death 
+stinger wings do 2x damage
+stingWinger wings do 4x damage
+sneakyStriker has 2x health
+bigSucker has 1.6x health
+slasher4,5 have 1.5x health
+finalBoss makes seeker bullets at a much faster rate
 
 bugs
-  tutorial levels
-    starter mobs didn't die in one shot throwing blocks
-    died on the falling bullets level from sniperBullets
+  constraint: 33% of mobs respawn, wasn't making mobs
+  pressure vessel no longer discharges foam during time dilation
+  negative mass field sometimes flashes when low on energy
+    maybe only when energy is a odd decimal?
+    I think I fixed it... not sure
 
-
-******************************************************** BUGS ********************************************************
-
-
-dmg side bar is too long sometimes
-  maybe rework damage indications
-
-graphical bug - player can become crouched while not touching the ground if they exit the ground while crouched
-
-safari browser looks weird with several stroke animations
-  might be related to dashed stroke 
-    ctx.setLineDash([200, 200]);
-  examples
-    going to next level, doorway animation
-    plasma field secret combo lightning
 
 
 *********************************************************** TODO *****************************************************
 
-n-gon long term goals
-  more wild synergies, less balanced for rare combos
-  more subtle lore hints and world building
-  more secrets
-  more indication of when things occur
+tech - nonrefundable that adds a tech to the pool that just does a free research
+  activate by changing frequency of preexisting tech form 0->X
+  maybe field tech?
+    if field tech if might not require an activation tech.
 
+tech, field? base game? - doing damage heals 1x (less?) of the last damage taken
+  so you can't heal if you take damage twice before doing enough damage
+    should work similar to the cloaking heal tech 
+  how much damage? change in m.health needs to match total damage done to mobs
+  makes sense as a field tech
+    ?plasma torch, pilot wave, molecular assembler
+    couple scale with coupling
+
+super balls tech - that hit blocks produce 10 balls?
+  destroy the block after 3 hits?
+
+late, end game mobs feel kinda samey
+  make more mob types
+  make more versions of popular mobs
+  T1 - seems fine
+  T2 - fine
+  T3 - 
+  T4 - too busy, too many bullets effects
+    give T4 and T3? mobs double health bars
+      on damage set health to full again, once
+        can we change the health bar color?
+          how does stun do it?
+
+    make simple mobs
+      high damage
+      need skill to avoid damage
+        boss that requires player to be close to mob to avoid damage
+          only triggers in within range?  2000-1000 is deadly?
+      high health
+      immune to damage unless you do something skill based
+      slow player?
+
+tech? - every time you fire, do a little jump basically ignore gravity and stay in one spot while firing
+  helps with aiming?
+  gun tech?
+    harpoon?
+
+nail gun guntech - needles follow you around until you get close to a mob and then they all fire
+
+consider switching font to monospace?
+  tech descriptions would be hugely impacted
 
 tech:   -  scale max energy with current health
   nonrefundable
@@ -182,9 +232,6 @@ cycle challenge each level?, no too confusing, but maybe randomize each time it 
 how to code?
   ephemera that watches key input states?
   rewrite event listener?
-
-look into locking mouse into the browser again
-  full screen
 
 mob status: confused - I could rotate the velocity that mobs have gently over 1-2 seconds. that might work.
 
@@ -1527,8 +1574,33 @@ possible names for tech
   virtual particles - can have these properties: imaginary mass, violation of the conservation of energy, violation of causality, traveling faster than light or backwards in time, popping in and out of the vacuum via vacuum fluctuations
   Sintering - the process of compacting and forming a solid mass of material by pressure[1] or heat[2] without melting it to the point of liquefaction. Sintering happens as part of a manufacturing process used with metals, ceramics, plastics, 
   Kolmogorov complexity - how long a computer program for an algorithm is
+  r-selection - flea/worm tech - opposite of K-selection, so lots of weaker sproes/fleas
+
+
+******************************************************** BUGS ********************************************************
+
+dmg side bar is too long sometimes
+  maybe rework damage indications
+
+graphical bug - player can become crouched while not touching the ground if they exit the ground while crouched
+
+safari browser looks weird with several stroke animations
+  might be related to dashed stroke 
+    ctx.setLineDash([200, 200]);
+  examples
+    going to next level, doorway animation
+    plasma field secret combo lightning
+
+on floccuation level there is a map element with poorly formed vertices
+  matter.min.js:16 matter-js: Bodies.fromVertices: Install the 'poly-decomp' library and use Common.setDecomp or provide 'decomp' as a global to decompose concave vertices.
 
 ******************************************************* DESIGN ******************************************************
+
+n-gon long term goals
+  more wild synergies, less balanced for rare combos
+  more subtle lore hints and world building
+  more secrets
+  more indication of when things occur
 
 priorities    
   synergies between tech

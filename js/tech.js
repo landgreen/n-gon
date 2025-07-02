@@ -9839,31 +9839,31 @@ const tech = {
             }
         }
     },
-    {
-        name: "startle response",
-        description: `if a threat is nearby, activate a ${powerUps.orb.boost(1)}<br>and lock your mouse until you press escape`,
-        maxCount: 1,
-        count: 0,
-        frequency: 0,
-        isJunk: true,
-        isInstant: true,
-        allowed: () => true,
-        requires: "",
-        effect() {
-            setInterval(() => {
-                if (powerUps.boost.endCycle < simulation.cycle && !simulation.paused && m.alive) {
-                    for (let i = 0; i < mob.length; i++) {
-                        if (mob[i].distanceToPlayer2() < 400000) { //650
-                            canvas.requestPointerLock();
-                            powerUps.boost.effect();
-                            break
-                        }
-                    }
-                }
-            }, 2000);
-        },
-        remove() { }
-    },
+    // {
+    //     name: "startle response",
+    //     description: `if a threat is nearby, activate a ${powerUps.orb.boost(1)}<br>and lock your mouse until you press escape`,
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 0,
+    //     isJunk: true,
+    //     isInstant: true,
+    //     allowed: () => true,
+    //     requires: "",
+    //     effect() {
+    //         setInterval(() => {
+    //             if (powerUps.boost.endCycle < simulation.cycle && !simulation.paused && m.alive) {
+    //                 for (let i = 0; i < mob.length; i++) {
+    //                     if (mob[i].distanceToPlayer2() < 400000) { //650
+    //                         canvas.requestPointerLock();
+    //                         powerUps.boost.effect();
+    //                         break
+    //                     }
+    //                 }
+    //             }
+    //         }, 2000);
+    //     },
+    //     remove() { }
+    // },
     {
         name: "closed timelike curve",
         description: `spawn ${powerUps.orb.field()}${powerUps.orb.field()}${powerUps.orb.field()}${powerUps.orb.field()}${powerUps.orb.field()}, but every 12 seconds<br>teleport a second into your future or past`,

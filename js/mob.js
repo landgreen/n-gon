@@ -361,7 +361,7 @@ const mobs = {
                         this.lostPlayer();
                         if (!m.isCloak) {
                             for (let i = 0; i < depth; i++) { //if lost player lock onto a player location in history
-                                let history = m.history[(m.cycle - 10 * i) % 600]
+                                let history = m.history[(simulation.cycle - 10 * i) % 600]
                                 if (Matter.Query.ray(map, this.position, history.position).length === 0) {
                                     this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //cycles before mob falls a sleep
                                     this.seePlayer.position.x = history.position.x;
@@ -1140,10 +1140,7 @@ const mobs = {
                             time: 60
                         });
                         setTimeout(() => {
-                            // const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
-                            // const size = 16 + Math.ceil(Math.random() * 15)
-                            // spawn[pick](this.position.x, this.position.y, size);
-                            spawn.randomMobByLevelsCleared(2650, -975);
+                            spawn.randomMobByLevelsCleared(this.position.x, this.position.y);
                         }, 1000);
                     }
                     if (tech.healSpawn && Math.random() < tech.healSpawn) {

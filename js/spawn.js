@@ -560,7 +560,7 @@ const spawn = {
         },
         {
             name: "seekers",
-            spawnRate: Math.max(15, 100 - 3 * simulation.difficultyMode),
+            spawnRate: Math.max(10, 80 - 6 * simulation.difficultyMode),
             do() {
                 if (!(me.cycle % this.spawnRate) && mob.length < me.maxMobs) { //spawn seeker
                     const index = Math.floor((me.cycle % 360) / 60)
@@ -2416,7 +2416,7 @@ const spawn = {
     bigSucker(x, y, radius = 10) {
         mobs.spawn(x, y, 9, radius, "#fff");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.0025); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0035); //normal is 0.001
         me.tier = 4
         me.isVerticesChange = true
         me.big = false; //required for grow
@@ -3044,10 +3044,7 @@ const spawn = {
                         ctx.scale(1, -1); // Flip vertically
                         //flip mouse Y
                         simulation.isInvertedVertical = true
-                        mouseMove = function (e) {
-                            simulation.mouse.x = e.clientX;
-                            simulation.mouse.y = window.innerHeight - e.clientY;
-                        }
+                        mouseMove.reset()
                     }
                     ctx.setLineDash([]) //reset stroke dash effect
                 })
@@ -3125,7 +3122,7 @@ const spawn = {
 
             if (!this.isStunned && !this.isSlowed) {
                 if (this.followDelay > this.delayLimit) this.followDelay -= 0.15;
-                let history = m.history[(m.cycle - Math.floor(this.followDelay)) % 600]
+                let history = m.history[(simulation.cycle - Math.floor(this.followDelay)) % 600]
                 Matter.Body.setPosition(this, { x: history.position.x, y: history.position.y - history.yOff + 24.2859 }) //bullets move with player
             }
         }
@@ -3370,8 +3367,8 @@ const spawn = {
 
                 const flapArc = 0.8 //don't go past 1.57 for normal flaps
                 ctx.fillStyle = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.2)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
-                this.wing(this.angle + 2.1 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
-                this.wing(this.angle - 2.1 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
+                this.wing(this.angle + 2.1 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius, 0.0015)
+                this.wing(this.angle - 2.1 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius, 0.0015)
 
                 // const seeRange = 2000 + 35 * simulation.difficultyMode;
                 if (this.distanceToPlayer() < 2000) {
@@ -3481,10 +3478,10 @@ const spawn = {
                 let a = Math.atan2(this.velocity.y, this.velocity.x)
                 const color = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.9)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
                 ctx.fillStyle = color//`hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.9)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
-                this.wing(a + Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity)
-                this.wing(a - Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity)
-                this.wing(a - Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity)
-                this.wing(a + Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity)
+                this.wing(a + Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.0025)//dmg = 0.0006
+                this.wing(a - Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.0025)
+                this.wing(a - Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.0025)
+                this.wing(a + Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.0025)
                 // const seeRange = 2000 + 35 * simulation.difficultyMode;
                 if (this.distanceToPlayer() < 3000) {
                     best = {
@@ -4359,7 +4356,7 @@ const spawn = {
                         move(this.seePlayer.position) //go after where you last saw the player
                     } else {
                         for (let i = 0; i < 55; i++) { //if lost player lock onto a player location in history
-                            let history = m.history[(m.cycle - 10 * i) % 600]
+                            let history = m.history[(simulation.cycle - 10 * i) % 600]
                             if (Matter.Query.ray(map, this.position, history.position).length === 0) {
                                 move(history.position) //go after where you last saw the player
                                 break
@@ -4584,7 +4581,7 @@ const spawn = {
                         move(this.seePlayer.position) //go after where you last saw the player
                     } else {
                         for (let i = 0; i < 55; i++) { //if lost player lock onto a player location in history
-                            let history = m.history[(m.cycle - 10 * i) % 600]
+                            let history = m.history[(simulation.cycle - 10 * i) % 600]
                             if (Matter.Query.ray(map, this.position, history.position).length === 0) {
                                 move(history.position) //go after where you last saw the player
                                 break
@@ -4727,7 +4724,7 @@ const spawn = {
                 } else { //aim at player
                     this.fireCycle++
                     //if cloaked, aim at player's history from 3 seconds ago
-                    const whereIsPlayer = m.isCloak ? m.history[(m.cycle - 180) % 600].position : m.pos
+                    const whereIsPlayer = m.isCloak ? m.history[(simulation.cycle - 180) % 600].position : m.pos
                     this.fireDir = Vector.normalise(Vector.sub(whereIsPlayer, this.position)); //set direction to turn to fire
                     //rotate towards fireAngle
                     const angle = this.angle + Math.PI / 2;
@@ -7048,7 +7045,7 @@ const spawn = {
         mobs.spawn(x, y, sides, radius, "rgb(100, 100, 100)");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.0025); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0035); //normal is 0.001
         me.accelMag = 0.00075 * simulation.accelScale;
         me.frictionStatic = 0;
         me.friction = 0;
@@ -7173,7 +7170,7 @@ const spawn = {
         mobs.spawn(x, y, sides, radius, "rgb(255, 255, 255)");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.0045); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0055); //normal is 0.001
         me.accelMag = 0.00135
         me.frictionStatic = 0;
         me.friction = 0;
@@ -7415,7 +7412,7 @@ const spawn = {
                 }
                 //teleport to near the end of player history
                 const index = Math.floor((m.history.length - 1) * (0.66 + 0.2 * Math.random()))
-                let history = m.history[(m.cycle - index) % 600]
+                let history = m.history[(simulation.cycle - index) % 600]
                 Matter.Body.setPosition(this, history.position)
                 Matter.Body.setVelocity(this, { x: 0, y: 0 });
 
@@ -7559,11 +7556,11 @@ const spawn = {
             }
         };
     },
-    sneakyStriker(x, y, radius = 30) {
+    sneakyStriker(x, y, radius = 35) {
         mobs.spawn(x, y, 7, radius, "transparent");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.0013); //normal is 0.001
+        Matter.Body.setDensity(me, 0.002); //normal is 0.001
         me.accelMag = 0.001
         me.frictionAir = 0.01;
         me.g = 0.0002; //required if using this.gravity
@@ -7617,7 +7614,7 @@ const spawn = {
                     this.lostPlayer();
                     if (!m.isCloak) {
                         for (let i = 0; i < 20; i++) { //if lost player lock onto a player location in history
-                            let history = m.history[(m.cycle - 10 * i) % 600]
+                            let history = m.history[(simulation.cycle - 10 * i) % 600]
                             if (Matter.Query.ray(map, this.position, history.position).length === 0) {
                                 this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //cycles before mob falls a sleep
                                 this.seePlayer.position.x = history.position.x;
@@ -8454,7 +8451,7 @@ const spawn = {
             this.attraction();
         };
     },
-    grenadier(x, y, radius = 45) {
+    grenadier(x, y, radius = 50) {
         mobs.spawn(x, y, 3, radius, "rgb(0,235,255)"); //rgb(255,100,200)
         let me = mob[mob.length - 1];
         me.tier = 1
@@ -8473,9 +8470,9 @@ const spawn = {
         me.torque = 0.0001 * me.inertia * (Math.random() > 0.5 ? -1 : 1)
         me.fireDir = { x: 0, y: 0 };
         me.onDeath = function () { //helps collisions functions work better after vertex have been changed
-            setTimeout(() => { //fix mob in place, but allow rotation
-                spawn.grenade(this.position.x, this.position.y, this.tier, 150);
-            }, 200);
+            // setTimeout(() => { //fix mob in place, but allow rotation
+            //     spawn.grenade(this.position.x, this.position.y, this.tier, 150);
+            // }, 200);
         }
         spawn.shield(me, x, y);
         me.do = function () {

@@ -4497,7 +4497,7 @@ const b = {
                         }
                     }
                 }
-                let history = m.history[(m.cycle - this.followDelay) % 600]
+                let history = m.history[(simulation.cycle - this.followDelay) % 600]
                 Matter.Body.setPosition(this, { x: history.position.x, y: history.position.y - history.yOff + 24.2859 }) //bullets move with player
             }
         })
@@ -5684,7 +5684,7 @@ const b = {
                 }) //position, velocity, damage
                 if (tech.isIceCrystals) {
                     bullet[bullet.length - 1].beforeDmg = function (who) {
-                        mobs.statusSlow(who, 60)
+                        mobs.statusSlow(who, 120)
                         if (tech.isNailRadiation) mobs.statusDoT(who, 1 * (tech.isFastRadiation ? 1.3 : 0.44), tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
                         if (tech.isNailCrit) {
                             if (!who.shield && Vector.dot(Vector.normalise(Vector.sub(who.position, this.position)), Vector.normalise(this.velocity)) > 0.97 - 1 / who.radius) {
@@ -5696,7 +5696,7 @@ const b = {
                     if (m.energy < 0.01) {
                         m.fireCDcycle = m.cycle + 60; // cool down
                     } else {
-                        m.energy -= 0.01
+                        m.energy -= 0.005
                     }
                 }
             },
@@ -6874,7 +6874,7 @@ const b = {
                     ctx.arc(m.pos.x + mag * Math.cos(m.angle), m.pos.y + mag * Math.sin(m.angle), radius, 0, 2 * Math.PI);
                     ctx.fill();
 
-                    if (this.isDischarge && m.cycle % 2) {
+                    if (this.isDischarge && m.cycle % 2 && !m.isTimeDilated) {
                         const spread = (m.crouch ? 0.04 : 0.5) * (Math.random() - 0.5)
                         const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
                         const SPEED = (m.crouch ? 1.2 : 1) * 10 - radius * 0.4 + Math.min(5, Math.sqrt(this.charge));
@@ -7374,7 +7374,7 @@ const b = {
                                 const mag = 4.1 * Math.sqrt(this.charge)
                                 ctx.beginPath();
                                 for (let i = 0; i < len; i++) {
-                                    const history = m.history[(m.cycle - i * spacing) % 600]
+                                    const history = m.history[(simulation.cycle - i * spacing) % 600]
                                     const off = history.yOff - 24.2859
                                     ctx.moveTo(history.position.x, history.position.y - off);
                                     ctx.ellipse(history.position.x, history.position.y - off, mag, mag * 0.65, history.angle, 0, 2 * Math.PI)
@@ -7386,7 +7386,7 @@ const b = {
                                     if (this.charge > 5) {
                                         m.fireCDcycle = m.cycle + Math.floor(35 * b.fireCDscale); // cool down
                                         for (let i = 0; i < len; i++) {
-                                            const history = m.history[(m.cycle - i * spacing) % 600]
+                                            const history = m.history[(simulation.cycle - i * spacing) % 600]
                                             const off = history.yOff - 24.2859
                                             b.pulse(1.65 * this.charge * this.lensDamage, history.angle, {
                                                 x: history.position.x,
@@ -7592,7 +7592,7 @@ const b = {
                     }, dmg);
 
                     for (let i = 1, len = 1 + tech.historyLaser; i < len; i++) {
-                        const history = m.history[(m.cycle - i * spacing) % 600]
+                        const history = m.history[(simulation.cycle - i * spacing) % 600]
                         const off = history.yOff - 24.2859 + 2 * i
                         // ctx.globalAlpha = 0.13
                         b.laser({
