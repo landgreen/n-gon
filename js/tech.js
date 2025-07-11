@@ -6973,7 +6973,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isDroneTeleport
+            return tech.isDroneTeleport && (tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldMode === 4 && simulation.molecularMode === 3))
         },
         requires: "drones, brushless motor",
         effect() {
@@ -7028,7 +7028,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isDroneRadioactive
+            return tech.isDroneRadioactive && (tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldMode === 4 && simulation.molecularMode === 3))
         },
         requires: "drones, irradiated drones",
         effect() {
@@ -7048,7 +7048,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isDroneRadioactive
+            return tech.isDroneRadioactive && (tech.haveGunCheck("drones") || tech.isForeverDrones || (m.fieldMode === 4 && simulation.molecularMode === 3))
         },
         requires: "drones, irradiated drones",
         effect() {

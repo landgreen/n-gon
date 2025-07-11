@@ -1431,8 +1431,9 @@ window.addEventListener("keydown", function (event) {
                         simulation.paused = false;
                         // level.levelAnnounce();
                         document.body.style.cursor = "none";
-                        requestAnimationFrame(cycle);
-                        if (document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
+                        requestAnimationFrame(cycle); //restart time
+
+                        if (document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.isChoosing) {
                             canvas.requestPointerLock();
                             mouseMove.isPointerLocked = true
                             mouseMove.reset()
@@ -1501,7 +1502,7 @@ window.addEventListener("keydown", function (event) {
                     input.reset(); //to prevent key ghosting reset all input keys
 
                     // Small delay to ensure fullscreen is established, then lock pointer to canvas
-                    if (!simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
+                    if (!simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused && !simulation.isChoosing) {
                         setTimeout(() => {
                             canvas.requestPointerLock();
                             mouseMove.isPointerLocked = true
@@ -1577,7 +1578,7 @@ window.addEventListener("keydown", function (event) {
                     <td class='key-used'>clear mobs</td>
                 </tr>
                 <tr>
-                    <td class='key-input-pause'>I/O</td>
+                    <td class='key-input-pause'>–/+</td>
                     <td class='key-used'>zoom in / out</td>
                 </tr>
                 <tr>
@@ -1637,13 +1638,13 @@ window.addEventListener("keydown", function (event) {
     if (simulation.testing) {
         if (event.key === "X") m.death(); //only uppercase
         switch (event.key.toLowerCase()) {
-            case "o":
+            case "=":
                 // simulation.isAutoZoom = false;
                 // simulation.zoomScale /= 0.9;
                 // simulation.setZoom();
                 simulation.zoomTransition(simulation.zoomScale / 0.9)
                 break;
-            case "i":
+            case "-":
                 // simulation.isAutoZoom = false;
                 // simulation.zoomScale *= 0.9;
                 // simulation.setZoom();
@@ -1744,6 +1745,13 @@ window.addEventListener("keydown", function (event) {
         }
     }
 });
+
+//exit fullscreen if you switch programs
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && document.fullscreenElement) {
+        document.exitFullscreen();
+    }
+});
 //mouse move input
 const mouseMove = {
     active(e) { },//this controls how the mouse is updated in the mousemove event based on 1 of the 4 methods below
@@ -1778,6 +1786,7 @@ const mouseMove = {
     isMouseInWindow: true,
     pointerUnlock(event) {
         setTimeout(() => {
+            //simulation.isChoosing
             if (mouseMove.isLockPointer && document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
                 mouseMove.isLockPointer = false
                 canvas.requestPointerLock();
@@ -1800,7 +1809,6 @@ const mouseMove = {
             } else {
                 mouseMove.active = mouseMove.inverted
             }
-
         } else {
             if (mouseMove.isPointerLocked) {
                 mouseMove.active = mouseMove.pointerLocked

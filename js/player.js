@@ -3688,7 +3688,7 @@ const m = {
         simulation.inGameConsole(`<div class="circle-grid field"></div> &nbsp; <span class='color-var'>m</span>.setField("<strong class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</strong>")<br>input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>MouseRight</span>"]`);
         if (m.fieldMode === 1) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[1]</span>energyHealthRatio <span class='color-symbol'>=</span> ${m.fieldUpgrades[1].energyHealthRatio} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←←↓→→↓</em>`);
         if (m.fieldMode === 2) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldPosition<span class='color-symbol'>+=</span>10 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">← → ← → ↧</em>`);
-        if (m.fieldMode === 3) simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↖↑→↗↑↑</em>`);
+        if (m.fieldMode === 3) simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↖↑↗→↑↑</em>`);
         if (m.fieldMode === 4) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${m.fieldUpgrades[4].modeText()} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↓↘→↓↙←↑↑↓</em>`);
         if (m.fieldMode === 5) simulation.inGameConsole(`m<span class='color-symbol'>.</span>energy <span class='color-symbol'>+=</span> 0.05 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↙↓↘→→↧</em>`);
         if (m.fieldMode === 6) simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle <span class='color-symbol'>-</span> 200 <span class='color-symbol'>)</span> <span class='color-symbol'>%</span> 600 <span class='color-symbol'>]</span>  &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 0.9rem;color: #055;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`);
@@ -4147,7 +4147,7 @@ const m = {
         },
         {
             name: "negative mass",
-            description: `use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br><strong>0.5x</strong> <strong class='color-defense'>damage taken</strong><br><strong>6</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">←↖↑→↗↑↑</em>`,
+            description: `use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br><strong>0.5x</strong> <strong class='color-defense'>damage taken</strong><br><strong>6</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">←↖↑↗→↑↑</em>`,
             keyLog: [null, null, null, null, null],
             fieldDrawRadius: 0,
             effect: () => {
@@ -4203,7 +4203,7 @@ const m = {
                             //     }
                             // },
                         })
-                        simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↖↑→↗↑↑</em>`);
+                        simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↖↑↗→↑↑</em>`);
                     }
                 }
                 window.addEventListener("keydown", m.fieldEvent);
@@ -4466,7 +4466,7 @@ const m = {
                             bullet[bullet.length - 1].force.y += 0.005 + push.y * (Math.random() - 0.5)
                             // b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
                         } else if (simulation.molecularMode === 2) {
-                            m.energy -= 0.044;
+                            m.energy -= 0.04;
                             b.iceIX(1)
                         } else if (simulation.molecularMode === 3) {
                             if (tech.isDroneRadioactive) {

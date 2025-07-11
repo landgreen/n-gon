@@ -2056,6 +2056,401 @@ const simulation = {
             ctx.fillStyle = "rgba(0, 0, 255, 0.25)";
             ctx.fill();
             // ctx.stroke();
+        },
+        font: {
+            word: new Path2D(),
+            xPos: 0,
+            yPos: 0,
+            drawString(text, x, y) {
+                this.xPos = x
+                this.yPos = y
+                const letters = text.toLowerCase().split('')
+                letters.forEach((letter, index) => {
+                    if (letter >= 'a' && letter <= 'z' && this[letter]) {
+                        this[letter]()
+                        if (index < letters.length - 1) {
+                            this.xPos += 29
+                        }
+                    } else if (letter === ' ') {
+                        this.xPos += 25
+                    }
+                })
+            },
+            a() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 10, this.yPos + 0)
+                this.word.lineTo(this.xPos + 20, this.yPos + 40)
+                this.word.moveTo(this.xPos + 5, this.yPos + 20)
+                this.word.lineTo(this.xPos + 15, this.yPos + 20)
+            },
+            b() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 17, this.yPos + 30)
+                this.word.lineTo(this.xPos + 5, this.yPos + 20)
+                this.word.lineTo(this.xPos + 17, this.yPos + 10)
+                this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            },
+            c() {
+                this.word.moveTo(this.xPos + 18, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 18, this.yPos + 40)
+            },
+            d() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 19, this.yPos + 20)
+                this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            },
+            e() {
+                this.word.moveTo(this.xPos + 17, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 20)
+                this.word.lineTo(this.xPos + 12, this.yPos + 20)
+                this.word.moveTo(this.xPos + 0, this.yPos + 20)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 17, this.yPos + 40)
+            },
+            f() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 20, this.yPos + 0)
+                this.word.moveTo(this.xPos + 0, this.yPos + 20)
+                this.word.lineTo(this.xPos + 14, this.yPos + 20)
+            },
+            g() {
+                this.word.moveTo(this.xPos + 17, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 17, this.yPos + 40)
+                this.word.lineTo(this.xPos + 17, this.yPos + 20)
+                this.word.lineTo(this.xPos + 10, this.yPos + 20)
+            },
+            h() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.moveTo(this.xPos + 0, this.yPos + 20)
+                this.word.lineTo(this.xPos + 17, this.yPos + 20)
+                this.word.lineTo(this.xPos + 17, this.yPos + 40)
+                this.word.moveTo(this.xPos + 17, this.yPos + 20)
+                this.word.lineTo(this.xPos + 17, this.yPos + 0)
+            },
+            i() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 19, this.yPos + 0)
+                this.word.moveTo(this.xPos + 9, this.yPos + 0)
+                this.word.lineTo(this.xPos + 9, this.yPos + 40)
+                this.word.moveTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 19, this.yPos + 40)
+            },
+            j() {
+                this.word.moveTo(this.xPos + 17, this.yPos + 0);
+                this.word.lineTo(this.xPos + 17, this.yPos + 40);
+                this.word.lineTo(this.xPos + 1, this.yPos + 40);
+                this.word.lineTo(this.xPos + 1, this.yPos + 30);
+            },
+            k() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.moveTo(this.xPos + 0, this.yPos + 20)
+                this.word.lineTo(this.xPos + 17, this.yPos + 0)
+                this.word.moveTo(this.xPos + 0, this.yPos + 20)
+                this.word.lineTo(this.xPos + 17, this.yPos + 40)
+            },
+            l() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 19, this.yPos + 40)
+            },
+            m() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 9, this.yPos + 20)
+                this.word.lineTo(this.xPos + 17, this.yPos + 0)
+                this.word.lineTo(this.xPos + 17, this.yPos + 40)
+            },
+            n() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 17, this.yPos + 40)
+                this.word.lineTo(this.xPos + 17, this.yPos + 0)
+            },
+            o() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 12)
+                this.word.lineTo(this.xPos + 9, this.yPos + 0)
+                this.word.lineTo(this.xPos + 17, this.yPos + 12)
+                this.word.lineTo(this.xPos + 17, this.yPos + 28)
+                this.word.lineTo(this.xPos + 9, this.yPos + 40)
+                this.word.lineTo(this.xPos + 0, this.yPos + 28)
+                this.word.lineTo(this.xPos + 0, this.yPos + 12)
+            },
+            p() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 17, this.yPos + 0)
+                this.word.lineTo(this.xPos + 17, this.yPos + 20)
+                this.word.lineTo(this.xPos + 0, this.yPos + 20)
+            },
+            q() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 12)
+                this.word.lineTo(this.xPos + 9, this.yPos + 0)
+                this.word.lineTo(this.xPos + 17, this.yPos + 12)
+                this.word.lineTo(this.xPos + 17, this.yPos + 28)
+                this.word.lineTo(this.xPos + 9, this.yPos + 40)
+                this.word.lineTo(this.xPos + 0, this.yPos + 28)
+                this.word.lineTo(this.xPos + 0, this.yPos + 12)
+                this.word.moveTo(this.xPos + 10, this.yPos + 24)
+                this.word.lineTo(this.xPos + 20, this.yPos + 40)
+            },
+            r() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 17, this.yPos + 0)
+                this.word.lineTo(this.xPos + 17, this.yPos + 20)
+                this.word.lineTo(this.xPos + 0, this.yPos + 20)
+                this.word.lineTo(this.xPos + 19, this.yPos + 40)
+            },
+            s() {
+                this.word.moveTo(this.xPos + 17, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 20)
+                this.word.lineTo(this.xPos + 17, this.yPos + 20)
+                this.word.lineTo(this.xPos + 17, this.yPos + 40)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+            },
+            t() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 20, this.yPos + 0)
+                this.word.moveTo(this.xPos + 10, this.yPos + 0)
+                this.word.lineTo(this.xPos + 10, this.yPos + 40)
+            },
+            u() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 17, this.yPos + 40)
+                this.word.lineTo(this.xPos + 17, this.yPos + 0)
+            },
+            v() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 8, this.yPos + 40)
+                this.word.lineTo(this.xPos + 17, this.yPos + 0)
+            },
+            w() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 8, this.yPos + 20)
+                this.word.lineTo(this.xPos + 17, this.yPos + 40)
+                this.word.lineTo(this.xPos + 17, this.yPos + 0)
+            },
+            x() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 19, this.yPos + 40)
+                this.word.moveTo(this.xPos + 19, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+            },
+            y() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0);
+                this.word.lineTo(this.xPos + 10, this.yPos + 20);
+                this.word.lineTo(this.xPos + 20, this.yPos + 0);
+                this.word.moveTo(this.xPos + 10, this.yPos + 20);
+                this.word.lineTo(this.xPos + 10, this.yPos + 40);
+            },
+            z() {
+                this.word.moveTo(this.xPos + 0, this.yPos + 0)
+                this.word.lineTo(this.xPos + 17, this.yPos + 0)
+                this.word.lineTo(this.xPos + 0, this.yPos + 40)
+                this.word.lineTo(this.xPos + 17, this.yPos + 40)
+            }
+            //letters are 50 tall and 40 wide
+            // a() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 20, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 40, this.yPos + 50)
+            //     this.word.moveTo(this.xPos + 10, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 30, this.yPos + 25)
+            // },
+            // b() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 37)
+            //     this.word.lineTo(this.xPos + 10, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 12)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            // },
+            // c() {
+            //     this.word.moveTo(this.xPos + 35, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            // },
+            // d() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            // },
+            // e() {
+            //     this.word.moveTo(this.xPos + 35, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 25, this.yPos + 25)
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            // },
+            // f() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 27, this.yPos + 25)
+            // },
+            // g() {
+            //     this.word.moveTo(this.xPos + 35, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 20, this.yPos + 25)
+            // },
+            // h() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            //     this.word.moveTo(this.xPos + 35, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
+            // },
+            // i() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
+            //     this.word.moveTo(this.xPos + 17, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 17, this.yPos + 50)
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            // },
+            // j() {
+            //     this.word.moveTo(this.xPos + 34, this.yPos + 0);
+            //     this.word.lineTo(this.xPos + 34, this.yPos + 50);
+            //     this.word.lineTo(this.xPos + 3, this.yPos + 50);
+            //     this.word.lineTo(this.xPos + 3, this.yPos + 37);
+            // },
+            // k() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            // },
+            // l() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            // },
+            // m() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 18, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            // },
+            // n() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
+            // },
+            // o() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 15)
+            //     this.word.lineTo(this.xPos + 18, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 15)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 35)
+            //     this.word.lineTo(this.xPos + 18, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 35)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 15)
+            // },
+            // p() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 25)
+            // },
+            // q() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 15)
+            //     this.word.lineTo(this.xPos + 18, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 15)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 35)
+            //     this.word.lineTo(this.xPos + 18, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 35)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 15)
+            //     this.word.moveTo(this.xPos + 20, this.yPos + 30)
+            //     this.word.lineTo(this.xPos + 40, this.yPos + 50)
+            // },
+            // r() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 30, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 30, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            // },
+            // s() {
+            //     this.word.moveTo(this.xPos + 35, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            // },
+            // t() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 40, this.yPos + 0)
+            //     this.word.moveTo(this.xPos + 20, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 20, this.yPos + 50)
+            // },
+            // u() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
+            // },
+            // v() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 17, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
+            // },
+            // w() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 20, this.yPos + 25)
+            //     this.word.lineTo(this.xPos + 40, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 40, this.yPos + 0)
+            // },
+            // x() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            //     this.word.moveTo(this.xPos + 35, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            // },
+            // y() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0);
+            //     this.word.lineTo(this.xPos + 20, this.yPos + 25);
+            //     this.word.lineTo(this.xPos + 40, this.yPos + 0);
+            //     this.word.moveTo(this.xPos + 20, this.yPos + 25);
+            //     this.word.lineTo(this.xPos + 20, this.yPos + 50);
+            // },
+            // z() {
+            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
+            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
+            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
+            // }
         }
     },
     checkLineIntersection(v1, v1End, v2, v2End) {

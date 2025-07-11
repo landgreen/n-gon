@@ -8875,10 +8875,14 @@ const spawn = {
         spawn.shield(me, x, y, 1);
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
-        Matter.Body.setDensity(me, 0.0045); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.006); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function () {
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
             // this.vertices = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //helps collisions functions work better after vertex have been changed
+            //remove all shields
+            for (let i = 0; i < mob.length; i++) {
+                if (mob[i].shield) mob[i].death()
+            }
         };
         me.onDamage = function () {
             this.cycle = 0

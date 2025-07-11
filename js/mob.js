@@ -1117,7 +1117,7 @@ const mobs = {
                             });
                         }
                     }
-                    if (level.isMobRespawn && !this.isBoss && 0.33 > Math.random()) {
+                    if (level.isMobRespawn && !this.isBoss && 0.25 > Math.random()) {
                         simulation.drawList.push({
                             x: this.position.x,
                             y: this.position.y,

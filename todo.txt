@@ -1,44 +1,34 @@
 ******************************************************** NEXT PATCH **************************************************
 
-press "o" to toggle fullscreen + pointer lock mode
-  doesn't work well in safari browser
-startle response removed
-  because it's too strong now that I got fullscreen mode working
+new level - furnace
 
-switched the setting "hide images" to "show AI images"
-  setting may switch off/on once as they update to the new patch, sorry
+constraint: 33->25% of mobs respawn
+updated loading screen SVG style
+zoom in and out in testing mode with  i/o -> -/+
 
-ice crystal nucleation
-  freeze lasts 1->2s
-  0.5x energy cost
-
-time rewind code switched to the simulation clock instead of the player clock
-  as a side effect simulation.cycle needs to start at 600, not zero
-time dilation combo
-    health can only increase during rewind
-    rewind rate is 3->2 cycles (slower)
-    rewind history clears after each period of rewinding
-    rewind energy cost slowly increases while rewinding to prevent unlimited use
-      cost returns to baseline at 0.3x the rate of cost growth
-
-grenadier no longer drops grenades on death 
-stinger wings do 2x damage
-stingWinger wings do 4x damage
-sneakyStriker has 2x health
-bigSucker has 1.6x health
-slasher4,5 have 1.5x health
-finalBoss makes seeker bullets at a much faster rate
+iceIX base damage 1.3->1.5
+iceIX molecular assembler cost 4.4->4 energy
+killing shieldBoss removes shields for all other mobs
+  0.0045->0.006 density (and health)
 
 bugs
-  constraint: 33% of mobs respawn, wasn't making mobs
-  pressure vessel no longer discharges foam during time dilation
-  negative mass field sometimes flashes when low on energy
-    maybe only when energy is a odd decimal?
-    I think I fixed it... not sure
-
-
+  typo in secret combo ←↖↑→↗↑↑ to ←↖↑↗→↑↑
 
 *********************************************************** TODO *****************************************************
+
+letters - not sure how to actually use them...
+  !training levels
+    write out current objective on level background
+    since it can only make letters in alphabet, all instructions would need to be customized
+    maybe just a message on the first training level telling them to look in the console
+  initial
+    !added instructions for inputs
+      maybe only if new player...
+    !let player know what lore chapter they are on
+      especially pacifist chapter
+  !run ephemera for 6 seconds with name of each level written somewhere on map
+    not sure this is a good idea, maybe do it very fast
+    display directly below level entrance
 
 tech - nonrefundable that adds a tech to the pool that just does a free research
   activate by changing frequency of preexisting tech form 0->X
@@ -81,6 +71,8 @@ tech? - every time you fire, do a little jump basically ignore gravity and stay 
   helps with aiming?
   gun tech?
     harpoon?
+
+on time stop after a hard hit to player draw the stroke outline form testing for one frame
 
 nail gun guntech - needles follow you around until you get close to a mob and then they all fire
 
@@ -144,7 +136,7 @@ wormhole tech:  - random bullets fire from both wormholes
   fire b.needle() for 3 seconds after making a new wormhole
     need to adjust b.needle() for positions that aren't the player's
 
-add sounds this summer?  see ***sound*** section below
+add sounds?  see ***sound*** section below
   Web Audio API
   AI sound generation survey (June 2025)
     https://elevenlabs.io/sound-effects
@@ -161,11 +153,6 @@ add sounds this summer?  see ***sound*** section below
       advanced features
       average songs
     
-
-
-
-
-
 power up: entanglement - make it spawn from killing a mob that kinda looks like the player?
 
 tech:  - limit the total number of tech 
@@ -250,7 +237,6 @@ mob: weepers - bullet
     invincible
     frozen/not moving/slow moving?
 
-
 !conformal infinity - after making a wormhole, subsequent wormholes generate energy 10 energy for the next 5 seconds
   replace holographic principle?
   !image
@@ -320,40 +306,6 @@ tech - benefit in the first 20 seconds of the level
 soft body boss?
   search    softBody(x, y, angle = 0, isAttached = true, len = 15, radius = 20, stiffness = 1, damping = 1) {
 
-use ←↑→↓↖↗↘↙ combos to allow fields to have special actions
-  how to limit spam?
-     on cooldown
-      timer or once per level
-     energy cost
-     research cost
-     toggle modes
-  combos are listed in white text in field description, and console message when getting field
-    shows up on highlight, and mouse over in experiment mode
-  field ideas:
-    standing wave
-      push mobs away are any distance
-      pull mobs towards you
-    perfect diamagnetism
-    negative mass
-    molecular assembler - done
-    plasma torch
-      move around like you have recoil, move kinda fast so it's hard to control
-        like form recoil but fast
-    time dilation
-    metamaterial cloaking
-    pilot wave - done
-    wormhole
-      toggle bullets entering with wormholes
-        and player??
-      shoot out all the blocks that were sucked in this level (maybe cap at like 10?, cap with energy spent to fire)
-        are block sizes stored properly?  because they shrink before they get eaten...
-          store vertices on the body object if one does already exists
-          after eating store the saved vertices
-        where to fire blocks from and in what direction?
-          target mobs?
-          fire from player (and draw a wormhole looking graphic)
-    grappling hook
-
 new level idea: large map sized blocks that can't be destroyed that the player walks on as a part of the level
   eventually the blocks fall
     after fall level progresses to a phase 2 to clean up the blocks or leave them
@@ -379,14 +331,16 @@ new level idea:  escort mission
       use the motion sense lasers
 
   
-tech:  - remove the research costs of all tech
+tech: conformal - remove the research costs of all tech
+  conformal - similar rules for small and big scales  linked to holographic principle
   there's about 15 tech with a research cost
-!!conformal - similar rules for small and big scales  linked to holographic principle
-!!holonomy - parallel transport of a vector leads to movement (applies to curved space)
+
+tech: holonomy - parallel transport of a vector leads to movement (applies to curved space)
   when far away from your wormhole regenerate 1% of your max energy per second
   when far away from your wormhole reduce damage taken
   heal last hit damage after enter wormhole
-!!quasar - plasma torch from both ends of wormhole
+
+tech: quasar - plasma torch from both ends of wormhole
   only after wormhole eats a block fire?
     or just increase plasma length after eating block?
 
@@ -1575,9 +1529,18 @@ possible names for tech
   Sintering - the process of compacting and forming a solid mass of material by pressure[1] or heat[2] without melting it to the point of liquefaction. Sintering happens as part of a manufacturing process used with metals, ceramics, plastics, 
   Kolmogorov complexity - how long a computer program for an algorithm is
   r-selection - flea/worm tech - opposite of K-selection, so lots of weaker sproes/fleas
+  acousto-optic modulator - sound makes light have a different frequency (maybe use for laser tech with many colors)
 
 
 ******************************************************** BUGS ********************************************************
+double bots on level -  towers, and flocculation
+  both levels had portals, might be related bots in portals
+  https://landgreen.github.io/n-gon/index.html?&seed=88132&gun0=drones&gun1=mine&tech0=quenching&tech1=sentry&tech2=energy%20conservation&tech3=boom-bot&tech4=gauge&tech5=nail-bot&tech6=enthalpy&molMode=0&field=metamaterial%20cloaking&difficulty=6
+fullscreen
+  constraint "no pause while choosing" makes mouse not appear during drafting
+    it only happened on the first draft, but later I hard trouble reproducing it on the same game and level
+  while eternalism is active entering/exiting fullscreen while drafting a tech removed mouse pointer on mouse lock
+  exit fullscreen when focus is lost
 
 dmg side bar is too long sometimes
   maybe rework damage indications

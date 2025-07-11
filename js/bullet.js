@@ -2801,7 +2801,7 @@ const b = {
             friction: 0,
             frictionAir: 0.02,
             restitution: 0.9,
-            dmg: 1.3, //damage done in addition to the damage from momentum
+            dmg: 1.5, //damage done in addition to the damage from momentum
             lookFrequency: 14 + Math.floor(8 * Math.random()),
             endCycle: simulation.cycle + 65 * tech.bulletsLastLonger + Math.floor(25 * Math.random()),
             classType: "bullet",
