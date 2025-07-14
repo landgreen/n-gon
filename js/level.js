@@ -24,8 +24,8 @@ const level = {
             // build.isExperimentRun = true
             // tech.duplicateChance += 1
             // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
-            // simulation.isHorizontalFlipped = true
-            // level.levelsCleared = 6
+            // simulation.isHorizontalFlipped = false//true
+            // level.levelsCleared = 4
             // level.updateDifficulty()
             // tech.giveTech("performance")
             // m.coyoteCycles = 120
@@ -79,9 +79,9 @@ const level = {
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
-            // for (let i = 0; i < 14; i++) spawn.starter(1300 + 100 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.quasarBoss(1300 + 100 * i, -200)
             // for (let i = 0; i < 1; i++) spawn.historyBoss(1100 + 100 * i, -100 - i * 100)
-            // for (let i = 0; i < 3; i++) spawn.freezer(1100 + 100 * i, -300)
+            // for (let i = 0; i < 3; i++) spawn.starter(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
             // for (let i = 0; i < 1; i++) spawn.laserLayer(1100 + 100 * i, -400, 50)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 25)
@@ -2431,7 +2431,7 @@ const level = {
         }
     },
     isHazardRise: false,
-    hazard(x, y, width, height, damage = 0.002) {
+    hazard(x, y, width, height, damage = 0.0025) {
         return {
             min: { x: x, y: y },
             max: { x: x + width, y: y + height },
@@ -2500,9 +2500,9 @@ const level = {
                     }
                 }
             },
-            heatWarning(opacity = 0.2 * Math.random()) {
+            heatWarning(opacity = 0.1 + 0.07 * Math.random()) {
                 //draw background
-                ctx.fillStyle = `hsla(0, 100%, 50%,${opacity})`
+                ctx.fillStyle = `hsla(0, 100%, 45%,${opacity})`
                 ctx.fillRect(this.min.x, this.min.y, this.width, this.height)
 
                 //draw horizontal bars along top and bottom, to indicate where the heat is coming from
@@ -2514,22 +2514,23 @@ const level = {
             heatQuery() {
                 if (this.isOn) {
                     //draw background
-                    const opacity = (simulation.cycle % 6) ? 0.9 : 0.3 * Math.random()
-                    ctx.fillStyle = `hsla(${0}, 100%, 57%,${opacity})`
+                    const opacity = 0.6 + 0.06 * Math.random()//(simulation.cycle % 6) ? 0.5 : 0.2 * Math.random()
+                    ctx.fillStyle = `hsla(${0}, 100%, 43%,${opacity})`
                     ctx.fillRect(this.min.x, this.min.y, this.width, this.height)
 
                     //draw random vertical rectangles
-                    const hue = 365 + 25 * Math.sin(simulation.cycle * 0.1)
+                    const hue = 10 + 25 * Math.sin(simulation.cycle * 0.1) //360 is total circular space for hue
                     const width = Math.floor(0.25 * this.width * Math.random())
                     const x = this.min.x + (this.width - width) * Math.random()
-                    ctx.fillStyle = `hsla(${hue}, 100%, 50%,0.8)`
+                    ctx.fillStyle = `hsla(${hue}, 100%, 65%,0.5)`
                     ctx.fillRect(x, this.min.y, width, this.height)
 
                     //draw horizontal bars along top and bottom, to indicate where the heat is coming from
                     const h = 10
-                    ctx.fillStyle = `hsla(0, 100%, ${65 + 25 * Math.random()}%,${0.8 + 0.2 * Math.random()})`
+                    ctx.fillStyle = `hsla(0, 100%, ${70 + 20 * Math.random()}%,0.8)`
                     ctx.fillRect(this.min.x, this.min.y, this.width, h)
                     ctx.fillRect(this.min.x, this.min.y - h + this.height, this.width, h)
+
                     //collision with player
                     if (this.height > 0 && Matter.Query.region([player], this).length && !(m.isCloak)) {
                         if (m.immuneCycle < m.cycle) {
@@ -7717,16 +7718,16 @@ const level = {
                                 //spawn second wave of flipped mobs only once
                                 spawn.randomMob(-1500, -1425, 0);
                                 spawn.randomMob(-950, -1425, 0);
-                                spawn.randomMob(-800, -1475, 0);
+                                // spawn.randomMob(-800, -1475, 0);
                                 spawn.randomMob(-425, -1425, 0);
                                 spawn.randomMob(850, -1750, 0.1);
                                 spawn.randomMob(325, -850, 0.1);
                                 spawn.randomMob(400, -400, 0.2);
-                                spawn.randomMob(825, -475, 0.2);
+                                // spawn.randomMob(825, -475, 0.2);
                                 spawn.randomMob(875, -1050, 0.3);
                                 spawn.randomMob(1425, 1425, 0.4);
                                 spawn.randomMob(675, 1450, 0.5);
-                                spawn.randomMob(225, 1475, 0.6);
+                                // spawn.randomMob(225, 1475, 0.6);
                                 spawn.randomMob(-275, 1425, 1);
                                 spawn.randomMob(-800, 1375, 1);
 
@@ -7862,27 +7863,27 @@ const level = {
         spawn.bodyRect(775, 75, 75, 75, 0.1);
         spawn.bodyRect(1200, 1900, 125, 100, 0.1);
 
-        spawn.randomMob(125, -1900, 0);
+        // spawn.randomMob(125, -1900, 0);
         spawn.randomMob(-375, -1875, 0);
         spawn.randomMob(-1350, -1750, 0);
         spawn.randomMob(-875, -1575, 0);
-        spawn.randomMob(500, -1875, 0);
+        // spawn.randomMob(500, -1875, 0);
         spawn.randomMob(350, 825, 0);
         spawn.randomMob(375, 400, 0);
         spawn.randomMob(1500, -25, 0.1);
-        spawn.randomMob(650, -1950, 0.2);
+        // spawn.randomMob(650, -1950, 0.2);
         spawn.randomMob(775, 700, 0.2);
         spawn.randomMob(275, -50, 0.3);
         spawn.randomMob(75, -1750, 0.3);
-        spawn.randomMob(1750, -1425, 0.4);
+        // spawn.randomMob(1750, -1425, 0.4);
         spawn.randomMob(950, 50, 0.4);
         spawn.randomMob(-1375, 175, 0.4);
         spawn.randomMob(-350, 175, 0.5);
-        spawn.randomMob(725, 1175, 0.5);
+        // spawn.randomMob(725, 1175, 0.5);
         spawn.randomMob(-850, -1950, 0.6);
         spawn.randomMob(-1400, -1725, 0.7);
         spawn.randomMob(1400, -1700, 0.7);
-        spawn.randomMob(-800, 200, 0.7);
+        // spawn.randomMob(-800, 200, 0.7);
         spawn.randomMob(1475, 1550, 0.8);
         spawn.randomMob(1475, 500, 0.8);
 
@@ -8791,8 +8792,9 @@ const level = {
                             }
                         }
                         if (hazards[i].countdown < 240) {
-                            const opacity = 0.7 * (1 - hazards[i].countdown / 240) * Math.random()
+                            const opacity = 0.3 * (1 - hazards[i].countdown / 240) + 0.06 * Math.random()
                             hazards[i].heatWarning(opacity)
+                            // hazards[i].heatWarning()
                         }
                         // else if (hazards[i].countdown % (hazardOffCycles / 4) < 30) {
                         //     hazards[i].heatWarning()

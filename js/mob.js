@@ -279,16 +279,33 @@ const mobs = {
                 ctx.stroke()
             },
             healthBar4() {
-                const h = this.radius * 0.36;
-                const w = this.radius * 2;
-                const x = this.position.x - w / 2;
-                const y = this.position.y - w * 0.7;
-                ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
-                ctx.fillRect(x, y, w, h);
-                ctx.fillStyle = "#000";
-                for (let j = 0; j < 5; j++) {
-                    if (this.health > j * 0.2) {
-                        ctx.fillRect(x + (j * 0.41) * this.radius, y, h, h);
+                if (this.health > 0.5) {
+                    const h = this.radius * 0.36;
+                    const w = this.radius * 2;
+                    const x = this.position.x - w / 2;
+                    const y = this.position.y - w * 0.7;
+                    ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                    ctx.fillRect(x, y, w, h);
+                    ctx.fillStyle = "#000";
+                    const health = 2 * (this.health - 0.5)
+                    for (let j = 0; j < 5; j++) {
+                        if (health > j * 0.2) {
+                            ctx.fillRect(x + (j * 0.41) * this.radius, y, h, h);
+                        }
+                    }
+                } else {
+                    const h = this.radius * 0.36;
+                    const w = this.radius * 2;
+                    const x = this.position.x - w / 2;
+                    const y = this.position.y - w * 0.7;
+                    ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                    ctx.fillRect(x, y, w, h);
+                    ctx.fillStyle = "#fff";
+                    const health = 2 * this.health
+                    for (let j = 0; j < 5; j++) {
+                        if (health > j * 0.2) {
+                            ctx.fillRect(x + (j * 0.41) * this.radius, y, h, h);
+                        }
                     }
                 }
             },

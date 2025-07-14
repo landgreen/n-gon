@@ -1,18 +1,16 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new level - furnace
+new T4 bosses
+  defendingBoss - upgraded version of shieldingBoss
+  iceBlockBoss - upgraded blockBoss
+  quasarBoss - upgraded pulsarBoss
 
-constraint: 33->25% of mobs respawn
-updated loading screen SVG style
-zoom in and out in testing mode with  i/o -> -/+
+furnace graphics have much less flashing and lower contrast
+all reactor bosses have about 0.85x health
+interferometer has fewer mobs
 
-iceIX base damage 1.3->1.5
-iceIX molecular assembler cost 4.4->4 energy
-killing shieldBoss removes shields for all other mobs
-  0.0045->0.006 density (and health)
-
-bugs
-  typo in secret combo ←↖↑→↗↑↑ to ←↖↑↗→↑↑
+T4 mobs have a second health bar
+  but the same total health
 
 *********************************************************** TODO *****************************************************
 
@@ -45,27 +43,6 @@ tech, field? base game? - doing damage heals 1x (less?) of the last damage taken
 
 super balls tech - that hit blocks produce 10 balls?
   destroy the block after 3 hits?
-
-late, end game mobs feel kinda samey
-  make more mob types
-  make more versions of popular mobs
-  T1 - seems fine
-  T2 - fine
-  T3 - 
-  T4 - too busy, too many bullets effects
-    give T4 and T3? mobs double health bars
-      on damage set health to full again, once
-        can we change the health bar color?
-          how does stun do it?
-
-    make simple mobs
-      high damage
-      need skill to avoid damage
-        boss that requires player to be close to mob to avoid damage
-          only triggers in within range?  2000-1000 is deadly?
-      high health
-      immune to damage unless you do something skill based
-      slow player?
 
 tech? - every time you fire, do a little jump basically ignore gravity and stay in one spot while firing
   helps with aiming?
