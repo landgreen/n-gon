@@ -34,7 +34,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(3) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(4) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
             // m.fieldUpgrades[6].isRewindMode = true
@@ -42,6 +42,7 @@ const level = {
             // m.fieldUpgrades[6].set()
             // m.wakeCheck();
 
+            // m.damageDone *= 5
             // m.maxHealth = m.health = 10000000
             // m.displayHealth();
             // m.immuneCycle = Infinity //you can't take damage
@@ -52,35 +53,38 @@ const level = {
             // simulation.molecularMode = 2
             // m.takeDamage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("mine") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("grenades") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("drones") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.guns[9].ammo = 100000000
+            // b.guns[0].ammo = 100000000000
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("aerostat") });
+
             // tech.laserColor = "#fff"
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
             // requestAnimationFrame(() => { tech.giveTech("eternalism") });
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("equivalence principle")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("eternalism")
-            // for (let i = 0; i < 1; i++) tech.giveTech("dynamo-bot")
-            // for (let i = 0; i < 1; i++) tech.giveTech("boom-bot")
-            // for (let i = 0; i < 1; i++) tech.giveTech("laser-bot")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("neutron bomb")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("counterfactual conditional")
+            // for (let i = 0; i < 1; i++) tech.giveTech("vacuum bomb")
+            // for (let i = 0; i < 1; i++) tech.giveTech("precision bombing")
+            // for (let i = 0; i < 1; i++) tech.giveTech("eternalism")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("aerostat") });
             // requestAnimationFrame(() => { level.blurryChoices = true });
             // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 7; i++) powerUps.directSpawn(450, -50, "coupling");
+            // for (let i = 0; i < 7; i++) powerUps.directSpawn(550, -450, "tech");
             // for (let i = 0; i < 7; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
+            // level.superstructure()
             // level.furnace()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
-            // for (let i = 0; i < 1; i++) spawn.quasarBoss(1300 + 100 * i, -200)
-            // for (let i = 0; i < 1; i++) spawn.historyBoss(1100 + 100 * i, -100 - i * 100)
+            // for (let i = 0; i < 10; i++) spawn.starter(1300 + 100 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -100 - i * 100)
             // for (let i = 0; i < 3; i++) spawn.starter(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
             // for (let i = 0; i < 1; i++) spawn.laserLayer(1100 + 100 * i, -400, 50)
@@ -88,7 +92,7 @@ const level = {
             // for (let i = 0; i < 1; i++) spawn.hopsploder(1100 + 100 * i, -500)
             // for (let i = 0; i < 1; ++i) spawn.spiderBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
-            // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
+            // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 500 * Math.random(), m.pos.y + 500 * Math.random(), "heal");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             //lore testing
@@ -436,15 +440,15 @@ const level = {
                 level.isLowHeal = false
             }
         },
-        {
-            description: "no pause while choosing",
-            effect() {
-                level.isNoPause = true
-            },
-            remove() {
-                level.isNoPause = false
-            }
-        },
+        // {
+        //     description: "no pause while choosing",
+        //     effect() {
+        //         level.isNoPause = true
+        //     },
+        //     remove() {
+        //         level.isNoPause = false
+        //     }
+        // },
         {
             description: "no health bar",
             effect() {
@@ -8765,6 +8769,11 @@ const level = {
             level.enter.draw();
 
             ctx.fillStyle = "#b9b9b9" //scaffolding
+            //center
+            ctx.fillRect(450, -600, 75, 1575);
+            ctx.fillRect(-900, -600, 75, 1575);
+
+            //right
             ctx.fillRect(2575, -1025, 50, 2100);
             ctx.fillRect(3050, -1025, 50, 2100);
         };
@@ -8857,6 +8866,7 @@ const level = {
         spawn.bodyRect(-3780, -125, 50, 235);
 
         //safe zone left
+        spawn.mapVertex(-1975, 500, "225 -20  225 20  200 45  -200 45  -225 20  -225 -20  -200 -45  200 -45");
         spawn.mapVertex(-1975, -1000, "600 -250  600 250  550 300  -550 300  -600 250  -600 -250");
         spawn.mapVertex(-1975, 0, "600 -250  600 250  550 300  -550 300  -600 250  -600 -250  -550 -300  550 -300");
         spawn.mapVertex(-1975, 1000, "600 -250  600 250    -600 250  -600 -250  -550 -300  550 -300");
@@ -8868,35 +8878,43 @@ const level = {
         powerUps.spawn(125, 950, "heal");
         powerUps.spawn(-2150, -475, "ammo");
         powerUps.spawn(-1925, -475, "ammo");
+        spawn.bodyRect(-1490, -725, 50, 200, 0.5);
+
 
         //center
         //top
-        spawn.mapVertex(-792, -800, "-75 0   75 0   75 400   35 435   -35 435   -75 400");
+        spawn.mapVertex(-862, -800, "-75 0   75 0   75 400   35 435   -35 435   -75 400");
         spawn.mapVertex(-189, -800, "-75 0   75 0   75 400   35 435   -35 435   -75 400");
-        spawn.mapVertex(414, -800, "-75 0   75 0   75 400   35 435   -35 435   -75 400");
+        spawn.mapVertex(484, -800, "-75 0   75 0   75 400   35 435   -35 435   -75 400");
         //ground
-        spawn.mapVertex(-862, 1000, "-100 0  -275 200  275 200  100 0");
+        spawn.mapVertex(-862, 1060, "-50 0   -500 200   500 200   50 0");
         spawn.mapVertex(-189, 1000, "-100 0  -275 200  275 200  100 0");
         spawn.mapVertex(-189, 525, "-80 0  -35 -35   35 -35   80 0   80 300   -80 300");
-        spawn.mapVertex(484, 1000, "-100 0  -275 200  275 200  100 0");
+        spawn.mapVertex(484, 1060, "-50 0   -500 200   500 200   50 0");
+        //scaffolding
+        spawn.mapRect(475, 650, 225, 25);
+        spawn.mapRect(275, 325, 225, 25);
+        spawn.mapRect(475, 0, 225, 25);
+        spawn.mapRect(275, -325, 225, 25);
+
 
         //safe zone right
         spawn.mapVertex(1600, -1100, "600 -250  600 250  550 300  -550 300  -600 250  -600 -250");
         spawn.mapVertex(1600, 200, "600 -100  600 100  550 150  -550 150  -600 100  -600 -100  -550 -150  550 -150");
         spawn.mapVertex(1600, 900, "600 -250  600 250    -600 250  -600 -250  -550 -300  550 -300");
-        spawn.mapVertex(1600, 100, "-100 0  -275 200  275 200  100 0");
         spawn.mapRect(1050, -850, 75, 700);
-
-
+        spawn.mapVertex(1600, 120, "-100 0   -500 200   500 200   100 0");
+        // spawn.mapVertex(1600, -230, "-100 0  -35 -35   35 -35   100 0   100 200   -100 200");
+        spawn.mapVertex(1600, -250, "275 -25  275 25  250 50  -250 50  -275 25  -275 -25  -250 -50  250 -50");
 
 
         //far right zone
-        spawn.mapRect(2975, 750, 200, 25);
-        spawn.mapRect(2500, 450, 200, 25);
-        spawn.mapRect(2975, 150, 200, 25);
-        spawn.mapRect(2500, -150, 200, 25);
-        spawn.mapRect(2975, -450, 200, 25);
-        spawn.mapRect(2500, -750, 200, 25);
+        spawn.mapRect(2925, 750, 300, 25);
+        spawn.mapRect(2450, 450, 300, 25);
+        spawn.mapRect(2925, 150, 300, 25);
+        spawn.mapRect(2450, -150, 300, 25);
+        spawn.mapRect(2925, -450, 300, 25);
+        spawn.mapRect(2450, -750, 300, 25);
 
         //exit
         // spawn.mapRect(3550, 150, 500, 900);
@@ -8932,8 +8950,10 @@ const level = {
         spawn.randomMob(-2650, 900, 0.3);
         spawn.randomMob(2825, 975, 0.3);
         spawn.randomMob(-2925, 875, 0.3);
+
         spawn.randomLevelBoss(-600, 500);
-        spawn.secondaryBossChance(250, 500);
+        spawn.secondaryBossChance(125, 100);
+
         powerUps.spawnStartingPowerUps(1625, 25)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
         powerUps.chooseRandomPowerUp(-1600, -350);
@@ -10372,6 +10392,95 @@ const level = {
                 ctx.fillRect(250 - 450, -300, 450, 300)
             };
         }
+    },
+    superstructure() {
+        level.announceMobTypes()
+        level.fallMode = "start";
+        const boost1 = level.boost(475, 0, 1300)
+        const boost2 = level.boost(4450, 0, 1300);
+        level.custom = () => {
+            boost1.query();
+            boost2.query();
+            ctx.fillStyle = "#d4f4f4"
+            ctx.fillRect(1350, -2100, 400, 250)
+            ctx.fillStyle = "#d4d4d7"
+            ctx.fillRect(3350, -1300, 50, 1325)
+            ctx.fillRect(1300, -1800, 750, 1800)
+            level.exit.drawAndCheck();
+            level.enter.draw();
+        };
+        level.customTopLayer = () => {
+            ctx.fillStyle = "rgba(0,0,0,0.1)"
+            ctx.fillRect(2500, -1100, 450, 250)
+            ctx.fillRect(2400, -550, 600, 150)
+            ctx.fillRect(2550, -1650, 250, 200)
+            ctx.fillStyle = "rgba(0,0,0,0.2)"
+            ctx.fillRect(700, -110, 400, 110)
+            ctx.fillRect(3800, -110, 400, 110)
+            ctx.fillStyle = "rgba(0,0,0,0.15)"
+            ctx.fillRect(-250, -300, 450, 300)
+        };
+        level.setPosToSpawn(-50, -60); //normal spawn
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        level.exit.x = 1500;
+        level.exit.y = -1875;
+        level.defaultZoom = 2000
+        simulation.zoomTransition(level.defaultZoom)
+        powerUps.spawnStartingPowerUps(1475, -1175);
+        spawn.debris(750, -2200, 3700, 16); //16 debris per level
+        document.body.style.backgroundColor = "#dcdcde";
+
+        spawn.mapRect(-300, 0, 5100, 300); //***********ground
+        spawn.mapRect(-300, -350, 50, 400); //far left starting left wall
+        spawn.mapRect(-300, -10, 500, 50); //far left starting ground
+        spawn.mapRect(-300, -350, 500, 50); //far left starting ceiling
+        spawn.mapRect(150, -350, 50, 200); //far left starting right part of wall
+        spawn.bodyRect(170, -130, 14, 140, 1, spawn.propsFriction); //door to starting room
+        spawn.mapRect(700, -1100, 400, 990); //far left building
+        spawn.mapRect(1600, -400, 1500, 500); //long center building
+        spawn.mapRect(1345, -1100, 250, 25); //left platform
+        spawn.mapRect(1755, -1100, 250, 25); //right platform
+        spawn.mapRect(1300, -1850, 800, 50); //left higher platform
+        spawn.mapRect(1300, -2150, 50, 350); //left higher platform left edge wall
+        spawn.mapRect(1300, -2150, 450, 50); //left higher platform roof
+        spawn.mapRect(1500, -1860, 100, 50); //ground bump wall
+        spawn.mapRect(2400, -850, 600, 300); //center floating large square
+        //spawn.bodyRect(2500, -1100, 25, 250); //wall before chasers
+        spawn.mapRect(2500, -1450, 450, 350); //higher center floating large square
+        spawn.mapRect(2500, -1675, 50, 300); //left wall on higher center floating large square
+        spawn.mapRect(2500, -1700, 300, 50); //roof on higher center floating large square
+        spawn.mapRect(3275, -750, 200, 25); //ledge by far right building
+        spawn.mapRect(3275, -1300, 200, 25); //higher ledge by far right building
+        spawn.mapRect(3800, -1100, 400, 990); //far right building
+
+        spawn.bodyRect(3200, -1375, 300, 25, 0.9);
+        spawn.bodyRect(1825, -1875, 400, 25, 0.9);
+        // spawn.bodyRect(1800, -575, 250, 150, 0.8);
+        spawn.bodyRect(1800, -600, 110, 150, 0.8);
+        spawn.bodyRect(2557, -450, 35, 55, 0.7);
+        spawn.bodyRect(2957, -450, 30, 15, 0.7);
+        spawn.bodyRect(2900, -450, 60, 45, 0.7);
+        spawn.bodyRect(915, -1200, 60, 100, 0.95);
+        spawn.bodyRect(925, -1300, 50, 100, 0.95);
+        if (Math.random() < 0.9) {
+            spawn.bodyRect(2300, -1720, 400, 20);
+            spawn.bodyRect(2590, -1780, 80, 80);
+        }
+        spawn.bodyRect(2925, -1100, 25, 250, 0.8);
+        spawn.bodyRect(3325, -1550, 50, 200, 0.3);
+        if (Math.random() < 0.8) {
+            spawn.bodyRect(1400, -75, 200, 75); //block to get up ledge from ground
+            spawn.bodyRect(1525, -125, 50, 50); //block to get up ledge from ground
+        }
+        spawn.bodyRect(1025, -1110, 400, 25, 0.9); //block on far left building
+        spawn.bodyRect(1425, -1110, 115, 25, 0.9); //block on far left building
+        spawn.bodyRect(1540, -1110, 300, 25, 0.9); //block on far left building
+
+
+        // spawn.randomLevelBoss(2800 + 200 * Math.random(), -2200 + 200 * Math.random());
+        // spawn.secondaryBossChance(4000, -1825)
+        //spawn.randomHigherTierMob(1675, -728)
+        // powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     highrise() {
         level.announceMobTypes()

@@ -313,6 +313,7 @@ const m = {
         m.throwCharge = 4;
         m.holdingTarget = who
         m.isHolding = true;
+        m.fieldUpgrades[4].endoThermic(0.3)
     },
     alive: false,
     isSwitchingWorlds: false,
@@ -1018,6 +1019,8 @@ const m = {
         if (dmg > 0.05) { // freeze game for high damage hits
             simulation.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
             simulation.fpsInterval = 1000 / simulation.fpsCap;
+
+
             if (tech.isHarmFreeze) {
                 for (let i = 0, len = mob.length; i < len; i++) mobs.statusSlow(mob[i], 480) //freeze all mobs
             }
@@ -4393,6 +4396,16 @@ const m = {
             setDescription() {
                 return `use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>excess <strong class='color-f'>energy</strong> used to <strong class='color-print'>print</strong> ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br><strong>12</strong> <strong class='color-f'>energy</strong> per second <em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↘→↓↙←↑↑↓</em>`
             },
+            endoThermic(drain) {
+                if (tech.isEndoThermic) {
+                    const len = 10 * drain
+                    if (Math.random() < len) {
+                        for (let i = 0; i < len; i++) {
+                            b.iceIX(1)
+                        }
+                    }
+                }
+            },
             keyLog: [null, null, null, null, null, null, null],
             effect: () => {
                 //store event function so it can be found and removed in m.setField()
@@ -4430,6 +4443,7 @@ const m = {
                                         x: speed * Math.cos(m.angle),
                                         y: speed * Math.sin(m.angle)
                                     })
+                                    m.fieldUpgrades[4].endoThermic(drain)
                                 }
                             } else if (tech.isSporeWorm) {
                                 const drain = 0.18 + (Math.max(bullet.length, 130) - 130) * 0.02
@@ -4444,6 +4458,7 @@ const m = {
                                         x: SPEED * Math.cos(m.angle),
                                         y: SPEED * Math.sin(m.angle)
                                     });
+                                    m.fieldUpgrades[4].endoThermic(drain)
                                 }
                             } else {
                                 const drain = 0.095 + (Math.max(bullet.length, 130) - 130) * 0.01
@@ -4452,22 +4467,27 @@ const m = {
                                         m.energy -= drain
                                         const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
                                         b.spore(Vector.add(m.pos, Vector.mult(unit, 25)), Vector.mult(unit, 10))
+                                        m.fieldUpgrades[4].endoThermic(drain)
                                     } else {
                                         break
                                     }
                                 }
                             }
                         } else if (simulation.molecularMode === 1) {
-                            m.energy -= 0.33;
+                            const drain = 0.33
+                            m.energy -= drain;
                             const direction = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
                             const push = Vector.mult(Vector.perp(direction), 0.08)
                             b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, -15)
                             bullet[bullet.length - 1].force.x += push.x * (Math.random() - 0.5)
                             bullet[bullet.length - 1].force.y += 0.005 + push.y * (Math.random() - 0.5)
                             // b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
+                            m.fieldUpgrades[4].endoThermic(drain)
                         } else if (simulation.molecularMode === 2) {
-                            m.energy -= 0.04;
+                            const drain = 0.04
+                            m.energy -= drain;
                             b.iceIX(1)
+                            m.fieldUpgrades[4].endoThermic(drain)
                         } else if (simulation.molecularMode === 3) {
                             if (tech.isDroneRadioactive) {
                                 const drain = 0.8 + (Math.max(bullet.length, 50) - 50) * 0.01
@@ -4477,6 +4497,7 @@ const m = {
                                         x: m.pos.x + 30 * Math.cos(m.angle) + 10 * (Math.random() - 0.5),
                                         y: m.pos.y + 30 * Math.sin(m.angle) + 10 * (Math.random() - 0.5)
                                     }, 25)
+                                    m.fieldUpgrades[4].endoThermic(drain)
                                 }
                             } else {
                                 //every bullet above 100 adds 0.005 to the energy cost per drone
@@ -4485,6 +4506,7 @@ const m = {
                                 if (m.energy > drain) {
                                     m.energy -= drain
                                     b.drone()
+                                    m.fieldUpgrades[4].endoThermic(drain)
                                 }
                             }
                         }

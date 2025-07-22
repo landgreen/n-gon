@@ -317,7 +317,11 @@ const powerUps = {
             if (tech.isCancelTech && tech.cancelTechCount === 0 && type !== "entanglement") {
                 tech.cancelTechCount++
                 // powerUps.research.use('tech')
-                powerUps[type].effect();
+                // powerUps[type].effect();
+                requestAnimationFrame(() => { // generates new choices
+                    powerUps[type].effect();
+                    if (document.fullscreenElement) mouseMove.isLockPointer = false//this interacts with the mousedown event listener to exit pointer lock
+                });
                 return
             }
         }
@@ -817,6 +821,9 @@ const powerUps = {
                 simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             }
             powerUps[type].effect();
+            if ((tech.isNoDraftPause || level.isNoPause) && document.fullscreenElement) {
+                mouseMove.isLockPointer = false//this interacts with the mousedown event listener to exit pointer lock
+            }
         },
     },
     heal: {
@@ -1398,7 +1405,7 @@ const powerUps = {
                                 tech.tech[choose].isBanished = true
                                 if (i === 0) simulation.inGameConsole(`options.length = ${optionLengthNoDuplicates} <em class='color-text'>//removed from pool by decoherence</em>`)
                             }
-                            removeOption(choose) //remove from future options pool to avoid repeats on this selection
+                            removeOption(choose) //remove from options pool to avoid repeats
 
                             //this flag prevents this option from being shown the next time you pick up a tech power up
                             //check if not extra choices from "path integral"
@@ -1469,7 +1476,7 @@ const powerUps = {
                                 document.body.style.cursor = "auto";
                                 document.getElementById("choose-grid").style.transitionDuration = "0s";
                             }
-                            if (count < 10 && simulation.isChoosing) {
+                            if (count < 10 && simulation.isChoosing && tech.isBrainstormActive) {
                                 requestAnimationFrame(cycle);
                             } else {
                                 tech.isBrainstormActive = false

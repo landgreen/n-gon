@@ -1,18 +1,94 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new T4 bosses
-  defendingBoss - upgraded version of shieldingBoss
-  iceBlockBoss - upgraded blockBoss
-  quasarBoss - upgraded pulsarBoss
+grenade tech: precision bombing - if your grenades are directly above a mob they fall on the mobs
+tech: endothermic - each time you print you also print ice IX crystals
+tech: counterfactual conditional - add a new tech named counterfactual to the tech pool, choosing counterfactual randomizes current choices
+  counterfactual has a 10% chance to eject
 
-furnace graphics have much less flashing and lower contrast
-all reactor bosses have about 0.85x health
-interferometer has fewer mobs
+keyword: "expend" is used for spending/using research
+  text is right aligned and underlined pink
+combinatorial optimization expends 2 research, no longer a field tech
+quantum Zeno effect 2->3x damage while below 0 health
+improved fire rate will also reduce the delay on shotgun tech repeater
 
-T4 mobs have a second health bar
-  but the same total health
+added more structures to furnace to improve traversal
+stingWinger, slasher5, slasher4:  are slower, but do more damage and have more life
+quadLaser lasers aren't on as often, but they do more damage
+
+bug fixes
+  researching in fullscreen mode with "no pause while choosing" hid the mouse
+  constraint: "no pause while choosing" and tech: eternalism have been disabled
+    because they are annoying and have some minor issues with fullscreen mode and the mouse
+    I can bring them back if people complain
 
 *********************************************************** TODO *****************************************************
+
+gun tech upgrade that rewards pressing fire with a precise rhythm
+  press fire every 2-3 seconds and each time you get a "perfect" rhythm
+    gain 1.5x damage for that gun, but lose the bonus if you miss the timing
+    refund ammo cost for each perfect
+  gun:
+    shotgun?
+    super balls?
+  need to draw an on screen animation to help with timing
+
+persistent effects: effects that carry over to your next game: "for the next 3 runs of n-gon"
+  offer a research donation and get a random effect
+  new power up type
+    reward for completing reactor
+    large yellow?
+  effects
+    start with ____ power ups
+    the first research is free
+    start with ____ duplication
+    start with ____ damage
+    start with ____ damage reduction
+challenges
+  names: Epistemic logic, Temporal logic, relational semantics, Axiomatic systems, Modal realism
+  if you ______ for a level
+    don't crouch
+    don't fire
+    don't use field
+    don't get taken damage/get hit
+    keep energy above 90
+  get _______:
+    damage, damage taken, power ups, duplication
+  for the next ___ choices
+    always pick the last choice
+    research once
+    pick only JUNK tech
+  at the end of the next level
+    leave __ mobs alive
+    leave a boss alive
+    leave __ power ups
+
+see if LLM can improve the line of sight code?
+
+new boss - murmuration of small mobs (maybe 30-50)
+  first mob of this type in mob array controls the others
+    commands
+      every 5 seconds have %5 mobs fire at player (if in line of sight)
+      use seePlayerByHistory to set goal for the murmuration
+        if one mob can't see goal have them target other mobs in the murmuration
+    if no more mobs left on death spawn power ups
+
+new tech: - anti memetic
+  something related to memory SCP?
+
+molecular fabricator tech: macromolecular machine
+  0.5x printing cost, you print ice IX, drones, spores, and missiles
+    this might be annoying because of all the code that looks at what mode molecular assembler is in...  and this wouldn't have a mode...
+  
+molecular fabricator tech: endothermic
+  each time you print ____ you also print ice IX for 0 energy
+    this will print iceIX proportional to how much energy was used
+
+
+new level: superstructure - similar to skyscrappers
+  multiple ways to get around, 2-4 different levels of traversal
+  lots of rooms
+  small level
+  blacks as planks that bridge 2 sections
 
 letters - not sure how to actually use them...
   !training levels
@@ -28,11 +104,6 @@ letters - not sure how to actually use them...
     not sure this is a good idea, maybe do it very fast
     display directly below level entrance
 
-tech - nonrefundable that adds a tech to the pool that just does a free research
-  activate by changing frequency of preexisting tech form 0->X
-  maybe field tech?
-    if field tech if might not require an activation tech.
-
 tech, field? base game? - doing damage heals 1x (less?) of the last damage taken
   so you can't heal if you take damage twice before doing enough damage
     should work similar to the cloaking heal tech 
@@ -44,17 +115,7 @@ tech, field? base game? - doing damage heals 1x (less?) of the last damage taken
 super balls tech - that hit blocks produce 10 balls?
   destroy the block after 3 hits?
 
-tech? - every time you fire, do a little jump basically ignore gravity and stay in one spot while firing
-  helps with aiming?
-  gun tech?
-    harpoon?
-
-on time stop after a hard hit to player draw the stroke outline form testing for one frame
-
 nail gun guntech - needles follow you around until you get close to a mob and then they all fire
-
-consider switching font to monospace?
-  tech descriptions would be hugely impacted
 
 tech:   -  scale max energy with current health
   nonrefundable
@@ -170,32 +231,6 @@ field tech: - use _____ to refresh current choices  (or give +6 choices for the 
     10 health
     all your energy 
       produce a new choice for each 30 energy
-
-new class of effects:  for the next 3 runs of n-gon
-  offer a research donation and get a random effect
-  new power up type
-    reward for completing reactor
-    large yellow?
-  effects
-    start with ____ power ups
-    the first research is free
-    start with ____ duplication
-    start with ____ damage
-    start with ____ damage reduction
-
-tech:   player behavior challenges
-  if you ______ for a level
-    don't crouch
-    don't fire
-    don't use field
-    don't get taken damage/get hit
-    keep energy above 90
-  get _______:
-    damage, damage taken, power ups, duplication
-cycle challenge each level?, no too confusing, but maybe randomize each time it shows up
-how to code?
-  ephemera that watches key input states?
-  rewrite event listener?
 
 mob status: confused - I could rotate the velocity that mobs have gently over 1-2 seconds. that might work.
 
@@ -1393,6 +1428,7 @@ if pause is pressed while selecting power ups, display pause menu on top of sele
   nail gun - Screenprint
   shotgun - blueprint by Dan McPharlin
   grenades, missiles, explosions - vibrant fireball explosion sonic shockwave ring art by Victo Ngai --ar 3:2 --v 5 --s 750
+    Detailed Intricate Fine lines Surreal styles Vivid colors Moody colors
   spores - turquoise black spores on a white background full color scientific anatomy by Ernst Haeckel
   drones - insect quadcopter tilt-shift photography
   super balls - By Akari Toriyama
@@ -1507,17 +1543,23 @@ possible names for tech
   Kolmogorov complexity - how long a computer program for an algorithm is
   r-selection - flea/worm tech - opposite of K-selection, so lots of weaker sproes/fleas
   acousto-optic modulator - sound makes light have a different frequency (maybe use for laser tech with many colors)
+  gravity wave - 
 
 
 ******************************************************** BUGS ********************************************************
+
+still getting some hidden mouse on fullscreen when drafting,
+  seems to occur when the game is slow
+    or maybe it occurs when the game pauses wen player takes damage?
+hides mouse when -> (eternalism or no pause) + fullscreen + show AI images
+  this was still broken in previous patch, probably never worked
+  maybe just disable eternalism / no pause if in fullscreen mode and AI images
+  maybe just disable eternalism / no pause always
+
+
 double bots on level -  towers, and flocculation
   both levels had portals, might be related bots in portals
   https://landgreen.github.io/n-gon/index.html?&seed=88132&gun0=drones&gun1=mine&tech0=quenching&tech1=sentry&tech2=energy%20conservation&tech3=boom-bot&tech4=gauge&tech5=nail-bot&tech6=enthalpy&molMode=0&field=metamaterial%20cloaking&difficulty=6
-fullscreen
-  constraint "no pause while choosing" makes mouse not appear during drafting
-    it only happened on the first draft, but later I hard trouble reproducing it on the same game and level
-  while eternalism is active entering/exiting fullscreen while drafting a tech removed mouse pointer on mouse lock
-  exit fullscreen when focus is lost
 
 dmg side bar is too long sometimes
   maybe rework damage indications

@@ -1784,7 +1784,7 @@ const mouseMove = {
     isLockPointer: false,//use to lock pointer in the mousedown eventlistener
     isPointerLocked: false, //tracks the pointer locked state
     isMouseInWindow: true,
-    pointerUnlock(event) {
+    pointerUnlock() { //event
         setTimeout(() => {
             //simulation.isChoosing
             if (mouseMove.isLockPointer && document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
@@ -1792,14 +1792,11 @@ const mouseMove = {
                 canvas.requestPointerLock();
                 mouseMove.isPointerLocked = true
                 mouseMove.reset()
-
-                document.body.removeEventListener('mousedown', mouseMove.pointerUnlock);
             } else if (!mouseMove.isLockPointer || !document.fullscreenElement) {
                 mouseMove.isLockPointer = false
-
-                document.body.removeEventListener('mousedown', mouseMove.pointerUnlock);
             }
-        }, 100);
+            document.body.removeEventListener('mousedown', mouseMove.pointerUnlock); //remove self so it can't trigger
+        }, 200);
     },
     reset() {//sets mouseMove.active based on inverted and pointer lock
         if (simulation.isInvertedVertical) {

@@ -231,6 +231,7 @@
                         </select>
                         <br><label for="links-select" title="community links">community links:</label>
                         <select name="links-select" id="links-select" onChange="window.location.href=this.value">
+                            <option value="https://scratch.mit.edu/studios/36273655/">n-gon on scratch</option>
                             <option value="https://www.cornbread2100.com/n-gon-loader">n-commit loader</option>
                             <option value="https://3xiondev.github.io/n-gon-upgraded">n-gon upgraded</option>
                             <option value="https://n-gon-enhanced.vercel.app">n-gon enhanced</option>
@@ -283,13 +284,12 @@
             <!-- fade in background -->
             <g fill='#fff' stroke='none' class="fade-in">
                 <path d="M70 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
-                <g fill="#fafcfd" opacity="0.8">
+                <g>
                     <path d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
                     <path d="M140 60 h60 v-60 h-60 v60" class="draw-lines-box-3" />
 
                     <path d="M240 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
                     <path d="M310 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
-
                 </g>
 
                 <path d="M0 70 h60 v60 h-60 v-60" class="draw-lines-box-1" />
@@ -298,7 +298,7 @@
             </g>
             <g fill='none' stroke='#333' stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
                 <path d="M70 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
-                <g stroke='#aeb6c2' stroke-width="1.5">
+                <g stroke='#777' stroke-width="1.5">
                     <path d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
                     <path d="M140 60 h60 v-60 h-60 v60" class="draw-lines-box-3" />
 
@@ -314,7 +314,7 @@
                 <text x="30" y="113" id="splash-left">A</text>
                 <text x="100" y="113" id="splash-down">S</text>
                 <text x="170" y="113" id="splash-right">D</text>
-                <g stroke-width="1.5" opacity="1" stroke='#aeb6c2'>
+                <g stroke-width="1.5" opacity="1" stroke='#666'>
                     <text x="30" y="45" id="splash-previous-gun">Q</text>
                     <text x="170" y="45" id="splash-next-gun">E</text>
                     <text x="270" y="45" id="splash-fullscreen">O</text>
@@ -323,16 +323,18 @@
             </g>
         </g>
         <g class="fade-in" fill="none" stroke="#aaa" stroke-width="1">
-            <path d="M 164 433.5 h-35.5 v40" opacity="0.4" />
-            <path d="M 205 433.5 h36.5 v40" opacity="0.4" />
-            <path d="M 321 533 v+50" opacity="0.4" />
-            <path d="M 374 533 v+20" opacity="0.4" />
+            <g stroke="#ccc">
+                <path d="M 164 433.5 h-35.5 v40" />
+                <path d="M 205 433.5 h36.5 v40" />
+                <path d="M 321 533 v+50" />
+                <path d="M 374 533 v+20" />
+            </g>
             <path d="M 184 625 v-35" />
             <path d="M 460.5 442 v50 h38" />
             <path d="M 642.5 442 v50 h-38" />
         </g>
         <g class="fade-in" stroke="none" fill="#999" font-size="16px">
-            <g opacity="0.4" font-size="14px">
+            <g fill="#bbb" font-size="14px">
                 <text x="165.5" y="422">switch</text>
                 <text x="169.5" y="438">guns</text>
                 <text x="292" y="596">fullscreen</text>
@@ -356,7 +358,6 @@
     <script src="js/lore.js"></script>
     <script src="js/engine.js"></script>
     <script src="js/index.js"></script>
-    <!-- <script>javascript: (async () => { const scriptText = await (await fetch('https://raw.githubusercontent.com/kgurchiek/n-gon-controller/main/main.js')).text(); var script = document.createElement('script'); script.type = 'text/javascript'; script.textContent = scriptText; document.head.appendChild(script); })();</script> -->
 </body>
 
 </html>
