@@ -1080,7 +1080,7 @@ const m = {
         m.hip.y = 24 + offset;
         //stepSize goes to zero if Vx is zero or not on ground (make m transition cleaner)
         m.stepSize = 0.8 * m.stepSize + 0.2 * (7 * Math.sqrt(Math.min(9, Math.abs(m.Vx))) * m.onGround);
-        //changes to stepsize are smoothed by adding only a percent of the new value each cycle
+        //changes to stepSize are smoothed by adding only a percent of the new value each cycle
         const stepAngle = 0.034 * m.walk_cycle + cycle_offset;
         m.foot.x = 2.2 * m.stepSize * Math.cos(stepAngle) + offset;
         m.foot.y = offset + 1.2 * m.stepSize * Math.sin(stepAngle) + m.yOff + m.height;
@@ -5660,7 +5660,7 @@ const m = {
                                             if (m.standingOn === body[i] && m.onGround) {
                                                 //try to stop the walk animation
                                                 m.walk_cycle -= m.flipLegs * m.Vx
-                                                m.stepSize *= 0
+                                                m.stepSize = 0
                                                 //extra stability
                                                 Matter.Body.setAngularVelocity(body[i], body[i].angularVelocity * 0)
                                                 //match velocity upto a change of 10 per cycle

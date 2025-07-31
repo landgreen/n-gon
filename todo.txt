@@ -1,27 +1,20 @@
 ******************************************************** NEXT PATCH **************************************************
 
-grenade tech: precision bombing - if your grenades are directly above a mob they fall on the mobs
-tech: endothermic - each time you print you also print ice IX crystals
-tech: counterfactual conditional - add a new tech named counterfactual to the tech pool, choosing counterfactual randomizes current choices
-  counterfactual has a 10% chance to eject
+new level: superstructure
+figured out how to give specific moving blocks horizontal traction and player leg animation
+  superstructure, tower, furnace have a bouncy platform with the traction code
+trainBoss on the level corridor is slower, and invulnerable for less time
 
-keyword: "expend" is used for spending/using research
-  text is right aligned and underlined pink
-combinatorial optimization expends 2 research, no longer a field tech
-quantum Zeno effect 2->3x damage while below 0 health
-improved fire rate will also reduce the delay on shotgun tech repeater
+peer review 1.5->1.3 damage per expending research in any way
+  no longer gives 1% JUNK
+tech: clinical peer review - spawn a heal per expending research in any way
+eternalism is now a JUNK tech
 
-added more structures to furnace to improve traversal
-stingWinger, slasher5, slasher4:  are slower, but do more damage and have more life
-quadLaser lasers aren't on as often, but they do more damage
-
-bug fixes
-  researching in fullscreen mode with "no pause while choosing" hid the mouse
-  constraint: "no pause while choosing" and tech: eternalism have been disabled
-    because they are annoying and have some minor issues with fullscreen mode and the mouse
-    I can bring them back if people complain
+switched self-assembly heal spawn to have a delay to prevent lag at a zillion health
 
 *********************************************************** TODO *****************************************************
+
+tech -  gain 5% duplication each time you expend a research orb
 
 gun tech upgrade that rewards pressing fire with a precise rhythm
   press fire every 2-3 seconds and each time you get a "perfect" rhythm
@@ -62,7 +55,8 @@ challenges
     leave a boss alive
     leave __ power ups
 
-see if LLM can improve the line of sight code?
+see if LLM can improve the performance of
+  line of sight code?
 
 new boss - murmuration of small mobs (maybe 30-50)
   first mob of this type in mob array controls the others
@@ -71,24 +65,6 @@ new boss - murmuration of small mobs (maybe 30-50)
       use seePlayerByHistory to set goal for the murmuration
         if one mob can't see goal have them target other mobs in the murmuration
     if no more mobs left on death spawn power ups
-
-new tech: - anti memetic
-  something related to memory SCP?
-
-molecular fabricator tech: macromolecular machine
-  0.5x printing cost, you print ice IX, drones, spores, and missiles
-    this might be annoying because of all the code that looks at what mode molecular assembler is in...  and this wouldn't have a mode...
-  
-molecular fabricator tech: endothermic
-  each time you print ____ you also print ice IX for 0 energy
-    this will print iceIX proportional to how much energy was used
-
-
-new level: superstructure - similar to skyscrappers
-  multiple ways to get around, 2-4 different levels of traversal
-  lots of rooms
-  small level
-  blacks as planks that bridge 2 sections
 
 letters - not sure how to actually use them...
   !training levels
@@ -1544,6 +1520,8 @@ possible names for tech
   r-selection - flea/worm tech - opposite of K-selection, so lots of weaker sproes/fleas
   acousto-optic modulator - sound makes light have a different frequency (maybe use for laser tech with many colors)
   gravity wave - 
+  tuple - a finite list
+  Navier–Stokes - equations for the movement of fluids
 
 
 ******************************************************** BUGS ********************************************************

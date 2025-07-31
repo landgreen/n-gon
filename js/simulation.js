@@ -2,83 +2,6 @@
 //*********************************************************************
 const simulation = {
     loop() { }, //main game loop, gets set to normal or testing loop
-    // normalLoop() {
-    //     try {
-    //         simulation.gravity();
-    //         Engine.update(engine, simulation.delta);
-    //         simulation.wipe();
-    //         simulation.textLog();
-    //         if (m.onGround) {
-    //             m.groundControl()
-    //         } else {
-    //             m.airControl()
-    //         }
-    //         m.move();
-    //         m.look();
-    //         simulation.camera();
-    //         level.custom();
-    //         powerUps.do();
-    //         mobs.draw();
-    //         simulation.draw.cons();
-    //         simulation.draw.body();
-    //         if (!m.isTimeDilated) mobs.loop();
-    //         m.draw();
-    //         m.hold();
-    //         level.customTopLayer();
-    //         simulation.draw.drawMapPath();
-    //         b.fire();
-    //         b.bulletRemove();
-    //         b.bulletDraw();
-    //         if (!m.isTimeDilated) b.bulletDo();
-    //         simulation.drawCircle();
-    //         simulation.runEphemera();
-    //         ctx.restore();
-    //     } catch (error) {
-    //         simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${(error.stack && error.stack.replace(/\n/g, "<br>")) || (error.message + ` <u>${error.filename}:${error.lineno}</u>`)}`);
-    //     } finally {
-    //         simulation.drawCursor();
-    //     }
-    // },
-    // testingLoop() {
-    //     try {
-    //         simulation.gravity();
-    //         Engine.update(engine, simulation.delta);
-    //         simulation.wipe();
-    //         simulation.textLog();
-    //         if (m.onGround) {
-    //             m.groundControl()
-    //         } else {
-    //             m.airControl()
-    //         }
-    //         m.move();
-    //         m.look();
-    //         simulation.camera();
-    //         level.custom();
-    //         m.draw();
-    //         m.hold();
-    //         level.customTopLayer();
-    //         simulation.draw.wireFrame();
-    //         if (input.fire && m.fireCDcycle < m.cycle) {
-    //             m.fireCDcycle = m.cycle + 15; //fire cooldown       
-    //             for (let i = 0, len = mob.length; i < len; i++) {
-    //                 if (Vector.magnitudeSquared(Vector.sub(mob[i].position, simulation.mouseInGame)) < mob[i].radius * mob[i].radius) {
-    //                     console.log(mob[i])
-    //                 }
-    //             }
-    //         }
-    //         simulation.draw.cons();
-    //         simulation.draw.testing();
-    //         simulation.drawCircle();
-    //         simulation.runEphemera();
-    //         simulation.constructCycle()
-    //     } catch (error) {
-    //         simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${(error.stack && error.stack.replace(/\n/g, "<br>")) || (error.message + ` <u>${error.filename}:${error.lineno}</u>`)}`);
-    //     } finally {
-    //         ctx.restore();
-    //         simulation.testingOutput();
-    //         simulation.drawCursor();
-    //     }
-    // },
     normalLoop() {
         simulation.gravity();
         Engine.update(engine, simulation.delta);
@@ -1162,7 +1085,7 @@ const simulation = {
                             for (let i = 0; i < bullet.length; i++) {
                                 if (bullet[i].botType) Matter.Body.setPosition(bullet[i], Vector.sub(bullet[i].position, change));
                             }
-                        } else { //get hurt and go to start
+                        } else { //go to start
                             Matter.Body.setVelocity(player, { x: 0, y: 0 });
                             Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
                             // move bots
@@ -2504,6 +2427,7 @@ const simulation = {
         }
     },
     enableConstructMode() {
+        tech.giveTech('motion sickness') //for precise mouse control
         level.isProcedural = false //this is set to be true in levels like labs that need x+ and y+ in front of positions
         level.isVerticalFLipLevel = false
         simulation.isConstructionMode = true;

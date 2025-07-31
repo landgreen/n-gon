@@ -766,18 +766,18 @@ const powerUps = {
                     if (m.alive && powerUps.research.count >= cost) {
                         requestAnimationFrame(cycle);
                         this.isMakingBots = true
-
                         if (!simulation.paused && !simulation.isChoosing && !(simulation.cycle % 60)) {
-                            powerUps.research.count -= cost
+                            // powerUps.research.count -= cost
+                            powerUps.research.expend(cost)
                             b.randomBot()
-                            if (tech.renormalization) {
-                                for (let i = 0; i < cost; i++) {
-                                    if (Math.random() < 0.47) {
-                                        m.fieldCDcycle = m.cycle + 20;
-                                        powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
-                                    }
-                                }
-                            }
+                            // if (tech.renormalization) {
+                            //     for (let i = 0; i < cost; i++) {
+                            //         if (Math.random() < 0.47) {
+                            //             m.fieldCDcycle = m.cycle + 20;
+                            //             powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "research");
+                            //         }
+                            //     }
+                            // }
                         }
                     } else {
                         this.isMakingBots = false
@@ -803,6 +803,21 @@ const powerUps = {
             }
         },
         currentRerollCount: 0,
+        expend(count) { //runs when tech spend research
+            for (let i = 0; i < count; i++) {
+                if (powerUps.research.count > 0) {
+                    powerUps.research.changeRerolls(-1)
+                    if (tech.isResearchDamage) {
+                        m.damageDone *= 1.03
+                        simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.03} //peer review`);
+                        // tech.addJunkTechToPool(0.01)
+                    }
+                    if (tech.isResearchHeal) {
+                        powerUps.spawn(player.position.x + 150 * (Math.random() - 0.5), player.position.y + 150 * (Math.random() - 0.5), "heal", false);
+                    }
+                }
+            }
+        },
         use(type) { //runs when you actually research a list of selections, type can be field, gun, or tech
             if (tech.isJunkResearch && powerUps.research.currentRerollCount < 2) {
                 tech.addJunkTechToPool(0.01)
@@ -810,9 +825,12 @@ const powerUps = {
                 powerUps.research.changeRerolls(-1)
             }
             if (tech.isResearchDamage) {
-                m.damageDone *= 1.05
-                simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.05} //peer review`);
-                tech.addJunkTechToPool(0.01)
+                m.damageDone *= 1.03
+                simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.03} //peer review`);
+                // tech.addJunkTechToPool(0.01)
+            }
+            if (tech.isResearchHeal) {
+                powerUps.spawn(player.position.x + 150 * (Math.random() - 0.5), player.position.y + 150 * (Math.random() - 0.5), "heal", false);
             }
             powerUps.research.currentRerollCount++
             if (tech.isResearchReality) {

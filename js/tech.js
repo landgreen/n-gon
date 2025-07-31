@@ -1281,9 +1281,7 @@ const tech = {
         requires: "",
         effect() {
             tech.isDamageFromBulletCount = true
-            for (let i = 0; i < 3; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(3)
         },
         remove() {
             tech.isDamageFromBulletCount = false
@@ -1347,9 +1345,7 @@ const tech = {
             m.damageDone *= this.damage
             tech.slowFireDamage = 1.42
             b.setFireCD();
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(2)
         },
         remove() {
             if (this.count && m.alive) {
@@ -1447,9 +1443,7 @@ const tech = {
         effect() {
             m.damageDone *= this.damage
             tech.isCloakingDamage = true
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(2)
         },
         remove() {
             tech.isCloakingDamage = false
@@ -2424,9 +2418,7 @@ const tech = {
         },
         requires: "at least 4 bots",
         effect() {
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(2)
             // m.energy = 0.01;
             b.randomBot()
             b.randomBot()
@@ -2449,9 +2441,7 @@ const tech = {
         requires: "at least 6 bots",
         effect() {
             requestAnimationFrame(() => {
-                for (let i = 0; i < 3; i++) {
-                    if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-                }
+                powerUps.research.expend(3)
                 //fill array of available bots
                 const notUpgradedBots = []
                 const num = 2
@@ -2838,9 +2828,7 @@ const tech = {
         effect() {
             tech.isFieldHarmReduction = true
             m.damageReduction *= 0.6
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(2)
         },
         remove() {
             tech.isFieldHarmReduction = false
@@ -3874,11 +3862,16 @@ const tech = {
                 })
             }
         },
-        remove() { }
+        remove() {
+            requestAnimationFrame(() => { //need a 2 cycle wait because of -> search for this:   tech.tech.unshift(item); // Add the element to the front of the array
+                this.frequency = 0
+            })
+        }
     },
     {
         name: "peer review",
-        description: `after you <strong class='color-r'>research</strong> gain <strong>1.05x</strong> <strong class='color-d'>damage</strong><br>and <strong>+1%</strong> chance for <strong class='color-junk'>JUNK</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>`,
+        description: `after <strong class='color-r'>researching</strong> or <span class="underline">expending</span> ${powerUps.orb.research(1)}<br>gain <strong>1.03x</strong> <strong class='color-d'>damage</strong>`,
+        // <br>and <strong>+1%</strong> chance for <strong class='color-junk'>JUNK</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3892,6 +3885,26 @@ const tech = {
         },
         remove() {
             tech.isResearchDamage = false;
+        }
+    },
+    {
+        name: "clinical peer review",
+        descriptionFunction() {
+            return `after <strong class='color-r'>researching</strong> or <span class="underline">expending</span> ${powerUps.orb.research(1)}<br>spawn ${powerUps.orb.heal()}`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return (powerUps.research.count > 0 || build.isExperimentSelection) && !tech.isSuperDeterminism
+        },
+        requires: "at least 1 research, not superdeterminism",
+        effect() {
+            tech.isResearchHeal = true;
+        },
+        remove() {
+            tech.isResearchHeal = false;
         }
     },
     {
@@ -4023,27 +4036,6 @@ const tech = {
             }
         }
     },
-    // {
-    //     name: "eternalism",
-    //     description: `<strong>1.3x</strong> <strong class='color-d'>damage</strong>, but <strong>time</strong> doesn't <strong>pause</strong><br>while <strong class='color-choice'><span>ch</span><span>oos</span><span>ing</span></strong> ${powerUps.orb.field()}, ${powerUps.orb.tech()}, or ${powerUps.orb.gun()}`,
-    //     maxCount: 1,
-    //     count: 0,
-    //     frequency: 1,
-    //     frequencyDefault: 1,
-    //     allowed() {
-    //         return !tech.isPauseSwitchField && !tech.isPauseEjectTech && !tech.isWormHolePause && !document.fullscreenElement
-    //     },
-    //     requires: "not unified field theory, paradigm shift, invariant, fullscreen",
-    //     damage: 1.3,
-    //     effect() {
-    //         m.damageDone *= this.damage
-    //         tech.isNoDraftPause = true
-    //     },
-    //     remove() {
-    //         if (this.count && m.alive) m.damageDone /= this.damage
-    //         tech.isNoDraftPause = false
-    //     }
-    // },
     {
         name: "brainstorming",
         description: `<strong>randomize</strong> ${powerUps.orb.tech()} <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br>every <strong>1.5</strong> seconds for <strong>10</strong> seconds`,
@@ -5983,9 +5975,7 @@ const tech = {
             tech.missileBotCount++;
             b.missileBot();
             if (tech.haveGunCheck("missiles", false)) b.removeGun("missiles") //remove your last gun
-            for (let i = 0; i < 1; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(1)
         },
         remove() {
             // if (this.count) {
@@ -6240,9 +6230,7 @@ const tech = {
         requires: "an explosive damage source, not rocket propelled grenade",
         effect() {
             tech.isSmartRadius = true;
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(2)
         },
         remove() {
             tech.isSmartRadius = false;
@@ -6895,9 +6883,7 @@ const tech = {
         requires: "drones, not fault tolerance",
         effect() {
             tech.isExponential = true
-            for (let i = 0; i < this.cost; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(this.cost)
         },
         remove() {
             if (this.count > 0) powerUps.research.changeRerolls(this.cost)
@@ -6940,9 +6926,7 @@ const tech = {
                     bullet[bullet.length - 1].endCycle = Infinity
                 }
             }
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(2)
         },
         remove() {
             tech.isForeverDrones = 0
@@ -7215,9 +7199,7 @@ const tech = {
             }
             simulation.inGameConsole(`tech.isFoamBotUpgrade = true`)
             if (tech.haveGunCheck("foam", false)) b.removeGun("foam")
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(2)
         },
         remove() {
             // if (this.count) {
@@ -8221,9 +8203,7 @@ const tech = {
         effect() {
             tech.harmonicEnergy = 1.66
             m.setMaxEnergy()
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(2)
         },
         remove() {
             tech.harmonicEnergy = 0;
@@ -8826,9 +8806,7 @@ const tech = {
                 document.getElementById("field-0").classList.add("build-field-selected");
             }
             m.setField("field emitter")
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(2)
         },
         remove() {
             if (this.count > 0) {
@@ -8862,9 +8840,7 @@ const tech = {
         requires: "plasma torch",
         effect() {
             tech.isPlasmaBoost = true;
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(2)
         },
         remove() {
             tech.isPlasmaBoost = false;
@@ -8892,9 +8868,7 @@ const tech = {
         requires: "plasma torch",
         effect() {
             tech.isPlasmaRange += 0.5;
-            for (let i = 0; i < 1; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(1)
         },
         remove() {
             tech.isPlasmaRange = 1;
@@ -9045,9 +9019,7 @@ const tech = {
             tech.isFastTime = true
             m.setMovement();
             b.setFireCD();
-            for (let i = 0; i < 3; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(3)
         },
         remove() {
             tech.isFastTime = false
@@ -9330,9 +9302,7 @@ const tech = {
             tech.fieldDuplicate = 0.11
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             if (!build.isExperimentSelection && !simulation.isTextLogOpen) simulation.circleFlare(0.11);
-            for (let i = 0; i < 2; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(2)
         },
         remove() {
             tech.fieldDuplicate = 0
@@ -9425,9 +9395,7 @@ const tech = {
         },
         requires: "wormhole",
         effect() {
-            for (let i = 0; i < this.cost; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(this.cost)
             tech.isFreeWormHole = true
         },
         remove() {
@@ -9521,9 +9489,7 @@ const tech = {
         requires: "wormhole, not eternalism",
         effect() {
             tech.isWormHolePause = true
-            for (let i = 0; i < this.cost; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(this.cost)
         },
         remove() {
             if (tech.isWormHolePause && m.isTimeDilated) m.wakeCheck();
@@ -9549,9 +9515,7 @@ const tech = {
         },
         requires: "wormhole",
         effect() {
-            for (let i = 0; i < this.cost; i++) {
-                if (powerUps.research.count > 0) powerUps.research.changeRerolls(-1)
-            }
+            powerUps.research.expend(this.cost)
             tech.isWormholeMapIgnore = true
         },
         remove() {
@@ -10144,6 +10108,28 @@ const tech = {
         remove() {
             tech.isBrainstorm = false
             tech.isBrainstormActive = false
+        }
+    },
+    {
+        name: "eternalism",
+        description: `<strong>1.3x</strong> <strong class='color-d'>damage</strong>, but <strong>time</strong> doesn't <strong>pause</strong><br>while <strong class='color-choice'><span>ch</span><span>oos</span><span>ing</span></strong> ${powerUps.orb.field()}, ${powerUps.orb.tech()}, or ${powerUps.orb.gun()}`,
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        frequencyDefault: 0,
+        isJunk: true,
+        allowed() {
+            return !tech.isPauseSwitchField && !tech.isPauseEjectTech && !tech.isWormHolePause && !document.fullscreenElement
+        },
+        requires: "not unified field theory, paradigm shift, invariant, fullscreen",
+        damage: 1.3,
+        effect() {
+            m.damageDone *= this.damage
+            tech.isNoDraftPause = true
+        },
+        remove() {
+            if (this.count && m.alive) m.damageDone /= this.damage
+            tech.isNoDraftPause = false
         }
     },
     {
@@ -12737,6 +12723,7 @@ const tech = {
     isPowerUpDamage: null,
     isExitPrompt: null,
     isResearchDamage: null,
+    isResearchHeal: null,
     interestRate: null,
     isImmunityDamage: null,
     isMobDeathImmunity: null,

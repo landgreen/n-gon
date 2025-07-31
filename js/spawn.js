@@ -6791,7 +6791,7 @@ const spawn = {
         mobs.spawn(x, y, 0, radius, "rgba(255,0,155,1)") // "rgb(201,202,225)");
         let me = mob[mob.length - 1];
         me.isBoss = true;
-        Matter.Body.setDensity(me, 0.02); //normal is 0.001
+        Matter.Body.setDensity(me, 0.015); //normal is 0.001
         me.damageReduction = 1
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
@@ -6800,7 +6800,7 @@ const spawn = {
 
         me.seeAtDistance2 = 4000000; //2000 distance
         me.cycle = 0
-        me.accelMag = 0.04
+        me.accelMag = 0.037
         me.frictionAir = 1
         me.restitution = 1
         me.friction = 0
@@ -6810,14 +6810,13 @@ const spawn = {
             if (this.health < this.nextHealthThreshold) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 4) / 4
-                this.invulnerableCount = 70 + simulation.difficultyMode * 20
+                this.invulnerableCount = 50 + simulation.difficultyMode * 10
                 this.isInvulnerable = true
                 this.damageReduction = 0
                 for (let i = 0, len = mob.length; i < len; ++i) { //trigger old mines
                     if (mob[i].isMine) mob[i].isExploding = true
                 }
-
-                this.ammo = 20 + simulation.difficultyMode * 8 + level.levelsCleared * 2
+                this.ammo = 15 + simulation.difficultyMode * 6 + level.levelsCleared
             }
         };
 
@@ -10803,6 +10802,12 @@ const spawn = {
         map[map.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, properties);
     },
     mapVertex(x, y, vector, properties) { //adds shape to map array
+        map[map.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
+    },
+    bodyRectCorner(x, y, w = 800, h = 400, c = 25, properties) {
+        w *= 0.5
+        h *= 0.5
+        const vector = `${w} -${h - c}  ${w} ${h - c}  ${w - c} ${h}  -${w - c} ${h}  -${w} ${h - c}  -${w} -${h - c}  -${w - c} -${h}  ${w - c} -${h}`
         map[map.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
     },
     mapRectNow(x, y, width, height, properties, isRedrawMap = true) { //adds rectangle to map array in the middle of a level
