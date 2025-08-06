@@ -313,7 +313,7 @@ const m = {
         m.throwCharge = 4;
         m.holdingTarget = who
         m.isHolding = true;
-        m.fieldUpgrades[4].endoThermic(0.3)
+        m.fieldUpgrades[4].endoThermic(0.4)
     },
     alive: false,
     isSwitchingWorlds: false,
@@ -931,6 +931,7 @@ const m = {
                     y: m.pos.y + 30 * Math.sin(m.angle) + 100 * (Math.random() - 0.5)
                 }) //spawn drone
             }
+            m.fieldUpgrades[4].endoThermic(Math.min(5 * dmg, 1))
         }
         if (tech.isEnergyHealth) {
             if (isDefense) dmg *= Math.pow(m.defense(), 0.6)
@@ -4397,7 +4398,7 @@ const m = {
                 return `use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs<br>excess <strong class='color-f'>energy</strong> used to <strong class='color-print'>print</strong> ${simulation.molecularMode === 0 ? "<strong class='color-p' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s'>ice IX" : "<strong>drones"}</strong><br><strong>12</strong> <strong class='color-f'>energy</strong> per second <em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↘→↓↙←↑↑↓</em>`
             },
             endoThermic(drain) {
-                if (tech.isEndoThermic) {
+                if (tech.isEndothermic) {
                     const len = 10 * drain
                     if (Math.random() < len) {
                         for (let i = 0; i < len; i++) {
@@ -5944,9 +5945,10 @@ const m = {
                                                     if (tech.blockDupCount < 0.4) {
                                                         tech.blockDupCount += 0.02
                                                         simulation.inGameConsole(`<span class='color-var'>duplicationChance</span><span class='color-symbol'>++</span> <em>//${(tech.blockDupCount * 100).toFixed(0)}% for anyon</em>`);
-                                                    } else {
-                                                        simulation.inGameConsole(`//<em><span class='color-var'>duplicationChance</span> limit reached for this level</em>`);
                                                     }
+                                                    // else {
+                                                    //     simulation.inGameConsole(`//<em><span class='color-var'>duplicationChance</span> limit reached for this level</em>`);
+                                                    // }
                                                 }
                                                 break
                                             }
@@ -5975,9 +5977,10 @@ const m = {
                                                 if (tech.blockDupCount < 0.4) {
                                                     tech.blockDupCount += 0.02
                                                     simulation.inGameConsole(`<span class='color-var'>duplicationChance</span><span class='color-symbol'>++</span> <em>//${(tech.blockDupCount * 100).toFixed(0)}% for anyon</em>`);
-                                                } else {
-                                                    simulation.inGameConsole(`//<em><span class='color-var'>duplicationChance</span> limit reached for this level</em>`);
                                                 }
+                                                // else {
+                                                //     simulation.inGameConsole(`//<em><span class='color-var'>duplicationChance</span> limit reached for this level</em>`);
+                                                // }
                                             }
                                             break
                                         }

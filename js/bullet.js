@@ -2929,7 +2929,7 @@ const b = {
                 y: SPEED * Math.sin(ANGLE)
             });
             Composite.add(engine.world, bullet[bIndex]); //add bullet to world
-            if (tech.isMutualism && m.health > 0.04) {
+            if (tech.isMutualism && m.health > 0.5) {
                 m.health -= 0.02
                 m.displayHealth();
                 bullet[bIndex].isMutualismActive = true
@@ -3024,7 +3024,7 @@ const b = {
 
             Composite.add(engine.world, bullet[bIndex]); //add bullet to world
 
-            if (tech.isMutualism && m.health > 0.01) {
+            if (tech.isMutualism && m.health > 0.05) {
                 m.health -= 0.01
                 m.displayHealth();
                 bullet[bIndex].isMutualismActive = true
@@ -3224,7 +3224,7 @@ const b = {
         })
         Composite.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
-        if (tech.isMutualism && m.health > 0.01) {
+        if (tech.isMutualism && m.health > 0.05) {
             m.health -= 0.01
             m.displayHealth();
             bullet[bullet.length - 1].isMutualismActive = true
@@ -3311,6 +3311,7 @@ const b = {
                         })
                         if (found && m.energy > 0.041) {
                             m.energy -= 0.04
+                            m.fieldUpgrades[4].endoThermic(0.4)
                             //remove the body and spawn a new drone
                             Composite.remove(engine.world, found)
                             body.splice(body.indexOf(found), 1)
@@ -3573,6 +3574,7 @@ const b = {
                         })
                         if (found && m.energy > 0.091) {
                             m.energy -= 0.09
+                            m.fieldUpgrades[4].endoThermic(0.7)
                             //remove the body and spawn a new drone
                             Composite.remove(engine.world, found)
                             body.splice(body.indexOf(found), 1)

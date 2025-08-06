@@ -6800,7 +6800,7 @@ const spawn = {
 
         me.seeAtDistance2 = 4000000; //2000 distance
         me.cycle = 0
-        me.accelMag = 0.037
+        me.accelMag = 0.023 //can't follow track above 1.1
         me.frictionAir = 1
         me.restitution = 1
         me.friction = 0
@@ -6920,12 +6920,7 @@ const spawn = {
 
         Matter.Body.setPosition(me, me.track[me.trackIndex])
         me.do = function () {
-            //player vision
-            if (this.distanceToPlayer2() < this.seeAtDistance2 && (Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0) && !m.isCloak) {
-                this.foundPlayer();
-            } else if (this.seePlayer.recall) {
-                this.lostPlayer();
-            }
+
             //move towards next coordinate
             const where = this.track[this.trackIndex]
             const sub = Vector.sub(where, this.position)
@@ -6950,9 +6945,6 @@ const spawn = {
             ctx.lineWidth = 5
             ctx.strokeStyle = "rgba(255,0,155,1)"
             ctx.stroke();
-            // ctx.lineWidth = 10
-            // ctx.strokeStyle = `rgba(0,255,255,0.2)`;
-            // ctx.stroke();
 
             index = this.trackIndex - 2
             if (index < 0) index = this.track.length - 1
@@ -6967,20 +6959,16 @@ const spawn = {
                 ctx.arc(this.track[index].x, this.track[index].y, 7, 0, 2 * Math.PI);
                 ctx.fill();
             }
-
-
-            //maintain speed //faster in the vertical to help avoid repeating patterns
-            // if (this.speed < 0.01) {
-            //     const unit = Vector.sub(player.position, this.position)
-            //     Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(unit), 0.1));
-            // } else {
-            //     if (Math.abs(this.velocity.y) < 10) {
-            //         Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.03 });
-            //     }
-            //     if (Math.abs(this.velocity.x) < 7) {
-            //         Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y });
-            //     }
-            // }
+            //player vision
+            if (this.distanceToPlayer2() < this.seeAtDistance2) { //2000
+                //close to player, go slow
+                me.accelMag = 0.023 //can't follow track above 1.1
+                if ((Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0) && !m.isCloak) this.foundPlayer();
+            } else {
+                //far from player, go fast
+                me.accelMag = 0.1 //can't follow track above 1.1
+                if (this.seePlayer.recall) this.lostPlayer();
+            }
             if (this.isInvulnerable) {
                 this.invulnerableCount--
                 if (this.invulnerableCount < 0) {
@@ -7001,23 +6989,14 @@ const spawn = {
                     // spawn.freezeGrenade(this.position.x, this.position.y, null, 60, 100 + 20 * simulation.difficultyMode);
                     spawn.mine(this.position.x, this.position.y)
                 }
-            } else {
-                // if (this.seePlayer.recall && !(simulation.cycle % 30)) {
-                //     spawn.sniperBullet(this.position.x, this.position.y, 7 + Math.ceil(this.radius / 15), 5);
-                //     const v = 13 + Math.floor(3 * Math.random()) + simulation.difficultyMode
-                //     const sub = Vector.sub(m.pos, this.position)
-                //     const fireDir = Vector.mult(Vector.normalise(sub), v)
-                //     Matter.Body.setVelocity(mob[mob.length - 1], fireDir);
-                // }
-                if (this.seePlayer.recall && this.ammo && !(simulation.cycle % 7)) {
-                    this.ammo--
-                    // const velocity = Vector.rotate(Vector.mult(Vector.normalise(this.velocity), -5 - 10 * Math.random()), 0.5 * (Math.random() - 0.5))
-                    const v = 8 + Math.floor(4 * Math.random()) + simulation.difficultyMode
-                    const sub = Vector.sub(m.pos, this.position)
-                    const fireDir = Vector.rotate(Vector.mult(Vector.normalise(sub), v), 0.12 * (Math.random() - 0.5))
-                    spawn.bounceBullet(this.position.x, this.position.y, Vector.add(fireDir, Vector.mult(this.velocity, 0.4)))
-                }
-
+            } else if (this.seePlayer.recall && this.ammo && !(simulation.cycle % 7)) {
+                // console.log(this.seePlayer.recall)
+                this.ammo--
+                // const velocity = Vector.rotate(Vector.mult(Vector.normalise(this.velocity), -5 - 10 * Math.random()), 0.5 * (Math.random() - 0.5))
+                const v = 8 + Math.floor(4 * Math.random()) + simulation.difficultyMode
+                const sub = Vector.sub(m.pos, this.position)
+                const fireDir = Vector.rotate(Vector.mult(Vector.normalise(sub), v), 0.12 * (Math.random() - 0.5))
+                spawn.bounceBullet(this.position.x, this.position.y, Vector.add(fireDir, Vector.mult(this.velocity, 0.4)))
             }
             this.checkStatus();
         };

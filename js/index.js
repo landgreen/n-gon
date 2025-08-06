@@ -487,7 +487,6 @@ const build = {
 
         let fullscreenWarning = document.fullscreenElement ? `<div><span style="font-size:1.25em;font-weight: 600; float: left;">FULLSCREEN</span> <em style="float: right;color:#ccc;">press ${cleanText(input.key.fullscreen)} or hold ESC to exit</em></div><br>` : ""
         let text = `<div class="pause-grid-module" style="padding: 8px;">
-        
 <span style="font-size:1.4em;font-weight: 600; float: left;">PAUSED</span> 
 <em style="float: right;color:#ccc;">press ${input.key.pause} to resume</em>
 <br>
@@ -546,7 +545,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 </details>
 ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padding: 0 8px;"><summary>active constraints</summary><div class="pause-details"><span class="constraint">${level.constraintDescription1}<br>${level.constraintDescription2}</span></div></details>` : ""}
 </div>`
-        if (!localSettings.isHideHUD) text += `<div class="pause-grid-module card-background" style="height:auto;">
+        text += `<div class="pause-grid-module card-background" style="height:auto;">
 <details id = "console-log-details" style="padding: 0 8px;">
 <summary>console log</summary>
 <div class="pause-details">

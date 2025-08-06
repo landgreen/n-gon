@@ -1,18 +1,28 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new level: superstructure
-figured out how to give specific moving blocks horizontal traction and player leg animation
-  superstructure, tower, furnace have a bouncy platform with the traction code
-trainBoss on the level corridor is slower, and invulnerable for less time
+announcing level name and constraints using in-level text
 
-peer review 1.5->1.3 damage per expending research in any way
-  no longer gives 1% JUNK
-tech: clinical peer review - spawn a heal per expending research in any way
-eternalism is now a JUNK tech
+von Neumann probe, ablative drones are included in endothermic's effects
+maul and rebar use 10->30 ammo
+tech reduced tolerances renamed standardization
+trainBoss is now slow near player and fast otherwise
+opened up reversed version of corridor level
 
-switched self-assembly heal spawn to have a delay to prevent lag at a zillion health
+bugs
+  removed excessive console messages from anyon
+  activated hoizontally flipped mode on corridor level
+  fixed issue with localSettings.isHideHUD disabling constraint state settings with pause menu
 
 *********************************************************** TODO *****************************************************
+
+T3, T4 (mostly T4)
+  reduce mob CD and move speed
+  reduce number of mob bulelts
+  increase damage taken
+
+perfect diamagnetism tech:   - using field while crouching will pull in blocks
+  releasing field will fire the blocks  (like control)
+  very strong, but high energy cost
 
 tech -  gain 5% duplication each time you expend a research orb
 
@@ -92,6 +102,7 @@ super balls tech - that hit blocks produce 10 balls?
   destroy the block after 3 hits?
 
 nail gun guntech - needles follow you around until you get close to a mob and then they all fire
+  like the spell in eldin ring with the 3 swords
 
 tech:   -  scale max energy with current health
   nonrefundable
@@ -1535,9 +1546,12 @@ hides mouse when -> (eternalism or no pause) + fullscreen + show AI images
   maybe just disable eternalism / no pause always
 
 
-double bots on level -  towers, and flocculation
-  both levels had portals, might be related bots in portals
-  https://landgreen.github.io/n-gon/index.html?&seed=88132&gun0=drones&gun1=mine&tech0=quenching&tech1=sentry&tech2=energy%20conservation&tech3=boom-bot&tech4=gauge&tech5=nail-bot&tech6=enthalpy&molMode=0&field=metamaterial%20cloaking&difficulty=6
+double bots on start of level
+  towers, flocculation, highrise
+  occured with only the base bot tech: sound-bot  giving 2x sound-bot, then back to 1 on next level
+  occured again on skyscrappers with 2x laser-bots, but should only be one
+    https://landgreen.github.io/n-gon/index.html?&seed=88132&gun0=drones&gun1=mine&tech0=quenching&tech1=sentry&tech2=energy%20conservation&tech3=boom-bot&tech4=gauge&tech5=nail-bot&tech6=enthalpy&molMode=0&field=metamaterial%20cloaking&difficulty=6
+    https://landgreen.github.io/n-gon/index.html?&seed=99677&gun0=laser&gun1=super%20balls&tech0=expansion&tech1=superposition&tech2=energy%20conservation&tech3=polyurethane%20foam&tech4=quasiparticles&tech5=laser-bot&tech6=recycling&molMode=1&field=standing%20wave&difficulty=5
 
 dmg side bar is too long sometimes
   maybe rework damage indications

@@ -74,8 +74,8 @@ const level = {
             // for (let i = 0; i < 70; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
-            // level.superstructure()
-            // level.towers()
+            // simulation.isHorizontalFlipped = true
+            // level.corridor()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
@@ -427,11 +427,75 @@ const level = {
             document.getElementById("right-HUD").style.top = "15px";
         }
     },
+    announceText(x, y, isCentered = false) {  //max width around 900-1000
+        let xAdjusted = x
+        // simulation.draw.font.drawString('abcdefghijklmnopqrstuvwxyzdnasijfnibdiasbfuyabndkjbsdufdbaisfbkadsbfkusbfdkuhbsdfubdsaifbadosifbiousadbfiuasdbfiuasdbifubasi', x, y)
+        if (!localSettings.isHideHUD) {
+            if (level.constraintDescription1) {
+                simulation.draw.font.word = new Path2D()
+                if (isCentered) xAdjusted -= level.constraintDescription1.length * 29 / 2
+                simulation.draw.font.drawString(level.constraintDescription1, xAdjusted, y) //level.constraintDescription2
+                simulation.ephemera.push({
+                    name: `constraint text ${Math.random()}`,
+                    count: 300, //cycles before it self removes
+                    do() {
+                        ctx.beginPath()
+                        const a = this.count > 280 ? Math.min((300 - this.count) * 0.05, 1) : Math.min(this.count / 20, 1)
+                        // ctx.strokeStyle = "#444"
+                        // ctx.lineWidth = 6 
+                        // ctx.stroke(simulation.draw.font.word)
+                        ctx.strokeStyle = `rgba(255, 83, 177,${a})`
+                        ctx.lineWidth = 3  //Math.min(3, (360 - this.count) * 0.01)  //Math.floor(4 + 2 * Math.sin(simulation.cycle * 0.13));
+                        ctx.stroke(simulation.draw.font.word)
+                        this.count--
+                        if (this.count < 0) {
+                            simulation.removeEphemera(this.name)
+                            if (level.constraintDescription2) {
+                                simulation.draw.font.word = new Path2D()
+                                if (isCentered) xAdjusted = x - level.constraintDescription2.length * 29 / 2
+                                simulation.draw.font.drawString(level.constraintDescription2, xAdjusted, y) //level.constraintDescription2
+                                simulation.ephemera.push({
+                                    name: `constraint text ${Math.random()}`,
+                                    count: 300, //cycles before it self removes
+                                    do() {
+                                        const a = this.count > 280 ? Math.min((300 - this.count) * 0.05, 1) : Math.min(this.count / 20, 1)
+                                        ctx.strokeStyle = `rgba(255, 83, 177,${a})`
+                                        ctx.lineWidth = 3
+                                        ctx.beginPath()
+                                        ctx.stroke(simulation.draw.font.word)
+                                        this.count--
+                                        if (this.count < 0) simulation.removeEphemera(this.name)
+                                    },
+                                })
+                            }
+
+                        }
+                    },
+                })
+            } else {
+                simulation.draw.font.word = new Path2D()
+                if (isCentered) xAdjusted -= level.levels[level.onLevel].length * 29 / 2
+                simulation.draw.font.drawString(level.levels[level.onLevel], xAdjusted, y)
+                simulation.ephemera.push({
+                    name: `constraint text ${Math.random()}`,
+                    count: 240, //cycles before it self removes
+                    do() {
+                        ctx.strokeStyle = `rgba(255, 255, 255,${Math.min(this.count / 20, 1)})`
+                        ctx.lineWidth = 3
+                        ctx.beginPath()
+                        ctx.stroke(simulation.draw.font.word)
+                        this.count--
+                        if (this.count < 0) simulation.removeEphemera(this.name)
+                    },
+                })
+            }
+        }
+    },
     constraintDescription1: "", //used in pause menu and console
     constraintDescription2: "",
     constraint: [
         {
-            description: "0.5x healing",
+            description: "reduced healing",//just A-Z for use with simulation.draw.font.drawString 
             effect() {
                 level.isLowHeal = true
             },
@@ -467,7 +531,7 @@ const level = {
             }
         },
         {
-            description: "0.5x energy regen",
+            description: "reduced energy regen",
             effect() {
                 level.isReducedRegen = 0.5
             },
@@ -476,7 +540,7 @@ const level = {
             }
         },
         {
-            description: "0.5x max health",
+            description: "lower max health",
             effect() {
                 level.isReducedHealth = true
                 m.setMaxHealth()
@@ -493,7 +557,7 @@ const level = {
             }
         },
         {
-            description: "after 50 seconds spawn WIMPs",
+            description: "spawn wimps",
             effect() {
                 simulation.ephemera.push({
                     name: "WIMPS",
@@ -513,7 +577,7 @@ const level = {
             }
         },
         {
-            description: "0.3x damage after using power ups",
+            description: "low damage after power ups",
             effect() {
                 level.isNoDamage = true
                 level.noDamageCycle = 0
@@ -524,7 +588,7 @@ const level = {
             }
         },
         {
-            description: "mobs heal after you take damage",
+            description: "mobs heal if you take damage",
             effect() {
                 level.isMobHealPlayerDamage = true
             },
@@ -542,7 +606,7 @@ const level = {
             }
         },
         {
-            description: "4x shielded mobs",
+            description: "more shielded mobs",
             effect() {
                 level.isMobShields = true
             },
@@ -551,7 +615,7 @@ const level = {
             }
         },
         {
-            description: "40% JUNK chance",
+            description: "higher JUNK chance",
             effect() {
                 level.junkAdded = 0.4
             },
@@ -560,7 +624,7 @@ const level = {
             }
         },
         {
-            description: "-1 choice",
+            description: "fewer choices",
             effect() {
                 level.fewerChoices = true
             },
@@ -603,7 +667,7 @@ const level = {
             }
         },
         {
-            description: "25% of mobs respawn",
+            description: "some mobs respawn",
             effect() {
                 level.isMobRespawn = true
             },
@@ -612,7 +676,7 @@ const level = {
             }
         },
         {
-            description: "0 duplication",
+            description: "no duplication",
             effect() {
                 level.isNoDuplicate = true
             },
@@ -621,7 +685,7 @@ const level = {
             }
         },
         {
-            description: "2x ammo cost",
+            description: "double ammo cost",
             effect() {
                 level.is2xAmmo = true
             },
@@ -630,7 +694,7 @@ const level = {
             }
         },
         {
-            description: "0.5x max energy",
+            description: "lower max energy",
             effect() {
                 level.isReducedEnergy = true
                 m.setMaxEnergy()
@@ -3630,6 +3694,7 @@ const level = {
         }
     },
     subway() {
+        level.announceText(0, -575, true)
         // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
         // m.maxHealth = m.health = 100
         // color.map = "#333" //custom map color
@@ -4762,6 +4827,11 @@ const level = {
         simulation.draw.drawMapPath = simulation.draw.drawMapSight
     },
     reservoir() {
+        if (simulation.isHorizontalFlipped) {
+            level.announceText(700, 950, true)
+        } else {
+            level.announceText(-687, 950, true)
+        }
         level.announceMobTypes()
         level.exit.x = 1700;
         level.exit.y = -4510;
@@ -5050,6 +5120,11 @@ const level = {
         }
     },
     reactor() {
+        if (simulation.isHorizontalFlipped) {
+            level.announceText(550, -710, true)
+        } else {
+            level.announceText(-550, -725, true)
+        }
         level.exit.x = 3500;
         level.exit.y = -42;
         spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 25);
@@ -5290,7 +5365,6 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     towers() {
-        // simulation.isHorizontalFlipped = true
         level.announceMobTypes()
         const isFlippedHorizontal = (simulation.isHorizontalFlipped && Math.random() < 0.33) ? true : false
         if (isFlippedHorizontal) {
@@ -5303,6 +5377,11 @@ const level = {
             level.setPosToSpawn(400, -50);
             level.exit.x = 9150;
             level.exit.y = -2230;
+        }
+        if (isFlippedHorizontal) {
+            level.announceText(9200, -2170, true)
+        } else {
+            level.announceText(400, 50, true)
         }
 
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
@@ -5617,6 +5696,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     factory() {
+        level.announceText(2238, -1715, true)
         level.announceMobTypes()
         // simulation.enableConstructMode() //remove this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -5930,6 +6010,7 @@ const level = {
         const mobSpawnChance = 0 // Math.random() < chance + 0.07 * simulation.difficulty
         enterOptions = [
             (x = offset.x, y = offset.y) => { //lasers
+                level.announceText(x + 900, y - 1370)
                 level.setPosToSpawn(x + 1750, y - 800);
                 spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
                 spawn.mapRect(x + 1450, y - 1350, 50, 450); //entrance left wall
@@ -6996,6 +7077,12 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     pavilion() {
+        if (simulation.isHorizontalFlipped) {
+            level.announceText(900, 300, true)
+        } else {
+            level.announceText(-900, 300, true)
+        }
+
         level.announceMobTypes()
         level.fallMode = "start";
         const vanish = []
@@ -7154,6 +7241,7 @@ const level = {
         }
     },
     testChamber() {
+        level.announceText(0, 20, true)
         level.announceMobTypes()
         level.setPosToSpawn(0, -50); //lower start
         level.exit.y = level.enter.y - 550;
@@ -7417,6 +7505,7 @@ const level = {
 
     },
     interferometer() {
+        level.announceText(-1825, 2025, true)
         level.isVerticalFLipLevel = true
         mobs.maxMobBody = 20 //normally 40, but set to 10 to avoid too much clutter
         simulation.fallHeight = 4000
@@ -7973,7 +8062,7 @@ const level = {
     },
     gravitron() {
         mobs.maxMobBody = 25 //normally 40, but set lower to avoid too much clutter
-
+        level.announceText(-2375, 1030, true)
         level.isVerticalFLipLevel = true
         simulation.fallHeight = 4000
         level.announceMobTypes()
@@ -8322,7 +8411,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     substructure() {
-        // simulation.fallHeight = 4000
+        level.announceText(-3800, -680, true)
         level.announceMobTypes()
         level.setPosToSpawn(-3800, -750);
         level.exit.x = 3750
@@ -8527,14 +8616,18 @@ const level = {
         powerUps.chooseRandomPowerUp(2950, -1450);
 
         // level.isHorizontalFlipped = true
-        if (level.isHorizontalFlipped) {
+        if (simulation.isHorizontalFlipped) {
+            level.announceText(14075, -550, true)
             level.setPosToSpawn(14075, -625);
             level.exit.x = -350
             level.exit.y = 505
             spawn.bodyRect(13525, -675, 50, 100);
             var color1 = "rgba(0,20,60,0.09)"
             var color2 = "rgba(0,255,255,0.1)"
+            spawn.mapVertex(13800, -600, "0 -325  -50 -300  -50 300  50 300  50 -300");
+
         } else {
+            level.announceText(-350, 580, true)
             level.setPosToSpawn(-350, 475);
             level.exit.x = 14025
             level.exit.y = -600
@@ -8796,10 +8889,12 @@ const level = {
     furnace() {
         level.announceMobTypes()
         if (simulation.isHorizontalFlipped) {
+            level.announceText(4350, 325, true)
             level.setPosToSpawn(4350, 250);
             level.exit.x = -4375
             level.exit.y = 115
         } else {
+            level.announceText(-4325, 175, true)
             level.setPosToSpawn(-4325, 100);
             level.exit.x = 4300
             level.exit.y = 270
@@ -9088,6 +9183,7 @@ const level = {
         powerUps.chooseRandomPowerUp(-3175, 925);
     },
     lock() {
+        level.announceText(0, 75, true)
         level.announceMobTypes()
         level.setPosToSpawn(0, -65); //lower start
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -9308,6 +9404,7 @@ const level = {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     sewers() {
+        level.announceText(0, 25, true)
         level.announceMobTypes()
         const button1 = level.button(6600, 2675)
         // const hazard = level.hazard(4550, 2750, 4550, 150)
@@ -9499,9 +9596,9 @@ const level = {
             balance4 = level.rotor(9300, 2205, 25, 380, 0.001) //exit
             balance5 = level.rotor(2605, 1100, 390, 25, 0.001) //falling
         }
-
     },
     flocculation() {
+        level.announceText(0, 25, true)
         level.announceMobTypes()
         const button0 = level.button(1125, 795)
         const button1 = level.button(6538, 2670)
@@ -9758,6 +9855,11 @@ const level = {
 
     },
     satellite() {
+        if (simulation.isHorizontalFlipped) {
+            level.announceText(100, 275, true)
+        } else {
+            level.announceText(-100, 275, true)
+        }
         level.announceMobTypes()
         level.fallMode = "start";
         const boost1 = level.boost(5825, 235, 1400)
@@ -9804,7 +9906,9 @@ const level = {
         document.body.style.backgroundColor = "#dbdcde";
 
         //spawn start building
-        spawn.mapRect(-350, -800, 100, 1100);
+
+        spawn.mapRect(-575, -850, 325, 1400); //extended wall to fit text
+        // spawn.mapRect(-350, -800, 100, 1100);
         // spawn.mapRect(-300, -10, 500, 50);
         spawn.mapRect(150, -510, 50, 365);
         spawn.bodyRect(170, -140, 20, 163, 1, spawn.propsFriction); //door to starting room
@@ -9947,7 +10051,6 @@ const level = {
     },
     rooftops() {
         level.announceMobTypes()
-
         // level.fallPosition = { x: 5000, y:-4000}
         const elevator = level.elevator(1450, -990, 235, 45, -2000)
         const boost1 = level.boost(4950, 0, 1100)
@@ -9988,25 +10091,33 @@ const level = {
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#dcdcde";
 
-
-
         // level.fallMode = "start";
         let isBackwards = false
         if (Math.random() < 0.75) {
+            if (simulation.isHorizontalFlipped) {
+                level.announceText(450, -1975, true)
+            } else {
+                level.announceText(-450, -1975, true)
+            }
             //normal direction start in top left
             level.setPosToSpawn(-450, -2060);
-            level.exit.x = 3600;
-            level.exit.y = -300;
-            spawn.mapRect(3600, -285, 100, 50); //ground bump wall
+            level.exit.x = 4225;
+            level.exit.y = -30;
+            spawn.mapRect(4225, -10, 100, 50); //ground bump wall
             //mobs that spawn in exit room
             spawn.bodyRect(4850, -750, 300, 25, 0.6); //
             spawn.randomSmallMob(4100, -100);
             spawn.randomSmallMob(4600, -100);
             spawn.randomMob(3765, -450, 0.3);
         } else {
+            if (simulation.isHorizontalFlipped) {
+                level.announceText(-4225, 30, true)
+            } else {
+                level.announceText(4225, 30, true)
+            }
             isBackwards = true
             //reverse direction, start in bottom right
-            level.setPosToSpawn(3650, -325);
+            level.setPosToSpawn(4225, -50);
             level.exit.x = -550;
             level.exit.y = -2030;
             spawn.mapRect(-550, -2015, 100, 50); //ground bump wall
@@ -10018,7 +10129,8 @@ const level = {
 
         //spawn.mapRect(-700, 0, 6250, 100); //ground
         spawn.mapRect(3400, 0, 2150, 100); //ground
-        spawn.mapRect(-700, -2000, 2125, 50); //Top left ledge
+        // spawn.mapRect(-700, -2000, 2125, 100); 
+        spawn.mapRect(-850, -2000, 2275, 100);//Top left ledge
         spawn.bodyRect(1300, -2125, 50, 125, 0.8);
         spawn.bodyRect(1307, -2225, 50, 100, 0.8);
         spawn.mapRect(-700, -2350, 50, 400); //far left starting left wall
@@ -10099,7 +10211,7 @@ const level = {
             elevator.holdX = -elevator.holdX // flip the elevator horizontally
 
             if (isBackwards) {
-                level.setPosToSpawn(-3650, -325); //-x
+                level.setPosToSpawn(-4225, -50); //-x
             } else {
                 level.setPosToSpawn(450, -2060); //-x
             }
@@ -10157,7 +10269,7 @@ const level = {
                 ctx.fillRect(-275, -1275, 425, 300)
             } else {
                 ctx.fillStyle = "#d4f4f4"
-                ctx.fillRect(3750, -3650, 550, 400)
+                ctx.fillRect(4025, -3675, 575, 450)
             }
             ctx.fillStyle = "#c7c7ca"
             ctx.fillRect(4200, -2200, 100, 2600)
@@ -10170,7 +10282,8 @@ const level = {
         level.customTopLayer = () => {
             if (backwards) {
                 ctx.fillStyle = "rgba(0,0,0,0.1)"
-                ctx.fillRect(3750, -3650, 550, 400)
+                // ctx.fillRect(3750, -3650, 550, 400)
+                ctx.fillRect(4025, -3675, 575, 450);
             } else {
                 ctx.fillStyle = "rgba(0,0,0,0.1)"
                 ctx.fillRect(-275, -1275, 425, 300)
@@ -10196,15 +10309,25 @@ const level = {
         level.defaultZoom = 2100
         simulation.zoomTransition(level.defaultZoom)
 
-        const backwards = (Math.random() < 0.25 && simulation.difficulty > 8) ? true : false;
+        const backwards = Math.random() < 0.25 ? true : false;
         if (backwards) {
-            level.setPosToSpawn(4000, -3300); //normal spawn
+            level.setPosToSpawn(4300, -3300); //normal spawn
             level.exit.x = -100;
             level.exit.y = -1025;
+            if (simulation.isHorizontalFlipped) {
+                level.announceText(-4300, -3223, true)
+            } else {
+                level.announceText(4300, -3225, true)
+            }
         } else {
             level.setPosToSpawn(-50, -1050); //normal spawn
-            level.exit.x = 3950;
+            level.exit.x = 4250;
             level.exit.y = -3275;
+            if (simulation.isHorizontalFlipped) {
+                level.announceText(-975, -975, true)
+            } else {
+                level.announceText(975, -975, true)
+            }
         }
 
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -10254,9 +10377,9 @@ const level = {
         spawn.mapRect(4150, -1600, 200, 25);
         spawn.mapRect(4150, -700, 200, 25);
         //exit room on top of tower
-        spawn.mapRect(3700, -3700, 600, 50);
-        spawn.mapRect(3700, -3700, 50, 500);
-        spawn.mapRect(4250, -3700, 50, 300);
+        spawn.mapRect(4000, -3700, 600, 50);
+        spawn.mapRect(4000, -3700, 50, 500);
+        spawn.mapRect(4550, -3700, 50, 300);
         spawn.mapRect(3700, -3250, 1100, 100);
 
         spawn.randomGroup(350, -500, 1)
@@ -10331,7 +10454,7 @@ const level = {
 
 
             if (backwards) {
-                level.setPosToSpawn(-4000, -3300); //-x
+                level.setPosToSpawn(-4300, -3300); //-x
             } else {
                 level.setPosToSpawn(50, -1050); //-x
             }
@@ -10343,7 +10466,7 @@ const level = {
                     ctx.fillRect(275 - 425, -1275, 425, 300)
                 } else {
                     ctx.fillStyle = "#d4f4f4"
-                    ctx.fillRect(-3750 - 550, -3650, 550, 400)
+                    ctx.fillRect(-4050 - 550, -3650, 550, 400)
                 }
                 ctx.fillStyle = "#c7c7ca"
                 ctx.fillRect(-4200 - 100, -2200, 100, 2600)
@@ -10356,7 +10479,7 @@ const level = {
             level.customTopLayer = () => {
                 if (backwards) {
                     ctx.fillStyle = "rgba(0,0,0,0.1)"
-                    ctx.fillRect(-3750 - 550, -3650, 550, 400)
+                    ctx.fillRect(-4050 - 550, -3650, 550, 400)
                 } else {
                     ctx.fillStyle = "rgba(0,0,0,0.1)"
                     ctx.fillRect(275 - 425, -1275, 425, 300)
@@ -10379,6 +10502,12 @@ const level = {
         }
     },
     skyscrapers() {
+        if (simulation.isHorizontalFlipped) {
+            level.announceText(50, 20, true)
+        } else {
+            level.announceText(-50, 20, true)
+        }
+
         level.announceMobTypes()
         level.fallMode = "start";
         const boost1 = level.boost(475, 0, 1300)
@@ -10415,7 +10544,7 @@ const level = {
         spawn.debris(750, -2200, 3700, 16); //16 debris per level
         document.body.style.backgroundColor = "#dcdcde";
 
-        spawn.mapRect(-300, 0, 5100, 300); //***********ground
+        spawn.mapRect(-600, 0, 5400, 300); //***********ground
         spawn.mapRect(-300, -350, 50, 400); //far left starting left wall
         spawn.mapRect(-300, -10, 500, 50); //far left starting ground
         spawn.mapRect(-300, -350, 500, 50); //far left starting ceiling
@@ -10519,6 +10648,7 @@ const level = {
         }
     },
     superstructure() {
+        level.announceText(0, 1025, true)
         level.announceMobTypes()
         level.setPosToSpawn(0, 930);
         level.exit.x = 600
@@ -10764,6 +10894,11 @@ const level = {
         powerUps.chooseRandomPowerUp(800, -2675);
     },
     highrise() {
+        if (simulation.isHorizontalFlipped) {
+            level.announceText(175, -1085, true)
+        } else {
+            level.announceText(-175, -1085, true)
+        }
         level.announceMobTypes()
         level.fallMode = "start";
         const elevator1 = level.elevator(-790, -190, 180, 25, -1150, 0.0025, { up: 0.01, down: 0.2 }, true) //x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }) {
@@ -11049,6 +11184,11 @@ const level = {
         }
     },
     warehouse() {
+        if (simulation.isHorizontalFlipped) {
+            level.announceText(-25, 20, true)
+        } else {
+            level.announceText(25, 20, true)
+        }
         level.announceMobTypes()
         level.fallMode = "start";
         level.custom = () => {
@@ -11366,13 +11506,23 @@ const level = {
         level.announceMobTypes()
         let button, door
         let isReverse = false
-        if (Math.random() < 0.75) { //normal direction start in top left
+        if (Math.random() < 0.8) { //normal direction start in top left
+            if (simulation.isHorizontalFlipped) {
+                level.announceText(-1200, -1483, true)
+            } else {
+                level.announceText(1200, -1483, true)
+            }
             button = level.button(525, 0)
             door = level.door(1362, -400, 25, 400, 355, 1.5) //door(x, y, width, height, distance, speed = 1) {
-            level.setPosToSpawn(1375, -1550); //normal spawn
+            level.setPosToSpawn(1200, -1550); //normal spawn
             level.exit.x = 3088;
             level.exit.y = -630;
         } else { //reverse direction, start in bottom right
+            if (simulation.isHorizontalFlipped) {
+                level.announceText(-3135, 30, true)
+            } else {
+                level.announceText(3135, 30, true)
+            }
             isReverse = true
             button = level.button(3800, 0)
             door = level.door(3012, -400, 25, 400, 355, 1.5)
@@ -11434,7 +11584,9 @@ const level = {
         spawn.mapRect(1350, -1500, 50, 1125); //right wall
         spawn.mapRect(-600, -2000 + 250, 2000 - 700, 50); //roof left
         spawn.mapRect(-600 + 1300, -2000, 50, 300); //right roof wall
-        spawn.mapRect(-600 + 1300, -2000, 900, 50); //center wall
+
+        // //center wall
+        spawn.mapRect(700, -2025, 900, 75);
 
         map[map.length] = Bodies.polygon(725, -1700, 0, 15); //circle above door
         spawn.bodyRect(720, -1675, 15, 170, 1, spawn.propsDoor); // door
@@ -11442,16 +11594,13 @@ const level = {
         //makes door swing
         consBB[consBB.length] = Constraint.create({
             bodyA: body[body.length - 1],
-            pointA: {
-                x: 0,
-                y: -90
-            },
+            pointA: { x: 0, y: -90 },
             bodyB: map[map.length - 1],
             stiffness: 1
         });
         Composite.add(engine.world, consBB[consBB.length - 1]);
 
-        spawn.mapRect(-600 + 300, -2000 * 0.75, 1900, 50); //3rd floor
+        spawn.mapRect(-600 + 300, -2000 * 0.75, 1900, 75); //3rd floor
         spawn.mapRect(-600 + 2000 * 0.7, -2000 * 0.74, 50, 375); //center wall
         spawn.bodyRect(-600 + 2000 * 0.7, -2000 * 0.5 - 106, 50, 106); //center block under wall
         spawn.mapRect(-600, -1000, 1100, 50); //2nd floor
@@ -11471,7 +11620,7 @@ const level = {
         spawn.mapRect(3000 + 2000 - 50, -1300, 50, 1100); //right wall
         spawn.mapRect(4150, -600, 350, 150); //table
         spawn.mapRect(3650, -1300, 50, 700); //exit wall
-        spawn.mapRect(3650, -1300, 1350, 50); //exit wall
+        spawn.mapRect(3650, -1325, 1350, 75); //exit wall
         spawn.bodyRect(3665, -600, 20, 100); //door
 
         spawn.mapRect(3025, -600, 250, 125);
@@ -11514,12 +11663,10 @@ const level = {
 
         if (simulation.isHorizontalFlipped) { //flip the map horizontally
             level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
-            level.setPosToSpawn(50, -60);
-
-            if (!isReverse) { //normal direction start in top left
-                level.setPosToSpawn(-1375, -1550); //normal spawn //-x
-            } else { //reverse direction, start in bottom right
+            if (isReverse) { //normal direction start in top left
                 level.setPosToSpawn(-3137, -650); //normal spawn
+            } else { //reverse direction, start in bottom right
+                level.setPosToSpawn(-1200, -1550); //normal spawn //-x
             }
             button.min.x = -button.min.x - 126 // flip the button horizontally
             button.max.x = -button.max.x + 126 // flip the button horizontally

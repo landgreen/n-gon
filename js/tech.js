@@ -6937,7 +6937,7 @@ const tech = {
     {
         name: "ablative drones",
         descriptionFunction() {
-            return `after losing ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} there is a chance<br>to rebuild your broken parts as <strong>drones</strong>`
+            return `after losing ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} there is a chance<br>to use your broken parts to <strong class='color-print'>print</strong> <strong>drones</strong>`
         },
         isGunTech: true,
         maxCount: 1,
@@ -6956,8 +6956,7 @@ const tech = {
         }
     },
     {
-        name: "reduced tolerances",
-        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Engineering_tolerance' class="link">reduced tolerances</a>`,
+        name: "standardization",
         description: `<strong>2x</strong> <strong>drones</strong> per ${powerUps.orb.ammo()} and <strong class='color-f'>energy</strong><br><strong>0.6x</strong> drone <strong>duration</strong>`,
         isGunTech: true,
         maxCount: 1,
@@ -7005,8 +7004,8 @@ const tech = {
         }
     },
     {
-        name: "von Neumann probe",  //"drone repair",
-        description: "after a <strong>drone</strong> expires it will use <strong>-4</strong> <strong class='color-f'>energy</strong><br>and a nearby <strong class='color-block'>block</strong> to <strong>replicate</strong> itself",
+        name: "von Neumann probe",  //"drone repair", 
+        description: "after a <strong>drone</strong> expires it will use <strong>-4</strong> <strong class='color-f'>energy</strong><br>and a nearby <strong class='color-block'>block</strong> to <strong class='color-print'>reprint</strong> itself",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -7468,7 +7467,7 @@ const tech = {
         count: 0,
         frequency: 3,
         frequencyDefault: 3,
-        removeAmmo: 10,
+        removeAmmo: 30,
         allowed() {
             return tech.haveGunCheck("harpoon") && (build.isExperimentSelection || b.guns[9].ammo >= this.removeAmmo)
         },
@@ -7507,7 +7506,7 @@ const tech = {
         count: 0,
         frequency: 4,
         frequencyDefault: 4,
-        removeAmmo: 10,
+        removeAmmo: 30,
         allowed() {
             return tech.haveGunCheck("harpoon") && (build.isExperimentSelection || b.guns[9].ammo >= this.removeAmmo) && tech.isRebar
         },
@@ -8667,7 +8666,7 @@ const tech = {
     },
     {
         name: "endothermic",
-        description: `each time you <strong class='color-print'>print</strong> something also<br>print <strong class='color-s'>ice IX</strong> crystals for <strong>0</strong> <strong class='color-f'>energy</strong>`,
+        description: `each time you <strong class='color-print'>print</strong> something also<br><strong class='color-print'>print</strong> <strong class='color-s'>ice IX</strong> crystals for <strong>0</strong> <strong class='color-f'>energy</strong>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -8678,10 +8677,10 @@ const tech = {
         },
         requires: "molecular assembler, pilot wave, standing wave",
         effect() {
-            tech.isEndoThermic = true
+            tech.isEndothermic = true
         },
         remove() {
-            tech.isEndoThermic = false
+            tech.isEndothermic = false
         }
     },
     {
@@ -12757,6 +12756,6 @@ const tech = {
     isExponential: null,
     isCoyote: null,
     isNitinol: null,
-    isEndoThermic: null,
+    isEndothermic: null,
     isPrecision: null,
 }
