@@ -1509,12 +1509,11 @@ const b = {
                     } else if (tech.isHarpoonFullHealth && who.health === 1) {
                         Matter.Body.setDensity(this, 2.11 * 0.004); //+90% damage if mob has full health do
                         simulation.ephemera.push({
-                            name: "grapple outline",
                             count: 3, //cycles before it self removes
                             vertices: this.vertices,
                             do() {
                                 this.count--
-                                if (this.count < 0) simulation.removeEphemera(this.name)
+                                if (this.count < 0) simulation.removeEphemera(this)
 
                                 ctx.beginPath();
                                 ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
@@ -1641,11 +1640,10 @@ const b = {
                         body.splice(body.indexOf(blocks[0].bodyA), 1)
                         //animate the block fading away
                         simulation.ephemera.push({
-                            name: "blockFadeOut",
                             count: 25, //cycles before it self removes
                             do() {
                                 this.count--
-                                if (this.count < 0) simulation.removeEphemera(this.name)
+                                if (this.count < 0) simulation.removeEphemera(this)
                                 ctx.beginPath();
                                 ctx.moveTo(block[0].x, block[0].y);
                                 for (let j = 1; j < block.length; j++) ctx.lineTo(block[j].x, block[j].y);
@@ -1679,11 +1677,10 @@ const b = {
                                         body.splice(body.indexOf(blocks[i].bodyA), 1)
                                         //animate the block fading away
                                         simulation.ephemera.push({
-                                            name: "blockFadeOut",
                                             count: 25, //cycles before it self removes
                                             do() {
                                                 this.count--
-                                                if (this.count < 0) simulation.removeEphemera(this.name)
+                                                if (this.count < 0) simulation.removeEphemera(this)
                                                 ctx.beginPath();
                                                 ctx.moveTo(blockVertices[0].x, blockVertices[0].y);
                                                 for (let j = 1; j < blockVertices.length; j++) ctx.lineTo(blockVertices[j].x, blockVertices[j].y);
@@ -1914,12 +1911,11 @@ const b = {
                 } else if (tech.isHarpoonFullHealth && who.health === 1) {
                     Matter.Body.setDensity(this, 2.2 * tech.harpoonDensity); //+90% damage if mob has full health do
                     simulation.ephemera.push({
-                        name: "harpoon outline",
                         count: 2, //cycles before it self removes
                         vertices: this.vertices,
                         do() {
                             this.count--
-                            if (this.count < 0) simulation.removeEphemera(this.name)
+                            if (this.count < 0) simulation.removeEphemera(this)
 
                             ctx.beginPath();
                             ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
@@ -2152,8 +2148,8 @@ const b = {
     },
     missile(where, angle, speed, size = 1) {
         if (tech.isMissileBig) {
-            size *= 1.55
-            if (tech.isMissileBiggest) size *= 1.55
+            size *= 1.5
+            if (tech.isMissileBiggest) size *= 1.5
         }
         const me = bullet.length;
         bullet[me] = Bodies.rectangle(where.x, where.y, 30 * size, 4 * size, {
@@ -2169,7 +2165,7 @@ const b = {
             },
             minDmgSpeed: 10,
             lookFrequency: Math.floor(10 + Math.random() * 3),
-            explodeRad: (tech.isMissileBig ? 230 : 180) + 60 * Math.random(),
+            explodeRad: 180 + 60 * Math.random(),
             density: 0.02, //0.001 is normal
             beforeDmg() {
                 Matter.Body.setDensity(this, 0.0001); //reduce density to normal
@@ -2179,6 +2175,29 @@ const b = {
             onEnd() {
                 b.explosion(this.position, this.explodeRad * size); //makes bullet do explosive damage at end
                 if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
+                if (tech.isMissileFast) {
+                    simulation.ephemera.push({
+                        count: 21,
+                        where: this.position,
+                        size: this.explodeRad * size,
+                        do() {
+                            if (!m.isTimeDilated) {
+                                this.count--
+                                if (this.count < 0) {
+                                    simulation.removeEphemera(this)
+                                    b.explosion(this.where, this.size * (tech.isMissile2ndExplode ? 1.7 : 0.8));
+                                }
+                                // //draw outline
+                                // ctx.beginPath();
+                                // const r = this.size * Math.max((this.count) / 21, 0.7)
+                                // ctx.arc(this.where.x, this.where.y, r, 0, 2 * Math.PI);
+                                // ctx.strokeStyle = "#000"
+                                // ctx.lineWidth = 2
+                                // ctx.stroke();
+                            }
+                        },
+                    })
+                }
             },
             lockedOn: null,
             tryToLockOn() {
@@ -2265,6 +2284,41 @@ const b = {
             y: 0.5 * player.velocity.y + speed * Math.sin(angle)
         });
         Composite.add(engine.world, bullet[me]); //add bullet to world
+        if (tech.isMissileFast) {
+            simulation.ephemera.push({
+                name: Math.random(),
+                count: 40, //cycles before it self removes
+                who: bullet[me],
+                do() {
+                    if (!m.isTimeDilated) {
+                        const mag = 0.07 * this.who.mass
+                        this.count--
+                        if (this.count < 0 || !this.who) {
+                            simulation.removeEphemera(this)
+                        } else if (this.count < 3) {
+                            if (this.count === 2) this.who.tryToLockOn();
+                            if (this.who.lockedOn) {
+                                const unit = Vector.normalise(Vector.sub(this.who.lockedOn.position, this.who.position))
+
+                                const push = Vector.mult(unit, mag)
+                                this.who.force.x += push.x
+                                this.who.force.y += push.y
+                            } else {
+                                const unit = {
+                                    x: Math.cos(this.who.angle),
+                                    y: Math.sin(this.who.angle)
+                                }
+                                const push = Vector.mult(unit, mag)
+                                this.who.force.x += push.x
+                                this.who.force.y += push.y
+                            }
+                        } else {
+                            Matter.Body.setVelocity(this.who, { x: this.who.velocity.x * 0.7, y: this.who.velocity.y * 0.7 });
+                        }
+                    }
+                },
+            })
+        }
     },
     lastAngle: 0,
     wasExtruderOn: false,
@@ -3326,11 +3380,10 @@ const b = {
 
                             //animate the block fading away
                             simulation.ephemera.push({
-                                name: "droneRespawn",
                                 count: 60, //cycles before it self removes
                                 do() {
                                     this.count--
-                                    if (this.count < 0) simulation.removeEphemera(this.name)
+                                    if (this.count < 0) simulation.removeEphemera(this)
                                     ctx.beginPath();
                                     let vertices = found.vertices;
                                     ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -3362,7 +3415,6 @@ const b = {
             hasExploded: false,
             eatPowerUp(i) {
                 simulation.ephemera.push({
-                    name: "drone grab",
                     count: 5, //cycles before it self removes
                     pos: this.position,
                     PposX: powerUp[i].position.x,
@@ -3371,7 +3423,7 @@ const b = {
                     color: powerUp[i].color,
                     do() {
                         this.count--
-                        if (this.count < 0) simulation.removeEphemera(this.name)
+                        if (this.count < 0) simulation.removeEphemera(this)
                         ctx.strokeStyle = "#000"
                         ctx.lineWidth = 3
                         ctx.beginPath();
@@ -3589,11 +3641,10 @@ const b = {
 
                             //animate the block fading away
                             simulation.ephemera.push({
-                                name: "droneRespawn",
                                 count: 60, //cycles before it self removes
                                 do() {
                                     this.count--
-                                    if (this.count < 0) simulation.removeEphemera(this.name)
+                                    if (this.count < 0) simulation.removeEphemera(this)
                                     ctx.beginPath();
                                     let vertices = found.vertices;
                                     ctx.moveTo(vertices[0].x, vertices[0].y);

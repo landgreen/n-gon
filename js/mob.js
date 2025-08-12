@@ -969,12 +969,11 @@ const mobs = {
                                 if (tech.isMobFullHealthCloak) {
                                     dmg *= 2.11
                                     simulation.ephemera.push({
-                                        name: "damage outline",
                                         count: 7, //cycles before it self removes
                                         vertices: this.vertices,
                                         do() {
                                             this.count--
-                                            if (this.count < 0) simulation.removeEphemera(this.name)
+                                            if (this.count < 0) simulation.removeEphemera(this)
                                             //draw body
                                             ctx.beginPath();
                                             const vertices = this.vertices;
@@ -994,12 +993,11 @@ const mobs = {
                             } else if (tech.isMobLowHealth && this.health < 0.25) {
                                 dmg *= 3
                                 simulation.ephemera.push({
-                                    name: "damage outline",
                                     count: 2, //cycles before it self removes
                                     vertices: this.vertices,
                                     do() {
                                         this.count--
-                                        if (this.count < 0) simulation.removeEphemera(this.name)
+                                        if (this.count < 0) simulation.removeEphemera(this)
                                         //draw body
                                         ctx.beginPath();
                                         const vertices = this.vertices;

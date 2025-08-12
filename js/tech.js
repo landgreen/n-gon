@@ -3857,7 +3857,7 @@ const tech = {
                         this.count--
                         powerUps.tech.effect(); //generates new tech options
                         // tech.isBrainstormActive = false //this prevents a potential infinite loop with brainstorm
-                        if (document.fullscreenElement) mouseMove.isLockPointer = false//this interacts with the mousedown event listener to exit pointer lock
+                        // if (document.fullscreenElement) mouseMove.isLockPointer = false//this interacts with the mousedown event listener to exit pointer lock
                     })
                 })
             }
@@ -5988,17 +5988,55 @@ const tech = {
         }
     },
     {
-        name: "cruise missile",
-        description: "<strong>2x</strong> <strong>missile</strong> <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong>, radius<br><strong>0.5x</strong> <strong>missile</strong> speed",
+        name: "liquid-propellant",
+        description: "after <strong>1</strong> second, <strong>missiles</strong> rapidly accelerate<br><strong>missiles</strong> <strong class='color-e'>explode</strong> again at <strong>0.8x</strong> radius and <strong class='color-d'>damage</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.haveGunCheck("missiles") && tech.missileFireCD === 45) || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount
+            return (tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount) && !tech.isMissileBig
         },
-        requires: "missiles, not launch system",
+        requires: "missiles, not cruise missile",
+        effect() {
+            tech.isMissileFast = true
+        },
+        remove() {
+            tech.isMissileFast = false
+        }
+    },
+    {
+        name: "hypergolic propellant",
+        description: `the 2nd <strong class='color-e'>explosion</strong> from <strong>liquid-propellant</strong><br>is increased from <strong style="text-decoration: line-through;">0.8x</strong> to <strong>1.7x</strong> radius and <strong class='color-d'>damage</strong>`,
+        isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return (tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount) && tech.isMissileFast
+        },
+        requires: "missiles, liquid-propellant",
+        effect() {
+            tech.isMissile2ndExplode = true
+        },
+        remove() {
+            tech.isMissile2ndExplode = false
+        }
+    },
+    {
+        name: "cruise missile",
+        description: "<strong>1.75x</strong> <strong>missile</strong> <strong class='color-e'>explosive</strong> <strong class='color-d'>damage</strong>, radius<br><strong>0.5x</strong> <strong>missile</strong> speed",
+        isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return (tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount) && !tech.isMissileFast
+        },
+        requires: "missiles, not liquid-propellant",
         effect() {
             tech.isMissileBig = true
         },
@@ -6034,9 +6072,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("missiles") && !tech.isMissileBig
+            return tech.haveGunCheck("missiles")
         },
-        requires: "missiles, not cruise missile",
+        requires: "missiles",
         ammoBonus: 1.3,
         effect() {
             tech.missileFireCD = 10
@@ -6072,9 +6110,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("missiles") && !tech.isMissileBig
+            return tech.haveGunCheck("missiles")
         },
-        requires: "missiles, not cruise missile",
+        requires: "missiles",
         ammoBonus: 1.5,
         effect() {
             tech.isTargeting = true
@@ -8641,7 +8679,7 @@ const tech = {
             })
         },
         remove() {
-            if (this.count) simulation.removeEphemera("blockJump")
+            if (this.count) simulation.removeEphemera("blockJump", true)
         }
     },
     {
@@ -11136,7 +11174,6 @@ const tech = {
         requires: "",
         effect() {
             simulation.ephemera.push({
-                name: "hue-rotate",
                 do() {
                     // document.documentElement.style.filter = `blur(${2 + 2 * Math.sin(simulation.cycle * 0.01)}px)`
                     if (!(simulation.cycle % 180)) document.documentElement.style.filter = `blur(${Math.floor(4 * Math.random())}px)`
@@ -11160,7 +11197,6 @@ const tech = {
         effect() {
             //   
             simulation.ephemera.push({
-                name: "hue-rotate",
                 count: 0,
                 do() {
                     document.documentElement.style.filter = `hue-rotate(${simulation.cycle}deg)`
@@ -11184,7 +11220,6 @@ const tech = {
         effect() {
             //   
             simulation.ephemera.push({
-                name: "brightness",
                 count: 0,
                 do() {
                     document.documentElement.style.filter = `brightness(${1 + 0.5 * Math.sin(simulation.cycle * 0.03)})`
@@ -11692,7 +11727,6 @@ const tech = {
         requires: "",
         effect() {
             simulation.ephemera.push({
-                name: "pet",
                 count: 0,
                 do() {
                     this.count++
@@ -12543,6 +12577,8 @@ const tech = {
     isEndLevelPowerUp: null,
     isMissileBig: null,
     isMissileBiggest: null,
+    isMissileFast: null,
+    isMissile2ndExplode: null,
     isLaserMine: null,
     isFoamMine: null,
     isAmmoFoamSize: null,

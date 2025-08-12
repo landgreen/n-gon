@@ -33,7 +33,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(8) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(3) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
             // m.fieldUpgrades[6].isRewindMode = true
@@ -51,8 +51,8 @@ const level = {
             // simulation.molecularMode = 2
             // m.takeDamage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("grenades") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("drones") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("missiles") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 100000000000
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("aerostat") });
 
@@ -63,9 +63,9 @@ const level = {
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("peer review")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("self-assembly")
-            // for (let i = 0; i < 1; i++) tech.giveTech("mass-energy equivalence")
-            // for (let i = 0; i < 1; i++) tech.giveTech("1st ionization energy")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("liquid-propellant")
+            // for (let i = 0; i < 1; i++) tech.giveTech("hypergolic propellant")
+            // for (let i = 0; i < 1; i++) tech.giveTech("launch system")
             // for (let i = 0; i < 1; i++) tech.giveTech("eternalism")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("bot fabrication") });
             // requestAnimationFrame(() => { level.blurryChoices = true });
@@ -75,13 +75,13 @@ const level = {
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
-            // level.corridor()
+            // level.subway()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
-            // for (let i = 0; i < 10; i++) spawn.starter(1300 + 100 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.quasarBoss(1300 + 100 * i, -200)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -100 - i * 100)
             // for (let i = 0; i < 3; i++) spawn.starter(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
@@ -436,7 +436,6 @@ const level = {
                 if (isCentered) xAdjusted -= level.constraintDescription1.length * 29 / 2
                 simulation.draw.font.drawString(level.constraintDescription1, xAdjusted, y) //level.constraintDescription2
                 simulation.ephemera.push({
-                    name: `constraint text ${Math.random()}`,
                     count: 300, //cycles before it self removes
                     do() {
                         ctx.beginPath()
@@ -449,13 +448,12 @@ const level = {
                         ctx.stroke(simulation.draw.font.word)
                         this.count--
                         if (this.count < 0) {
-                            simulation.removeEphemera(this.name)
+                            simulation.removeEphemera(this)
                             if (level.constraintDescription2) {
                                 simulation.draw.font.word = new Path2D()
                                 if (isCentered) xAdjusted = x - level.constraintDescription2.length * 29 / 2
                                 simulation.draw.font.drawString(level.constraintDescription2, xAdjusted, y) //level.constraintDescription2
                                 simulation.ephemera.push({
-                                    name: `constraint text ${Math.random()}`,
                                     count: 300, //cycles before it self removes
                                     do() {
                                         const a = this.count > 280 ? Math.min((300 - this.count) * 0.05, 1) : Math.min(this.count / 20, 1)
@@ -464,7 +462,7 @@ const level = {
                                         ctx.beginPath()
                                         ctx.stroke(simulation.draw.font.word)
                                         this.count--
-                                        if (this.count < 0) simulation.removeEphemera(this.name)
+                                        if (this.count < 0) simulation.removeEphemera(this)
                                     },
                                 })
                             }
@@ -477,7 +475,6 @@ const level = {
                 if (isCentered) xAdjusted -= level.levels[level.onLevel].length * 29 / 2
                 simulation.draw.font.drawString(level.levels[level.onLevel], xAdjusted, y)
                 simulation.ephemera.push({
-                    name: `constraint text ${Math.random()}`,
                     count: 240, //cycles before it self removes
                     do() {
                         ctx.strokeStyle = `rgba(255, 255, 255,${Math.min(this.count / 20, 1)})`
@@ -485,7 +482,7 @@ const level = {
                         ctx.beginPath()
                         ctx.stroke(simulation.draw.font.word)
                         this.count--
-                        if (this.count < 0) simulation.removeEphemera(this.name)
+                        if (this.count < 0) simulation.removeEphemera(this)
                     },
                 })
             }
@@ -560,7 +557,6 @@ const level = {
             description: "spawn wimps",
             effect() {
                 simulation.ephemera.push({
-                    name: "WIMPS",
                     time: 0,
                     levelName: level.levels[level.onLevel],
                     do() {
@@ -568,7 +564,7 @@ const level = {
                         if (level.levels[level.onLevel] === this.levelName) {
                             if (this.time > 3000 && !(this.time % 540)) spawn.WIMP(level.enter.x, level.enter.y)
                         } else {
-                            simulation.removeEphemera(this.name);
+                            simulation.removeEphemera(this);
                         }
                     },
                 })
@@ -3721,8 +3717,10 @@ const level = {
         const stationList = [] //use to randomize station order
         for (let i = 1, totalNumberOfStations = 10; i < totalNumberOfStations; ++i) stationList.push(i) //!!!! update station number when you add a new station
         stationList.sort(() => Math.random() - 0.5);
-        stationList.splice(0, simulation.difficultyMode > 4 ? 4 : 5); //remove some stations to keep it to 4 stations
-        stationList.unshift(0) //add index zero to the front of the array
+        // console.log(stationList)
+        stationList.splice(0, stationList.length - 3); //remove all but 3 stations
+        stationList.unshift(0) //add index zero to the front of the array for the starting station
+        // console.log(stationList, "after splice")
 
         let isExitOpen = false
         let isTechSpawned = false
@@ -4592,7 +4590,7 @@ const level = {
                     }
                 },
                 () => { //people movers
-                    simulation.removeEphemera("zoom")//stop previous zooms
+                    simulation.removeEphemera("zoom", true)//stop previous zooms
                     simulation.zoomTransition(2000)
                     const buttonsCoords = [{ x: x - 65, y: -2045 }] //only one button location?
                     const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array
@@ -4744,6 +4742,7 @@ const level = {
                     }
                 },
             ]
+            // console.log(stations, "stations")
             //update totalNumberOfStations to a higher number when adding new maps
             simulation.zoomTransition(level.defaultZoom)
             // spawn.randomHigherTierMob(1732, -2267)
@@ -5544,12 +5543,11 @@ const level = {
         //apply heavy damping for just a second on spawn to prevent crazy shakes
 
         simulation.ephemera.push({
-            name: "blockFriction",
             count: 25, //cycles before it self removes
             do() {
                 this.count--
                 if (this.count < 0) {
-                    simulation.removeEphemera(this.name)
+                    simulation.removeEphemera(this)
                     blocks[0].frictionAir = 0.02
                 }
             },
@@ -7629,14 +7627,13 @@ const level = {
             buttons[buttons.length - 1].isUp = true
 
             simulation.ephemera.push({
-                name: "buttons up",
                 count: flipAnimationCycles + 30,
                 do() {
                     this.count--
                     if (this.count < 0) {
                         // for (let i = 0; i < buttons.length; i++) buttons[i].isUp = true
                         buttons[0].isUp = true
-                        simulation.removeEphemera(this.name);
+                        simulation.removeEphemera(this);
                         isFlipping = false
                     }
                 },
@@ -7713,13 +7710,12 @@ const level = {
             buttons[buttons.length - 1].isUp = true
 
             simulation.ephemera.push({
-                name: "buttons up",
                 count: flipAnimationCycles + 30,
                 do() {
                     this.count--
                     if (this.count < 0) {
                         buttons[0].isUp = true
-                        simulation.removeEphemera(this.name);
+                        simulation.removeEphemera(this);
                         isFlipping = false
                     }
                 },
@@ -8103,13 +8099,12 @@ const level = {
             buttons.push(level.button(3725, -985, 126, true, true, "hsl(330, 100%, 50%)"))
             for (let i = 0; i < buttons.length; i++) buttons[i].isUp = false
             simulation.ephemera.push({
-                name: "buttons up",
                 count: flipAnimationCycles,
                 do() {
                     this.count--
                     if (this.count < 0) {
                         for (let i = 0; i < buttons.length; i++) buttons[i].isUp = true
-                        simulation.removeEphemera(this.name);
+                        simulation.removeEphemera(this);
                         isFlipping = false
                     }
                 },
@@ -8165,13 +8160,12 @@ const level = {
             for (let i = 0; i < buttons.length; i++) buttons[i].isUp = false
 
             simulation.ephemera.push({
-                name: "buttons up",
                 count: flipAnimationCycles,
                 do() {
                     this.count--
                     if (this.count < 0) {
                         for (let i = 0; i < buttons.length; i++) buttons[i].isUp = true
-                        simulation.removeEphemera(this.name);
+                        simulation.removeEphemera(this);
                         isFlipping = false
                     }
                 },
@@ -10830,12 +10824,11 @@ const level = {
         //apply heavy damping for just a second on spawn to prevent crazy shakes
 
         simulation.ephemera.push({
-            name: "blockFriction",
             count: 25, //cycles before it self removes
             do() {
                 this.count--
                 if (this.count < 0) {
-                    simulation.removeEphemera(this.name)
+                    simulation.removeEphemera(this)
                     blocks[0].frictionAir = 0.02
                 }
             },
@@ -22157,7 +22150,6 @@ const level = {
         lightButton.isUp = true;
         var lightOn = false;
         simulation.ephemera.push({
-            name: "lightWire",
             do() {
                 if (level.levels[level.onLevel] == "clock") {
                     // light wire
@@ -22171,7 +22163,7 @@ const level = {
                     ctx.strokeStyle = lightOn ? "#ffd700" : "000";
                     ctx.stroke();
                 } else {
-                    simulation.removeEphemera(this.name);
+                    simulation.removeEphemera(this);
                 }
             },
         })
@@ -27874,7 +27866,7 @@ const level = {
             me.leaveBody = false;
             me.isDropPowerUp = false;
             me.onHit = function () {
-                b.explosion(this.position, (tech.isMissileBig ? 230 : 180) + 60 * Math.random())
+                b.explosion(this.position, (tech.isMissileBig ? 210 : 180) + 60 * Math.random())
                 this.death()
             }
             me.do = function () {
@@ -32517,7 +32509,6 @@ const level = {
         for (let i = 0, len = mob.length; i < len; i++) {
             if (mob[i].isSlashBoss) {
                 simulation.ephemera.push({
-                    name: "bossBar",
                     do() {
                         if (level.levels[level.onLevel] == "ace" && !isDestroyed) {
                             ctx.save();
@@ -33503,9 +33494,8 @@ const level = {
         }
         checkVid();
         simulation.ephemera.push({
-            name: "vid",
             do() {
-                if (level.levels[level.onLevel] !== "crimsonTowers") simulation.removeEphemera(this.name);
+                if (level.levels[level.onLevel] !== "crimsonTowers") simulation.removeEphemera(this);
                 if (mediaSource && !isSus) {
                     ctx.drawImage(videoContainer.video, -1600, -15000, 3200, 1800);
                 } else if (mediaSource) {
@@ -36586,7 +36576,6 @@ const level = {
         };
         level.customTopLayer = () => { };
         simulation.ephemera.push({
-            name: "genesis",
             death: false,
             pwuspawn: 0,
             do() {
@@ -36597,8 +36586,8 @@ const level = {
                             powerUps.spawnBossPowerUp(g.pos.x, g.pos.y)
                             this.pwuspawn++;
                         }
-                        simulation.removeEphemera(this.name);
-                        simulation.removeEphemera("genisisScythe");
+                        simulation.removeEphemera(this);
+                        simulation.removeEphemera("genisisScythe", true);
                     }, 1000);
                 }
                 if (g.health >= 0) {

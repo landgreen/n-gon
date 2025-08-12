@@ -84,6 +84,7 @@ const spawn = {
 
             tier++
             seededShuffle(spawn.tier[tier])
+            seededShuffle(spawn.bossTier[tier])
             for (let i = 0; i < 4; i++) {
                 spawn.mobTypeSpawnOrder.push(spawn.tier[tier][i])
                 spawn.mobTierSpawnOrder.push(tier)
@@ -1552,7 +1553,7 @@ const spawn = {
             if (this.health < this.nextHealthThreshold && this.alive) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 5) / 5
-                this.invulnerableCount = 120
+                this.invulnerableCount = 60
                 this.isInvulnerable = true
                 this.damageReduction = 0
             }
@@ -1598,7 +1599,6 @@ const spawn = {
             } else if (!(simulation.cycle % 30)) {
                 if (!(simulation.cycle % 210)) {
                     simulation.ephemera.push({
-                        name: "freeze",
                         count: 210,
                         position: {
                             x: this.position.x,
@@ -1608,7 +1608,7 @@ const spawn = {
                         radius: 120,
                         do() {
                             this.count--
-                            if (this.count < 0 || this.level !== level.levelsCleared) simulation.removeEphemera(this.name);
+                            if (this.count < 0 || this.level !== level.levelsCleared) simulation.removeEphemera(this);
                             this.radius *= 0.99
 
                             if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.radius + 40) {
@@ -1734,7 +1734,6 @@ const spawn = {
         me.onDeath = function () {
             if (isIce) {
                 simulation.ephemera.push({
-                    name: "freeze",
                     count: 200,
                     position: {
                         x: this.position.x,
@@ -1744,7 +1743,7 @@ const spawn = {
                     radius: 130,
                     do() {
                         this.count--
-                        if (this.count < 0 || this.level !== level.levelsCleared) simulation.removeEphemera(this.name);
+                        if (this.count < 0 || this.level !== level.levelsCleared) simulation.removeEphemera(this);
                         this.radius *= 0.99
 
                         if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.radius + 40) {
@@ -2319,7 +2318,7 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "rgb(33, 174, 160)");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.0025); //normal is 0.001
+        Matter.Body.setDensity(me, 0.004); //normal is 0.001
         me.accelMag = 0.05;
         me.g = 0.0032; //required if using this.gravity
         me.frictionAir = 0.01;
@@ -2642,11 +2641,11 @@ const spawn = {
     bigSucker(x, y, radius = 10) {
         mobs.spawn(x, y, 9, radius, "#fff");
         let me = mob[mob.length - 1];
-        Matter.Body.setDensity(me, 0.005); //normal is 0.001
+        Matter.Body.setDensity(me, 0.009); //normal is 0.001
         me.tier = 4
         me.isVerticesChange = true
         me.big = false; //required for grow
-        me.accelMag = 0.00025 * simulation.accelScale;
+        me.accelMag = 0.00005 * simulation.accelScale;
         me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.player //can't touch other mobs
         me.eventHorizon = radius * 8; //required for black hole
         me.memory = 300
@@ -3640,7 +3639,7 @@ const spawn = {
         mobs.spawn(x, y, 14, radius, color);
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.0032); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.005); //extra dense //normal is 0.001 //makes effective life much larger
         // me.damageReduction = 0.04 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         // Matter.Body.rotate(me, Math.random() * Math.PI * 2);
@@ -4004,14 +4003,14 @@ const spawn = {
             if (this.health < this.nextHealthThreshold && this.alive) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 5) / 5
-                this.invulnerableCount = 60
+                this.invulnerableCount = 40
                 this.isInvulnerable = true
                 this.damageReduction = 0
                 this.frictionAir = 0
                 this.wingGoal = 0
                 this.wingSize = 0
-                this.flapRate += 0.13
-                this.accelMag *= 1.4
+                this.flapRate += 0.1
+                this.accelMag *= 1.2
             }
         };
         me.do = function () {
@@ -4685,8 +4684,8 @@ const spawn = {
         me.onDamage = function () {
             if (this.health < this.nextHealthThreshold) {
                 this.health = this.nextHealthThreshold - 0.01
-                this.nextHealthThreshold = Math.floor(this.health * 5) / 5 //0.75,0.5,0.25
-                this.invulnerableCount = 200
+                this.nextHealthThreshold = Math.floor(this.health * 5) / 5
+                this.invulnerableCount = 170
                 this.isInvulnerable = true
                 this.damageReduction = 0
                 if (this.history.length < 200) for (let i = 0; i < 10; i++) this.history.unshift(this.history[0])
@@ -5032,7 +5031,7 @@ const spawn = {
             if (this.health < this.nextHealthThreshold && this.alive) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 5) / 5
-                this.invulnerableCount = 120
+                this.invulnerableCount = 90
                 this.isInvulnerable = true
                 this.damageReduction = 0
             }
@@ -5082,7 +5081,6 @@ const spawn = {
                         }
 
                         simulation.ephemera.push({
-                            name: "quasar",
                             count: 360,
                             position: this.fireTarget,
                             level: level.levelsCleared,
@@ -5090,7 +5088,7 @@ const spawn = {
                             do() {
                                 this.count--
                                 if (this.count < 120) this.radius *= 0.98
-                                if (this.count < 0 || this.level !== level.levelsCleared) simulation.removeEphemera(this.name);
+                                if (this.count < 0 || this.level !== level.levelsCleared) simulation.removeEphemera(this);
 
                                 //hitting player
                                 if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.radius && m.immuneCycle < m.cycle) {
@@ -5726,22 +5724,22 @@ const spawn = {
         me.tier = 4
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-        me.accelMag = 0.0002 * simulation.accelScale;
+        me.accelMag = 0.0001 * simulation.accelScale;
         me.memory = 360;
-        me.laserInterval = 210 + Math.floor(80 * Math.random())
+        me.laserInterval = 250 + Math.floor(80 * Math.random())
         me.cycle = 0
-        Matter.Body.setDensity(me, 0.0047); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.0057); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y);
-        me.nextHealthThreshold = 0.857
+        // me.nextHealthThreshold = 0.857
         me.onDamage = function () {
-            if (this.health < this.nextHealthThreshold) {
-                this.health = this.nextHealthThreshold - 0.01
-                this.nextHealthThreshold = Math.floor(this.health * 7) / 7
-            }
+            // if (this.health < this.nextHealthThreshold) {
+            //     this.health = this.nextHealthThreshold - 0.01
+            //     this.nextHealthThreshold = Math.floor(this.health * 7) / 7
+            // }
         };
         me.do = function () {
             if (this.seePlayer.recall) this.healthBar4()
-            this.torque = this.lookTorque * this.inertia * 0.4;
+            this.torque = this.lookTorque * this.inertia * 0.2;
             this.seePlayerCheck();
             this.checkStatus();
             this.attraction();
@@ -5767,7 +5765,7 @@ const spawn = {
 
                         // hitting player
                         if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
-                            const dmg = 0.0035 * this.damageScale();
+                            const dmg = 0.004 * this.damageScale();
                             m.takeDamage(dmg);
                             //draw damage
                             ctx.fillStyle = color;
@@ -5845,7 +5843,7 @@ const spawn = {
             if (this.health < this.nextHealthThreshold) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 7) / 7 //0.75,0.5,0.25
-                this.invulnerableCount = 90
+                this.invulnerableCount = 60
                 this.isInvulnerable = true
                 this.damageReduction = 0
 
@@ -7463,8 +7461,8 @@ const spawn = {
         mobs.spawn(x, y, sides, radius, "rgb(100, 100, 100)");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.006); //normal is 0.001
-        me.accelMag = 0.0007 * simulation.accelScale;
+        Matter.Body.setDensity(me, 0.008); //normal is 0.001
+        me.accelMag = 0.0005 * simulation.accelScale;
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0.02;
@@ -7475,7 +7473,7 @@ const spawn = {
         me.swordRadiusInitial = radius / 2;
         me.swordRadius = me.swordRadiusInitial;
         me.swordRadiusMax = 600
-        me.swordRadiusGrowRateInitial = 1.08
+        me.swordRadiusGrowRateInitial = 1.05
         me.swordRadiusGrowRate = me.swordRadiusGrowRateInitial//me.swordRadiusMax * (0.009 + 0.0002 * simulation.difficulty)
         me.isSlashing = false;
         me.swordDamage = 0.06 * me.damageScale()
@@ -7583,13 +7581,13 @@ const spawn = {
             ctx.setLineDash([]);
         }
     },
-    slasher5(x, y, radius = 40) {
+    slasher5(x, y, radius = 45) {
         const sides = 6
         mobs.spawn(x, y, sides, radius, "rgb(255, 255, 255)");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.006); //normal is 0.001
-        me.accelMag = 0.0012
+        Matter.Body.setDensity(me, 0.009); //normal is 0.001
+        me.accelMag = 0.0007
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0.04;
@@ -7598,25 +7596,28 @@ const spawn = {
         me.onDamage = function () { };
         me.swords = [
             { index: 0, long: 0, cycle: 262 },
-            { index: 2, long: 0, cycle: 157 },
+            // { index: 2, long: 0, cycle: 157 },
             { index: 4, long: 0, cycle: 52 },
         ]
         me.do = function () {
             if (this.seePlayer.recall) this.healthBar4()
             this.checkStatus();
-            this.seePlayerByHistory(40);
-            this.attraction()
-            this.torque = 0.0000006 * this.inertia
-
-            for (let i = 0, len = this.swords.length; i < len; i++) {
-                this.swords[i].cycle++
-                this.swords[i].long = 450 * Math.sin(this.swords[i].cycle * 0.01)
-                if (this.swords[i].long < 1) {
-                    this.swords[i].cycle = 0
-                    this.swords[i].index++
-                    if (this.swords[i].index > sides - 1) this.swords[i].index = 0
+            if (!this.isStunned) {
+                this.seePlayerByHistory(40);
+                this.attraction()
+                this.torque = 0.0000004 * this.inertia
+                const mag = 375
+                for (let i = 0, len = this.swords.length; i < len; i++) {
+                    this.swords[i].cycle++
+                    this.swords[i].long = mag * Math.sin(this.swords[i].cycle * 0.007)
+                    if (this.swords[i].long < 1) {
+                        this.swords[i].cycle = 0
+                        this.swords[i].index++
+                        if (this.swords[i].index > sides - 1) this.swords[i].index = 0
+                    }
+                    // this.laserSpear(this.vertices[this.swords[i].index], this.angle + this.swords[i].index / sides * 2 * Math.PI + Math.PI / sides, Math.max(10, this.swords[i].long));
+                    this.laserSpear(this.vertices[this.swords[i].index], this.angle + this.swords[i].index / sides * 2 * Math.PI + Math.PI / sides, Math.max(10, this.swords[i].long));
                 }
-                this.laserSpear(this.vertices[this.swords[i].index], this.angle + this.swords[i].index / sides * 2 * Math.PI + Math.PI / sides, Math.max(10, this.swords[i].long));
             }
 
         };
@@ -7978,7 +7979,7 @@ const spawn = {
         mobs.spawn(x, y, 7, radius, "transparent");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.003); //normal is 0.001
+        Matter.Body.setDensity(me, 0.005); //normal is 0.001
         me.accelMag = 0.001
         me.frictionAir = 0.01;
         me.g = 0.0002; //required if using this.gravity
@@ -8623,7 +8624,7 @@ const spawn = {
         mobs.spawn(x, y, 5, radius, "rgb(150,150,255)");
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.0038); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0048); //normal is 0.001
         me.accelMag = 0.001
         me.fireFreq = 240 + Math.floor(30 * Math.random())
         me.frictionStatic = 0;
@@ -8765,7 +8766,7 @@ const spawn = {
             if (this.health < this.nextHealthThreshold) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 5) / 5 //0.75,0.5,0.25
-                this.invulnerableCount = 120 + simulation.difficultyMode * 10
+                this.invulnerableCount = 60 + simulation.difficultyMode * 10
                 this.isInvulnerable = true
                 this.damageReduction = 0
 
@@ -9022,11 +9023,11 @@ const spawn = {
             }
         };
     },
-    mortar(x, y, radius = 35 + Math.ceil(Math.random() * 20)) {
+    mortar(x, y, radius = 40 + Math.ceil(Math.random() * 20)) {
         mobs.spawn(x, y, 3, radius, "transparent"); //rgb(255,100,200)
         let me = mob[mob.length - 1];
         me.tier = 4
-        Matter.Body.setDensity(me, 0.0045); //normal is 0.001
+        Matter.Body.setDensity(me, 0.0055); //normal is 0.001
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         me.isVerticesChange = true
         me.stroke = "transparent"; //used for drawSneaker
@@ -9212,7 +9213,6 @@ const spawn = {
         me.isMobBullet = true;
         me.onDeath = function () {
             simulation.ephemera.push({
-                name: "freeze",
                 count: 210 + 10 * tier,
                 position: {
                     x: me.position.x,
@@ -9222,7 +9222,7 @@ const spawn = {
                 radius: pulseRadius,
                 do() {
                     this.count--
-                    if (this.count < 0 || this.level !== level.levelsCleared) simulation.removeEphemera(this.name);
+                    if (this.count < 0 || this.level !== level.levelsCleared) simulation.removeEphemera(this);
                     this.radius *= 0.994
 
                     if (Vector.magnitude(Vector.sub(player.position, this.position)) < this.radius + 40) {
@@ -9411,7 +9411,7 @@ const spawn = {
             if (this.health < this.nextHealthThreshold && this.alive) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 5) / 5
-                this.invulnerableCount = 120
+                this.invulnerableCount = 90
                 this.isInvulnerable = true
                 this.damageReduction = 0
             }
@@ -9499,10 +9499,9 @@ const spawn = {
                 this.cycle = 0
             } else {
                 simulation.ephemera.push({ //using ephemera to overwrite the map background color
-                    name: "drawMap",
                     opacity: Math.pow(this.cycle / this.maxCycles, 3),
                     do() {
-                        simulation.removeEphemera(this.name)
+                        simulation.removeEphemera(this)
                         ctx.fillStyle = `rgba(255,50,100,${this.opacity})`;
                         ctx.fill(simulation.draw.mapPath);
                     },

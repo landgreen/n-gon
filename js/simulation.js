@@ -113,11 +113,20 @@ const simulation = {
         simulation.isTimeSkipping = false;
     },
     ephemera: [], //array that is used to store ephemera objects
-    removeEphemera: function (name) {
-        for (let i = 0, len = simulation.ephemera.length; i < len; i++) {
-            if (simulation.ephemera[i].name === name) {
-                simulation.ephemera.splice(i, 1);
-                break;
+    removeEphemera: function (who, isRemoveByName) {
+        if (isRemoveByName) { //who is a string
+            for (let i = 0, len = simulation.ephemera.length; i < len; i++) {
+                if (simulation.ephemera[i].name === who) {
+                    simulation.ephemera.splice(i, 1);
+                    break;
+                }
+            }
+        } else {
+            for (let i = 0, len = simulation.ephemera.length; i < len; i++) {
+                if (simulation.ephemera[i] === who) {
+                    simulation.ephemera.splice(i, 1);
+                    break;
+                }
             }
         }
     },
@@ -415,32 +424,6 @@ const simulation = {
         }
         simulation.boldActiveGunHUD();
     },
-    // updateTechHUD() {
-    //     let text = ""
-    //     for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
-    //         if (tech.tech[i].isLost) {
-    //             if (text) text += "<br>" //add a new line, but not on the first line
-    //             text += `<span style="text-decoration: line-through;">${tech.tech[i].name}</span>`
-    //         } else if (tech.tech[i].count > 0 && !tech.tech[i].isInstant) {
-    //             if (text) text += "<br>" //add a new line, but not on the first line
-    //             text += `<span id = "${tech.tech[i].name}">${tech.tech[i].name}${tech.tech[i].count > 1 ? ` (${tech.tech[i].count}x)` : ""}</span>`
-
-    //             // document.getElementById(tech.tech[i].name).style.fontWeight = 'bold';
-    //             // simulation.ephemera.push({
-    //             //     name: "bold",
-    //             //     count: 180,
-    //             //     do() {
-    //             //         this.count--
-    //             //         if (this.count < 0) {
-    //             //             simulation.removeEphemera(this.name)
-    //             //             if (document.getElementById(tech.tech[i].name)) document.getElementById(tech.tech[i].name).style.fontWeight = 'normal';
-    //             //         }
-    //             //     }
-    //             // })
-    //         }
-    //     }
-    //     document.getElementById("right-HUD").innerHTML = text
-    // },
     updateTechHUD() {
         let text = ""
         for (let i = 0, len = tech.tech.length; i < len; i++) { //add tech
@@ -559,7 +542,7 @@ const simulation = {
                     simulation.zoomScale += step
                     if (this.count < 1 && this.currentLevel === level.onLevel && simulation.isAutoZoom) {
                         simulation.zoomScale = newZoomScale
-                        simulation.removeEphemera(this.name)
+                        simulation.removeEphemera(this)
                     }
                     simulation.setZoom(simulation.zoomScale);
                 },
@@ -805,8 +788,8 @@ const simulation = {
     firstRun: true,
     splashReturn() {
         if (document.fullscreenElement) {
-            mouseMove.isLockPointer = true
-            document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+            // mouseMove.isLockPointer = true
+            document.body.addEventListener('mousedown', mouseMove.pointerUnlock, { once: true })//watches for mouse clicks that exit draft mode and self removes
 
             document.exitPointerLock();
             mouseMove.isPointerLocked = false
@@ -1021,7 +1004,7 @@ const simulation = {
             })
         }
         simulation.ephemera.push({
-            name: "uniqueName", count: 0, do() {
+            name: "checks", count: 0, do() {
                 if (!(m.cycle % 60)) { //once a second
                     //energy overfill 
                     if (m.energy > m.maxEnergy) {
@@ -1033,11 +1016,10 @@ const simulation = {
                             //infinite falling.  teleport to sky after falling
 
                             simulation.ephemera.push({
-                                name: "slow player",
                                 count: 160, //cycles before it self removes
                                 do() {
                                     this.count--
-                                    if (this.count < 0 || m.onGround) simulation.removeEphemera(this.name)
+                                    if (this.count < 0 || m.onGround) simulation.removeEphemera(this)
                                     if (player.velocity.y > 70) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
                                     if (player.velocity.y > 90) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
                                 },
@@ -1060,11 +1042,10 @@ const simulation = {
                             }
                         } else if (level.fallMode === "position") { //fall and stay in the same horizontal position
                             simulation.ephemera.push({
-                                name: "slow player",
                                 count: 180, //cycles before it self removes
                                 do() {
                                     this.count--
-                                    if (this.count < 0 || m.onGround) simulation.removeEphemera(this.name)
+                                    if (this.count < 0 || m.onGround) simulation.removeEphemera(this)
                                     if (player.velocity.y > 70) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
                                     if (player.velocity.y > 90) Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.99 });
                                 },
@@ -1140,19 +1121,18 @@ const simulation = {
                         if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
                             //check for the next few seconds to see if being stuck continues
                             simulation.ephemera.push({
-                                name: "stuck",
                                 count: 240, //cycles before it self removes
                                 do() {
                                     if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
                                         this.count--
 
                                         if (this.count < 0) {
-                                            simulation.removeEphemera(this.name)
+                                            simulation.removeEphemera(this)
                                             Matter.Body.setVelocity(player, { x: 0, y: 0 });
                                             Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
                                         }
                                     } else {
-                                        simulation.removeEphemera(this.name)
+                                        simulation.removeEphemera(this)
                                     }
                                 },
                             })
@@ -1220,7 +1200,7 @@ const simulation = {
         simulation.fpsInterval = 1000 / simulation.fpsCap;
         simulation.then = Date.now();
         requestAnimationFrame(cycle); //starts game loop
-        if (document.fullscreenElement) mouseMove.isLockPointer = true //this interacts with the mousedown event listener to exit pointer lock
+        // if (document.fullscreenElement) mouseMove.isLockPointer = true //this interacts with the mousedown event listener to exit pointer lock
     },
     clearTimeouts() {
         let id = window.setTimeout(function () { }, 0);

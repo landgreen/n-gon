@@ -1,24 +1,27 @@
 ******************************************************** NEXT PATCH **************************************************
 
-announcing level name and constraints using in-level text
+tech: liquid-propellant - missiles speed up, missiles explode a 2nd time at 0.8x radius and damage
+tech: hypergolic propellant - secondary explision is 1.7x original's radius and damage
+cruise missile 2->1.75x damage
+  it's compatible with more missile tech now
 
-von Neumann probe, ablative drones are included in endothermic's effects
-maul and rebar use 10->30 ammo
-tech reduced tolerances renamed standardization
-trainBoss is now slow near player and fast otherwise
-opened up reversed version of corridor level
+T4 mobs have more health
+  bigSucker - lower acceleration
+  slasher4 - lower acceleration, slower stab speed
+  slasher5 - shorter swords, slower accceleration, 3->2 active swords
+  quadLaser - slower acceleration, slower rotational torque, longer laser on/off cycles
+T4 bosses are invulnerable for fewer cycles
 
-bugs
-  removed excessive console messages from anyon
-  activated hoizontally flipped mode on corridor level
-  fixed issue with localSettings.isHideHUD disabling constraint state settings with pause menu
+subway has only 3 stations (previously 4 or 5)
+removed a 200ms delay on entering fullscreen, also cleaned up mouse lock code and removed a 100ms delay
+  fullscreen still doesn't work well in firefox or safari, but works 99% on chrome
+most ephemera are now removed by self reference not by name
+
+bug
+  T4 bosses spawn order was not random
+    the list wasn't getting shuffled
 
 *********************************************************** TODO *****************************************************
-
-T3, T4 (mostly T4)
-  reduce mob CD and move speed
-  reduce number of mob bulelts
-  increase damage taken
 
 perfect diamagnetism tech:   - using field while crouching will pull in blocks
   releasing field will fire the blocks  (like control)
@@ -76,7 +79,7 @@ new boss - murmuration of small mobs (maybe 30-50)
         if one mob can't see goal have them target other mobs in the murmuration
     if no more mobs left on death spawn power ups
 
-letters - not sure how to actually use them...
+diagetic letters
   !training levels
     write out current objective on level background
     since it can only make letters in alphabet, all instructions would need to be customized
@@ -86,9 +89,6 @@ letters - not sure how to actually use them...
       maybe only if new player...
     !let player know what lore chapter they are on
       especially pacifist chapter
-  !run ephemera for 6 seconds with name of each level written somewhere on map
-    not sure this is a good idea, maybe do it very fast
-    display directly below level entrance
 
 tech, field? base game? - doing damage heals 1x (less?) of the last damage taken
   so you can't heal if you take damage twice before doing enough damage
@@ -118,12 +118,6 @@ tech:   -  set max energy equal to max health
     stress–energy tensor
     nuclear pasta
     Lagrangian
-
-missile tech - missiles explode when they hit walls
-  missiles explode a second time, 30 cycles later
-    second explosion isn't in the same spot.
-      it follows the missile?  if possible
-      it targets mobs that got hit by the first explosions?
 
 tech:   - make a few random types of special bullets for super balls
   super ball type ideas:
@@ -220,11 +214,11 @@ field tech: - use _____ to refresh current choices  (or give +6 choices for the 
       produce a new choice for each 30 energy
 
 mob status: confused - I could rotate the velocity that mobs have gently over 1-2 seconds. that might work.
-
-JUNK: Tracepath (literally traces M's path for a bit, sort of like snakeBoss)
+  probably also want to add a force so effects are noticable for stationary mobs
+  problem is that mobs all have different airFriction
 
 constraint: remove 10% of your tech until the end of the level
-  does remove then add give any benefits?
+  does remove then add give any benefits, or lasting effects?
 
 mob: weeping angle - spawns long lasting bullets, like seekers, but called weepers
   tier 3
@@ -250,9 +244,6 @@ mob: weepers - bullet
 guntech:  - 0.5x damage taken while ____  gun is equipped
   wave or shotgun?
   thematic issues? (how is a gun going to protect you)
-
-missiles that start slow but accelerate until hypersonic
-  maybe just add this to another missile tech to make it less boring
 
 make guns do different things if  tap or hold fire
   effects have some overlap with crouch
@@ -701,8 +692,6 @@ tech: get sent to a new tab that closes in 3 minutes
   give player equipment like many-worlds
     count guns, field, tech and give random stuff on new tab
   i-frame instead of tab?
-
-tech: missiles explode a 2nd time after 1/2 a second (with a slightly different position determined by original velocity)
 
 seed isn't working right from shared URL
 

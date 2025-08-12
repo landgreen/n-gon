@@ -284,8 +284,8 @@ const powerUps = {
             });
         }
         if (document.fullscreenElement) {
-            mouseMove.isLockPointer = true
-            document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+            // mouseMove.isLockPointer = true
+            document.body.addEventListener('mousedown', mouseMove.pointerUnlock, { once: true });//watches for mouse clicks that exit draft mode and self removes
 
             document.exitPointerLock();
             mouseMove.isPointerLocked = false
@@ -320,7 +320,7 @@ const powerUps = {
                 // powerUps[type].effect();
                 requestAnimationFrame(() => { // generates new choices
                     powerUps[type].effect();
-                    if (document.fullscreenElement) mouseMove.isLockPointer = false//this interacts with the mousedown event listener to exit pointer lock
+                    // if (document.fullscreenElement) mouseMove.isLockPointer = false//this interacts with the mousedown event listener to exit pointer lock
                 });
                 return
             }
@@ -343,15 +343,14 @@ const powerUps = {
         if (m.immuneCycle < m.cycle + 5) m.immuneCycle = m.cycle + 5; //player is immune to damage
         if (m.holdingTarget) m.drop();
 
-        if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
+        // if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
     },
     animatePowerUpGrab(color) {
         simulation.ephemera.push({
-            // name: "",
             count: 25, //cycles before it self removes
             do() {
                 this.count -= 2
-                if (this.count < 5) simulation.removeEphemera(this.name)
+                if (this.count < 5) simulation.removeEphemera(this)
 
                 ctx.beginPath();
                 ctx.arc(m.pos.x, m.pos.y, Math.max(3, this.count), 0, 2 * Math.PI);
@@ -432,11 +431,11 @@ const powerUps = {
                     document.getElementById("choose-grid").classList.add('choose-grid');
                     document.getElementById("choose-grid").classList.remove('choose-grid-no-images');
                 }
-                if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
+                // if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
             });
             if (document.fullscreenElement) {
-                mouseMove.isLockPointer = true
-                document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+                // mouseMove.isLockPointer = true
+                document.body.addEventListener('mousedown', mouseMove.pointerUnlock, { once: true });//watches for mouse clicks that exit draft mode and self removes
 
                 document.exitPointerLock();
                 mouseMove.isPointerLocked = false
@@ -454,7 +453,7 @@ const powerUps = {
             level.levels[level.onLevel + 1] = name
             powerUps.warp.exit()
             level.nextLevel();
-            if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
+            // if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
             // simulation.clearNow = true
         },
         exit() {
@@ -513,11 +512,11 @@ const powerUps = {
 
             document.getElementById("exit").addEventListener("click", () => {
                 powerUps.warp.exit()
-                if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
+                // if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
             });
             if (document.fullscreenElement) {
-                mouseMove.isLockPointer = true
-                document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+                // mouseMove.isLockPointer = true
+                document.body.addEventListener('mousedown', mouseMove.pointerUnlock, { once: true });//watches for mouse clicks that exit draft mode and self removes
 
                 document.exitPointerLock();
                 mouseMove.isPointerLocked = false
@@ -626,12 +625,12 @@ const powerUps = {
                     level.initialPowerUps()
                     simulation.trails(30)
                 }
-                if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
+                // if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
             });
 
             if (document.fullscreenElement) {
-                mouseMove.isLockPointer = true
-                document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+                // mouseMove.isLockPointer = true
+                document.body.addEventListener('mousedown', mouseMove.pointerUnlock, { once: true });//watches for mouse clicks that exit draft mode and self removes
 
                 document.exitPointerLock()
                 mouseMove.isPointerLocked = false
@@ -839,9 +838,9 @@ const powerUps = {
                 simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             }
             powerUps[type].effect();
-            if ((tech.isNoDraftPause || level.isNoPause) && document.fullscreenElement) {
-                mouseMove.isLockPointer = false//this interacts with the mousedown event listener to exit pointer lock
-            }
+            // if ((tech.isNoDraftPause || level.isNoPause) && document.fullscreenElement) {
+            //     mouseMove.isLockPointer = false//this interacts with the mousedown event listener to exit pointer lock
+            // }
         },
     },
     heal: {
@@ -888,13 +887,12 @@ const powerUps = {
                         }
                         if (!foundActiveEffect) {
                             simulation.ephemera.push({
-                                name: "healPush",
                                 count: totalTime, //cycles before it self removes
                                 range: 0,
                                 scale: Math.min(Math.max(0.7, heal * 4), 2.2), //typically heal is 0.35
                                 do() {
                                     this.count--
-                                    if (this.count < 0) simulation.removeEphemera(this.name)
+                                    if (this.count < 0) simulation.removeEphemera(this)
                                     this.range = this.range * 0.99 + 0.01 * (300 * this.scale + 100 * Math.sin(m.cycle * 0.022))
                                     if (this.count < 120) this.range -= 5 * this.scale
                                     this.range = Math.max(this.range, 1) //don't go negative

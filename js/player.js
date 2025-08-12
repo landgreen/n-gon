@@ -3404,12 +3404,11 @@ const m = {
             Matter.Body.setVelocity(block, unit);
 
             simulation.ephemera.push({
-                name: "remove block",
                 count: 120, //cycles before it self removes
                 do() {
                     this.count--
                     if (this.count < 0) {
-                        simulation.removeEphemera(this.name)
+                        simulation.removeEphemera(this)
                         Matter.Composite.remove(engine.world, block);
                         //find block
                         for (let i = 0; i < body.length; i++) {
@@ -3436,11 +3435,10 @@ const m = {
                 m.fieldCDcycle = m.cycle + Math.max(m.fieldBlockCD, 60);
                 if (tech.isLaserField) {
                     simulation.ephemera.push({
-                        name: "laser field", //used to find this array element in simulation.removeEphemera()
                         count: 20 + Math.floor(m.maxEnergy * 30 * 0.0018 / tech.laserDrain), //how many cycles the ephemera lasts, scales with max energy
                         do() {
                             this.count--
-                            if (this.count < 0) simulation.removeEphemera(this.name)
+                            if (this.count < 0) simulation.removeEphemera(this)
                             for (let i = 0, num = 12; i < num; i++) { //draw random lasers
                                 const angle = 6.28 * i / num + m.cycle * 0.04
                                 b.laser({ x: m.pos.x + 30 * Math.cos(angle), y: m.pos.y + 30 * Math.sin(angle) }, { x: m.pos.x + 3000 * Math.cos(angle), y: m.pos.y + 3000 * Math.sin(angle) }, tech.laserDamage * 2.5)//dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1
@@ -3883,7 +3881,6 @@ const m = {
                     const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
                     if (arraysEqual(m.fieldUpgrades[m.fieldMode].keyLog, patternA) || arraysEqual(m.fieldUpgrades[m.fieldMode].keyLog, patternB)) {
                         simulation.ephemera.push({
-                            name: "field move",
                             do() {
                                 //check if touching map
                                 const a = 0.5  //reduces arc to put collision line in middle of field
@@ -3902,7 +3899,7 @@ const m = {
                                 // ctx.strokeStyle = "#f0f";
                                 // ctx.stroke();
                                 const rayResults = Matter.Query.ray(map, upper, lower, 35);
-                                if (!input.down || rayResults.length) simulation.removeEphemera(this.name)
+                                if (!input.down || rayResults.length) simulation.removeEphemera(this)
                                 const unit = { x: Math.cos(m.fieldAngle), y: Math.sin(m.fieldAngle) }
                                 m.fieldPosition = Vector.add(m.fieldPosition, Vector.mult(unit, 10))
                             },
@@ -4166,12 +4163,11 @@ const m = {
                     if (input.field && m.energy > drain && (arraysEqual(m.fieldUpgrades[3].keyLog, patternA) || arraysEqual(m.fieldUpgrades[3].keyLog, patternB))) {
                         m.energy -= drain
                         simulation.ephemera.push({
-                            name: "mass push",
                             count: 60,
                             range: 1700,
                             do() {
                                 this.count--
-                                if (this.count < 0) simulation.removeEphemera(this.name)
+                                if (this.count < 0) simulation.removeEphemera(this)
                                 // if (this.count < 0) {
                                 //     this.count = 20
                                 //     this.do = this.pushDo
@@ -4192,7 +4188,7 @@ const m = {
                             },
                             // pushDo() {
                             //     this.count--
-                            //     if (this.count < 0) simulation.removeEphemera(this.name)
+                            //     if (this.count < 0) simulation.removeEphemera(this)
                             //     for (let i = 0, len = body.length; i < len; ++i) {
                             //         sub = Vector.sub(body[i].position, m.pos);
                             //         dist = Vector.magnitude(sub);
@@ -4564,9 +4560,8 @@ const m = {
                     if (arraysEqual(m.fieldUpgrades[5].keyLog, patternA) || arraysEqual(m.fieldUpgrades[5].keyLog, patternB)) {
 
                         simulation.ephemera.push({
-                            name: "plasma combo",
                             do() {
-                                if (!input.down || input.field || input.fire) simulation.removeEphemera(this.name)
+                                if (!input.down || input.field || input.fire) simulation.removeEphemera(this)
                                 if (!(simulation.cycle % 6)) {
                                     //look for closest mob in player's LoS
                                     const closest = { distance: 1500, target: null }
@@ -4590,7 +4585,6 @@ const m = {
                                         where = Vector.add(m.pos, Vector.rotate(Vector.mult(dir, Math.floor(300 + 800 * Math.random())), (Math.random() - 0.5)))
                                     }
                                     simulation.ephemera.push({
-                                        name: "lightning",
                                         count: 25,
                                         who: closest.target,
                                         where: where,
@@ -4598,7 +4592,7 @@ const m = {
                                         path: [where],
                                         do() {
                                             this.count--
-                                            if (this.count < 0) simulation.removeEphemera(this.name)
+                                            if (this.count < 0) simulation.removeEphemera(this)
                                             if (this.isReady) {
                                                 for (let i = 0; i < 1; i++) {
                                                     if (Vector.magnitudeSquared(Vector.sub(m.pos, this.where)) > 1000) {
@@ -4817,7 +4811,6 @@ const m = {
                         },
                         explode() {
                             simulation.ephemera.push({
-                                name: "plasma ball",
                                 vertices: this.vertices,
                                 position: {
                                     x: m.plasmaBall.position.x,
@@ -4830,7 +4823,7 @@ const m = {
                                     //grow and fade
                                     this.radius *= 1.05
                                     this.alpha -= 0.05
-                                    if (this.alpha < 0) simulation.removeEphemera(this.name)
+                                    if (this.alpha < 0) simulation.removeEphemera(this)
                                     //graphics
                                     const radius = this.radius * (0.99 + 0.02 * Math.random()) + 3 * Math.random()
                                     const gradient = ctx.createRadialGradient(this.position.x, this.position.y, 0, this.position.x, this.position.y, radius);
@@ -5597,7 +5590,6 @@ const m = {
                                 ) { //use power up if it is close enough
 
                                     simulation.ephemera.push({
-                                        name: "pilot grab",
                                         count: 5, //cycles before it self removes
                                         PposX: powerUp[i].position.x,
                                         PposY: powerUp[i].position.y,
@@ -5605,7 +5597,7 @@ const m = {
                                         color: powerUp[i].color,
                                         do() {
                                             this.count--
-                                            if (this.count < 0) simulation.removeEphemera(this.name)
+                                            if (this.count < 0) simulation.removeEphemera(this)
                                             ctx.beginPath();
                                             ctx.arc(this.PposX, this.PposY, this.size * (this.count + 2) / 7, 0, 2 * Math.PI);
                                             ctx.fillStyle = this.color
@@ -5888,7 +5880,6 @@ const m = {
                                 if (dist2 < 1000 && !simulation.isChoosing) { //use power up if it is close enough
 
                                     simulation.ephemera.push({
-                                        name: "womrhole grab",
                                         count: 5, //cycles before it self removes
                                         PposX: powerUp[i].position.x,
                                         PposY: powerUp[i].position.y,
@@ -5896,7 +5887,7 @@ const m = {
                                         color: powerUp[i].color,
                                         do() {
                                             this.count--
-                                            if (this.count < 0) simulation.removeEphemera(this.name)
+                                            if (this.count < 0) simulation.removeEphemera(this)
                                             ctx.beginPath();
                                             ctx.arc(this.PposX, this.PposY, Math.max(1, this.size * (this.count + 1) / 7), 0, 2 * Math.PI);
                                             ctx.fillStyle = this.color
@@ -6164,12 +6155,11 @@ const m = {
                                     const dmg = 1.5
                                     m.damageDone *= dmg
                                     simulation.ephemera.push({
-                                        name: `wormholeDamage${m.cycle}`,
                                         count: 300, //cycles before it self removes
                                         do() {
                                             this.count--
                                             if (this.count < 0) {
-                                                simulation.removeEphemera(this.name)
+                                                simulation.removeEphemera(this)
                                                 m.damageDone /= dmg
                                             }
                                         },
@@ -6426,11 +6416,10 @@ const m = {
                                 const range = 0.05 * Math.min(h - hLast, 1500)
                                 const range2 = Math.min(h - hLast, 1500) * Math.min(h - hLast, 1500)
                                 simulation.ephemera.push({
-                                    name: "ground slam",
                                     count: 0, //cycles before it self removes
                                     do() {
                                         this.count++
-                                        if (this.count > 6) simulation.removeEphemera(this.name)
+                                        if (this.count > 6) simulation.removeEphemera(this)
 
                                         ctx.fillStyle = 'rgba(255,255,255,0.5)'
                                         ctx.beginPath();

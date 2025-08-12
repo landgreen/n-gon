@@ -425,7 +425,7 @@ const build = {
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         document.getElementById("hide-hud").checked = localSettings.isHideHUD
         document.getElementById("hide-hud").classList.toggle("ticked")
-        simulation.removeEphemera("dmgDefBars")
+        simulation.removeEphemera("dmgDefBars", true)
         if (!localSettings.isHideHUD) {
             simulation.ephemera.push({
                 name: "dmgDefBars", count: 0, do() {
@@ -697,7 +697,6 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
         } else if (find === 'have') {
             tech.tech.sort((a, b) => {
                 return (a.allowed() === b.allowed()) ? 0 : a.allowed() ? -1 : 1;
-                return 0;
             });
         } else if (find === 'heal') {
             tech.tech.sort((a, b) => {
@@ -1490,31 +1489,88 @@ window.addEventListener("keydown", function (event) {
         case input.key.fullscreen:
             // Escape key will also automatically exit pointer lock and fullscreen
             // console.log(document.activeElement !== document.getElementById('sort-input'), document.activeElement)
-            if (document.fullscreenElement && document.activeElement !== document.getElementById('sort-input')) {
-                document.exitPointerLock();
-                mouseMove.isPointerLocked = false
-                mouseMove.reset()
-                document.exitFullscreen();
-                input.reset(); //to prevent key ghosting reset all input keys
-            } else if (document.activeElement !== document.getElementById('sort-input') && mouseMove.isMouseInWindow) {
-                document.documentElement.requestFullscreen().then(() => {
-                    input.reset(); //to prevent key ghosting reset all input keys
 
-                    // Small delay to ensure fullscreen is established, then lock pointer to canvas
-                    if (!simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused && !simulation.isChoosing) {
-                        setTimeout(() => {
+
+            // const onFullscreenChange = () => {
+            //     if (document.fullscreenElement) { // Make sure we entered, not exited
+            //         input.reset();
+
+            //         if (!simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused && !simulation.isChoosing) {
+            //             canvas.requestPointerLock();
+            //             mouseMove.isPointerLocked = true;
+            //             mouseMove.reset();
+            //         } else {
+            //             mouseMove.isLockPointer = true;
+            //             document.body.addEventListener('mousedown', mouseMove.pointerUnlock);
+            //         }
+            //     }
+            // };
+
+            // // Add the listener that runs only once.
+            // document.addEventListener('fullscreenchange', onFullscreenChange, { once: true });
+
+            // // Now, request fullscreen.
+            // document.documentElement.requestFullscreen().catch(err => {
+            //     // If the request fails, the 'fullscreenchange' event will never fire,
+            //     // so the listener we added will just be garbage collected. No cleanup needed.
+            //     console.error('Error attempting to enable fullscreen:', err);
+            // });
+
+            if (document.activeElement !== document.getElementById('sort-input')) {//not typing "o" in the sort text menu
+                if (document.fullscreenElement) { //exit fullscreen mode if in fullscreen  
+                    document.exitPointerLock();
+                    mouseMove.isPointerLocked = false
+                    mouseMove.reset()
+                    document.exitFullscreen();
+                    input.reset(); //to prevent key ghosting reset all input keys
+                } else if (mouseMove.isMouseInWindow) { //if mouse is in the window enter fullscreen
+                    document.documentElement.requestFullscreen().then(() => {//wait for fullscreen to be ready
+                        input.reset(); //to prevent key ghosting reset all input keys
+                        //request pointer lock, but not if in a game situation that needs the traditional mouse
+                        if (!simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused && !simulation.isChoosing) {
                             canvas.requestPointerLock();
                             mouseMove.isPointerLocked = true
                             mouseMove.reset()
-                        }, 100);
-                    } else {
-                        mouseMove.isLockPointer = true
-                        document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
-                    }
-                }).catch(err => {
-                    console.error('Error attempting to enable fullscreen:', err);
-                });
+                        } else {
+                            // mouseMove.isLockPointer = true
+                            // document.body.addEventListener('mousedown', mouseMove.pointerUnlock, { once: true });//watches for mouse clicks that exit draft mode and self removes
+                            document.addEventListener('mousedown', mouseMove.pointerUnlock, { once: true })
+                        }
+                    }).catch(err => {
+                        console.error('Error attempting to enable fullscreen:', err);
+                    });
+                }
             }
+
+
+
+
+
+            // if (document.fullscreenElement && document.activeElement !== document.getElementById('sort-input')) {
+            //     document.exitPointerLock();
+            //     mouseMove.isPointerLocked = false
+            //     mouseMove.reset()
+            //     document.exitFullscreen();
+            //     input.reset(); //to prevent key ghosting reset all input keys
+            // } else if (document.activeElement !== document.getElementById('sort-input') && mouseMove.isMouseInWindow) {
+            //     document.documentElement.requestFullscreen().then(() => {
+            //         input.reset(); //to prevent key ghosting reset all input keys
+
+            //         // Small delay to ensure fullscreen is established, then lock pointer to canvas
+            //         if (!simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused && !simulation.isChoosing) {
+            //             setTimeout(() => {
+            //                 canvas.requestPointerLock();
+            //                 mouseMove.isPointerLocked = true
+            //                 mouseMove.reset()
+            //             }, 100);
+            //         } else {
+            //             mouseMove.isLockPointer = true
+            //             document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
+            //         }
+            //     }).catch(err => {
+            //         console.error('Error attempting to enable fullscreen:', err);
+            //     });
+            // }
             break
         case input.key.testing:
             if (m.alive && localSettings.loreCount > 0 && !simulation.paused && !build.isExperimentSelection) {
@@ -1780,22 +1836,22 @@ const mouseMove = {
         if (simulation.mouse.y < 0) simulation.mouse.y = 0
         if (simulation.mouse.y > canvas.height) simulation.mouse.y = canvas.height
     },
-    isLockPointer: false,//use to lock pointer in the mousedown eventlistener
+    // isLockPointer: false,//use to lock pointer in the mousedown eventlistener
     isPointerLocked: false, //tracks the pointer locked state
     isMouseInWindow: true,
     pointerUnlock() { //event
         setTimeout(() => {
-            //simulation.isChoosing
-            if (mouseMove.isLockPointer && document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
-                mouseMove.isLockPointer = false
+            if (document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
+                // mouseMove.isLockPointer = false
                 canvas.requestPointerLock();
                 mouseMove.isPointerLocked = true
                 mouseMove.reset()
-            } else if (!mouseMove.isLockPointer || !document.fullscreenElement) {
-                mouseMove.isLockPointer = false
             }
-            document.body.removeEventListener('mousedown', mouseMove.pointerUnlock); //remove self so it can't trigger
-        }, 200);
+            // else if (!mouseMove.isLockPointer || !document.fullscreenElement) {
+            //     mouseMove.isLockPointer = false
+            // }
+            // document.body.removeEventListener('mousedown', mouseMove.pointerUnlock); //remove self so it can't trigger
+        }, 100);
     },
     reset() {//sets mouseMove.active based on inverted and pointer lock
         if (simulation.isInvertedVertical) {
