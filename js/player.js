@@ -276,7 +276,7 @@ const m = {
         }
 
         if (Math.abs(moveX) > 4) { //come to a stop if fast     // if (player.speed > 4) { //come to a stop if fast 
-            const stoppingFriction = (m.crouch) ? 0.65 : 0.89; // this controls speed when crouched
+            const stoppingFriction = (m.crouch && (input.down || !m.checkHeadClear())) ? 0.65 : 0.89; // this controls speed when crouched 
             Matter.Body.setVelocity(player, { x: m.moverX * (1 - stoppingFriction) + player.velocity.x * stoppingFriction, y: player.velocity.y * stoppingFriction });
         }
         m.moverX = 0 //reset the level mover offset
@@ -765,7 +765,7 @@ const m = {
     },
     baseHealth: 1,
     setMaxHealth(isMessage) {
-        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 5 * tech.isFallingDamage
+        m.maxHealth = m.baseHealth + tech.extraMaxHealth + 6 * tech.isFallingDamage
         m.maxHealth /= m.fieldUpgrades[1].energyHealthRatio
         if (level.isReducedHealth) {
             level.reducedHealthLost = Math.max(0, m.health - m.maxHealth * 0.5)
@@ -790,7 +790,7 @@ const m = {
         if (tech.energyDefense && m.energy > 1.99) dmg *= 0.1
         if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
         if (tech.isMaxHealthDefense && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 0.1
-        if (tech.isDiaphragm) dmg *= 0.55 + 0.35 * Math.sin(m.cycle * 0.0075);
+        if (tech.isDiaphragm) dmg *= 0.55 + 0.35 * Math.sin(m.cycle * 0.01);
         if (tech.isHarmDarkMatter) dmg *= (tech.isMoveDarkMatter || tech.isNotDarkMatter) ? 0.25 : 0.4
         if (tech.isImmortal) dmg *= 0.7
         if (m.fieldMode === 0 || m.fieldMode === 3) dmg *= 0.973 ** m.coupling
@@ -965,6 +965,23 @@ const m = {
             if (isDefense) dmg *= m.defense()
             dmg = Math.min(dmg, 0.4 * m.maxHealth)
             m.health -= dmg;
+
+            if (tech.isEnergyNoAmmo && m.health < 0.33) {
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].name === "non-renewables") {
+                        powerUps.ejectTech(i)
+                        break
+                    }
+                }
+            }
+            if (tech.crouchAmmoCount && m.health < 0.33) {
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].name === "desublimated ammunition") {
+                        powerUps.ejectTech(i)
+                        break
+                    }
+                }
+            }
             if (m.health < 0 || isNaN(m.health)) {
                 if (tech.isDeathAvoid && powerUps.research.count > 0 && !tech.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
                     tech.isDeathAvoidedThisLevel = true
@@ -2077,7 +2094,7 @@ const m = {
                 }
 
                 //zoom camera in and out
-                simulation.setZoom(1800 + 400 * Math.sin(m.cycle * 0.01))
+                simulation.setZoom(1800 + 500 * Math.sin(m.cycle * 0.01))
             }
         },
         dilate2() {
@@ -2136,7 +2153,7 @@ const m = {
                     ctx.restore();
                 }
 
-                simulation.setZoom(1800 + 400 * amplitude)
+                simulation.setZoom(1800 + 500 * amplitude)
             }
             m.drawLeg = function (stroke) {
                 // if (simulation.mouseInGame.x > m.pos.x) {
@@ -2839,7 +2856,7 @@ const m = {
     },
     setFieldRegen() {
         if (m.fieldMode === 0) {
-            m.fieldRegen = 0.00067  //4 energy per second for field emitter
+            m.fieldRegen = 0.001  //6 energy per second for field emitter
         } else if (m.fieldMode === 6) {
             m.fieldRegen = 0.002  //12 energy per second for time dilation
         } else if (m.fieldMode === 2) {
@@ -2857,7 +2874,8 @@ const m = {
         } else {
             m.fieldRegen = 0.001 //6 energy per second
         }
-        if (m.fieldMode === 0 || m.fieldMode === 4) m.fieldRegen += 0.0001 * m.coupling
+        if (m.fieldMode === 4) m.fieldRegen += 0.0001 * m.coupling
+        if (m.fieldMode === 0) m.fieldRegen += 0.00005 * m.coupling
         if (tech.isTimeCrystals) {
             m.fieldRegen *= 2.5
         } else if (tech.isGroundState) {
@@ -3441,7 +3459,13 @@ const m = {
                             if (this.count < 0) simulation.removeEphemera(this)
                             for (let i = 0, num = 12; i < num; i++) { //draw random lasers
                                 const angle = 6.28 * i / num + m.cycle * 0.04
-                                b.laser({ x: m.pos.x + 30 * Math.cos(angle), y: m.pos.y + 30 * Math.sin(angle) }, { x: m.pos.x + 3000 * Math.cos(angle), y: m.pos.y + 3000 * Math.sin(angle) }, tech.laserDamage * 2.5)//dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1
+                                if (tech.isLaserLens) { //&& b.guns[11].isInsideArc(angle)
+                                    b.guns[11].lens()
+                                    b.laser({ x: m.pos.x + 30 * Math.cos(angle), y: m.pos.y + 30 * Math.sin(angle) }, { x: m.pos.x + 3000 * Math.cos(angle), y: m.pos.y + 3000 * Math.sin(angle) }, tech.laserDamage * 2.5 * b.guns[11].lensDamage)//dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1
+                                } else {
+                                    b.laser({ x: m.pos.x + 30 * Math.cos(angle), y: m.pos.y + 30 * Math.sin(angle) }, { x: m.pos.x + 3000 * Math.cos(angle), y: m.pos.y + 3000 * Math.sin(angle) }, tech.laserDamage * 2.5)//dmg = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1
+                                }
+
                             }
                         },
                     })
@@ -3690,7 +3714,7 @@ const m = {
         simulation.inGameConsole(`<div class="circle-grid field"></div> &nbsp; <span class='color-var'>m</span>.setField("<strong class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</strong>")<br>input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>MouseRight</span>"]`);
         if (m.fieldMode === 1) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[1]</span>energyHealthRatio <span class='color-symbol'>=</span> ${m.fieldUpgrades[1].energyHealthRatio} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←←↓→→↓</em>`);
         if (m.fieldMode === 2) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldPosition<span class='color-symbol'>+=</span>10 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">← → ← → ↧</em>`);
-        if (m.fieldMode === 3) simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↖↑↗→↑↑</em>`);
+        if (m.fieldMode === 3) simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↖↑→↗↑↑</em>`);
         if (m.fieldMode === 4) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${m.fieldUpgrades[4].modeText()} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↓↘→↓↙←↑↑↓</em>`);
         if (m.fieldMode === 5) simulation.inGameConsole(`m<span class='color-symbol'>.</span>energy <span class='color-symbol'>+=</span> 0.05 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↙↓↘→→↧</em>`);
         if (m.fieldMode === 6) simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle <span class='color-symbol'>-</span> 200 <span class='color-symbol'>)</span> <span class='color-symbol'>%</span> 600 <span class='color-symbol'>]</span>  &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 0.9rem;color: #055;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`);
@@ -3705,7 +3729,7 @@ const m = {
             name: "field emitter",
             imageNumber: Math.floor(Math.random() * 26), //pick one of the 25 field emitter image files at random
             description: `<em>initial field</em><br>use <strong class='color-f'>energy</strong> to <strong>deflect</strong> mobs and <strong>throw</strong> <strong class='color-block'>blocks</strong>
-        <br><strong>4</strong> <strong class='color-f'>energy</strong> per second`, //            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
+        <br><strong>6</strong> <strong class='color-f'>energy</strong> per second`, //            <br><strong>100</strong> max <strong class='color-f'>energy</strong>
             effect: () => {
                 m.hold = function () {
                     if (m.isHolding) {
@@ -4148,7 +4172,7 @@ const m = {
         },
         {
             name: "negative mass",
-            description: `use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br><strong>0.5x</strong> <strong class='color-defense'>damage taken</strong><br><strong>6</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">←↖↑↗→↑↑</em>`,
+            description: `use <strong class='color-f'>energy</strong> to nullify &nbsp;<strong style='letter-spacing: 7px;'>gravity</strong><br><strong>0.5x</strong> <strong class='color-defense'>damage taken</strong><br><strong>6</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">←↖↑→↗↑↑</em>`,
             keyLog: [null, null, null, null, null],
             fieldDrawRadius: 0,
             effect: () => {
@@ -4203,7 +4227,7 @@ const m = {
                             //     }
                             // },
                         })
-                        simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↖↑↗→↑↑</em>`);
+                        simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↖↑→↗↑↑</em>`);
                     }
                 }
                 window.addEventListener("keydown", m.fieldEvent);
@@ -5262,11 +5286,11 @@ const m = {
                     if (arraysEqual(m.fieldUpgrades[7].keyLog, patternA) || arraysEqual(m.fieldUpgrades[7].keyLog, patternB)) {
                         if (m.fieldUpgrades[7].smallFieldRadius === 130) {
                             m.fieldUpgrades[7].smallFieldRadius = 70
+                            simulation.inGameConsole(`<strong>4.5</strong><span class='color-symbol'>→</span><strong>6x</strong> <strong class='color-cloaked'>decloaking</strong> <strong class='color-d'>damage</strong> &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">↑↓↙←↓↘→</em>`);
                         } else {
                             m.fieldUpgrades[7].smallFieldRadius = 130
+                            simulation.inGameConsole(`<strong>6</strong><span class='color-symbol'>→</span><strong>4.5x</strong> <strong class='color-cloaked'>decloaking</strong> <strong class='color-d'>damage</strong> &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">↑↓↙←↓↘→</em>`);
                         }
-
-                        simulation.inGameConsole(`<strong>4.5</strong><span class='color-symbol'>→</span><strong>6x</strong> <strong class='color-cloaked'>decloaking</strong> <strong class='color-d'>damage</strong> &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">↑↓↙←↓↘→</em>`);
                     }
                 }
                 window.addEventListener("keydown", m.fieldEvent);
@@ -5573,14 +5597,6 @@ const m = {
                                 const dyP = m.fieldPosition.y - powerUp[i].position.y;
                                 const dist2 = dxP * dxP + dyP * dyP + 200;
                                 const graphicRange = graphicScale * m.fieldRadius
-                                // float towards field  if looking at and in range  or  if very close to player
-                                // if (
-                                //     dist2 < graphicRange * graphicRange &&
-                                //     (m.lookingAt(powerUp[i]) || dist2 < 16000)
-                                // ) {
-                                //     powerUp[i].force.x += 0.05 * (dxP / Math.sqrt(dist2)) * powerUp[i].mass;
-                                //     powerUp[i].force.y += 0.05 * (dyP / Math.sqrt(dist2)) * powerUp[i].mass - powerUp[i].mass * simulation.g; //negate gravity
-                                //     Matter.Body.setVelocity(powerUp[i], { x: powerUp[i].velocity.x * 0.11, y: powerUp[i].velocity.y * 0.11 }); //extra friction
                                 if (
                                     dist2 < graphicRange * graphicRange &&
                                     !simulation.isChoosing &&
@@ -5588,7 +5604,6 @@ const m = {
                                     // (powerUp[i].name !== "heal" || m.health < 0.94 * m.maxHealth)
                                     // (powerUp[i].name !== "ammo" || b.guns[b.activeGun].ammo !== Infinity)
                                 ) { //use power up if it is close enough
-
                                     simulation.ephemera.push({
                                         count: 5, //cycles before it self removes
                                         PposX: powerUp[i].position.x,
@@ -5612,7 +5627,6 @@ const m = {
                                     // m.fieldRadius += 50
                                     break; //because the array order is messed up after splice
                                 }
-                                // }
                             }
 
                             let radiusGoal, radiusSmooth, drainPassive
@@ -6397,10 +6411,7 @@ const m = {
                     const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
                     const drain = 0.13
                     if (m.energy > drain && arraysEqual(m.fieldUpgrades[10].keyLog, patternA) || arraysEqual(m.fieldUpgrades[10].keyLog, patternB)) {
-                        m.energy -= drain
-                        //check if at least 500 above the ground
                         // const rayResults = Matter.Query.ray(map, m.pos, { x: m.pos.x, y: m.pos.y + 5000 }, 50)
-
                         const combinedElements = [...map, ...body];
                         const rayResults = Matter.Query.ray(combinedElements, m.pos, { x: m.pos.x, y: m.pos.y + 5000 }, 40);
 
@@ -6411,7 +6422,8 @@ const m = {
                                 return yA - yB;
                             });
                             const h = rayResults[0].body.bounds.min.y
-                            if (h - m.pos.y > 400) {
+                            if (h - m.pos.y > 400) { //check if at least 500 above the ground
+                                m.energy -= drain
                                 const hLast = player.position.y
                                 const range = 0.05 * Math.min(h - hLast, 1500)
                                 const range2 = Math.min(h - hLast, 1500) * Math.min(h - hLast, 1500)

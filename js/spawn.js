@@ -3,7 +3,7 @@ const spawn = {
     pickList: ["starter", "starter"],
     fullPickList: [
         "slasher", "slasher", "slasher2", "slasher3",
-        "hopper", "hopper", "hopMother", "hopMother",
+        "hopper", "hopper", "hopMother", "hopMother", "hopperBaby",
         "stabber", "stabber", "stabber",
         "springer", "springer", "springer",
         "stinger", "stinger", "stinger",
@@ -17,18 +17,18 @@ const spawn = {
         "sneaker", "launcher", "launcherOne", "exploder", "sucker", "sniper", "spinner", "grower", "beamer", "spawner", "ghoster", "focuser", "slasher4", "hopsploder", "stingWinger", "sneakyStriker", "bigSucker", "quadLaser", "launchPusher", "slasher5", "mortar"
     ],
     tier: [
-        ["starter"],
+        ["starter"], //T0
         ["slasher", "hopper", "flutter", "shooter", "grower", "grenadier", "laser", "beamer", "launcher", "exploder"],
-        ["slasher2", "stabber", "springer", "striker", "spinner", "sucker", "pulsar", "focuser", "spawner"],
+        ["slasher2", "hopperBaby", "stabber", "springer", "striker", "spinner", "sucker", "pulsar", "focuser", "spawner"],
         ["slasher3", "hopMother", "stinger", "sniper", "sneaker", "ghoster", "laserLayer", "launcherOne", "freezer"],
-        ["slasher4", "hopsploder", "stingWinger", "sneakyStriker", "bigSucker", "quadLaser", "launchPusher", "slasher5", "mortar"],
+        ["slasher4", "hopsploder", "stingWinger", "sneakyStriker", "bigSucker", "quadLaser", "launchPusher", "slasher5", "mortar"],//T4
     ],
     bossTier: [
-        [],
-        ["snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss"],
-        ["powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture"],
-        ["powerUpBoss", "laserLayerBoss", "historyBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss", "conductorBoss"],
-        ["stagBeetleBoss", "kingSnakeBoss", "iceBlockBoss", "fabricatorBoss", "pentaLaserBoss", "defendingBoss", "quasarBoss"]
+        [],//T0
+        ["snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss"],//t1
+        ["powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture"],//T2
+        ["powerUpBoss", "laserLayerBoss", "historyBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss", "conductorBoss"],//T3
+        ["stagBeetleBoss", "kingSnakeBoss", "iceBlockBoss", "fabricatorBoss", "pentaLaserBoss", "defendingBoss", "quasarBoss"] //T4
         //finalBoss is T5
     ],
     // tier-n bosses: suckerBoss, laserBoss, tetherBoss, bounceBoss, sprayBoss, mineBoss, hopMotherBoss, trainBoss    //these need a particular level to work so they scale with level.levelsCleared
@@ -2404,6 +2404,70 @@ const spawn = {
                     const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
                     this.force.x += forceMag * Math.cos(angle);
                     this.force.y += forceMag * Math.sin(angle) - 0.07 * this.mass; //antigravity
+                }
+            }
+        };
+    },
+    hopperBaby(x, y, radius = 20 + Math.ceil(Math.random() * 15)) {
+        mobs.spawn(x, y, 5, radius, "rgba(0, 220, 198, 1)");
+        let me = mob[mob.length - 1];
+        me.tier = 2
+        Matter.Body.setDensity(me, 0.0015); //normal is 0.001
+        me.g = 0.01; //required if using this.gravity
+        me.frictionAir = 0.01;
+        me.friction = 1
+        me.frictionStatic = 1
+        me.restitution = 0;
+        me.randomHopFrequency = 40 + Math.floor(Math.random() * 260);
+        me.randomHopCD = simulation.cycle + me.randomHopFrequency;
+        me.hopCount = 0
+        me.delay = 32 + Math.floor(4 * Math.random())
+        Matter.Body.rotate(me, Math.random() * Math.PI);
+        spawn.shield(me, x, y);
+        me.do = function () {
+            if (this.seePlayer.recall) this.healthBar1()
+            this.gravity();
+            this.seePlayerCheck();
+            this.checkStatus();
+            if (this.seePlayer.recall) {
+                if (this.cd < simulation.cycle && (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length)) {
+                    this.hopCount++
+                    if (this.hopCount > 6) { //big hop
+                        this.hopCount = 0
+                        this.cd = simulation.cycle + 120;
+                        const forceMag = 0.07 * this.mass;
+                        const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                        this.force.x += forceMag * Math.cos(angle);
+                        this.force.y += forceMag * Math.sin(angle) - (0.2) * this.mass; //antigravity
+                    } else { //normal hop
+                        this.cd = simulation.cycle + this.delay;
+                        const forceMag = 0.04 * this.mass;
+                        const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
+                        this.force.x += forceMag * Math.cos(angle);
+                        this.force.y += forceMag * Math.sin(angle) - (0.08) * this.mass; //antigravity
+                    }
+                }
+            } else {
+                //randomly hob if not aware of player
+                if (this.randomHopCD < simulation.cycle && (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length)) {
+                    this.randomHopCD = simulation.cycle + this.randomHopFrequency;
+                    this.randomHopFrequency = Math.max(80, this.randomHopFrequency + (0.5 - Math.random()) * 150);
+
+                    this.hopCount++
+                    if (this.hopCount > 6) { //big hop
+                        this.hopCount = 0
+                        this.cd = simulation.cycle + 120;
+                        const forceMag = 0.07 * this.mass;
+                        const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
+                        this.force.x += forceMag * Math.cos(angle);
+                        this.force.y += forceMag * Math.sin(angle) - (0.2) * this.mass; //antigravity
+                    } else { //normal hop
+                        this.cd = simulation.cycle + this.delay;
+                        const forceMag = 0.04 * this.mass;
+                        const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
+                        this.force.x += forceMag * Math.cos(angle);
+                        this.force.y += forceMag * Math.sin(angle) - (0.1) * this.mass; //antigravity
+                    }
                 }
             }
         };

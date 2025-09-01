@@ -4,11 +4,25 @@
     --hover-card-color: #e5e5ed;
 }
 
+/* * {
+    cursor: crosshair;
+} */
+
+/* override for text elements */
+/* p,
+span,
+input,
+textarea {
+    cursor: auto;
+} */
+
 body {
     font-family: "Helvetica", "Arial", sans-serif;
     margin: 0;
     overflow: hidden;
     cursor: auto;
+    /* cursor: crosshair; */
+    /* cursor: text; */
     background-color: #f00;
     /* filter: grayscale(1); */
     /* transition: background-color 0.2s ease-in-out; */
@@ -1528,7 +1542,7 @@ summary {
 } */
 .blurry-text {
     user-select: none;
-    filter: blur(2.8px) contrast(1.4);
+    filter: blur(3.5px) contrast(1.4);
 }
 
 .blur-text {

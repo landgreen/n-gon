@@ -611,7 +611,7 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0) {
                 const style = (localSettings.isHideImages || tech.tech[i].isJunk || tech.tech[i].isLore) ? `style="height:auto;"` : `style = "background-image: url('img/${tech.tech[i].name}.webp');"`
-                const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
+                // const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                 if (tech.tech[i].isInstant) {
                     // text += `<div class="pause-grid-module" id ="${i}-pause-tech"  style = "border: 0px; opacity:0.5; font-size: 60%; line-height: 130%; margin: 1px; padding: 6px;"><div class="grid-title">${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isFieldTech) {
@@ -1523,6 +1523,9 @@ window.addEventListener("keydown", function (event) {
                     mouseMove.reset()
                     document.exitFullscreen();
                     input.reset(); //to prevent key ghosting reset all input keys
+
+
+
                 } else if (mouseMove.isMouseInWindow) { //if mouse is in the window enter fullscreen
                     document.documentElement.requestFullscreen().then(() => {//wait for fullscreen to be ready
                         input.reset(); //to prevent key ghosting reset all input keys
@@ -1866,6 +1869,20 @@ const mouseMove = {
                 mouseMove.active = mouseMove.pointerLocked
             } else {
                 mouseMove.active = mouseMove.default
+                // if (true) {
+                //     //show where mouse is
+                //     simulation.ephemera.push({
+                //         count: 30, //cycles before it self removes
+                //         do() {
+                //             this.count--
+                //             if (this.count < 0) simulation.removeEphemera(this)
+                //             ctx.beginPath();
+                //             ctx.arc(simulation.mouse.x, -simulation.mouse.y, 50, 0, 2 * Math.PI);
+                //             ctx.fillStyle = "#f00"
+                //             ctx.fill();
+                //         },
+                //     })
+                // }
             }
         }
     },
@@ -2157,7 +2174,7 @@ document.getElementById("updates").addEventListener("toggle", function () {
                 text += data[i].commit.message
                 if (i < len - 1) text += "<hr>"
             }
-            text += "</pre>"
+            text += `</pre><hr><em>complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a></em>`
             document.getElementById("updates-div").innerHTML = text.replace(/\n/g, "<br />")
         },
         function (xhr) {

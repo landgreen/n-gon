@@ -1510,18 +1510,66 @@ const simulation = {
             best.dist = Math.sqrt(best.dist)
             return best;
         },
+        // getIntersections(v1, v1End, domain) {
+        //     const intersections = [];
+        //     for (const obj of domain) {
+        //         for (var i = 0; i < obj.vertices.length - 1; i++) {
+        //             results = simulation.checkLineIntersection(v1, v1End, obj.vertices[i], obj.vertices[i + 1]);
+        //             if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
+        //         }
+        //         results = simulation.checkLineIntersection(v1, v1End, obj.vertices[obj.vertices.length - 1], obj.vertices[0]);
+        //         if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
+        //     }
+        //     return intersections;
+        // },
+
+        // (Only adds an AABB guard + declares `results` with let.)
         getIntersections(v1, v1End, domain) {
+            function segmentsBboxOverlap(p1, p2, q1, q2) {
+                // Bounding box of segment p1-p2
+                const pMinX = p1.x < p2.x ? p1.x : p2.x;
+                const pMaxX = p1.x > p2.x ? p1.x : p2.x;
+                const pMinY = p1.y < p2.y ? p1.y : p2.y;
+                const pMaxY = p1.y > p2.y ? p1.y : p2.y;
+
+                // Bounding box of segment q1-q2
+                const qMinX = q1.x < q2.x ? q1.x : q2.x;
+                const qMaxX = q1.x > q2.x ? q1.x : q2.x;
+                const qMinY = q1.y < q2.y ? q1.y : q2.y;
+                const qMaxY = q1.y > q2.y ? q1.y : q2.y;
+
+                // Boxes must overlap on both axes to possibly intersect
+                return !(pMaxX < qMinX || qMaxX < pMinX || pMaxY < qMinY || qMaxY < pMinY);
+            }
+
             const intersections = [];
+
             for (const obj of domain) {
-                for (var i = 0; i < obj.vertices.length - 1; i++) {
-                    results = simulation.checkLineIntersection(v1, v1End, obj.vertices[i], obj.vertices[i + 1]);
+                // iterate edges [i] -> [i+1]
+                for (let i = 0; i < obj.vertices.length - 1; i++) {
+                    const a = obj.vertices[i];
+                    const b = obj.vertices[i + 1];
+
+                    // Cheap reject: skip if segment bbox doesn't overlap ray bbox
+                    if (!segmentsBboxOverlap(v1, v1End, a, b)) continue;
+
+                    let results = simulation.checkLineIntersection(v1, v1End, a, b);
                     if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
                 }
-                results = simulation.checkLineIntersection(v1, v1End, obj.vertices[obj.vertices.length - 1], obj.vertices[0]);
-                if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
+
+                // close the polygon: last -> first
+                const a = obj.vertices[obj.vertices.length - 1];
+                const b = obj.vertices[0];
+
+                if (segmentsBboxOverlap(v1, v1End, a, b)) {
+                    let results = simulation.checkLineIntersection(v1, v1End, a, b);
+                    if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
+                }
             }
+
             return intersections;
         },
+
         circleLoS(pos, radius) {
             function allCircleLineCollisions(c, radius, domain) {
                 var lines = [];
@@ -1704,74 +1752,7 @@ const simulation = {
         },
     },
     draw: {
-        // powerUp() { //is set by Bayesian tech
-        //     // ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
-        //     // for (let i = 0, len = powerUp.length; i < len; ++i) {
-        //     //   ctx.beginPath();
-        //     //   ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
-        //     //   ctx.fillStyle = powerUp[i].color;
-        //     //   ctx.fill();
-        //     // }
-        //     // ctx.globalAlpha = 1;
-        // },
-        // powerUpNormal() { //back up in case power up draw gets changed
-        //     ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
-        //     for (let i = 0, len = powerUp.length; i < len; ++i) {
-        //         ctx.beginPath();
-        //         ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
-        //         ctx.fillStyle = powerUp[i].color;
-        //         ctx.fill();
-        //     }
-        //     ctx.globalAlpha = 1;
-        // },
-        // powerUpBonus() { //draws crackle effect for bonus power ups
-        //     ctx.globalAlpha = 0.4 * Math.sin(m.cycle * 0.15) + 0.6;
-        //     for (let i = 0, len = powerUp.length; i < len; ++i) {
-        //         ctx.beginPath();
-        //         ctx.arc(powerUp[i].position.x, powerUp[i].position.y, powerUp[i].size, 0, 2 * Math.PI);
-        //         ctx.fillStyle = powerUp[i].color;
-        //         ctx.fill();
-        //     }
-        //     ctx.globalAlpha = 1;
-        //     for (let i = 0, len = powerUp.length; i < len; ++i) {
-        //         if (powerUp[i].isDuplicated && Math.random() < 0.1) {
-        //             //draw electricity
-        //             const mag = 5 + powerUp[i].size / 5
-        //             let unit = Vector.rotate({
-        //                 x: mag,
-        //                 y: mag
-        //             }, 2 * Math.PI * Math.random())
-        //             let path = {
-        //                 x: powerUp[i].position.x + unit.x,
-        //                 y: powerUp[i].position.y + unit.y
-        //             }
-        //             ctx.beginPath();
-        //             ctx.moveTo(path.x, path.y);
-        //             for (let i = 0; i < 6; i++) {
-        //                 unit = Vector.rotate(unit, 3 * (Math.random() - 0.5))
-        //                 path = Vector.add(path, unit)
-        //                 ctx.lineTo(path.x, path.y);
-        //             }
-        //             ctx.lineWidth = 0.5 + 2 * Math.random();
-        //             ctx.strokeStyle = "#000"
-        //             ctx.stroke();
-        //         }
-        //     }
-        // },
 
-        // map: function() {
-        //     ctx.beginPath();
-        //     for (let i = 0, len = map.length; i < len; ++i) {
-        //         let vertices = map[i].vertices;
-        //         ctx.moveTo(vertices[0].x, vertices[0].y);
-        //         for (let j = 1; j < vertices.length; j += 1) {
-        //             ctx.lineTo(vertices[j].x, vertices[j].y);
-        //         }
-        //         ctx.lineTo(vertices[0].x, vertices[0].y);
-        //     }
-        //     ctx.fillStyle = "#444";
-        //     ctx.fill();
-        // },
         mapPath: null, //holds the path for the map to speed up drawing
         setPaths() {
             //runs at each new level to store the path for the map since the map doesn't change

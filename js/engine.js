@@ -34,18 +34,22 @@ function playerOnGroundCheck(event) {
             } else {
                 //sets a hard land where player stays in a crouch for a bit and can't jump
                 //crouch is forced in groundControl below
+
                 const momentum = player.velocity.y * player.mass //player mass is 5 so this triggers at 26 down velocity, unless the player is holding something
-                if (momentum > m.hardLanding && !input.up) {
+                if (momentum > m.hardLanding) { //&& !input.up
                     m.doCrouch();
                     m.yOff = m.yOffWhen.jump;
                     m.hardLandCD = m.cycle + m.hardLandCDScale * Math.min(momentum / 6.5 - 6, 40)
-                    //falling damage
-                    if (tech.isFallingDamage && m.immuneCycle < m.cycle && momentum > 150) {
-                        m.takeDamage(Math.min(Math.sqrt(momentum - 100) * 0.01, 0.2) * spawn.dmgToPlayerByLevelsCleared());
-                        if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
-                    }
+                    // m.hardLandCD = m.cycle + m.hardLandCDScale * Math.min(0.2 * momentum - 7.5, 60)
                 } else {
                     m.yOffGoal = m.yOffWhen.stand;
+                }
+                //falling damage
+                if (tech.isFallingDamage && m.immuneCycle < m.cycle && momentum > 150) {
+                    // m.takeDamage(Math.min(Math.sqrt(momentum - 100) * 0.02, 0.4) * spawn.dmgToPlayerByLevelsCleared());
+                    m.takeDamage(Math.min(Math.sqrt(momentum - 100) * 0.03, 0.6));
+                    // m.takeDamage(20);
+                    if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
                 }
             }
         }
@@ -120,6 +124,8 @@ function collisionChecks(event) {
                             simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
                         }
                         if (tech.isPiezo) m.energy += 20.48 * level.isReducedRegen;
+                        if (tech.isExplodeContact) b.explosion(m.pos, 450);
+
                         if (tech.isCouplingNoHit && m.coupling > 0) {
                             m.couplingChange(-3)
 

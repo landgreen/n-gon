@@ -1592,7 +1592,7 @@ const b = {
                         player.force.x += momentum.x
                         player.force.y += momentum.y
                         if (this.pickUpTarget) {
-                            if (tech.isReel && this.blockDist > 150) {
+                            if (tech.isReel && this.blockDist > 15 && m.immuneCycle < m.cycle) {
                                 // console.log(0.0003 * Math.min(this.blockDist, 1000))
                                 m.energy += 0.00113 * Math.min(this.blockDist, 800) * level.isReducedRegen //max 0.352 energy
                                 simulation.drawList.push({ //add dmg to draw queue
@@ -2177,23 +2177,27 @@ const b = {
                 if (tech.fragments) b.targetedNail(this.position, tech.fragments * Math.floor(2 + 1.5 * Math.random()))
                 if (tech.isMissileFast) {
                     simulation.ephemera.push({
-                        count: 21,
+                        count: 35,
                         where: this.position,
                         size: this.explodeRad * size,
                         do() {
                             if (!m.isTimeDilated) {
                                 this.count--
-                                if (this.count < 0) {
+                                if (this.count < 3) {
                                     simulation.removeEphemera(this)
+                                } else if (this.count === 15) {
                                     b.explosion(this.where, this.size * (tech.isMissile2ndExplode ? 1.7 : 0.8));
+                                } else if (this.count < 17) {
+                                    //draw outline
+                                    ctx.beginPath();
+                                    const r = this.size * (tech.isMissile2ndExplode ? 1.7 : 0.8)
+                                    ctx.arc(this.where.x, this.where.y, r, 0, 2 * Math.PI);
+                                    // ctx.fillStyle = "rgba(255,155,200,0.5)"
+                                    // ctx.fill()
+                                    ctx.strokeStyle = "#000"
+                                    ctx.lineWidth = 4
+                                    ctx.stroke();
                                 }
-                                // //draw outline
-                                // ctx.beginPath();
-                                // const r = this.size * Math.max((this.count) / 21, 0.7)
-                                // ctx.arc(this.where.x, this.where.y, r, 0, 2 * Math.PI);
-                                // ctx.strokeStyle = "#000"
-                                // ctx.lineWidth = 2
-                                // ctx.stroke();
                             }
                         },
                     })

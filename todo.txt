@@ -1,25 +1,37 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: liquid-propellant - missiles speed up, missiles explode a 2nd time at 0.8x radius and damage
-tech: hypergolic propellant - secondary explision is 1.7x original's radius and damage
-cruise missile 2->1.75x damage
-  it's compatible with more missile tech now
+added in level text instructions to training levels
+tier 2 mob: hopperBaby - same as hopper but it does mostly fast small hops
+hard landings no longer slow player's horizontal movement
+  they still visually crouch and prevent jumping
+  fixed: hard landings didn't trigger if you held jump
+constraint: blurry choices now only effects 60% of choices
+mouse briefly swaps to a loading style when exiting fullscreen mouse lock to help you find the original mouse
+field emitter 4->6 energy regen/s, but 0.5x regen from coupling
 
-T4 mobs have more health
-  bigSucker - lower acceleration
-  slasher4 - lower acceleration, slower stab speed
-  slasher5 - shorter swords, slower accceleration, 3->2 active swords
-  quadLaser - slower acceleration, slower rotational torque, longer laser on/off cycles
-T4 bosses are invulnerable for fewer cycles
+tech: contact explosive - explode after collisions
+tech: a priori - after you get a gun or field get a guntech or fieldtech
+tech: indistinguishable particles - remove a tech and get 3 fields
+tech: arms trade - 1.1 damage, remove this to spawn 2 guns
 
-subway has only 3 stations (previously 4 or 5)
-removed a 200ms delay on entering fullscreen, also cleaned up mouse lock code and removed a 100ms delay
-  fullscreen still doesn't work well in firefox or safari, but works 99% on chrome
-most ephemera are now removed by self reference not by name
+exchange symmetry gets 2->3 guns
+non-renewables and desublimated ammunition both eject if your health goes below 33
+  2->2.5 damage for non-renewables
+tungsten carbide 500->600 max health  8->30 falling damage
+surface plasmons benefits from lens now
+buffed cancel tech:
+  residual dipolar coupling  10->12 coupling
+  commodities exchange +4 more power ups
+  futures exchange 7->8% duplication
+non-Newtonian armor renamed non-Newtonian
 
-bug
-  T4 bosses spawn order was not random
-    the list wasn't getting shuffled
+bugs
+  shortened some constraint text to fix in game text spaces
+  mobs in training levels were too hard
+  skin: diaphragm was out of sync with the other cyclical graphical effects
+  update text that lists a health loss to include a prediction of m.defense() mitigation
+  reel was giving energy back while invulnerable
+  added clinical peer review image
 
 *********************************************************** TODO *****************************************************
 
@@ -68,9 +80,6 @@ challenges
     leave a boss alive
     leave __ power ups
 
-see if LLM can improve the performance of
-  line of sight code?
-
 new boss - murmuration of small mobs (maybe 30-50)
   first mob of this type in mob array controls the others
     commands
@@ -80,10 +89,6 @@ new boss - murmuration of small mobs (maybe 30-50)
     if no more mobs left on death spawn power ups
 
 diagetic letters
-  !training levels
-    write out current objective on level background
-    since it can only make letters in alphabet, all instructions would need to be customized
-    maybe just a message on the first training level telling them to look in the console
   initial
     !added instructions for inputs
       maybe only if new player...
@@ -150,6 +155,7 @@ tech:  - repeat all _____ effects a second time
   on remove/eject tech
   on mob death
   on getting hit
+  hard to balance this...
 
 wormhole tech:  - random bullets fire from both wormholes
   fire b.needle() for 3 seconds after making a new wormhole
@@ -198,9 +204,6 @@ tech:  - nonrefundable tech that gives you 2 tech that each have minor negative 
     you can't heal
   positive effects
     benefit after removing the negative tech
-
-mob that does very fast tiny little hops, like a little bunny
-  it has extra gravity so it can jump faster
 
 field tech: - use _____ to refresh current choices  (or give +6 choices for the next 3 tech)
   which field? (pick one based on the name)
@@ -271,7 +274,7 @@ tech - if you haven't fired a bullet in 4 seconds your next bullet is bigger?
 option for numerical HUD
   dmg, energy, health, defense
 
-hold jump to jump higher
+hold jump to jump much higher
   field tech?  or skin tech?
     maybe require nitinol first?
 
@@ -405,22 +408,8 @@ after picking up research gain ____
 tech: Energy generation increases with you velocity
   Newtons' 3rd law?
 
-tech - getting caught in an explosion gives you _____
-  damage for 10 seconds?
-  heals
-
 explosions have a chance to spawn spores
   infinite feedback loop with spores that explode?
-
-tech - getting a new gun also gives you 2 random tech for that gun
-  or a field?
-  can these guntech tech be converted into a player choice?
-
-how to reduce the number of clicks and keypresses
-  auto fire mode
-    player shoots at whatever is nearby
-      should player have to look towards mobs?
-      increase ammo?
 
 animate egg laying mobs
   just draw a circle when it happens?
@@ -493,13 +482,6 @@ make grappling hook of different shapes
     swarf, reel, tokamak
   do this in draw or in verticies?
     draw can have different colors 
-
-player got stuck inside block that wasn't pick up able
-
-tech - killing a mob heals for the last damage you took
-  disable cloaking heal?  maybe you don't need to disable, just don't heal twice
-  heal for 50%?
-  heal from mob damage or from kills?
 
 on sucker mob death trigger radiation damage AoE and a graphic  (Hawking radiation)
 
@@ -1524,19 +1506,16 @@ possible names for tech
   Navier–Stokes - equations for the movement of fluids
 
 
-******************************************************** BUGS ********************************************************
+******************************************************** UNSOLVED BUGS ********************************************************
 
-still getting some hidden mouse on fullscreen when drafting,
-  seems to occur when the game is slow
-    or maybe it occurs when the game pauses wen player takes damage?
-hides mouse when -> (eternalism or no pause) + fullscreen + show AI images
-  this was still broken in previous patch, probably never worked
-  maybe just disable eternalism / no pause if in fullscreen mode and AI images
-  maybe just disable eternalism / no pause always
-
+  !pilot wave always on + power ups in stasis caused a game crash, stuck in paused
+    also was in fullscreen
+    !can't reproduce crash
+    maybe add try to put a delay on pilot wave collecting power ups at start of level
 
 double bots on start of level
-  towers, flocculation, highrise
+  towers, flocculation, highrise, aerie
+  not levelFliped
   occured with only the base bot tech: sound-bot  giving 2x sound-bot, then back to 1 on next level
   occured again on skyscrappers with 2x laser-bots, but should only be one
     https://landgreen.github.io/n-gon/index.html?&seed=88132&gun0=drones&gun1=mine&tech0=quenching&tech1=sentry&tech2=energy%20conservation&tech3=boom-bot&tech4=gauge&tech5=nail-bot&tech6=enthalpy&molMode=0&field=metamaterial%20cloaking&difficulty=6
