@@ -801,7 +801,7 @@ const simulation = {
         //String(document.getElementById("seed").value)
         // Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
 
-
+        canvas.style.filter = "brightness(1)"
         simulation.clearTimeouts();
         simulation.onTitlePage = true;
         document.getElementById("splash").onclick = function () {
@@ -982,7 +982,7 @@ const simulation = {
         build.hasExperimentalMode = false
         build.isExperimentSelection = false;
         build.isExperimentRun = false;
-
+        canvas.style.filter = "brightness(1)"
 
         //setup checks
         if (!localSettings.isHideHUD) {

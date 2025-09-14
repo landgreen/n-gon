@@ -1,45 +1,47 @@
 ******************************************************** NEXT PATCH **************************************************
 
-added in level text instructions to training levels
-tier 2 mob: hopperBaby - same as hopper but it does mostly fast small hops
-hard landings no longer slow player's horizontal movement
-  they still visually crouch and prevent jumping
-  fixed: hard landings didn't trigger if you held jump
-constraint: blurry choices now only effects 60% of choices
-mouse briefly swaps to a loading style when exiting fullscreen mouse lock to help you find the original mouse
-field emitter 4->6 energy regen/s, but 0.5x regen from coupling
+new mobs
+  T2 dodger - dodges by rotating an arc segment centered around player
+  T3 slicer - same as dodger but with a sword slice 
 
-tech: contact explosive - explode after collisions
-tech: a priori - after you get a gun or field get a guntech or fieldtech
-tech: indistinguishable particles - remove a tech and get 3 fields
-tech: arms trade - 1.1 damage, remove this to spawn 2 guns
-
-exchange symmetry gets 2->3 guns
-non-renewables and desublimated ammunition both eject if your health goes below 33
-  2->2.5 damage for non-renewables
-tungsten carbide 500->600 max health  8->30 falling damage
-surface plasmons benefits from lens now
-buffed cancel tech:
-  residual dipolar coupling  10->12 coupling
-  commodities exchange +4 more power ups
-  futures exchange 7->8% duplication
-non-Newtonian armor renamed non-Newtonian
+1.2x movement speed added to skins: Higgs mechanism and aperture
+Higgs mechanism unlocks acoustic levitation
+nitinol jumps a bit higher and only triggers hard landings at higher speeds
+you can avoid hard landings if holding jump and moving at unusually high speeds
+shaped charge will no longer reduce explosive radius if you are invulnerable
+paradigm shift self ejects before you die
+  health loss per use increases 1.3->1.4x
+  added console messages
 
 bugs
-  shortened some constraint text to fix in game text spaces
-  mobs in training levels were too hard
-  skin: diaphragm was out of sync with the other cyclical graphical effects
-  update text that lists a health loss to include a prediction of m.defense() mitigation
-  reel was giving energy back while invulnerable
-  added clinical peer review image
+  if you have the CIWS field tech and harpoons, the harpoons fired by CIWS added harpoon ammo
+  arms trade wasn't spawning 2 guns
+  acoustic levitation wasn't resetting coyote time and damage taken properly on removal
 
 *********************************************************** TODO *****************************************************
+
+performance issue with experiment mode
+  causes my computer fan to turn on when I leave it on for a few minutes
+    maybe do a performance test in dev tools
+  fixes?
+    remove some CSS animations
+    shadows?
+    find a way to not draw things off screen?
+    something might be changing size and forcing a redraw of everything
+
+constraint - see halucinations
+  draw shapes that don't exists that look like
+    mobs
+    map
+    power ups?
+    blocks?
+  shapes end
+    fade over time?
+    fade when player gets close?
 
 perfect diamagnetism tech:   - using field while crouching will pull in blocks
   releasing field will fire the blocks  (like control)
   very strong, but high energy cost
-
-tech -  gain 5% duplication each time you expend a research orb
 
 gun tech upgrade that rewards pressing fire with a precise rhythm
   press fire every 2-3 seconds and each time you get a "perfect" rhythm
@@ -1351,12 +1353,11 @@ Zapsplat Game Developer Sounds | Download FREE Game Developer sound effects | Za
 
 ******************************************************** IMAGES ********************************************************
 
-process:  discord midjourney prompts -> "pixelmator pro" adjust color, repair, scale to 384x256, export PNG -> webP? -> place in /img folder
-make n-gon a progressive web app to manage image downloads, cache
-wave function collapse opens the pause menu after it triggers alternate reality
-  this is actually good, maybe reuse this code to get pause menu to open at any time
-if pause is pressed while selecting power ups, display pause menu on top of selection menu
+process:  "pixelmator pro" adjust color, repair, adjust size ratio to 3:2, scale to 384x256, export PNG -> webP? -> place in /img folder
+make n-gon a progressive web app to manage image downloads, cache?
 ***styles***
+  player robot -- generate an image of a clean white robot spherical turret on bird legs in a test chamber
+    this worked very well on gemini nano banana
   try --- Pastel drawing, Psychedelic art, Arabesque (cool patterns), knolling (everything spread out and placed on a flat mat)
   try taking screen shots of fields graphics and feeding them into midJourney V4
   technology stuff --- Dan Matutina (cute complex technology),
@@ -1558,10 +1559,10 @@ add more randomize sub level map content
 
 list of powerful synergies
   CPT + high energy regen
-  research + bot fabrication + ersatz bots + various bot upgrades
+  research + Peer Review + bot fabrication + ersatz bots + various bot upgrades
   harpoon + high fire rate + alternator + time dilation
-  duplication 100%
-  interest + coupling, research + (peer review? or Bayesian statistics)
   electronegativity and high energy?
     electronegativity + anyon + duplication + Maxwells demon + interest + pair production
-  chain reaction + invulnerable + Abelian group + parasitism = clear all mobs on level
+  chain reaction + invulnerable + Abelian group = clear all mobs on level
+  Wormhole + manifold + that one upgrade that makes wormholes super cheap on energy + that one upgrade that makes them stop time
+  Unified Field Theory+Lots of duplication tech (and wormhole)+Inductive Charging+Energy Conservation+Virtual Particles+Residual Dipolar Coating

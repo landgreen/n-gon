@@ -36,7 +36,7 @@ function playerOnGroundCheck(event) {
                 //crouch is forced in groundControl below
 
                 const momentum = player.velocity.y * player.mass //player mass is 5 so this triggers at 26 down velocity, unless the player is holding something
-                if (momentum > m.hardLanding) { //&& !input.up
+                if (momentum > m.hardLanding && !(input.up && Math.abs(player.velocity.x) > 7.5)) { //&& !input.up
                     m.doCrouch();
                     m.yOff = m.yOffWhen.jump;
                     m.hardLandCD = m.cycle + m.hardLandCDScale * Math.min(momentum / 6.5 - 6, 40)

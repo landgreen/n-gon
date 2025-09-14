@@ -19,8 +19,10 @@ const spawn = {
     tier: [
         ["starter"], //T0
         ["slasher", "hopper", "flutter", "shooter", "grower", "grenadier", "laser", "beamer", "launcher", "exploder"],
-        ["slasher2", "hopperBaby", "stabber", "springer", "striker", "spinner", "sucker", "pulsar", "focuser", "spawner"],
-        ["slasher3", "hopMother", "stinger", "sniper", "sneaker", "ghoster", "laserLayer", "launcherOne", "freezer"],
+        // ["slasher2", "hopperBaby", "stabber", "springer", "striker", "dodger", "spinner", "sucker", "pulsar", "focuser", "spawner"],
+        ["dodger", "dodger", "dodger", "dodger"],
+        ["slicer", "slicer", "slicer", "slicer"],
+        // ["slasher3", "hopMother", "stinger", "sniper", "sneaker", "slicer", "ghoster", "laserLayer", "launcherOne", "freezer"],
         ["slasher4", "hopsploder", "stingWinger", "sneakyStriker", "bigSucker", "quadLaser", "launchPusher", "slasher5", "mortar"],//T4
     ],
     bossTier: [
@@ -4259,6 +4261,7 @@ const spawn = {
                     if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                         const dmg = 0.006 * this.damageScale();
                         m.takeDamage(dmg);
+                        // this.blind()
                         //draw damage
                         ctx.fillStyle = color;
                         ctx.beginPath();
@@ -5451,6 +5454,7 @@ const spawn = {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage after getting hit
                         const dmg = 0.03 * this.damageScale();
                         m.takeDamage(dmg);
+                        // this.blind(60)
                         simulation.drawList.push({
                             x: best.x,
                             y: best.y,
@@ -5616,6 +5620,7 @@ const spawn = {
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage after getting hit
                         const dmg = 0.03 * this.damageScale();
                         m.takeDamage(dmg);
+                        // this.blind()
                         simulation.drawList.push({
                             x: best.x,
                             y: best.y,
@@ -5756,6 +5761,7 @@ const spawn = {
                         ctx.beginPath();
                         ctx.arc(best.x, best.y, dmg * 1500, 0, 2 * Math.PI);
                         ctx.fill();
+                        // this.blind(60)
                     }
                     //draw beam
                     if (best.dist2 === Infinity) best = look;
@@ -5831,6 +5837,7 @@ const spawn = {
                         if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                             const dmg = 0.004 * this.damageScale();
                             m.takeDamage(dmg);
+                            // this.blind()
                             //draw damage
                             ctx.fillStyle = color;
                             ctx.beginPath();
@@ -6149,7 +6156,7 @@ const spawn = {
 
             if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
                 m.immuneCycle = m.cycle + m.collisionImmuneCycles + 30; //player is immune to damage for an extra second
-                const dmg = 0.12 * this.damageScale();
+                const dmg = 0.13 * this.damageScale();
                 m.takeDamage(dmg);
                 simulation.drawList.push({
                     x: best.x,
@@ -6158,6 +6165,7 @@ const spawn = {
                     color: "rgba(80,0,255,0.5)",
                     time: 20
                 });
+                // this.blind(180)
             }
             //draw beam
             if (best.dist2 === Infinity) best = look;
@@ -6289,7 +6297,7 @@ const spawn = {
                     Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), this.strikeRange));
                 }
                 ctx.lineTo(this.position.x, this.position.y);
-                ctx.lineWidth = radius * 2.1;
+                ctx.lineWidth = radius * 2.15;
                 ctx.strokeStyle = this.fill; //"rgba(0,0,0,0.5)"; //'#000'
                 ctx.stroke();
                 Matter.Body.setVelocity(this, {
@@ -6298,6 +6306,292 @@ const spawn = {
                 });
             }
         };
+    },
+    dodger(x, y, radius = 20 + Math.ceil(Math.random() * 15)) {
+        mobs.spawn(x, y, 5, radius, "rgba(89, 89, 89, 1)");
+        let me = mob[mob.length - 1];
+        me.tier = 2
+        me.accelMag = 0.00035;
+        me.frictionStatic = 0;
+        me.friction = 0;
+        me.restitution = 1
+        me.delay = 30 + Math.floor(10 * Math.random())
+        me.cd = Infinity;
+        // Matter.Body.rotate(me, Math.PI * 0.1);
+        spawn.shield(me, x, y);
+        me.onDamage = function () {
+            this.cd = simulation.cycle + this.delay * 2;
+        };
+        me.onHit = function () {
+            this.accelMag = 0.00035
+            Matter.Body.setVelocity(this, Vector.mult(this.velocity, -0.9)) //bounce off player
+        };
+        me.do = function () {
+            if (this.seePlayer.recall) this.healthBar2()
+            if (!(simulation.cycle % this.seePlayerFreq)) { // this.seePlayerCheck();  from mobs
+                if (
+                    this.distanceToPlayer2() < this.seeAtDistance2 &&
+                    Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
+                    !m.isCloak
+                ) {
+                    this.foundPlayer();
+                    if (this.cd === Infinity) this.cd = simulation.cycle + this.delay * 0.7;
+                } else if (this.seePlayer.recall) {
+                    this.lostPlayer();
+                    this.cd = Infinity
+                }
+            }
+            this.checkStatus();
+            if (this.distanceToPlayer() < 500) {
+                this.accelMag = 0.002 //faster when close
+            } else {
+                this.accelMag = 0.00035
+            }
+            this.attraction();
+
+
+            //dodge by rotating an arc around the player
+            if (this.cd < simulation.cycle && this.seePlayer.recall && this.distanceToPlayer() > 500) {
+                this.cd = simulation.cycle + this.delay;
+                ctx.beginPath();
+                ctx.moveTo(this.position.x, this.position.y);
+
+                let sub = Vector.sub(this.position, m.pos)
+                const angle = 300 / Vector.magnitude(sub)
+                let rotate = angle * (Math.random() < 0.5 ? 1 : -1)
+                let where = Vector.add(m.pos, Vector.rotate(sub, rotate))
+                if (Matter.Query.ray(map, this.position, where).length === 0) {
+                    Matter.Body.setPosition(this, where)
+                    ctx.lineTo(this.position.x, this.position.y);
+                    ctx.lineWidth = radius * 2.1;
+                    ctx.strokeStyle = this.fill;
+                    ctx.stroke();
+                } else { //try the other direction
+                    rotate *= -1
+                    where = Vector.add(m.pos, Vector.rotate(sub, rotate)) //negative rotate
+                    if (Matter.Query.ray(map, this.position, where).length === 0) {
+                        Matter.Body.setPosition(this, where)
+                        ctx.lineTo(this.position.x, this.position.y);
+                        ctx.lineWidth = radius * 2.1;
+                        ctx.strokeStyle = this.fill;
+                        ctx.stroke();
+                    } else {
+                        rotate *= 0.5 //try the other direction and shorter distance
+                        where = Vector.add(m.pos, Vector.rotate(sub, rotate)) //negative rotate
+                        if (Matter.Query.ray(map, this.position, where).length === 0) {
+                            Matter.Body.setPosition(this, where)
+                            ctx.lineTo(this.position.x, this.position.y);
+                            ctx.lineWidth = radius * 2.1;
+                            ctx.strokeStyle = this.fill;
+                            ctx.stroke();
+                        } else {
+                            rotate *= -1 //try the other direction and shorter distance
+                            where = Vector.add(m.pos, Vector.rotate(sub, rotate)) //negative rotate
+                            if (Matter.Query.ray(map, this.position, where).length === 0) {
+                                Matter.Body.setPosition(this, where)
+                                ctx.lineTo(this.position.x, this.position.y);
+                                ctx.lineWidth = radius * 2.1;
+                                ctx.strokeStyle = this.fill;
+                                ctx.stroke();
+                            }
+                        }
+                    }
+                }
+                // redirect towards player
+                Matter.Body.setVelocity(this,
+                    Vector.mult(Vector.rotate(this.velocity, rotate), 0.7)
+                )
+            }
+        };
+    },
+    slicer(x, y, radius = 12 + Math.ceil(Math.random() * 15)) {
+        const sides = 5
+        mobs.spawn(x, y, sides, radius, "rgba(182, 99, 124, 1)");
+        let me = mob[mob.length - 1];
+        me.tier = 3
+        me.accelMag = 0.00035;
+        me.frictionStatic = 0;
+        me.friction = 0;
+        me.restitution = 1
+        me.delay = 25 + Math.floor(10 * Math.random())
+        me.cd = Infinity;
+        me.cycle = 0;
+        me.swordVertex = 1
+        me.swordRadiusInitial = radius / 2;
+        me.swordRadius = me.swordRadiusInitial;
+        me.swordRadiusMax = 400
+        me.swordRadiusGrowRateInitial = 1.1
+        me.swordRadiusGrowRate = me.swordRadiusGrowRateInitial//me.swordRadiusMax * (0.009 + 0.0002 * simulation.difficulty)
+        me.isSlashing = false;
+        me.swordDamage = 0.03 * me.damageScale()
+        me.laserAngle = 3 * Math.PI / 5
+
+
+        // Matter.Body.rotate(me, Math.PI * 0.1);
+        spawn.shield(me, x, y);
+        me.onDamage = function () {
+            this.cd = simulation.cycle + this.delay * 2;
+        };
+        me.onHit = function () {
+            this.accelMag = 0.0004
+            Matter.Body.setVelocity(this, Vector.mult(this.velocity, -0.9)) //bounce off player
+        };
+        me.do = function () {
+            if (this.seePlayer.recall) this.healthBar2()
+            if (!(simulation.cycle % this.seePlayerFreq)) { // this.seePlayerCheck();  from mobs
+                if (
+                    this.distanceToPlayer2() < this.seeAtDistance2 &&
+                    Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
+                    !m.isCloak
+                ) {
+                    this.foundPlayer();
+                    if (this.cd === Infinity) this.cd = simulation.cycle + this.delay * 0.7;
+                } else if (this.seePlayer.recall) {
+                    this.lostPlayer();
+                    this.cd = Infinity
+                }
+            }
+            this.checkStatus();
+            if (this.distanceToPlayer() < 500) {
+                this.accelMag = 0.0015 //faster when close
+                if (!this.isSlashing && m.immuneCycle < m.cycle && Matter.Query.ray(map, this.position, m.pos).length === 0) this.sword = this.swordWaiting
+            } else {
+                this.accelMag = 0.0004
+            }
+            this.attraction();
+            this.sword() //does various things depending on what stage of the sword swing
+
+
+            //dodge by rotating an arc around the player
+            if (this.cd < simulation.cycle && this.seePlayer.recall && this.distanceToPlayer() > 500) {
+                this.cd = simulation.cycle + this.delay;
+                ctx.beginPath();
+                ctx.moveTo(this.position.x, this.position.y);
+
+                let sub = Vector.sub(this.position, m.pos)
+                const angle = 300 / Vector.magnitude(sub)
+                let rotate = angle * (Math.random() < 0.5 ? 1 : -1)
+                let where = Vector.add(m.pos, Vector.rotate(sub, rotate))
+                if (Matter.Query.ray(map, this.position, where).length === 0) {
+                    Matter.Body.setPosition(this, where)
+                    ctx.lineTo(this.position.x, this.position.y);
+                    ctx.lineWidth = radius * 2.1;
+                    ctx.strokeStyle = this.fill;
+                    ctx.stroke();
+                } else { //try the other direction
+                    rotate *= -1
+                    where = Vector.add(m.pos, Vector.rotate(sub, rotate)) //negative rotate
+                    if (Matter.Query.ray(map, this.position, where).length === 0) {
+                        Matter.Body.setPosition(this, where)
+                        ctx.lineTo(this.position.x, this.position.y);
+                        ctx.lineWidth = radius * 2.1;
+                        ctx.strokeStyle = this.fill;
+                        ctx.stroke();
+                    } else {
+                        rotate *= 0.5 //try the other direction and shorter distance
+                        where = Vector.add(m.pos, Vector.rotate(sub, rotate)) //negative rotate
+                        if (Matter.Query.ray(map, this.position, where).length === 0) {
+                            Matter.Body.setPosition(this, where)
+                            ctx.lineTo(this.position.x, this.position.y);
+                            ctx.lineWidth = radius * 2.1;
+                            ctx.strokeStyle = this.fill;
+                            ctx.stroke();
+                        } else {
+                            rotate *= -1 //try the other direction and shorter distance
+                            where = Vector.add(m.pos, Vector.rotate(sub, rotate)) //negative rotate
+                            if (Matter.Query.ray(map, this.position, where).length === 0) {
+                                Matter.Body.setPosition(this, where)
+                                ctx.lineTo(this.position.x, this.position.y);
+                                ctx.lineWidth = radius * 2.1;
+                                ctx.strokeStyle = this.fill;
+                                ctx.stroke();
+                            }
+                        }
+                    }
+                }
+                // redirect towards player
+                Matter.Body.setVelocity(this,
+                    Vector.mult(Vector.rotate(this.velocity, rotate), 0.7)
+                )
+            }
+        };
+        me.swordWaiting = function () {
+            this.cd = simulation.cycle + 74;
+            //find vertex farthest to the player
+            let dist = 0
+            for (let i = 0, len = this.vertices.length; i < len; i++) {
+                const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
+                if (D > dist) {
+                    dist = D
+                    this.swordVertex = i
+                }
+            }
+            this.laserAngle = this.swordVertex / sides * 2 * Math.PI + Math.PI / sides
+            this.sword = this.swordGrow
+            this.isSlashing = true
+            this.cycle = 0
+            this.swordRadius = this.swordRadiusInitial
+
+            Matter.Body.setAngularVelocity(this, 0)
+            //gently rotate towards the player with a torque, use cross product to decided clockwise or counterclockwise
+            const laserStartVector = Vector.sub(this.position, this.vertices[this.swordVertex])
+            const playerVector = Vector.sub(this.position, m.pos)
+            const cross = Matter.Vector.cross(laserStartVector, playerVector)
+            this.torque = 0.0003 * this.inertia * (cross > 0 ? 1 : -1)
+        }
+        me.sword = () => { } //base function that changes during different aspects of the sword swing
+        me.swordGrow = function () {
+            this.laserSpear(this.vertices[this.swordVertex], this.angle + this.laserAngle);
+            Matter.Body.setVelocity(this, Vector.mult(this.velocity, 0.98))
+            // this.swordRadius += this.swordRadiusGrowRate
+            this.cycle++
+            // console.log(this.cycle)
+            // this.swordRadius = this.swordRadiusMax * Math.sin(this.cycle * 0.03)
+            this.swordRadius *= this.swordRadiusGrowRate
+
+            if (this.swordRadius > this.swordRadiusMax) this.swordRadiusGrowRate = 1 / this.swordRadiusGrowRateInitial
+            // if (this.swordRadius > this.swordRadiusMax) this.swordRadiusGrowRate = -Math.abs(this.swordRadiusGrowRate)
+            if (this.swordRadius < this.swordRadiusInitial || this.isStunned) {
+                // this.swordRadiusGrowRate = Math.abs(this.swordRadiusGrowRate)
+                this.swordRadiusGrowRate = this.swordRadiusGrowRateInitial
+                this.sword = () => { }//this.swordWaiting
+                this.isSlashing = false
+                this.swordRadius = 0
+            }
+        }
+        me.laserSpear = function (where, angle) {
+            best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
+            const look = { x: where.x + this.swordRadius * Math.cos(angle), y: where.y + this.swordRadius * Math.sin(angle) };
+            best = vertexCollision(where, look, [map, body, [playerBody, playerHead]]);
+
+            if (best.who && (best.who === playerBody || best.who === playerHead)) {
+                this.swordRadiusGrowRate = 1 / this.swordRadiusGrowRateInitial //!!!! this retracts the sword if it hits the player
+
+                if (m.immuneCycle < m.cycle) {
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
+                    m.takeDamage(this.swordDamage);
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: best.x,
+                        y: best.y,
+                        radius: this.swordDamage * 1500,
+                        color: "rgba(80,0,255,0.5)",
+                        time: 20
+                    });
+                }
+            }
+            if (best.dist2 === Infinity) best = look;
+            ctx.beginPath(); //draw beam
+            ctx.moveTo(where.x, where.y);
+            ctx.lineTo(best.x, best.y);
+            ctx.strokeStyle = "rgba(255, 0, 76, 0.1)";
+            ctx.lineWidth = 15;
+            ctx.stroke();
+            ctx.strokeStyle = "rgb(255, 0, 77)";
+            ctx.lineWidth = 4;
+            ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+            ctx.stroke(); // Draw it
+            ctx.setLineDash([]);
+        }
     },
     revolutionBoss(x, y, radius = 70) {
         const sides = 9 + Math.floor(Math.min(12, 0.2 * simulation.difficulty))

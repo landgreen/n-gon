@@ -248,6 +248,7 @@ const m = {
     },
     moverX: 0, //used to tell the player about moving platform x velocity
     groundControl() {
+        const moveX = player.velocity.x - m.moverX //account for mover platforms
         //check for crouch or jump
         if (m.crouch) {
             if (!(input.down) && m.checkHeadClear() && m.hardLandCD < m.cycle) m.undoCrouch();
@@ -256,7 +257,7 @@ const m = {
         } else if (input.up && m.buttonCD_jump + 20 < m.cycle) {
             m.jump()
         }
-        const moveX = player.velocity.x - m.moverX //account for mover platforms
+        //Math.abs(player.velocity.x) < 7.5
         if (input.left && !input.right) {
             if (moveX > -2) {
                 player.force.x -= m.Fx * 1.5
@@ -1028,6 +1029,7 @@ const m = {
                 simulation.fpsInterval = 1000 / simulation.fpsCap;
                 document.getElementById("dmg").style.transition = "opacity 1s";
                 document.getElementById("dmg").style.opacity = "0";
+                // canvas.style.filter = 'grayscale(0)';
             } else {
                 requestAnimationFrame(normalFPS);
             }
@@ -1038,10 +1040,21 @@ const m = {
             simulation.fpsCap = 4 //40 - Math.min(25, 100 * dmg)
             simulation.fpsInterval = 1000 / simulation.fpsCap;
 
-
             if (tech.isHarmFreeze) {
                 for (let i = 0, len = mob.length; i < len; i++) mobs.statusSlow(mob[i], 480) //freeze all mobs
             }
+
+            // simulation.ephemera.push({
+            //     count: 120,
+            //     do() {
+            //         canvas.style.filter = `grayscale(${this.count / 120})`;
+            //         this.count--
+            //         if (this.count < 0) {
+            //             simulation.removeEphemera(this)
+            //         }
+            //     }
+            // })
+            // canvas.style.filter = 'grayscale(1)';
         } else {
             simulation.fpsCap = simulation.fpsCapDefault
             simulation.fpsInterval = 1000 / simulation.fpsCap;
@@ -1124,7 +1137,7 @@ const m = {
         m.yOffWhen.stand = 49
         m.yOffWhen.crouch = 22
         m.isAltSkin = false
-        m.coyoteCycles = 5
+        m.coyoteCycles = 5 + 120 * tech.isCoyote
         m.hardLanding = 130
         m.squirrelFx = 1;
         m.squirrelJump = 1;
@@ -1363,11 +1376,11 @@ const m = {
             m.isAltSkin = true
             m.yOffWhen.stand = 52
             m.yOffWhen.jump = 72
-            m.coyoteCycles = 11 + 120 * tech.isCoyote
+            m.coyoteCycles = 12 + 120 * tech.isCoyote
             m.hardLandCDScale = 0.5
-            m.hardLanding = 160
+            m.hardLanding = 250
             m.squirrelFx = 1.4;
-            m.squirrelJump = 1.16;
+            m.squirrelJump = 1.17;
             m.setMovement()
 
             m.draw = function () {
@@ -1574,6 +1587,10 @@ const m = {
             m.isAltSkin = true
             m.yOffWhen.stand = 52
             m.yOffWhen.jump = 72
+            m.coyoteCycles = 11 + 120 * tech.isCoyote
+
+            m.squirrelFx = 1.28;
+            m.setMovement()
             // m.speedSmooth = 0
             // m.smoothAngle = 0
             m.draw = function () {
@@ -1677,7 +1694,12 @@ const m = {
                 }
                 ctx.lineWidth = 4;
                 ctx.stroke();
-
+                if (m.coyoteCycles > 30 && !m.onGround) {
+                    ctx.lineWidth = 0.2 * Math.max(0, Math.min(3 * (m.cycle - m.lastOnGroundCycle), Math.min(120, m.lastOnGroundCycle + m.coyoteCycles - m.cycle)))
+                    ctx.strokeStyle = "rgba(255, 255, 0, 0.3)"
+                    ctx.stroke()
+                    ctx.strokeStyle = stroke;
+                }
                 //hip joint
                 ctx.beginPath();
                 ctx.arc(m.hip.x, m.hip.y, 8, 0, 2 * Math.PI);
@@ -2042,6 +2064,9 @@ const m = {
         dilate() {
             m.isAltSkin = true
             simulation.isAutoZoom = false;
+            m.squirrelFx = 1.28;
+            m.setMovement()
+
             m.draw = function () {
                 const amplitude = 8 + 4 * Math.sin(m.cycle * 0.01)
                 ctx.fillStyle = m.fillColor;
@@ -2099,6 +2124,9 @@ const m = {
         },
         dilate2() {
             m.isAltSkin = true
+            m.squirrelFx = 1.28;
+            m.setMovement()
+
             m.draw = function () {
                 const amplitude = Math.sin(m.cycle * 0.01)
 
@@ -2470,7 +2498,7 @@ const m = {
         },
         cat() {
             m.isAltSkin = true
-            m.coyoteCycles = 10
+            m.coyoteCycles = 12
             m.draw = function () {
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
@@ -5027,7 +5055,7 @@ const m = {
         },
         {
             name: "time dilation",
-            description: `use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>1.2x</strong> movement and <strong><em>fire rate</em></strong><br><strong>12</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:0.8rem;color:#fff;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`,
+            description: `use <strong class='color-f'>energy</strong> to <strong style='letter-spacing: 2px;'>stop time</strong><br><strong>1.2x</strong> <strong class="color-speed">movement</strong> and <strong><em>fire rate</em></strong><br><strong>12</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:0.8rem;color:#fff;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`,
             keyLog: [null, null, null, null, null, null, null, null],
             isRewindMode: false, //m.fieldUpgrades[6].isRewindMode
             isRewinding: false,
@@ -6524,11 +6552,11 @@ const m = {
                                     m.energy -= 0.1
                                     if (m.fieldCDcycle < m.cycle + 20) m.fieldCDcycle = m.cycle + 20
                                     const angle = Math.atan2(mob[i].position.y - player.position.y, mob[i].position.x - player.position.x);
-                                    b.harpoon(m.pos, mob[i], angle, 0.75, true, 20) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
+                                    b.harpoon(m.pos, mob[i], angle, 0.75, true, 20, false) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
                                     bullet[bullet.length - 1].drain = 0
                                     const maxCount = 6
                                     for (let j = maxCount - 1; j > 0; j--) {
-                                        b.harpoon(m.pos, mob[i], angle + j * 2 * Math.PI / maxCount, 0.75, true, 10)
+                                        b.harpoon(m.pos, mob[i], angle + j * 2 * Math.PI / maxCount, 0.75, true, 10, false)
                                         bullet[bullet.length - 1].drain = 0
                                     }
                                     break

@@ -33,7 +33,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(1) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(5) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
             // m.fieldUpgrades[6].isRewindMode = true
@@ -52,7 +52,7 @@ const level = {
             // m.takeDamage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("missiles") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 100000000000
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("aerostat") });
 
@@ -63,10 +63,9 @@ const level = {
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("desublimated ammunition")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("contact explosive")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("CIWS")
             // for (let i = 0; i < 1; i++) tech.giveTech("non-renewables")
             // for (let i = 0; i < 1; i++) tech.giveTech("commodities exchange")
-            // for (let i = 0; i < 1; i++) tech.giveTech("a priori")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("bot fabrication") });
             // requestAnimationFrame(() => { level.blurryChoices = true });
             // m.lastKillCycle = m.cycle
@@ -75,18 +74,18 @@ const level = {
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
-            // level.superstructure()
-            // level.subway()
+            // level.corridor()
+            // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
-            // for (let i = 0; i < 7; i++) spawn.hopperBaby(1300 + 100 * i, -200)
-            // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -100 - i * 100)
+            // for (let i = 0; i < 4; i++) spawn.dodger(1300 + 100 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.laserLayer(1100 + 100 * i, -100 - i * 100)
             // for (let i = 0; i < 3; i++) spawn.starter(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
-            // for (let i = 0; i < 1; i++) spawn.laserLayer(1100 + 100 * i, -400, 50)
-            // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 25)
+            // for (let i = 0; i < 1; i++) spawn.laserLayerBoss(1300 + 100 * i, -400)
+            // for (let i = 0; i < 1; i++) spawn.laserBoss(1100 + 100 * i, -500)
             // for (let i = 0; i < 1; i++) spawn.hopsploder(1100 + 100 * i, -500)
             // for (let i = 0; i < 1; ++i) spawn.spiderBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
@@ -497,7 +496,7 @@ const level = {
             do() {
                 if (!m.alive || this.onLevel !== level.levels[level.onLevel]) simulation.removeEphemera(this)
                 ctx.strokeStyle = `rgb(200, 200, 200)`
-                ctx.lineWidth = 2 + Math.random()
+                ctx.lineWidth = 3// + Math.random()
                 ctx.beginPath()
                 ctx.stroke(simulation.draw.font.word)
             },
@@ -38106,7 +38105,7 @@ const level = {
         level.trainingText(`press <strong class="key-input-train">${input.key.down.replace('Key', '').replace('Digit', '')}</strong> to crouch`)
         level.announceTextTraining(1150, 75, `press ${input.key.down.replace('Key', '').replace('Digit', '')} to crouch`)
         level.custom = () => {
-            if (instruction === 0 && input.down) {
+            if (instruction === 0 && m.pos.x > 525) {
                 instruction++
                 level.trainingText(`<s> press <strong class= "key-input-train"> ${input.key.down.replace('Key', '').replace('Digit', '')}</strong > to crouch</s>`)
                 level.announceTextTraining(750, 100, ``)

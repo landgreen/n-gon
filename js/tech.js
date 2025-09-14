@@ -350,7 +350,7 @@ const tech = {
     tech: [{
         name: "tungsten carbide",
         descriptionFunction() {
-            return `<strong>+600</strong> maximum <strong class='color-h'>health</strong><br>lose up to <strong>~${(60 * m.defense()).toFixed(0)}</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>`
+            return `<strong>+600</strong> maximum <strong class='color-h'>health</strong><br>lose up to <strong>${(60 * m.defense()).toFixed(0)}</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>`
         },
         // description: `<strong>+600</strong> maximum <strong class='color-h'>health</strong><br>lose up to <strong>~40</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>`,
         maxCount: 1,
@@ -376,7 +376,7 @@ const tech = {
     },
     {
         name: "nitinol",
-        description: "<strong>1.3x</strong> <strong>movement</strong> and <strong>jumping</strong><br><strong>0.17</strong> seconds of <strong>coyote time</strong> <em style ='float: right;'>(jumping after falling)</em>",
+        description: `<strong>1.3x</strong> <strong class="color-speed">movement</strong> and <strong>jumping</strong><br>+<strong>0.2</strong> seconds of <strong>coyote time</strong> <em style ='float: right;'>(jumping after falling)</em>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -393,7 +393,7 @@ const tech = {
         },
         remove() {
             tech.isNitinol = false
-            if (this.count) m.resetSkin();
+            if (this.count) m.resetSkin(); //this runs setMovement()
         }
     },
     {
@@ -404,9 +404,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isNitinol
+            return tech.isNitinol || tech.isFireMoveLock
         },
-        requires: "nitinol",
+        requires: "nitinol, Higgs mechanism",
         effect() {
             tech.isCoyote = true
             m.coyoteCycles += 120 //adjust this 120 value in mech() skin
@@ -415,14 +415,19 @@ const tech = {
         remove() {
             tech.isCoyote = false
             if (this.count > 0) {
-                m.damageReduction /= 0.7
-                if (tech.isNitinol) m.skin.mech(); //resets m.coyoteCycles
+                for (let i = 0; i < this.count; i++) {
+                    m.damageReduction /= 0.7
+                    m.coyoteCycles -= 120 * this.count
+                }
+                if (m.coyoteCycles < 5) m.coyoteCycles = 5
+                if (tech.isNitinol) m.skin.mech();
+                if (tech.isFireMoveLock) m.skin.strokeGap();
             }
         }
     },
     {
         name: "Higgs mechanism",
-        description: "<strong>4x</strong> <em>fire rate</em><br>while <strong>firing</strong> your <strong>position</strong> is fixed",
+        description: `<strong>4x</strong> <em>fire rate</em> and <strong>1.2x</strong> <strong class="color-speed">movement</strong><br>while <em>firing</em> you can't <strong class="color-speed">move</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -446,6 +451,57 @@ const tech = {
                 m.resetSkin();
             }
             tech.isFireMoveLock = false
+        }
+    },
+    {
+        name: "aperture",
+        description: `<strong class='color-d'>damage</strong> oscillates between <strong>0.8x</strong> and <strong>3x</strong><br><strong>1.2x</strong> <strong class="color-speed">movement</strong>`,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        isSkin: true,
+        allowed() {
+            return !m.isAltSkin
+        },
+        requires: "not skinned",
+        effect() {
+            tech.isDilate = true
+            m.skin.dilate()
+            m.setMovement()
+
+        },
+        remove() {
+            tech.isDilate = false
+            if (this.count) {
+                m.resetSkin();
+                if (tech.isDiaphragm) m.skin.dilate2()
+            }
+        }
+    },
+    {
+        name: "diaphragm",
+        description: "<strong class='color-defense'>damage taken</strong> oscillates between <strong>0.8x</strong> and <strong>3x</strong>",
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        // isSkin: true,
+        allowed() {
+            return tech.isDilate
+        },
+        requires: "aperture",
+        effect() {
+            tech.isDiaphragm = true
+            m.resetSkin();
+            m.skin.dilate2()
+        },
+        remove() {
+            tech.isDiaphragm = false
+            if (this.count) {
+                m.resetSkin();
+                if (tech.isDilate) m.skin.dilate()
+            }
         }
     },
     {
@@ -497,57 +553,8 @@ const tech = {
         }
     },
     {
-        name: "aperture",
-        description: "every <strong>4</strong> seconds your <strong class='color-d'>damage</strong> cycles<br>between <strong>0.8x</strong> and <strong>3x</strong> <strong class='color-d'>damage</strong>",
-        maxCount: 1,
-        count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
-        isSkin: true,
-        allowed() {
-            return !m.isAltSkin
-        },
-        requires: "not skinned",
-        effect() {
-            tech.isDilate = true
-            m.skin.dilate()
-        },
-        remove() {
-            tech.isDilate = false
-            if (this.count) {
-                m.resetSkin();
-                if (tech.isDiaphragm) m.skin.dilate2()
-            }
-        }
-    },
-    {
-        name: "diaphragm",
-        description: "every <strong>4</strong> seconds your <strong class='color-defense'>damage taken</strong> cycles<br>between <strong>0.9x</strong> and <strong>0.2x</strong> <strong class='color-defense'>damage taken</strong>",
-        maxCount: 1,
-        count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
-        // isSkin: true,
-        allowed() {
-            return tech.isDilate
-        },
-        requires: "aperture",
-        effect() {
-            tech.isDiaphragm = true
-            m.resetSkin();
-            m.skin.dilate2()
-        },
-        remove() {
-            tech.isDiaphragm = false
-            if (this.count) {
-                m.resetSkin();
-                if (tech.isDilate) m.skin.dilate()
-            }
-        }
-    },
-    {
         name: "mass-energy equivalence",
-        description: `<strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong><br><strong>1.5x</strong> <strong class='color-d'>damage</strong>`,
+        description: `<strong>1.5x</strong> <strong class='color-d'>damage</strong><br><strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -1181,8 +1188,8 @@ const tech = {
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
-        allowed: () => true,
-        requires: "",
+        allowed: () => m.health > 0.33,
+        requires: "health > 33",
         effect() {
             tech.crouchAmmoCount = true
         },
@@ -2840,7 +2847,7 @@ const tech = {
     },
     {
         name: "contact explosive",
-        description: `<strong class='color-e'>explode</strong> after mob <strong>collisions</strong><br><em>while you're still <strong class="color-invulnerable">invulnerabile</strong></em>`,
+        description: `<strong class='color-e'>explode</strong> after mob <strong>collisions</strong><br><em>exploding doesn't reduce your health</em>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -4827,7 +4834,6 @@ const tech = {
         },
         requires: "",
         damage: 1.1,
-        ammo: 50,
         effect() {
             m.damageDone *= this.damage
         },
@@ -4836,7 +4842,9 @@ const tech = {
             if (this.count > 0 && m.alive) {
                 m.damageDone /= this.damage
                 this.frequency = 0
-                requestAnimationFrame(() => { powerUps.spawnDelay("ammo", this.ammo) });
+                requestAnimationFrame(() => {
+                    powerUps.spawnDelay("gun", 2)
+                });
             }
         }
     },
@@ -4918,7 +4926,7 @@ const tech = {
     {
         name: "paradigm shift",
         descriptionFunction() {
-            return `when <strong>paused</strong> clicking your ${powerUps.orb.tech()} <span class='color-remove'>ejects</span> them<br>costs <strong>${(tech.pauseEjectTech * m.defense()).toFixed(1)}</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} <em style ="float: right;">(1.3x cost each use)</em>`
+            return `when <strong>paused</strong> clicking your ${powerUps.orb.tech()} <span class='color-remove'>ejects</span> them<br>costs <strong>${(tech.pauseEjectTech * m.defense()).toFixed(1)}</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} <em style ="float: right;">(1.4x cost each use)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -6083,7 +6091,7 @@ const tech = {
     },
     {
         name: "liquid-propellant",
-        description: "after <strong>1</strong> second, <strong>missiles</strong> rapidly accelerate<br><strong>missiles</strong> <strong class='color-e'>explode</strong> again at <strong>0.8x</strong> radius and <strong class='color-d'>damage</strong>",
+        description: "after <strong>1</strong> second, <strong>missiles</strong> rapidly accelerate<br><span style = 'font-size: 95%'><strong>missiles</strong> <strong class='color-e'>explode</strong> again at <strong>0.8x</strong> radius <strong class='color-d'>damage</strong></span>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -8527,7 +8535,7 @@ const tech = {
     },
     {
         name: "neutronium",
-        description: `<strong>0.8x</strong> <strong>move</strong> and <strong>jump</strong>, but <br>while your ${powerUps.orb.field()} is active <strong>0.05x</strong> <strong class='color-defense'>damage taken</strong>`,
+        description: `<strong>0.8x</strong> <strong class="color-speed">movement</strong> and <strong>jumping</strong>, but <br>while your ${powerUps.orb.field()} is active <strong>0.05x</strong> <strong class='color-defense'>damage taken</strong>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -9136,7 +9144,7 @@ const tech = {
     },
     {
         name: "Lorentz transformation",
-        description: `<span style ="float: right;"><span class="underline">expend</span> ${powerUps.orb.research(3)}</span><strong>1.5x</strong> movement and jumping<br><strong>1.5x</strong> <em>fire rate</em>`,
+        description: `<span style ="float: right;"><span class="underline">expend</span> ${powerUps.orb.research(3)}</span><strong>1.5x</strong> <strong class="color-speed">movement</strong> and jumping<br><strong>1.5x</strong> <em>fire rate</em>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,

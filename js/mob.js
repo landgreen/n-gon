@@ -498,6 +498,22 @@ const mobs = {
             //     this.force = Vector.mult(Vector.normalise(Vector.sub(this.hackedTarget.position, this.position)), this.mass * 0.0015)
             //   }
             // },
+            // blind(cycles = 90, brightness = 4) {
+            //     //remove other existing blind ephemera
+            //     for (let i = 0; i < simulation.ephemera.length; i++) {
+            //         if (simulation.ephemera[i].name === "blind") simulation.removeEphemera(simulation.ephemera[i])
+            //     }
+            //     simulation.ephemera.push({
+            //         name: "blind",
+            //         count: cycles,
+            //         do() {
+            //             canvas.style.filter = `brightness(${1 + (brightness - 1) * this.count / cycles})`;
+            //             this.count--
+            //             if (this.count < 0 || !m.alive) simulation.removeEphemera(this)
+            //         }
+            //     })
+            //     canvas.style.filter = `brightness(${brightness})`;
+            // },
             harmZone() {
                 if (this.seePlayer.yes) {
                     ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
