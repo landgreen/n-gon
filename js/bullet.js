@@ -386,7 +386,7 @@ const b = {
         }
         let sub = Vector.sub(where, player.position);
         let dist = Vector.magnitude(sub);
-        if (tech.isSmartRadius && radius > dist - 50 && m.immuneCycle > m.cycle) radius = Math.max(dist - 50, 1)
+        if (tech.isSmartRadius && (radius > dist - 50) && m.immuneCycle < m.cycle) radius = Math.max(dist - 50, 1)
 
         if (tech.isExplodeRadio) { //radiation explosion
             radius *= 1.25; //alert range

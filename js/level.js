@@ -51,7 +51,7 @@ const level = {
             // simulation.molecularMode = 2
             // m.takeDamage(0.1);
             // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("grenades") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 100000000000
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("aerostat") });
@@ -63,7 +63,7 @@ const level = {
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("desublimated ammunition")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("CIWS")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("shaped charge")
             // for (let i = 0; i < 1; i++) tech.giveTech("non-renewables")
             // for (let i = 0; i < 1; i++) tech.giveTech("commodities exchange")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("bot fabrication") });
