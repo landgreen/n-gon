@@ -2945,9 +2945,9 @@ const spawn = {
         me.onHit = function () {
             this.explode(this.mass * 20);
         };
-        me.onDamage = function () {
-            this.explode(this.mass * 20);
-        };
+        // me.onDamage = function () {
+        //     this.timeLeft = 0
+        // };
         Matter.Body.setDensity(me, 0.00005); //normal is 0.001
         me.timeLeft = time;
         me.frictionAir = 0;
