@@ -1820,12 +1820,17 @@ const powerUps = {
     pauseEjectTech(index) {
         if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isInstant) {
             const dmg = tech.pauseEjectTech * 0.01
-            if (dmg * m.defense() < m.health) {
+            if ((!tech.isEnergyHealth && dmg * m.defense() < m.health) || (tech.isEnergyHealth && dmg * Math.pow(m.defense(), 0.6) < m.energy)) {
                 tech.tech[index].frequency = 0 //banish tech
                 powerUps.ejectTech(index)
                 if (m.immuneCycle < m.cycle) m.takeDamage(tech.pauseEjectTech * 0.01, false)
                 tech.pauseEjectTech *= 1.4
-                simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-h'>health</span> <span class='color-symbol'>-=</span> ${(100 * dmg * m.defense()).toFixed(1)} <em>//paradigm shift</em>`)
+                if (tech.isEnergyHealth) {
+                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-f'>energy</span> <span class='color-symbol'>-=</span> ${(100 * dmg * m.defense()).toFixed(1)} <em>//paradigm shift</em>`)
+                } else {
+                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-h'>health</span> <span class='color-symbol'>-=</span> ${(100 * dmg * m.defense()).toFixed(1)} <em>//paradigm shift</em>`)
+                }
+
 
                 // simulation.inGameConsole(`decoherence <span class='color-var'>tech</span> ejected<br>options reset`)
             } else { //if you would die
@@ -1835,7 +1840,11 @@ const powerUps = {
                 }
                 tech.tech[index].frequency = 0 //banish tech
                 powerUps.ejectTech(index)
-                simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-h'>health</span> = ${(100 * m.health).toFixed(1)} <em>//ejecting paradigm shift to prevent m.death()</em>`)
+                if (tech.isEnergyHealth) {
+                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-f'>energy</span> = ${(100 * m.energy).toFixed(1)} <em>//ejecting paradigm shift to prevent m.death()</em>`)
+                } else {
+                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-h'>health</span> = ${(100 * m.health).toFixed(1)} <em>//ejecting paradigm shift to prevent m.death()</em>`)
+                }
             }
             document.getElementById(`${index}-pause-tech`).style.textDecoration = "line-through"
             document.getElementById(`${index}-pause-tech`).style.animation = ""

@@ -935,9 +935,27 @@ const m = {
             m.fieldUpgrades[4].endoThermic(Math.min(5 * dmg, 1))
         }
         if (tech.isEnergyHealth) {
-            if (isDefense) dmg *= Math.pow(m.defense(), 0.6)
+            if (isDefense) dmg *= Math.pow(m.defense(), 0.6) //if you change this, search for this code and adjust it everywhere (like paradigm shift)
             dmg = Math.min(dmg, 0.49 * m.maxHealth)
             m.energy -= dmg //scale damage with heal reduction difficulty
+
+            if (tech.isEnergyNoAmmo && m.energy < 0.33) {
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].name === "non-renewables") {
+                        powerUps.ejectTech(i)
+                        break
+                    }
+                }
+            }
+            if (tech.crouchAmmoCount && m.energy < 0.33) {
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].name === "desublimated ammunition") {
+                        powerUps.ejectTech(i)
+                        break
+                    }
+                }
+            }
+
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
                     tech.isDeathAvoidedThisLevel = true
@@ -3811,7 +3829,6 @@ const m = {
                             m.fieldUpgrades[1].energyHealthRatio = 0.5
                         } else {
                             m.fieldUpgrades[1].energyHealthRatio = 1
-
                         }
                         m.setMaxEnergy()
                         m.setMaxHealth()

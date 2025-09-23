@@ -63,8 +63,8 @@ const level = {
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("desublimated ammunition")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("shaped charge")
-            // for (let i = 0; i < 1; i++) tech.giveTech("non-renewables")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("paradigm shift")
+            // for (let i = 0; i < 1; i++) tech.giveTech("mass-energy equivalence")
             // for (let i = 0; i < 1; i++) tech.giveTech("commodities exchange")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("bot fabrication") });
             // requestAnimationFrame(() => { level.blurryChoices = true });
@@ -74,17 +74,17 @@ const level = {
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
-            // level.corridor()
+            // level.furnace()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
-            // for (let i = 0; i < 4; i++) spawn.dodger(1300 + 100 * i, -200)
-            // for (let i = 0; i < 1; i++) spawn.laserLayer(1100 + 100 * i, -100 - i * 100)
-            // for (let i = 0; i < 3; i++) spawn.starter(1100 + 100 * i, -300)
+            // for (let i = 0; i < 10; i++) spawn.pitcher(1300 + 100 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.pitcher4(1100 + 100 * i, -100 - i * 100)
+            // for (let i = 0; i < 1; i++) spawn.defendingBoss(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
-            // for (let i = 0; i < 1; i++) spawn.laserLayerBoss(1300 + 100 * i, -400)
+            // for (let i = 0; i < 1; i++) spawn.defendingBoss(1300 + 100 * i, -400)
             // for (let i = 0; i < 1; i++) spawn.laserBoss(1100 + 100 * i, -500)
             // for (let i = 0; i < 1; i++) spawn.hopsploder(1100 + 100 * i, -500)
             // for (let i = 0; i < 1; ++i) spawn.spiderBoss(1900, -500)
@@ -5555,6 +5555,7 @@ const level = {
         });
         const blocks = []
         blocks.push(body[body.length - 1]) //saved to blocks array to give player traction in level.custom
+        blocks[0].isNotHoldable = true
         //apply heavy damping for just a second on spawn to prevent crazy shakes
 
         simulation.ephemera.push({
@@ -9084,6 +9085,8 @@ const level = {
         //ball on string
         spawn.bodyVertex(-3100, 450, "400 -50  400 50  350 100  -350 100  -400 50  -400 -50  -350 -100  350 -100")
         blocks.push(body[body.length - 1])
+        blocks[0].isNotHoldable = true
+
         cons[cons.length] = Constraint.create({
             pointA: { x: -3600, y: 150 },
             pointB: { x: -350, y: -50 }, //offset of point A from bodyB
@@ -10836,6 +10839,7 @@ const level = {
             isNotHoldable: true,
         });
         blocks.push(body[body.length - 1]) //saved to blocks array to give player traction in level.custom
+        blocks[0].isNotHoldable = true
         //apply heavy damping for just a second on spawn to prevent crazy shakes
 
         simulation.ephemera.push({

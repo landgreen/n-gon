@@ -18,14 +18,16 @@ const spawn = {
     ],
     tier: [
         ["starter"], //T0
-        ["slasher", "hopper", "flutter", "shooter", "grower", "grenadier", "laser", "beamer", "launcher", "exploder"],
-        ["slasher2", "hopperBaby", "stabber", "springer", "striker", "dodger", "spinner", "sucker", "pulsar", "focuser", "spawner"],
-        ["slasher3", "hopMother", "stinger", "sniper", "sneaker", "slicer", "ghoster", "laserLayer", "launcherOne", "freezer"],
-        ["slasher4", "hopsploder", "stingWinger", "sneakyStriker", "bigSucker", "quadLaser", "launchPusher", "slasher5", "mortar"],//T4
+        // ["pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher"],
+        ["slasher", "hopper", "flutter", "shooter", "grower", "grenadier", "laser", "beamer", "launcher", "exploder", "pitcher"], //T2
+        ["slasher2", "hopperBaby", "stabber", "springer", "striker", "dodger", "spinner", "sucker", "pulsar", "focuser", "spawner"], //T2
+        // ["pitcher3", "pitcher3", "pitcher3", "pitcher3", "pitcher3", "pitcher3"],
+        ["slasher3", "hopMother", "stinger", "sniper", "sneaker", "slicer", "ghoster", "laserLayer", "launcherOne", "freezer", "pitcher3"], //T3
+        ["slasher4", "hopsploder", "stingWinger", "sneakyStriker", "bigSucker", "quadLaser", "launchPusher", "slasher5", "mortar", "pitcher4",],//T4
     ],
     bossTier: [
         [],//T0
-        ["snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss"],//t1
+        ["snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss"],//T1
         ["powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture"],//T2
         ["powerUpBoss", "laserLayerBoss", "historyBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss", "conductorBoss"],//T3
         ["stagBeetleBoss", "kingSnakeBoss", "iceBlockBoss", "fabricatorBoss", "pentaLaserBoss", "defendingBoss", "quasarBoss"] //T4
@@ -191,10 +193,10 @@ const spawn = {
     },
     allowedGroupList: [
         ["starter"],
-        ["laser", "beamer", "shooter", "launcher", "grenadier"],
-        ["focuser", "pulsar"],
-        ["launcherOne", "sniper", "laserLayer", "freezer"],
-        ["quadLaser", "launchPusher", "mortar"],
+        ["laser", "pitcher", "beamer", "shooter", "launcher", "grenadier"],
+        ["focuser", "pulsar", "pitcher", "shooter", "launcher", "grenadier"],
+        ["launcherOne", "sniper", "laserLayer", "freezer", "pulsar", "pitcher3"],
+        ["launcherOne", "sniper", "laserLayer", "quadLaser", "launchPusher", "mortar", "freezer", "pitcher4"],
     ],
     randomGroup(x, y, chance = 1) {
         if ((spawn.spawnChance(chance) && simulation.difficulty > 2) || chance === Infinity) {
@@ -2657,11 +2659,9 @@ const spawn = {
         };
     },
     spinner(x, y, radius = 30 + Math.ceil(Math.random() * 35)) {
-        mobs.spawn(x, y, 5, radius, "#000000");
+        mobs.spawn(x, y, 5, radius, "#28b");
         let me = mob[mob.length - 1];
         me.tier = 2
-        me.fill = "#28b";
-        me.rememberFill = me.fill;
         me.cd = 0;
         me.burstDir = { x: 0, y: 0 };
         me.frictionAir = 0.022;
@@ -2695,12 +2695,295 @@ const spawn = {
             ctx.stroke();
             ctx.setLineDash([]);
             if (this.cd < simulation.cycle) {
-                this.fill = this.rememberFill;
                 this.cd = simulation.cycle + 180 * simulation.CDScale
                 this.do = this.look
                 this.force = Vector.mult(this.burstDir, this.mass * 0.25);
             }
         }
+    },
+    pitcher(x, y, radius = 35 + Math.ceil(Math.random() * 25)) {
+        mobs.spawn(x, y, 3, radius, "#28b");
+        let me = mob[mob.length - 1];
+        me.tier = 1
+        me.revolutions = 0;
+        me.isDotNeg = false
+        me.cd = 0
+        me.fireDir = { x: 0, y: 0 };
+        me.frictionAir = 0.02;
+        me.accelMag = 0.00014 * simulation.accelScale;
+        me.lookTorque = 0.0000014;
+        me.restitution = 0;
+        me.myBall = null
+        spawn.shield(me, x, y);
+        me.onDeath = function () {
+            if (this.myBall) {
+                this.myBall.timeLeft = 0
+                powerUps.directSpawn(this.vertices[1].x, this.vertices[1].y, "boost");
+            }
+        };
+        me.look = function () {
+            this.attraction();
+            if (this.seePlayer.recall) this.healthBar1()
+            this.seePlayerByLookingAt();
+            this.checkStatus();
+            if (this.seePlayer.recall && this.cd < simulation.cycle) {
+                this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                this.revolutions = 0
+                this.do = this.spin
+
+                spawn.ball(this.vertices[1].x, this.vertices[1].y, 8);
+                this.myBall = mob[mob.length - 1]
+                this.myBall.drawOutline = false
+            }
+        }
+        me.do = me.look
+        me.spin = function () {
+            if (this.seePlayer.recall) this.healthBar1()
+            this.checkStatus();
+            this.torque += 0.000017 * this.inertia;
+
+            //track revolutions so that the throw timing matches mob momentum direction
+            const dot = Vector.dot({
+                x: Math.cos(this.angle),
+                y: Math.sin(this.angle)
+            }, this.fireDir);
+            if (dot > 0) {
+                this.isDotNeg = false
+            } else if (!this.isDotNeg) {
+                this.isDotNeg = true
+                this.revolutions++
+            }
+
+            Matter.Body.setPosition(this.myBall, this.vertices[1])
+            if (this.revolutions > 3) {
+                this.cd = simulation.cycle + 300 * simulation.CDScale
+                this.do = this.look
+
+                this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                this.force.x -= 0.02 * this.fireDir.x * this.mass;
+                this.force.y -= 0.02 * this.fireDir.y * this.mass;
+                if (this.myBall) {
+                    const v = 16
+                    Matter.Body.setVelocity(this.myBall, {
+                        x: this.velocity.x + this.fireDir.x * v + 5 * (Math.random() - 0.5),
+                        y: this.velocity.y + this.fireDir.y * v + 5 * (Math.random() - 0.5)
+                    });
+                    this.myBall.drawOutline = true
+                    this.myBall = null
+                }
+            }
+        }
+    },
+    pitcher3(x, y, radius = 25 + Math.ceil(Math.random() * 15)) {
+        mobs.spawn(x, y, 3, radius, "rgba(41, 49, 197, 1)");
+        let me = mob[mob.length - 1];
+        me.tier = 3
+        me.revolutions = 0;
+        me.isDotNeg = false
+        me.cd = 0
+        me.fireDir = { x: 0, y: 0 };
+        me.frictionAir = 0.02;
+        me.accelMag = 0.0003 * simulation.accelScale;
+        me.lookTorque = 0.0000017;
+        me.restitution = 0;
+        me.myBall = null
+        spawn.shield(me, x, y);
+        me.onDeath = function () {
+            if (this.myBall) {
+                this.myBall.timeLeft = 0
+                powerUps.directSpawn(this.vertices[1].x, this.vertices[1].y, "boost");
+            }
+        };
+        me.look = function () {
+            this.attraction();
+            if (this.seePlayer.recall) this.healthBar3()
+            this.seePlayerByLookingAt();
+            this.checkStatus();
+            if (this.seePlayer.recall && this.cd < simulation.cycle) {
+                this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                this.revolutions = 0
+                this.do = this.spin
+
+                spawn.ball(this.vertices[1].x, this.vertices[1].y, 12, 540 + 120);
+                this.myBall = mob[mob.length - 1]
+                this.myBall.drawOutline = false
+            }
+        }
+        me.do = me.look
+        me.spin = function () {
+            if (this.seePlayer.recall) this.healthBar3()
+            this.checkStatus();
+            this.torque += 0.00002 * this.inertia;
+
+            //track revolutions so that the throw timing matches mob momentum direction
+            const dot = Vector.dot({
+                x: Math.cos(this.angle),
+                y: Math.sin(this.angle)
+            }, this.fireDir);
+            if (dot > 0) {
+                this.isDotNeg = false
+            } else if (!this.isDotNeg) {
+                this.isDotNeg = true
+                this.revolutions++
+            }
+
+            Matter.Body.setPosition(this.myBall, this.vertices[1])
+            if (this.revolutions > 1) {
+                this.cd = simulation.cycle + 120 * simulation.CDScale
+                this.do = this.look
+
+                this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                this.force.x -= 0.03 * this.fireDir.x * this.mass;
+                this.force.y -= 0.03 * this.fireDir.y * this.mass;
+                if (this.myBall) {
+                    const v = 20 + Math.floor(10 * Math.random())
+                    Matter.Body.setVelocity(this.myBall, {
+                        x: this.velocity.x + this.fireDir.x * v + (Math.random() - 0.5),
+                        y: this.velocity.y + this.fireDir.y * v + (Math.random() - 0.5)
+                    });
+                    this.myBall.drawOutline = true
+                    this.myBall = null
+                }
+            }
+        }
+    },
+    pitcher4(x, y, radius = 20 + Math.ceil(Math.random() * 10)) {
+        mobs.spawn(x, y, 3, radius, "rgba(99, 106, 237, 1)");
+        let me = mob[mob.length - 1];
+        me.tier = 4
+        me.revolutions = 0;
+        me.vertexAngleCount = -1 //offsets angle used in dot product to account for different vertexes of balls
+        me.isDotNeg = false
+        me.cd = 0
+        me.fireDir = { x: 0, y: 0 };
+        me.frictionAir = 0.02;
+        me.accelMag = 0.0003 * simulation.accelScale;
+        me.lookTorque = 0.0000017;
+        me.torqueMag = (0.000015 + 0.000003 * (Math.random() - 0.5)) * me.inertia
+        me.restitution = 0;
+        me.myBall = [null, null, null]
+        spawn.shield(me, x, y);
+        me.onDeath = function () {
+            for (let i = 0; i < 3; i++) {
+                if (this.myBall[i] !== null) {
+                    this.myBall[i].timeLeft = 0
+                    powerUps.directSpawn(this.vertices[i].x, this.vertices[i].y, "boost");
+                }
+            }
+        };
+        me.look = function () {
+            this.attraction();
+            if (this.seePlayer.recall) this.healthBar4()
+            this.seePlayerByLookingAt();
+            this.checkStatus();
+            if (this.seePlayer.recall && this.cd < simulation.cycle) {
+                this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                this.revolutions = 0
+                this.vertexAngleCount = -1
+                this.do = this.spin
+
+                for (let i = 0; i < 3; i++) {
+                    spawn.ball(this.vertices[i].x, this.vertices[i].y, 12, 540 + 300);
+                    this.myBall[i] = mob[mob.length - 1]
+                    this.myBall[i].drawOutline = false
+                }
+            }
+        }
+        me.do = me.look
+        me.spin = function () {
+            if (this.seePlayer.recall) this.healthBar4()
+            this.checkStatus();
+            this.torque += this.torqueMag;
+
+            //track revolutions so that the throw timing matches mob momentum direction
+            const a = this.angle + 2 / 3 * Math.PI * this.vertexAngleCount
+            const dot = Vector.dot({
+                x: Math.cos(a),
+                y: Math.sin(a)
+            }, this.fireDir);
+            if (dot > 0) {
+                this.isDotNeg = false
+            } else if (!this.isDotNeg) {
+                this.isDotNeg = true
+                this.revolutions++
+            }
+
+            for (let i = 0; i < 3; i++) {
+
+                if (this.myBall[i] !== null) {
+                    Matter.Body.setPosition(this.myBall[i], this.vertices[i])
+
+                    if (this.revolutions > i + 1) {
+                        this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                        this.force.x -= 0.01 * this.fireDir.x * this.mass;
+                        this.force.y -= 0.01 * this.fireDir.y * this.mass;
+
+                        if (this.myBall) {
+                            const v = 23 + Math.floor(18 * Math.random())
+                            Matter.Body.setVelocity(this.myBall[i], {
+                                x: this.velocity.x + this.fireDir.x * v + 6 * (Math.random() - 0.5),
+                                y: this.velocity.y + this.fireDir.y * v + 6 * (Math.random() - 0.5)
+                            });
+                            this.myBall[i].drawOutline = true
+                            this.myBall[i] = null
+                            this.vertexAngleCount++
+                        }
+                    }
+                }
+            }
+
+            if (this.revolutions > 3) {
+                this.cd = simulation.cycle + 120 * simulation.CDScale
+                this.do = this.look
+            }
+        }
+    },
+    ball(x, y, radius = 20, time = 540) { //bullets
+        mobs.spawn(x, y, 7, radius, "#f55");
+        let me = mob[mob.length - 1];
+        me.stroke = "transparent";
+        me.onHit = function () {
+            this.explode(this.mass * 20);
+        };
+        me.onDamage = function () {
+            this.explode(this.mass * 20);
+        };
+        Matter.Body.setDensity(me, 0.00005); //normal is 0.001
+        me.timeLeft = time;
+        me.frictionAir = 0;
+        me.friction = 0
+        me.frictionStatic = 0
+        me.restitution = 1.01;
+        me.leaveBody = false;
+        me.isDropPowerUp = false;
+        me.isBadTarget = true;
+        me.isMobBullet = true;
+        me.collisionFilter.category = cat.mobBullet;
+        me.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet;
+        me.velocitySmooth = { x: 0, y: 0 }
+        me.do = function () {
+            this.timeLimit();
+
+            if (this.speed < 10) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y * 1.03 });
+
+            if (this.drawOutline) {//draw outline
+                ctx.save();
+                ctx.translate(this.position.x, this.position.y);
+                this.velocitySmooth = Vector.add(Vector.mult(this.velocitySmooth, 0.8), Vector.mult(this.velocity, 0.2))
+                ctx.rotate(Math.atan2(this.velocitySmooth.y, this.velocitySmooth.x))
+                ctx.beginPath();
+                const r = 15 + radius
+                const mag = r * 4
+                ctx.arc(0, 0, r, -Math.PI / 2, Math.PI / 2);
+                ctx.bezierCurveTo(-r, r, -r, 0, -mag, 0); // bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
+                ctx.bezierCurveTo(-r, 0, -r, -r, 0, -r);
+
+                const time = Math.min(60, this.timeLeft) / 60
+                ctx.fillStyle = `rgba(255,0,200,${0.04 + 0.3 * time})`
+                ctx.fill()
+                ctx.restore();
+            }
+        };
     },
     bigSucker(x, y, radius = 10) {
         mobs.spawn(x, y, 9, radius, "#fff");
@@ -6435,7 +6718,7 @@ const spawn = {
             Matter.Body.setVelocity(this, Vector.mult(this.velocity, -0.9)) //bounce off player
         };
         me.do = function () {
-            if (this.seePlayer.recall) this.healthBar2()
+            if (this.seePlayer.recall) this.healthBar3()
             if (!(simulation.cycle % this.seePlayerFreq)) { // this.seePlayerCheck();  from mobs
                 if (
                     this.distanceToPlayer2() < this.seeAtDistance2 &&
@@ -9621,7 +9904,7 @@ const spawn = {
         };
     },
     shieldingBoss(x, y, radius = 200) {
-        mobs.spawn(x, y, 9, radius, "rgb(150, 150, 255)");
+        mobs.spawn(x, y, 6, radius, "rgb(150, 150, 255)");
         let me = mob[mob.length - 1];
         me.tier = 1
         setTimeout(() => { //fix mob in place, but allow rotation
@@ -9637,7 +9920,7 @@ const spawn = {
             Composite.add(engine.world, me.constraint);
         }, 2000); //add in a delay in case the level gets flipped left right
 
-        Matter.Body.rotate(me, Math.random() * 2 * Math.PI)
+        // Matter.Body.rotate(me, Math.random() * 2 * Math.PI)
         // me.stroke = "rgb(220,220,255)"
         me.isBoss = true;
         me.cycle = 0
@@ -9645,8 +9928,11 @@ const spawn = {
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 1;
-        // me.homePosition = { x: x, y: y };
+
+        me.radius *= 1.5 //make the shield have a larger radius
         spawn.shield(me, x, y, 1);
+        me.radius /= 1.5
+
         spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random())
 
         Matter.Body.setDensity(me, 0.006); //extra dense //normal is 0.001 //makes effective life much larger
@@ -9664,13 +9950,52 @@ const spawn = {
         me.damageReduction = 0.39
         me.do = function () {
             if (this.seePlayer.recall) this.healthBar1()
-            Matter.Body.rotate(this, 0.003) //gently spin around
+            // Matter.Body.rotate(this, 0.003) //gently spin around
             this.checkStatus();
+
+
+            if (!this.isShielded) {
+                //draw cool lines
+                ctx.beginPath();
+                //outline
+                ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                for (let i = 0; i < this.vertices.length; i++) {
+                    // const vertex = (i * 5) % this.vertices.length
+                    ctx.lineTo(this.vertices[i].x, this.vertices[i].y);
+                }
+                ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+
+                //cube sections
+                ctx.moveTo(this.vertices[1].x, this.vertices[1].y);
+                for (let i = 0; i < 3; i++) {
+                    ctx.lineTo(this.position.x, this.position.y);
+                    const vertex = (i * 2 + 1) % this.vertices.length
+                    ctx.lineTo(this.vertices[vertex].x, this.vertices[vertex].y);
+                }
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "#000";
+                ctx.stroke();
+            }
+
+
             ctx.beginPath(); //draw cycle timer
             ctx.moveTo(this.vertices[this.vertices.length - 1].x, this.vertices[this.vertices.length - 1].y)
             const phase = (this.vertices.length + 1) * this.cycle / this.maxCycles
             if (phase > 1) ctx.lineTo(this.vertices[0].x, this.vertices[0].y)
             for (let i = 1; i < phase - 1; i++) ctx.lineTo(this.vertices[i].x, this.vertices[i].y)
+            if (phase > 1) {
+                ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
+                ctx.lineTo(this.position.x, this.position.y)
+                if (phase > 3) {
+                    ctx.moveTo(this.vertices[3].x, this.vertices[3].y)
+                    ctx.lineTo(this.position.x, this.position.y)
+                    if (phase > 5) {
+                        ctx.moveTo(this.vertices[5].x, this.vertices[5].y)
+                        ctx.lineTo(this.position.x, this.position.y)
+                    }
+                }
+            }
+
             ctx.lineWidth = 5
             ctx.strokeStyle = "rgb(255,255,255)"
             ctx.stroke();
@@ -9688,7 +10013,13 @@ const spawn = {
                         mob[mob.length - 1].damageReduction = 0.5 * 0.075  //shields are extra strong
                     }
                 }
-                if (!this.isShielded && this.alive) spawn.shield(this, this.position.x, this.position.y, 1, true);
+
+                if (!this.isShielded && this.alive) {
+                    me.radius *= 1.5 //make the shield have a larger radius
+                    spawn.shield(this, this.position.x, this.position.y, 1, true);
+                    me.radius /= 1.5
+                }
+
                 ctx.lineWidth = 20
                 ctx.strokeStyle = "rgb(200,200,255)"
                 ctx.stroke();
@@ -9696,7 +10027,7 @@ const spawn = {
         };
     },
     defendingBoss(x, y, radius = 200) {
-        mobs.spawn(x, y, 9, radius, "rgba(66, 66, 246, 1)");
+        mobs.spawn(x, y, 6, radius, "rgba(66, 66, 246, 1)");
         let me = mob[mob.length - 1];
         me.tier = 4
         setTimeout(() => { //fix mob in place, but allow rotation
@@ -9719,10 +10050,12 @@ const spawn = {
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 1;
-        // me.homePosition = { x: x, y: y };
-        spawn.shield(me, x, y, 1);
-        spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random(), 1)
 
+        me.radius *= 1.5 //make the shield have a larger radius
+        spawn.shield(me, x, y, 1);
+        me.radius /= 1.5
+
+        spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random(), 1)
         Matter.Body.setDensity(me, 0.001);
         me.damageReduction = 0.3
         me.startingDamageReduction = me.damageReduction
@@ -9767,7 +10100,7 @@ const spawn = {
             if (this.health < this.nextHealthThreshold && this.alive) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 5) / 5
-                this.invulnerableCount = 90
+                this.invulnerableCount = 100
                 this.isInvulnerable = true
                 this.damageReduction = 0
             }
@@ -9776,11 +10109,47 @@ const spawn = {
             if (this.seePlayer.recall) this.healthBar4()
             Matter.Body.rotate(this, 0.003) //gently spin around
             this.checkStatus();
+
+            if (!this.isShielded) {
+                //draw cool lines
+                ctx.beginPath();
+                //outline
+                ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                for (let i = 0; i < this.vertices.length; i++) {
+                    ctx.lineTo(this.vertices[i].x, this.vertices[i].y);
+                }
+                ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+
+                //cube sections
+                ctx.moveTo(this.vertices[1].x, this.vertices[1].y);
+                for (let i = 0; i < 3; i++) {
+                    ctx.lineTo(this.position.x, this.position.y);
+                    const vertex = (i * 2 + 1) % this.vertices.length
+                    ctx.lineTo(this.vertices[vertex].x, this.vertices[vertex].y);
+                }
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = "#000";
+                ctx.stroke();
+            }
+
+
             ctx.beginPath(); //draw cycle timer
             ctx.moveTo(this.vertices[this.vertices.length - 1].x, this.vertices[this.vertices.length - 1].y)
             const phase = (this.vertices.length + 1) * this.cycle / this.maxCycles
             if (phase > 1) ctx.lineTo(this.vertices[0].x, this.vertices[0].y)
             for (let i = 1; i < phase - 1; i++) ctx.lineTo(this.vertices[i].x, this.vertices[i].y)
+            if (phase > 1) {
+                ctx.moveTo(this.vertices[1].x, this.vertices[1].y)
+                ctx.lineTo(this.position.x, this.position.y)
+                if (phase > 3) {
+                    ctx.moveTo(this.vertices[3].x, this.vertices[3].y)
+                    ctx.lineTo(this.position.x, this.position.y)
+                    if (phase > 5) {
+                        ctx.moveTo(this.vertices[5].x, this.vertices[5].y)
+                        ctx.lineTo(this.position.x, this.position.y)
+                    }
+                }
+            }
             ctx.lineWidth = 5
             ctx.strokeStyle = "rgb(255,255,255)"
             ctx.stroke();
@@ -9798,7 +10167,11 @@ const spawn = {
                         mob[mob.length - 1].damageReduction = 0.5 * 0.075  //shields are extra strong
                     }
                 }
-                if (!this.isShielded && this.alive) spawn.shield(this, this.position.x, this.position.y, 1, true);
+                if (!this.isShielded && this.alive) {
+                    me.radius *= 1.5 //make the shield have a larger radius
+                    spawn.shield(this, this.position.x, this.position.y, 1, true);
+                    me.radius /= 1.5
+                }
                 ctx.lineWidth = 20
                 ctx.strokeStyle = "rgb(200,200,255)"
                 ctx.stroke();
@@ -10490,12 +10863,14 @@ const spawn = {
     //chance = Math.min(0.02 + simulation.difficulty * 0.005, 0.2) + tech.duplicationChance()
     shield(target, x, y, chance = (level.isMobShields ? 4 : 1) * Math.min(0.02 + simulation.difficulty * 0.005, 0.2)) {
         if (this.allowShields && Math.random() < chance) {
-            mobs.spawn(x, y, 9, target.radius + 30, "rgba(220,220,255,0.9)");
+            mobs.spawn(x, y, 6, target.radius + 30, "rgba(220,220,255,0.9)");
             let me = mob[mob.length - 1];
-            me.stroke = "rgb(220,220,255)";
+            Matter.Body.rotate(me, Math.random() * Math.PI);
             Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
+            me.stroke = "transparent";
             me.shield = true;
             me.damageReduction = 0.073
+            me.torqueMag = (0.00000005 + 0.00000001 * (Math.random() - 0.5)) * me.inertia
             me.isUnblockable = true
             me.collisionFilter.category = cat.mobShield
             me.collisionFilter.mask = cat.bullet;
@@ -10532,6 +10907,29 @@ const spawn = {
             };
             me.do = function () {
                 this.checkStatus();
+
+                //gentle rotation
+                this.torque += this.torqueMag;
+
+                //draw cool lines
+                ctx.beginPath();
+                //outline
+                ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                for (let i = 0; i < this.vertices.length; i++) {
+                    ctx.lineTo(this.vertices[i].x, this.vertices[i].y);
+                }
+                ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
+
+                //cube sections
+                ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+                for (let i = 0; i < 3; i++) {
+                    ctx.lineTo(this.position.x, this.position.y);
+                    const vertex = (i * 2) % this.vertices.length
+                    ctx.lineTo(this.vertices[vertex].x, this.vertices[vertex].y);
+                }
+                ctx.lineWidth = 0.5;
+                ctx.strokeStyle = "#222";
+                ctx.stroke();
             };
 
             mob.unshift(me); //move shield to the front of the array, so that mob is behind shield graphically

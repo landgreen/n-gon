@@ -1,22 +1,14 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new mobs
-  T2 dodger - dodges by rotating an arc segment centered around player
-  T3 slicer - same as dodger but with a sword slice 
+new mobs: pitcher, pitcher3, pitcher4 - it spins and then throws a bouncy ball at you
 
-1.2x movement speed added to skins: Higgs mechanism and aperture
-Higgs mechanism unlocks acoustic levitation
-nitinol jumps a bit higher and only triggers hard landings at higher speeds
-you can avoid hard landings if holding jump and moving at unusually high speeds
-shaped charge will no longer reduce explosive radius if you are invulnerable
-paradigm shift self ejects before you die
-  health loss per use increases 1.3->1.4x
-  added console messages
+mob shields have lines that look like a cube
+  also shieldingBosses have cube lines
 
 bugs
-  if you have the CIWS field tech and harpoons, the harpoons fired by CIWS added harpoon ammo
-  arms trade wasn't spawning 2 guns
-  acoustic levitation wasn't resetting coyote time and damage taken properly on removal
+  fixed interaction between non-renewables and desublimated ammunition and mass-energy
+  fixed interaction between paradigm shift and mass-energy
+  gave slicer correct Tier health bar
 
 *********************************************************** TODO *****************************************************
 

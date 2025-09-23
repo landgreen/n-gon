@@ -1154,13 +1154,15 @@ const tech = {
     },
     {
         name: "non-renewables",
-        description: `<strong>2.5x</strong> <strong class='color-d'>damage</strong>, but you can't pickup ${powerUps.orb.ammo()}<br><span class='color-remove'>eject</span> this if <strong class='color-h'>health</strong> <strong>></strong> <strong>33</strong>`,
+        descriptionFunction() {
+            return `<strong>2.5x</strong> <strong class='color-d'>damage</strong>, but you can't pickup ${powerUps.orb.ammo()}<br><span class='color-remove'>eject</span> this if ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} <strong><</strong> <strong>33</strong>`
+        },
         maxCount: 1,
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return !tech.isAmmoFromHealth && !tech.isBoostReplaceAmmo && m.health > 0.33
+            return !tech.isAmmoFromHealth && !tech.isBoostReplaceAmmo && ((m.health > 0.33 && !tech.isEnergyHealth) || (m.energy > 0.33 && tech.isEnergyHealth))
         },
         requires: "health > 33, not catabolism, quasiparticles",
         damage: 2.5,
@@ -1183,12 +1185,14 @@ const tech = {
     },
     {
         name: "desublimated ammunition",
-        description: `alternating shots cost <strong>0</strong> <strong class='color-ammo'>ammo</strong> while <strong>crouched</strong><br><span class='color-remove'>eject</span> this if <strong class='color-h'>health</strong> <strong>></strong> <strong>33</strong>`,
+        descriptionFunction() {
+            return `alternating shots cost <strong>0</strong> <strong class='color-ammo'>ammo</strong> while <strong>crouched</strong><br><span class='color-remove'>eject</span> this if ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} <strong><</strong> <strong>33</strong>`
+        },
         maxCount: 1,
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
-        allowed: () => m.health > 0.33,
+        allowed: () => (m.health > 0.33 && !tech.isEnergyHealth) || (m.energy > 0.33 && tech.isEnergyHealth),
         requires: "health > 33",
         effect() {
             tech.crouchAmmoCount = true
