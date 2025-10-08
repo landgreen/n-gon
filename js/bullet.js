@@ -748,12 +748,14 @@ const b = {
                             !mob[i].isBadTarget &&
                             !mob[i].isInvulnerable &&
                             this.position.y < mob[i].bounds.min.y &&
-                            this.position.x > mob[i].position.x - mob[i].radius / 2 &&
-                            this.position.x < mob[i].position.x + mob[i].radius / 2 &&
+                            this.position.x > mob[i].position.x - mob[i].radius - 10 &&
+                            this.position.x < mob[i].position.x + mob[i].radius + 10 &&
                             Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                             Matter.Query.ray(body, this.position, mob[i].position).length === 0
                         ) {
-                            Matter.Body.setVelocity(this, { x: 0, y: 4 + Math.max(10, this.speed) });
+                            const unit = Vector.normalise(Vector.sub(mob[i].position, this.position))
+                            Matter.Body.setVelocity(this, Vector.mult(unit, 45));
+                            Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
                             this.do = function () {
                                 this.force.y += this.mass * 0.003;
                             }
@@ -815,12 +817,14 @@ const b = {
                             !mob[i].isBadTarget &&
                             !mob[i].isInvulnerable &&
                             this.position.y < mob[i].bounds.min.y &&
-                            this.position.x > mob[i].position.x - mob[i].radius / 2 &&
-                            this.position.x < mob[i].position.x + mob[i].radius / 2 &&
+                            this.position.x > mob[i].position.x - mob[i].radius - 10 &&
+                            this.position.x < mob[i].position.x + mob[i].radius + 10 &&
                             Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                             Matter.Query.ray(body, this.position, mob[i].position).length === 0
                         ) {
-                            Matter.Body.setVelocity(this, { x: 0, y: 4 + Math.max(10, this.speed) });
+                            const unit = Vector.normalise(Vector.sub(mob[i].position, this.position))
+                            Matter.Body.setVelocity(this, Vector.mult(unit, 45));
+                            Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
                             this.frictionAir = 0
                             this.do = function () {
                                 this.force.y += this.mass * 0.003;
@@ -932,12 +936,15 @@ const b = {
                             !mob[i].isBadTarget &&
                             !mob[i].isInvulnerable &&
                             this.position.y < mob[i].bounds.min.y &&
-                            this.position.x > mob[i].position.x - mob[i].radius / 2 &&
-                            this.position.x < mob[i].position.x + mob[i].radius / 2 &&
+                            this.position.x > mob[i].position.x - mob[i].radius - 10 &&
+                            this.position.x < mob[i].position.x + mob[i].radius + 10 &&
                             Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                             Matter.Query.ray(body, this.position, mob[i].position).length === 0
                         ) {
-                            Matter.Body.setVelocity(this, { x: 0, y: 4 + Math.max(10, this.speed) });
+                            const unit = Vector.normalise(Vector.sub(mob[i].position, this.position))
+                            Matter.Body.setVelocity(this, Vector.mult(unit, 45));
+                            Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
+
                             this.frictionAir = 0
                             this.do = function () {
                                 if (simulation.cycle > this.endCycle - this.suckCycles) { //suck
@@ -985,9 +992,14 @@ const b = {
                             const sub = Vector.sub(that.position, who[i].position);
                             const dist = Vector.magnitude(sub);
                             if (dist < radius && dist > 150 && !who.isInvulnerable) {
-                                knock = Vector.mult(Vector.normalise(sub), mag * who[i].mass / Math.sqrt(dist));
-                                who[i].force.x += knock.x;
-                                who[i].force.y += knock.y;
+                                knock = Vector.mult(Vector.normalise(sub), mag * who[i].mass / Math.sqrt(Math.max(50, dist)));
+                                if (who.isBoss) {
+                                    who[i].force.x += 0.3 * knock.x;
+                                    who[i].force.y += 0.3 * knock.y;
+                                } else {
+                                    who[i].force.x += knock.x;
+                                    who[i].force.y += knock.y;
+                                }
                             }
                         }
                     }
@@ -1045,9 +1057,14 @@ const b = {
                                 const sub = Vector.sub(that.position, who[i].position);
                                 const dist = Vector.magnitude(sub);
                                 if (dist < radius && dist > 150 && !who.isInvulnerable) {
-                                    knock = Vector.mult(Vector.normalise(sub), mag * who[i].mass / Math.sqrt(dist));
-                                    who[i].force.x += knock.x;
-                                    who[i].force.y += knock.y;
+                                    knock = Vector.mult(Vector.normalise(sub), mag * who[i].mass / Math.sqrt(Math.max(50, dist)));
+                                    if (who.isBoss) {
+                                        who[i].force.x += 0.3 * knock.x;
+                                        who[i].force.y += 0.3 * knock.y;
+                                    } else {
+                                        who[i].force.x += knock.x;
+                                        who[i].force.y += knock.y;
+                                    }
                                 }
                             }
                         }
@@ -1082,12 +1099,14 @@ const b = {
                             !mob[i].isBadTarget &&
                             !mob[i].isInvulnerable &&
                             this.position.y < mob[i].bounds.min.y &&
-                            this.position.x > mob[i].position.x - mob[i].radius / 2 &&
-                            this.position.x < mob[i].position.x + mob[i].radius / 2 &&
+                            this.position.x > mob[i].position.x - mob[i].radius - 10 &&
+                            this.position.x < mob[i].position.x + mob[i].radius + 10 &&
                             Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                             Matter.Query.ray(body, this.position, mob[i].position).length === 0
                         ) {
-                            Matter.Body.setVelocity(this, { x: 0, y: 4 + Math.max(10, this.speed) });
+                            const unit = Vector.normalise(Vector.sub(mob[i].position, this.position))
+                            Matter.Body.setVelocity(this, Vector.mult(unit, 45));
+                            Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
 
                             this.do = function () {
                                 this.force.y += this.mass * 0.0025; //extra gravity for harder arcs
@@ -1101,9 +1120,14 @@ const b = {
                                             const sub = Vector.sub(that.position, who[i].position);
                                             const dist = Vector.magnitude(sub);
                                             if (dist < radius && dist > 150 && !who.isInvulnerable) {
-                                                knock = Vector.mult(Vector.normalise(sub), mag * who[i].mass / Math.sqrt(dist));
-                                                who[i].force.x += knock.x;
-                                                who[i].force.y += knock.y;
+                                                knock = Vector.mult(Vector.normalise(sub), mag * who[i].mass / Math.sqrt(Math.max(50, dist)));
+                                                if (who.isBoss) {
+                                                    who[i].force.x += 0.3 * knock.x;
+                                                    who[i].force.y += 0.3 * knock.y;
+                                                } else {
+                                                    who[i].force.x += knock.x;
+                                                    who[i].force.y += knock.y;
+                                                }
                                             }
                                         }
                                     }
@@ -1241,13 +1265,15 @@ const b = {
                             !mob[i].isBadTarget &&
                             !mob[i].isInvulnerable &&
                             this.position.y < mob[i].bounds.min.y &&
-                            this.position.x > mob[i].position.x - mob[i].radius / 2 &&
-                            this.position.x < mob[i].position.x + mob[i].radius / 2 &&
+                            this.position.x > mob[i].position.x - mob[i].radius - 10 &&
+                            this.position.x < mob[i].position.x + mob[i].radius + 10 &&
                             Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
                             Matter.Query.ray(body, this.position, mob[i].position).length === 0
                         ) {
-                            Matter.Body.setVelocity(this, { x: 0, y: 4 + Math.max(10, this.speed) });
-                            // console.log()
+                            const unit = Vector.normalise(Vector.sub(mob[i].position, this.position))
+                            Matter.Body.setVelocity(this, Vector.mult(unit, 45));
+                            Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
+
                             isPrecisionTriggered = true
                             if (tech.isRPG) this.thrust = { x: 0, y: 0 }
 

@@ -150,7 +150,7 @@ function beforeUnloadEventListener(event) {
     if (tech.isExitPrompt) {
         m.damageDone *= 1.25
         // simulation.inGameConsole(`<strong class='color-d'>damage</strong> <span class='color-symbol'>*=</span> ${1.25}`)
-        simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.25} //beforeunload`);
+        simulation.inGameConsole(`<span class='color-var'>tech</span>.<strong class='color-d'>damage</strong> *= ${1.25} //beforeunload`);
         if (Math.random() < 0.25) {
             removeEventListener('beforeunload', beforeUnloadEventListener);
         }
@@ -549,7 +549,7 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
 <details id = "console-log-details" style="padding: 0 8px;">
 <summary>console log</summary>
 <div class="pause-details">
-    <div class="pause-grid-module" style="    background-color: #e2e9ec;font-size: 0.8em;">${document.getElementById("text-log").innerHTML}</div>
+    <div class="pause-grid-module" style="background-color: #e2e9ec;font-size: 0.85em; font-family: monospace;">${document.getElementById("text-log").innerHTML}</div>
 </div>
 </details>
 </div>`
@@ -2170,9 +2170,11 @@ document.getElementById("updates").addEventListener("toggle", function () {
             //     text += "<br><em>https://github.com/landgreen/n-gon/</em>: hash does <strong>not</strong> match latest version<br><hr>"
             // }
             for (let i = 0, len = 20; i < len; i++) {
-                text += "<strong>" + data[i].commit.author.date.substr(0, 10) + "</strong> - "; //+ "<br>"
-                text += data[i].commit.message
-                if (i < len - 1) text += "<hr>"
+                if (data[i].commit.message !== "quick bug fix") {
+                    text += "<strong>" + data[i].commit.author.date.substr(0, 10) + "</strong> - "; //+ "<br>"
+                    text += data[i].commit.message
+                    if (i < len - 1) text += "<hr>"
+                }
             }
             text += `</pre><hr><em>complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a></em>`
             document.getElementById("updates-div").innerHTML = text.replace(/\n/g, "<br />")

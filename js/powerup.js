@@ -241,7 +241,7 @@ const powerUps = {
     choose(type, index) {
         if (type === "gun") {
             b.giveGuns(index)
-            let text = `<div class="circle-grid gun"></div> &nbsp; b.giveGuns("<strong class='color-text'>${b.guns[index].name}</strong>")`
+            let text = `<div class="circle-grid gun"></div> b.giveGuns("<strong class='color-text'>${b.guns[index].name}</strong>")`
             if (b.inventory.length === 1) text += `<br>input.key.gun<span class='color-symbol'>:</span> ["<span class='color-text'>MouseLeft</span>"]`
             if (b.inventory.length === 2) text += `
             <br>input.key.nextGun<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.nextGun}</span>","<span class='color-text'>MouseWheel</span>"]
@@ -296,7 +296,7 @@ const powerUps = {
                 }
             }
         } else if (type === "tech") {
-            simulation.inGameConsole(`<div class="circle-grid tech"></div> &nbsp; <span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${tech.tech[index].name}</strong>")`);
+            simulation.inGameConsole(`<div class="circle-grid tech"></div> <span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${tech.tech[index].name}</strong>")`);
             tech.giveTech(index)
         }
         powerUps.endDraft(type);
@@ -861,7 +861,7 @@ const powerUps = {
                     powerUps.research.changeRerolls(-1)
                     if (tech.isResearchDamage) {
                         m.damageDone *= 1.03
-                        simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.03} //peer review`);
+                        simulation.inGameConsole(`<span class='color-var'>tech</span>.<strong class='color-d'>damage</strong> *= ${1.03} //peer review`);
                         // tech.addJunkTechToPool(0.01)
                     }
                     if (tech.isResearchHeal) {
@@ -878,7 +878,7 @@ const powerUps = {
             }
             if (tech.isResearchDamage) {
                 m.damageDone *= 1.03
-                simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.03} //peer review`);
+                simulation.inGameConsole(`<span class='color-var'>tech</span>.<strong class='color-d'>damage</strong> *= ${1.03} //peer review`);
                 // tech.addJunkTechToPool(0.01)
             }
             if (tech.isResearchHeal) {
@@ -910,11 +910,11 @@ const powerUps = {
                     let overHeal = m.health + heal * simulation.healScale - m.maxHealth //used with tech.isOverHeal
                     const healOutput = Math.min(m.maxHealth - m.health, heal) * simulation.healScale
                     m.addHealth(heal);
-                    if (healOutput > 0) simulation.inGameConsole(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
+                    if (healOutput > 0) simulation.inGameConsole(`<div class="circle-grid heal"></div> <span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${(healOutput).toFixed(3)}`) // <br>${m.health.toFixed(3)}
                     if (tech.isOverHeal && overHeal > 0) { //tech quenching
                         tech.extraMaxHealth += 0.5 * overHeal //increase max health
                         m.setMaxHealth();
-                        simulation.inGameConsole(`<div class="circle-grid heal"></div> &nbsp; <span class='color-var'>m</span>.maxHealth <span class='color-symbol'>+=</span> ${(0.3 * overHeal).toFixed(3)}`)
+                        simulation.inGameConsole(`<div class="circle-grid heal"></div> <span class='color-var'>m</span>.maxHealth <span class='color-symbol'>+=</span> ${(0.3 * overHeal).toFixed(3)}`)
                         simulation.drawList.push({ //add dmg to draw queue
                             x: m.pos.x,
                             y: m.pos.y,
@@ -1820,7 +1820,7 @@ const powerUps = {
     pauseEjectTech(index) {
         if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isInstant) {
             const dmg = tech.pauseEjectTech * 0.01
-            if ((!tech.isEnergyHealth && dmg * m.defense() < m.health) || (tech.isEnergyHealth && dmg * Math.pow(m.defense(), 0.6) < m.energy)) {
+            if ((!tech.isEnergyHealth && (dmg * m.defense() < m.health || tech.isNoDeath)) || (tech.isEnergyHealth && dmg * Math.pow(m.defense(), 0.6) < m.energy)) {
                 tech.tech[index].frequency = 0 //banish tech
                 powerUps.ejectTech(index)
                 if (m.immuneCycle < m.cycle) m.takeDamage(tech.pauseEjectTech * 0.01, false)

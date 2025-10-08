@@ -146,7 +146,7 @@ const tech = {
                 const dmg = 1.3
                 m.damageDone *= dmg
                 // simulation.inGameConsole(`<strong class='color-d'>damage</strong> <span class='color-symbol'>*=</span> ${1.05}`)
-                simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${dmg} //hidden-variable theory`);
+                simulation.inGameConsole(`<span class='color-var'>tech</span>.<strong class='color-d'>damage</strong> *= ${dmg} //hidden-variable theory`);
             }
             // console.log(index, tech.tech[index])
             tech.tech[index].effect(); //give specific tech
@@ -275,7 +275,7 @@ const tech = {
         if (tech.isImmunityDamage && m.immuneCycle > m.cycle) dmg *= 3
         if (tech.isPowerUpDamage) dmg *= 1 + 0.07 * powerUp.length
         if (tech.isDamageCooldown) dmg *= m.lastKillCycle + tech.isDamageCooldownTime > m.cycle ? 0.4 : 4
-        if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.9
+        if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 2
         if (tech.isOffGroundDamage && !m.onGround && m.cycle - m.lastOnGroundCycle > 65) dmg *= 2.5
         if (tech.isDilate) dmg *= 1.9 + 1.1 * Math.sin(m.cycle * 0.01)
         if (tech.isGunChoice) dmg *= 1 + 0.4 * b.inventory.length
@@ -376,7 +376,7 @@ const tech = {
     },
     {
         name: "nitinol",
-        description: `<strong>1.3x</strong> <strong class="color-speed">movement</strong> and <strong>jumping</strong><br>+<strong>0.2</strong> seconds of <strong>coyote time</strong> <em style ='float: right;'>(jumping after falling)</em>`,
+        description: `<strong>1.3x</strong> <strong class="color-speed">movement</strong> and <strong>jumping</strong> with <strong>ledge grabbing</strong><br>+<strong>0.2</strong> seconds of <strong>coyote time</strong> <em style ='float: right;'>(jumping after falling)</em>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -738,7 +738,7 @@ const tech = {
     {
         name: "ternary", //"divisor",
         descriptionFunction() {
-            return `<strong>1.9x</strong> <strong class='color-d'>damage</strong> while your <strong class='color-ammo'>ammo</strong><br>is evenly <strong>divisible</strong> by <strong>3</strong><em style ="float: right;">(${((b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) ? "1.9" : "1")}x)</em>` //if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.9
+            return `<strong>2x</strong> <strong class='color-d'>damage</strong> while your <strong class='color-ammo'>ammo</strong><br>is evenly <strong>divisible</strong> by <strong>3</strong><em style ="float: right;">(${((b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) ? "1.9" : "1")}x)</em>` //if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.9
         },
         maxCount: 1,
         count: 0,
@@ -1428,7 +1428,7 @@ const tech = {
             const damage = (Math.floor((Math.random() * 0.3 + 1) * 100)) / 100
             m.damageDone *= damage
             this.damageSoFar.push(damage)
-            simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${damage} //mechatronics`);
+            simulation.inGameConsole(`<span class='color-var'>tech</span>.<strong class='color-d'>damage</strong> *= ${damage} //mechatronics`);
         },
         remove() {
             if (this.count && m.alive) for (let i = 0; i < this.damageSoFar.length; i++) m.damageDone /= this.damageSoFar[i]
@@ -4881,6 +4881,34 @@ const tech = {
         }
     },
     {
+        name: "ectomy",
+        descriptionFunction() {
+            return `<strong>1.1x</strong> <strong class='color-d'>damage</strong><br><span class='color-remove'>removing</span> this spawns <strong>${this.heals}</strong> ${powerUps.orb.heal()}`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        isBadRandomOption: true,
+        allowed() {
+            return true
+        },
+        requires: "",
+        damage: 1.1,
+        heals: 25,
+        effect() {
+            m.damageDone *= this.damage
+        },
+        isRemoveBenefit: true,
+        remove() {
+            if (this.count > 0 && m.alive) {
+                m.damageDone /= this.damage
+                this.frequency = 0
+                requestAnimationFrame(() => { powerUps.spawnDelay("heal", this.heals) });
+            }
+        }
+    },
+    {
         name: "deprecated",
         scale: 0.08,
         descriptionFunction() {
@@ -5003,7 +5031,7 @@ const tech = {
             for (let i = 0, len = pool.length * 0.5; i < len; i++) removeCount += tech.removeTech(pool[i])
             this.damage = this.damagePerRemoved * removeCount
             m.damageDone *= (1 + this.damage)
-            simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${(1 + this.damage).toFixed(2)} <em>//from Occam's razor</em>`);
+            simulation.inGameConsole(`<span class='color-var'>tech</span>.<strong class='color-d'>damage</strong> *= ${(1 + this.damage).toFixed(2)} <em>//from Occam's razor</em>`);
         },
         remove() {
             if (this.count && m.alive) m.damageDone /= (1 + this.damage)
@@ -7101,7 +7129,7 @@ const tech = {
     },
     {
         name: "standardization",
-        description: `<strong>2x</strong> <strong>drones</strong> per ${powerUps.orb.ammo()} and <strong class='color-f'>energy</strong><br><strong>0.6x</strong> drone <strong>duration</strong>`,
+        description: `<strong>2x</strong> <strong>drones</strong> from ${powerUps.orb.ammo()} <em>(or <strong class='color-f'>energy</strong>)</em><br><strong>0.6x</strong> drone <strong>duration</strong>`,
         isGunTech: true,
         maxCount: 1,
         count: 0,

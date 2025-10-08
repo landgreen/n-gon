@@ -23,6 +23,12 @@ const m = {
         player = Body.create({
             //combine jumpSensor and playerBody
             parts: [playerBody, playerHead, jumpSensor, headSensor],
+            // collision: {
+            //     isBody: false,
+            //     isHead: false,
+            //     isHeadSensor: false,
+            //     isJump: false,
+            // },
             inertia: Infinity, //prevents player rotation
             friction: 0.002,
             frictionAir: 0.001,
@@ -1022,7 +1028,6 @@ const m = {
                     if (tech.isDeathTech && !tech.isDeathTechTriggered) {
                         tech.isDeathTechTriggered = true
                         powerUps.spawn(player.position.x, player.position.y, "tech");
-                        // simulation.inGameConsole(`<span class='color-var'>tech</span>.damage *= ${1.05} //Zeno`);
                         tech.addJunkTechToPool(0.02)
                     }
                 } else {
@@ -1402,26 +1407,59 @@ const m = {
             m.setMovement()
 
             m.draw = function () {
-                if (powerUps.boost.endCycle > simulation.cycle) {
-                    //gel that acts as if the wind is blowing it when player moves
-                    ctx.save();
-                    ctx.translate(m.pos.x, m.pos.y);
-                    m.velocitySmooth = Vector.add(Vector.mult(m.velocitySmooth, 0.8), Vector.mult(player.velocity, 0.2))
-                    ctx.rotate(Math.atan2(m.velocitySmooth.y, m.velocitySmooth.x))
-                    ctx.beginPath();
-                    const radius = 39
-                    const mag = 14 * Vector.magnitude(m.velocitySmooth) + radius
-                    ctx.arc(0, 0, radius, -Math.PI / 2, Math.PI / 2);
-                    ctx.bezierCurveTo(-radius, radius, -radius, 0, -mag, 0); // bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
-                    ctx.bezierCurveTo(-radius, 0, -radius, -radius, 0, -radius);
-                    const time = Math.min(0.5, (powerUps.boost.endCycle - simulation.cycle) / powerUps.boost.duration)
-                    ctx.fillStyle = `rgba(0,0,0,${0.04 + 0.3 * time})`
-                    ctx.fill()
-                    // ctx.strokeStyle = "#333"
-                    // ctx.lineWidth = 1
-                    // ctx.stroke();
-                    ctx.restore();
+
+
+                // const bounds = {
+                //     min: {
+                //         x: m.pos.x - 30,
+                //         y: m.pos.y
+                //     },
+                //     max: {
+                //         x: m.pos.x + 30,
+                //         y: m.pos.y + 90
+                //     }
+                // }
+                // const hit = Matter.Query.region(map, bounds)
+
+
+                // // Draw the rectangle
+                // const x = bounds.min.x;
+                // const y = bounds.min.y;
+                // const width = bounds.max.x - bounds.min.x;
+                // const height = bounds.max.y - bounds.min.y;
+                // ctx.strokeStyle = hit.length ? "#f00" : "#000"
+                // ctx.strokeRect(x, y, width, height);
+
+
+
+
+                //ledge grab if
+                //   area around head is not touching anything 
+                //   area around body is touching map
+                //   player is not on the ground
+                if (input.up &&
+                    m.buttonCD_jump + 20 < m.cycle &&
+                    !m.onGround &&
+                    !Matter.Query.region([...map, ...body], {
+                        min: { x: m.pos.x - 40, y: m.pos.y - 30 },
+                        max: { x: m.pos.x + 40, y: m.pos.y - 10 }
+                    }).length &&
+                    Matter.Query.region([...map, ...body], {
+                        min: { x: m.pos.x - 40, y: m.pos.y },
+                        max: { x: m.pos.x + 40, y: m.pos.y + 95 }
+                    }).length
+                ) {
+                    // m.jump()
+
+                    m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
+                    player.force.y = -0.85 * m.jumpForce; //player jump force
+                    Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
+                        x: player.velocity.x,
+                        y: 0
+                    });
                 }
+
+
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
                 ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
@@ -1442,6 +1480,28 @@ const m = {
                 ctx.stroke();
                 ctx.restore();
                 m.yOff = m.yOff * 0.75 + m.yOffGoal * 0.25; //smoothly move leg height towards height goal
+
+                if (powerUps.boost.endCycle > simulation.cycle) {
+                    //gel that acts as if the wind is blowing it when player moves
+                    ctx.save();
+                    ctx.translate(m.pos.x, m.pos.y);
+                    m.velocitySmooth = Vector.add(Vector.mult(m.velocitySmooth, 0.95), Vector.mult(player.velocity, 0.05))
+                    ctx.rotate(Math.atan2(m.velocitySmooth.y, m.velocitySmooth.x))
+                    ctx.beginPath();
+                    const radius = 39
+                    const mag = 17 * Vector.magnitude(m.velocitySmooth) + radius
+                    ctx.arc(0, 0, radius, -Math.PI / 2, Math.PI / 2);
+                    ctx.bezierCurveTo(-radius, radius, -radius, 0, -mag, 0); // bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
+                    ctx.bezierCurveTo(-radius, 0, -radius, -radius, 0, -radius);
+                    const time = Math.min(0.8, (powerUps.boost.endCycle - simulation.cycle) / powerUps.boost.duration)
+                    const c = Math.ceil(240 + 15 * Math.random())
+                    ctx.fillStyle = `rgba(${c},${c},${c},${time})`
+                    ctx.fill()
+                    // ctx.strokeStyle = "#333"
+                    // ctx.lineWidth = 1
+                    // ctx.stroke();
+                    ctx.restore();
+                }
             }
             m.drawLeg = function (stroke) {
                 if (m.angle > -Math.PI / 2 && m.angle < Math.PI / 2) {
@@ -3757,17 +3817,17 @@ const m = {
         document.getElementById("field").innerHTML = m.fieldUpgrades[index].name
         m.setHoldDefaults();
         m.fieldUpgrades[index].effect();
-        simulation.inGameConsole(`<div class="circle-grid field"></div> &nbsp; <span class='color-var'>m</span>.setField("<strong class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</strong>")<br>input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>MouseRight</span>"]`);
+        simulation.inGameConsole(`<div class="circle-grid field"></div> <span class='color-var'>m</span>.setField("<strong class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</strong>")<br>input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>MouseRight</span>"]`);
         if (m.fieldMode === 1) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[1]</span>energyHealthRatio <span class='color-symbol'>=</span> ${m.fieldUpgrades[1].energyHealthRatio} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←←↓→→↓</em>`);
         if (m.fieldMode === 2) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldPosition<span class='color-symbol'>+=</span>10 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">← → ← → ↧</em>`);
         if (m.fieldMode === 3) simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↖↑→↗↑↑</em>`);
         if (m.fieldMode === 4) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${m.fieldUpgrades[4].modeText()} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↓↘→↓↙←↑↑↓</em>`);
         if (m.fieldMode === 5) simulation.inGameConsole(`m<span class='color-symbol'>.</span>energy <span class='color-symbol'>+=</span> 0.05 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↙↓↘→→↧</em>`);
-        if (m.fieldMode === 6) simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle <span class='color-symbol'>-</span> 200 <span class='color-symbol'>)</span> <span class='color-symbol'>%</span> 600 <span class='color-symbol'>]</span>  &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 0.9rem;color: #055;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`);
-        if (m.fieldMode === 7) simulation.inGameConsole(`<strong>4.5</strong><span class='color-symbol'>→</span><strong>6x</strong> <strong class='color-cloaked'>decloaking</strong> <strong class='color-d'>damage</strong> &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↑↓↙←↓↘→</em>`);
-        if (m.fieldMode === 8) simulation.inGameConsole(`Composite<span class='color-symbol'>.</span>add<span class='color-symbol'>(</span>engine.world<span class='color-symbol'>,</span> block<span class='color-symbol'>)</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↓↓→↘↓↙←↓↓</em>`);
-        if (m.fieldMode === 9) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>({</span> x<span class='color-symbol'>:</span> 0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span> 0 <span class='color-symbol'>})</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↓↓↓↑↓</em>`);
-        if (m.fieldMode === 10) simulation.inGameConsole(`Matter<span class='color-symbol'>.</span>Body<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>(</span>player<span class='color-symbol'>, {</span> x<span class='color-symbol'>:</span> 0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span> 0 <span class='color-symbol'>})</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↑↑↓↓</em>`);
+        if (m.fieldMode === 6) simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle<span class='color-symbol'>-</span>200<span class='color-symbol'>)</span><span class='color-symbol'>%</span>600<span class='color-symbol'>]</span> <em style="float: right;font-family: monospace;font-size: 0.9rem;color: #055;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`);
+        if (m.fieldMode === 7) simulation.inGameConsole(`<strong>4.5</strong><span class='color-symbol'>→</span><strong>6x</strong> <strong class='color-cloaked'>decloaking</strong> <strong class='color-d'>damage</strong> <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↑↓↙←↓↘→</em>`);
+        if (m.fieldMode === 8) simulation.inGameConsole(`Composite<span class='color-symbol'>.</span>add<span class='color-symbol'>(</span>engine.world<span class='color-symbol'>,</span> block<span class='color-symbol'>)</span> <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">↓↓→↘↓↙←↓↓</em>`);
+        if (m.fieldMode === 9) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>({</span>x<span class='color-symbol'>:</span>0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span>0<span class='color-symbol'>})</span> <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">↓↓↓↑↓</em>`);
+        if (m.fieldMode === 10) simulation.inGameConsole(`Matter<span class='color-symbol'>.</span>Body<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>(</span>player<span class='color-symbol'>,{</span>x<span class='color-symbol'>:</span>0<span class='color-symbol'>,</span>y<span class='color-symbol'>:</span>0<span class='color-symbol'>})</span> <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">↑↑↓↓</em>`);
     },
     fieldEvent: null,
     fieldUpgrades: [
@@ -5101,7 +5161,7 @@ const m = {
                                 m.wakeCheck();
                             }
                         }
-                        simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle <span class='color-symbol'>-</span> 200 <span class='color-symbol'>)</span> <span class='color-symbol'>%</span> 600 <span class='color-symbol'>]</span>  &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 0.9rem;color: #fff;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`);
+                        simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle <span class='color-symbol'>-</span> 200<span class='color-symbol'>)</span> <span class='color-symbol'>%</span> 600<span class='color-symbol'>]</span> <em style="float: right;font-family: monospace;font-size: 0.9rem;color: #fff;">←↙↓↘→↗↑↖←↙↓↘→↗↑</em>`);
                     }
                 }
                 window.addEventListener("keydown", m.fieldEvent);

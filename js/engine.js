@@ -55,16 +55,18 @@ function playerOnGroundCheck(event) {
         }
     }
 
-    const pairs = event.pairs;
-    for (let i = 0, j = pairs.length; i != j; ++i) {
-        let pair = pairs[i];
-        if (pair.bodyA === jumpSensor) {
-            m.standingOn = pair.bodyB; //keeping track to correctly provide recoil on jump
-            if (m.standingOn.alive !== true || m.immuneCycle > m.cycle) enter();
-        } else if (pair.bodyB === jumpSensor) {
-            m.standingOn = pair.bodyA; //keeping track to correctly provide recoil on jump
+
+    for (let i = 0, j = event.pairs.length; i != j; ++i) {
+        if (event.pairs[i].bodyA === jumpSensor) {
+            m.standingOn = event.pairs[i].bodyB; //keeping track to correctly provide recoil on jump
             if (m.standingOn.alive !== true || m.immuneCycle > m.cycle) enter();
         }
+
+        //doesn't seem to need to check bodyB (this might be because the player is added so it's earlier in array?)
+        // else if (event.pairs[i].bodyB === jumpSensor) {
+        //     m.standingOn = event.pairs[i].bodyA; //keeping track to correctly provide recoil on jump
+        //     if (m.standingOn.alive !== true || m.immuneCycle > m.cycle) enter();
+        // }
     }
     m.numTouching = 0;
 }
@@ -73,7 +75,7 @@ function playerOffGroundCheck(event) {
     //runs on collisions events
     const pairs = event.pairs;
     for (let i = 0, j = pairs.length; i != j; ++i) {
-        if (pairs[i].bodyA === jumpSensor || pairs[i].bodyB === jumpSensor) {
+        if (pairs[i].bodyA === jumpSensor) { //|| pairs[i].bodyB === jumpSensor) {
             if (m.onGround && m.numTouching === 0) {
                 m.onGround = false;
                 m.lastOnGroundCycle = m.cycle;
@@ -281,11 +283,25 @@ function collisionChecks(event) {
     }
 }
 
-//determine if player is on the ground
+
 Events.on(engine, "collisionStart", function (event) {
     playerOnGroundCheck(event);
     // playerHeadCheck(event);
     collisionChecks(event);
+
+
+    // //do we need to also check bodyB
+    // for (let i = 0, j = event.pairs.length; i != j; ++i) {
+    //     if (event.pairs[i].bodyA === jumpSensor) {
+    //         player.collision.isJump = true
+    //     } else if (event.pairs[i].bodyA === playerBody) {
+    //         player.collision.isBody = true
+    //     } else if (event.pairs[i].bodyA === playerHead) {
+    //         player.collision.isHead = true
+    //     } else if (event.pairs[i].bodyA === headSensor) {
+    //         player.collision.isHeadSensor = true
+    //     }
+    // }
 });
 Events.on(engine, "collisionActive", function (event) {
     playerOnGroundCheck(event);
@@ -293,4 +309,16 @@ Events.on(engine, "collisionActive", function (event) {
 });
 Events.on(engine, "collisionEnd", function (event) {
     playerOffGroundCheck(event);
+
+    // for (let i = 0, j = event.pairs.length; i != j; ++i) {
+    //     if (event.pairs[i].bodyA === jumpSensor) {
+    //         player.collision.isJump = false
+    //     } else if (event.pairs[i].bodyA === playerBody) {
+    //         player.collision.isBody = false
+    //     } else if (event.pairs[i].bodyA === playerHead) {
+    //         player.collision.isHead = false
+    //     } else if (event.pairs[i].bodyA === headSensor) {
+    //         player.collision.isHeadSensor = false
+    //     }
+    // }
 });

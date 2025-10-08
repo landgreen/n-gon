@@ -63,8 +63,8 @@ const level = {
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("desublimated ammunition")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("paradigm shift")
-            // for (let i = 0; i < 1; i++) tech.giveTech("mass-energy equivalence")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("nitinol")
+            // for (let i = 0; i < 1; i++) tech.giveTech("nail-bot")
             // for (let i = 0; i < 1; i++) tech.giveTech("commodities exchange")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("bot fabrication") });
             // requestAnimationFrame(() => { level.blurryChoices = true });
@@ -74,13 +74,13 @@ const level = {
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
-            // level.furnace()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
-            // for (let i = 0; i < 10; i++) spawn.pitcher(1300 + 100 * i, -200)
+            // spawn.randomGroup(1300, -200, Infinity);
+            // for (let i = 0; i < 3; i++) spawn.pitcher(1300 + 200 * i, -200)
             // for (let i = 0; i < 1; i++) spawn.pitcher4(1100 + 100 * i, -100 - i * 100)
             // for (let i = 0; i < 1; i++) spawn.defendingBoss(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
@@ -90,7 +90,7 @@ const level = {
             // for (let i = 0; i < 1; ++i) spawn.spiderBoss(1900, -500)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
-            // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 500 * Math.random(), m.pos.y + 500 * Math.random(), "heal");
+            // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 500 * Math.random(), m.pos.y + 500 * Math.random(), "boost");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             //lore testing
             // localSettings.isTrainingNotAttempted = true
@@ -116,7 +116,7 @@ const level = {
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.pickList = ["focuser", "focuser"]
-            level[level.levels[level.onLevel]](); //picks the current map from the the levels array
+            level[level.levels[level.onLevel]](); //picks the current map from the levels array
             if (!simulation.isCheating && !build.isExperimentRun && !simulation.isTraining) {
                 localSettings.runCount += level.levelsCleared //track the number of total runs locally
                 localSettings.levelsClearedLastGame = level.levelsCleared
@@ -729,9 +729,11 @@ const level = {
             },
             remove() {
                 if (level.isSlowBots) {
-                    level.isSlowBots = false
-                    b.clearPermanentBots();
-                    b.respawnBots();
+                    requestAnimationFrame(() => {
+                        level.isSlowBots = false
+                        b.clearPermanentBots();
+                        b.respawnBots();
+                    });
                 } else {
                     level.isSlowBots = false
                 }
@@ -5135,7 +5137,7 @@ const level = {
     },
     reactor() {
         if (simulation.isHorizontalFlipped) {
-            level.announceText(550, -710, true)
+            level.announceText(650, -710, true)
         } else {
             level.announceText(-550, -725, true)
         }
@@ -5176,206 +5178,207 @@ const level = {
         let isFightOver = false
         let isSpawnedBoss = false
 
-        if (simulation.isHorizontalFlipped) { //flip the map horizontally
-            level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
-            level.setPosToSpawn(550, -800); //normal spawn
-            spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        // if (simulation.isHorizontalFlipped) { //flip the map horizontally
+        //     level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
+        //     level.setPosToSpawn(550, -800); //normal spawn
+        //     spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
 
-            const button = level.button(-1500, 0)
-            button.isUp = true
+        //     const button = level.button(-1500, 0)
+        //     button.isUp = true
 
-            level.custom = () => {
-                if (isDoorsLocked) {
-                    if (player.position.x > 300) { //if player gets trapped inside starting room open up again
-                        isDoorsLocked = false
-                        doorIn.isClosing = false
-                    }
+        //     level.custom = () => {
+        //         if (isDoorsLocked) {
+        //             if (player.position.x > 300) { //if player gets trapped inside starting room open up again
+        //                 isDoorsLocked = false
+        //                 doorIn.isClosing = false
+        //             }
+        //         }
+        //         doorIn.openClose();
+        //         doorOut.openClose();
+        //         ctx.fillStyle = "#d5ebef"
+        //         ctx.fillRect(-3800, -375, 1050, 375)
+        //         level.enter.draw();
+        //         level.exit.drawAndCheck();
+        //         button.draw();
+        //         if (button.isUp) {
+        //             button.query();
+        //         } else if (!isSpawnedBoss) {
+        //             if (player.position.x < 0) {
+        //                 if (!doorOut.isClosed() || !doorIn.isClosed()) {
+        //                     doorIn.isClosing = true
+        //                     doorOut.isClosing = true
+        //                     //block caught in a door
+        //                     if (Matter.Query.collides(doorOut, body).length > 1 || Matter.Query.collides(doorIn, body).length > 1) {
+        //                         button.isUp = true
+        //                         doorIn.isClosing = false
+        //                         doorOut.isClosing = false
+        //                     }
+        //                 } else {
+        //                     isSpawnedBoss = true
+        //                     isDoorsLocked = true
+        //                     for (let i = 0; i < 12; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1800, "ammo")
+        //                     for (let i = 0; i < 5; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1700, "heal");
+        //                     for (let i = 0; i < 1; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1750, "research");
+        //                     if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
+        //                         for (let i = 0; i < 250; i++) spawn.starter(-2700 + 2400 * Math.random(), -1300 - 500 * Math.random())
+        //                     } else {
+        //                         const bossNumber = level.levelsCleared / 10 + simulation.difficultyMode / 3
+        //                         if (Math.random() < 0.25) {
+        //                             for (let i = 0, len = bossNumber; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+        //                         } else if (Math.random() < 0.33) {
+        //                             for (let i = 0, len = bossNumber * 0.7; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+        //                         } else if (Math.random() < 0.5) {
+        //                             for (let i = 0, len = bossNumber * 0.7; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+        //                         } else {
+        //                             for (let i = 0, len = bossNumber; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+        //                         }
+        //                     }
+        //                     // for (let i = 0, len = 2; i < len; ++i) spawn.sprayBoss(-1327, -1525, 30, false) //spawn 2-3 at difficulty 15 
+
+        //                     // // const scale = Math.pow(simulation.difficulty, 0.7)
+        //                     // if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
+        //                     //     for (let i = 0; i < 250; i++) spawn.starter(-2700 + 2400 * Math.random(), -1300 - 500 * Math.random())
+        //                     // } else {
+        //                     //     if (Math.random() < 0.07 && simulation.difficulty > 35) {
+        //                     //         for (let i = 0, len = scale * 0.22 / 6; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
+        //                     //         for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false);
+        //                     //         for (let i = 0, len = scale * 0.13 / 6; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false)
+        //                     //         for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false);
+        //                     //     } else {
+        //                     //         if (Math.random() < 0.25) {
+        //                     //             for (let i = 0, len = scale * 0.22; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+        //                     //         } else if (Math.random() < 0.33) {
+        //                     //             for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+        //                     //         } else if (Math.random() < 0.5) {
+        //                     //             for (let i = 0, len = scale * 0.13; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+        //                     //         } else {
+        //                     //             for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+        //                     //         }
+        //                     //     }
+        //                     // }
+        //                 }
+        //             } else {
+        //                 doorIn.isClosing = false
+        //             }
+        //         } else if (!isFightOver && !(simulation.cycle % 180)) {
+        //             let isFoundBoss = false
+        //             for (let i = 0; i < mob.length; i++) {
+        //                 if (mob[i].isReactorBoss) {
+        //                     isFoundBoss = true
+        //                     break
+        //                 }
+        //             }
+        //             if (!isFoundBoss) {
+        //                 isFightOver = true
+        //                 doorIn.isClosing = false
+        //                 doorOut.isClosing = false
+        //                 // powerUps.spawnBossPowerUp(-3600, -100)
+        //                 powerUps.spawn(-3650, -50, "tech")
+        //                 powerUps.spawn(-3650, -150, "tech")
+        //                 if (simulation.difficultyMode < 7) powerUps.spawn(-3650, -300, "tech")
+        //             }
+        //         }
+        //     };
+
+        //     level.customTopLayer = () => {
+        //         doorIn.draw();
+        //         doorOut.draw();
+        //         ctx.fillStyle = "rgba(0,0,0,0.1)"
+        //         ctx.fillRect(-225, -1100, 1000, 350);
+        //     };
+        // } else {
+        level.setPosToSpawn(-550, -800); //normal spawn
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+
+        const button = level.button(1400, 0)
+        button.isUp = true
+
+        level.custom = () => {
+            if (isDoorsLocked) {
+                if (player.position.x < -300) { //if player gets trapped inside starting room open up again
+                    isDoorsLocked = false
+                    doorIn.isClosing = false
                 }
-                doorIn.openClose();
-                doorOut.openClose();
-                ctx.fillStyle = "#d5ebef"
-                ctx.fillRect(-3800, -375, 1050, 375)
-                level.enter.draw();
-                level.exit.drawAndCheck();
-                button.draw();
-                if (button.isUp) {
-                    button.query();
-                } else if (!isSpawnedBoss) {
-                    if (player.position.x < 0) {
-                        if (!doorOut.isClosed() || !doorIn.isClosed()) {
-                            doorIn.isClosing = true
-                            doorOut.isClosing = true
-                            //block caught in a door
-                            if (Matter.Query.collides(doorOut, body).length > 1 || Matter.Query.collides(doorIn, body).length > 1) {
-                                button.isUp = true
-                                doorIn.isClosing = false
-                                doorOut.isClosing = false
-                            }
+            }
+            doorIn.openClose();
+            doorOut.openClose();
+            ctx.fillStyle = "#d5ebef"
+            ctx.fillRect(2750, -375, 1050, 375)
+            level.enter.draw();
+            level.exit.drawAndCheck();
+            button.draw();
+            if (button.isUp) {
+                button.query();
+            } else if (!isSpawnedBoss) {
+                if (player.position.x > 0) {
+                    if (!doorOut.isClosed() || !doorIn.isClosed()) {
+                        doorIn.isClosing = true
+                        doorOut.isClosing = true
+                        //block caught in a door
+                        if (Matter.Query.collides(doorOut, body).length > 1 || Matter.Query.collides(doorIn, body).length > 1) {
+                            button.isUp = true
+                            doorIn.isClosing = false
+                            doorOut.isClosing = false
+                        }
+                    } else {
+                        isSpawnedBoss = true
+                        isDoorsLocked = true
+                        for (let i = 0; i < 9; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo")
+                        for (let i = 0; i < 3; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "heal");
+                        if (simulation.difficultyMode > 4) for (let i = 0; i < 8; i++) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo"); //extra ammo on why difficulty
+                        if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
+                            for (let i = 0; i < 250; i++) spawn.starter(300 + 2400 * Math.random(), -1300 - 500 * Math.random())
                         } else {
-                            isSpawnedBoss = true
-                            isDoorsLocked = true
-                            for (let i = 0; i < 12; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1800, "ammo")
-                            for (let i = 0; i < 5; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1700, "heal");
-                            for (let i = 0; i < 1; ++i) powerUps.spawn(-1800 + 550 * Math.random(), -1750, "research");
-                            if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
-                                for (let i = 0; i < 250; i++) spawn.starter(-2700 + 2400 * Math.random(), -1300 - 500 * Math.random())
+                            const count = Math.pow(simulation.difficultyMode, 0.6)
+                            if (Math.random() < 0.07 && count > 3) {
+                                spawn.timeBoss(1487 + 200 * 0, -1525, 60, false);
+                                spawn.bounceBoss(1487 + 200 * 1, -1525, 80, false);
+                                spawn.sprayBoss(1487 + 200 * 2, -1525, 30, false)
+                                spawn.mineBoss(1487 + 200 * 3, -1525, 50, false);
                             } else {
-                                const bossNumber = level.levelsCleared / 10 + simulation.difficultyMode / 3
                                 if (Math.random() < 0.25) {
-                                    for (let i = 0, len = bossNumber; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                                    for (let i = 0, len = count; i < len; ++i)spawn.timeBoss(1487 + 200 * i, -1525, 80, false);
                                 } else if (Math.random() < 0.33) {
-                                    for (let i = 0, len = bossNumber * 0.7; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
+                                    for (let i = 0, len = count; i < len; ++i)spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
                                 } else if (Math.random() < 0.5) {
-                                    for (let i = 0, len = bossNumber * 0.7; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
+                                    for (let i = 0, len = count; i < len; ++i)spawn.sprayBoss(1487 + 200 * i, -1525, 30, false)
                                 } else {
-                                    for (let i = 0, len = bossNumber; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
+                                    for (let i = 0, len = count; i < len; ++i)spawn.mineBoss(1487 + 200 * i, -1525, 50, false);
                                 }
                             }
-                            // const scale = Math.pow(simulation.difficulty, 0.7)
-                            // if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
-                            //     for (let i = 0; i < 250; i++) spawn.starter(-2700 + 2400 * Math.random(), -1300 - 500 * Math.random())
-                            // } else {
-                            //     if (Math.random() < 0.07 && simulation.difficulty > 35) {
-                            //         for (let i = 0, len = scale * 0.22 / 6; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
-                            //         for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false);
-                            //         for (let i = 0, len = scale * 0.13 / 6; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false)
-                            //         for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false);
-                            //     } else {
-                            //         if (Math.random() < 0.25) {
-                            //             for (let i = 0, len = scale * 0.22; i < len; ++i) spawn.timeBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
-                            //         } else if (Math.random() < 0.33) {
-                            //             for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(-1327 - 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
-                            //         } else if (Math.random() < 0.5) {
-                            //             for (let i = 0, len = scale * 0.13; i < len; ++i) spawn.sprayBoss(-1327 - 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
-                            //         } else {
-                            //             for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.mineBoss(-1327 - 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
-                            //         }
-                            //     }
-                            // }
-                        }
-                    } else {
-                        doorIn.isClosing = false
-                    }
-                } else if (!isFightOver && !(simulation.cycle % 180)) {
-                    let isFoundBoss = false
-                    for (let i = 0; i < mob.length; i++) {
-                        if (mob[i].isReactorBoss) {
-                            isFoundBoss = true
-                            break
                         }
                     }
-                    if (!isFoundBoss) {
-                        isFightOver = true
-                        doorIn.isClosing = false
-                        doorOut.isClosing = false
-                        // powerUps.spawnBossPowerUp(-3600, -100)
-                        powerUps.spawn(-3650, -50, "tech")
-                        powerUps.spawn(-3650, -150, "tech")
-                        if (simulation.difficultyMode < 7) powerUps.spawn(-3650, -300, "tech")
+                } else {
+                    doorIn.isClosing = false
+                }
+            } else if (!isFightOver && !(simulation.cycle % 180)) {
+                let isFoundBoss = false
+                for (let i = 0; i < mob.length; i++) {
+                    if (mob[i].isBoss) {
+                        isFoundBoss = true
+                        break
                     }
                 }
-            };
-
-            level.customTopLayer = () => {
-                doorIn.draw();
-                doorOut.draw();
-                ctx.fillStyle = "rgba(0,0,0,0.1)"
-                ctx.fillRect(-225, -1100, 1000, 350);
-            };
-        } else {
-            level.setPosToSpawn(-550, -800); //normal spawn
-            spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-
-            const button = level.button(1400, 0)
-            button.isUp = true
-
-            level.custom = () => {
-                if (isDoorsLocked) {
-                    if (player.position.x < -300) { //if player gets trapped inside starting room open up again
-                        isDoorsLocked = false
-                        doorIn.isClosing = false
-                    }
+                if (!isFoundBoss) {
+                    isFightOver = true
+                    doorIn.isClosing = false
+                    doorOut.isClosing = false
+                    // powerUps.spawnBossPowerUp(3600, -100)
+                    powerUps.spawn(3650, -50, "tech")
+                    powerUps.spawn(3650, -150, "tech")
+                    powerUps.spawn(3650, -300, "tech")
+                    // if (player.position.x < 2760 && player.position.x > 210) {}
                 }
-                doorIn.openClose();
-                doorOut.openClose();
-                ctx.fillStyle = "#d5ebef"
-                ctx.fillRect(2750, -375, 1050, 375)
-                level.enter.draw();
-                level.exit.drawAndCheck();
-                button.draw();
-                if (button.isUp) {
-                    button.query();
-                } else if (!isSpawnedBoss) {
-                    if (player.position.x > 0) {
-                        if (!doorOut.isClosed() || !doorIn.isClosed()) {
-                            doorIn.isClosing = true
-                            doorOut.isClosing = true
-                            //block caught in a door
-                            if (Matter.Query.collides(doorOut, body).length > 1 || Matter.Query.collides(doorIn, body).length > 1) {
-                                button.isUp = true
-                                doorIn.isClosing = false
-                                doorOut.isClosing = false
-                            }
-                        } else {
-                            isSpawnedBoss = true
-                            isDoorsLocked = true
-                            for (let i = 0; i < 9; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo")
-                            for (let i = 0; i < 3; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "heal");
-                            if (simulation.difficultyMode > 5) for (let i = 0; i < 8; i++) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo"); //extra ammo on why difficulty
-                            const scale = Math.pow(simulation.difficulty, 0.7) //hard around 30, why around 54
-                            if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) {
-                                for (let i = 0; i < 250; i++) spawn.starter(300 + 2400 * Math.random(), -1300 - 500 * Math.random())
-                            } else {
-                                if (Math.random() < 0.07 && simulation.difficulty > 35) {
-                                    for (let i = 0, len = scale * 0.25 / 6; i < len; ++i) spawn.timeBoss(1487 + 200 * i, -1525, 60, false); //spawn 1-2 at difficulty 15 
-                                    for (let i = 0, len = scale * 0.1 / 6; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false);
-                                    for (let i = 0, len = scale * 0.15 / 6; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false)
-                                    for (let i = 0, len = scale * 0.26 / 6; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false);
-                                } else {
-                                    if (Math.random() < 0.25) {
-                                        for (let i = 0, len = scale * 0.25; i < len; ++i) spawn.timeBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
-                                    } else if (Math.random() < 0.33) {
-                                        for (let i = 0, len = scale * 0.1; i < len; ++i) spawn.bounceBoss(1487 + 200 * i, -1525, 80, false); //spawn 1-2 at difficulty 15 
-                                    } else if (Math.random() < 0.5) {
-                                        for (let i = 0, len = scale * 0.15; i < len; ++i) spawn.sprayBoss(1487 + 200 * i, -1525, 30, false) //spawn 2-3 at difficulty 15 
-                                    } else {
-                                        for (let i = 0, len = scale * 0.26; i < len; ++i) spawn.mineBoss(1487 + 200 * i, -1525, 50, false); //spawn 3-4 at difficulty 15 
-                                    }
-                                }
-                            }
-                            // spawn.secondaryBossChance(2200, -800)
-                        }
-                    } else {
-                        doorIn.isClosing = false
-                    }
-                } else if (!isFightOver && !(simulation.cycle % 180)) {
-                    let isFoundBoss = false
-                    for (let i = 0; i < mob.length; i++) {
-                        if (mob[i].isBoss) {
-                            isFoundBoss = true
-                            break
-                        }
-                    }
-                    if (!isFoundBoss) {
-                        isFightOver = true
-                        doorIn.isClosing = false
-                        doorOut.isClosing = false
-                        // powerUps.spawnBossPowerUp(3600, -100)
-                        powerUps.spawn(3650, -50, "tech")
-                        powerUps.spawn(3650, -150, "tech")
-                        powerUps.spawn(3650, -300, "tech")
-                        // if (player.position.x < 2760 && player.position.x > 210) {}
-                    }
-                }
-            };
+            }
+        };
 
-            level.customTopLayer = () => {
-                doorIn.draw();
-                doorOut.draw();
-                ctx.fillStyle = "rgba(0,0,0,0.1)"
-                ctx.fillRect(-775, -1100, 1000, 350);
-            };
-        }
+        level.customTopLayer = () => {
+            doorIn.draw();
+            doorOut.draw();
+            ctx.fillStyle = "rgba(0,0,0,0.1)"
+            ctx.fillRect(-775, -1100, 1000, 350);
+        };
+        // }
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     towers() {
@@ -6658,7 +6661,7 @@ const level = {
                             button.query();
                             if (!button.isUp) {
                                 const mapStartingLength = map.length //track this so you know how many you added when running addMapToLevelInProgress
-                                addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+                                addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the elements so they show up visually
                                     who.collisionFilter.category = cat.map;
                                     who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
                                     Matter.Body.setStatic(who, true); //make static
@@ -6767,7 +6770,7 @@ const level = {
                             button.query();
                             if (!button.isUp) {
                                 const mapStartingLength = map.length //track this so you know how many you added when running addMapToLevelInProgress
-                                addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+                                addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the elements so they show up visually
                                     who.collisionFilter.category = cat.map;
                                     who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
                                     Matter.Body.setStatic(who, true); //make static
@@ -6832,7 +6835,7 @@ const level = {
                             button.query();
                             if (!button.isUp) {
                                 // toggle.isAddedElements = true //only do this once
-                                addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+                                addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all  the elements so they show up visually
                                     who.collisionFilter.category = cat.map;
                                     who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
                                     Matter.Body.setStatic(who, true); //make static
@@ -6925,7 +6928,7 @@ const level = {
                         if (button.isUp) {
                             button.query();
                             if (!button.isUp) {
-                                addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+                                addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all  the elements so they show up visually
                                     who.collisionFilter.category = cat.map;
                                     who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
                                     Matter.Body.setStatic(who, true); //make static
@@ -14784,7 +14787,7 @@ const level = {
     run() {
         simulation.inGameConsole(`<strong>run</strong> by <span class='color-var'>iNoobBoi</span>`);
 
-        addPartToMap = (len) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+        addPartToMap = (len) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the elements so they show up visually
             map[len].collisionFilter.category = cat.map;
             map[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
             Matter.Body.setStatic(map[len], true); //make static

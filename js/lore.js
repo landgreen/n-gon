@@ -880,7 +880,7 @@ const lore = {
                             spawn.mapRect(200, -850, 300, 900);
                             spawn.mapRect(-500, 0, 1000, 275);
 
-                            addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the the elements so they show up visually
+                            addMapToLevelInProgress = (who) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the elements so they show up visually
                                 who.collisionFilter.category = cat.map;
                                 who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
                                 Matter.Body.setStatic(who, true); //make static

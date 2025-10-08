@@ -2710,7 +2710,7 @@ const spawn = {
         me.cd = 0
         me.fireDir = { x: 0, y: 0 };
         me.frictionAir = 0.02;
-        me.accelMag = 0.00014 * simulation.accelScale;
+        me.accelMag = 0.00017 * simulation.accelScale;
         me.lookTorque = 0.0000014;
         me.restitution = 0;
         me.myBall = null
@@ -2760,10 +2760,10 @@ const spawn = {
                 this.do = this.look
 
                 this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
-                this.force.x -= 0.02 * this.fireDir.x * this.mass;
-                this.force.y -= 0.02 * this.fireDir.y * this.mass;
+                this.force.x -= 0.005 * this.fireDir.x * this.mass;
+                this.force.y -= 0.005 * this.fireDir.y * this.mass;
                 if (this.myBall) {
-                    const v = 16
+                    const v = 11
                     Matter.Body.setVelocity(this.myBall, {
                         x: this.velocity.x + this.fireDir.x * v + 5 * (Math.random() - 0.5),
                         y: this.velocity.y + this.fireDir.y * v + 5 * (Math.random() - 0.5)
@@ -2804,7 +2804,7 @@ const spawn = {
                 this.revolutions = 0
                 this.do = this.spin
 
-                spawn.ball(this.vertices[1].x, this.vertices[1].y, 12, 540 + 120);
+                spawn.ball(this.vertices[1].x, this.vertices[1].y, 12, 540 + 240);
                 this.myBall = mob[mob.length - 1]
                 this.myBall.drawOutline = false
             }
@@ -2833,8 +2833,8 @@ const spawn = {
                 this.do = this.look
 
                 this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
-                this.force.x -= 0.03 * this.fireDir.x * this.mass;
-                this.force.y -= 0.03 * this.fireDir.y * this.mass;
+                this.force.x -= 0.01 * this.fireDir.x * this.mass;
+                this.force.y -= 0.01 * this.fireDir.y * this.mass;
                 if (this.myBall) {
                     const v = 20 + Math.floor(10 * Math.random())
                     Matter.Body.setVelocity(this.myBall, {
@@ -2883,7 +2883,7 @@ const spawn = {
                 this.do = this.spin
 
                 for (let i = 0; i < 3; i++) {
-                    spawn.ball(this.vertices[i].x, this.vertices[i].y, 12, 540 + 300);
+                    spawn.ball(this.vertices[i].x, this.vertices[i].y, 12, 540 + 420);
                     this.myBall[i] = mob[mob.length - 1]
                     this.myBall[i].drawOutline = false
                 }
@@ -2915,8 +2915,8 @@ const spawn = {
 
                     if (this.revolutions > i + 1) {
                         this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
-                        this.force.x -= 0.01 * this.fireDir.x * this.mass;
-                        this.force.y -= 0.01 * this.fireDir.y * this.mass;
+                        this.force.x -= 0.003 * this.fireDir.x * this.mass;
+                        this.force.y -= 0.003 * this.fireDir.y * this.mass;
 
                         if (this.myBall) {
                             const v = 23 + Math.floor(18 * Math.random())
@@ -2938,7 +2938,7 @@ const spawn = {
             }
         }
     },
-    ball(x, y, radius = 20, time = 540) { //bullets
+    ball(x, y, radius = 20, time = 660) { //bullets
         mobs.spawn(x, y, 7, radius, "#f55");
         let me = mob[mob.length - 1];
         me.stroke = "transparent";
@@ -6978,15 +6978,14 @@ const spawn = {
         me.isBoss = true;
         me.isReactorBoss = true;
         me.inertia = Infinity; //no rotation
-        me.burstFireFreq = 22 + Math.floor(13 * simulation.CDScale)
-        me.burstTotalPhases = 3 + Math.floor(1.4 / simulation.CDScale)
+        me.burstFireFreq = 20
+        me.burstTotalPhases = 9
         me.frictionStatic = 0;
         me.friction = 0;
         me.frictionAir = 0;
         me.restitution = 1
-        // spawn.spawnOrbitals(me, radius + 50 + 125 * Math.random(), 1)
         Matter.Body.setDensity(me, 0.002 + 0.00005 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
-        me.damageReduction = 0.16
+        me.damageReduction = 0.25
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.nextHealthThreshold = 0.75
@@ -7005,6 +7004,7 @@ const spawn = {
                 this.damageReduction = 0
             }
         };
+
         me.radialLines = function () {
             ctx.beginPath();
             for (let i = 0, len = this.vertices.length; i < len; i++) {
@@ -7076,7 +7076,7 @@ const spawn = {
         me.isBoss = true;
         me.isReactorBoss = true;
         Matter.Body.setDensity(me, 0.003); //normal is 0.001
-        me.damageReduction = 0.15
+        me.damageReduction = 0.25
         me.startingDamageReduction = me.damageReduction
         me.inertia = Infinity;
         me.isInvulnerable = false
@@ -7100,7 +7100,7 @@ const spawn = {
         me.cycle = 0
         me.nextHealthThreshold = 0.75
         me.fireCount = 0
-        // console.log(me.mass) //100
+
         me.do = function () {
             me.seePlayer.recall = 1
             //maintain speed //faster in the vertical to help avoid repeating patterns
@@ -7169,7 +7169,7 @@ const spawn = {
         // me.skipRate = 1 + Math.floor(simulation.difficulty*0.02)
         // spawn.shield(me, x, y, 1);
         Matter.Body.setDensity(me, 0.001); //normal is 0.001
-        me.damageReduction = 0.085
+        me.damageReduction = 0.1
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.onDamage = function () {
@@ -7190,7 +7190,7 @@ const spawn = {
         me.cycle = Math.floor(360 * Math.random())
         me.nextHealthThreshold = 0.75
         me.invulnerableCount = 0
-        // console.log(me.mass) //100
+
         me.do = function () {
             this.cycle++
             this.fill = `hsl(${this.cycle * 0.5}, 100%, 80%)`;
@@ -7248,7 +7248,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.stroke = "transparent";
         Matter.Body.setDensity(me, 0.00001); //normal is 0.001
-        me.timeLeft = 360 + Math.floor(180 * Math.random())
+        me.timeLeft = 300 + Math.floor(120 * Math.random())
         me.inertia = Infinity;
         me.damageReduction = 1
         me.frictionAir = 0
@@ -7299,13 +7299,6 @@ const spawn = {
                 this.isInvulnerable = true
                 this.damageReduction = 0
 
-                //slow time to look cool
-                // simulation.fpsCap = 10 //new fps
-                // simulation.fpsInterval = 1000 / simulation.fpsCap;
-                //how long to wait to return to normal fps
-                // m.defaultFPSCycle = m.cycle + 20 + 90
-
-
                 for (let i = 0, len = mob.length; i < len; ++i) { //trigger nearby mines
                     if (mob[i].isMine && Vector.magnitude(Vector.sub(this.position, mob[i].position)) < this.explodeRange) mob[i].isExploding = true
                 }
@@ -7325,7 +7318,6 @@ const spawn = {
                 if (mob[i].isMine && Vector.magnitude(Vector.sub(this.position, mob[i].position)) < this.explodeRange) mob[i].isExploding = true
             }
         };
-        // console.log(me.mass) //100
         me.do = function () {
             me.seePlayer.recall = 1
             //maintain speed //faster in the vertical to help avoid repeating patterns
