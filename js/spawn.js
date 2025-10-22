@@ -18,10 +18,8 @@ const spawn = {
     ],
     tier: [
         ["starter"], //T0
-        // ["pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher", "pitcher"],
         ["slasher", "hopper", "flutter", "shooter", "grower", "grenadier", "laser", "beamer", "launcher", "exploder", "pitcher"], //T2
         ["slasher2", "hopperBaby", "stabber", "springer", "striker", "dodger", "spinner", "sucker", "pulsar", "focuser", "spawner"], //T2
-        // ["pitcher3", "pitcher3", "pitcher3", "pitcher3", "pitcher3", "pitcher3"],
         ["slasher3", "hopMother", "stinger", "sniper", "sneaker", "slicer", "ghoster", "laserLayer", "launcherOne", "freezer", "pitcher3"], //T3
         ["slasher4", "hopsploder", "stingWinger", "sneakyStriker", "bigSucker", "quadLaser", "launchPusher", "slasher5", "mortar", "pitcher4",],//T4
     ],
@@ -42,11 +40,11 @@ const spawn = {
         "timeSkipBoss", "dragonFlyBoss", "beetleBoss", "sneakBoss", "mantisBoss", "laserLayerBoss",
         "snakeBoss", "conductorBoss"
     ],
-    mobDmgDoneByTier: [0.35, 0.7, 2.1, 3.5, 4.9, 6.3],
+    mobDmgDoneByTier: [0.35, 0.7, 2.1, 3.8, 5.4, 6.5],
     dmgToPlayerByLevelsCleared() {
         return 0.5 * level.levelsCleared
     },
-    mobDmgTakenByTier: [0.5, 1, 0.5, 0.1, 0.02, 0.004],
+    mobDmgTakenByTier: [0.5, 1, 0.5, 0.06, 0.01, 0.003],
     mobDmgTakenByLevelsCleared() {
         return 0.5 * Math.pow(0.2, 0.25 * level.levelsCleared)
     },
@@ -160,10 +158,64 @@ const spawn = {
             spawn[pick](x, y);
         }
     },
+
+
+
+    /* spawn chance rework
+    how to randomize the order of the mobs spawned in the level
+        combine chance to spawn with level cap
+        max mobs code:
+            mobs.length < 3*Math.log(level.levelsCleared)+simulation.difficultyMode
+        spawn chance code: (ignores chance parameter)
+            Math.random() < 1/math.sqrt(mob.length) + 0.05*simulation.difficultyMode
+
+    scales with
+        simulation.difficultyMode 1-7
+            +1 max mob per simulation.difficultyMode
+        level.levelsCleared 1-13
+        mob.length 0-20+
+            lower chance to spawn with mob.length
+        chance?
+            maybe just ignore chance?
+            maybe all spawns not random
+    ideal mobs
+        level.levelsCleared 12 (subway)
+            simulation.difficultyMode 2 = 10
+            simulation.difficultyMode 5 = 13
+            simulation.difficultyMode 7 = 15
+        level.levelsCleared 1 (level after intro)
+            simulation.difficultyMode 2 = 3
+            simulation.difficultyMode 5 = 6
+            simulation.difficultyMode 7 = 9
+
+    
+
+*/
+
+
+    //reworked with no chance effect
+    // spawnChance(chance) {
+    //     if (mob.length < 3 * Math.log(level.levelsCleared) + simulation.difficultyMode) {
+    //         return Math.random() < 1 / Math.sqrt(1.2 * mob.length) + 0.05 * simulation.difficultyMode
+    //     }
+    // },
+
+
+    // original with 10% + number of mobs chance to fail
     spawnChance(chance) {
-        const difficultyChance = (simulation.difficultyMode === 1) ? 1 : simulation.difficulty
-        return (Math.random() < chance + 0.07 * difficultyChance) && (mob.length < -1 + 16 * Math.log10(simulation.difficulty + 1))
+        if (Math.random() < 0.1 + mob.length) false
+        // const mobs = 12 * Math.log10(5 * level.levelsCleared)
+        const mobs = 5 * Math.log(level.levelsCleared + 1)
+        const maxMobs = (simulation.difficultyMode === 1) ? 2 : mobs
+        return (Math.random() < chance + 0.35 * level.levelsCleared) && (mob.length < maxMobs)
     },
+
+    // original
+    // spawnChance(chance) {
+    //     const difficultyChance = (simulation.difficultyMode === 1) ? 1 : simulation.difficulty
+    //     return (Math.random() < chance + 0.07 * difficultyChance) && (mob.length < -1 + 16 * Math.log10(simulation.difficulty + 1))
+    // },
+
     randomMob(x, y, chance = 1) {
         if (spawn.spawnChance(chance) || chance === Infinity) {
             const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)];
@@ -1537,7 +1589,7 @@ const spawn = {
         me.damageReduction = 0.02
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
-        me.nextHealthThreshold = 0.8
+        me.nextHealthThreshold = 0.75
         me.invulnerableCount = 0
 
         me.frictionAir = 0.01;
@@ -1554,7 +1606,7 @@ const spawn = {
         me.onDamage = function () {
             if (this.health < this.nextHealthThreshold && this.alive) {
                 this.health = this.nextHealthThreshold - 0.01
-                this.nextHealthThreshold = Math.floor(this.health * 5) / 5
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4
                 this.invulnerableCount = 60
                 this.isInvulnerable = true
                 this.damageReduction = 0
@@ -2328,7 +2380,7 @@ const spawn = {
         me.frictionStatic = 1
         me.restitution = 0;
         me.delay = 100
-        me.randomHopFrequency = 150 + Math.floor(Math.random() * 100);
+        me.randomHopFrequency = 210 + Math.floor(Math.random() * 60);
         me.randomHopCD = simulation.cycle + me.randomHopFrequency;
         Matter.Body.rotate(me, Math.random() * Math.PI);
         spawn.shield(me, x, y);
@@ -2351,7 +2403,7 @@ const spawn = {
                     this.force.y += forceMag * Math.sin(angle) - (Math.random() * 0.06 + 0.1) * this.mass; //antigravity
 
                     //    grenade(x, y, tier, lifeSpan = 90 + Math.ceil(60 / simulation.accelScale), pulseRadius = Math.min(550, 250 + simulation.difficulty * 3), size = 3) {
-                    spawn.grenade(this.position.x, this.position.y + radius, this.tier, 85, 350, 6);
+                    spawn.grenade(this.position.x, this.position.y + radius, this.tier, 30, 350, 6);
                 }
             } else {
                 //randomly hob if not aware of player
@@ -2964,7 +3016,11 @@ const spawn = {
         me.do = function () {
             this.timeLimit();
 
-            if (this.speed < 10) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y * 1.03 });
+            if (this.leaveBody && this.speed < 0.1) {
+                this.timeLeft -= 20
+                // console.log(this.timeLeft)
+                // Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y * 1.03 });
+            }
 
             if (this.drawOutline) {//draw outline
                 ctx.save();
@@ -3788,7 +3844,7 @@ const spawn = {
 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-        me.accelMag = 0.0006 + 0.0007 * Math.sqrt(simulation.accelScale);
+        me.accelMag = 0.0007
         me.frictionAir = 0.04;
         // me.seePlayerFreq = 40 + Math.floor(13 * Math.random())
         me.memory = 240;
@@ -3838,48 +3894,6 @@ const spawn = {
                 this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
                 this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
             }
-            // else { //flocking behavior (not working yet)
-            //     this.force.x += Math.cos(this.angle) * this.accelMag * this.mass
-            //     this.force.y += Math.sin(this.angle) * this.accelMag * this.mass
-            //     //set direction to turn to fire
-            //     if (!(simulation.cycle % this.seePlayerFreq)) {
-            //         //find nearest mob and maintain a distance
-            //         let nearestMob = null
-            //         let nearestMobDistance = Infinity
-            //         for (let i = 0; i < mob.length; i++) {
-            //             const newMobDistance = Vector.magnitude(Vector.sub(this.position, mob[i].position))
-            //             if (mob[i].isDropPowerUp && mob[i].alive && newMobDistance < nearestMobDistance) { //&& !mob[i].isBoss
-            //                 nearestMobDistance = newMobDistance
-            //                 nearestMob = mob[i]
-            //             }
-            //         }
-            //         if (nearestMob) {
-            //             // console.log(nearestMob)
-            //             this.fireDir = Vector.normalise(Vector.sub(nearestMob.position, this.position));
-            //             //dot product can't tell if mob is facing directly away or directly towards,  so check if pointed directly away from player every few cycles
-            //             const mod = (a, n) => {
-            //                 return a - Math.floor(a / n) * n
-            //             }
-            //             const sub = Vector.sub(nearestMob.position, this.position) //check by comparing different between angles.  Give this a nudge if angles are 180 degree different
-            //             const diff = mod(Math.atan2(sub.y, sub.x) - this.angle + Math.PI, 2 * Math.PI) - Math.PI
-            //             if (Math.abs(diff) > 2.8) this.torque += 0.0002 * this.inertia * Math.random();
-            //         }
-            //     }
-            //     //rotate towards fireDir
-            //     const angle = this.angle + Math.PI / 2;
-            //     c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
-            //     const threshold = 0.4;
-            //     const turn = 0.000025 * this.inertia
-            //     if (c > threshold) {
-            //         this.torque += turn;
-            //     } else if (c < -threshold) {
-            //         this.torque -= turn;
-            //     }
-            //     const flapArc = 0.7 //don't go past 1.57 for normal flaps
-            //     ctx.fillStyle = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.2)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
-            //     this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
-            //     this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
-            // }
         };
     },
     stinger(x, y, radius = 18 + 4 * Math.random()) {
@@ -3939,8 +3953,8 @@ const spawn = {
 
                 const flapArc = 0.8 //don't go past 1.57 for normal flaps
                 ctx.fillStyle = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.2)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
-                this.wing(this.angle + 2.1 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius, 0.0015)
-                this.wing(this.angle - 2.1 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius, 0.0015)
+                this.wing(this.angle + 2.1 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius, 0.003)
+                this.wing(this.angle - 2.1 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius, 0.003)
 
                 // const seeRange = 2000 + 35 * simulation.difficultyMode;
                 if (this.distanceToPlayer() < 2000) {
@@ -3990,7 +4004,7 @@ const spawn = {
         // me.damageReduction = 0.04 
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
         // Matter.Body.rotate(me, Math.random() * Math.PI * 2);
-        me.accelMag = 0.0025
+        me.accelMag = 0.002
         me.frictionAir = 0.03;
         // me.seePlayerFreq = 40 + Math.floor(13 * Math.random())
         me.memory = 240;
@@ -4004,7 +4018,7 @@ const spawn = {
         me.flapRate = 0.06 + 0.03 * Math.random()
         // me.flapRadius = 40 + radius * 3
         me.flapArc = 0.25 //don't go past 1.57 for normal flaps
-        me.wingLength = 150
+        me.wingLength = 110
         me.ellipticity = 0.2
         me.angleOff = 0.4
 
@@ -4037,23 +4051,15 @@ const spawn = {
                     this.torque -= turn;
                 }
 
-                // this.accelMag = 0.0006 + 0.0007 * Math.sqrt(simulation.accelScale);
                 this.frictionAir = 0.08 + 0.09 * Math.sin(simulation.cycle * this.flapRate - Math.PI / 2)
-
-                // const flapArc = 0.8 //don't go past 1.57 for normal flaps
-                // ctx.fillStyle = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.2)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
-                // this.wing(this.angle + 2.1 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
-                // this.wing(this.angle - 2.1 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
-
-                // wing(a, radius = 250, ellipticity = 0.4, dmg = 0.0006) {
 
                 let a = Math.atan2(this.velocity.y, this.velocity.x)
                 const color = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.9)`;
                 ctx.fillStyle = color
-                this.wing(a + Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.003)//dmg = 0.0006
-                this.wing(a - Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.003)
-                this.wing(a - Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.003)
-                this.wing(a + Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.003)
+                this.wing(a + Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.006)//dmg = 0.0006
+                this.wing(a - Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.006)
+                this.wing(a - Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.006)
+                this.wing(a + Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.006)
                 // const seeRange = 2000 + 35 * simulation.difficultyMode;
                 if (this.distanceToPlayer() < 3000) {
                     best = {
@@ -4064,7 +4070,7 @@ const spawn = {
                         v1: null,
                         v2: null
                     };
-                    const seeRangeRandom = 500 - 50 * Math.random()
+                    const seeRangeRandom = 450 - 50 * Math.random()
                     const look = { x: this.position.x + seeRangeRandom * Math.cos(this.angle), y: this.position.y + seeRangeRandom * Math.sin(this.angle) };
                     best = vertexCollision(this.position, look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
 
@@ -4260,8 +4266,8 @@ const spawn = {
                 const flapArc = 0.7 //don't go past 1.57 for normal flaps
                 this.wingSize = 0.97 * this.wingSize + 0.03 * this.wingGoal
                 ctx.fillStyle = this.fill = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.9)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
-                this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.0012)
-                this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.0012)
+                this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.01)
+                this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.01)
             } else {
                 this.wingSize = 0.96 * this.wingSize + 0 //shrink while stunned
             }
@@ -4277,7 +4283,7 @@ const spawn = {
         me.damageReduction = 0.08
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
-        me.nextHealthThreshold = 0.8
+        me.nextHealthThreshold = 0.75
         me.invulnerableCount = 0
         me.flapRate = 0.4
         me.wingSize = 0
@@ -4349,7 +4355,7 @@ const spawn = {
         me.onDamage = function () {
             if (this.health < this.nextHealthThreshold && this.alive) {
                 this.health = this.nextHealthThreshold - 0.01
-                this.nextHealthThreshold = Math.floor(this.health * 5) / 5
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4
                 this.invulnerableCount = 40
                 this.isInvulnerable = true
                 this.damageReduction = 0
@@ -4415,8 +4421,8 @@ const spawn = {
                 }
                 const flapArc = 0.7 //don't go past 1.57 for normal flaps
                 this.wingSize = 0.97 * this.wingSize + 0.03 * this.wingGoal
-                this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.0012)
-                this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.0012)
+                this.wing(this.angle + Math.PI / 2 + flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.03)
+                this.wing(this.angle - Math.PI / 2 - flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingSize, 0.5, 0.03)
             } else {
                 this.wingSize = 0.96 * this.wingSize + 0 //shrink while stunned
             }
@@ -4981,7 +4987,7 @@ const spawn = {
         me.damageReduction = 0.4
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
-        me.nextHealthThreshold = 0.8
+        me.nextHealthThreshold = 0.75
         me.invulnerableCount = 0
         me.history = []
         for (let i = 0; i < 20; i++) {
@@ -5032,7 +5038,7 @@ const spawn = {
         me.onDamage = function () {
             if (this.health < this.nextHealthThreshold) {
                 this.health = this.nextHealthThreshold - 0.01
-                this.nextHealthThreshold = Math.floor(this.health * 5) / 5
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4
                 this.invulnerableCount = 170
                 this.isInvulnerable = true
                 this.damageReduction = 0
@@ -5361,7 +5367,7 @@ const spawn = {
         me.damageReduction = 0.3
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
-        me.nextHealthThreshold = 0.8
+        me.nextHealthThreshold = 0.75
         me.invulnerableCount = 0
 
         spawn.shield(me, x, y, 1);
@@ -5378,7 +5384,7 @@ const spawn = {
         me.onDamage = function () {
             if (this.health < this.nextHealthThreshold && this.alive) {
                 this.health = this.nextHealthThreshold - 0.01
-                this.nextHealthThreshold = Math.floor(this.health * 5) / 5
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4
                 this.invulnerableCount = 90
                 this.isInvulnerable = true
                 this.damageReduction = 0
@@ -5664,8 +5670,7 @@ const spawn = {
         };
     },
     laserLayer(x, y, radius = 18 + Math.floor(6 * Math.random())) {
-        const color = "#f09"
-        mobs.spawn(x, y, 4, radius, color);
+        mobs.spawn(x, y, 4, radius, "#f09");
         let me = mob[mob.length - 1];
         me.tier = 3
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
@@ -5740,7 +5745,7 @@ const spawn = {
                             x: best.x,
                             y: best.y,
                             radius: dmg * 1500,
-                            color: "rgba(255,0,100,0.5)",
+                            color: "rgba(255,0,255,0.5)",
                             time: 20
                         });
                         this.laserArray.splice(i, 1) //remove this laser node
@@ -5754,7 +5759,7 @@ const spawn = {
                         ctx.beginPath();
                         ctx.moveTo(best.x, best.y);
                         ctx.lineTo(this.laserArray[i].a.x, this.laserArray[i].a.y);
-                        ctx.strokeStyle = `rgb(255,0,100)`;
+                        ctx.strokeStyle = `rgb(255,0,255)`;
                         ctx.lineWidth = 2;
                         ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
                         ctx.stroke();
@@ -5763,7 +5768,7 @@ const spawn = {
                         ctx.beginPath();
                         ctx.moveTo(this.laserArray[i].b.x, this.laserArray[i].b.y);
                         ctx.lineTo(this.laserArray[i].a.x, this.laserArray[i].a.y);
-                        ctx.strokeStyle = `rgb(255,0,100)`;
+                        ctx.strokeStyle = `rgb(255,0,255)`;
                         ctx.lineWidth = 2;
                         ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
                         ctx.stroke();
@@ -5775,7 +5780,7 @@ const spawn = {
                     ctx.moveTo(this.laserArray[i].a.x, this.laserArray[i].a.y);
                     ctx.lineTo(this.laserArray[i].b.x, this.laserArray[i].b.y);
                     ctx.lineWidth = 2 + 40 - 40 * this.laserArray[i].fade;
-                    ctx.strokeStyle = `rgba(255,0,100,${0.02 + 0.1 * this.laserArray[i].fade})`;
+                    ctx.strokeStyle = `rgba(255,0,255,${0.02 + 0.1 * this.laserArray[i].fade})`;
                     ctx.stroke();
                 }
             }
@@ -5814,8 +5819,7 @@ const spawn = {
         };
     },
     laserLayerBoss(x, y, radius = 65) {
-        const color = "#f09"
-        mobs.spawn(x, y, 4, radius, color);
+        mobs.spawn(x, y, 4, radius, "#f09");
         let me = mob[mob.length - 1];
         me.tier = 3
         me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
@@ -5906,7 +5910,7 @@ const spawn = {
                             x: best.x,
                             y: best.y,
                             radius: dmg * 1500,
-                            color: "rgba(255,0,100,0.5)",
+                            color: "rgba(255,0,255,0.5)",
                             time: 20
                         });
                         this.laserArray.splice(i, 1) //remove this laser node
@@ -5920,7 +5924,7 @@ const spawn = {
                         ctx.beginPath();
                         ctx.moveTo(best.x, best.y);
                         ctx.lineTo(this.laserArray[i].a.x, this.laserArray[i].a.y);
-                        ctx.strokeStyle = `rgb(255,0,100)`;
+                        ctx.strokeStyle = `rgb(255,0,255)`;
                         ctx.lineWidth = 2;
                         ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
                         ctx.stroke();
@@ -5929,7 +5933,7 @@ const spawn = {
                         ctx.beginPath();
                         ctx.moveTo(this.laserArray[i].b.x, this.laserArray[i].b.y);
                         ctx.lineTo(this.laserArray[i].a.x, this.laserArray[i].a.y);
-                        ctx.strokeStyle = `rgb(255,0,100)`;
+                        ctx.strokeStyle = `rgb(255,0,255)`;
                         ctx.lineWidth = 2;
                         ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
                         ctx.stroke();
@@ -5941,7 +5945,7 @@ const spawn = {
                     ctx.moveTo(this.laserArray[i].a.x, this.laserArray[i].a.y);
                     ctx.lineTo(this.laserArray[i].b.x, this.laserArray[i].b.y);
                     ctx.lineWidth = 2 + 40 - 40 * this.laserArray[i].fade;
-                    ctx.strokeStyle = `rgba(255,0,100,${0.02 + 0.1 * this.laserArray[i].fade})`;
+                    ctx.strokeStyle = `rgba(255,0,255,${0.02 + 0.1 * this.laserArray[i].fade})`;
                     ctx.stroke();
                     if (this.laserArray[i].fade > 0.99) {
                         this.laserArray[i].fade = 1;
@@ -6081,7 +6085,6 @@ const spawn = {
         me.cycle = 0
         Matter.Body.setDensity(me, 0.0057); //extra dense //normal is 0.001 //makes effective life much larger
         spawn.shield(me, x, y);
-        // me.nextHealthThreshold = 0.857
         me.onDamage = function () {
             // if (this.health < this.nextHealthThreshold) {
             //     this.health = this.nextHealthThreshold - 0.01
@@ -8237,7 +8240,7 @@ const spawn = {
                 this.seePlayerByHistory(40);
                 this.attraction()
                 this.torque = 0.0000004 * this.inertia
-                const mag = 375
+                const mag = 350
                 for (let i = 0, len = this.swords.length; i < len; i++) {
                     this.swords[i].cycle++
                     this.swords[i].long = mag * Math.sin(this.swords[i].cycle * 0.007)
@@ -9263,8 +9266,8 @@ const spawn = {
         me.frictionAir = 0.1;
         spawn.shield(me, x, y);
         me.onDamage = function () { };
-        me.pushAway = function (magX = 0.04, magY = 0.03) {
-            const range = 810000 //900
+        me.pushAway = function (magX = 0.03, magY = 0.02) {
+            const range = 640000 //800
             for (let i = 0, len = body.length; i < len; ++i) {
                 if (Vector.magnitudeSquared(Vector.sub(body[i].position, this.position)) < range) {
                     body[i].force.x += magX * body[i].mass * (body[i].position.x > this.position.x ? 1 : -1)
@@ -9371,7 +9374,7 @@ const spawn = {
         me.damageReduction = 0.22
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
-        me.nextHealthThreshold = 0.8
+        me.nextHealthThreshold = 0.75
         me.invulnerableCount = 0
 
         me.accelMag = 0.0003;
@@ -9396,7 +9399,7 @@ const spawn = {
         me.onDamage = function () {
             if (this.health < this.nextHealthThreshold) {
                 this.health = this.nextHealthThreshold - 0.01
-                this.nextHealthThreshold = Math.floor(this.health * 5) / 5 //0.75,0.5,0.25
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
                 this.invulnerableCount = 60 + simulation.difficultyMode * 10
                 this.isInvulnerable = true
                 this.damageReduction = 0
@@ -10052,7 +10055,7 @@ const spawn = {
         me.damageReduction = 0.3
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
-        me.nextHealthThreshold = 0.8
+        me.nextHealthThreshold = 0.75
         me.invulnerableCount = 0
 
 
@@ -10091,7 +10094,7 @@ const spawn = {
             if (!this.isInvulnerable) this.cycle = 0
             if (this.health < this.nextHealthThreshold && this.alive) {
                 this.health = this.nextHealthThreshold - 0.01
-                this.nextHealthThreshold = Math.floor(this.health * 5) / 5
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4
                 this.invulnerableCount = 100
                 this.isInvulnerable = true
                 this.damageReduction = 0

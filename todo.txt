@@ -1,35 +1,45 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: ectomy - 1.1 damage, spawn 25 heals on removal
+reducing late game chaos: with fewer, but stronger mobs
+  T3, T4 mobs have higher damage and health
+    T3
+      mob dmg       3.5->3.8
+      mob dmg taken 0.1->0.06
+    T4
+      mob dmg       4.9->5.4
+      mob dmg taken 0.02->0.01
+  ~15% more ammo spawns on later levels and higher difficulties
+  ~20% fewer mobs on levels with too many mobs
+  T4 health bar has 5->4 squares
+  T4 bosses have 5->4 immunity phases
+  T4 mobs
+    stingWinger - shorter wing and stinger, 10% slower
+    launchPusher - 30% weaker pushes
+    hopsploder - explosions trigger in 90->30 cycles
+    launchPusher - 900->800 push range
+    slasher5 - 375->350 laser range
 
-in game console font is now: monospace
-  adjusted spacing and font size
-  
-nitinol skin now has ledge grab
-  you can jump onto a ledge if you body is touching a ledge and your head is above the ledge
-updated nitinol skin boost graphics
-vacuum bomb grenades have 1/3 effect on bosses
-  also added a limit to effect of distance on it's pull
-precision bombing hits it's target much more reliably
-ternary 1.9->2x damage
-reactor level rebalance
-  made it so you always have the same number of bosses, based on difficulty setting
-    spray boss and bounce boss have less health and fewer bullets
-pitcher mobs are no longer drifting far away from player sometimes
-pitcher mob balls last 2-3 seconds longer
+missile tech: AIM-9 Sidewinder - fire 2 missiles perpendicular to your aim
+shotgun tech: photonic crystal - shot gun fires 5+ laser beams that last for 2 seconds
 
-removed check bodyB in engine for player collisions
-
-
+paradigm shift 1.4->2x increased health cost after each use
+perturbation theory ejects if you have above 1 research
+  2->3x fire rate
+infrared diode laser color is now barely visible
+mob wings push player away from mob
+  wings do 3x damage, but they also hit less often
 
 bug fixes
-  removing constraint "slow bots" was making duplicate bots on next level
-  you can now keep paradigm shift even when your health is below 0 with quantum-zeno
+  some pitcher's balls got stuck at 0 speed
 
 *********************************************************** TODO *****************************************************
 
-make T3 and T4 have higher damage and health
-  but fewer projectiles and slower move/fire rates
+make an alternate train boss
+  shoots different bullets?
+
+rework martingale?
+  it's really strong, but people may not understand how to use it.
+  how to be true to the name (where you gamble by doubling your bet)
 
 reduce importance of high dmg tech
   do this after a patch so you can revert changes
@@ -44,7 +54,8 @@ performance issue with experiment mode
     maybe do a performance test in dev tools
   fixes?
     remove some CSS animations
-    shadows?
+      cloaking
+      choices
     find a way to not draw things off screen?
     something might be changing size and forcing a redraw of everything
 

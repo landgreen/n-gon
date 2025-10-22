@@ -845,12 +845,13 @@ const powerUps = {
                 for (let i = 0, len = -amount; i < len; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
             }
             if (tech.isRerollHaste) {
-                if (powerUps.research.count === 0) {
-                    tech.researchHaste = 0.5;
-                    b.setFireCD();
-                } else {
-                    tech.researchHaste = 1;
-                    b.setFireCD();
+                if (powerUps.research.count > 1) {
+                    for (let i = 0; i < tech.tech.length; i++) {
+                        if (tech.tech[i].name === "perturbation theory") {
+                            powerUps.ejectTech(i)
+                            break
+                        }
+                    }
                 }
             }
         },
@@ -1657,10 +1658,6 @@ const powerUps = {
             powerUps.spawn(x, y, "heal");
             return;
         }
-        if (Math.random() < 0.15 && b.inventory.length > 0) {
-            powerUps.spawn(x, y, "ammo");
-            return;
-        }
         if (Math.random() < 0.0007 * (3 - b.inventory.length)) { //a new gun has a low chance for each not acquired gun up to 3
             powerUps.spawn(x, y, "gun");
             return;
@@ -1671,6 +1668,12 @@ const powerUps = {
         }
         if (tech.isCouplingPowerUps && Math.random() < 0.17) {
             powerUps.spawn(x, y, "coupling");
+            return;
+        }
+        // 0.03 * (level.levelsCleared > 7) + 0.05 * (level.levelsCleared > 10)
+        if ((Math.random() < 0.15 + 0.002 * level.levelsCleared) && b.inventory.length > 0) {
+            powerUps.spawn(x, y, "ammo");
+            if (Math.random() < 0.2 * (simulation.difficultyMode - 4)) powerUps.spawn(x + 20, y, "ammo");
             return;
         }
         if (Math.random() < 0.02 || (tech.isBoostPowerUps && Math.random() < 0.14)) {
@@ -1703,11 +1706,13 @@ const powerUps = {
                     }
                 } else {
                     if (m.health < 0.65 && !tech.isEnergyHealth) {
+                        powerUps.spawn(x - 20, y, "heal");
                         powerUps.spawn(x, y, "heal");
-                        powerUps.spawn(x, y, "heal");
+                        powerUps.spawn(x + 20, y, "heal");
                     } else {
+                        powerUps.spawn(x - 20, y, "ammo");
                         powerUps.spawn(x, y, "ammo");
-                        powerUps.spawn(x, y, "ammo");
+                        powerUps.spawn(x + 20, y, "ammo");
                     }
                 }
             }
@@ -1824,7 +1829,7 @@ const powerUps = {
                 tech.tech[index].frequency = 0 //banish tech
                 powerUps.ejectTech(index)
                 if (m.immuneCycle < m.cycle) m.takeDamage(tech.pauseEjectTech * 0.01, false)
-                tech.pauseEjectTech *= 1.4
+                tech.pauseEjectTech *= 2
                 if (tech.isEnergyHealth) {
                     simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-f'>energy</span> <span class='color-symbol'>-=</span> ${(100 * dmg * m.defense()).toFixed(1)} <em>//paradigm shift</em>`)
                 } else {

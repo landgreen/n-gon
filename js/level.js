@@ -33,7 +33,7 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(5) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(4) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 0
 
             // m.fieldUpgrades[6].isRewindMode = true
@@ -41,7 +41,7 @@ const level = {
             // m.fieldUpgrades[6].set()
             // m.wakeCheck();
             // m.damageDone *= 5
-            // m.maxHealth = m.health = 10000000
+            // m.maxHealth = m.health = 9999999
             // m.displayHealth();
             // m.immuneCycle = Infinity //you can't take damage
             // m.maxEnergy = m.energy = 10000000
@@ -50,23 +50,22 @@ const level = {
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.takeDamage(0.1);
-            // b.giveGuns("nail gun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("grenades") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("harpoon") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 100000000000
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("aerostat") });
 
             // tech.laserColor = "#fff"
             // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
 
-            // requestAnimationFrame(() => { tech.giveTech("clinical peer review") });
+            // requestAnimationFrame(() => { tech.giveTech("MIRV") });
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("desublimated ammunition")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("nitinol")
-            // for (let i = 0; i < 1; i++) tech.giveTech("nail-bot")
-            // for (let i = 0; i < 1; i++) tech.giveTech("commodities exchange")
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("bot fabrication") });
+            // for (let i = 0; i < 1; ++i) tech.giveTech("photonic crystal")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("AIM-9 Sidewinder")
+            // for (let i = 0; i < 1; i++) tech.giveTech("diffraction grating")
+            // for (let i = 0; i < 1; i++) tech.giveTech("perturbation theory")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("infrared diode") });
             // requestAnimationFrame(() => { level.blurryChoices = true });
             // m.lastKillCycle = m.cycle
             // for (let i = 0; i < 4; i++) powerUps.directSpawn(1550, -450, "field");
@@ -80,7 +79,7 @@ const level = {
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
             // spawn.randomGroup(1300, -200, Infinity);
-            // for (let i = 0; i < 3; i++) spawn.pitcher(1300 + 200 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.dragonFlyBoss(1300 + 200 * i, -200)
             // for (let i = 0; i < 1; i++) spawn.pitcher4(1100 + 100 * i, -100 - i * 100)
             // for (let i = 0; i < 1; i++) spawn.defendingBoss(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
@@ -4919,18 +4918,18 @@ const level = {
         spawn.mapRect(-1450, -3225, 425, 25);
         spawn.mapRect(-1512.5, -3825, 550, 25);
 
-        spawn.randomMob(1000, -275, 0.2);
-        spawn.randomMob(950, -1725, 0.1);
-        spawn.randomMob(-725, -1775, 0.1);
-        spawn.randomMob(-200, -2075, 0);
-        spawn.randomMob(-550, -3500, -0.2);
-        spawn.randomMob(375, -2125, 0);
-        spawn.randomMob(-700, -2450, -0.1);
-        spawn.randomMob(-1175, -2775, -0.1);
-        spawn.randomMob(1025, -3200, -0.2);
-        spawn.randomMob(-525, -3750, -0.2);
-        spawn.randomMob(1350, -2075, -0.3);
-        spawn.randomMob(1775, 1000, -0.4);
+        spawn.randomMob(1000, -275, 0.1);
+        spawn.randomMob(950, -1725, 0);
+        spawn.randomMob(-725, -1775, 0);
+        spawn.randomMob(-200, -2075, -0.1);
+        spawn.randomMob(-550, -3500, -0.3);
+        // spawn.randomMob(375, -2125, -0.2);
+        spawn.randomMob(-700, -2450, -0.3);
+        spawn.randomMob(-1175, -2775, -0.3);
+        // spawn.randomMob(1025, -3200, -0.3);
+        spawn.randomMob(-525, -3750, -0.4);
+        spawn.randomMob(1350, -2075, -0.5);
+        spawn.randomMob(1775, 1000, -0.5);
         spawn.randomSmallMob(-575, -2925);
         spawn.randomGroup(-400, -4400, 0);
         spawn.randomLevelBoss(825, -3500);
@@ -5886,16 +5885,16 @@ const level = {
                     spawn.randomMob(2700, -350, 0.2);
                     spawn.randomMob(6975, -650, 0.2);
                     spawn.randomMob(6550, -325, 0.3);
-                    spawn.randomMob(7350, -350, 0.3);
+                    // spawn.randomMob(7350, -350, 0.3);
                     spawn.randomMob(7925, -975, 0.5);
-                    spawn.randomMob(7950, -1725, 0.5);
+                    // spawn.randomMob(7950, -1725, 0.5);
                     spawn.randomMob(7000, -1375, 0.3);
                     spawn.randomMob(5700, -1350, 0.5);
-                    spawn.randomMob(5250, -1575, 0.5);
+                    // spawn.randomMob(5250, -1575, 0.5);
                     spawn.randomMob(6325, -75, 0.3);
-                    spawn.randomMob(7900, -1925, 0.1);
+                    // spawn.randomMob(7900, -1925, 0.1);
                     spawn.randomMob(5300, -1975, 0.3);
-                    spawn.randomMob(7875, -1900, 0.3);
+                    // spawn.randomMob(7875, -1900, 0.3);
                     spawn.randomMob(5325, -1975, 0.4);
 
                     spawn.randomGroup(3900, -725, 0.4);
@@ -6007,7 +6006,7 @@ const level = {
         spawn.randomMob(350, -325, 0.5);
         spawn.randomMob(875, -375, 0.5);
         spawn.randomMob(1250, -575, 0.5);
-        spawn.randomMob(1550, -600, 0.5);
+        // spawn.randomMob(1550, -600, 0.5);
         spawn.randomSmallMob(1250, -175);
         spawn.randomSmallMob(1500, -229);
         spawn.randomSmallMob(1850, -300);
@@ -7903,12 +7902,12 @@ const level = {
                                 // spawn.randomMob(-800, -1475, 0);
                                 spawn.randomMob(-425, -1425, 0);
                                 spawn.randomMob(850, -1750, 0.1);
-                                spawn.randomMob(325, -850, 0.1);
+                                // spawn.randomMob(325, -850, 0.1);
                                 spawn.randomMob(400, -400, 0.2);
                                 // spawn.randomMob(825, -475, 0.2);
                                 spawn.randomMob(875, -1050, 0.3);
-                                spawn.randomMob(1425, 1425, 0.4);
-                                spawn.randomMob(675, 1450, 0.5);
+                                // spawn.randomMob(1425, 1425, 0.4);
+                                // spawn.randomMob(675, 1450, 0.5);
                                 // spawn.randomMob(225, 1475, 0.6);
                                 spawn.randomMob(-275, 1425, 1);
                                 spawn.randomMob(-800, 1375, 1);
@@ -8051,19 +8050,19 @@ const level = {
         spawn.randomMob(-875, -1575, 0);
         // spawn.randomMob(500, -1875, 0);
         spawn.randomMob(350, 825, 0);
-        spawn.randomMob(375, 400, 0);
+        // spawn.randomMob(375, 400, 0);
         spawn.randomMob(1500, -25, 0.1);
         // spawn.randomMob(650, -1950, 0.2);
-        spawn.randomMob(775, 700, 0.2);
+        // spawn.randomMob(775, 700, 0.2);
         spawn.randomMob(275, -50, 0.3);
         spawn.randomMob(75, -1750, 0.3);
         // spawn.randomMob(1750, -1425, 0.4);
         spawn.randomMob(950, 50, 0.4);
-        spawn.randomMob(-1375, 175, 0.4);
+        // spawn.randomMob(-1375, 175, 0.4);
         spawn.randomMob(-350, 175, 0.5);
         // spawn.randomMob(725, 1175, 0.5);
         spawn.randomMob(-850, -1950, 0.6);
-        spawn.randomMob(-1400, -1725, 0.7);
+        // spawn.randomMob(-1400, -1725, 0.7);
         spawn.randomMob(1400, -1700, 0.7);
         // spawn.randomMob(-800, 200, 0.7);
         spawn.randomMob(1475, 1550, 0.8);

@@ -4604,10 +4604,16 @@ const m = {
                             m.energy -= drain;
                             const direction = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
                             const push = Vector.mult(Vector.perp(direction), 0.08)
-                            b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, -15)
-                            bullet[bullet.length - 1].force.x += push.x * (Math.random() - 0.5)
-                            bullet[bullet.length - 1].force.y += 0.005 + push.y * (Math.random() - 0.5)
-                            // b.missile({ x: m.pos.x, y: m.pos.y - 40 }, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
+                            if (tech.isMissileSide) {
+                                let d = Vector.rotate({ x: Math.cos(m.angle), y: Math.sin(m.angle) }, Math.PI / 2)
+                                b.missile({ x: m.pos.x + 30 * d.x, y: m.pos.y + 30 * d.y }, m.angle + Math.PI / 2, 15)
+                                d = Vector.rotate(d, Math.PI)
+                                b.missile({ x: m.pos.x + 30 * d.x, y: m.pos.y + 30 * d.y }, m.angle - Math.PI / 2, 15)
+                            } else {
+                                b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, -15)
+                                bullet[bullet.length - 1].force.x += push.x * (Math.random() - 0.5)
+                                bullet[bullet.length - 1].force.y += 0.005 + push.y * (Math.random() - 0.5)
+                            }
                             m.fieldUpgrades[4].endoThermic(drain)
                         } else if (simulation.molecularMode === 2) {
                             const drain = 0.04

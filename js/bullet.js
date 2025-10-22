@@ -2527,7 +2527,7 @@ const b = {
     }, whereEnd = {
         x: where.x + 3000 * Math.cos(m.angle),
         y: where.y + 3000 * Math.sin(m.angle)
-    }, damage = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1) {
+    }, damage = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1, laserColor = tech.laserColor) {
         const reflectivity = 1 - 1 / (reflections * 3)
         let best = { x: 1, y: 1, dist2: Infinity, who: null, v1: 1, v2: 1 };
         const path = [{ x: where.x, y: where.y }, { x: whereEnd.x, y: whereEnd.y }];
@@ -2616,7 +2616,7 @@ const b = {
                 ctx.lineTo(path[i].x, path[i].y);
             }
         } else if (tech.isLaserLens && b.guns[11].lensDamage !== 1) {
-            ctx.strokeStyle = tech.laserColor;
+            ctx.strokeStyle = laserColor;
             ctx.lineWidth = 2
             ctx.lineDashOffset = 900 * Math.random()
             ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
@@ -2641,7 +2641,7 @@ const b = {
             ctx.stroke();
             ctx.globalAlpha = 1;
         } else {
-            ctx.strokeStyle = tech.laserColor;
+            ctx.strokeStyle = laserColor;
             ctx.lineWidth = 2
             ctx.lineDashOffset = 900 * Math.random()
             ctx.setLineDash([50 + 120 * Math.random(), 50 * Math.random()]);
@@ -4947,13 +4947,24 @@ const b = {
                                     const push = Vector.mult(Vector.perp(direction), 0.015 * countReduction / Math.sqrt(tech.missileCount))
                                     for (let i = 0; i < tech.missileCount; i++) {
                                         setTimeout(() => {
-                                            b.missile(this.position, angle, -8, size)
+                                            if (tech.isMissileSide) {
+                                                b.missile(this.position, angle + Math.PI / 2, 15, size)
+                                                b.missile(this.position, angle - Math.PI / 2, 15, size)
+                                            } else {
+                                                b.missile(this.position, angle, -8, size)
+                                            }
+
                                             bullet[bullet.length - 1].force.x += push.x * (i - (tech.missileCount - 1) / 2);
                                             bullet[bullet.length - 1].force.y += push.y * (i - (tech.missileCount - 1) / 2);
                                         }, 40 * tech.missileCount * Math.random());
                                     }
                                 } else {
-                                    b.missile(this.position, angle, -8) //    missile(where, angle, speed, size = 1) {
+                                    if (tech.isMissileSide) {
+                                        b.missile(this.position, angle + Math.PI / 2, 15)
+                                        b.missile(this.position, angle - Math.PI / 2, 15)
+                                    } else {
+                                        b.missile(this.position, angle, -8) //    missile(where, angle, speed, size = 1) {
+                                    }
                                 }
                                 break;
                             }
@@ -6037,31 +6048,7 @@ const b = {
             ammoPack: 1.6,
             defaultAmmoPack: 1.6,
             have: false,
-            do() {
-                //fade cross hairs
-
-
-
-                // draw loop around player head
-                // const left = m.fireCDcycle !== Infinity ? 0.05 * Math.max(m.fireCDcycle - m.cycle, 0) : 0
-                // if (left > 0) {
-                //     ctx.beginPath();
-                //     // ctx.arc(simulation.mouseInGame.x, simulation.mouseInGame.y, 30, 0, left);
-                //     ctx.arc(m.pos.x, m.pos.y, 28, m.angle - left, m.angle);
-                //     // ctx.fillStyle = "rgba(0,0,0,0.3)" //"#333"
-                //     // ctx.fill();
-                //     ctx.strokeStyle = "#333";
-                //     ctx.lineWidth = 2;
-                //     ctx.stroke();
-                // }
-
-
-                //draw hip circle
-                // ctx.beginPath();
-                // ctx.arc(m.pos.x + m.hip.x, m.pos.y + m.hip.y, 11, 0, 2 * Math.PI);
-                // ctx.fillStyle = "rgba(0,0,0,0.3)" //"#333"
-                // ctx.fill();
-            },
+            do() { },
             fire() {
                 let knock, spread
                 const coolDown = function () {
@@ -6113,7 +6100,60 @@ const b = {
                     }
                 }
                 const chooseBulletType = function () {
-                    if (tech.isRivets) {
+                    if (tech.isLaserShot) {
+                        simulation.ephemera.push({
+                            count: 150 * tech.bulletsLastLonger, //cycles before it self removes
+                            where: { x: m.pos.x + 15 * Math.cos(m.angle), y: m.pos.y + 15 * Math.sin(m.angle) },
+                            end: {
+                                x: m.pos.x + 5000 * Math.cos(m.angle),
+                                y: m.pos.y + 5000 * Math.sin(m.angle)
+                            },
+                            dmg: 0.23 * (tech.isShotgunReversed ? 1.5 : 1), //normal laser is 0.18
+                            angle: m.angle,
+                            cleared: level.levelsCleared,
+                            // color: "#0f8",
+                            do() {
+                                this.count--
+                                if (this.count < 0 || this.cleared !== level.levelsCleared) simulation.removeEphemera(this)
+
+                                // const color = `hsl(${270 + 80 * Math.sin(simulation.cycle * 0.03)},100%,50%)`
+                                //!(simulation.cycle % 10)
+                                const color = `hsla(${340 + 40 * Math.sin(simulation.cycle * 0.3)}, 100%, 50%, 1.00)`
+                                b.laser(this.where, this.end, this.dmg, tech.laserReflections, false, 1, color);
+                                if (tech.beamSplitter) {
+                                    let spread = 0.05
+                                    for (let i = 0; i < tech.beamSplitter; i++) {
+                                        b.laser(this.where, {
+                                            x: this.where.x + 5000 * Math.cos(this.angle + spread),
+                                            y: this.where.y + 5000 * Math.sin(this.angle + spread)
+                                        }, this.dmg, tech.laserReflections, false, 1, color)
+                                        spread *= -1
+                                        if (spread > 0) spread += 0.05
+                                    }
+                                }
+                                const size = 12;
+                                ctx.save();
+                                ctx.translate(this.where.x, this.where.y);
+                                ctx.rotate(this.angle);
+                                ctx.beginPath();
+                                ctx.moveTo(size, 0);           // tip (pointing right/forward)
+                                ctx.lineTo(0, size / 2);       // bottom
+                                ctx.lineTo(-size, 0);          // back
+                                ctx.lineTo(0, -size / 2);      // top
+                                ctx.closePath();
+                                ctx.fillStyle = color;
+                                ctx.fill();
+                                ctx.restore();
+
+                                // ctx.beginPath();
+                                // ctx.arc(this.where.x, this.where.y, 4, 0, 2 * Math.PI);
+                                // ctx.fillStyle = color//`hsl(${2 * simulation.cycle},100%,70%)`
+                                // ctx.fill();
+                            },
+                        })
+
+
+                    } else if (tech.isRivets) {
                         const me = bullet.length;
                         // const dir = m.angle + 0.02 * (Math.random() - 0.5)
                         bullet[me] = Bodies.rectangle(m.pos.x + 35 * Math.cos(m.angle), m.pos.y + 35 * Math.sin(m.angle), 56 * tech.bulletSize, 25 * tech.bulletSize, b.fireAttributes(m.angle));
@@ -6294,7 +6334,6 @@ const b = {
                         spray(16); //fires normal shotgun bullets
                     }
                 }
-
 
                 coolDown();
                 b.muzzleFlash(35);
@@ -6780,65 +6819,52 @@ const b = {
             do() { },
             fire() {
                 const countReduction = Math.pow(0.86, tech.missileCount)
-                // if (m.crouch) {
-                //     m.fireCDcycle = m.cycle + tech.missileFireCD * b.fireCDscale / countReduction; // cool down
-                //     // for (let i = 0; i < tech.missileCount; i++) {
-                //     //     b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction))
-                //     //     bullet[bullet.length - 1].force.x += 0.004 * countReduction * (i - (tech.missileCount - 1) / 2);
-                //     // }
-
-                //     if (tech.missileCount > 1) {
-                //         for (let i = 0; i < tech.missileCount; i++) {
-                //             setTimeout(() => {
-                //                 const where = { x: m.pos.x, y: m.pos.y - 40 }
-                //                 b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5) * Math.sqrt(tech.missileCount), -2, Math.sqrt(countReduction))
-                //                 bullet[bullet.length - 1].force.x += 0.025 * countReduction * (i - (tech.missileCount - 1) / 2);
-                //             }, 20 * tech.missileCount * Math.random());
-                //         }
-                //     } else {
-                //         const where = {
-                //             x: m.pos.x,
-                //             y: m.pos.y - 40
-                //         }
-                //         b.missile(where, -Math.PI / 2 + 0.2 * (Math.random() - 0.5), -2)
-                //     }
-                // } else {
                 m.fireCDcycle = m.cycle + tech.missileFireCD * b.fireCDscale / countReduction; // cool down
-                const direction = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
-                // const where = {
-                //     x: m.pos.x + 30 * direction.x,
-                //     y: m.pos.y + 30 * direction.y
-                // }
+                let direction = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
                 if (tech.missileCount > 1) {
                     const push = Vector.mult(Vector.perp(direction), 0.2 * countReduction / Math.sqrt(tech.missileCount))
                     const sqrtCountReduction = Math.sqrt(countReduction)
-                    // for (let i = 0; i < tech.missileCount; i++) {
-                    //     setTimeout(() => {
-                    //         if (m.crouch) {
-                    //             b.missile(where, m.angle, 20, sqrtCountReduction)
-                    //             // bullet[bullet.length - 1].force.x += 0.7 * push.x * (i - (tech.missileCount - 1) / 2);
-                    //             // bullet[bullet.length - 1].force.y += 0.7 * push.y * (i - (tech.missileCount - 1) / 2);
-                    //         } else {
-                    //             b.missile(where, m.angle, -10, sqrtCountReduction)
-                    //             bullet[bullet.length - 1].force.x += push.x * (i - (tech.missileCount - 1) / 2);
-                    //             bullet[bullet.length - 1].force.y += 0.005 + push.y * (i - (tech.missileCount - 1) / 2);
-                    //         }
-
-                    //     }, 1 + i * 10 * tech.missileCount);
-                    // }
-                    const launchDelay = 4
+                    const launchDelay = 6
                     let count = 0
+                    let totalMissiles = tech.isMissileSide + tech.missileCount
+
                     const fireMissile = () => {
                         if (m.crouch) {
-                            b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, 20, sqrtCountReduction)
-                            bullet[bullet.length - 1].force.x += 0.5 * push.x * (Math.random() - 0.5)
-                            bullet[bullet.length - 1].force.y += 0.004 + 0.5 * push.y * (Math.random() - 0.5)
+                            if (tech.isMissileSide) {
+                                direction = Vector.rotate({ x: Math.cos(m.angle), y: Math.sin(m.angle) }, Math.PI / 2)
+                                b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle + Math.PI / 2, 0, sqrtCountReduction)
+                                totalMissiles--
+                                if (totalMissiles > 0) {
+                                    direction = Vector.rotate(direction, Math.PI)
+                                    b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle - Math.PI / 2, 0, sqrtCountReduction)
+                                    totalMissiles--
+                                }
+                            } else {
+                                b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, 20, sqrtCountReduction)
+                                bullet[bullet.length - 1].force.x += 0.5 * push.x * (Math.random() - 0.5)
+                                bullet[bullet.length - 1].force.y += 0.004 + 0.5 * push.y * (Math.random() - 0.5)
+                                totalMissiles--
+                            }
                         } else {
-                            b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, -15, sqrtCountReduction)
-                            bullet[bullet.length - 1].force.x += push.x * (Math.random() - 0.5)
-                            bullet[bullet.length - 1].force.y += 0.005 + push.y * (Math.random() - 0.5)
+                            if (tech.isMissileSide) {
+                                direction = Vector.rotate({ x: Math.cos(m.angle), y: Math.sin(m.angle) }, Math.PI / 2)
+                                b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle + Math.PI / 2, 15, sqrtCountReduction)
+                                totalMissiles--
+                                if (totalMissiles > 0) {
+                                    direction = Vector.rotate(direction, Math.PI)
+                                    b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle - Math.PI / 2, 15, sqrtCountReduction)
+                                    totalMissiles--
+                                }
+                            } else {
+                                b.missile({ x: m.pos.x + 30 * direction.x, y: m.pos.y + 30 * direction.y }, m.angle, -15, sqrtCountReduction)
+                                bullet[bullet.length - 1].force.x += push.x * (Math.random() - 0.5)
+                                bullet[bullet.length - 1].force.y += 0.005 + push.y * (Math.random() - 0.5)
+                                totalMissiles--
+                            }
                         }
                     }
+
+
                     const cycle = () => {
                         if ((simulation.paused) && m.alive) {
                             requestAnimationFrame(cycle)
@@ -6847,16 +6873,34 @@ const b = {
                             if (!(count % launchDelay)) {
                                 fireMissile()
                             }
-                            if (count < tech.missileCount * launchDelay && m.alive) requestAnimationFrame(cycle);
+                            if (totalMissiles > 0 && m.alive) requestAnimationFrame(cycle);
                         }
                     }
                     requestAnimationFrame(cycle);
                 } else {
                     if (m.crouch) {
-                        b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle, 25)
+                        if (tech.isMissileSide) {
+                            direction = Vector.rotate(direction, Math.PI / 2)
+                            b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle + Math.PI / 2, 0)
+                            // bullet[bullet.length - 1].force.y += 0.04 * (Math.random() - 0.2)
+                            direction = Vector.rotate(direction, Math.PI)
+                            b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle - Math.PI / 2, 0)
+                            // bullet[bullet.length - 1].force.y += 0.04 * (Math.random() - 0.2)
+                        } else {
+                            b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle, 25)
+                        }
                     } else {
-                        b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle, -12)
-                        bullet[bullet.length - 1].force.y += 0.04 * (Math.random() - 0.2)
+                        if (tech.isMissileSide) {
+                            direction = Vector.rotate(direction, Math.PI / 2)
+                            b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle + Math.PI / 2, 25)
+                            // bullet[bullet.length - 1].force.y += 0.04 * (Math.random() - 0.2)
+                            direction = Vector.rotate(direction, Math.PI)
+                            b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle - Math.PI / 2, 25)
+                            // bullet[bullet.length - 1].force.y += 0.04 * (Math.random() - 0.2)
+                        } else {
+                            b.missile({ x: m.pos.x + 40 * direction.x, y: m.pos.y + 40 * direction.y }, m.angle, -12)
+                            bullet[bullet.length - 1].force.y += 0.04 * (Math.random() - 0.2)
+                        }
                     }
                 }
             }

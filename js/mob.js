@@ -279,33 +279,22 @@ const mobs = {
                 ctx.stroke()
             },
             healthBar4() {
+                const w = this.radius * 0.43;
+                const x = this.position.x - this.radius;
+                const y = this.position.y - this.radius * 1.4;
+                ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                ctx.fillRect(x, y, this.radius * 2, w);
+                let health
                 if (this.health > 0.5) {
-                    const h = this.radius * 0.36;
-                    const w = this.radius * 2;
-                    const x = this.position.x - w / 2;
-                    const y = this.position.y - w * 0.7;
-                    ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
-                    ctx.fillRect(x, y, w, h);
                     ctx.fillStyle = "#000";
-                    const health = 2 * (this.health - 0.5)
-                    for (let j = 0; j < 5; j++) {
-                        if (health > j * 0.2) {
-                            ctx.fillRect(x + (j * 0.41) * this.radius, y, h, h);
-                        }
-                    }
+                    health = 2 * (this.health - 0.5)
                 } else {
-                    const h = this.radius * 0.36;
-                    const w = this.radius * 2;
-                    const x = this.position.x - w / 2;
-                    const y = this.position.y - w * 0.7;
-                    ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
-                    ctx.fillRect(x, y, w, h);
                     ctx.fillStyle = "#fff";
-                    const health = 2 * this.health
-                    for (let j = 0; j < 5; j++) {
-                        if (health > j * 0.2) {
-                            ctx.fillRect(x + (j * 0.41) * this.radius, y, h, h);
-                        }
+                    health = 2 * this.health
+                }
+                for (let j = 0; j < 4; j++) {
+                    if (health > j * 0.25) {
+                        ctx.fillRect(x + (j * 0.52) * this.radius, y, w, w);
                     }
                 }
             },
@@ -559,6 +548,15 @@ const mobs = {
                 const hitPlayer = Matter.Query.ray([player], this.position, Vector.add(this.position, Vector.mult(perp, radius * 2.05)), minorRadius)
                 if (hitPlayer.length && m.immuneCycle < m.cycle) {
                     m.takeDamage(dmg * this.damageScale());
+                    // if (m.immuneCycle < m.cycle + immuneTime) m.immuneCycle = m.cycle + immuneTime; //player is immune to damage
+
+                    //push player away
+                    const sub = Vector.sub(m.pos, this.position)
+                    const push = Vector.mult(Vector.normalise(sub), 0.3 * player.mass)
+                    Matter.Body.setVelocity(player, {
+                        x: 0.8 * player.velocity.x + push.x,
+                        y: 0.8 * player.velocity.y + push.y - 0.1 * player.mass
+                    })
                 }
             },
             searchSpring() {
