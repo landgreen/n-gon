@@ -6223,9 +6223,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1)) && tech.isMissileBig
+            return (tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1))
         },
-        requires: "missiles, cruise missile",
+        requires: "missiles",
         effect() {
             tech.isMissileSide = true
         },
