@@ -1,53 +1,30 @@
 ******************************************************** NEXT PATCH **************************************************
 
-reducing late game chaos: with fewer, but stronger mobs
-  T3, T4 mobs have higher damage and health
-    T3
-      mob dmg       3.5->3.8
-      mob dmg taken 0.1->0.06
-    T4
-      mob dmg       4.9->5.4
-      mob dmg taken 0.02->0.01
-  ~15% more ammo spawns on later levels and higher difficulties
-  ~20% fewer mobs on levels with too many mobs
-  T4 health bar has 5->4 squares
-  T4 bosses have 5->4 immunity phases
-  T4 mobs
-    stingWinger - shorter wing and stinger, 10% slower
-    launchPusher - 30% weaker pushes
-    hopsploder - explosions trigger in 90->30 cycles
-    launchPusher - 900->800 push range
-    slasher5 - 375->350 laser range
+nitinol skin tech: ledge grab upgraded to full wall grab and wall jump
+  wall grab will hold hold the player in place with left and right keys
+  nitinol no longer has higher jumps
+  nitinol can no long get acoustic levitation
 
-missile tech: AIM-9 Sidewinder - fire 2 missiles perpendicular to your aim
-shotgun tech: photonic crystal - shot gun fires 5+ laser beams that last for 2 seconds
+Higgs mechanism gets 1.3x jumps, but 4->3x fire rate
+mass-energy equivalence has 1.2 movement
+quenching gives 0.5->0.6x overheal to max health
 
-paradigm shift 1.4->2x increased health cost after each use
-perturbation theory ejects if you have above 1 research
-  2->3x fire rate
-infrared diode laser color is now barely visible
-mob wings push player away from mob
-  wings do 3x damage, but they also hit less often
+alternate trainBoss2 on corridor level with yellow beams
+the moving platform on towers level comes consistently after 2-3 seconds to reduce the wait
 
 bug fixes
-  some pitcher's balls got stuck at 0 speed
+  Cordyceps no longer eats dark matter
+  shotgun laser graphical glitch with laser lens
 
 *********************************************************** TODO *****************************************************
 
-make an alternate train boss
-  shoots different bullets?
+should blocks block mobs and bullets?
+  is this too easy to cheese by holding a huge block
+    maybe drain energy when the block you hold hits a mob...
 
 rework martingale?
   it's really strong, but people may not understand how to use it.
   how to be true to the name (where you gamble by doubling your bet)
-
-reduce importance of high dmg tech
-  do this after a patch so you can revert changes
-  scale bonus from tech to sqrt of dmg values
-  scale mob damage taken to match expected drop in dmg from tech
-    don't scale boss damage taken
-      slightly reduce boss immunity duration
-
 
 performance issue with experiment mode
   causes my computer fan to turn on when I leave it on for a few minutes
@@ -59,7 +36,7 @@ performance issue with experiment mode
     find a way to not draw things off screen?
     something might be changing size and forcing a redraw of everything
 
-constraint - see hallucinations
+new constraint - see hallucinations
   draw shapes that don't exists that look like
     mobs
     map
@@ -78,8 +55,7 @@ gun tech upgrade that rewards pressing fire with a precise rhythm
     gain 1.5x damage for that gun, but lose the bonus if you miss the timing
     refund ammo cost for each perfect
   gun:
-    shotgun?
-    super balls?
+    shotgun: time it so you press fire right after CD ends
   need to draw an on screen animation to help with timing
 
 persistent effects: effects that carry over to your next game: "for the next 3 runs of n-gon"

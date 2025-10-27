@@ -61,10 +61,10 @@ const level = {
             // requestAnimationFrame(() => { tech.giveTech("MIRV") });
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("photonic crystal")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("nitinol")
             // for (let i = 0; i < 1; ++i) tech.giveTech("AIM-9 Sidewinder")
             // for (let i = 0; i < 1; i++) tech.giveTech("diffraction grating")
-            // for (let i = 0; i < 1; i++) tech.giveTech("perturbation theory")
+            // for (let i = 0; i < 1; i++) tech.giveTech("photonic crystal")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("infrared diode") });
             // requestAnimationFrame(() => { level.blurryChoices = true });
             // m.lastKillCycle = m.cycle
@@ -79,7 +79,7 @@ const level = {
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
             // spawn.randomGroup(1300, -200, Infinity);
-            // for (let i = 0; i < 1; i++) spawn.dragonFlyBoss(1300 + 200 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.starter(1300 + 200 * i, -200, 700)
             // for (let i = 0; i < 1; i++) spawn.pitcher4(1100 + 100 * i, -100 - i * 100)
             // for (let i = 0; i < 1; i++) spawn.defendingBoss(1100 + 100 * i, -300)
             // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
@@ -3032,7 +3032,7 @@ const level = {
         }
 
         spawn.mapRect(2500, -1200, 200, 750); //right wall
-        spawn.mapRect(2500, -200, 200, 300); //right wall
+        // spawn.mapRect(2500, -200, 200, 300); //right wall
         spawn.mapRect(4500, -1200, 200, 650); //right wall
         blockDoor(4585, -310)
         spawn.mapRect(4500, -300, 200, 400); //right wall
@@ -3040,6 +3040,10 @@ const level = {
         spawn.mapRect(6400, -200, 400, 300); //right wall
         spawn.mapRect(6700, -1800, 800, 2600); //right wall
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
+
+        spawn.mapVertex(2600, 25, "-600 0  -150 -300  150 -300  600 0");
+        spawn.mapVertex(2600, -35, "-300 0  -150 -300  150 -300  300 0");
+
         //place to hide
         spawn.mapRect(4650, -300, 1150, 50);
         spawn.mapRect(5750, -300, 50, 200);
@@ -5448,27 +5452,7 @@ const level = {
             boost5.query();
             boost6.query();
             boost7.query();
-            //trains oscillate back and forth and act like they are bouncing off each other
-            // if (train1.position.x < 2850) {
-            //     train1.changeDirection(true) //go right
-            // } else if (train1.position.x > 3850) {
-            //     train1.changeDirection(false) //go left
-            // }
-            // if (train2.position.x < 1450) {
-            //     train2.changeDirection(true) //go right
-            // } else if (train2.position.x > 2450) {
-            //     train2.changeDirection(false) //go left
-            // }
-            // if (train3.position.x < 4250) {
-            //     train3.changeDirection(true) //go right
-            // } else if (train3.position.x > 5250) {
-            //     train3.changeDirection(false) //go left
-            // }
-            // train1.move();
-            // train2.move();
-            // train3.move();
-            // ctx.fillStyle = "rgba(0,0,0,0.25)"
-            // ctx.fillRect(1250, 121, 4200, 6)
+
             ctx.fillStyle = "rgba(50,70,100,0.04)"
             ctx.fillRect(2500, -10000, 1800, 30000);
             ctx.fillRect(8300, -10000, 1800, 30000);
@@ -5512,13 +5496,13 @@ const level = {
             ctx.lineWidth = 10
             ctx.stroke();
 
-
             //combination of a horizontal force on the block and changing the length of constraints keeps the block form rotating as it swings
             //these parameters need fine tuning, mostly amplitude
             const rate = 0.011
-            blocks[0].force.x = 0.004 * Math.sin(simulation.cycle * rate + 0.2) * blocks[0].mass
-            cons[0].length = 1550 + 1630 * Math.sin(simulation.cycle * rate)
-            cons[1].length = 1550 + 1630 * Math.sin(simulation.cycle * rate + Math.PI)
+            blockCycle++
+            blocks[0].force.x = 0.004 * Math.sin(blockCycle * rate + 0.2) * blocks[0].mass
+            cons[0].length = 1550 + 1630 * Math.sin(blockCycle * rate)
+            cons[1].length = 1550 + 1630 * Math.sin(blockCycle * rate + Math.PI)
         };
         level.customTopLayer = () => {
             ctx.fillStyle = "rgba(0,0,0,0.13)"
@@ -5548,13 +5532,14 @@ const level = {
         const shape = "300 -50  300 50  275 75  -275 75  -300 50  -300 -50  -275 -75  275 -75"
 
         //force on block to make gentle swinging motion
-        spawn.bodyVertex(3300, 300, shape, {
+        spawn.bodyVertex(4900, 300, shape, {
             density: 0.0002,
             friction: 1,
             frictionStatic: 1,
             frictionAir: 0.2,
             isNotHoldable: true,
         });
+        blockCycle = 180;
         const blocks = []
         blocks.push(body[body.length - 1]) //saved to blocks array to give player traction in level.custom
         blocks[0].isNotHoldable = true
@@ -8891,7 +8876,8 @@ const level = {
             } else {  //T1
                 spawn.randomLevelBoss(where.x, where.y, ["shooterBoss", "shieldingBoss"]);
             }
-            spawn.secondaryBossChance(3486, -557, ["trainBoss"]);
+            spawn.secondaryBossChance(3486, -557, [Math.random() < 0.5 ? "trainBoss" : "trainBoss2"]);
+            // spawn.secondaryBossChance(3486, -557, ["trainBoss2"]);
         } else {
             powerUps.spawnBossPowerUp(2800, -1400)
         }

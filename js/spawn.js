@@ -1366,7 +1366,7 @@ const spawn = {
                     Matter.Body.setVelocity(this, { x: this.velocity.x * 0.99, y: this.velocity.y * 0.99 });
                 }
                 const hit = (who) => {
-                    if (!who.isZombie && who.damageReduction) {
+                    if (!who.isZombie && who.damageReduction && !who.isDarkMatter) {
                         this.hitCD = simulation.cycle + 15
                         //knock back  away from recently hit mob
                         const force = Vector.mult(Vector.normalise(Vector.sub(who.position, this.position)), 0.03 * this.mass)
@@ -7617,7 +7617,7 @@ const spawn = {
                 ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.2 * Math.random()})`;
                 ctx.stroke();
                 //drop mines while invulnerable
-                if (!(simulation.cycle % 12) && mob.length < 360 && level.levelsCleared > 6) {
+                if (!(simulation.cycle % 12) && mob.length < 360 && level.levelsCleared > 5) {
                     // spawn.freezeGrenade(this.position.x, this.position.y, null, 60, 100 + 20 * simulation.difficultyMode);
                     spawn.mine(this.position.x, this.position.y)
                 }
@@ -7632,6 +7632,304 @@ const spawn = {
             }
             this.checkStatus();
         };
+    },
+    trainBoss2(x, y, radius = 50, isSpawnBossPowerUp = true) {
+        mobs.spawn(x, y, 0, radius, "rgba(255, 255, 0, 1)") // "rgb(201,202,225)");
+        let me = mob[mob.length - 1];
+        me.isBoss = true;
+        Matter.Body.setDensity(me, 0.015); //normal is 0.001
+        me.damageReduction = 1
+        me.startingDamageReduction = me.damageReduction
+        me.isInvulnerable = false
+        me.nextHealthThreshold = 0.75
+        me.invulnerableCount = 0
+
+        me.seeAtDistance2 = 4000000; //2000 distance
+        me.cycle = 0
+        me.accelMag = 0.03 //can't follow track above 1.1
+        me.frictionAir = 1
+        me.restitution = 1
+        me.friction = 0
+        me.collisionFilter.mask = cat.bullet //| cat.player | cat.body | cat.map | cat.mob
+        me.seePlayer.recall = 1;
+        me.onDamage = function () {
+            if (this.health < this.nextHealthThreshold) {
+                this.health = this.nextHealthThreshold - 0.01
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4
+                this.invulnerableCount = 60 + simulation.difficultyMode * 12
+                this.isInvulnerable = true
+                this.damageReduction = 0
+                for (let i = 0, len = mob.length; i < len; ++i) { //trigger old mines
+                    if (mob[i].isMine) mob[i].isExploding = true
+                }
+                this.ammo = 15 + simulation.difficultyMode * 6 + level.levelsCleared
+            }
+        };
+        me.ammo = 20 + simulation.difficultyMode * 8 + level.levelsCleared * 2
+        me.onDeath = function () {
+            if (isSpawnBossPowerUp) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+        };
+        me.trackIndex = 0
+        //this track is specific to the corridor level,  overwrite this for different levels
+        me.track = [
+            { x: -3200, y: 925 },
+            { x: -3200, y: 500 },
+            { x: -3200, y: 75 },
+            { x: -3200, y: -350 },
+            { x: -3200, y: -775 },
+            { x: -3200, y: -1200 },
+            { x: -3200, y: -1625 },
+            { x: -2760, y: -1625 },
+            { x: -2320, y: -1625 },
+            { x: -1880, y: -1625 },
+            { x: -1440, y: -1625 },
+            { x: -1000, y: -1625 },
+            { x: -500, y: -1625 },
+            { x: 0, y: -1625 },
+            { x: 500, y: -1625 },
+            { x: 1000, y: -1625 },
+            { x: 1500, y: -1625 },
+            { x: 2000, y: -1625 },
+            { x: 2500, y: -1625 },
+            { x: 3000, y: -1625 },
+            { x: 3500, y: -1625 },
+            { x: 4000, y: -1625 },
+            { x: 4500, y: -1625 },
+            { x: 5000, y: -1625 },
+            { x: 5500, y: -1625 },
+            { x: 6000, y: -1625 },
+            { x: 6450, y: -1625 },
+            { x: 6900, y: -1625 },
+            { x: 7350, y: -1625 },
+            { x: 7800, y: -1625 },
+            { x: 7950, y: -1412.5 },
+            { x: 8100, y: -1200 },
+            { x: 8557, y: -1200 },
+            { x: 9014, y: -1200 },
+            { x: 9471, y: -1200 },
+            { x: 9928, y: -1200 },
+            { x: 10333.67, y: -1141.67 },
+            { x: 10739.33, y: -1083.33 },
+            { x: 11145, y: -1025 },
+            { x: 11638, y: -1025 },
+            { x: 12131, y: -1025 },
+            { x: 12487.33, y: -850 },
+            { x: 12843.67, y: -675 },
+            { x: 13200, y: -500 },
+            { x: 12760, y: -500 },
+            { x: 12320, y: -500 },
+            { x: 11880, y: -500 },
+            { x: 11440, y: -500 },
+            { x: 11000, y: -500 },
+            { x: 10500, y: -500 },
+            { x: 10000, y: -500 },
+            { x: 9500, y: -500 },
+            { x: 9000, y: -500 },
+            { x: 8500, y: -500 },
+            { x: 8000, y: -500 },
+            { x: 7500, y: -500 },
+            { x: 7000, y: -500 },
+            { x: 6500, y: -500 },
+            { x: 6000, y: -500 },
+            { x: 5500, y: -500 },
+            { x: 5000, y: -500 },
+            { x: 4500, y: -500 },
+            { x: 4000, y: -500 },
+            { x: 3503, y: -500 },
+            { x: 3502, y: -116.67 },
+            { x: 3501, y: 266.67 },
+            { x: 3500, y: 650 },
+            { x: 3267, y: 925 },
+            { x: 2813.6, y: 925 },
+            { x: 2360.2, y: 925 },
+            { x: 1906.8, y: 925 },
+            { x: 1453.4, y: 925 },
+            { x: 1000, y: 925 },
+            { x: 562.25, y: 925 },
+            { x: 124.5, y: 925 },
+            { x: -313.25, y: 925 },
+            { x: -751, y: 925 },
+            { x: -1250, y: 925 },
+            { x: -1750, y: 925 },
+            { x: -2250, y: 925 },
+            { x: -2750, y: 925 }
+        ];
+        me.smoothAngle = 0
+
+        Matter.Body.setPosition(me, me.track[me.trackIndex])
+        me.do = function () {
+
+            //move towards next coordinate
+            const where = this.track[this.trackIndex]
+            const sub = Vector.sub(where, this.position)
+            const force = Vector.mult(Vector.normalise(sub), this.accelMag * this.mass)
+            this.force.x += force.x;
+            this.force.y += force.y;
+            //check if close to next coordinate
+            if (Vector.magnitude(sub) < 20) {
+                this.trackIndex++
+                if (this.trackIndex === this.track.length) this.trackIndex = 0
+            }
+            //draw tracks
+            let index = this.trackIndex - 3
+            // if (index < 0) index = this.track.length - 1
+            // ctx.beginPath();
+            // ctx.moveTo(this.track[index].x, this.track[index].y);
+            // for (let i = 0; i < 5; i++) {
+            //     index++
+            //     if (index > this.track.length - 1) index = 0
+            //     ctx.lineTo(this.track[index].x, this.track[index].y);
+            // }
+            // ctx.lineWidth = 5
+            // ctx.strokeStyle = "#fff"
+            // ctx.stroke();
+
+            index = this.trackIndex - 3
+            if (index < 0) index = this.track.length - 1
+            ctx.beginPath();
+            ctx.arc(this.track[index].x, this.track[index].y, 7, 0, 2 * Math.PI);
+            ctx.fillStyle = "#fff"
+            ctx.fill();
+            for (let i = 0; i < 7; i++) {
+                index++
+                if (index > this.track.length - 1) index = 0
+                ctx.beginPath();
+                ctx.arc(this.track[index].x, this.track[index].y, 7, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            //player vision
+            if (this.distanceToPlayer2() < this.seeAtDistance2) { //2000
+                //close to player, go slow
+                me.accelMag = 0.03 //can't follow track above 1.1
+                if ((Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0) && !m.isCloak) this.foundPlayer();
+            } else {
+                //far from player, go fast
+                me.accelMag = 0.1 //can't follow track above 1.1
+                if (this.seePlayer.recall) this.lostPlayer();
+            }
+            if (!this.isStunned) {
+                //check if slowed
+                let slowed = false
+                for (let i = 0; i < this.status.length; i++) {
+                    if (this.status[i].type === "slow") {
+                        slowed = true
+                        break
+                    }
+                }
+                if (!slowed) {
+                    this.count++
+                    // Matter.Body.setAngle(this, this.count * this.rotateVelocity)
+                    // Matter.Body.setAngularVelocity(this, 0)
+                }
+
+
+                //find the final and initial points, then find the angle between them to use to aim the lasers
+                let isResetAngle = false
+                index = this.trackIndex - 3
+                if (index < 0) index = this.track.length - 1
+                const startPos = this.track[index]
+                for (let i = 0; i < 6; i++) {
+                    index++
+                    if (index > this.track.length - 1) {
+                        index = 0
+                        isResetAngle = true
+                    }
+                }
+                const a = Vector.angle(startPos, this.track[index])
+                this.smoothAngle = 0.9 * this.smoothAngle + 0.1 * a
+                if (isResetAngle) this.smoothAngle = a
+
+                ctx.beginPath();
+                index = this.trackIndex - 3
+                if (index < 0) index = this.track.length - 1
+                for (let i = 0; i < 6; i++) {
+                    let dist = Vector.magnitude(Vector.sub(this.position, this.track[index]))
+                    dist = 1000 - dist
+                    if (dist > 10) {
+                        this.laserArray(this.track[index], this.smoothAngle + Math.PI / 2, dist);
+                        this.laserArray(this.track[index], this.smoothAngle - Math.PI / 2, dist);
+                    }
+                    index++
+                    if (index > this.track.length - 1) index = 0
+                }
+
+                // this.phase += 0.002
+                // this.laserArray(this.position, this.phase);
+                // this.laserArray(this.position, this.phase + Math.PI);
+                // this.laserArray(this.position, this.phase + Math.PI / 2);
+                // this.laserArray(this.position, this.phase + 3 * Math.PI / 2);
+
+                ctx.strokeStyle = "rgba(255, 255, 0, 1)";
+                ctx.lineWidth = 3;
+                ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
+                ctx.stroke(); // Draw it
+                ctx.setLineDash([]);
+                ctx.lineWidth = 40;
+                ctx.strokeStyle = "rgba(255, 255, 0, 0.15)";
+                ctx.stroke(); // Draw it
+            }
+            if (this.isInvulnerable) {
+                this.invulnerableCount--
+                if (this.invulnerableCount < 0) {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                }
+                // this.phase += 0.008
+                //draw invulnerable
+                ctx.beginPath();
+                let vertices = this.vertices;
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                ctx.lineTo(vertices[0].x, vertices[0].y);
+                ctx.lineWidth = 13 + 5 * Math.random();
+                ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.2 * Math.random()})`;
+                ctx.stroke();
+                //drop mines while invulnerable
+                const delay = Math.max(12, 120 - 6 * simulation.difficultyMode - level.levelsCleared)
+                if (!(simulation.cycle % delay) && mob.length < 360) {
+                    index = this.trackIndex - 3
+                    if (index < 0) index = this.track.length - 1
+                    for (let i = 0; i < 6; i++) {
+                        index++
+                        if (index > this.track.length - 1) index = 0
+                        spawn.freezeGrenade(this.track[index].x, this.track[index].y, null, 40, 80 + 20 * simulation.difficultyMode); //freezeGrenade(x, y, tier = null, lifeSpan = 90, pulseRadius = 230 + 10 * tier, size = 3) {
+                    }
+
+                    // spawn.mine(this.position.x, this.position.y)
+                }
+            }
+            this.checkStatus();
+        };
+        me.laserArray = function (where, angle, seeRange = 1000) {
+            best = {
+                x: null,
+                y: null,
+                dist2: Infinity,
+                who: null,
+                v1: null,
+                v2: null
+            };
+            const look = { x: where.x + seeRange * Math.cos(angle), y: where.y + seeRange * Math.sin(angle) };
+            best = vertexCollision(where, look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
+
+            if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
+                m.immuneCycle = m.cycle + m.collisionImmuneCycles + 30; //player is immune to damage for an extra second
+                const dmg = 0.06 * this.damageScale();
+                m.takeDamage(dmg);
+                simulation.drawList.push({
+                    x: best.x,
+                    y: best.y,
+                    radius: dmg * 1500,
+                    color: "rgba(80,0,255,0.5)",
+                    time: 20
+                });
+                // this.blind(180)
+            }
+            //draw beam
+            if (best.dist2 === Infinity) best = look;
+            ctx.moveTo(where.x, where.y);
+            ctx.lineTo(best.x, best.y);
+        }
     },
     slashBoss(x, y, radius = 80) {
         mobs.spawn(x, y, 5, radius, "rgb(201,202,225)");

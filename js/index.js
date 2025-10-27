@@ -1637,7 +1637,7 @@ window.addEventListener("keydown", function (event) {
                 </tr>
                 <tr>
                     <td class='key-input-pause'>–/+</td>
-                    <td class='key-used'>zoom in / out</td>
+                    <td class='key-used'>zoom out / in</td>
                 </tr>
                 <tr>
                     <td class='key-input-pause'>1-8</td>
@@ -1696,13 +1696,13 @@ window.addEventListener("keydown", function (event) {
     if (simulation.testing) {
         if (event.key === "X") m.death(); //only uppercase
         switch (event.key.toLowerCase()) {
-            case "=":
+            case "-":
                 // simulation.isAutoZoom = false;
                 // simulation.zoomScale /= 0.9;
                 // simulation.setZoom();
                 simulation.zoomTransition(simulation.zoomScale / 0.9)
                 break;
-            case "-":
+            case "=":
                 // simulation.isAutoZoom = false;
                 // simulation.zoomScale *= 0.9;
                 // simulation.setZoom();

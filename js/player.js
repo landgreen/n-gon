@@ -1399,64 +1399,76 @@ const m = {
             m.isAltSkin = true
             m.yOffWhen.stand = 52
             m.yOffWhen.jump = 72
-            m.coyoteCycles = 12 + 120 * tech.isCoyote
+            m.coyoteCycles = 12 //+ 120 * tech.isCoyote
             m.hardLandCDScale = 0.5
             m.hardLanding = 250
             m.squirrelFx = 1.4;
-            m.squirrelJump = 1.17;
+            // m.squirrelJump = 1.17;
             m.setMovement()
 
+            m.ledgeCoyote = 0
             m.draw = function () {
 
+                const ledgeJump = function (xForce) {
+                    if (input.up &&
+                        m.buttonCD_jump + 20 < m.cycle &&
+                        !m.onGround
+                    ) {
+                        m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
+                        player.force.y = -m.jumpForce; //player jump force
+                        player.force.x = xForce * m.jumpForce; //player jump force
+                        Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
+                            x: 0,
+                            y: 0
+                        });
+                    }
+                }
 
-                // const bounds = {
-                //     min: {
-                //         x: m.pos.x - 30,
-                //         y: m.pos.y
-                //     },
-                //     max: {
-                //         x: m.pos.x + 30,
-                //         y: m.pos.y + 90
-                //     }
+                const sensorWidth = 25
+                // if (input.right) {
+                //     // console.log(Matter.Query.collides(player, [...map, ...body]))
+                //     console.log(Matter.Query.ray([...map, ...body], { x: m.pos.x + sensorWidth, y: m.pos.y + 50 }, { x: m.pos.x + sensorWidth, y: m.pos.y + 95 }))
+                //     ctx.beginPath()
+                //     ctx.moveTo(m.pos.x + sensorWidth, m.pos.y + 50);
+                //     ctx.lineTo(m.pos.x + sensorWidth, m.pos.y + 95);
+                //     ctx.strokeStyle = "red";
+                //     ctx.lineWidth = 3;
+                //     ctx.stroke();
                 // }
-                // const hit = Matter.Query.region(map, bounds)
+                // [...map, ...body]
 
-
-                // // Draw the rectangle
-                // const x = bounds.min.x;
-                // const y = bounds.min.y;
-                // const width = bounds.max.x - bounds.min.x;
-                // const height = bounds.max.y - bounds.min.y;
-                // ctx.strokeStyle = hit.length ? "#f00" : "#000"
-                // ctx.strokeRect(x, y, width, height);
-
-
-
-
-                //ledge grab if
-                //   area around head is not touching anything 
-                //   area around body is touching map
-                //   player is not on the ground
-                if (input.up &&
+                if (input.left &&
                     m.buttonCD_jump + 20 < m.cycle &&
                     !m.onGround &&
-                    !Matter.Query.region([...map, ...body], {
-                        min: { x: m.pos.x - 40, y: m.pos.y - 30 },
-                        max: { x: m.pos.x + 40, y: m.pos.y - 10 }
-                    }).length &&
-                    Matter.Query.region([...map, ...body], {
-                        min: { x: m.pos.x - 40, y: m.pos.y },
-                        max: { x: m.pos.x + 40, y: m.pos.y + 95 }
-                    }).length
+                    Matter.Query.ray(map, { x: m.pos.x - sensorWidth, y: m.pos.y + 50 }, { x: m.pos.x - sensorWidth, y: m.pos.y + 95 }).length
                 ) {
-                    // m.jump()
-
-                    m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
-                    player.force.y = -0.85 * m.jumpForce; //player jump force
+                    m.ledgeCoyote = -20
                     Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
-                        x: player.velocity.x,
-                        y: 0
+                        x: 0,
+                        y: 0.65 * player.velocity.y
                     });
+                    player.force.y -= player.mass * simulation.g; //undo gravity to prevent slipping
+
+                    ledgeJump(0.4)
+                } else if (input.right &&
+                    m.buttonCD_jump + 20 < m.cycle &&
+                    !m.onGround &&
+                    Matter.Query.ray(map, { x: m.pos.x + sensorWidth, y: m.pos.y + 50 }, { x: m.pos.x + sensorWidth, y: m.pos.y + 95 }).length
+                ) {
+                    m.ledgeCoyote = 20
+                    Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
+                        x: 0,
+                        y: 0.65 * player.velocity.y
+                    });
+                    player.force.y -= player.mass * simulation.g; //undo gravity to prevent slipping
+
+                    ledgeJump(-0.4)
+                } else if (m.ledgeCoyote > 0) {
+                    m.ledgeCoyote--
+                    ledgeJump(-0.6)
+                } else if (m.ledgeCoyote < 0) {
+                    m.ledgeCoyote++
+                    ledgeJump(0.6)
                 }
 
 
@@ -1666,7 +1678,7 @@ const m = {
             m.yOffWhen.stand = 52
             m.yOffWhen.jump = 72
             m.coyoteCycles = 11 + 120 * tech.isCoyote
-
+            m.squirrelJump = 1.15;
             m.squirrelFx = 1.28;
             m.setMovement()
             // m.speedSmooth = 0
@@ -1796,6 +1808,9 @@ const m = {
         },
         energy() {
             m.isAltSkin = true
+            m.squirrelFx = 1.28;
+            m.setMovement()
+
             m.color = {
                 hue: 184,
                 sat: 100,

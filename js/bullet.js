@@ -290,7 +290,7 @@ const b = {
         if (m.fieldMode === 6) b.fireCDscale *= 0.8
         if (tech.isFastTime) b.fireCDscale *= 0.666
         if (tech.isFireRateForGuns) b.fireCDscale *= Math.pow(0.76923, Math.max(0, b.inventory.length - 1))
-        if (tech.isFireMoveLock) b.fireCDscale *= 0.25
+        if (tech.isFireMoveLock) b.fireCDscale *= 0.33
     },
     fireAttributes(dir, rotate = true) {
         if (rotate) {
@@ -6118,20 +6118,26 @@ const b = {
 
                                 // const color = `hsl(${270 + 80 * Math.sin(simulation.cycle * 0.03)},100%,50%)`
                                 //!(simulation.cycle % 10)
-                                const color = `hsla(${340 + 40 * Math.sin(simulation.cycle * 0.3)}, 100%, 50%, 1.00)`
-                                b.laser(this.where, this.end, this.dmg, tech.laserReflections, false, 1, color);
+                                const color = `hsl(${340 + 40 * Math.sin(simulation.cycle * 0.3)}, 100%, 50%)`
+                                ctx.strokeStyle = color
+                                ctx.lineWidth = 4
+                                // ctx.globalAlpha = 0.5;
+                                ctx.beginPath();
+                                b.laser(this.where, this.end, this.dmg, tech.laserReflections, true, 1, color);
                                 if (tech.beamSplitter) {
                                     let spread = 0.05
                                     for (let i = 0; i < tech.beamSplitter; i++) {
                                         b.laser(this.where, {
                                             x: this.where.x + 5000 * Math.cos(this.angle + spread),
                                             y: this.where.y + 5000 * Math.sin(this.angle + spread)
-                                        }, this.dmg, tech.laserReflections, false, 1, color)
+                                        }, this.dmg, tech.laserReflections, true, 1, color)
                                         spread *= -1
                                         if (spread > 0) spread += 0.05
                                     }
                                 }
-                                const size = 12;
+                                ctx.stroke();
+
+                                const size = 20;
                                 ctx.save();
                                 ctx.translate(this.where.x, this.where.y);
                                 ctx.rotate(this.angle);

@@ -376,7 +376,7 @@ const tech = {
     },
     {
         name: "nitinol",
-        description: `<strong>1.3x</strong> <strong class="color-speed">movement</strong> and <strong>jumping</strong> with <strong>ledge grabbing</strong><br>+<strong>0.2</strong> seconds of <strong>coyote time</strong> <em style ='float: right;'>(jumping after falling)</em>`,
+        description: `<strong>wall grab</strong> and <strong>1.3x</strong> <strong class="color-speed">movement</strong><br>+<strong>0.2</strong> seconds of <strong>coyote time</strong> <em style ='float: right;'>(jumping after falling)</em>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -404,9 +404,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isNitinol || tech.isFireMoveLock
+            return tech.isFireMoveLock
         },
-        requires: "nitinol, Higgs mechanism",
+        requires: "Higgs mechanism",
         effect() {
             tech.isCoyote = true
             m.coyoteCycles += 120 //adjust this 120 value in mech() skin
@@ -427,7 +427,7 @@ const tech = {
     },
     {
         name: "Higgs mechanism",
-        description: `<strong>4x</strong> <em>fire rate</em> and <strong>1.2x</strong> <strong class="color-speed">movement</strong><br>while <em>firing</em> you can't <strong class="color-speed">move</strong>`,
+        description: `<strong>3x</strong> <em>fire rate</em>, but while <em>firing</em> you can't <strong class="color-speed">move</strong><br><strong>1.2x</strong> <strong class="color-speed">movement</strong> and <strong>jumps</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -554,7 +554,7 @@ const tech = {
     },
     {
         name: "mass-energy equivalence",
-        description: `<strong>1.5x</strong> <strong class='color-d'>damage</strong><br><strong class='color-f'>energy</strong> protects you instead of <strong class='color-h'>health</strong>`,
+        description: `<strong>1.5x</strong> <strong class='color-d'>damage</strong> and <strong>1.2x</strong> <strong class="color-speed">movement</strong><br><strong class='color-f'>energy</strong> replaces your <strong class='color-h'>health</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -675,7 +675,7 @@ const tech = {
     {
         name: "CPT symmetry",
         descriptionFunction() {
-            return `after losing <strong class='color-h'>health</strong>, if you have above <strong>${(85 * Math.min(1, m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong><br><strong>rewind</strong> time for <strong>20</strong> <strong class='color-f'>energy</strong> per second`
+            return `after losing <strong class='color-h'>health</strong> use all your <strong class='color-f'>energy</strong><br>to <strong>rewind</strong> time if you have above <strong>${(85 * Math.min(1, m.maxEnergy)).toFixed(0)}</strong> <strong class='color-f'>energy</strong>`
         },
         // (85 * Math.min(100, m.maxEnergy)
         maxCount: 1,
@@ -738,7 +738,7 @@ const tech = {
     {
         name: "ternary", //"divisor",
         descriptionFunction() {
-            return `<strong>2x</strong> <strong class='color-d'>damage</strong> while your <strong class='color-ammo'>ammo</strong><br>is evenly <strong>divisible</strong> by <strong>3</strong><em style ="float: right;">(${((b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) ? "1.9" : "1")}x)</em>` //if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.9
+            return `<strong>2x</strong> <strong class='color-d'>damage</strong> while your <strong class='color-ammo'>ammo</strong><br>is evenly <strong>divisible</strong> by <strong>3</strong><em style ="float: right;">(${((b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) ? "2" : "1")}x)</em>` //if (tech.isDivisor && b.activeGun !== undefined && b.activeGun !== null && b.guns[b.activeGun].ammo % 3 === 0) dmg *= 1.9
         },
         maxCount: 1,
         count: 0,
@@ -3536,7 +3536,7 @@ const tech = {
     {
         name: "quenching",
         descriptionFunction() {
-            return `<strong>0.5x</strong> of ${powerUps.orb.heal()} over<strong class='color-h'>healing</strong><br>is added to <strong>maximum</strong> <strong class='color-h'>health</strong>`
+            return `<strong>0.6x</strong> of ${powerUps.orb.heal()} over<strong class='color-h'>healing</strong><br>is added to <strong>maximum</strong> <strong class='color-h'>health</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -8603,7 +8603,7 @@ const tech = {
     },
     {
         name: "neutronium",
-        description: `<strong>0.8x</strong> <strong class="color-speed">movement</strong> and <strong>jumping</strong>, but <br>while your ${powerUps.orb.field()} is active <strong>0.05x</strong> <strong class='color-defense'>damage taken</strong>`,
+        description: `<strong>0.8x</strong> <strong class="color-speed">movement</strong> and <strong>jumps</strong>, but <br>while your ${powerUps.orb.field()} is active <strong>0.05x</strong> <strong class='color-defense'>damage taken</strong>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -9212,7 +9212,7 @@ const tech = {
     },
     {
         name: "Lorentz transformation",
-        description: `<span style ="float: right;"><span class="underline">expend</span> ${powerUps.orb.research(3)}</span><strong>1.5x</strong> <strong class="color-speed">movement</strong> and jumping<br><strong>1.5x</strong> <em>fire rate</em>`,
+        description: `<span style ="float: right;"><span class="underline">expend</span> ${powerUps.orb.research(3)}</span><strong>1.5x</strong> <strong class="color-speed">movement</strong> and jumps<br><strong>1.5x</strong> <em>fire rate</em>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
