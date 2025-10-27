@@ -1417,10 +1417,8 @@ const m = {
                         m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
                         player.force.y = -m.jumpForce; //player jump force
                         player.force.x = xForce * m.jumpForce; //player jump force
-                        Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
-                            x: 0,
-                            y: 0
-                        });
+                        Matter.Body.setVelocity(player, { x: 0, y: 0 });//zero player y-velocity for consistent jumps
+                        m.yOffGoal = m.yOffWhen.jump;
                     }
                 }
 
@@ -1448,7 +1446,7 @@ const m = {
                         y: 0.65 * player.velocity.y
                     });
                     player.force.y -= player.mass * simulation.g; //undo gravity to prevent slipping
-
+                    m.yOffGoal = m.yOffWhen.stand;
                     ledgeJump(0.4)
                 } else if (input.right &&
                     m.buttonCD_jump + 20 < m.cycle &&
@@ -1461,14 +1459,16 @@ const m = {
                         y: 0.65 * player.velocity.y
                     });
                     player.force.y -= player.mass * simulation.g; //undo gravity to prevent slipping
-
+                    m.yOffGoal = m.yOffWhen.stand;
                     ledgeJump(-0.4)
                 } else if (m.ledgeCoyote > 0) {
                     m.ledgeCoyote--
                     ledgeJump(-0.6)
+                    m.yOffGoal = m.yOffWhen.jump;
                 } else if (m.ledgeCoyote < 0) {
                     m.ledgeCoyote++
                     ledgeJump(0.6)
+                    m.yOffGoal = m.yOffWhen.jump;
                 }
 
 
