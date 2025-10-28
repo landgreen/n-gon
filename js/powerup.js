@@ -1823,7 +1823,7 @@ const powerUps = {
         }
     },
     pauseEjectTech(index) {
-        if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isInstant) {
+        if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isInstant && m.immuneCycle < m.cycle) {
             const dmg = tech.pauseEjectTech * 0.01
             if ((!tech.isEnergyHealth && (dmg * m.defense() < m.health || tech.isNoDeath)) || (tech.isEnergyHealth && dmg * Math.pow(m.defense(), 0.6) < m.energy)) {
                 tech.tech[index].frequency = 0 //banish tech

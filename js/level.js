@@ -33,8 +33,8 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(4) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
-            // m.energy = 0
+            // m.setField(1) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.energy = 1000
 
             // m.fieldUpgrades[6].isRewindMode = true
             // window.removeEventListener("keydown", m.fieldEvent);
@@ -63,7 +63,7 @@ const level = {
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("nitinol")
             // for (let i = 0; i < 1; ++i) tech.giveTech("AIM-9 Sidewinder")
-            // for (let i = 0; i < 1; i++) tech.giveTech("diffraction grating")
+            // for (let i = 0; i < 1; i++) tech.giveTech("spherical harmonics")
             // for (let i = 0; i < 1; i++) tech.giveTech("photonic crystal")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("infrared diode") });
             // requestAnimationFrame(() => { level.blurryChoices = true });
@@ -8138,7 +8138,8 @@ const level = {
 
             //open center right area with both bosses
             // spawn.mapRect(0, -450, 425, 1100);
-            spawn.mapVertex(213, 0, "-213 -650  0 -600  213 -550  213 650  0 600  -213 550");
+            spawn.mapVertex(213, 0, "-213 -600   0 -550    213 -500    213 600     -213 500");
+            //
             spawn.mapRect(0, -1050, 425, 63);
             spawn.mapRect(0, 987, 425, 50);
             spawn.mapVertex(1700, -1000, "-600 0  -400 400  400 400  600 0");
@@ -8199,7 +8200,8 @@ const level = {
             Matter.Body.setAngle(map[map.length - 1], Math.PI / 4)
 
             //open center right area with both bosses
-            spawn.mapVertex(213, 0, "-213 -550  0 -600  213 -650  213 550  0 600  -213 650");
+            spawn.mapVertex(213, 0, "-213 -500  0 -550  213 -600  213 500  -213 600");
+
             spawn.mapRect(0, 1050 - 63, 425, 63);
             spawn.mapRect(0, -987 - 50, 425, 50);
             spawn.mapVertex(1700, 1000, "-400 0  -600 400  600 400  400 0");

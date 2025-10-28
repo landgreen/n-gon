@@ -607,7 +607,7 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
     <input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#000;" placeholder="sort by" />
     <button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
 </div>`;
-        const ejectClass = (tech.isPauseEjectTech && !simulation.isChoosing) ? 'pause-eject' : ''
+        const ejectClass = (tech.isPauseEjectTech && !simulation.isChoosing && m.immuneCycle < m.cycle) ? 'pause-eject' : ''
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0) {
                 const style = (localSettings.isHideImages || tech.tech[i].isJunk || tech.tech[i].isLore) ? `style="height:auto;"` : `style = "background-image: url('img/${tech.tech[i].name}.webp');"`
